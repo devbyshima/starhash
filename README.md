@@ -4,6 +4,8 @@
 
 Native iOS · SwiftUI · iOS 18 and later · no third-party packages
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+
 Type an amount, pick who gets it, and StarHash dials the MoMo code for you.
 MTN's own prompt asks for your PIN, as always; StarHash never sees it and
 never moves money itself. Every payment is kept in Activity, and with a
@@ -11,7 +13,13 @@ Shortcuts automation MTN's confirmation SMS fills in the fee, the reference
 and your new balance. No account, no login, no server: everything stays on
 your iPhone.
 
+Free and open source.
+
 ## Features
+
+- **What's New and Replay Onboarding**: Settings lists every release with
+  what it brought (`ReleaseHistory` in StarHashKit; add a release at the top
+  when shipping), and can show the welcome screens again.
 
 - **Side menu**: the menu button at the top left of every page, or a swipe
   in from the left edge, slides the page aside, as X does. At the top, your
@@ -109,3 +117,10 @@ simulator Pay shows the code in an alert instead.
 - `StarHash` - the SwiftUI app and its App Intents.
 
 See `AGENTS.md` for conventions and the debug launch arguments.
+
+## License
+
+StarHash is free and open source, under the
+[GNU General Public License v3.0](LICENSE). You may use, study, share and
+change it; anything you distribute that is built on it must be under the same
+license, with its source.

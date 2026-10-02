@@ -58,6 +58,16 @@ private struct HelpRootList: View {
                     SettingsRow(symbol: "lock.fill", title: "Privacy", caption: "Everything stays on this iPhone")
                 }
                 .settingsCardRow(.first)
+                Link(destination: HelpLinks.sourceCode) {
+                    SettingsRow(symbol: "chevron.left.forwardslash.chevron.right", title: "Source code", caption: "StarHash is free and open source") {
+                        Image(systemName: "arrow.up.right")
+                            .starhashFont(14, weight: .semibold, relativeTo: .footnote)
+                            .foregroundStyle(Color.starhashTertiaryText)
+                            .accessibilityHidden(true)
+                    }
+                }
+                .buttonStyle(HighlightRowButtonStyle())
+                .settingsCardRow(.middle)
                 SettingsRow(symbol: "info.circle.fill", title: "Version", value: SettingsVersion.short)
                     .settingsCardRow(.last)
             }
@@ -86,4 +96,9 @@ enum HelpLaunch {
         []
         #endif
     }
+}
+
+enum HelpLinks {
+    /// StarHash's code on GitHub, under the GNU GPL v3.
+    static let sourceCode = URL(string: "https://github.com/devbyshima/starhash")!
 }

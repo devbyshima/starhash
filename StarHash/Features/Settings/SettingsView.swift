@@ -27,12 +27,16 @@ struct SettingsView: View {
 enum SettingsPage: Hashable {
     case wallets
     case autoVerify
+    case whatsNew
+    case release(String)
 
     @MainActor @ViewBuilder
     var destination: some View {
         switch self {
         case .wallets: WalletsView()
         case .autoVerify: AutoVerificationGuide()
+        case .whatsNew: WhatsNewView()
+        case .release(let version): ReleaseDetailView(version: version)
         }
     }
 }
@@ -50,11 +54,27 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.lastVerifiedAt) private var lastVerifiedAt: Double = 0
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
 
+    @AppStorage(PreferenceKey.hasOnboarded) private var hasOnboarded = true
+
     @State private var confirmsDeleteAll = false
     @State private var confirmsAutoVerifyOff = SettingsLaunch.confirmsAutoVerifyOff
     @State private var locationRefused = false
 
     var body: some View {
+        ScrollViewReader { proxy in
+            list
+                #if DEBUG
+                // -settingsScrolled: start at the bottom, to check the top edge.
+                .task {
+                    guard DebugLaunch.arguments.contains("-settingsScrolled") else { return }
+                    try? await Task.sleep(for: .milliseconds(500))
+                    proxy.scrollTo("starhash", anchor: .bottom)
+                }
+                #endif
+        }
+    }
+
+    private var list: some View {
         List {
             Section {
                 SettingsSectionTitle("Wallets")
@@ -121,6 +141,22 @@ private struct SettingsRootList: View {
                 .settingsCardRow(.single, insets: .settingsTextRow)
             } footer: {
                 SettingsFootnote("Transactions are kept only on this iPhone. Deleting them cannot be undone.")
+            }
+
+            Section {
+                SettingsSectionTitle("StarHash")
+                NavigationLink(value: SettingsPage.whatsNew) {
+                    SettingsRow(symbol: "sparkles", title: "What's New", caption: "What each version brought")
+                }
+                .settingsCardRow(.first)
+                Button {
+                    withAnimation(.smooth) { hasOnboarded = false }
+                } label: {
+                    SettingsRow(symbol: "play.circle.fill", title: "Replay Onboarding", caption: "See the welcome screens again")
+                }
+                .buttonStyle(HighlightRowButtonStyle())
+                .settingsCardRow(.last)
+                .id("starhash")
             }
 
         }
@@ -239,6 +275,8 @@ enum SettingsLaunch {
 
     static var initialPath: [SettingsPage] {
         if page == "wallets" { return [.wallets] }
+        if page == "whatsNew" { return [.whatsNew] }
+        if page == "release" { return [.whatsNew, .release(ReleaseHistory.releases[0].version)] }
         if page?.hasPrefix("guide") == true { return [.autoVerify] }
         return []
     }

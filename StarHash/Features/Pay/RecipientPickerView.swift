@@ -84,6 +84,7 @@ struct RecipientPickerView: View {
         }
         // Rows scrolling under the Total bar fade into it instead of
         // showing sharp through the glass.
+        .starhashSoftTopEdge()
         .starhashSoftBottomEdge()
         // Above the keyboard while it is up, above the tab bar after.
         .starhashBottomBar { totalBar }

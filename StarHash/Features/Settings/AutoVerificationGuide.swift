@@ -59,6 +59,7 @@ struct AutoVerificationGuide: View {
                 .transition(reduceMotion ? .opacity : .push(from: .trailing))
             }
             .scrollBounceBehavior(.basedOnSize)
+            .starhashSoftTopEdge()
             .starhashBottomBar { buttonsBar }
         }
         .starhashReadableWidth(StarHashMetrics.narrowReadableWidth)
