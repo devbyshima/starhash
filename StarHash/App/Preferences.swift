@@ -4,6 +4,8 @@ import Foundation
 /// reads and writes the same key.
 enum PreferenceKey {
     static let hasOnboarded = "hasOnboarded"
+    /// Whether the developer note has been seen after onboarding.
+    static let hasSeenDeveloperNote = "hasSeenDeveloperNote"
     static let saveTransactions = "saveTransactions"
     static let enableContacts = "enableContacts"
     static let nearbyLocation = "nearbyLocation"

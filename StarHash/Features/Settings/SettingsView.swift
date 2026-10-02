@@ -57,6 +57,7 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.hasOnboarded) private var hasOnboarded = true
 
     @State private var confirmsDeleteAll = false
+    @State private var showsDeveloperNote = false
     @State private var confirmsAutoVerifyOff = SettingsLaunch.confirmsAutoVerifyOff
     @State private var locationRefused = false
 
@@ -155,6 +156,11 @@ private struct SettingsRootList: View {
                     SettingsRow(symbol: "play.circle.fill", title: "Replay Onboarding", caption: "See the welcome screens again")
                 }
                 .buttonStyle(HighlightRowButtonStyle())
+                .settingsCardRow(.middle)
+                Button { showsDeveloperNote = true } label: {
+                    SettingsRow(symbol: "envelope.open.fill", title: "Developer Note", caption: "A few words on why StarHash exists")
+                }
+                .buttonStyle(HighlightRowButtonStyle())
                 .settingsCardRow(.last)
                 .id("starhash")
             }
@@ -171,6 +177,9 @@ private struct SettingsRootList: View {
             }
         } message: {
             Text("Your whole history will be removed from this iPhone.")
+        }
+        .sheet(isPresented: $showsDeveloperNote) {
+            DeveloperNoteSheet()
         }
         .sheet(isPresented: $confirmsAutoVerifyOff) {
             TurnOffAutoVerifySheet {

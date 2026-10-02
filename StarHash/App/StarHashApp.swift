@@ -12,6 +12,9 @@ struct StarHashApp: App {
         #if DEBUG
         if DebugLaunch.arguments.contains("-skipOnboarding") {
             UserDefaults.standard.set(true, forKey: PreferenceKey.hasOnboarded)
+            // Seen too, so it does not cover the page a screenshot is after
+            // (-note shows it anyway).
+            UserDefaults.standard.set(true, forKey: PreferenceKey.hasSeenDeveloperNote)
             // Onboarding asks for the number; skipping it needs one.
             if (UserDefaults.standard.string(forKey: PreferenceKey.ownerNumber) ?? "").isEmpty {
                 UserDefaults.standard.set("0781234567", forKey: PreferenceKey.ownerNumber)

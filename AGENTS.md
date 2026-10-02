@@ -76,6 +76,7 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 | `-onboardingPage 0...4` | onboarding page (with `-resetOnboarding`) |
 | `-tab pay\|buy\|activity\|settings\|help` | starting page |
 | `-menu` | side menu open |
+| `-note`, `-noteTLDR` | the developer note (full, or on its TL;DR) |
 | `-ownerName <name> -ownerNumber <number>` | the owner shown in the menu (UserDefaults; `-skipOnboarding` sets 0781234567 when none) |
 | `-onboardingPage 0...5` | onboarding page (with `-resetOnboarding`; 1 is the MoMo number) |
 | `-helpPage howItWorks\|privacy` | a Help page (with `-tab help`) |
