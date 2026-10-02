@@ -1,0 +1,119 @@
+import SwiftUI
+
+/// The full-width ink capsule (white in dark mode, black in light mode):
+/// "Get Started", "Continue",
+/// "Enable Notifications". The label is 18pt semibold, as measured in the
+/// reference.
+struct PrimaryButtonStyle: ButtonStyle {
+    /// The design height; the paywall's button is taller than the others.
+    var height: CGFloat = StarHashMetrics.primaryButtonHeight
+
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .starhashFont(18, weight: .semibold, relativeTo: .body)
+            .foregroundStyle(Color.starhashOnInk)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity)
+            // The design height, growing only when a large text size makes
+            // the label wrap, so the label is never cut off.
+            .frame(minHeight: height)
+            .background(Capsule().fill(Color.starhashInk.opacity(isEnabled ? 1 : 0.4)))
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .opacity(configuration.isPressed ? 0.85 : 1)
+            .animation(.snappy(duration: 0.2), value: configuration.isPressed)
+    }
+}
+
+extension ButtonStyle where Self == PrimaryButtonStyle {
+    static var starhashPrimary: PrimaryButtonStyle { PrimaryButtonStyle() }
+}
+
+/// The full-width glass capsule beside or under a primary button: a
+/// sheet's way out ("Cancel", "Keep On") or, with `role: .destructive`, the
+/// red action it is confirming ("Turn Off").
+struct SecondaryButtonStyle: ButtonStyle {
+    var role: ButtonRole?
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .starhashFont(18, weight: .semibold, relativeTo: .body)
+            .foregroundStyle(role == .destructive ? Color.starhashDestructive : Color.starhashPrimaryText)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity)
+            .frame(minHeight: StarHashMetrics.primaryButtonHeight)
+            .contentShape(Capsule())
+            .starhashGlass(interactive: true)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.snappy(duration: 0.2), value: configuration.isPressed)
+    }
+}
+
+extension ButtonStyle where Self == SecondaryButtonStyle {
+    static var starhashSecondary: SecondaryButtonStyle { SecondaryButtonStyle() }
+    static var starhashDestructive: SecondaryButtonStyle { SecondaryButtonStyle(role: .destructive) }
+}
+
+/// An SF Symbol on a rounded dark tile, as in expense rows and the
+/// onboarding sample rows.
+struct SymbolTile: View {
+    let symbol: String
+    var size: CGFloat = 40
+    var background: Color = .starhashCardRaised
+
+    var body: some View {
+        Image(systemName: symbol)
+            .font(.system(size: size * 0.45, weight: .semibold))
+            .foregroundStyle(Color.starhashPrimaryText)
+            .frame(width: size, height: size)
+            .background(background, in: RoundedRectangle(cornerRadius: size * 0.3, style: .continuous))
+    }
+}
+
+/// Centred symbol, title, message and optional action for empty screens.
+/// `.large` is Home's version ("No Account", "No Expenses"): a bigger grey
+/// symbol and 20pt text, measured from the reference.
+struct EmptyStateView<Actions: View>: View {
+    enum Style { case regular, large }
+
+    let symbol: String
+    let title: String
+    let message: String
+    var style: Style = .regular
+    @ViewBuilder var actions: Actions
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Image(systemName: symbol)
+                .starhashFont(style == .large ? 40 : 28)
+                .foregroundStyle(style == .large ? Color.starhashMutedIcon : Color.starhashPrimaryText)
+                .padding(.bottom, style == .large ? 21 : 14)
+                .accessibilityHidden(true)
+            Text(title)
+                .starhashFont(style == .large ? 20 : 17, weight: .bold)
+                .foregroundStyle(Color.starhashPrimaryText)
+                .multilineTextAlignment(.center)
+            Text(message)
+                .starhashFont(style == .large ? 20 : 15)
+                .foregroundStyle(Color.starhashSecondaryText)
+                .multilineTextAlignment(.center)
+                .padding(.top, style == .large ? 3 : 4)
+                .fixedSize(horizontal: false, vertical: true)
+            actions
+                .padding(.top, style == .large ? 30 : 16)
+        }
+        .frame(maxWidth: style == .large ? 260 : 280)
+        .accessibilityElement(children: .contain)
+    }
+}
+
+extension EmptyStateView where Actions == EmptyView {
+    init(symbol: String, title: String, message: String, style: Style = .regular) {
+        self.init(symbol: symbol, title: title, message: message, style: style) { EmptyView() }
+    }
+}

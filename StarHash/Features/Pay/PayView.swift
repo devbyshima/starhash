@@ -1,0 +1,286 @@
+import StarHashKit
+import SwiftUI
+
+/// The Pay tab: type an amount, tap Pay, pick who gets it on the screen
+/// that slides in, and StarHash dials the MoMo code. The system's call
+/// prompt, showing the whole code, is the approval; MoMo then asks for the
+/// PIN. Balance dials the balance code. Nothing is sent by StarHash itself.
+struct PayView: View {
+    @Environment(StarHashStore.self) private var store
+    @Environment(AppRouter.self) private var router
+    @AppStorage(PreferenceKey.saveTransactions) private var saveTransactions = true
+    @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
+
+    @State private var input = AmountInput()
+    /// The recipient picker when it is showing.
+    @State private var path: [PayRoute] = []
+    /// Who to pay, from Pay Again on a transaction. Pay then dials them
+    /// straight away instead of opening the picker.
+    @State private var chosenRecipient: Recipient?
+    /// A code the system would not dial (the simulator, an iPad), shown in
+    /// an alert so it can be dialled by hand.
+    @State private var undialledCode: String?
+    /// Started when the picker opens, so a location fix is usually ready by
+    /// the time Pay is tapped; the payment never waits for it.
+    @State private var locationTask: Task<StarHashKit.Transaction.Coordinate?, Never>?
+    @State private var didApplyDebugLaunch = false
+
+    var body: some View {
+        NavigationStack(path: $path) {
+            keypadScreen
+                .toolbar(.hidden, for: .navigationBar)
+                .navigationDestination(for: PayRoute.self) { route in
+                    switch route {
+                    case .recipients(let query):
+                        RecipientPickerView(amount: input.value, query: query) { recipient in
+                            pay(recipient)
+                        }
+                    }
+                }
+        }
+        .alert(
+            "Can't dial on this device",
+            isPresented: Binding(get: { undialledCode != nil }, set: { if !$0 { undialledCode = nil } }),
+            presenting: undialledCode
+        ) { code in
+            Button("Copy Code") { UIPasteboard.general.string = code }
+            Button("OK", role: .cancel) {}
+        } message: { code in
+            Text("Dial \(code) on your phone to finish.")
+        }
+        // Pay Again on a transaction, from the Activity tab.
+        .onChange(of: router.payRequest?.id, initial: true) { takePayRequest() }
+        .onChange(of: path) { _, path in
+            if path.isEmpty { locationTask = nil }
+            router.setPushedScreen(!path.isEmpty, on: .pay)
+        }
+        .onAppear(perform: applyDebugLaunch)
+    }
+
+    private var keypadScreen: some View {
+        VStack(spacing: 0) {
+            PageHeader { walletPill }
+
+            Spacer(minLength: 12)
+            PayAmountDisplay(amount: input.value)
+            if let chosenRecipient {
+                PayChosenRecipient(recipient: chosenRecipient) {
+                    withAnimation(.smooth(duration: 0.25)) { self.chosenRecipient = nil }
+                }
+                .padding(.top, 12)
+                .transition(.scale(scale: 0.9).combined(with: .opacity))
+            }
+            Spacer(minLength: 12)
+
+            // The keypad takes the room the tab bar left: up to 360pt, so
+            // keys grow to thumb size, and the amount keeps the space above.
+            PayKeypad(onKey: press, canClear: !input.isZero)
+                .frame(maxHeight: 360)
+                .padding(.horizontal, 24)
+
+            buttons
+                .padding(.horizontal, StarHashMetrics.screenPadding)
+                .padding(.top, 20)
+                .padding(.bottom, 8)
+        }
+        .starhashReadableWidth(StarHashMetrics.narrowReadableWidth)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.starhashBackground.ignoresSafeArea())
+    }
+
+    // MARK: Pieces
+
+    private var walletPill: some View {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(Color.starhashInk)
+                .frame(width: 8, height: 8)
+            Text("MTN MoMo")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.starhashPrimaryText)
+        }
+        .padding(.horizontal, 16)
+        .frame(minHeight: 36)
+        .starhashGlass()
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Wallet: MTN MoMo")
+    }
+
+    private var buttons: some View {
+        HStack(spacing: 12) {
+            // The system asks before it calls, so Balance needs no prompt
+            // of its own.
+            Button {
+                dial(USSD.balance)
+            } label: {
+                Label("Balance", systemImage: "wallet.bifold")
+                    // At accessibility sizes the word alone, shrunk a little
+                    // rather than broken across two lines.
+                    .labelStyle(BalanceLabelStyle())
+                    .starhashFont(18, weight: .semibold, relativeTo: .body)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .foregroundStyle(Color.starhashPrimaryText)
+                    .padding(.horizontal, 12)
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: StarHashMetrics.primaryButtonHeight)
+                    .contentShape(Capsule())
+                    .starhashGlass(interactive: true)
+            }
+            .buttonStyle(PressScaleButtonStyle())
+            .accessibilityHint("Dials \(USSD.balance)")
+
+            Button("Pay") {
+                if let chosenRecipient {
+                    pay(chosenRecipient)
+                } else {
+                    openPicker()
+                }
+            }
+                .buttonStyle(.starhashPrimary)
+                .disabled(input.isZero)
+                .animation(.smooth(duration: 0.2), value: input.isZero)
+        }
+    }
+
+    // MARK: Actions
+
+    private func press(_ key: AmountInput.Key) -> Bool {
+        var next = input
+        let changed = next.apply(key)
+        if changed {
+            withAnimation(.snappy(duration: 0.25)) { input = next }
+        }
+        return changed
+    }
+
+    private func openPicker(query: String = "") {
+        if saveTransactions, nearbyLocation, PaymentLocation.isAuthorized {
+            locationTask = Task { await PaymentLocation.current() }
+        }
+        path = [.recipients(query: query)]
+    }
+
+    /// The recipient waits under the amount, and Pay dials them.
+    private func takePayRequest() {
+        guard let request = router.takePayRequest() else { return }
+        path = []
+        withAnimation(.smooth(duration: 0.25)) { chosenRecipient = request.recipient }
+    }
+
+    /// Records the payment (pending until its SMS), goes back to the keypad
+    /// and dials. The amount stays, as in the call prompt's wake: a call
+    /// cancelled there can be dialled again, and that retry is the same
+    /// pending payment rather than a second one.
+    private func pay(_ recipient: Recipient) {
+        let amount = input.value
+        guard amount > 0, recipient.isPayable else { return }
+        let pendingLocation = locationTask
+        locationTask = nil
+
+        var recordedID: UUID?
+        if saveTransactions {
+            recordedID = store.recordPayment(to: recipient, amount: amount, retryWindow: 5 * 60).id
+        }
+        let code = USSD.payment(to: recipient, amount: amount)
+        withAnimation(.smooth(duration: 0.25)) { chosenRecipient = nil }
+        path = []
+        // The call prompt (or the alert) comes up once the picker has gone.
+        Task {
+            try? await Task.sleep(for: .milliseconds(400))
+            dial(code)
+        }
+
+        // The location is filled in once it arrives, never before dialling.
+        if let recordedID, let pendingLocation {
+            Task {
+                guard let coordinate = await pendingLocation.value,
+                      var transaction = store.transaction(id: recordedID) else { return }
+                transaction.location = coordinate
+                store.update(transaction)
+            }
+        }
+    }
+
+    private func dial(_ code: String) {
+        Task {
+            if await !USSDDialer.dial(code) {
+                undialledCode = code
+            }
+        }
+    }
+
+    // MARK: Debug
+
+    private func applyDebugLaunch() {
+        #if DEBUG
+        guard !didApplyDebugLaunch else { return }
+        didApplyDebugLaunch = true
+        if let amount = PayDebug.amount { input = AmountInput(value: amount) }
+        if let recipient = PayDebug.chosenRecipient(in: store) { chosenRecipient = recipient }
+        if PayDebug.opensPicker {
+            openPicker(query: PayDebug.query ?? "")
+        }
+        #endif
+    }
+}
+
+/// The wallet icon and "Balance", or only the word at accessibility text
+/// sizes, where the button is half the screen's width.
+private struct BalanceLabelStyle: LabelStyle {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 8) {
+            if !dynamicTypeSize.isAccessibilitySize { configuration.icon }
+            configuration.title
+        }
+    }
+}
+
+/// The screens Pay pushes.
+private enum PayRoute: Hashable {
+    /// The recipient picker, searching for `query`.
+    case recipients(query: String)
+}
+
+/// The recipient Pay Again chose, under an empty amount: who the next
+/// payment goes to, with a way to drop them and pick someone else.
+private struct PayChosenRecipient: View {
+    let recipient: Recipient
+    let onClear: () -> Void
+
+    @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
+    private var contacts: PayContacts { .shared }
+
+    var body: some View {
+        HStack(spacing: 10) {
+            RecipientTile(
+                tile: .for(recipient, photoContactID: enableContacts ? contacts.photoContactID(for: recipient) : nil),
+                size: 28
+            )
+            Text("To \(recipient.displayName)")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.starhashPrimaryText)
+                .lineLimit(1)
+            Button(action: onClear) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.body)
+                    .foregroundStyle(Color.starhashSecondaryText)
+                    .frame(minWidth: 32, minHeight: 32)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Remove \(recipient.displayName)")
+        }
+        .padding(.leading, 6)
+        .padding(.trailing, 4)
+        .padding(.vertical, 4)
+        .starhashGlass()
+        .padding(.horizontal, StarHashMetrics.screenPadding)
+        // The photo, when the number or code is saved in Contacts.
+        .task(id: enableContacts) {
+            if enableContacts { await contacts.loadIfAllowed() }
+        }
+    }
+}

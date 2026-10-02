@@ -1,0 +1,254 @@
+import StarHashKit
+import SwiftUI
+
+/// Settings: the wallets and what StarHash saves. (The owner lives at the
+/// top of the side menu; how StarHash works, privacy and the version in
+/// Help.) Its own NavigationStack, with My Wallets and the auto-verify
+/// setup pushed onto it.
+struct SettingsView: View {
+    @Environment(AppRouter.self) private var router
+    @State private var path: [SettingsPage] = SettingsLaunch.initialPath
+
+    var body: some View {
+        NavigationStack(path: $path) {
+            SettingsRootList { path.append(.autoVerify) }
+                .navigationTitle("Settings")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar { SideMenuToolbarItem() }
+                .navigationDestination(for: SettingsPage.self) { $0.destination }
+        }
+        .onChange(of: path.isEmpty, initial: true) { _, isEmpty in
+            router.setPushedScreen(!isEmpty, on: .settings)
+        }
+    }
+}
+
+/// Every page pushed in the Settings tab.
+enum SettingsPage: Hashable {
+    case wallets
+    case autoVerify
+
+    @MainActor @ViewBuilder
+    var destination: some View {
+        switch self {
+        case .wallets: WalletsView()
+        case .autoVerify: AutoVerificationGuide()
+        }
+    }
+}
+
+private struct SettingsRootList: View {
+    /// Opens the auto-verify setup, the only way to turn it on.
+    let setUpAutoVerify: () -> Void
+
+    @Environment(StarHashStore.self) private var store
+
+    @AppStorage(PreferenceKey.saveTransactions) private var saveTransactions = true
+    @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
+    @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
+    @AppStorage(PreferenceKey.saveRecents) private var saveRecents = true
+    @AppStorage(PreferenceKey.lastVerifiedAt) private var lastVerifiedAt: Double = 0
+    @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
+
+    @State private var confirmsDeleteAll = false
+    @State private var confirmsAutoVerifyOff = SettingsLaunch.confirmsAutoVerifyOff
+    @State private var locationRefused = false
+
+    var body: some View {
+        List {
+            Section {
+                SettingsSectionTitle("Wallets")
+                NavigationLink(value: SettingsPage.wallets) {
+                    SettingsRow(symbol: "wallet.bifold.fill", title: "My Wallets", caption: "MTN MoMo is your main wallet")
+                }
+                .settingsCardRow(.single)
+            }
+
+            Section {
+                SettingsSectionTitle("Transactions")
+                SettingsToggleRow(
+                    symbol: "tray.full.fill",
+                    title: "Save transactions",
+                    caption: "Keep a history of what you pay and receive",
+                    isOn: $saveTransactions
+                )
+                .settingsCardRow(.first)
+                SettingsToggleRow(
+                    symbol: "checkmark.message.fill",
+                    title: "Auto-verify transactions",
+                    caption: "Confirm payments from M\u{2011}Money messages",
+                    isOn: autoVerifyBinding
+                )
+                .settingsCardRow(.last)
+            }
+
+            Section {
+                SettingsSectionTitle("Recipients")
+                SettingsToggleRow(
+                    symbol: "person.crop.circle.fill",
+                    title: "Enable contacts",
+                    caption: "Pick who to pay from your contacts",
+                    isOn: contactsBinding
+                )
+                .settingsCardRow(.first)
+                SettingsToggleRow(
+                    symbol: "location.fill",
+                    title: "Nearby",
+                    caption: "Note where you paid, to show it on a map",
+                    isOn: locationBinding
+                )
+                .settingsCardRow(.middle)
+                SettingsToggleRow(
+                    symbol: "clock.arrow.circlepath",
+                    title: "Save recent recipients",
+                    caption: "Show who you paid last at the top",
+                    isOn: $saveRecents
+                )
+                .settingsCardRow(.last)
+            }
+
+            Section {
+                SettingsSectionTitle("Data")
+                Button(role: .destructive) { confirmsDeleteAll = true } label: {
+                    Text("Delete All Transactions")
+                        .font(.body)
+                        .foregroundStyle(Color.starhashDestructive)
+                        .frame(maxWidth: .infinity, minHeight: 52)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(HighlightRowButtonStyle())
+                .disabled(store.transactions.isEmpty)
+                .settingsCardRow(.single, insets: .settingsTextRow)
+            } footer: {
+                SettingsFootnote("Transactions are kept only on this iPhone. Deleting them cannot be undone.")
+            }
+
+        }
+        .settingsListStyle(sectionSpacing: 14)
+        .confirmationDialog(
+            "Delete all transactions?",
+            isPresented: $confirmsDeleteAll,
+            titleVisibility: .visible
+        ) {
+            Button("Delete All Transactions", role: .destructive) {
+                withAnimation(.smooth) { store.deleteAll() }
+            }
+        } message: {
+            Text("Your whole history will be removed from this iPhone.")
+        }
+        .sheet(isPresented: $confirmsAutoVerifyOff) {
+            TurnOffAutoVerifySheet {
+                withAnimation(.smooth) {
+                    StarHashPreferences.turnOffAutoVerify()
+                    autoVerifySetUp = false
+                    lastVerifiedAt = 0
+                }
+            }
+        }
+        .alert("Location is off", isPresented: $locationRefused) {
+            Button("Open Settings") { SettingsAppLink.open() }
+            Button("Not Now", role: .cancel) {}
+        } message: {
+            Text("Allow StarHash to use your location in the Settings app to note where you pay.")
+        }
+    }
+
+    /// On once the setup finished with a working shortcut. Switching it on
+    /// opens the setup, which turns it on only after checking the shortcut;
+    /// switching it off asks first, since payments then stay Pending.
+    private var autoVerifyBinding: Binding<Bool> {
+        Binding {
+            lastVerifiedAt > 0 && autoVerifySetUp
+        } set: { isOn in
+            if isOn { setUpAutoVerify() } else { confirmsAutoVerifyOff = true }
+        }
+    }
+
+    /// Turning contacts on asks for access the first time.
+    private var contactsBinding: Binding<Bool> {
+        Binding {
+            enableContacts
+        } set: { isOn in
+            enableContacts = isOn
+            guard isOn else { return }
+            Task { await SettingsContactsAccess.request() }
+        }
+    }
+
+    /// Turning Nearby on asks for when-in-use location; a refusal switches
+    /// it back off and points to the Settings app.
+    private var locationBinding: Binding<Bool> {
+        Binding {
+            nearbyLocation
+        } set: { isOn in
+            nearbyLocation = isOn
+            guard isOn else { return }
+            Task {
+                let allowed = await SettingsLocationAccess.shared.request()
+                if !allowed {
+                    withAnimation { nearbyLocation = false }
+                    locationRefused = true
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Footer
+
+enum SettingsVersion {
+    static var short: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+    }
+}
+
+/// The mark, then the name and version on two centred lines (Help).
+struct SettingsFooter: View {
+    var body: some View {
+        VStack(spacing: 16) {
+            StarHashMark(size: 56)
+            VStack(spacing: 0) {
+                Text("StarHash")
+                Text(SettingsVersion.short)
+            }
+            .font(.body)
+            .foregroundStyle(Color.starhashSecondaryText)
+            .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 24)
+        .padding(.bottom, 24)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("StarHash version \(SettingsVersion.short)")
+    }
+}
+
+// MARK: - Launch arguments
+
+/// `-settingsPage wallets|guide|guide2|guide3` (DEBUG only, with
+/// `-tab settings`) opens that page or the guide at launch.
+@MainActor
+enum SettingsLaunch {
+    private static var page: String? {
+        #if DEBUG
+        DebugLaunch.value(after: "-settingsPage")
+        #else
+        nil
+        #endif
+    }
+
+    static var initialPath: [SettingsPage] {
+        if page == "wallets" { return [.wallets] }
+        if page?.hasPrefix("guide") == true { return [.autoVerify] }
+        return []
+    }
+
+    /// `-settingsPage autoVerifyOff` asks to turn auto-verify off.
+    static var confirmsAutoVerifyOff: Bool { page == "autoVerifyOff" }
+
+    /// `-settingsPage guide2` starts the guide on its second step.
+    static var guideStep: Int {
+        guard let page, page.hasPrefix("guide"), let n = Int(page.dropFirst(5)) else { return 0 }
+        return max(0, min(n - 1, AutoVerificationGuide.stepCount - 1))
+    }
+}

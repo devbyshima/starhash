@@ -1,0 +1,11 @@
+.DS_Store
+*.xcodeproj
+.build/
+.swiftpm/
+Packages/StarHashKit/.build/
+Packages/StarHashKit/.build-*/
+xcuserdata/
+screenshots/.stage/
+/.scratch/
+screenshots/
+screenshots.prev/

@@ -1,0 +1,46 @@
+import Foundation
+
+extension PreferenceKey {
+    /// When the Process Carrier SMS action last ran (seconds since 1970).
+    /// The auto verification guide watches it to know the shortcut works,
+    /// and Settings shows Auto-verify as On once it is set.
+    static let lastVerifiedAt = "lastVerifiedAt"
+}
+
+/// Preference values read outside a view (App Intents, permission
+/// helpers), with the same defaults the Settings toggles show: everything
+/// on except Nearby, which needs location permission first. @AppStorage
+/// defaults only apply inside views, so code elsewhere reads through here.
+enum StarHashPreferences {
+    static func bool(_ key: String, default value: Bool) -> Bool {
+        UserDefaults.standard.object(forKey: key) as? Bool ?? value
+    }
+
+    static var saveTransactions: Bool { bool(PreferenceKey.saveTransactions, default: true) }
+    static var saveRecents: Bool { bool(PreferenceKey.saveRecents, default: true) }
+    static var enableContacts: Bool { bool(PreferenceKey.enableContacts, default: true) }
+    static var nearbyLocation: Bool { bool(PreferenceKey.nearbyLocation, default: false) }
+
+    /// Nil until the shortcut has run once.
+    static var lastVerifiedAt: Date? {
+        let seconds = UserDefaults.standard.double(forKey: PreferenceKey.lastVerifiedAt)
+        return seconds > 0 ? Date(timeIntervalSince1970: seconds) : nil
+    }
+
+    /// Auto-verify is on once its setup finished with a working shortcut,
+    /// until it is turned off in Settings. While off, the action ignores
+    /// every message, even though the automation in Shortcuts still runs.
+    static var autoVerifyOn: Bool {
+        bool(PreferenceKey.autoVerifySetUp, default: false) && lastVerifiedAt != nil
+    }
+
+    /// Turned off in Settings: setting it up again checks the shortcut anew.
+    static func turnOffAutoVerify() {
+        UserDefaults.standard.set(false, forKey: PreferenceKey.autoVerifySetUp)
+        UserDefaults.standard.set(0.0, forKey: PreferenceKey.lastVerifiedAt)
+    }
+
+    static func markVerified(at date: Date = .now) {
+        UserDefaults.standard.set(date.timeIntervalSince1970, forKey: PreferenceKey.lastVerifiedAt)
+    }
+}

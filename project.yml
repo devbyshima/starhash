@@ -1,0 +1,64 @@
+name: StarHash
+options:
+  bundleIdPrefix: com.fulltimestudio
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+
+packages:
+  StarHashKit:
+    path: Packages/StarHashKit
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: 7WHQR6L96K
+    SWIFT_APPROACHABLE_CONCURRENCY: YES
+    SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY: YES
+
+schemes:
+  StarHash:
+    build:
+      targets:
+        StarHash: all
+    run:
+      config: Debug
+    archive:
+      config: Release
+
+targets:
+  StarHash:
+    type: application
+    platform: iOS
+    sources:
+      - path: StarHash
+    dependencies:
+      - package: StarHashKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.fulltimestudio.starhash
+        TARGETED_DEVICE_FAMILY: "1"
+        ENABLE_PREVIEWS: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    info:
+      path: StarHash/App/Info.plist
+      properties:
+        CFBundleDisplayName: StarHash
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        ITSAppUsesNonExemptEncryption: false
+        NSContactsUsageDescription: StarHash shows your contacts so you can pick who to pay. They stay on your iPhone.
+        NSLocationWhenInUseUsageDescription: StarHash can note where you paid, so each payment shows on a map. It stays on your iPhone.
+        LSApplicationQueriesSchemes: [tel]
+        CFBundleURLTypes:
+          - CFBundleURLName: com.fulltimestudio.starhash
+            CFBundleURLSchemes: [starhash]
