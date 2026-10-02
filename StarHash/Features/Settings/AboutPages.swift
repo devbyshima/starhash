@@ -5,9 +5,9 @@ import SwiftUI
 /// kept, as numbered cards.
 struct HowStarHashWorksView: View {
     private let steps: [(symbol: String, title: String, text: String)] = [
-        ("number", "Type an amount", "Enter what you want to pay on the keypad. Balance checks your MoMo balance with *182*6*1#."),
+        ("number", "Type an amount", "Enter what you want to pay on the keypad. Balance checks your wallet: *182*6*1# on MTN MoMo, the *182# menu on Airtel Money."),
         ("person.fill", "Pick who", "Choose a contact, a recent recipient, or type a number or merchant code. Ten digits or more is a phone number; fewer is a MoMo Pay code."),
-        ("phone.fill", "StarHash dials", "StarHash opens the dialer with the right USSD code: *182*1*1*number*amount# to send to MTN, *182*1*2*number*amount# to send to Airtel, *182*8*1*code*amount# to pay a merchant. You confirm with your PIN, as always."),
+        ("phone.fill", "StarHash dials", "StarHash opens the dialer with your wallet's USSD code: *182*1*1*number*amount# to send on your own network, *182*1*2*number*amount# to send to the other one, *182*8*1*code*amount# to pay a merchant. You confirm with your PIN, as always."),
         ("checkmark.message.fill", "Every payment, logged", "The payment shows in Activity. With auto-verify set up, MTN's confirmation SMS fills in the fee, the reference and your new balance."),
     ]
 
@@ -19,10 +19,10 @@ struct HowStarHashWorksView: View {
                         SettingsSymbol(symbol: step.symbol)
                         VStack(alignment: .leading, spacing: 4) {
                             Text("\(index + 1). \(step.title)")
-                                .font(.body.weight(.semibold))
+                                .font(.starhash(.body, weight: .semibold))
                                 .foregroundStyle(Color.starhashPrimaryText)
                             Text(step.text)
-                                .font(.subheadline)
+                                .font(.starhash(.subheadline))
                                 .foregroundStyle(Color.starhashSecondaryText)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
@@ -61,10 +61,10 @@ struct PrivacyView: View {
                         SettingsSymbol(symbol: point.symbol)
                         VStack(alignment: .leading, spacing: 4) {
                             Text(point.title)
-                                .font(.body.weight(.semibold))
+                                .font(.starhash(.body, weight: .semibold))
                                 .foregroundStyle(Color.starhashPrimaryText)
                             Text(point.text)
-                                .font(.subheadline)
+                                .font(.starhash(.subheadline))
                                 .foregroundStyle(Color.starhashSecondaryText)
                                 .fixedSize(horizontal: false, vertical: true)
                         }

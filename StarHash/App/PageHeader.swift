@@ -45,7 +45,7 @@ struct PageTitle: View {
 
     var body: some View {
         Text(text)
-            .font(.headline)
+            .font(.starhash(.headline))
             .foregroundStyle(Color.starhashPrimaryText)
             .accessibilityAddTraits(.isHeader)
     }

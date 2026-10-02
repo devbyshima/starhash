@@ -1,11 +1,16 @@
 # StarHash
 
-iOS SwiftUI companion for MTN MoMo Rwanda: type an amount, pick a recipient,
-and StarHash dials the USSD code; it also keeps the transactions, confirmed
+iOS SwiftUI companion for MTN MoMo and Airtel Money in Rwanda (the owner
+picks one as their wallet): type an amount, pick a recipient, and StarHash
+dials the USSD code; it also keeps the transactions, confirmed
 from MTN's SMS through a Shortcuts automation. No account, no paywall, no
-server. Three tabs: Pay, Activity and Settings. Light and dark, monochrome,
-Liquid Glass on iOS 26+. The visual reference is Keaser
-(`~/Dev/apps/keaser`, read only): port its patterns, never import its code.
+server. Three tabs: Pay, Activity and Settings. Light and dark, monochrome
+but for the wallet's colour on primary buttons, Space Grotesk, Liquid Glass
+on iOS 26+. The visual reference is Keaser (`~/Dev/apps/keaser`, read
+only): port its patterns, never import its code. The primary button and the
+glass sheets follow Beam (`~/Dev/apps/beam/Apps/iOS`, read only), and so
+does onboarding: its reel, wallet step and permission screen are ports of
+Beam's `LoopOnBoarding`, "find your Mac" step and `PermissionOnBoarding`.
 
 - `Packages/StarHashKit/` - models (`Recipient`, `Transaction`, `Money`),
   `USSD`, `AmountInput`, `CarrierSMS` (the SMS parser), `ActivitySummary`
@@ -47,18 +52,30 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 - SwiftUI has its own `Transaction`: write `StarHashKit.Transaction` in any
   file that imports SwiftUI.
 - Colours only from `StarHash/Design/Theme.swift`. Ink is the one accent;
-  the only other hues are `starhashIncoming` (money in) and
-  `starhashDestructive` (money out arrows, destructive actions). Settings
-  switches keep the system green, as Keaser's do.
+  the only other hues are `starhashIncoming` (money in),
+  `starhashDestructive` (money out arrows, destructive actions) and the
+  wallet colours `starhashMTN` and `starhashAirtel`, which fill
+  `.starhashPrimary` buttons and tint onboarding (`OnboardingPalette.tint`)
+  only. Settings switches keep the system green,
+  as Keaser's do.
 - Glass only through `starhashGlass`, `starhashGlassButtonStyle`,
   `StarHashGlassContainer` (iOS 18 falls back to materials).
-- Build screens from the existing pieces: `StarHashSheetHeader`,
-  `StarHashCircleButton`, `StarHashCard`, `StarHashRowSeparator`,
-  `StarHashActionCard`, `.starhashPrimary`, `.starhashCapsule`,
-  `SymbolTile`, `EmptyStateView`, `starhashSheetChrome()`,
-  `starhashSheetScrollEdge()`, `starhashBottomBar`. Cards have radius 26.
-- Text through text styles or `.starhashFont(size, weight:)` so it follows
-  Dynamic Type; icon-only buttons get an accessibility label.
+- Build screens from the existing pieces: `StarHashCircleButton`,
+  `StarHashCard`, `StarHashRowSeparator`, `.starhashPrimary`,
+  `.starhashCapsule`, `SymbolTile`, `EmptyStateView`, `starhashBottomBar`.
+  Cards have radius 26.
+- Bottom sheets follow Beam's sheet language exactly, built only from
+  `StarHash/Design/SheetKit.swift`: `sheetGlass(detents:)`, `SheetHeader`
+  (centred 32pt bold title, at most a glass button on the right, no close
+  button), cards via `sheetCard()` (radius 22) with `SheetInfoRow`s split
+  by `SheetDivider` (dotted), `SheetSectionLabel`, `.sheetPrimary` /
+  `.sheetFilled` (50pt) and `SheetTextButton`, and the `Font.sheet...`
+  type scale (Beam's sizes and weights). Sized-to-content sheets use
+  `sheetHeight` and `.height(height + 8)`.
+- Text is Space Grotesk (`StarHash/Resources/Fonts`, a variable font):
+  `.font(.starhash(.body))` for a text style, `.starhashFont(size, weight:)`
+  for an exact size, so it follows Dynamic Type. Never `Font.system` for
+  text (SF Symbols keep it). Icon-only buttons get an accessibility label.
 - Preferences: read through `@AppStorage(PreferenceKey...)` in views or
   `StarHashPreferences` elsewhere, with the same defaults (everything on
   except Nearby).
@@ -73,19 +90,20 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 | --- | --- |
 | `-inMemory` | fresh in-memory store seeded with `SampleData` |
 | `-skipOnboarding`, `-resetOnboarding` | start on the tabs, or on onboarding |
-| `-onboardingPage 0...4` | onboarding page (with `-resetOnboarding`) |
 | `-tab pay\|buy\|activity\|settings\|help` | starting page |
 | `-menu` | side menu open |
 | `-note`, `-noteTLDR` | the developer note (full, or on its TL;DR) |
-| `-ownerName <name> -ownerNumber <number>` | the owner shown in the menu (UserDefaults; `-skipOnboarding` sets 0781234567 when none) |
-| `-onboardingPage 0...5` | onboarding page (with `-resetOnboarding`; 1 is the MoMo number) |
+| `-wallet mtn\|airtel\|none` | the main wallet (UserDefaults; none clears it; `-skipOnboarding` sets mtn when none) |
+| `-onboardingPage 0...2` | onboarding screen (with `-resetOnboarding`): 0 the reel, 1 the wallet, 2 Contacts |
 | `-helpPage howItWorks\|privacy` | a Help page (with `-tab help`) |
 | `-payAmount <n>` | amount on the keypad |
 | `-payChosen <input>` | a recipient already chosen (Pay Again with no amount) |
 | `-payPicker` | open the recipient picker |
 | `-payQuery <text>` | open the picker with this text in its search field |
+| `-payBrowse` | with `-payPicker`: the picker with its search closed (title header) |
 | `-activityPeriod today\|week\|month\|year\|all` | Activity period |
 | `-openFirstTransaction` | open the newest transaction's details |
+| `-confirmDelete` | with `-openFirstTransaction`: the delete question |
 | `-activitySearch <text>` | Activity search with this text |
 | `-activityChartSelection last\|<index>` | chart callout on a bar |
 | `-settingsPage wallets\|guide\|guide2\|autoVerifyOff` | a Settings page (with `-tab settings`); guide is Auto-verify at step 1 or 2; autoVerifyOff asks to turn it off |

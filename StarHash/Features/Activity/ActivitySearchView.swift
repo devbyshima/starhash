@@ -86,7 +86,7 @@ struct ActivitySearchView: View {
     private var field: some View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
-                .font(.body.weight(.medium))
+                .font(.starhash(.body, weight: .medium))
                 .foregroundStyle(Color.starhashPrimaryText)
                 .accessibilityHidden(true)
             TextField(
@@ -94,7 +94,7 @@ struct ActivitySearchView: View {
                 text: $text,
                 prompt: Text("Search transactions").foregroundStyle(Color.starhashSecondaryText)
             )
-            .font(.body)
+            .font(.starhash(.body))
             .foregroundStyle(Color.starhashPrimaryText)
             .focused(isFocused)
             .submitLabel(.search)
@@ -107,7 +107,7 @@ struct ActivitySearchView: View {
                     isFocused.wrappedValue = true
                 } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .font(.body)
+                        .font(.starhash(.body))
                         .foregroundStyle(Color.starhashPrimaryText)
                         .frame(width: 44, height: 44)
                         .contentShape(Rectangle())

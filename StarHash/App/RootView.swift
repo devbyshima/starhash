@@ -1,12 +1,12 @@
 import SwiftUI
 
 /// Onboarding the first time, the side menu and its pages after. An
-/// install that finished onboarding before it asked for the MoMo number is
+/// install that finished onboarding before it asked for the wallet is
 /// asked for it once, on its own page. The developer note shows once, over
 /// the app, right after onboarding.
 struct RootView: View {
     @AppStorage(PreferenceKey.hasOnboarded) private var hasOnboarded = false
-    @AppStorage(PreferenceKey.ownerNumber) private var ownerNumber = ""
+    @AppStorage(PreferenceKey.wallet) private var wallet = ""
     @AppStorage(PreferenceKey.hasSeenDeveloperNote) private var hasSeenDeveloperNote = false
     @State private var forcesNote = DeveloperNoteLaunch.forcesNote
 
@@ -15,16 +15,16 @@ struct RootView: View {
             if !hasOnboarded {
                 OnboardingView { withAnimation(.smooth) { hasOnboarded = true } }
                     .transition(.opacity)
-            } else if ownerNumber.isEmpty {
-                OnboardingNumberPage {}
-                    .background(OnboardingPalette.background.ignoresSafeArea())
+            } else if wallet.isEmpty {
+                OnboardingWalletPage {}
+                    .background(Color.starhashBackground.ignoresSafeArea())
                     .transition(.opacity)
             } else {
                 SideMenuContainer()
                     .transition(.opacity)
             }
         }
-        .animation(.smooth, value: ownerNumber.isEmpty)
+        .animation(.smooth, value: wallet.isEmpty)
         .sheet(isPresented: developerNotePresented) {
             DeveloperNoteSheet()
         }
@@ -33,7 +33,7 @@ struct RootView: View {
 
     private var developerNotePresented: Binding<Bool> {
         Binding(
-            get: { forcesNote || (hasOnboarded && !ownerNumber.isEmpty && !hasSeenDeveloperNote) },
+            get: { forcesNote || (hasOnboarded && !wallet.isEmpty && !hasSeenDeveloperNote) },
             set: { presented in
                 if !presented {
                     hasSeenDeveloperNote = true

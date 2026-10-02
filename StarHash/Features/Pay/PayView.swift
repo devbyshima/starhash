@@ -10,6 +10,7 @@ struct PayView: View {
     @Environment(AppRouter.self) private var router
     @AppStorage(PreferenceKey.saveTransactions) private var saveTransactions = true
     @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
+    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
 
     @State private var input = AmountInput()
     /// The recipient picker when it is showing.
@@ -59,7 +60,7 @@ struct PayView: View {
 
     private var keypadScreen: some View {
         VStack(spacing: 0) {
-            PageHeader { walletPill }
+            PageHeader { EmptyView() } trailing: { WalletSwitcher() }
 
             Spacer(minLength: 12)
             PayAmountDisplay(amount: input.value)
@@ -72,15 +73,25 @@ struct PayView: View {
             }
             Spacer(minLength: 12)
 
-            // The keypad takes the room the tab bar left: up to 360pt, so
-            // keys grow to thumb size, and the amount keeps the space above.
+            // The amount sits midway between the top bar and the currency;
+            // the currency, keypad and buttons stack at the bottom, as in a
+            // payment app's keypad screen.
+            PayCurrencyPill(isEmpty: input.isZero)
+                .padding(.bottom, 14)
+
+            // Up to 332pt, four rows of about 83, so keys grow to thumb size
+            // and the amount keeps the space above.
             PayKeypad(onKey: press, canClear: !input.isZero)
-                .frame(maxHeight: 360)
-                .padding(.horizontal, 24)
+                .frame(maxHeight: 332)
+                .padding(.horizontal, 8)
+                // Takes its full height before the spacers around the
+                // amount share what is left, so the keys never move as the
+                // amount changes size.
+                .layoutPriority(1)
 
             buttons
                 .padding(.horizontal, StarHashMetrics.screenPadding)
-                .padding(.top, 20)
+                .padding(.top, 16)
                 .padding(.bottom, 8)
         }
         .starhashReadableWidth(StarHashMetrics.narrowReadableWidth)
@@ -90,28 +101,12 @@ struct PayView: View {
 
     // MARK: Pieces
 
-    private var walletPill: some View {
-        HStack(spacing: 8) {
-            Circle()
-                .fill(Color.starhashInk)
-                .frame(width: 8, height: 8)
-            Text("MTN MoMo")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(Color.starhashPrimaryText)
-        }
-        .padding(.horizontal, 16)
-        .frame(minHeight: 36)
-        .starhashGlass()
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Wallet: MTN MoMo")
-    }
-
     private var buttons: some View {
         HStack(spacing: 12) {
             // The system asks before it calls, so Balance needs no prompt
             // of its own.
             Button {
-                dial(USSD.balance)
+                dial(USSD.balance(for: wallet))
             } label: {
                 Label("Balance", systemImage: "wallet.bifold")
                     // At accessibility sizes the word alone, shrunk a little
@@ -128,7 +123,7 @@ struct PayView: View {
                     .starhashGlass(interactive: true)
             }
             .buttonStyle(PressScaleButtonStyle())
-            .accessibilityHint("Dials \(USSD.balance)")
+            .accessibilityHint("Dials \(USSD.balance(for: wallet))")
 
             Button("Pay") {
                 if let chosenRecipient {
@@ -182,7 +177,7 @@ struct PayView: View {
         if saveTransactions {
             recordedID = store.recordPayment(to: recipient, amount: amount, retryWindow: 5 * 60).id
         }
-        let code = USSD.payment(to: recipient, amount: amount)
+        let code = USSD.payment(to: recipient, amount: amount, from: wallet)
         withAnimation(.smooth(duration: 0.25)) { chosenRecipient = nil }
         path = []
         // The call prompt (or the alert) comes up once the picker has gone.
@@ -260,12 +255,12 @@ private struct PayChosenRecipient: View {
                 size: 28
             )
             Text("To \(recipient.displayName)")
-                .font(.subheadline.weight(.semibold))
+                .font(.starhash(.subheadline, weight: .semibold))
                 .foregroundStyle(Color.starhashPrimaryText)
                 .lineLimit(1)
             Button(action: onClear) {
                 Image(systemName: "xmark.circle.fill")
-                    .font(.body)
+                    .font(.starhash(.body))
                     .foregroundStyle(Color.starhashSecondaryText)
                     .frame(minWidth: 32, minHeight: 32)
                     .contentShape(Rectangle())

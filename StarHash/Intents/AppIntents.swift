@@ -2,17 +2,18 @@ import AppIntents
 import StarHashKit
 import UIKit
 
-/// Opens StarHash and dials the MoMo balance code (*182*6*1#).
+/// Opens StarHash and dials the main wallet's balance code (*182*6*1# on
+/// MTN MoMo).
 struct CheckBalanceIntent: AppIntent {
     static let title: LocalizedStringResource = "Check MoMo Balance"
-    static let description = IntentDescription("Dials MTN MoMo's balance code.")
+    static let description = IntentDescription("Dials your wallet's balance code.")
     /// The dialer can only be opened from the foreground.
     static let openAppWhenRun = true
 
     @MainActor
     func perform() async throws -> some IntentResult {
         AppEnvironment.router.selectedTab = .pay
-        if let url = USSD.telURL(for: USSD.balance) {
+        if let url = USSD.telURL(for: USSD.balance(for: StarHashPreferences.wallet)) {
             await UIApplication.shared.open(url)
         }
         return .result()

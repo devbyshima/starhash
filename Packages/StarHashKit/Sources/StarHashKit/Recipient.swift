@@ -9,9 +9,11 @@ public struct Recipient: Codable, Hashable, Sendable {
         case merchant
     }
 
-    /// The mobile network a phone number is on. MoMo sends to both, with a
-    /// different code and fee for each.
-    public enum Network: String, Sendable {
+    /// The mobile network a phone number is on, which is also the wallet
+    /// the owner pays from (MTN MoMo or Airtel Money). Each wallet sends to
+    /// both, with a different code and fee for its own network and the
+    /// other one.
+    public enum Network: String, CaseIterable, Sendable {
         case mtn
         case airtel
 
@@ -19,6 +21,14 @@ public struct Recipient: Codable, Hashable, Sendable {
             switch self {
             case .mtn: "MTN"
             case .airtel: "Airtel"
+            }
+        }
+
+        /// The mobile money wallet on this network.
+        public var walletName: String {
+            switch self {
+            case .mtn: "MTN MoMo"
+            case .airtel: "Airtel Money"
             }
         }
     }
@@ -52,17 +62,6 @@ public struct Recipient: Codable, Hashable, Sendable {
     public var network: Network? {
         guard kind == .phone else { return nil }
         return destination.hasPrefix("072") || destination.hasPrefix("073") ? .airtel : .mtn
-    }
-
-    /// The owner's own MTN MoMo number from what they typed, in local form,
-    /// or nil when it is not one: 078 or 079 and ten digits, typed with or
-    /// without the leading 0 or the +250.
-    public static func ownMoMoNumber(from input: String) -> String? {
-        var digits = input.filter(\.isASCIIDigit)
-        if digits.count == 9, digits.hasPrefix("7") { digits = "0" + digits }
-        let local = localNumber(digits)
-        guard local.count == 10, local.hasPrefix("078") || local.hasPrefix("079") else { return nil }
-        return local
     }
 
     /// "250781234567" becomes "0781234567"; anything else is kept.

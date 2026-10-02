@@ -55,7 +55,7 @@ private struct FallbackGlassButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.body.weight(.medium))
+            .font(.starhash(.body, weight: .medium))
             .foregroundStyle(isEnabled ? Color.starhashPrimaryText : Color.starhashTertiaryText)
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
@@ -68,19 +68,6 @@ private struct FallbackGlassButtonStyle: ButtonStyle {
 }
 
 extension View {
-    /// Sheet chrome: on iOS 26 the system's floating glass sheet is left
-    /// alone; before that, a charcoal background with large corners.
-    @ViewBuilder
-    func starhashSheetChrome() -> some View {
-        if #available(iOS 26.0, *) {
-            self
-        } else {
-            self
-                .presentationBackground(Color.starhashSheetBackground)
-                .presentationCornerRadius(32)
-        }
-    }
-
     /// The round glass icon button used in sheet headers (close, back,
     /// confirm, add).
     func starhashCircleButton() -> some View {

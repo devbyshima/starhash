@@ -57,7 +57,7 @@ struct ActivitySummaryCard: View {
     private var receivedLine: some View {
         HStack(spacing: 4) {
             Image(systemName: "arrow.down.left")
-                .font(.footnote.weight(.bold))
+                .font(.starhash(.footnote, weight: .bold))
                 .accessibilityHidden(true)
             Text("Received \(Money.format(totals.received))")
         }
@@ -127,7 +127,7 @@ struct ActivitySpendingChart: View {
                     // whatever `values` lists, so each label checks itself.
                     if let key = value.as(String.self), let bucket = bucket(for: key), bucket.showsLabel {
                         Text(narrow ? bucket.narrowLabel : bucket.label)
-                            .font(.caption2)
+                            .font(.starhash(.caption2))
                             .foregroundStyle(Color.starhashSecondaryText)
                             .fixedSize()
                     }
@@ -141,7 +141,7 @@ struct ActivitySpendingChart: View {
                 AxisValueLabel {
                     if let position = value.as(Double.self) {
                         Text(Money.compact(Int((position * top).rounded())))
-                            .font(.caption2)
+                            .font(.starhash(.caption2))
                             .foregroundStyle(Color.starhashSecondaryText)
                     }
                 }

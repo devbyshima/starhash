@@ -1,0 +1,231 @@
+import SwiftUI
+
+/// A permission primer, a port of Beam's `PermissionOnBoarding`: an iPhone
+/// drawn in outline with a system alert popping up on it and a finger
+/// tapping the button to choose, over and over, and the words and buttons on
+/// a soft panel at the bottom. The real prompt comes after Continue.
+struct OnboardingPermission: View {
+    struct Config {
+        /// Before the alert first appears, so the screen settles first.
+        var initialDelay: Double = 0
+        var title: String
+        var description: String
+        /// How many buttons the drawn alert has, and which one is tapped.
+        var alertButtons = 2
+        var tappedButton = 2
+        var primaryTitle: String
+        var primaryAction: () -> Void
+        var secondaryTitle: String?
+        var secondaryAction: (() -> Void)?
+    }
+
+    let config: Config
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var showsAlert = false
+
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            iPhone
+                .accessibilityHidden(true)
+
+            VStack(spacing: 15) {
+                Text(config.title)
+                    .starhashFont(28, weight: .bold, relativeTo: .title)
+                    .foregroundStyle(Color.starhashPrimaryText)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.7)
+                    .accessibilityAddTraits(.isHeader)
+
+                Text(config.description)
+                    .font(.starhash(.footnote))
+                    .foregroundStyle(Color.starhashSecondaryText)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.7)
+                    .padding(.bottom, 10)
+
+                Button(config.primaryTitle, action: config.primaryAction)
+                    .buttonStyle(.starhashPrimary)
+                    .padding(.horizontal, 15)
+
+                if let title = config.secondaryTitle, let action = config.secondaryAction {
+                    Button(action: action) {
+                        Text(title)
+                            .font(.starhash(.subheadline, weight: .semibold))
+                            .foregroundStyle(Color.starhashSecondaryText)
+                            .frame(minHeight: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .frame(height: 270)
+            .padding(15)
+            .frame(maxWidth: .infinity)
+            // The phone fades into the page under the words.
+            .background {
+                Rectangle()
+                    .fill(Color.starhashBackground)
+                    .blur(radius: 25)
+                    .padding(-50)
+                    .ignoresSafeArea()
+            }
+        }
+        .padding(.top, 20)
+        .task {
+            guard !showsAlert else { return }
+            try? await Task.sleep(for: .seconds(config.initialDelay))
+            showsAlert = true
+        }
+    }
+
+    // MARK: The iPhone
+
+    /// Drawn at an iPhone's size (402 by 874 points) and scaled down to fit
+    /// the room above the panel.
+    private var iPhone: some View {
+        Color.clear
+            .overlay(alignment: .top) {
+                let radius: CGFloat = 55
+                ZStack {
+                    RoundedRectangle(cornerRadius: radius)
+                        .fill(OnboardingPalette.mockFill)
+                        .overlay(alignment: .top) { statusBar }
+                        .overlay(alignment: .top) {
+                            // The Dynamic Island.
+                            Capsule()
+                                .fill(OnboardingPalette.mockEdge)
+                                .frame(width: 120, height: 37)
+                                .offset(y: 15)
+                        }
+
+                    // The bezel.
+                    ZStack {
+                        RoundedRectangle(cornerRadius: radius + 7)
+                            .stroke(OnboardingPalette.mockBezel, lineWidth: 12)
+                        RoundedRectangle(cornerRadius: radius + 7)
+                            .stroke(OnboardingPalette.mockEdge, lineWidth: 4)
+                        RoundedRectangle(cornerRadius: radius + 3)
+                            .stroke(OnboardingPalette.mockEdge, lineWidth: 6)
+                            .padding(4)
+                    }
+                    .padding(-7)
+
+                    if showsAlert {
+                        alert
+                    }
+                }
+                .frame(width: 402, height: 874)
+            }
+            .visualEffect { content, proxy in
+                let design = CGSize(width: 402, height: 874)
+                let ratio = min(proxy.size.width / design.width, proxy.size.height / design.height)
+                return content.scaleEffect(ratio, anchor: .top)
+            }
+            .padding(.top, 10)
+            .padding(.bottom, 270)
+            .frame(maxHeight: .infinity, alignment: .top)
+    }
+
+    private var statusBar: some View {
+        HStack(spacing: 8) {
+            Text("9:41")
+                .padding(.leading, 24)
+            Spacer(minLength: 0)
+            Group {
+                Image(systemName: "wifi")
+                Image(systemName: "battery.50percent")
+            }
+            .offset(y: -2)
+        }
+        // The iPhone's own status bar, so the system's font, not the app's.
+        .font(.system(size: 18, weight: .medium))
+        .foregroundStyle(Color.starhashPrimaryText)
+        .frame(height: 37)
+        .padding(.horizontal, 35)
+        .offset(y: 18)
+    }
+
+    // MARK: The alert
+
+    /// Pops in, a finger taps the chosen button, and it fades, every 3.4s.
+    @ViewBuilder
+    private var alert: some View {
+        if reduceMotion {
+            alertCard(Frame(opacity: 1, scale: 1, tapOpacity: 1))
+        } else {
+            KeyframeAnimator(initialValue: Frame(), repeating: true) { frame in
+                alertCard(frame)
+                    .opacity(frame.opacity)
+                    .scaleEffect(frame.scale)
+            } keyframes: { _ in
+                SpringKeyframe(Frame(opacity: 1, scale: 1), duration: 0.7, spring: .smooth(duration: 0.5, extraBounce: 0))
+                SpringKeyframe(Frame(opacity: 1, scale: 1, tapOpacity: 1), duration: 0.1, spring: .smooth(duration: 0.4, extraBounce: 0))
+                SpringKeyframe(Frame(opacity: 1, scale: 1, tapOpacity: 1, tapScale: 0.9), duration: 0.2, spring: .smooth(duration: 0.4, extraBounce: 0))
+                SpringKeyframe(Frame(opacity: 1, scale: 1), duration: 0.4, spring: .smooth(duration: 0.4, extraBounce: 0))
+                SpringKeyframe(Frame(), duration: 2, spring: .smooth(duration: 0.4, extraBounce: 0))
+            }
+        }
+    }
+
+    /// A system alert in outline: a title, two lines of text and the
+    /// buttons, one of them being tapped.
+    private func alertCard(_ frame: Frame) -> some View {
+        let fill = OnboardingPalette.mockFill
+        return VStack(alignment: .leading, spacing: 6) {
+            RoundedRectangle(cornerRadius: 5)
+                .fill(fill)
+                .frame(width: 120, height: 20)
+                .padding(.bottom, 12)
+            RoundedRectangle(cornerRadius: 3)
+                .fill(fill)
+                .frame(height: 15)
+            RoundedRectangle(cornerRadius: 3)
+                .fill(fill)
+                .frame(height: 15)
+                .padding(.trailing, 50)
+                .padding(.bottom, 30)
+
+            let layout = config.alertButtons > 2 ? AnyLayout(VStackLayout(spacing: 10)) : AnyLayout(HStackLayout(spacing: 8))
+            layout {
+                ForEach(1...config.alertButtons, id: \.self) { index in
+                    let isTapped = index == config.tappedButton
+                    Capsule()
+                        .fill(fill)
+                        .frame(height: 45)
+                        .overlay {
+                            if isTapped {
+                                Circle()
+                                    .fill(OnboardingPalette.mockTap)
+                                    .padding(5)
+                                    .opacity(frame.tapOpacity)
+                            }
+                        }
+                        .scaleEffect(isTapped ? frame.tapScale : 1)
+                }
+            }
+        }
+        .frame(width: 280)
+        .padding(20)
+        .starhashGlass(in: RoundedRectangle(cornerRadius: 30, style: .continuous))
+    }
+
+    private struct Frame: Animatable {
+        var opacity: CGFloat = 0
+        var scale: CGFloat = 1.1
+        var tapOpacity: CGFloat = 0
+        var tapScale: CGFloat = 1
+
+        var animatableData: AnimatablePair<AnimatablePair<CGFloat, CGFloat>, AnimatablePair<CGFloat, CGFloat>> {
+            get { AnimatablePair(AnimatablePair(opacity, scale), AnimatablePair(tapOpacity, tapScale)) }
+            set {
+                opacity = newValue.first.first
+                scale = newValue.first.second
+                tapOpacity = newValue.second.first
+                tapScale = newValue.second.second
+            }
+        }
+    }
+}

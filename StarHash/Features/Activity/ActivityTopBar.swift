@@ -50,11 +50,11 @@ struct ActivityTopBar: View {
         } label: {
             HStack(spacing: 5) {
                 Text(period.title)
-                    .font(.body.weight(.medium))
+                    .font(.starhash(.body, weight: .medium))
                     .lineLimit(1)
                     .contentTransition(.opacity)
                 Image(systemName: "chevron.up.chevron.down")
-                    .font(.footnote.weight(.semibold))
+                    .font(.starhash(.footnote, weight: .semibold))
             }
             .foregroundStyle(Color.starhashPrimaryText)
             .dynamicTypeSize(...DynamicTypeSize.xxxLarge)

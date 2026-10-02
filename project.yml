@@ -56,6 +56,7 @@ targets:
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         ITSAppUsesNonExemptEncryption: false
+        UIAppFonts: [SpaceGrotesk.ttf]
         NSContactsUsageDescription: StarHash shows your contacts so you can pick who to pay. They stay on your iPhone.
         NSLocationWhenInUseUsageDescription: StarHash can note where you paid, so each payment shows on a map. It stays on your iPhone.
         LSApplicationQueriesSchemes: [tel]

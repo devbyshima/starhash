@@ -160,7 +160,7 @@ extension SettingsRow where Trailing == Text {
     init(symbol: String, title: String, caption: String? = nil, value: String) {
         self.init(symbol: symbol, title: title, caption: caption) {
             Text(value)
-                .font(.body)
+                .font(.starhash(.body))
                 .foregroundStyle(Color.starhashSecondaryText)
         }
     }
@@ -174,7 +174,7 @@ struct SettingsRowText: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
-                .font(.body.weight(.medium))
+                .font(.starhash(.body, weight: .medium))
                 .foregroundStyle(Color.starhashPrimaryText)
             if let caption {
                 Text(caption)

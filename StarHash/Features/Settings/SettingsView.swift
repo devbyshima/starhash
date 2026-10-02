@@ -51,8 +51,10 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
     @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
     @AppStorage(PreferenceKey.saveRecents) private var saveRecents = true
+    @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
     @AppStorage(PreferenceKey.lastVerifiedAt) private var lastVerifiedAt: Double = 0
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
+    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
 
     @AppStorage(PreferenceKey.hasOnboarded) private var hasOnboarded = true
 
@@ -80,7 +82,7 @@ private struct SettingsRootList: View {
             Section {
                 SettingsSectionTitle("Wallets")
                 NavigationLink(value: SettingsPage.wallets) {
-                    SettingsRow(symbol: "wallet.bifold.fill", title: "My Wallets", caption: "MTN MoMo is your main wallet")
+                    SettingsRow(symbol: "wallet.bifold.fill", title: "My Wallets", caption: "\(wallet.walletName) is your main wallet")
                 }
                 .settingsCardRow(.single)
             }
@@ -97,7 +99,11 @@ private struct SettingsRootList: View {
                 SettingsToggleRow(
                     symbol: "checkmark.message.fill",
                     title: "Auto-verify transactions",
-                    caption: "Confirm payments from M\u{2011}Money messages",
+                    // The SMS reader knows MTN's messages only, so Airtel
+                    // payments would stay pending.
+                    caption: wallet == .mtn
+                        ? "Confirm payments from M\u{2011}Money messages"
+                        : "Reads MTN MoMo messages only, for now",
                     isOn: autoVerifyBinding
                 )
                 .settingsCardRow(.last)
@@ -130,16 +136,23 @@ private struct SettingsRootList: View {
 
             Section {
                 SettingsSectionTitle("Data")
+                SettingsToggleRow(
+                    symbol: "questionmark.bubble.fill",
+                    title: "Ask before deleting",
+                    caption: "Confirm before a transaction is deleted",
+                    isOn: $confirmDeletes
+                )
+                .settingsCardRow(.first)
                 Button(role: .destructive) { confirmsDeleteAll = true } label: {
                     Text("Delete All Transactions")
-                        .font(.body)
+                        .font(.starhash(.body))
                         .foregroundStyle(Color.starhashDestructive)
                         .frame(maxWidth: .infinity, minHeight: 52)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(HighlightRowButtonStyle())
                 .disabled(store.transactions.isEmpty)
-                .settingsCardRow(.single, insets: .settingsTextRow)
+                .settingsCardRow(.last, insets: .settingsTextRow)
             } footer: {
                 SettingsFootnote("Transactions are kept only on this iPhone. Deleting them cannot be undone.")
             }
@@ -256,7 +269,7 @@ struct SettingsFooter: View {
                 Text("StarHash")
                 Text(SettingsVersion.short)
             }
-            .font(.body)
+            .font(.starhash(.body))
             .foregroundStyle(Color.starhashSecondaryText)
             .multilineTextAlignment(.center)
         }

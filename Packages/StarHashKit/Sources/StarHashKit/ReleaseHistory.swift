@@ -40,10 +40,10 @@ public enum ReleaseHistory {
         Release(
             version: "1.0.0",
             date: "2026-10-02",
-            summary: "The first release of StarHash: pay with MTN MoMo without typing USSD codes, and keep every payment in one place.",
+            summary: "The first release of StarHash: pay with MTN MoMo or Airtel Money without typing USSD codes, and keep every payment in one place.",
             highlights: [
                 .init(symbol: "number", title: "Pay in a few taps",
-                      detail: "Type an amount, pick who gets it, and StarHash dials the MoMo code for you. Your PIN is only ever typed into MTN's own prompt."),
+                      detail: "Type an amount, pick who gets it, and StarHash dials your wallet's code for you. Your PIN is only ever typed into your wallet's own prompt."),
                 .init(symbol: "storefront.fill", title: "Numbers and merchant codes",
                       detail: "Type a merchant code or a number, or pick a contact. Saved numbers and codes come up by name, with their photo."),
                 .init(symbol: "list.bullet.rectangle.fill", title: "Every payment in Activity",

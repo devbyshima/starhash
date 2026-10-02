@@ -1,35 +1,68 @@
 import StarHashKit
 import SwiftUI
 
-/// Pay's amount: very large and bold, the digits rolling as they change,
-/// with a smaller "RWF" sitting on the same baseline. Zero is drawn grey,
-/// so an empty amount reads as a placeholder rather than a value.
+/// Pay's amount: the number alone, very large and bold, the digits rolling
+/// as they change. Zero is drawn grey, so an empty amount reads as a
+/// placeholder rather than a value. The currency is its own pill, above
+/// the keypad (`PayCurrencyPill`).
 struct PayAmountDisplay: View {
     let amount: Int
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(Money.format(amount))
-                .starhashFont(76, weight: .bold, design: .rounded, relativeTo: .largeTitle)
-                .monospacedDigit()
-                .contentTransition(.numericText(value: Double(amount)))
-                .foregroundStyle(amount == 0 ? Color.starhashTertiaryText : Color.starhashPrimaryText)
-            Text(Money.currency)
-                .starhashFont(26, weight: .semibold, design: .rounded, relativeTo: .title)
-                .foregroundStyle(Color.starhashSecondaryText)
-        }
-        .lineLimit(1)
-        // "10,000,000 RWF" at the largest text sizes still fits one line.
-        .minimumScaleFactor(0.35)
-        .padding(.horizontal, StarHashMetrics.screenPadding)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Money.formatWithCurrency(amount))
-        .accessibilityAddTraits(.updatesFrequently)
+        Text(Money.format(amount))
+            .starhashFont(96, weight: .bold, design: .rounded, relativeTo: .largeTitle)
+            .monospacedDigit()
+            .contentTransition(.numericText(value: Double(amount)))
+            .foregroundStyle(amount == 0 ? Color.starhashTertiaryText : Color.starhashPrimaryText)
+            .lineLimit(1)
+            // "10,000,000" at the largest text sizes still fits one line.
+            .minimumScaleFactor(0.3)
+            .padding(.horizontal, StarHashMetrics.screenPadding)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Money.formatWithCurrency(amount))
+            .accessibilityAddTraits(.updatesFrequently)
     }
 }
 
-/// The 3 by 4 number pad under the amount: 1 to 9, then Clear (a muted
-/// "." while there is nothing to clear), 0 and delete. No keycaps, like a phone's
+/// The currency in a soft pill just above the keypad, apart from the
+/// amount as a payment app shows it: Rwanda's flag while nothing is typed,
+/// "RWF" once there is an amount. Only one currency, so nothing to pick.
+struct PayCurrencyPill: View {
+    /// Nothing typed yet: the flag rather than the code.
+    let isEmpty: Bool
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        ZStack {
+            if isEmpty {
+                Text("\u{1F1F7}\u{1F1FC}")
+                    .starhashFont(21, relativeTo: .subheadline)
+                    .transition(transition)
+            } else {
+                Text(Money.currency)
+                    .starhashFont(15, weight: .semibold, relativeTo: .subheadline)
+                    .foregroundStyle(Color.starhashSecondaryText)
+                    .transition(transition)
+            }
+        }
+        .padding(.horizontal, 16)
+        // One height for both, so the pill does not jump as it switches.
+        .frame(minWidth: 72, minHeight: 36)
+        .background(Color.starhashPrimaryText.opacity(0.08), in: Capsule())
+        .animation(.smooth(duration: 0.25), value: isEmpty)
+        // The amount already reads out with its currency.
+        .accessibilityHidden(true)
+    }
+
+    private var transition: AnyTransition {
+        reduceMotion ? .opacity : .scale(scale: 0.7).combined(with: .opacity)
+    }
+}
+
+/// The 3 by 4 number pad under the currency, across the full width: 1 to
+/// 9, then Clear (a muted "." while there is nothing to clear), 0 and
+/// delete ("<"). No keycaps, like a phone's
 /// dialler on a plain canvas; a key only shows a soft disc while pressed.
 struct PayKeypad: View {
     /// Called with every key; the caller applies it to its `AmountInput`
@@ -51,7 +84,7 @@ struct PayKeypad: View {
                     ForEach(row, id: \.self) { digit in
                         key(.digit(digit)) {
                             Text(String(digit))
-                                .starhashFont(34, weight: .regular, relativeTo: .title)
+                                .starhashFont(26, weight: .semibold, relativeTo: .title2)
                         }
                         .accessibilityLabel(String(digit))
                     }
@@ -67,10 +100,10 @@ struct PayKeypad: View {
                             .starhashFont(17, weight: .medium, relativeTo: .body)
                     } else {
                         Text(".")
-                            .starhashFont(40, weight: .semibold, relativeTo: .title)
+                            .starhashFont(30, weight: .semibold, relativeTo: .title2)
                             .foregroundStyle(Color.starhashSecondaryText)
                             // Up from the baseline to sit level with the digits.
-                            .offset(y: -8)
+                            .offset(y: -6)
                     }
                 }
                 .disabled(!canClear)
@@ -78,12 +111,12 @@ struct PayKeypad: View {
                 .accessibilityHidden(!canClear)
                 key(.digit(0)) {
                     Text("0")
-                        .starhashFont(34, weight: .regular, relativeTo: .title)
+                        .starhashFont(26, weight: .semibold, relativeTo: .title2)
                 }
                 .accessibilityLabel("0")
                 key(.delete) {
-                    Image(systemName: "delete.left")
-                        .font(.title2.weight(.regular))
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 22, weight: .semibold))
                 }
                 .accessibilityLabel("Delete")
                 // Holding delete clears the lot, as on the system keypad.

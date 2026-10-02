@@ -1,10 +1,14 @@
 import Foundation
+import StarHashKit
 
 extension PreferenceKey {
     /// When the Process Carrier SMS action last ran (seconds since 1970).
     /// The auto verification guide watches it to know the shortcut works,
     /// and Settings shows Auto-verify as On once it is set.
     static let lastVerifiedAt = "lastVerifiedAt"
+    /// Whether deleting one transaction asks first. Turned off with Don't
+    /// Ask Again on the question itself, back on in Settings.
+    static let confirmDeletes = "confirmDeletes"
 }
 
 /// Preference values read outside a view (App Intents, permission
@@ -20,6 +24,12 @@ enum StarHashPreferences {
     static var saveRecents: Bool { bool(PreferenceKey.saveRecents, default: true) }
     static var enableContacts: Bool { bool(PreferenceKey.enableContacts, default: true) }
     static var nearbyLocation: Bool { bool(PreferenceKey.nearbyLocation, default: false) }
+
+    /// MTN MoMo until the owner picks a wallet, which onboarding asks for
+    /// before anything can be dialled.
+    static var wallet: Recipient.Network {
+        UserDefaults.standard.string(forKey: PreferenceKey.wallet).flatMap(Recipient.Network.init(rawValue:)) ?? .mtn
+    }
 
     /// Nil until the shortcut has run once.
     static var lastVerifiedAt: Date? {

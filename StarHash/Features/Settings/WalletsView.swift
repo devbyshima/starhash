@@ -1,15 +1,14 @@
 import StarHashKit
 import SwiftUI
 
-/// My Wallets: the MTN MoMo number StarHash pays from, marked Main, and
-/// the wallets it cannot use yet, listed as coming soon.
+/// My Wallets: MTN MoMo and Airtel Money, one of them marked Main (the
+/// one StarHash dials codes for; a tap on the other switches), and the
+/// wallets it cannot use yet, listed as coming soon.
 struct WalletsView: View {
-    @AppStorage(PreferenceKey.ownerNumber) private var ownerNumber = ""
-    @State private var editsNumber = false
+    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
 
     /// Wallets with no USSD support in StarHash yet.
     private let upcoming: [(name: String, symbol: String)] = [
-        ("Airtel Money", "antenna.radiowaves.left.and.right"),
         ("Bank of Kigali", "building.columns.fill"),
         ("Equity Bank", "building.columns.fill"),
         ("I&M Bank", "building.columns.fill"),
@@ -18,16 +17,23 @@ struct WalletsView: View {
     var body: some View {
         List {
             Section {
-                Button { editsNumber = true } label: {
-                    SettingsRow(symbol: "simcard.fill", title: "MTN MoMo", caption: numberCaption) {
-                        SettingsBadge(text: "Main", filled: true)
+                ForEach(Array(Recipient.Network.allCases.enumerated()), id: \.element) { index, network in
+                    Button {
+                        withAnimation(.snappy(duration: 0.2)) { wallet = network }
+                    } label: {
+                        SettingsRow(symbol: network.symbol, title: network.walletName, caption: network.prefixes) {
+                            if wallet == network {
+                                SettingsBadge(text: "Main", filled: true)
+                            }
+                        }
                     }
+                    .buttonStyle(HighlightRowButtonStyle())
+                    .accessibilityAddTraits(wallet == network ? .isSelected : [])
+                    .accessibilityHint(wallet == network ? "" : "Pay from \(network.walletName)")
+                    .settingsCardRow(SettingsCardPosition(index: index, count: Recipient.Network.allCases.count))
                 }
-                .buttonStyle(HighlightRowButtonStyle())
-                .accessibilityHint("Change your MoMo number")
-                .settingsCardRow(.single)
             } footer: {
-                SettingsFootnote("StarHash pays from this wallet by dialling MTN MoMo's USSD codes for you.")
+                SettingsFootnote("StarHash pays from your main wallet by dialling its USSD codes for you.")
             }
 
             Section {
@@ -45,12 +51,5 @@ struct WalletsView: View {
         }
         .settingsListStyle(sectionSpacing: 14)
         .settingsPage("My Wallets")
-        .sheet(isPresented: $editsNumber) {
-            MoMoNumberSheet()
-        }
-    }
-
-    private var numberCaption: String {
-        Recipient(input: ownerNumber)?.formattedDestination ?? "Add your MoMo number"
     }
 }

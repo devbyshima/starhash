@@ -33,14 +33,43 @@ extension Color {
     /// Money coming in: the one hue besides ink, used only on received
     /// amounts and the incoming arrow.
     static let starhashIncoming = Color(light: .init(red: 0.11, green: 0.6, blue: 0.3), dark: .init(red: 0.3, green: 0.85, blue: 0.48))
-    /// Card fill for rows on a sheet.
-    static let homeSheetCard = Color(light: .black.opacity(0.055), dark: .white.opacity(0.055))
 
     /// The accent: chart bars, the add button, primary and capsule buttons,
     /// a filled confirm check. White in dark mode, black in light mode.
     static let starhashInk = Color(light: .black, dark: .white)
     /// Text and glyphs drawn on `starhashInk`.
     static let starhashOnInk = Color(light: .white, dark: .black)
+
+    /// The recipient picker's raised surfaces: its square header buttons
+    /// and search field, avatar tiles and the bands over its sections, a
+    /// step off the page in either appearance.
+    static let pickerSurface = Color(light: .init(white: 0.925), dark: .init(white: 0.075))
+    /// The outline of the picker's square buttons, field and tiles.
+    static let pickerOutline = Color(light: .black.opacity(0.08), dark: .white.opacity(0.1))
+    /// Letters a search matched, in the wallet's colour: MTN's yellow is
+    /// darkened on a light page, where the bright one would not read.
+    static let pickerMatchMTN = Color(light: .init(red: 0.62, green: 0.47, blue: 0), dark: .init(red: 1, green: 203 / 255, blue: 5 / 255))
+    static let pickerMatchAirtel = Color(light: .init(red: 0.8, green: 0, blue: 0), dark: .init(red: 1, green: 0.3, blue: 0.3))
+
+    /// Sheets, in Beam's colours: the solid surface cards sit on, the grey
+    /// of secondary text, and the fill of a filled button that is not the
+    /// accent.
+    static let sheetSurface = Color(light: .init(red: 251 / 255, green: 252 / 255, blue: 248 / 255),
+                                    dark: .init(red: 26 / 255, green: 26 / 255, blue: 26 / 255))
+    static let sheetSecondaryText = Color(light: .init(red: 116 / 255, green: 117 / 255, blue: 113 / 255),
+                                          dark: .init(red: 170 / 255, green: 172 / 255, blue: 167 / 255))
+    static let sheetFilledButton = Color(light: .init(red: 38 / 255, green: 38 / 255, blue: 38 / 255),
+                                         dark: .init(red: 233 / 255, green: 235 / 255, blue: 229 / 255))
+    /// The dotted line between a sheet card's rows.
+    static let sheetDivider = Color(light: .black.opacity(0.22), dark: .white.opacity(0.22))
+
+    /// The wallets' colours, which fill the primary buttons once a wallet
+    /// is chosen (`PrimaryButtonStyle`), so Pay says which wallet pays:
+    /// MTN's yellow with dark text, Airtel's red with white.
+    static let starhashMTN = Color(red: 1, green: 203 / 255, blue: 5 / 255)
+    static let starhashOnMTN = Color(white: 0.08)
+    static let starhashAirtel = Color(red: 228 / 255, green: 0, blue: 0)
+    static let starhashOnAirtel = Color.white
 
     /// Large empty-state symbols ("No Expenses") and other muted icons.
     static let starhashMutedIcon = Color(light: .init(white: 0.55), dark: .init(white: 0.62))
@@ -63,22 +92,6 @@ extension Color {
     /// `starhashSecondaryText`), in both appearances.
     static let starhashSnippetLabel = Color(light: .init(white: 0.54), dark: .init(white: 0.6))
 
-    /// A sheet's own background before iOS 26 (from iOS 26 the system draws
-    /// glass). Charcoal in dark mode; grouped grey in light mode, so white
-    /// cards stand out on it.
-    static let starhashSheetBackground = Color(light: .init(red: 242 / 255, green: 242 / 255, blue: 247 / 255), dark: .init(red: 28 / 255, green: 28 / 255, blue: 30 / 255))
-    /// Card fill for content on a sheet: a light veil in dark mode, so it
-    /// reads the same on the charcoal sheet and on glass. In light mode a
-    /// faint grey on iOS 26's glass sheet, which is almost white and would
-    /// swallow a white card; white on the grouped grey sheet before that.
-    static let starhashSheetCard: Color = {
-        if #available(iOS 26.0, *) { return .homeSheetCard }
-        return Color(light: .white, dark: .white.opacity(0.055))
-    }()
-    /// The barely visible tile behind row symbols and monograms on a sheet.
-    static let starhashSheetTile = Color(light: .black.opacity(0.03), dark: .white.opacity(0.014))
-    /// Symbol tiles and text fields sitting directly on a sheet.
-    static let starhashSheetField = Color(light: .black.opacity(0.05), dark: .white.opacity(0.03))
 
     /// One colour per appearance, resolved by the system whenever the
     /// appearance changes.
@@ -94,20 +107,34 @@ enum StarHashMetrics {
     static let cardRadius: CGFloat = 26
     static let rowRadius: CGFloat = 24
     static let primaryButtonHeight: CGFloat = 58
-    /// The band under a sheet's header that scrolled content stays out of
-    /// (`starhashSheetScrollEdge()`): twice the cards' 16pt spacing, the
-    /// first half clear and the second where content fades in.
-    static let sheetScrollEdge: CGFloat = 32
 }
 
 extension Font {
-    // Prefer text styles (.body, .headline...). When a design needs an exact
-    // size, use `starhashFont(_:weight:)` instead of Font.system(size:), so the
-    // size still follows Dynamic Type.
+    // Text is set in Space Grotesk, the app's typeface (a variable font,
+    // weights 300 to 700). Use `starhash(_:weight:)` where a text style
+    // fits and `starhashFont(_:weight:)` for an exact size, never
+    // Font.system, so the size still follows Dynamic Type. SF Symbols keep
+    // .system sizes.
+
+    /// The typeface's family name, as registered from `UIAppFonts`.
+    static let starhashFamily = "Space Grotesk"
+
+    /// Space Grotesk at a text style's size, scaling with it. Headline is
+    /// semibold unless told otherwise, as the system's is.
+    static func starhash(_ style: Font.TextStyle, weight: Font.Weight? = nil) -> Font {
+        .custom(starhashFamily, size: style.starhashDefaultSize, relativeTo: style)
+            .weight(weight ?? (style == .headline ? .semibold : .regular))
+    }
+
+    /// Space Grotesk at a size that never scales, for the onboarding
+    /// pictures, which are drawn at one size like an image.
+    static func starhashFixed(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
+        .custom(starhashFamily, fixedSize: size).weight(weight)
+    }
 
     /// Onboarding and sheet page titles: Title 1 semibold (28pt at the
     /// default text size).
-    static let starhashTitle = Font.title.weight(.semibold)
+    static let starhashTitle = Font.starhash(.title, weight: .semibold)
 }
 
 extension View {
@@ -136,11 +163,33 @@ private struct ScaledSystemFont: ViewModifier {
     }
 
     func body(content: Content) -> some View {
-        content.font(.system(size: size, weight: weight, design: design))
+        // Monospaced stays the system's, for codes typed digit by digit.
+        if design == .monospaced {
+            content.font(.system(size: size, weight: weight, design: design))
+        } else {
+            content.font(.custom(Font.starhashFamily, fixedSize: size).weight(weight))
+        }
     }
 }
 
 extension Font.TextStyle {
+    /// The style's size at the default text size, as the system sets it.
+    var starhashDefaultSize: CGFloat {
+        switch self {
+        case .largeTitle: 34
+        case .title: 28
+        case .title2: 22
+        case .title3: 20
+        case .headline, .body: 17
+        case .callout: 16
+        case .subheadline: 15
+        case .footnote: 13
+        case .caption: 12
+        case .caption2: 11
+        @unknown default: 17
+        }
+    }
+
     /// The text style whose default size is closest to `size`, so a custom
     /// size scales at the same rate as the text around it.
     static func starhashNearest(to size: CGFloat) -> Font.TextStyle {

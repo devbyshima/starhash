@@ -53,6 +53,45 @@ struct ActivityCardRowBackground: View {
     }
 }
 
+/// The question before one transaction is deleted: the title and the
+/// buttons, little else, since the transaction is right there. Don't Ask
+/// Again deletes and stops asking; Settings, Ask Before Deleting, brings it
+/// back.
+private struct DeleteTransactionDialog: ViewModifier {
+    @Binding var transaction: StarHashKit.Transaction?
+    let onDelete: (StarHashKit.Transaction) -> Void
+
+    @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
+
+    func body(content: Content) -> some View {
+        content.confirmationDialog(
+            "Delete Transaction?",
+            isPresented: Binding(get: { transaction != nil }, set: { if !$0 { transaction = nil } }),
+            titleVisibility: .visible,
+            presenting: transaction
+        ) { transaction in
+            Button("Delete", role: .destructive) { onDelete(transaction) }
+            Button("Delete, Don't Ask Again", role: .destructive) {
+                confirmDeletes = false
+                onDelete(transaction)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { _ in
+            Text("It is removed from StarHash only.")
+        }
+    }
+}
+
+extension View {
+    /// Asks before deleting `transaction` while it is set.
+    func deleteTransactionDialog(
+        _ transaction: Binding<StarHashKit.Transaction?>,
+        onDelete: @escaping (StarHashKit.Transaction) -> Void
+    ) -> some View {
+        modifier(DeleteTransactionDialog(transaction: transaction, onDelete: onDelete))
+    }
+}
+
 // Swipe to delete on Activity's own rows, which sit in a lazy stack rather
 // than a List. iOS 27 lets swipe actions work there once the scroll view
 // coordinates them; earlier systems keep only the long-press menu, so both

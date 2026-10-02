@@ -167,6 +167,10 @@ struct RecipientSearch {
 
     var isEmpty: Bool { trimmed.isEmpty }
 
+    /// What to mark in names: the query when it searches names, nothing
+    /// when it is a number.
+    var nameQuery: String { hasLetters ? trimmed : "" }
+
     /// The typed number or code itself, when the field holds digits only.
     var typedRecipient: Recipient? {
         guard !hasLetters, !digits.isEmpty else { return nil }

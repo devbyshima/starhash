@@ -11,10 +11,10 @@ struct WhatsNewView: View {
                     NavigationLink(value: SettingsPage.release(release.version)) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(release.title)
-                                .font(.body)
+                                .font(.starhash(.body))
                                 .foregroundStyle(Color.starhashPrimaryText)
                             Text(release.date)
-                                .font(.footnote)
+                                .font(.starhash(.footnote))
                                 .foregroundStyle(Color.starhashSecondaryText)
                         }
                         .frame(maxWidth: .infinity, minHeight: 66, alignment: .leading)
@@ -44,10 +44,10 @@ struct ReleaseDetailView: View {
                             .foregroundStyle(Color.starhashPrimaryText)
                             .accessibilityAddTraits(.isHeader)
                         Text(release.date)
-                            .font(.subheadline)
+                            .font(.starhash(.subheadline))
                             .foregroundStyle(Color.starhashSecondaryText)
                         Text(release.summary)
-                            .font(.body)
+                            .font(.starhash(.body))
                             .foregroundStyle(Color.starhashPrimaryText.opacity(0.85))
                             .fixedSize(horizontal: false, vertical: true)
                             .padding(.top, 6)
@@ -65,7 +65,7 @@ struct ReleaseDetailView: View {
                                     .starhashFont(17, weight: .semibold, relativeTo: .headline)
                                     .foregroundStyle(Color.starhashPrimaryText)
                                 Text(highlight.detail)
-                                    .font(.subheadline)
+                                    .font(.starhash(.subheadline))
                                     .foregroundStyle(Color.starhashSecondaryText)
                                     .fixedSize(horizontal: false, vertical: true)
                             }

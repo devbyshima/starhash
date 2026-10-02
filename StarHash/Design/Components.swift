@@ -1,19 +1,59 @@
+import StarHashKit
 import SwiftUI
 
-/// The full-width ink capsule (white in dark mode, black in light mode):
-/// "Get Started", "Continue",
-/// "Enable Notifications". The label is 18pt semibold, as measured in the
+/// The full-width primary capsule: "Pay", "Continue", "Get Started". After
+/// Beam's: a gradient in the main wallet's colour (MTN yellow or Airtel
+/// red) with a soft glow of the same colour under it, and ink until a
+/// wallet is chosen. The label is 18pt semibold, as measured in the
 /// reference.
 struct PrimaryButtonStyle: ButtonStyle {
+    /// Where the fill comes from.
+    enum Tint {
+        /// The main wallet's colour, or ink while none is chosen.
+        case mainWallet
+        /// This wallet's colour, or ink for nil (onboarding's wallet page,
+        /// before the choice is saved).
+        case wallet(Recipient.Network?)
+    }
+
     /// The design height; the paywall's button is taller than the others.
     var height: CGFloat = StarHashMetrics.primaryButtonHeight
-
-    @Environment(\.isEnabled) private var isEnabled
+    var tint: Tint = .mainWallet
 
     func makeBody(configuration: Configuration) -> some View {
+        PrimaryButtonBody(configuration: configuration, height: height, tint: tint)
+    }
+}
+
+private struct PrimaryButtonBody: View {
+    let configuration: ButtonStyleConfiguration
+    let height: CGFloat
+    let tint: PrimaryButtonStyle.Tint
+
+    @AppStorage(PreferenceKey.wallet) private var mainWallet = ""
+    @Environment(\.isEnabled) private var isEnabled
+
+    private var wallet: Recipient.Network? {
+        switch tint {
+        case .mainWallet: Recipient.Network(rawValue: mainWallet)
+        case .wallet(let wallet): wallet
+        }
+    }
+
+    private var fill: Color {
+        guard isEnabled else { return Color.starhashInk.opacity(0.14) }
+        return wallet?.buttonFill ?? .starhashInk
+    }
+
+    private var label: Color {
+        guard isEnabled else { return .starhashSecondaryText }
+        return wallet?.buttonLabel ?? .starhashOnInk
+    }
+
+    var body: some View {
         configuration.label
             .starhashFont(18, weight: .semibold, relativeTo: .body)
-            .foregroundStyle(Color.starhashOnInk)
+            .foregroundStyle(label)
             .multilineTextAlignment(.center)
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
@@ -21,42 +61,42 @@ struct PrimaryButtonStyle: ButtonStyle {
             // The design height, growing only when a large text size makes
             // the label wrap, so the label is never cut off.
             .frame(minHeight: height)
-            .background(Capsule().fill(Color.starhashInk.opacity(isEnabled ? 1 : 0.4)))
+            .background(fill.gradient, in: Capsule())
+            // The glow is the button's own colour, so it lifts off the page
+            // in either appearance; ink and disabled buttons get none.
+            .shadow(color: isEnabled && wallet != nil ? fill.opacity(0.35) : .clear, radius: 7, y: 3)
+            .contentShape(Capsule())
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
-            .opacity(configuration.isPressed ? 0.85 : 1)
-            .animation(.snappy(duration: 0.2), value: configuration.isPressed)
+            .opacity(configuration.isPressed ? 0.9 : 1)
+            .animation(.snappy(duration: 0.16), value: configuration.isPressed)
+            .animation(.smooth(duration: 0.25), value: wallet)
     }
 }
 
 extension ButtonStyle where Self == PrimaryButtonStyle {
     static var starhashPrimary: PrimaryButtonStyle { PrimaryButtonStyle() }
-}
 
-/// The full-width glass capsule beside or under a primary button: a
-/// sheet's way out ("Cancel", "Keep On") or, with `role: .destructive`, the
-/// red action it is confirming ("Turn Off").
-struct SecondaryButtonStyle: ButtonStyle {
-    var role: ButtonRole?
-
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .starhashFont(18, weight: .semibold, relativeTo: .body)
-            .foregroundStyle(role == .destructive ? Color.starhashDestructive : Color.starhashPrimaryText)
-            .multilineTextAlignment(.center)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .frame(maxWidth: .infinity)
-            .frame(minHeight: StarHashMetrics.primaryButtonHeight)
-            .contentShape(Capsule())
-            .starhashGlass(interactive: true)
-            .scaleEffect(configuration.isPressed ? 0.97 : 1)
-            .animation(.snappy(duration: 0.2), value: configuration.isPressed)
+    /// In `wallet`'s colour rather than the main wallet's.
+    static func starhashPrimary(wallet: Recipient.Network?) -> PrimaryButtonStyle {
+        PrimaryButtonStyle(tint: .wallet(wallet))
     }
 }
 
-extension ButtonStyle where Self == SecondaryButtonStyle {
-    static var starhashSecondary: SecondaryButtonStyle { SecondaryButtonStyle() }
-    static var starhashDestructive: SecondaryButtonStyle { SecondaryButtonStyle(role: .destructive) }
+extension Recipient.Network {
+    /// The primary button's fill and label on this wallet.
+    var buttonFill: Color {
+        switch self {
+        case .mtn: .starhashMTN
+        case .airtel: .starhashAirtel
+        }
+    }
+
+    var buttonLabel: Color {
+        switch self {
+        case .mtn: .starhashOnMTN
+        case .airtel: .starhashOnAirtel
+        }
+    }
 }
 
 /// An SF Symbol on a rounded dark tile, as in expense rows and the

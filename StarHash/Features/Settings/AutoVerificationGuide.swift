@@ -151,7 +151,7 @@ struct AutoVerificationGuide: View {
                 .contentTransition(.opacity)
             if let subtitle {
                 Text(subtitle)
-                    .font(.body)
+                    .font(.starhash(.body))
                     .foregroundStyle(Color.starhashSecondaryText)
                     .contentTransition(.opacity)
             }
@@ -372,7 +372,7 @@ private struct GuideStepList: View {
                         .alignmentGuide(.firstTextBaseline) { $0[VerticalAlignment.center] + 5 }
                         .accessibilityHidden(true)
                     Text(step)
-                        .font(.body)
+                        .font(.starhash(.body))
                         .foregroundStyle(Color.starhashPrimaryText)
                         .fixedSize(horizontal: false, vertical: true)
                     Spacer(minLength: 0)

@@ -19,6 +19,7 @@ struct ActivityView: View {
     /// clock, day or time zone changes and on returning to the app, so
     /// "Today" and "This Week" roll over by themselves.
     @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
+    @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
     @State private var now = Date.now
     @State private var period: ActivityPeriod = .week
 
@@ -56,17 +57,7 @@ struct ActivityView: View {
         .sheet(item: openTransaction, onDismiss: handOffPayAgain) { item in
             TransactionDetailSheet(transactionID: item.id) { payAgainRecipient = $0 }
         }
-        .confirmationDialog(
-            "Delete Transaction?",
-            isPresented: Binding(get: { transactionToDelete != nil }, set: { if !$0 { transactionToDelete = nil } }),
-            titleVisibility: .visible,
-            presenting: transactionToDelete
-        ) { transaction in
-            Button("Delete Transaction", role: .destructive) { delete(transaction) }
-            Button("Cancel", role: .cancel) {}
-        } message: { transaction in
-            Text("\(Money.formatWithCurrency(transaction.amount)) with \(transaction.counterparty.displayName) is removed from StarHash. MoMo keeps its own record.")
-        }
+        .deleteTransactionDialog($transactionToDelete, onDelete: delete)
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
             now = .now
         }
@@ -123,7 +114,7 @@ struct ActivityView: View {
                     )
                     if sections.isEmpty {
                         Text("No transactions \(period.emptyPhrase).")
-                            .font(.subheadline)
+                            .font(.starhash(.subheadline))
                             .foregroundStyle(Color.starhashSecondaryText)
                             .multilineTextAlignment(.center)
                             .frame(maxWidth: .infinity)
@@ -135,7 +126,7 @@ struct ActivityView: View {
                             transactions: section.transactions,
                             onOpen: open,
                             onConfirm: markConfirmed,
-                            onDelete: { transactionToDelete = $0 }
+                            onDelete: requestDelete
                         )
                     }
                 }
@@ -172,7 +163,7 @@ struct ActivityView: View {
             isFocused: $searchFocused,
             onOpen: open,
             onConfirm: markConfirmed,
-            onDelete: { transactionToDelete = $0 },
+            onDelete: requestDelete,
             onClose: endSearch
         )
     }
@@ -216,6 +207,15 @@ struct ActivityView: View {
         confirmed.fee = nil
         withAnimation(.smooth(duration: 0.3)) { store.update(confirmed) }
         feedbackCount += 1
+    }
+
+    /// Asks first, unless Don't Ask Again was chosen.
+    private func requestDelete(_ transaction: StarHashKit.Transaction) {
+        if confirmDeletes {
+            transactionToDelete = transaction
+        } else {
+            delete(transaction)
+        }
     }
 
     private func delete(_ transaction: StarHashKit.Transaction) {

@@ -1,13 +1,13 @@
 # StarHash
 
-**MTN MoMo (Rwanda) without the USSD menus.**
+**MTN MoMo and Airtel Money (Rwanda) without the USSD menus.**
 
 Native iOS · SwiftUI · iOS 18 and later · no third-party packages
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
-Type an amount, pick who gets it, and StarHash dials the MoMo code for you.
-MTN's own prompt asks for your PIN, as always; StarHash never sees it and
+Type an amount, pick who gets it, and StarHash dials your wallet's code for
+you. MTN's or Airtel's own prompt asks for your PIN, as always; StarHash never sees it and
 never moves money itself. Every payment is kept in Activity, and with a
 Shortcuts automation MTN's confirmation SMS fills in the fee, the reference
 and your new balance. No account, no login, no server: everything stays on
@@ -23,21 +23,24 @@ Free and open source.
 
 - **Side menu**: the menu button at the top left of every page, or a swipe
   in from the left edge, slides the page aside, as X does. At the top, your
-  photo (from Contacts, when your number is saved there with one) or
-  initials and your MoMo number, asked for once in onboarding (change it in
-  Settings, My Wallets). Then Pay, Buy (coming soon) and Activity, and
-  Settings and Help at the bottom.
-- **Pay**: a big amount on a keypad, Balance and Pay underneath. Pay slides
-  in the recipient screen with the number pad already up, since most
-  payments go to a merchant code typed on the spot. A number or code you
+  main wallet (MTN MoMo or Airtel Money), picked once in onboarding (change
+  it in Settings, My Wallets). Then Pay, Buy (coming soon) and Activity,
+  and Settings and Help at the bottom.
+- **Pay**: a big amount on a keypad, Balance and Pay underneath. The
+  button at the top right shows the main wallet's logo and switches wallet
+  from a menu. Pay slides
+  in the recipient screen with the keyboard already up on its numbers (one
+  keyboard for codes, numbers and names), since most payments go to a
+  merchant code typed on the spot. A number or code you
   have saved (a contact, or someone paid before) comes up at the top by
   name; anything else shows as typed. Recent recipients and contacts
-  follow. A contact with several numbers asks which one. The amount sits
-  above the keyboard with Pay. Picking someone dials at once: the iPhone's
+  follow. A contact with several numbers asks which one. The total sits
+  in a bar above the keyboard; matched letters show in the wallet's colour. Picking someone dials at once: the iPhone's
   call prompt, showing the whole code, is the approval.
 - **Fees**: shown only in Activity, and only once MTN's SMS has confirmed a
   payment and given its fee. Pay shows no fees. The keypad takes up to
-  10,000,000. Numbers starting 072 or 073 are Airtel and dial
+  10,000,000. Numbers starting 072 or 073 are Airtel, 078 and 079 MTN; a
+  number on the other network from your wallet dials
   `*182*1*2*NUMBER*AMOUNT#`.
 - **Activity**: payments grouped by day with a red arrow out and a green
   arrow in, a bar chart for Today, This Week, This Month, This Year or All
@@ -46,22 +49,35 @@ Free and open source.
   carrier code, a map of where you paid (when Nearby is on), what you sent
   them this year, Pay Again, Mark as Confirmed and Delete.
 - **Settings**: your profile and this year's totals, My Wallets (MTN MoMo
-  marked Main; Airtel Money and banks coming soon), switches for saving
-  transactions, contacts, Nearby and recent recipients, the auto
+  or Airtel Money, whichever you pay with, marked Main; banks coming soon),
+  switches for saving
+  transactions, contacts, Nearby and recent recipients, Ask before deleting
+  (also turned off from the delete question's Don't Ask Again), the auto
   verification guide, How StarHash Works and Privacy.
 - **Shortcuts and Siri**: Process Carrier SMS, Check MoMo Balance and Pay
   with StarHash actions.
-- Light and dark appearance, monochrome, with Liquid Glass on iOS 26 and
-  later.
+- Light and dark appearance, monochrome but for the primary buttons, which
+  take the main wallet's colour (MTN yellow or Airtel red) with a soft glow,
+  and set in Space Grotesk. Sheets are clear Liquid Glass with bold titles
+  on iOS 26 and later.
 
 ## USSD codes
 
+MTN MoMo and Airtel Money share the `*182#` menu, so the codes are the same
+from either wallet. Only which network counts as "other" changes.
+
 | What | Code |
 | --- | --- |
-| Send to an MTN number | `*182*1*1*NUMBER*AMOUNT#` |
-| Send to an Airtel number (072, 073) | `*182*1*2*NUMBER*AMOUNT#` |
+| Send to a number on your wallet's network | `*182*1*1*NUMBER*AMOUNT#` |
+| Send to a number on the other network | `*182*1*2*NUMBER*AMOUNT#` |
 | Pay a merchant code | `*182*8*1*CODE*AMOUNT#` |
-| Check your balance | `*182*6*1#` |
+| Check your balance, MTN MoMo | `*182*6*1#` |
+| Check your balance, Airtel Money | `*182#` (the menu: no balance shortcut confirmed) |
+
+The Airtel codes follow Airtel Rwanda's Airtel Money customer service
+charter (`*182#`, `*182*8*1#` for merchants) and its note that `*182*1*2#`
+sends between Airtel Money and MTN MoMo; they still need a check on a real
+Airtel SIM. Auto verification reads MTN's SMS only.
 
 Ten digits or more is a phone number (`+250 788 123 456` becomes
 `0788123456`); fewer is a MoMo Pay merchant code. In the `tel:` link the `#`
@@ -69,7 +85,8 @@ is sent as `%23`.
 
 ## Auto verification
 
-A payment dialled from StarHash is Pending until MTN's SMS confirms it.
+A payment dialled from StarHash is Pending until MTN's SMS confirms it
+(Airtel Money payments stay Pending until marked as confirmed).
 iOS does not let apps read messages, so a Shortcuts automation hands them
 over. Settings, Auto-verify transactions sets it up in two steps, each
 shown with a real screenshot of Shortcuts:
@@ -124,3 +141,14 @@ StarHash is free and open source, under the
 [GNU General Public License v3.0](LICENSE). You may use, study, share and
 change it; anything you distribute that is built on it must be under the same
 license, with its source.
+
+## Credits
+
+Space Grotesk by Florian Karsten, under the SIL Open Font License 1.1
+(`StarHash/Resources/Fonts/SpaceGrotesk.ttf`).
+
+The MTN and Airtel logos on Pay's wallet switcher and onboarding are trademarks of MTN Group
+and Airtel Africa, shown only to tell the two wallets apart; StarHash is not
+affiliated with either. The files come from Wikimedia Commons
+(`MTN_2022_logo.svg`, the same drawing as on mtn.com, with MTN's yellow
+added inside the oval; `Airtel_Africa_logo.svg`).

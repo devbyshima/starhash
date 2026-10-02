@@ -1,8 +1,8 @@
 import StarHashKit
 import SwiftUI
 
-/// The side menu, laid out like X's: the owner at the top, the main pages
-/// (Pay, Buy, Activity) large and bold under them, and Settings and Help
+/// The side menu, laid out like X's: the main pages (Pay, Buy, Activity)
+/// large and bold at the top, and Settings and Help
 /// smaller at the bottom, under a hairline. The page showing has a filled
 /// symbol. Taller than the screen (large text), it all scrolls together.
 struct SideMenu: View {
@@ -15,9 +15,6 @@ struct SideMenu: View {
         GeometryReader { viewport in
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    SideMenuProfile()
-                        .padding(.bottom, 28)
-
                     ForEach(Self.primary) { tab in
                         row(tab, isPrimary: true)
                     }
@@ -61,7 +58,7 @@ struct SideMenu: View {
                     .minimumScaleFactor(0.7)
                 if tab == .buy {
                     Text("Soon")
-                        .font(.footnote.weight(.semibold))
+                        .font(.starhash(.footnote, weight: .semibold))
                         .foregroundStyle(Color.starhashSecondaryText)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 4)
@@ -89,77 +86,6 @@ extension AppTab {
         case .settings: "gearshape.fill"
         case .help: "questionmark.circle.fill"
         }
-    }
-}
-
-/// The owner at the top of the menu: a round photo (theirs from Contacts,
-/// when their number is saved there with one) or initials, then the name
-/// registered on their number and the number under it. Both come from
-/// onboarding; until the registered name is known, the number leads.
-private struct SideMenuProfile: View {
-    @AppStorage(PreferenceKey.ownerName) private var ownerName = ""
-    @AppStorage(PreferenceKey.ownerNumber) private var ownerNumber = ""
-    @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
-    @ScaledMetric(relativeTo: .title) private var avatarSize: CGFloat = 52
-
-    private var name: String { ownerName.trimmingCharacters(in: .whitespaces) }
-    private var number: Recipient? { Recipient(input: ownerNumber).flatMap { $0.kind == .phone ? $0 : nil } }
-    private var contacts: PayContacts { .shared }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            avatar
-                .padding(.bottom, 14)
-            Text(title)
-                .starhashFont(20, weight: .bold, relativeTo: .title3)
-                .foregroundStyle(Color.starhashPrimaryText)
-                .lineLimit(2)
-            Text(subtitle)
-                .starhashFont(17, relativeTo: .body)
-                .foregroundStyle(Color.starhashSecondaryText)
-                .lineLimit(1)
-                .padding(.top, 2)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .combine)
-        .task(id: enableContacts) {
-            if enableContacts { await contacts.loadIfAllowed() }
-        }
-    }
-
-    private var title: String {
-        if !name.isEmpty { return name }
-        return number?.formattedDestination ?? "StarHash"
-    }
-
-    private var subtitle: String {
-        if !name.isEmpty, let number { return number.formattedDestination }
-        return "MTN MoMo"
-    }
-
-    @ViewBuilder
-    private var avatar: some View {
-        if enableContacts, let number, let contactID = contacts.photoContactID(for: number) {
-            ContactPhotoTile(contactID: contactID, size: avatarSize, isCircle: true) { initials }
-        } else {
-            initials
-        }
-    }
-
-    private var initials: some View {
-        Group {
-            if name.isEmpty {
-                Image(systemName: "person.fill")
-                    .font(.system(size: avatarSize * 0.42, weight: .semibold))
-            } else {
-                Text(PayContact.initials(for: name))
-                    .font(.system(size: avatarSize * 0.38, weight: .semibold, design: .rounded))
-            }
-        }
-        .foregroundStyle(Color.starhashPrimaryText)
-        .frame(width: avatarSize, height: avatarSize)
-        .background(Color.starhashCardRaised, in: Circle())
-        .accessibilityHidden(true)
     }
 }
 

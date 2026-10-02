@@ -26,28 +26,30 @@ import Testing
         #expect(Recipient(input: "020205")?.network == nil)
     }
 
-    @Test func ownMoMoNumberAcceptsMTNNumbersInAnyForm() {
-        #expect(Recipient.ownMoMoNumber(from: "0781234567") == "0781234567")
-        #expect(Recipient.ownMoMoNumber(from: "781 234 567") == "0781234567")
-        #expect(Recipient.ownMoMoNumber(from: "+250 791 234 567") == "0791234567")
-        #expect(Recipient.ownMoMoNumber(from: "0722497291") == nil)
-        #expect(Recipient.ownMoMoNumber(from: "078833593") == nil)
-        #expect(Recipient.ownMoMoNumber(from: "") == nil)
-    }
-
     @Test func noDigitsIsNil() {
         #expect(Recipient(input: "abc") == nil)
     }
 
-    @Test func ussdCodes() {
-        #expect(USSD.payment(to: Recipient(input: "0781234567")!, amount: 5000) == "*182*1*1*0781234567*5000#")
-        #expect(USSD.payment(to: Recipient(input: "020205")!, amount: 15000) == "*182*8*1*020205*15000#")
-        #expect(USSD.payment(to: Recipient(input: "0722497291")!, amount: 5000) == "*182*1*2*0722497291*5000#")
-        #expect(USSD.payment(to: Recipient(input: "+250 731 234 567")!, amount: 700) == "*182*1*2*0731234567*700#")
-        #expect(USSD.payment(to: Recipient(input: "0791234567")!, amount: 700) == "*182*1*1*0791234567*700#")
-        #expect(USSD.telURL(for: USSD.balance)?.absoluteString == "tel:*182*6*1%23")
-        let send = USSD.payment(to: Recipient(input: "+250 781 234 567")!, amount: 5000)
+    @Test func ussdCodesFromMTN() {
+        #expect(USSD.payment(to: Recipient(input: "0781234567")!, amount: 5000, from: .mtn) == "*182*1*1*0781234567*5000#")
+        #expect(USSD.payment(to: Recipient(input: "020205")!, amount: 15000, from: .mtn) == "*182*8*1*020205*15000#")
+        #expect(USSD.payment(to: Recipient(input: "0722497291")!, amount: 5000, from: .mtn) == "*182*1*2*0722497291*5000#")
+        #expect(USSD.payment(to: Recipient(input: "+250 731 234 567")!, amount: 700, from: .mtn) == "*182*1*2*0731234567*700#")
+        #expect(USSD.payment(to: Recipient(input: "0791234567")!, amount: 700, from: .mtn) == "*182*1*1*0791234567*700#")
+        #expect(USSD.telURL(for: USSD.balance(for: .mtn))?.absoluteString == "tel:*182*6*1%23")
+        let send = USSD.payment(to: Recipient(input: "+250 781 234 567")!, amount: 5000, from: .mtn)
         #expect(USSD.telURL(for: send)?.absoluteString == "tel:*182*1*1*0781234567*5000%23")
+    }
+
+    /// Airtel Money mirrors MTN's menu: its own network is 1, 1 and MTN is
+    /// the other network, 1, 2.
+    @Test func ussdCodesFromAirtel() {
+        #expect(USSD.payment(to: Recipient(input: "0722497291")!, amount: 5000, from: .airtel) == "*182*1*1*0722497291*5000#")
+        #expect(USSD.payment(to: Recipient(input: "0731234567")!, amount: 700, from: .airtel) == "*182*1*1*0731234567*700#")
+        #expect(USSD.payment(to: Recipient(input: "0781234567")!, amount: 5000, from: .airtel) == "*182*1*2*0781234567*5000#")
+        #expect(USSD.payment(to: Recipient(input: "0791234567")!, amount: 700, from: .airtel) == "*182*1*2*0791234567*700#")
+        #expect(USSD.payment(to: Recipient(input: "020205")!, amount: 15000, from: .airtel) == "*182*8*1*020205*15000#")
+        #expect(USSD.telURL(for: USSD.balance(for: .airtel))?.absoluteString == "tel:*182%23")
     }
 
     @Test func nineDigitsIsStillAMerchantCode() {

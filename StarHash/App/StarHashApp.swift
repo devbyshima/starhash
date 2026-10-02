@@ -15,20 +15,37 @@ struct StarHashApp: App {
             // Seen too, so it does not cover the page a screenshot is after
             // (-note shows it anyway).
             UserDefaults.standard.set(true, forKey: PreferenceKey.hasSeenDeveloperNote)
-            // Onboarding asks for the number; skipping it needs one.
-            if (UserDefaults.standard.string(forKey: PreferenceKey.ownerNumber) ?? "").isEmpty {
-                UserDefaults.standard.set("0781234567", forKey: PreferenceKey.ownerNumber)
+            // Onboarding asks for the wallet; skipping it needs one.
+            if (UserDefaults.standard.string(forKey: PreferenceKey.wallet) ?? "").isEmpty {
+                UserDefaults.standard.set(Recipient.Network.mtn.rawValue, forKey: PreferenceKey.wallet)
             }
+        }
+        if let wallet = DebugLaunch.value(after: "-wallet") {
+            // "none" clears it, for onboarding as a fresh install sees it.
+            let network = Recipient.Network(rawValue: wallet)
+            UserDefaults.standard.set(network?.rawValue ?? "", forKey: PreferenceKey.wallet)
         }
         if DebugLaunch.arguments.contains("-resetOnboarding") {
             UserDefaults.standard.set(false, forKey: PreferenceKey.hasOnboarded)
         }
         #endif
+        Self.useSpaceGroteskInNavigationBars()
+    }
+
+    /// Navigation bar titles (Settings, Help, the recipient picker) are
+    /// UIKit's, outside SwiftUI's font environment.
+    private static func useSpaceGroteskInNavigationBars() {
+        let bar = UINavigationBar.appearance()
+        bar.titleTextAttributes = [.font: UIFont.starhash(17, weight: 600)]
+        bar.largeTitleTextAttributes = [.font: UIFont.starhash(34, weight: 700)]
     }
 
     var body: some Scene {
         WindowGroup {
             RootView()
+                // Text with no font of its own (list rows, fields) is in
+                // Space Grotesk too.
+                .font(.starhash(.body))
                 .environment(store)
                 .environment(router)
                 .tint(Color.starhashInk)
@@ -39,5 +56,18 @@ struct StarHashApp: App {
             // were in the background.
             if phase == .active { store.reloadFromDisk() }
         }
+    }
+}
+
+private extension UIFont {
+    /// Space Grotesk at a point on its weight axis (300 to 700). Asked for
+    /// by name alone, UIKit gives the variable font's default, Light.
+    static func starhash(_ size: CGFloat, weight: CGFloat) -> UIFont {
+        let wght = 0x7767_6874 // the 'wght' axis tag
+        let descriptor = UIFontDescriptor(fontAttributes: [
+            .name: Font.starhashFamily,
+            UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String): [wght: weight],
+        ])
+        return UIFont(descriptor: descriptor, size: size)
     }
 }

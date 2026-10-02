@@ -1,8 +1,8 @@
 import SwiftUI
 
-// The pieces every sheet and card in StarHash is built from. Feature folders
-// use these rather than their own copies, so a sheet header, a round glass
-// button or a hairline looks and behaves the same everywhere.
+// The pieces pages and cards in StarHash are built from (sheets use
+// SheetKit). Feature folders use these rather than their own copies, so a
+// round glass button or a hairline looks and behaves the same everywhere.
 
 /// A round glass icon button: close, back, add, confirm.
 ///
@@ -51,110 +51,10 @@ struct StarHashCircleGlyph: View {
     }
 }
 
-extension View {
-    /// For the scroll view (or list) under a sheet's `StarHashSheetHeader`.
-    /// Content scrolled up stays clear of the header's buttons: it fades out
-    /// in the lower half of the `StarHashMetrics.sheetScrollEdge` band and is
-    /// gone in the upper half, and scrolling to an item stops below the
-    /// band. The band is top safe area padding,
-    /// so the caller takes it off its own top margin and nothing moves
-    /// before scrolling. A mask rather than a colour, since a sheet is
-    /// glass on iOS 26 and later.
-    func starhashSheetScrollEdge() -> some View {
-        safeAreaPadding(.top, StarHashMetrics.sheetScrollEdge)
-            .mask {
-                VStack(spacing: 0) {
-                    // Only the gradient's opacity counts in a mask.
-                    LinearGradient(
-                        stops: [.init(color: .clear, location: 0.5), .init(color: .black, location: 1)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .frame(height: StarHashMetrics.sheetScrollEdge)
-                    Rectangle()
-                }
-                // Content still runs on under the home indicator.
-                .ignoresSafeArea(edges: .bottom)
-            }
-    }
-}
-
-/// The header drawn at the top of a sheet: a control on each side and a
-/// centred title. The title stays centred on the sheet while it fits between
-/// the side controls, and wraps or shrinks (never overlaps them) at large
-/// text sizes.
-struct StarHashSheetHeader<Leading: View, Trailing: View>: View {
-    let title: String
-    @ViewBuilder var leading: Leading
-    @ViewBuilder var trailing: Trailing
-
-    var body: some View {
-        CenteredTitleLayout(spacing: 8) {
-            // Wrapped so an empty side (EmptyView) still counts as one
-            // subview; the layout expects exactly three.
-            HStack(spacing: 0) { leading }
-            Text(title)
-                .font(.headline)
-                .foregroundStyle(Color.starhashPrimaryText)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .minimumScaleFactor(0.8)
-                .accessibilityAddTraits(.isHeader)
-            HStack(spacing: 0) { trailing }
-        }
-        .frame(minHeight: 44)
-    }
-}
-
-extension StarHashSheetHeader where Trailing == EmptyView {
-    init(title: String, @ViewBuilder leading: () -> Leading) {
-        self.init(title: title, leading: leading) { EmptyView() }
-    }
-}
-
-extension StarHashSheetHeader where Leading == EmptyView, Trailing == EmptyView {
-    init(title: String) {
-        self.init(title: title) { EmptyView() } trailing: { EmptyView() }
-    }
-}
-
-/// Leading view at the start, trailing view at the end, and the middle view
-/// centred in the whole width, given only the room left between equal
-/// margins so it cannot run under either side.
-private struct CenteredTitleLayout: Layout {
-    var spacing: CGFloat
-
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        guard subviews.count == 3 else { return .zero }
-        let sides = sideSizes(subviews)
-        let width = proposal.width ?? (sides.leading.width + sides.trailing.width + 200)
-        let title = subviews[1].sizeThatFits(ProposedViewSize(width: titleWidth(width, sides), height: nil))
-        return CGSize(width: width, height: max(sides.leading.height, sides.trailing.height, title.height))
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        guard subviews.count == 3 else { return }
-        let sides = sideSizes(subviews)
-        subviews[0].place(at: CGPoint(x: bounds.minX, y: bounds.midY), anchor: .leading, proposal: .unspecified)
-        subviews[2].place(at: CGPoint(x: bounds.maxX, y: bounds.midY), anchor: .trailing, proposal: .unspecified)
-        let width = titleWidth(bounds.width, sides)
-        subviews[1].place(at: CGPoint(x: bounds.midX, y: bounds.midY), anchor: .center, proposal: ProposedViewSize(width: width, height: nil))
-    }
-
-    private func sideSizes(_ subviews: Subviews) -> (leading: CGSize, trailing: CGSize) {
-        (subviews[0].sizeThatFits(.unspecified), subviews[2].sizeThatFits(.unspecified))
-    }
-
-    private func titleWidth(_ total: CGFloat, _ sides: (leading: CGSize, trailing: CGSize)) -> CGFloat {
-        let margin = max(sides.leading.width, sides.trailing.width, 44) + spacing
-        return max(0, total - margin * 2)
-    }
-}
-
-/// A charcoal card holding rows. Rows inside are separated with
+/// A card holding rows. Rows inside are separated with
 /// `StarHashRowSeparator`.
 struct StarHashCard<Content: View>: View {
-    var fill: Color = .starhashSheetCard
+    var fill: Color = .starhashCard
     @ViewBuilder var content: Content
 
     var body: some View {
@@ -190,39 +90,6 @@ struct StarHashRowSeparator: View {
     }
 }
 
-/// An action on a sheet's content, such as Delete Expense: a full-width row
-/// at least 50pt tall, centred, in a card of its own below the content.
-struct StarHashActionCard: View {
-    let title: String
-    var role: ButtonRole?
-    /// `.homeSheetCard` on a sheet, `.starhashCard` on a full screen.
-    var fill: Color = .homeSheetCard
-    let action: () -> Void
-
-    init(_ title: String, role: ButtonRole? = nil, fill: Color = .homeSheetCard, action: @escaping () -> Void) {
-        self.title = title
-        self.role = role
-        self.fill = fill
-        self.action = action
-    }
-
-    var body: some View {
-        StarHashCard(fill: fill) {
-            Button(action: action) {
-                Text(title)
-                    .font(.body)
-                    .foregroundStyle(role == .destructive ? Color.starhashDestructive : Color.starhashPrimaryText)
-                    .multilineTextAlignment(.center)
-                    .padding(.vertical, 12)
-                    .frame(maxWidth: .infinity)
-                    .frame(minHeight: 50)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(HighlightRowButtonStyle())
-        }
-    }
-}
-
 /// A tappable card row that highlights while pressed, like a list cell.
 struct HighlightRowButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
@@ -240,7 +107,7 @@ struct StarHashCapsuleButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.body.weight(.semibold))
+            .font(.starhash(.body, weight: .semibold))
             .foregroundStyle(Color.starhashOnInk)
             .multilineTextAlignment(.center)
             .padding(.horizontal, horizontalPadding)
@@ -260,40 +127,6 @@ struct StarHashCapsuleButtonStyle: ButtonStyle {
 extension ButtonStyle where Self == StarHashCapsuleButtonStyle {
     static func starhashCapsule(height: CGFloat, horizontalPadding: CGFloat = 12) -> StarHashCapsuleButtonStyle {
         StarHashCapsuleButtonStyle(height: height, horizontalPadding: horizontalPadding)
-    }
-}
-
-/// The confirm button of a form sheet (New Account, New Category): a
-/// checkmark in a 44pt circle, filled with ink once the form is valid. On
-/// iOS 26 and later the checkmark is the system toolbar's (medium weight at
-/// the large symbol scale), as the reference's New Account measures.
-struct StarHashConfirmButton: View {
-    let label: String
-    var isEnabled: Bool
-    let action: () -> Void
-
-    init(_ label: String, isEnabled: Bool, action: @escaping () -> Void) {
-        self.label = label
-        self.isEnabled = isEnabled
-        self.action = action
-    }
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: "checkmark")
-                .font(.system(size: 17, weight: HeaderGlyph.usesToolbarSize ? .medium : .semibold))
-                .starhashHeaderGlyphScale()
-                .foregroundStyle(isEnabled ? Color.starhashOnInk : Color.starhashInk.opacity(0.55))
-                .frame(width: 44, height: 44)
-                .background(Circle().fill(isEnabled ? Color.starhashInk : Color.starhashInk.opacity(0.14)))
-                .contentShape(Circle())
-                .animation(.smooth(duration: 0.2), value: isEnabled)
-        }
-        .buttonStyle(PressScaleButtonStyle())
-        .disabled(!isEnabled)
-        .accessibilityLabel(label)
-        .accessibilityShowsLargeContentViewer { Label(label, systemImage: "checkmark") }
-        .accessibilityRemoveTraits(.isSelected)
     }
 }
 
