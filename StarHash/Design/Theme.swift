@@ -56,6 +56,10 @@ extension Color {
     /// The light rising from the foot of the launch splash: the blue on dark
     /// mode's near black, full white on light mode's blue.
     static let splashGlow = Color(light: .white, dark: .brandBlue)
+    /// The tint of Buy's call buttons: the accent, as Liquid Glass. Light:
+    /// the near black, under the blue glyph; dark: the blue, under the near
+    /// black one.
+    static let callGlassTint = Color(light: .brandNight.opacity(0.85), dark: .brandBlue.opacity(0.9))
     /// The period control's lens on the page's tinted glass: white, faint,
     /// with a bright rim, as the system's own selection reads.
     static let segmentedLens = Color(light: .white.opacity(0.42), dark: .white.opacity(0.14))

@@ -84,35 +84,25 @@ struct BuyView: View {
                     .padding(.leading, 16)
                     .padding(.bottom, 10)
 
-                let all = shortcuts.shortcuts
-                ForEach(Array(all.enumerated()), id: \.element.id) { index, shortcut in
-                    let position = ActivityCardPosition(index: index, count: all.count)
-                    Button {
-                        dial(shortcut.code)
-                    } label: {
-                        ShortcutRow(shortcut: shortcut)
-                            .background(ActivityCardRowBackground(position: position))
-                    }
-                    .buttonStyle(ActivityRowButtonStyle(position: position))
-                    .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: StarHashMetrics.rowRadius, style: .continuous))
-                    .contextMenu {
-                        Button("Dial \(shortcut.code)", systemImage: "phone.arrow.up.right") { dial(shortcut.code) }
-                        Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
-                        Button("Delete", systemImage: "trash", role: .destructive) { delete(shortcut) }
-                    }
-                    .accessibilityAction(named: "Edit") { editing = ShortcutDraft(shortcut) }
-                    .accessibilityAction(named: "Delete") { delete(shortcut) }
-                    // Outside the button, so a lifted row does not carry it.
-                    .overlay(alignment: .top) {
-                        if index > 0 {
-                            StarHashRowSeparator(leading: ActivityLayout.rowSeparatorLeading)
+                VStack(spacing: 10) {
+                    ForEach(shortcuts.shortcuts) { shortcut in
+                        ShortcutItem(
+                            shortcut: shortcut,
+                            onEdit: { editing = ShortcutDraft(shortcut) },
+                            onDial: { dial(shortcut.code) }
+                        )
+                        .contextMenu {
+                            Button("Dial \(shortcut.code)", systemImage: "phone.arrow.up.right") { dial(shortcut.code) }
+                            Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
+                            Button("Delete", systemImage: "trash", role: .destructive) { delete(shortcut) }
                         }
+                        .accessibilityAction(named: "Delete") { delete(shortcut) }
+                        .activitySwipeToDelete { delete(shortcut) }
+                        .transition(.opacity.combined(with: .scale(scale: 0.96)))
                     }
-                    .activitySwipeToDelete { delete(shortcut) }
-                    .transition(.opacity)
                 }
 
-                Text("A tap opens the code's menu in your phone's dialler, which asks for the amount and your PIN; nothing is paid until you confirm there. Hold a code to edit it.")
+                Text("The call button opens the code's menu in your phone's dialler, which asks for the amount and your PIN; nothing is paid until you confirm there. Tap a code to edit it.")
                     .starhashFont(13.5, weight: .medium, relativeTo: .footnote)
                     .foregroundStyle(Color.starhashSecondaryText)
                     .fixedSize(horizontal: false, vertical: true)
@@ -144,58 +134,58 @@ struct BuyView: View {
     }
 }
 
-/// One code, as Activity's transaction row: its symbol on a tile, its name
-/// over what it does and the code it dials, and at the end a round call
-/// button, so the row reads as something to tap.
-private struct ShortcutRow: View {
+/// One code, on its own: a concise card (its symbol on a tile, its name,
+/// the code) that opens it for editing, and beside it, apart, the button
+/// that dials it, in Liquid Glass tinted the accent, so starting a code is
+/// one clear thing.
+private struct ShortcutItem: View {
     let shortcut: USSDShortcut
-
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let onEdit: () -> Void
+    let onDial: () -> Void
 
     var body: some View {
-        let isLarge = dynamicTypeSize.isAccessibilitySize
-        HStack(spacing: 14) {
-            SymbolTile(symbol: shortcut.symbol ?? ShortcutSymbols.plain, size: 42)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(shortcut.name)
-                    .starhashFont(17, weight: .semibold, relativeTo: .headline)
-                    .foregroundStyle(Color.starhashPrimaryText)
-                    .lineLimit(isLarge ? 3 : 2)
-                if let detail = shortcut.detail {
-                    Text(detail)
-                        .starhashFont(15, relativeTo: .subheadline)
-                        .foregroundStyle(Color.starhashSecondaryText)
-                        .lineLimit(isLarge ? 4 : 2)
-                        .fixedSize(horizontal: false, vertical: true)
+        HStack(spacing: 10) {
+            Button(action: onEdit) {
+                HStack(spacing: 14) {
+                    SymbolTile(symbol: shortcut.symbol ?? ShortcutSymbols.plain, size: 40)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(shortcut.name)
+                            .starhashFont(17, weight: .semibold, relativeTo: .headline)
+                            .foregroundStyle(Color.starhashPrimaryText)
+                            .lineLimit(2)
+                        Text(shortcut.code)
+                            .starhashFont(14, weight: .semibold, relativeTo: .subheadline, tracking: 0)
+                            .foregroundStyle(Color.starhashTertiaryText)
+                            .lineLimit(1)
+                    }
+                    Spacer(minLength: 0)
                 }
-                // The code it dials, as a transaction row shows its number.
-                Text(shortcut.code)
-                    .starhashFont(14, weight: .semibold, relativeTo: .subheadline, tracking: 0)
-                    .foregroundStyle(Color.starhashTertiaryText)
-                    .lineLimit(1)
-                    .padding(.top, 1)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity, minHeight: 68, alignment: .leading)
+                .background(Color.starhashCard, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
             }
-            Spacer(minLength: 8)
-            callButton
-        }
-        .padding(16)
-        .contentShape(Rectangle())
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(shortcut.name)
-        .accessibilityValue(shortcut.detail ?? "")
-        .accessibilityHint("Dials \(shortcut.code)")
-        .accessibilityAddTraits(.isButton)
-    }
+            .buttonStyle(PressScaleButtonStyle())
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(shortcut.name)
+            .accessibilityValue(shortcut.code)
+            .accessibilityHint("Opens it to edit")
+            .accessibilityAddTraits(.isButton)
 
-    /// A round call button in the primary button's colours, so the row reads
-    /// as something to tap; the whole row dials, the button only shows it.
-    private var callButton: some View {
-        Image(systemName: "phone.fill")
-            .font(.system(size: 15, weight: .bold))
-            .foregroundStyle(Color.starhashOnInk)
-            .frame(width: 40, height: 40)
-            .background(Color.starhashInk.gradient, in: Circle())
-            .accessibilityHidden(true)
+            Button(action: onDial) {
+                Image(systemName: "phone.fill")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(Color.starhashOnInk)
+                    .frame(width: 68, height: 68)
+                    .contentShape(Circle())
+                    .starhashGlass(in: Circle(), interactive: true, tint: .callGlassTint)
+            }
+            .buttonStyle(HapticPlainButtonStyle(weight: .medium))
+            .accessibilityLabel("Dial \(shortcut.name)")
+            .accessibilityHint("Dials \(shortcut.code)")
+        }
     }
 }
 

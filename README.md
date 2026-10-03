@@ -41,10 +41,11 @@ Free and open source.
   follow. A contact with several numbers asks which one. The total sits
   in a bar above the keyboard; matched letters show in blue. Picking someone dials at once: the iPhone's
   call prompt, showing the whole code, is the approval.
-- **Buy**: the codes you dial often, listed as Activity lists payments
-  (after Keaser's Home): each row its symbol, name, what it does and the
-  code it dials, with a round call button at its end. A tap dials; holding a row offers
-  Dial, Edit and Delete, and a swipe deletes it. It comes with MoMo's
+- **Buy**: the codes you dial often, each on its own concise card (its
+  symbol, name and code) with its call button apart beside it, in Liquid
+  Glass tinted the accent. The call button dials; tapping a card opens it
+  to edit; holding one offers Dial, Edit and Delete, and a swipe deletes
+  it. It comes with MoMo's
   pending approvals and cash out, MTN's Gwamon' Pack and the airport's
   parking; the + at the top right adds your own in a sheet after Keaser's
   New Category, with a close button and a confirm one: a name, a code that
