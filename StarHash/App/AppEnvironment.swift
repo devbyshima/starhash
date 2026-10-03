@@ -65,15 +65,27 @@ enum AppTab: String, Hashable, CaseIterable, Identifiable {
 @MainActor
 @Observable
 final class AppRouter {
-    private(set) var selectedTab: AppTab = .pay
+    private(set) var selectedTab: AppTab
     /// Pay or Buy, whichever showed last: the tab bar's middle place
     /// returns to it.
-    private(set) var payPage: AppTab = .pay
+    private(set) var payPage: AppTab
     /// Pages showing a pushed screen or a search, where the tab bar steps
     /// aside.
     private(set) var pagesHidingTabBar: Set<AppTab> = []
     /// Shrunk while a page scrolls down.
     private(set) var isTabBarCompact = false
+
+    /// Opens on the default page chosen in Settings, Pay or Buy.
+    init() {
+        let home = StarHashPreferences.defaultPage
+        selectedTab = home
+        payPage = home
+    }
+
+    /// The page chosen to open on, for the tab bar's middle place too.
+    func showDefaultPage() {
+        show(StarHashPreferences.defaultPage)
+    }
 
     func setHidesTabBar(_ hides: Bool, on tab: AppTab) {
         if hides { pagesHidingTabBar.insert(tab) } else { pagesHidingTabBar.remove(tab) }

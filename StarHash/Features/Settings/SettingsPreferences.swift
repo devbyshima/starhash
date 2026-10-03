@@ -13,6 +13,9 @@ extension PreferenceKey {
     /// melting into a blob behind the pad. Off, a key presses as it does
     /// with Reduce Motion.
     static let keypadInk = "keypadInk"
+    /// Where StarHash opens, and where the tab bar's middle place starts:
+    /// "pay" or "buy". Pay unless chosen otherwise in Settings.
+    static let defaultPage = "defaultPage"
 }
 
 /// Preference values read outside a view (App Intents, permission
@@ -28,6 +31,11 @@ enum StarHashPreferences {
     static var saveRecents: Bool { bool(PreferenceKey.saveRecents, default: true) }
     static var enableContacts: Bool { bool(PreferenceKey.enableContacts, default: true) }
     static var nearbyLocation: Bool { bool(PreferenceKey.nearbyLocation, default: false) }
+
+    /// Pay or Buy, the page StarHash opens on.
+    static var defaultPage: AppTab {
+        UserDefaults.standard.string(forKey: PreferenceKey.defaultPage) == AppTab.buy.rawValue ? .buy : .pay
+    }
 
     /// MTN MoMo until the owner picks a wallet, which onboarding asks for
     /// before anything can be dialled.

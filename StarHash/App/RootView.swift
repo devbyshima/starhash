@@ -21,8 +21,9 @@ struct RootView: View {
         Group {
             if !hasOnboarded {
                 OnboardingView {
-                    // The note closes to Pay, a replay from Settings included.
-                    router.show(.pay)
+                    // The note closes to the default page (Pay unless Buy is
+                    // chosen), a replay from Settings included.
+                    router.showDefaultPage()
                     withAnimation(.smooth) { hasOnboarded = true }
                 }
                     .transition(.opacity)

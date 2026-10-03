@@ -68,6 +68,7 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.saveRecents) private var saveRecents = true
     @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
     @AppStorage(PreferenceKey.keypadInk) private var keypadInk = true
+    @AppStorage(PreferenceKey.defaultPage) private var defaultPage = AppTab.pay.rawValue
     @AppStorage(PreferenceKey.lastVerifiedAt) private var lastVerifiedAt: Double = 0
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
     @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
@@ -153,14 +154,22 @@ private struct SettingsRootList: View {
             }
 
             Section {
-                SettingsSectionTitle("Keypad")
+                SettingsSectionTitle("Pay & Buy")
+                SettingsRow(
+                    symbol: "house.fill",
+                    title: "Default page",
+                    caption: "Where StarHash opens"
+                ) {
+                    defaultPageMenu
+                }
+                .settingsCardRow(.firstUnderTitle)
                 SettingsToggleRow(
                     symbol: "drop.fill",
                     title: "Ink effect",
                     caption: "Ink spreads behind each key you press",
                     isOn: $keypadInk
                 )
-                .settingsCardRow(.onlyUnderTitle)
+                .settingsCardRow(.last)
             }
 
             Section {
@@ -239,6 +248,32 @@ private struct SettingsRootList: View {
         } message: {
             Text("Allow StarHash your precise location in the Settings app, so it can tell one till from the next.")
         }
+    }
+
+    /// Pay or Buy, from a menu at the row's end, as a choice is shown in
+    /// GO Club's settings: the value and the up and down chevron.
+    private var defaultPageMenu: some View {
+        Menu {
+            Picker("Default page", selection: $defaultPage) {
+                Text(AppTab.pay.title).tag(AppTab.pay.rawValue)
+                Text(AppTab.buy.title).tag(AppTab.buy.rawValue)
+            }
+        } label: {
+            HStack(spacing: 6) {
+                Text(defaultPage == AppTab.buy.rawValue ? AppTab.buy.title : AppTab.pay.title)
+                    .starhashFont(16, weight: .medium, relativeTo: .callout)
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.system(size: 13, weight: .semibold))
+            }
+            .foregroundStyle(Color.starhashPrimaryText)
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .menuOrder(.fixed)
+        .buttonStyle(.hapticPlain)
+        .sensoryFeedback(.selection, trigger: defaultPage)
+        .accessibilityLabel("Default page")
+        .accessibilityValue(defaultPage == AppTab.buy.rawValue ? AppTab.buy.title : AppTab.pay.title)
     }
 
     /// On once the setup finished with a working shortcut. Switching it on
