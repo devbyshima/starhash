@@ -70,8 +70,8 @@ struct PayCurrencyPill: View {
 /// bubble over its digit; as it lifts the digit flashes back in the accent
 /// and the bubble melts into a frosted blob that runs down behind the pad,
 /// a puff of the accent at its top, lingering for seconds
-/// (`PayEffects.swift`). With Reduce Motion, a faint disc behind a held key
-/// instead.
+/// (`PayEffects.swift`). With Reduce Motion, or the ink turned off in
+/// Settings, a faint disc behind a held key instead.
 struct PayKeypad: View {
     /// Called with every key; the caller applies it to its `AmountInput`
     /// and says whether anything changed.
@@ -82,6 +82,10 @@ struct PayKeypad: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
+    @AppStorage(PreferenceKey.keypadInk) private var keypadInk = true
+
+    /// The quiet press: no bubble, no ink, no flash.
+    private var isPlain: Bool { reduceMotion || !keypadInk }
 
     /// Bumped on every accepted key, so one light tap plays per press.
     @State private var accepted = 0
@@ -188,7 +192,7 @@ struct PayKeypad: View {
             bubbleSize: bubbleSize,
             // The grey the shader's blob starts from on black.
             bubbleFill: .payKeyBubble,
-            reduceMotion: reduceMotion
+            reduceMotion: isPlain
         ))
     }
 
@@ -200,7 +204,7 @@ struct PayKeypad: View {
 
     private func press(_ key: AmountInput.Key) {
         if onKey(key) { accepted += 1 } else { refused += 1 }
-        guard !reduceMotion, size != .zero else { return }
+        guard !isPlain, size != .zero else { return }
         // The bubble melts into ink as the key lifts; a dozen blobs at a
         // time is plenty, and keeps the shader's work small.
         let now = Date.now

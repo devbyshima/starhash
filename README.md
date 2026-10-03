@@ -63,7 +63,8 @@ Free and open source.
 - **Settings**: your profile and this year's totals, switches for saving
   transactions, contacts, Nearby and recent recipients, Ask before deleting
   from a menu or a transaction's page (also turned off from the delete
-  question's Don't Ask Again), the auto
+  question's Don't Ask Again), the keypad's ink effect (off, a key
+  presses as it does with Reduce Motion), the auto
   verification guide, How StarHash Works and Privacy, and at the bottom
   Delete All Data, which erases everything StarHash keeps on the iPhone
   (transactions, recents, wallet, settings) and starts again from

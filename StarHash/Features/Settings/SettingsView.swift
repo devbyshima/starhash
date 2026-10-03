@@ -64,6 +64,7 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
     @AppStorage(PreferenceKey.saveRecents) private var saveRecents = true
     @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
+    @AppStorage(PreferenceKey.keypadInk) private var keypadInk = true
     @AppStorage(PreferenceKey.lastVerifiedAt) private var lastVerifiedAt: Double = 0
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
     @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
@@ -146,6 +147,17 @@ private struct SettingsRootList: View {
                     isOn: $saveRecents
                 )
                 .settingsCardRow(.last)
+            }
+
+            Section {
+                SettingsSectionTitle("Keypad")
+                SettingsToggleRow(
+                    symbol: "drop.fill",
+                    title: "Ink effect",
+                    caption: "Ink spreads behind each key you press",
+                    isOn: $keypadInk
+                )
+                .settingsCardRow(.single)
             }
 
             Section {

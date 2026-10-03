@@ -9,6 +9,10 @@ extension PreferenceKey {
     /// Whether deleting one transaction asks first. Turned off with Don't
     /// Ask Again on the question itself, back on in Settings.
     static let confirmDeletes = "confirmDeletes"
+    /// Whether Pay's keypad plays its ink: the bubble over a held key
+    /// melting into a blob behind the pad. Off, a key presses as it does
+    /// with Reduce Motion.
+    static let keypadInk = "keypadInk"
 }
 
 /// Preference values read outside a view (App Intents, permission
