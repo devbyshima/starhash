@@ -1,51 +1,49 @@
 import StarHashKit
 import SwiftUI
 
-/// Buy: airtime, data bundles and electricity, paid from the wallet. Each
-/// opens its menu in the wallet itself (`USSD.purchase`), whose own prompts
-/// ask for the number, the amount or the meter, and the PIN; StarHash
-/// dials only the paths an operator has published, so no amount is filled
-/// in for it. The code each one dials shows on its card, so it is never a
-/// surprise. Nothing is logged in Activity: StarHash never learns the
-/// amount.
+/// Buy: the codes kept on hand to dial in a tap (`USSDShortcutList`). It
+/// comes with MoMo's pending approvals and cash out, MTN's Gwamon' Pack and
+/// the airport's parking, and the + at the top right adds the person's own.
+/// Each card shows its code, so a tap is never a surprise; holding one
+/// edits or deletes it. The wallet or service's own prompts take the
+/// amount and the PIN, so nothing is logged in Activity.
 struct BuyView: View {
-    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
+    @Environment(USSDShortcutList.self) private var shortcuts
 
+    /// The sheet open: a new code, or one being edited.
+    @State private var editing: ShortcutDraft?
     /// A code the system would not dial (the simulator, an iPad), shown in
     /// an alert so it can be dialled by hand.
     @State private var undialledCode: String?
 
     var body: some View {
         VStack(spacing: 0) {
-            PageHeader(page: .buy) { PageTitle(text: "Buy") } trailing: { WalletSwitcher() }
-
-            ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
-                    ForEach(USSD.Purchase.allCases) { purchase in
-                        BuyCard(purchase: purchase, code: USSD.purchase(purchase, from: wallet)) {
-                            dial(USSD.purchase(purchase, from: wallet))
-                        }
-                    }
-                    Text(footnote)
-                        .starhashFont(13.5, weight: .medium, relativeTo: .footnote)
-                        .foregroundStyle(Color.starhashSecondaryText)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.horizontal, 8)
-                        .padding(.top, 8)
+            PageHeader(page: .buy) { PageTitle(text: "Buy") } trailing: {
+                SwapGlassButton(symbol: "plus", label: "Add a code") {
+                    editing = ShortcutDraft()
                 }
-                .padding(.horizontal, StarHashMetrics.screenPadding)
-                .padding(.top, 20)
-                .padding(.bottom, 16)
-                .starhashReadableWidth(StarHashMetrics.narrowReadableWidth)
             }
-            .scrollIndicators(.hidden)
-            .scrollBounceBehavior(.basedOnSize)
-            .starhashTabBarFollowsScroll()
+
+            if shortcuts.shortcuts.isEmpty {
+                EmptyStateView(
+                    symbol: "number.square",
+                    title: "No Codes",
+                    message: "Add a code you dial often with the + button, and it is a tap away here.",
+                    style: .large
+                )
+                .padding(.horizontal, StarHashMetrics.screenPadding)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                list
+            }
         }
         .starhashTabBarClearance()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.starhashBackground.ignoresSafeArea())
-        .animation(.smooth(duration: 0.25), value: wallet)
+        .animation(.smooth(duration: 0.3), value: shortcuts.shortcuts)
+        .sheet(item: $editing) { draft in
+            ShortcutEditor(draft: draft)
+        }
         .alert(
             "Can't dial on this device",
             isPresented: Binding(get: { undialledCode != nil }, set: { if !$0 { undialledCode = nil } }),
@@ -57,14 +55,38 @@ struct BuyView: View {
             }
             Button("OK", role: .cancel) {}
         } message: { code in
-            Text("Dial \(code) on your phone to buy.")
+            Text("Dial \(code) on your phone.")
         }
     }
 
-    /// The same for every wallet: electricity opens Rwanda Energy Group's
-    /// menu rather than the wallet's, so it names neither.
-    private var footnote: String {
-        "Each opens its menu in your phone's dialler. It asks for the number, the amount or the meter, then your PIN, and nothing is paid until you confirm there."
+    private var list: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                ForEach(shortcuts.shortcuts) { shortcut in
+                    ShortcutCard(shortcut: shortcut) { dial(shortcut.code) }
+                        .contextMenu {
+                            Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
+                            Button("Delete", systemImage: "trash", role: .destructive) { shortcuts.remove(shortcut.id) }
+                        }
+                        .accessibilityAction(named: "Edit") { editing = ShortcutDraft(shortcut) }
+                        .accessibilityAction(named: "Delete") { shortcuts.remove(shortcut.id) }
+                        .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                }
+                Text("Each opens its menu in your phone's dialler, which asks for the amount and your PIN; nothing is paid until you confirm there. Hold a code to edit or delete it.")
+                    .starhashFont(13.5, weight: .medium, relativeTo: .footnote)
+                    .foregroundStyle(Color.starhashSecondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 8)
+                    .padding(.top, 8)
+            }
+            .padding(.horizontal, StarHashMetrics.screenPadding)
+            .padding(.top, 20)
+            .padding(.bottom, 16)
+            .starhashReadableWidth(StarHashMetrics.narrowReadableWidth)
+        }
+        .scrollIndicators(.hidden)
+        .scrollBounceBehavior(.basedOnSize)
+        .starhashTabBarFollowsScroll()
     }
 
     private func dial(_ code: String) {
@@ -76,23 +98,23 @@ struct BuyView: View {
     }
 }
 
-/// One thing to buy: its symbol on a tile, what it is, a line on what the
-/// wallet will ask for, and the code it dials, in a card the width of the
+/// One code: its symbol on a tile, its name, what it does (for the ones
+/// StarHash comes with) and the code itself, in a card the width of the
 /// page. The whole card is the button.
-private struct BuyCard: View {
-    let purchase: USSD.Purchase
-    let code: String
+private struct ShortcutCard: View {
+    let shortcut: USSDShortcut
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 14) {
-                SymbolTile(symbol: purchase.symbol, size: 46)
+                SymbolTile(symbol: shortcut.symbol ?? "number", size: 46)
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(purchase.title)
+                    Text(shortcut.name)
                         .starhashFont(18, weight: .bold, relativeTo: .headline)
                         .foregroundStyle(Color.starhashPrimaryText)
-                    Text(purchase.caption)
+                        .lineLimit(2)
+                    Text(shortcut.detail ?? shortcut.code)
                         .starhashFont(14, weight: .medium, relativeTo: .subheadline)
                         .foregroundStyle(Color.starhashTertiaryText)
                         .fixedSize(horizontal: false, vertical: true)
@@ -102,49 +124,151 @@ private struct BuyCard: View {
                     Image(systemName: "arrow.up.right")
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Color.starhashTertiaryText)
-                    Text(code)
-                        .starhashFont(13, weight: .medium, relativeTo: .footnote)
-                        .foregroundStyle(Color.starhashTertiaryText)
-                        .lineLimit(1)
-                        .contentTransition(.opacity)
+                    // The code under the arrow, unless it is already the
+                    // card's second line.
+                    if shortcut.detail != nil {
+                        Text(shortcut.code)
+                            .starhashFont(13, weight: .medium, relativeTo: .footnote)
+                            .foregroundStyle(Color.starhashTertiaryText)
+                            .lineLimit(1)
+                    }
                 }
             }
             .padding(.horizontal, 18)
             .padding(.vertical, 18)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.starhashCard, in: RoundedRectangle(cornerRadius: StarHashMetrics.cardRadius, style: .continuous))
+            .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: StarHashMetrics.cardRadius, style: .continuous))
             .contentShape(RoundedRectangle(cornerRadius: StarHashMetrics.cardRadius, style: .continuous))
         }
         .buttonStyle(PressScaleButtonStyle())
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Buy \(purchase.title)")
-        .accessibilityHint("Dials \(code) and opens your wallet's menu")
+        .accessibilityLabel(shortcut.name)
+        .accessibilityValue(shortcut.detail ?? "")
+        .accessibilityHint("Dials \(shortcut.code)")
         .accessibilityAddTraits(.isButton)
     }
 }
 
-extension USSD.Purchase {
-    var title: String {
-        switch self {
-        case .airtime: "Airtime"
-        case .bundles: "Data bundles"
-        case .electricity: "Electricity"
-        }
+/// What the editor works on: a new code (no id) or a copy of one to change.
+struct ShortcutDraft: Identifiable {
+    let id = UUID()
+    var editing: USSDShortcut.ID?
+    var name = ""
+    var code = ""
+
+    init() {}
+
+    init(_ shortcut: USSDShortcut) {
+        editing = shortcut.id
+        name = shortcut.name
+        code = shortcut.code
+    }
+}
+
+/// Adds or edits a code, in Beam's sheet language: the title, a card with
+/// the name and the code, a line on what a code looks like, and Add (or
+/// Save) once both are right; Delete under it when editing.
+private struct ShortcutEditor: View {
+    @Environment(USSDShortcutList.self) private var shortcuts
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var name: String
+    @State private var code: String
+    @State private var height: CGFloat = 420
+    @FocusState private var focused: Field?
+
+    private let editing: USSDShortcut.ID?
+
+    private enum Field { case name, code }
+
+    init(draft: ShortcutDraft) {
+        editing = draft.editing
+        _name = State(initialValue: draft.name)
+        _code = State(initialValue: draft.code)
     }
 
-    var caption: String {
-        switch self {
-        case .airtime: "For your number or someone else's"
-        case .bundles: "Internet, from the bundles on offer"
-        case .electricity: "Cash Power, with your meter number"
-        }
+    private var validCode: String? { USSDShortcut.code(from: code) }
+    private var canSave: Bool {
+        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && validCode != nil
+    }
+    /// Only once something is typed, and not while it could still become a
+    /// code (no closing # yet).
+    private var showsCodeHint: Bool {
+        !code.isEmpty && validCode == nil && code.hasSuffix("#")
     }
 
-    var symbol: String {
-        switch self {
-        case .airtime: "phone.fill"
-        case .bundles: "antenna.radiowaves.left.and.right"
-        case .electricity: "bolt.fill"
+    var body: some View {
+        VStack(spacing: 0) {
+            SheetHeader(editing == nil ? "Add a Code" : "Edit Code")
+
+            VStack(spacing: 14) {
+                VStack(spacing: 0) {
+                    field("Name", text: $name, prompt: "Pending approvals", field: .name)
+                        .textInputAutocapitalization(.sentences)
+                        .submitLabel(.next)
+                        .onSubmit { focused = .code }
+                    SheetDivider()
+                    field("Code", text: $code, prompt: "*182*7*1#", field: .code)
+                        .keyboardType(.phonePad)
+                }
+                .padding(.horizontal, 16)
+                .sheetCard()
+
+                Text(showsCodeHint ? "A code starts with * or #, ends with #, and has only digits, * and # in between." : "Starts with * or # and ends with #, as you would dial it.")
+                    .font(.sheetSubheadline)
+                    .foregroundStyle(showsCodeHint ? Color.starhashDestructive : Color.sheetSecondaryText)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .animation(.smooth(duration: 0.2), value: showsCodeHint)
+
+                VStack(spacing: 4) {
+                    Button(editing == nil ? "Add" : "Save", action: save)
+                        .buttonStyle(.sheetPrimary)
+                        .disabled(!canSave)
+                    if let editing {
+                        SheetTextButton("Delete Code", role: .destructive) {
+                            shortcuts.remove(editing)
+                            dismiss()
+                        }
+                    }
+                }
+                .padding(.top, 4)
+            }
+            .padding(.horizontal, 18)
+            .padding(.bottom, 12)
         }
+        .sheetHeight($height)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .sheetGlass(detents: [.height(height + 8)])
+        .onAppear { focused = editing == nil ? .name : nil }
+    }
+
+    private func field(_ label: String, text: Binding<String>, prompt: String, field: Field) -> some View {
+        HStack(spacing: 12) {
+            Text(label)
+                .font(.sheetBody)
+                .foregroundStyle(Color.starhashPrimaryText)
+                .frame(width: 56, alignment: .leading)
+            TextField(label, text: text, prompt: Text(prompt).foregroundStyle(Color.sheetSecondaryText))
+                .font(.sheetBody)
+                .foregroundStyle(Color.starhashPrimaryText)
+                .autocorrectionDisabled()
+                .focused($focused, equals: field)
+        }
+        .frame(minHeight: 50)
+    }
+
+    private func save() {
+        let saved = if let editing {
+            shortcuts.update(editing, name: name, code: code)
+        } else {
+            shortcuts.add(name: name, code: code)
+        }
+        guard saved else { return }
+        // Played here, as the sheet goes, which a view-bound haptic would
+        // not outlive.
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        dismiss()
     }
 }

@@ -15,7 +15,8 @@ does onboarding: its reel, wallet step and permission screen are ports of
 Beam's `LoopOnBoarding`, "find your Mac" step and `PermissionOnBoarding`.
 
 - `Packages/StarHashKit/` - models (`Recipient`, `Transaction`, `Money`),
-  `USSD`, `AmountInput`, `CarrierSMS` (the SMS parser), `ActivitySummary`
+  `USSD`, `USSDShortcut` and `USSDShortcutList` (Buy's codes, kept in
+  UserDefaults), `AmountInput`, `CarrierSMS` (the SMS parser), `ActivitySummary`
   and `StarHashStore` (one JSON file, `@Observable @MainActor`). Foundation
   only, `public` API, Swift Testing tests in `Tests/StarHashKitTests`.
   Anything testable belongs here.

@@ -41,9 +41,13 @@ Free and open source.
   follow. A contact with several numbers asks which one. The total sits
   in a bar above the keyboard; matched letters show in blue. Picking someone dials at once: the iPhone's
   call prompt, showing the whole code, is the approval.
-- **Buy**: airtime, data bundles and electricity (Cash Power), each a card
-  that dials its menu from the wallet chosen on Pay, with the code shown on
-  the card. The wallet's prompts take the amount and the PIN.
+- **Buy**: the codes you dial often, each a card that dials it in a tap,
+  with the code shown on the card. It comes with MoMo's pending approvals
+  and cash out, MTN's Gwamon' Pack and the airport's parking; the + at
+  the top right adds your own (a name and a code that starts with * or #
+  and ends with #), and holding a card edits or deletes it. The list is
+  kept on the iPhone, and Delete All Data brings back the four it came
+  with.
 - **Fees**: shown only in Activity, once a payment is confirmed: from MTN's
   SMS, or worked out from the carriers' published prices when it is marked
   as confirmed by hand (`Tariff` in StarHashKit, sources inside). Pay shows no fees. The keypad takes up to
@@ -92,15 +96,16 @@ from either wallet. Only which network counts as "other" changes.
 | Pay a merchant code | `*182*8*1*CODE*AMOUNT#` |
 | Check your balance, MTN MoMo | `*182*6*1#` |
 | Check your balance, Airtel Money | `*182#` (the menu: no balance shortcut confirmed) |
-| Buy airtime, MTN MoMo | `*182*2*1#` (MTN Rwanda) |
-| Buy data bundles, MTN MoMo | `*182*2*1*2#` (MTN Rwanda) |
-| Buy electricity (Cash Power), either wallet | `*662*1#` (Rwanda Energy Group) |
-| Buy airtime or bundles, Airtel Money | `*182#` (the menu: no shorter path confirmed) |
 
-Buy opens each menu and leaves the number, the amount or the meter, and
-the PIN to the wallet's own prompts: only the menu paths above have been
-published, so StarHash fills in nothing that could land in the wrong
-place, and Buy is not logged in Activity.
+Buy comes with four codes (`USSDShortcut.defaults`), and the menu each
+opens asks for the amount and the PIN; Buy is not logged in Activity.
+
+| Buy's code | Code |
+| --- | --- |
+| Pending approvals: payments waiting for your PIN (a shop's or Irembo's request) | `*182*7*1#` |
+| Cash out: start a withdrawal, which MTN now asks for before an agent's prompt | `*182*7*2#` |
+| Gwamon' Pack: MTN's minutes and data, for 7 days | `*154*0#` |
+| Airport parking: pay a Kigali airport parking ticket | `*182*3*8#` |
 
 The Airtel codes follow Airtel Rwanda's Airtel Money customer service
 charter (`*182#`, `*182*8*1#` for merchants) and its note that `*182*1*2#`

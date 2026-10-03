@@ -19,6 +19,19 @@ enum AppEnvironment {
         return PlaceMemory(fileURL: PlaceMemory.defaultFileURL)
     }()
 
+    /// Buy's codes. Debug launches with -inMemory start from the defaults
+    /// in a throwaway list.
+    static let shortcuts: USSDShortcutList = {
+        #if DEBUG
+        if DebugLaunch.inMemory {
+            let name = "StarHashDebugShortcuts"
+            UserDefaults().removePersistentDomain(forName: name)
+            return USSDShortcutList(defaults: UserDefaults(suiteName: name) ?? .standard)
+        }
+        #endif
+        return USSDShortcutList()
+    }()
+
     static let router: AppRouter = {
         let router = AppRouter()
         #if DEBUG

@@ -78,6 +78,7 @@ enum AppReset {
     static func eraseEverything(store: StarHashStore, router: AppRouter) {
         store.eraseAll()
         AppEnvironment.places.eraseAll()
+        AppEnvironment.shortcuts.reset()
         if let domain = Bundle.main.bundleIdentifier {
             UserDefaults.standard.removePersistentDomain(forName: domain)
         }

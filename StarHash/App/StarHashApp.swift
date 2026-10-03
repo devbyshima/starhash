@@ -7,6 +7,7 @@ struct StarHashApp: App {
 
     private let store = AppEnvironment.store
     private let router = AppEnvironment.router
+    private let shortcuts = AppEnvironment.shortcuts
 
     init() {
         #if DEBUG
@@ -54,6 +55,7 @@ struct StarHashApp: App {
                     .font(.starhash(.body))
                     .environment(store)
                     .environment(router)
+                    .environment(shortcuts)
                     .tint(Color.starhashPrimaryText)
                     .onOpenURL { router.handle($0) }
             }

@@ -52,15 +52,6 @@ import Testing
         #expect(USSD.telURL(for: USSD.balance(for: .airtel))?.absoluteString == "tel:*182%23")
     }
 
-    @Test func purchaseCodes() {
-        #expect(USSD.purchase(.airtime, from: .mtn) == "*182*2*1#")
-        #expect(USSD.purchase(.bundles, from: .mtn) == "*182*2*1*2#")
-        #expect(USSD.purchase(.electricity, from: .mtn) == "*662*1#")
-        #expect(USSD.purchase(.airtime, from: .airtel) == "*182#")
-        #expect(USSD.purchase(.bundles, from: .airtel) == "*182#")
-        #expect(USSD.purchase(.electricity, from: .airtel) == "*662*1#")
-    }
-
     @Test func nineDigitsIsStillAMerchantCode() {
         #expect(Recipient(input: "123456789")?.kind == .merchant)
         #expect(Recipient(input: "1234567890")?.kind == .phone)
