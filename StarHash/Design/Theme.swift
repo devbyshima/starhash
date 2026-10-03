@@ -147,8 +147,12 @@ extension Color {
     /// the page colour let mostly through the glass.
     static let sheetGlassTint = Color(light: .white, dark: .brandNight.opacity(0.6))
     /// A full page that reads as one of the sheets (onboarding's note):
-    /// white in light mode, the near black in dark.
+    /// Settings' card white in light mode, the near black in dark.
     static let sheetPage = Color(light: .white, dark: .brandNight)
+    /// Over the note sheets' glass in light mode: Settings' card white,
+    /// solid, since white-tinted glass still lets the blue page and its
+    /// highlights through on a device. Dark keeps the glass.
+    static let noteSheetFill = Color(light: .white, dark: .clear)
     /// The dotted line between a sheet card's rows.
     static let sheetDivider = Color(light: .brandNight.opacity(0.22), dark: .brandPaper.opacity(0.22))
 
