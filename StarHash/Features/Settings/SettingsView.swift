@@ -164,19 +164,15 @@ private struct SettingsRootList: View {
                 }
                 .buttonStyle(HighlightRowButtonStyle())
                 .settingsCardRow(.single, insets: .settingsTextRow)
-            } footer: {
-                SettingsFootnote("Erases everything StarHash keeps on this iPhone: transactions, recents, your wallet and settings. StarHash starts again from the welcome screens. Your contacts and the StarHash SMS shortcut are not touched.")
             }
 
         }
         .settingsListStyle(sectionSpacing: 14)
-        .alert("Delete all data?", isPresented: $confirmsDeleteAll) {
-            Button("Delete All Data", role: .destructive) {
+        .alert("Are you sure you want to delete all data?", isPresented: $confirmsDeleteAll) {
+            Button("Delete", role: .destructive) {
                 withAnimation(.smooth) { AppReset.eraseEverything(store: store, router: router) }
             }
             Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Your transactions, wallet and settings will be erased from this iPhone. This cannot be undone.")
         }
         .sheet(isPresented: $showsDeveloperNote) {
             DeveloperNoteSheet()
