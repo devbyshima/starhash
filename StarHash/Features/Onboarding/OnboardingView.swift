@@ -85,8 +85,13 @@ struct OnboardingView: View {
                     .id(Stage.autoVerify)
                     .transition(.opacity)
             case .note:
-                DeveloperNoteContent(kind: .welcome, primaryTitle: "Start Using StarHash", primaryAction: finish)
-                    .transition(.opacity)
+                // White in light mode, as the note's sheets are, not the blue.
+                DeveloperNoteContent(
+                    kind: .welcome, primaryTitle: "Start Using StarHash",
+                    primaryAction: finish, showsWriteLink: false
+                )
+                .background(Color.sheetPage.ignoresSafeArea())
+                .transition(.opacity)
             }
         }
         .sensoryFeedback(.impact(weight: .light), trigger: stage)

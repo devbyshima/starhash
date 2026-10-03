@@ -7,7 +7,7 @@ import SwiftUI
 ///
 /// - `welcome`, the last onboarding screen (and Settings, About StarHash,
 ///   Developer Note): why StarHash exists, free, open source and private,
-///   and enjoy it. No rating ask.
+///   and enjoy it. No rating ask, and on onboarding no Write to Shima.
 /// - `review`, once, after two weeks of use (`ReviewNote`): some of the
 ///   same, then the one ask: if you love it, rate it.
 enum DeveloperNoteKind {
@@ -20,7 +20,7 @@ enum DeveloperNoteKind {
             "Hi, I'm Shima, and I made StarHash.",
             "I built it because I was tired of how hard USSD makes paying. Typing codes and digging through menus for the things you do every day felt wrong, so StarHash does them in a few taps.",
             "It's free and open source, and it's private: no account, no server, no tracking. Everything stays on your iPhone.",
-            "I hope it makes paying a little easier. Enjoy it, and if something is off, write to me. I answer you myself.",
+            "I hope it makes paying a little easier. Enjoy it.",
         ]
         case .review: [
             "You've been using StarHash for two weeks now. Thank you.",
@@ -40,6 +40,8 @@ struct DeveloperNoteContent: View {
     let kind: DeveloperNoteKind
     let primaryTitle: String
     let primaryAction: () -> Void
+    /// Onboarding's note ends on its button alone.
+    var showsWriteLink = true
 
     @Environment(\.openURL) private var openURL
 
@@ -91,17 +93,19 @@ struct DeveloperNoteContent: View {
                         .contentShape(Capsule())
                 }
                 .buttonStyle(.plain)
-                Button {
-                    openURL(DeveloperNoteLinks.write)
-                } label: {
-                    Text("Write to Shima")
-                        .starhashFont(14, relativeTo: .subheadline)
-                        .foregroundStyle(Color.starhashSecondaryText)
-                        .frame(maxWidth: .infinity, minHeight: 64)
-                        .contentShape(Rectangle())
+                if showsWriteLink {
+                    Button {
+                        openURL(DeveloperNoteLinks.write)
+                    } label: {
+                        Text("Write to Shima")
+                            .starhashFont(14, relativeTo: .subheadline)
+                            .foregroundStyle(Color.starhashSecondaryText)
+                            .frame(maxWidth: .infinity, minHeight: 64)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityHint("Opens a new message to Shima on GitHub")
                 }
-                .buttonStyle(.plain)
-                .accessibilityHint("Opens a new message to Shima on GitHub")
             }
             .padding(.top, 30)
         }

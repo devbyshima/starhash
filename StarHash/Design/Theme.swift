@@ -146,6 +146,9 @@ extension Color {
     /// A sheet's background. Light: solid white, the founder's pick. Dark:
     /// the page colour let mostly through the glass.
     static let sheetGlassTint = Color(light: .white, dark: .brandNight.opacity(0.6))
+    /// A full page that reads as one of the sheets (onboarding's note):
+    /// white in light mode, the near black in dark.
+    static let sheetPage = Color(light: .white, dark: .brandNight)
     /// The dotted line between a sheet card's rows.
     static let sheetDivider = Color(light: .brandNight.opacity(0.22), dark: .brandPaper.opacity(0.22))
 
