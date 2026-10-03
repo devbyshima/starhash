@@ -14,16 +14,12 @@ extension View {
         modifier(StarHashBackButton())
     }
 
-    /// A close button at the leading end of the bar, for a page shown over
-    /// everything (auto-verify's setup during onboarding).
-    func starhashCloseButton(_ action: @escaping () -> Void) -> some View {
-        barButton {
-            Button(action: action) {
-                StarHashCircleGlyph(symbol: "xmark")
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Close")
-        }
+    /// A back button on the left that runs `back`, and a close button on
+    /// the right when `close` is given, for a page that steps back through
+    /// itself before leaving (auto-verify's setup). The swipe from the
+    /// left edge still goes back a screen.
+    func starhashBackAndClose(back: @escaping () -> Void, close: (() -> Void)?) -> some View {
+        modifier(BackAndClose(back: back, close: close))
     }
 
     /// The side menu button at the leading end of a root page's bar
@@ -50,6 +46,33 @@ private struct StarHashBackButton: ViewModifier {
     }
 }
 
+private struct BackAndClose: ViewModifier {
+    let back: () -> Void
+    let close: (() -> Void)?
+
+    func body(content: Content) -> some View {
+        content
+            .navigationBarBackButtonHidden()
+            .barButton {
+                Button(action: back) {
+                    StarHashCircleGlyph(symbol: "chevron.left")
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Back")
+            }
+            .trailingBarButton {
+                if let close {
+                    Button(action: close) {
+                        StarHashCircleGlyph(symbol: "xmark")
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Close")
+                }
+            }
+            .background(SwipeBackEnabler())
+    }
+}
+
 private struct SideMenuToolbar: ViewModifier {
     @Environment(AppRouter.self) private var router
 
@@ -65,6 +88,21 @@ private struct SideMenuToolbar: ViewModifier {
 }
 
 private extension View {
+    /// `button` at the trailing end of the bar, with no system glass.
+    @ViewBuilder
+    func trailingBarButton(@ViewBuilder _ button: () -> some View) -> some View {
+        if #available(iOS 26.0, *) {
+            toolbar {
+                ToolbarItem(placement: .topBarTrailing) { button() }
+                    .sharedBackgroundVisibility(.hidden)
+            }
+        } else {
+            toolbar {
+                ToolbarItem(placement: .topBarTrailing) { button() }
+            }
+        }
+    }
+
     /// `button` at the leading end of the bar, with the system's own glass
     /// behind it turned off on iOS 26 and later, where it would sit under
     /// ours.

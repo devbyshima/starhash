@@ -29,6 +29,7 @@ struct OnboardingView: View {
     @AppStorage(PreferenceKey.onboardingStage) private var savedStage = 0
     @State private var stage = OnboardingLaunch.initialStage ?? UserDefaults.standard.integer(forKey: PreferenceKey.onboardingStage)
     @State private var setsUpAutoVerify = false
+    @State private var setupWentBack = false
 
     enum Stage: Int {
         case reel, wallet, contacts, nearby, autoVerify
@@ -86,8 +87,12 @@ struct OnboardingView: View {
         // The setup in full, over onboarding; onboarding ends as it closes,
         // set up or not (Settings can switch it on later).
         .onChange(of: stage, initial: true) { _, stage in savedStage = stage }
-        .fullScreenCover(isPresented: $setsUpAutoVerify, onDismiss: finish) {
-            AutoVerifySetupCover()
+        // Done or closed, onboarding ends; back from its first step returns
+        // to this page instead.
+        .fullScreenCover(isPresented: $setsUpAutoVerify, onDismiss: {
+            if setupWentBack { setupWentBack = false } else { finish() }
+        }) {
+            AutoVerifySetupCover { setupWentBack = true }
         }
     }
 
@@ -276,15 +281,23 @@ enum OnboardingLaunch {
 }
 
 /// Auto-verify's setup as onboarding shows it: the same guide Settings
-/// pushes, in its own navigation bar with a close button. Done or closed,
-/// it goes, and onboarding ends with it.
+/// pushes, in its own navigation bar, with back on the left (to the
+/// onboarding page, from the first step) and close on the right (skipping
+/// the setup).
 private struct AutoVerifySetupCover: View {
+    let onBack: () -> Void
+
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack {
-            AutoVerificationGuide()
-                .starhashCloseButton { dismiss() }
+            AutoVerificationGuide(
+                onClose: { dismiss() },
+                onLeave: {
+                    onBack()
+                    dismiss()
+                }
+            )
         }
     }
 }

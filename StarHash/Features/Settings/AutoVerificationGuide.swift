@@ -14,6 +14,13 @@ import UIKit
 ///    action actually ran; there is no skipping, and auto-verify stays off
 ///    until it has.
 struct AutoVerificationGuide: View {
+    /// Over onboarding: the close button on the right, which skips the
+    /// setup. Pushed from Settings there is none.
+    var onClose: (() -> Void)?
+    /// Back from the first step, when leaving is not just going back a
+    /// screen (over onboarding, where it returns to onboarding's page).
+    var onLeave: (() -> Void)?
+
     @Environment(AppRouter.self) private var router
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
@@ -31,6 +38,21 @@ struct AutoVerificationGuide: View {
     @State private var verification: Verification = Self.launchVerification
     /// The scroll view's visible height, for centring a short step.
     @State private var viewportHeight: CGFloat = 0
+    /// The step's height without the room round its title and steps.
+    @State private var contentHeight: CGFloat = 0
+
+    /// The room over the title and under the steps: half what is left of
+    /// the visible height, at least 20pt.
+    private var centringGap: CGFloat {
+        max(20, (viewportHeight - contentHeight) / 2)
+    }
+
+    /// The title's line box leaves room over its letters that the eye does
+    /// not count, so a centred block looks low by about that much: this
+    /// moves it up, while there is room to.
+    private var opticalShift: CGFloat {
+        min(4.5, max(0, centringGap - 20))
+    }
 
     private static var launchVerification: Verification {
         switch SettingsLaunch.guideOutcome {
@@ -50,29 +72,32 @@ struct AutoVerificationGuide: View {
                 .padding(.top, 8)
             ScrollView {
                 VStack(spacing: 0) {
-                    // Tight enough that step 1 fits on an iPhone Pro with
-                    // room under its card, matching the gap over it.
                     screenshot
                         .padding(.top, 12)
-                    texts
-                        .padding(.top, 16)
-                    stepList
-                        .padding(.top, 20)
+                    // The title and the steps, centred between the phone
+                    // and the buttons: equal room over and under them,
+                    // never less than 20pt; a step too tall for the screen
+                    // scrolls with those 20pt. (Spacers do not stretch in a
+                    // scroll view, so the room is worked out.)
+                    Color.clear.frame(height: centringGap - opticalShift)
+                    VStack(spacing: 20) {
+                        texts
+                        stepList
+                    }
+                    Color.clear.frame(height: centringGap + opticalShift)
                 }
                 .padding(.horizontal, 24)
-                // As much room over the buttons as the steps have under
-                // the title.
-                .padding(.bottom, 25)
-                // Centred in the room between the progress and the buttons
-                // when it is shorter than that (step 2), so it never sits
-                // high over an empty band; a taller step scrolls as usual.
-                .frame(minHeight: viewportHeight, alignment: .center)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+                    contentHeight = height - 2 * centringGap
+                }
                 .id(step)
                 .transition(reduceMotion ? .opacity : .push(from: .trailing))
             }
             .scrollBounceBehavior(.basedOnSize)
             .onScrollGeometryChange(for: CGFloat.self) { geometry in
-                geometry.containerSize.height - geometry.contentInsets.top - geometry.contentInsets.bottom
+                // The container already stops at the button bar, which
+                // the bottom inset also counts.
+                geometry.containerSize.height - geometry.contentInsets.top
             } action: { _, height in
                 viewportHeight = height
             }
@@ -83,6 +108,9 @@ struct AutoVerificationGuide: View {
         .background(Color.starhashBackground.ignoresSafeArea())
         .navigationTitle("Auto-verify")
         .navigationBarTitleDisplayMode(.inline)
+        // Back on the left steps back through the setup, then leaves it;
+        // close on the right, over onboarding only.
+        .starhashBackAndClose(back: goBack, close: onClose)
         .onChange(of: lastVerifiedAt) { checkVerification() }
         .onChange(of: router.shortcutCallback) { _, callback in
             guard let callback, verification == .waiting else { return }
@@ -291,6 +319,16 @@ struct AutoVerificationGuide: View {
     private func finish() {
         autoVerifySetUp = true
         dismiss()
+    }
+
+    private func goBack() {
+        if step > 0 {
+            goTo(step - 1)
+        } else if let onLeave {
+            onLeave()
+        } else {
+            dismiss()
+        }
     }
 
     private func goTo(_ next: Int) {

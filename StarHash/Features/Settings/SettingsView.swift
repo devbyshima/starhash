@@ -16,7 +16,15 @@ struct SettingsView: View {
                 .navigationTitle("Settings")
                 .navigationBarTitleDisplayMode(.inline)
                 .starhashSideMenuToolbar()
-                .navigationDestination(for: SettingsPage.self) { $0.destination.starhashBackButton() }
+                .navigationDestination(for: SettingsPage.self) { page in
+                    // The setup brings its own back button, which steps
+                    // back through it first.
+                    if page == .autoVerify {
+                        page.destination
+                    } else {
+                        page.destination.starhashBackButton()
+                    }
+                }
         }
         .onChange(of: path.isEmpty, initial: true) { _, isEmpty in
             router.setPushedScreen(!isEmpty, on: .settings)
