@@ -95,6 +95,7 @@ struct AboutStarHashView: View {
                 }
                 .settingsCardRow(.first)
                 Button {
+                    UserDefaults.standard.set(0, forKey: PreferenceKey.onboardingStage)
                     withAnimation(.smooth) { hasOnboarded = false }
                 } label: {
                     SettingsRow(symbol: "play.circle.fill", title: "Replay Onboarding", caption: "See the welcome screens again")

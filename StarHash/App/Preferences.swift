@@ -4,6 +4,9 @@ import Foundation
 /// reads and writes the same key.
 enum PreferenceKey {
     static let hasOnboarded = "hasOnboarded"
+    /// The onboarding screen reached, so a flow left unfinished (the app
+    /// closed or killed partway) picks up there. Cleared when it finishes.
+    static let onboardingStage = "onboardingStage"
     /// Whether the developer note has been seen after onboarding.
     static let hasSeenDeveloperNote = "hasSeenDeveloperNote"
     static let saveTransactions = "saveTransactions"

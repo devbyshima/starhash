@@ -316,6 +316,13 @@ enum SettingsLaunch {
         guard let page, page.hasPrefix("guide"), let n = Int(page.dropFirst(5)) else { return 0 }
         return max(0, min(n - 1, AutoVerificationGuide.stepCount - 1))
     }
+
+    /// `-settingsPage guideFailed|guideVerified`: step 2 with its check
+    /// already failed or passed, for screenshots.
+    static var guideOutcome: String? {
+        guard let page, page == "guideFailed" || page == "guideVerified" else { return nil }
+        return page
+    }
 }
 
 enum SettingsLinks {

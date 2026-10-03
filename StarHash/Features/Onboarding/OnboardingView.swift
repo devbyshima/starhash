@@ -17,6 +17,8 @@ import SwiftUI
 ///      MTN's messages), and last, since setting it up leaves for Shortcuts.
 ///
 /// A screen whose setting is already on (a replay) offers Continue alone.
+/// The screen reached is saved as it changes, so a flow left unfinished
+/// opens again where it was left; finishing clears it.
 /// The tint is StarHash's blue throughout; the wallets show as their logos.
 struct OnboardingView: View {
     let onFinish: () -> Void
@@ -24,7 +26,8 @@ struct OnboardingView: View {
     @AppStorage(PreferenceKey.wallet) private var wallet = ""
     @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
-    @State private var stage = OnboardingLaunch.initialStage
+    @AppStorage(PreferenceKey.onboardingStage) private var savedStage = 0
+    @State private var stage = OnboardingLaunch.initialStage ?? UserDefaults.standard.integer(forKey: PreferenceKey.onboardingStage)
     @State private var setsUpAutoVerify = false
 
     enum Stage: Int {
@@ -82,7 +85,8 @@ struct OnboardingView: View {
         .sensoryFeedback(.impact(weight: .light), trigger: stage)
         // The setup in full, over onboarding; onboarding ends as it closes,
         // set up or not (Settings can switch it on later).
-        .fullScreenCover(isPresented: $setsUpAutoVerify, onDismiss: onFinish) {
+        .onChange(of: stage, initial: true) { _, stage in savedStage = stage }
+        .fullScreenCover(isPresented: $setsUpAutoVerify, onDismiss: finish) {
             AutoVerifySetupCover()
         }
     }
@@ -136,15 +140,22 @@ struct OnboardingView: View {
             description: "Add one shortcut and each M\u{2011}Money message\nconfirms its payment, with the fee.",
             primaryTitle: autoVerifySetUp ? "Continue" : "Set Up",
             primaryAction: {
-                if autoVerifySetUp { onFinish() } else { setsUpAutoVerify = true }
+                if autoVerifySetUp { finish() } else { setsUpAutoVerify = true }
             },
             secondaryTitle: autoVerifySetUp ? nil : "Maybe Later",
-            secondaryAction: onFinish
+            secondaryAction: finish
         )
     }
 
+    /// Done: the next launch starts on the tabs, and a later replay from
+    /// the first screen.
+    private func finish() {
+        savedStage = 0
+        onFinish()
+    }
+
     private func advance() {
-        guard stage < stages.count - 1 else { return onFinish() }
+        guard stage < stages.count - 1 else { return finish() }
         withAnimation(.smooth(duration: 0.45)) { stage += 1 }
     }
 }
@@ -250,15 +261,16 @@ extension View {
 // MARK: - Launch arguments
 
 /// `-onboardingPage 0...4` (DEBUG, with `-resetOnboarding`) starts on that
-/// screen: the reel, the wallet, Contacts, Nearby, auto-verify.
+/// screen: the reel, the wallet, Contacts, Nearby, auto-verify. Without it,
+/// onboarding starts where it was left.
 @MainActor
 enum OnboardingLaunch {
-    static var initialStage: Int {
+    static var initialStage: Int? {
         #if DEBUG
-        let stage = DebugLaunch.value(after: "-onboardingPage").flatMap(Int.init) ?? 0
+        guard let stage = DebugLaunch.value(after: "-onboardingPage").flatMap(Int.init) else { return nil }
         return min(max(stage, 0), OnboardingView.stageCount - 1)
         #else
-        return 0
+        return nil
         #endif
     }
 }

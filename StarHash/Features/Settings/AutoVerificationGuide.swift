@@ -23,12 +23,22 @@ struct AutoVerificationGuide: View {
     @AppStorage(PreferenceKey.lastVerifiedAt) private var lastVerifiedAt: Double = 0
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
 
-    @State private var step = SettingsLaunch.guideStep
+    @State private var step = SettingsLaunch.guideOutcome == nil ? SettingsLaunch.guideStep : 1
     /// Whether Add Shortcut has been tapped, which brings up Continue.
     @State private var didAct = false
     /// `lastVerifiedAt` when Verify Shortcut was tapped; nil before.
     @State private var verifyStartedAt: Double?
-    @State private var verification: Verification = .idle
+    @State private var verification: Verification = Self.launchVerification
+    /// The scroll view's visible height, for centring a short step.
+    @State private var viewportHeight: CGFloat = 0
+
+    private static var launchVerification: Verification {
+        switch SettingsLaunch.guideOutcome {
+        case "guideFailed": .failed
+        case "guideVerified": .verified
+        default: .idle
+        }
+    }
 
     private enum Verification { case idle, waiting, verified, failed }
 
@@ -46,24 +56,26 @@ struct AutoVerificationGuide: View {
                         .padding(.top, 12)
                     texts
                         .padding(.top, 16)
-                    if step == 0 {
-                        GuideStepList(steps: [
-                            "Tap **Add Shortcut** below.",
-                            "In Shortcuts, tap **Add Shortcut**.",
-                            "To run it silently, open **Automation**, tap StarHash SMS and turn off **Notify When Run**.",
-                            "Come back and tap **Continue**.",
-                        ])
+                    stepList
                         .padding(.top, 20)
-                    }
                 }
                 .padding(.horizontal, 24)
                 // As much room over the buttons as the steps have under
                 // the title.
                 .padding(.bottom, 25)
+                // Centred in the room between the progress and the buttons
+                // when it is shorter than that (step 2), so it never sits
+                // high over an empty band; a taller step scrolls as usual.
+                .frame(minHeight: viewportHeight, alignment: .center)
                 .id(step)
                 .transition(reduceMotion ? .opacity : .push(from: .trailing))
             }
             .scrollBounceBehavior(.basedOnSize)
+            .onScrollGeometryChange(for: CGFloat.self) { geometry in
+                geometry.containerSize.height - geometry.contentInsets.top - geometry.contentInsets.bottom
+            } action: { _, height in
+                viewportHeight = height
+            }
             .starhashSoftTopEdge()
             .starhashBottomBar { buttonsBar }
         }
@@ -111,7 +123,7 @@ struct AutoVerificationGuide: View {
                 highlight: CGRect(x: 0.055, y: 0.895, width: 0.89, height: 0.064)
             )
         } else {
-            GuideCardScreenshot(
+            GuideAutomationPhone(
                 imageName: "GuideAutomationOn",
                 label: "Shortcuts' Automation tab: When I get a message containing RWF, run StarHash SMS, switched on",
                 // The switch, on.
@@ -133,35 +145,52 @@ struct AutoVerificationGuide: View {
         }
     }
 
-    /// Step 1 has its numbered steps instead.
-    private var subtitle: String? {
-        switch step {
-        case 0:
-            nil
-        default:
-            switch verification {
-            case .verified: "Every M\u{2011}Money message now logs itself in Activity. In Shortcuts, Automation shows it switched on, as above."
-            case .failed: "Add StarHash SMS first, then try again. In Shortcuts, Automation, make sure it is switched on."
-            default: "StarHash sends a test message through the shortcut and comes straight back. Nothing is saved."
+    /// Both steps say what to do in a card under the title, as numbered
+    /// steps; once verified, what now works, ticked.
+    @ViewBuilder
+    private var stepList: some View {
+        if step == 0 {
+            GuideStepList(steps: [
+                "Tap **Add Shortcut** below.",
+                "In Shortcuts, tap **Add Shortcut**.",
+                "To run it silently, open **Automation**, tap StarHash SMS and turn off **Notify When Run**.",
+                "Come back and tap **Continue**.",
+            ])
+        } else {
+            Group {
+                switch verification {
+                case .verified:
+                    GuideStepList(steps: [
+                        "Every M\u{2011}Money message confirms its payment.",
+                        "Fees and your balance fill in by themselves.",
+                        "Turn it off any time in **Settings**.",
+                    ], symbol: "checkmark")
+                case .failed:
+                    GuideStepList(steps: [
+                        "In Shortcuts, check **StarHash SMS** was added.",
+                        "Open **Automation** and make sure it is switched on, as above.",
+                        "Come back and tap **Try Again**.",
+                    ])
+                default:
+                    GuideStepList(steps: [
+                        "Tap **Verify Shortcut** below.",
+                        "Shortcuts opens and runs **StarHash SMS** on a test message.",
+                        "It comes straight back here. Nothing is saved.",
+                    ])
+                }
             }
+            .id(verification)
+            .transition(.opacity)
         }
     }
 
     private var texts: some View {
-        VStack(spacing: 8) {
-            Text(title)
-                .font(.starhashTitle)
-                .foregroundStyle(Color.starhashPrimaryText)
-                .accessibilityAddTraits(.isHeader)
-                .contentTransition(.opacity)
-            if let subtitle {
-                Text(subtitle)
-                    .font(.starhash(.body))
-                    .foregroundStyle(Color.starhashSecondaryText)
-                    .contentTransition(.opacity)
-            }
-        }
-        .multilineTextAlignment(.center)
+        Text(title)
+            .font(.starhashTitle)
+            .foregroundStyle(Color.starhashPrimaryText)
+            .accessibilityAddTraits(.isHeader)
+            .contentTransition(.opacity)
+            .multilineTextAlignment(.center)
         .fixedSize(horizontal: false, vertical: true)
         .animation(.smooth, value: verification)
     }
@@ -313,40 +342,67 @@ private struct GuidePhoneScreenshot: View {
     }
 }
 
-/// A real screenshot cut to one Shortcuts card, on a rounded card of its
-/// own, with what matters ringed, and a green check on the corner once the
-/// shortcut is verified.
-private struct GuideCardScreenshot: View {
+/// Step 2's picture, in the same phone as step 1's and the same size, so
+/// both steps lay out alike: Shortcuts' dark Automation tab with the real
+/// screenshot of the StarHash SMS automation on it, its switch ringed, and a
+/// green check once the shortcut is verified.
+private struct GuideAutomationPhone: View {
     let imageName: String
     let label: String
     let highlight: CGRect
     var isVerified = false
 
+    @ScaledMetric(relativeTo: .body) private var height: CGFloat = 283
+
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: 24, style: .continuous)
-        Image(imageName)
-            .resizable()
-            .scaledToFit()
-            .overlay { GuideHighlight(rect: highlight, cornerFraction: 0.5) }
-            .clipShape(shape)
-            .overlay(shape.strokeBorder(Color.white.opacity(0.12), lineWidth: 1))
-            .shadow(color: .black.opacity(0.22), radius: 18, y: 8)
-            .overlay(alignment: .topTrailing) {
-                if isVerified {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 34, weight: .semibold))
-                        .symbolRenderingMode(.palette)
-                        .foregroundStyle(Color.starhashOnIncoming, Color.starhashIncoming)
-                        .background(Circle().fill(Color.starhashBackground).padding(2))
-                        .offset(x: 10, y: -10)
-                        .transition(.scale.combined(with: .opacity))
+        let screen = RoundedRectangle(cornerRadius: 26, style: .continuous)
+        let body = RoundedRectangle(cornerRadius: 31, style: .continuous)
+        let phoneHeight = min(height, 420)
+        // Step 1's screenshot's proportions (1206 by 2454).
+        let screenSize = CGSize(width: (phoneHeight - 10) * 1206 / 2454, height: phoneHeight - 10)
+        ZStack(alignment: .top) {
+            Color(white: 0.07)
+            VStack(alignment: .leading, spacing: screenSize.height * 0.03) {
+                // Shortcuts' large title, drawn as the screenshots are.
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Color.white.opacity(0.85))
+                    .frame(width: screenSize.width * 0.5, height: screenSize.height * 0.028)
+                    .padding(.top, screenSize.height * 0.11)
+                Image(imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .overlay { GuideHighlight(rect: highlight, cornerFraction: 0.5) }
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .overlay(alignment: .topTrailing) {
+                        if isVerified {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 22, weight: .semibold))
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(Color.starhashOnIncoming, Color.starhashIncoming)
+                                .background(Circle().fill(Color(white: 0.07)).padding(1))
+                                .offset(x: 6, y: -8)
+                                .transition(.scale.combined(with: .opacity))
+                        }
+                    }
+                // The automations under it, faded: the tab is a list.
+                ForEach(0..<3, id: \.self) { index in
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(Color.white.opacity(0.07 - Double(index) * 0.02))
+                        .frame(height: screenSize.height * 0.1)
                 }
             }
-            .animation(.spring(duration: 0.4, bounce: 0.3), value: isVerified)
-            .frame(maxWidth: 420)
-            .accessibilityElement()
-            .accessibilityLabel(label)
-            .accessibilityAddTraits(.isImage)
+            .padding(.horizontal, screenSize.width * 0.06)
+        }
+        .frame(width: screenSize.width, height: screenSize.height)
+        .clipShape(screen)
+        .padding(5)
+        .background(body.fill(Color(white: 0.09)))
+        .overlay(body.strokeBorder(Color.white.opacity(0.14), lineWidth: 1))
+        .shadow(color: .black.opacity(0.28), radius: 24, y: 12)
+        .animation(.spring(duration: 0.4, bounce: 0.3), value: isVerified)
+        .accessibilityElement()
+        .accessibilityLabel(label)
+        .accessibilityAddTraits(.isImage)
     }
 }
 
@@ -386,17 +442,26 @@ private struct GuideHighlight: View {
 }
 
 /// Numbered steps for the person to follow, in a card: each number in a
-/// small ink disc, the text beside it.
+/// small ink disc, the text beside it. With `symbol`, every disc shows that
+/// symbol instead (a tick for what now works).
 private struct GuideStepList: View {
     let steps: [LocalizedStringKey]
+    var symbol: String?
 
     var body: some View {
         StarHashCard(fill: .starhashCard) {
             ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
                 if index > 0 { StarHashRowSeparator(leading: 54) }
                 HStack(alignment: .firstTextBaseline, spacing: 14) {
-                    Text("\(index + 1)")
-                        .starhashFont(14, weight: .bold, relativeTo: .subheadline)
+                    Group {
+                        if let symbol {
+                            Image(systemName: symbol)
+                                .font(.system(size: 12, weight: .heavy))
+                        } else {
+                            Text("\(index + 1)")
+                                .starhashFont(14, weight: .bold, relativeTo: .subheadline)
+                        }
+                    }
                         .foregroundStyle(Color.starhashOnInk)
                         .frame(width: 24, height: 24)
                         .background(Color.starhashInk, in: Circle())
