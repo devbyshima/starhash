@@ -14,6 +14,9 @@ struct LensGlass: View, Animatable {
     var sideInset: CGFloat
     var lensMinX: CGFloat
     var lensMaxX: CGFloat
+    /// Clear by default, as the tab bar's; nil takes the page's tint, as
+    /// the system-looking glass of the buttons beside the period control.
+    var tint: Color? = .clear
 
     var animatableData: AnimatablePair<CGFloat, AnimatablePair<CGFloat, CGFloat>> {
         get { AnimatablePair(width, AnimatablePair(lensMinX, lensMaxX)) }
@@ -29,18 +32,31 @@ struct LensGlass: View, Animatable {
         let maxX = max(width, lensMaxX + sideInset)
         Color.clear
             .frame(width: maxX - minX, height: height)
-            // Clear glass, not the app's deep-blue tint: GO Club's frosts
-            // whatever is under it.
-            .starhashGlass(in: Capsule(), tint: .clear)
+            .starhashGlass(in: Capsule(), tint: tint)
             .offset(x: minX)
             .allowsHitTesting(false)
     }
 }
 
 /// The lens under the choice showing: the palette's grey, faint, with the
-/// light top edge and dark sides glass has.
+/// light top edge and dark sides glass has (the tab bar's); or, `light`, a
+/// white one with a bright rim, as the system's selection reads on tinted
+/// glass (the period control's).
 struct GlassLens: View {
+    var light = false
+
     var body: some View {
+        if light {
+            Capsule()
+                .fill(Color.segmentedLens)
+                .overlay(Capsule().strokeBorder(Color.segmentedLensEdge, lineWidth: 0.75))
+                .accessibilityHidden(true)
+        } else {
+            greyLens
+        }
+    }
+
+    private var greyLens: some View {
         Capsule()
             .fill(Color.tabBarLens)
             .overlay {

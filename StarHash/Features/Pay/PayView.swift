@@ -56,7 +56,10 @@ struct PayView: View {
             isPresented: Binding(get: { undialledCode != nil }, set: { if !$0 { undialledCode = nil } }),
             presenting: undialledCode
         ) { code in
-            Button("Copy Code") { UIPasteboard.general.string = code }
+            Button("Copy Code") {
+                UIPasteboard.general.string = code
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            }
             Button("OK", role: .cancel) {}
         } message: { code in
             Text("Dial \(code) on your phone to finish.")
@@ -372,7 +375,7 @@ private struct PayChosenRecipient: View {
                     .frame(minWidth: 32, minHeight: 32)
                     .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.hapticPlain)
             .accessibilityLabel("Remove \(recipient.displayName)")
         }
         .padding(.leading, 6)

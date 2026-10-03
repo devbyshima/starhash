@@ -24,6 +24,9 @@ struct SettingsView: View {
                     }
                 }
         }
+        // A light tap as a page opens; the list's rows are not buttons of
+        // ours, so they do not play the press haptic themselves.
+        .sensoryFeedback(.impact(weight: .light), trigger: path.count) { old, new in new > old }
         .onChange(of: path.isEmpty, initial: true) { _, isEmpty in
             router.setHidesTabBar(!isEmpty, on: .settings)
         }
@@ -216,6 +219,7 @@ private struct SettingsRootList: View {
         .settingsListStyle()
         .alert("Are you sure you want to delete all data?", isPresented: $confirmsDeleteAll) {
             Button("Delete", role: .destructive) {
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
                 withAnimation(.smooth) { AppReset.eraseEverything(store: store, router: router) }
             }
             Button("Cancel", role: .cancel) {}

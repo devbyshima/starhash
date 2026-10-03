@@ -59,6 +59,7 @@ private struct PrimaryButtonBody: View {
             .opacity(configuration.isPressed ? 0.9 : 1)
             .animation(.snappy(duration: 0.16), value: configuration.isPressed)
             .animation(.smooth(duration: 0.2), value: isEnabled)
+            .starhashPressHaptic(configuration.isPressed)
     }
 }
 

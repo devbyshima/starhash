@@ -26,7 +26,7 @@ struct WalletSwitcher: View {
                 .animation(.smooth(duration: 0.25), value: wallet)
         }
         .menuOrder(.fixed)
-        .buttonStyle(.plain)
+        .buttonStyle(.hapticPlain)
         .sensoryFeedback(.selection, trigger: wallet)
         .accessibilityLabel("Wallet: \(wallet.walletName)")
         .accessibilityHint("Switches the wallet you pay from")

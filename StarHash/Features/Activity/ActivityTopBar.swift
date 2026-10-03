@@ -71,7 +71,7 @@ struct ActivityTopBar: View {
                         .frame(width: 28, height: 38)
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.hapticPlain)
                 .accessibilityLabel("Clear search")
             }
         }

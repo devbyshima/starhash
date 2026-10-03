@@ -267,6 +267,7 @@ private struct SheetButtonBody: View {
             .opacity(configuration.isPressed ? 0.9 : 1)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.snappy(duration: 0.16), value: configuration.isPressed)
+            .starhashPressHaptic(configuration.isPressed)
     }
 }
 
@@ -302,6 +303,6 @@ struct SheetTextButton: View {
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.hapticPlain)
     }
 }

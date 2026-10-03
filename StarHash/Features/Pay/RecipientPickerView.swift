@@ -243,7 +243,6 @@ struct RecipientPickerView: View {
             }
         }
         .sensoryFeedback(.impact(weight: .medium), trigger: hasPaid)
-        .sensoryFeedback(.selection, trigger: isSearching)
     }
 
     // MARK: Header
@@ -322,7 +321,7 @@ struct RecipientPickerView: View {
                         .frame(width: 28, height: 38)
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.hapticPlain)
                 .accessibilityLabel("Clear search")
             }
         }

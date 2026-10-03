@@ -5,6 +5,9 @@ import SwiftUI
 struct SwapGlassButton: View {
     let symbol: String
     let label: String
+    /// Off where the action plays its own (the Pay and Buy switcher's page
+    /// change).
+    var pressHaptic = true
     let action: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -23,7 +26,7 @@ struct SwapGlassButton: View {
             }
             .starhashCircleButton()
         }
-        .buttonStyle(.plain)
+        .buttonStyle(HapticPlainButtonStyle(weight: pressHaptic ? .light : nil))
         .accessibilityLabel(label)
     }
 }

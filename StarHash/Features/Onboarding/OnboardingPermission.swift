@@ -66,7 +66,7 @@ struct OnboardingPermission: View {
                             .frame(minHeight: 44)
                             .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.hapticPlain)
                 }
             }
             .frame(height: 270)

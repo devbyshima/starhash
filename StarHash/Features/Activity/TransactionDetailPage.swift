@@ -170,7 +170,8 @@ struct TransactionDetailPage: View {
             .starhashGlass(interactive: true)
         }
         .menuOrder(.fixed)
-        .buttonStyle(.plain)
+        .buttonStyle(.hapticPlain)
+        .sensoryFeedback(.selection, trigger: transaction.category)
         .accessibilityLabel("Category")
         .accessibilityValue(category?.title ?? customTitle ?? "None")
     }

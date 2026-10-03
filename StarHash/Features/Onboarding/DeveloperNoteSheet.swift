@@ -96,7 +96,7 @@ struct DeveloperNoteContent: View {
                             .frame(maxWidth: .infinity, minHeight: 64)
                             .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.hapticPlain)
                     .accessibilityHint("Opens a new message to Shima on GitHub")
                 }
             }
@@ -184,7 +184,7 @@ private struct NoteSheetFrame<Content: View>: View {
                         .frame(width: 44, height: 44)
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.hapticPlain)
                 .accessibilityLabel("Close")
             }
             .padding(.horizontal, 16)

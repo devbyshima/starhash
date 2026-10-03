@@ -93,10 +93,16 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   width change rides the spring; never let the page re-centre it, or the
   symbols jump on the first frame of a switch. Page changes play
   `NavigationHaptics` (two layers on the switch, a thump and a rumble; none for the lens's
-  bounce), never a plain `sensoryFeedback`. It and Activity's period control
-  (`GlassSegmentedControl`, built on the same `LensGlass`, `GlassLens` and
-  `LensMotion`) are the only glass with no tint: clear Liquid Glass, as
-  the reference's. Root pages leave room for it with
+  bounce), never a plain `sensoryFeedback`. It is the only glass with no tint: clear
+  Liquid Glass, as the reference's. Activity's period control
+  (`GlassSegmentedControl`) moves as it does, on the same `LensGlass` and
+  `LensMotion`, but in the page's tinted glass with a light lens, as the
+  search button beside it, and plays the system's selection tick.
+- Every button is felt as it goes down: the shared button styles play an
+  impact (`starhashPressHaptic`; medium for Pay, Balance, Continue and a
+  sheet's button, light for round glass buttons and rows), and a plain
+  button uses `.hapticPlain`, never `.plain`. Don't add a second haptic
+  for the same tap. Root pages leave room for it with
   `starhashTabBarClearance()`, scroll views shrink it with
   `starhashTabBarFollowsScroll()`, and a page hides it with
   `router.setHidesTabBar(_:on:)` while a screen is pushed or a search is

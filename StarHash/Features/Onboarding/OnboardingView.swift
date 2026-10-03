@@ -84,7 +84,6 @@ struct OnboardingView: View {
                     .transition(.opacity)
             }
         }
-        .sensoryFeedback(.impact(weight: .light), trigger: stage)
         .onChange(of: stage, initial: true) { _, stage in savedStage = stage }
         // The setup in full, over onboarding. Done or closed, onboarding
         // ends, set up or not (Settings can switch it on later); back from

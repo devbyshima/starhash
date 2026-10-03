@@ -28,7 +28,7 @@ struct StarHashCircleButton: View {
         Button(action: action) {
             StarHashCircleGlyph(symbol: symbol)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.hapticPlain)
         .accessibilityLabel(label)
         // A checkmark glyph would otherwise make VoiceOver say "selected".
         .accessibilityRemoveTraits(.isSelected)
@@ -87,6 +87,7 @@ struct HighlightRowButtonStyle: ButtonStyle {
         configuration.label
             .background(Color.starhashPrimaryText.opacity(configuration.isPressed ? 0.06 : 0))
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+            .starhashPressHaptic(configuration.isPressed, weight: .light)
     }
 }
 
@@ -112,6 +113,7 @@ struct StarHashCapsuleButtonStyle: ButtonStyle {
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
             .opacity(configuration.isPressed ? 0.8 : 1)
             .animation(.snappy(duration: 0.2), value: configuration.isPressed)
+            .starhashPressHaptic(configuration.isPressed, weight: .light)
     }
 }
 
@@ -149,5 +151,6 @@ struct PressScaleButtonStyle: ButtonStyle {
             .scaleEffect(configuration.isPressed ? 0.94 : 1)
             .opacity(configuration.isPressed ? 0.85 : 1)
             .animation(.snappy(duration: 0.18), value: configuration.isPressed)
+            .starhashPressHaptic(configuration.isPressed)
     }
 }

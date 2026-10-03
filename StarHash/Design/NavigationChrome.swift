@@ -41,7 +41,7 @@ private struct StarHashBackButton: ViewModifier {
                 Button { dismiss() } label: {
                     StarHashCircleGlyph(symbol: "chevron.left")
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.hapticPlain)
                 .accessibilityLabel("Back")
             }
             .background(SwipeBackEnabler())
@@ -59,7 +59,7 @@ private struct BackAndClose: ViewModifier {
                 Button(action: back) {
                     StarHashCircleGlyph(symbol: "chevron.left")
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.hapticPlain)
                 .accessibilityLabel("Back")
             }
             .trailingBarButton {
@@ -67,7 +67,7 @@ private struct BackAndClose: ViewModifier {
                     Button(action: close) {
                         StarHashCircleGlyph(symbol: "xmark")
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.hapticPlain)
                     .accessibilityLabel("Close")
                 }
             }

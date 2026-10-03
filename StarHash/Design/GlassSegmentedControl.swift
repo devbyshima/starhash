@@ -2,11 +2,12 @@ import SwiftUI
 
 /// GO Club's period control, measured from its screen recording (a capsule
 /// 41pt tall of short labels 41pt apart, 16pt medium, over a lens 34pt
-/// tall), in the tab bar's Liquid Glass and with its motion: clear glass,
-/// the grey lens, a spring that overshoots about a tenth and settles,
-/// stretching the glass when it overshoots an end, and the tab bar's heavy
-/// haptic on a change. A finger dragged along it carries the lens and
-/// chooses wherever it lets go.
+/// tall), in the same glass as the search button beside it, the page's
+/// tinted Liquid Glass, so it looks the system's own, with a light lens.
+/// It moves as the tab bar does: a spring that overshoots about a tenth and
+/// settles, stretching the glass when it overshoots an end. A change plays
+/// the system's selection tick. A finger dragged along it carries the lens
+/// and chooses wherever it lets go.
 struct GlassSegmentedControl<Value: Hashable>: View {
     let options: [Value]
     let selection: Value
@@ -33,10 +34,11 @@ struct GlassSegmentedControl<Value: Hashable>: View {
                 height: Metrics.height,
                 sideInset: Metrics.inset,
                 lensMinX: lensCenter - Metrics.segment / 2,
-                lensMaxX: lensCenter + Metrics.segment / 2
+                lensMaxX: lensCenter + Metrics.segment / 2,
+                tint: nil
             )
 
-            GlassLens()
+            GlassLens(light: true)
                 .frame(width: Metrics.segment, height: Metrics.lensHeight)
                 .offset(x: lensCenter - Metrics.segment / 2, y: (Metrics.height - Metrics.lensHeight) / 2)
 
@@ -51,7 +53,7 @@ struct GlassSegmentedControl<Value: Hashable>: View {
         .animation(dragX == nil ? LensMotion.spring(reduceMotion: reduceMotion) : .interactiveSpring(response: 0.18), value: lensCenter)
         .contentShape(Capsule())
         .gesture(choosing)
-        .onAppear { NavigationHaptics.shared.prepare() }
+        .sensoryFeedback(.selection, trigger: selection)
         .accessibilityElement(children: .contain)
     }
 
@@ -98,11 +100,9 @@ struct GlassSegmentedControl<Value: Hashable>: View {
             }
     }
 
-    /// Another choice, with the tab bar's haptic; the one showing does
-    /// nothing.
+    /// Another choice; the one showing does nothing.
     private func choose(_ option: Value) {
         guard option != selection else { return }
-        NavigationHaptics.shared.switchPage()
         onSelect(option)
     }
 }

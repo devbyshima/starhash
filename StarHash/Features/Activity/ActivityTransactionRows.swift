@@ -146,5 +146,6 @@ private struct ActivityRowButtonStyle: ButtonStyle {
                     .allowsHitTesting(false)
             }
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+            .starhashPressHaptic(configuration.isPressed, weight: .light)
     }
 }

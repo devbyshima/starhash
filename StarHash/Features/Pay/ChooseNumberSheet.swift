@@ -86,7 +86,7 @@ struct RecipientNumberRow: View {
             .padding(.vertical, 11)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.hapticPlain)
         .accessibilityElement(children: .combine)
     }
 
