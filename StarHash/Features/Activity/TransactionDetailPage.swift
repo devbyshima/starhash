@@ -301,7 +301,7 @@ struct TransactionDetailPage: View {
                 Button("Mark as Confirmed") { markConfirmed(transaction) }
                     .buttonStyle(.sheetFilled)
             }
-            SheetTextButton("Delete Transaction", role: .destructive, onPage: true) {
+            SheetTextButton("Delete Transaction", role: .destructive) {
                 requestDelete(transaction)
             }
         }
