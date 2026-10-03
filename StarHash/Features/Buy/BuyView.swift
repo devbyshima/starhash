@@ -142,7 +142,7 @@ struct BuyView: View {
                                 Button(shortcuts.canPin ? "Pin" : "Pinned is full", systemImage: "pin") { afterMenu { pin(shortcut, true) } }
                                     .disabled(!shortcuts.canPin)
                                 Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
-                                Button("Delete", systemImage: "trash", role: .destructive) { afterMenu { delete(shortcut) } }
+                                Button(role: .destructive) { afterMenu { delete(shortcut) } } label: { DestructiveMenuLabel("Delete") }
                             }
                             .accessibilityAction(named: "Pin") { pin(shortcut, true) }
                             .accessibilityAction(named: "Delete") { delete(shortcut) }
@@ -190,7 +190,7 @@ struct BuyView: View {
                         Button("Unpin", systemImage: "pin.slash") { afterMenu { pin(shortcut, false) } }
                         Button("Details", systemImage: "info.circle") { details = shortcut }
                         Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
-                        Button("Delete", systemImage: "trash", role: .destructive) { afterMenu { delete(shortcut) } }
+                        Button(role: .destructive) { afterMenu { delete(shortcut) } } label: { DestructiveMenuLabel("Delete") }
                     }
                     // Dragged to a new place: lifted by the system's drag,
                     // which a long press with no movement leaves to the

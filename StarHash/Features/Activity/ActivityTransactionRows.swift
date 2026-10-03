@@ -44,7 +44,7 @@ struct ActivityTransactionRows: View {
                 Button(role: .destructive) {
                     onDelete(transaction)
                 } label: {
-                    Label("Delete", systemImage: "trash")
+                    DestructiveMenuLabel("Delete")
                 }
             }
             // Outside the button, so a lifted row does not carry it.

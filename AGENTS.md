@@ -79,7 +79,9 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 - Every delete button StarHash draws is `DeleteButton`: the blood red
   capsule with a bin and white words, full width in sheets and pages, the
   width of its words for Delete All Data. Menus, swipes and confirmation
-  alerts stay the system's own.
+  alerts stay the system's own, but a destructive menu item's icon is red
+  with its words (`DestructiveMenuLabel`), never a black bin beside a red
+  "Delete".
 - Every separator is dashed, GO Club's 3pt on and 3pt off: `SheetDivider`,
   or `StarHashRowSeparator` (which draws it with insets). Settings lists
   hide the system's solid lines and `settingsCardRow` draws the dashed one

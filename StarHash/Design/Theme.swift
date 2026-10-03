@@ -350,3 +350,35 @@ extension Font.TextStyle {
         }
     }
 }
+
+extension Image {
+    /// A destructive menu item's icon, in the same red as its words. Menus
+    /// draw an item's icon as a template in the text colour, so a red
+    /// "Delete" sat beside a black bin; this one is coloured beforehand,
+    /// in the system red the menu gives the words (light and dark alike),
+    /// and kept as drawn.
+    static func destructiveMenuIcon(_ systemName: String) -> Image {
+        guard let symbol = UIImage(systemName: systemName) else { return Image(systemName: systemName) }
+        return Image(uiImage: symbol.withTintColor(.systemRed, renderingMode: .alwaysOriginal))
+    }
+}
+
+/// A destructive menu item with its icon red to match its words: "Delete"
+/// in a long-press menu.
+struct DestructiveMenuLabel: View {
+    let title: String
+    var systemImage = "trash"
+
+    init(_ title: String, systemImage: String = "trash") {
+        self.title = title
+        self.systemImage = systemImage
+    }
+
+    var body: some View {
+        Label {
+            Text(title)
+        } icon: {
+            Image.destructiveMenuIcon(systemImage)
+        }
+    }
+}
