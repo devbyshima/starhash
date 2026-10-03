@@ -1,91 +1,136 @@
 import SwiftUI
 import UIKit
 
-/// StarHash, like Keaser, is monochrome and follows the system appearance. Dark: black
-/// canvas, charcoal cards, white ink. Light: pale grey canvas, white cards,
-/// black ink. "Ink" is the one accent: chart bars, the add button, primary
-/// buttons. Every colour in the app comes from here, and each one resolves
-/// per appearance, so nothing else needs to know which mode is on.
+/// StarHash follows the system appearance in four colours: the brand blue
+/// #05A9F4, the pale grey #F4F4F4, the near black #171717 and the grey
+/// #616161, plus variations of them where contrast needs one. Light: Pay
+/// is the blue, as Cash App's keypad is its green, and every other page is
+/// the pale grey with white cards and near-black text. Dark: every page,
+/// Pay too, is the near black, with lifted charcoal cards, pale grey text
+/// and the blue as the accent. Each colour resolves per appearance, so
+/// nothing else needs to know which mode is on.
 extension Color {
-    /// Screen background: pure black, or the reference's pale grey.
-    static let starhashBackground = Color(light: .init(white: 245 / 255), dark: .black)
-    /// Cards, list rows, the chart panel.
-    static let starhashCard = Color(light: .white, dark: .init(red: 28 / 255, green: 28 / 255, blue: 30 / 255))
+    // MARK: The palette, exactly as given
+
+    static let brandBlue = Color(red: 5 / 255, green: 169 / 255, blue: 244 / 255)
+    static let brandPaper = Color(white: 244 / 255)
+    static let brandNight = Color(white: 23 / 255)
+    static let brandGrey = Color(white: 97 / 255)
+
+    // MARK: Pages
+
+    /// Screen background: the pale grey, or the near black.
+    static let starhashBackground = Color(light: .brandPaper, dark: .brandNight)
+    /// Pay's background, the brand screen: the blue, or the near black.
+    static let starhashPayBackground = Color(light: .brandBlue, dark: .brandNight)
+    /// Cards, list rows, the chart panel: white on the pale grey, and the
+    /// near black lifted a step so a card reads on its page.
+    static let starhashCard = Color(light: .white, dark: .init(white: 38 / 255))
     /// Controls sitting on a card (icon tiles, date pill, text fields).
-    static let starhashCardRaised = Color(light: .init(white: 242 / 255), dark: .init(red: 44 / 255, green: 44 / 255, blue: 46 / 255))
+    static let starhashCardRaised = Color(light: .brandPaper, dark: .init(white: 52 / 255))
     /// Hairlines between rows.
-    static let starhashSeparator = Color(light: .black.opacity(0.1), dark: .white.opacity(0.12))
-    /// Hairlines between the rows of a settings list. The reference draws
-    /// them fainter on its dark cards than the ones in sheets such as New
-    /// Expense; light mode is the same as `starhashSeparator`.
-    static let starhashListSeparator = Color(light: .black.opacity(0.1), dark: .white.opacity(0.08))
-    static let starhashPrimaryText = Color(light: .black, dark: .white)
-    static let starhashSecondaryText = Color(light: .init(white: 0.45), dark: .init(white: 0.56))
-    static let starhashTertiaryText = Color(light: .init(white: 0.68), dark: .init(white: 0.36))
-    /// Section titles and the small print under settings cards: the cool
-    /// grey the reference uses there, a little lighter than
-    /// `starhashSecondaryText` in light mode. Row values stay secondary.
-    static let starhashCaptionText = Color(
-        light: .init(red: 122 / 255, green: 121 / 255, blue: 128 / 255),
-        dark: .init(red: 142 / 255, green: 141 / 255, blue: 148 / 255)
-    )
-    static let starhashDestructive = Color(red: 1, green: 0.27, blue: 0.23)
-    /// Money coming in: the one hue besides ink, used only on received
-    /// amounts and the incoming arrow.
-    static let starhashIncoming = Color(light: .init(red: 0.11, green: 0.6, blue: 0.3), dark: .init(red: 0.3, green: 0.85, blue: 0.48))
+    static let starhashSeparator = Color(light: .brandNight.opacity(0.1), dark: .brandPaper.opacity(0.12))
+    /// Hairlines between the rows of a settings list, a little fainter on
+    /// dark cards; light mode is the same as `starhashSeparator`.
+    static let starhashListSeparator = Color(light: .brandNight.opacity(0.1), dark: .brandPaper.opacity(0.08))
 
-    /// The accent: chart bars, the add button, primary and capsule buttons,
-    /// a filled confirm check. White in dark mode, black in light mode.
-    static let starhashInk = Color(light: .black, dark: .white)
-    /// Text and glyphs drawn on `starhashInk`.
-    static let starhashOnInk = Color(light: .white, dark: .black)
+    // MARK: Text
 
-    /// Letters a search matched, in the wallet's colour: MTN's yellow is
-    /// darkened on a light page, where the bright one would not read.
-    static let pickerMatchMTN = Color(light: .init(red: 0.62, green: 0.47, blue: 0), dark: .init(red: 1, green: 203 / 255, blue: 5 / 255))
-    static let pickerMatchAirtel = Color(light: .init(red: 0.8, green: 0, blue: 0), dark: .init(red: 1, green: 0.3, blue: 0.3))
+    static let starhashPrimaryText = Color(light: .brandNight, dark: .brandPaper)
+    /// The grey: #616161 on light pages (5.6:1 on the pale grey). On the
+    /// near black that grey reads at under 3:1, so dark mode lifts it
+    /// (7.4:1 on the page, 4.5:1 or more on its cards and glass).
+    static let starhashSecondaryText = Color(light: .brandGrey, dark: .init(white: 166 / 255))
+    /// Placeholders and muted marks, still 3:1 on their page.
+    static let starhashTertiaryText = Color(light: .init(white: 138 / 255), dark: .init(white: 117 / 255))
+    /// Section titles and the small print under settings cards.
+    static let starhashCaptionText = Color(light: .brandGrey, dark: .init(white: 166 / 255))
+    /// Money going out and destructive actions: one of the two hues besides
+    /// the blue, each AA on every card it sits on.
+    static let starhashDestructive = Color(light: .init(red: 0.84, green: 0.16, blue: 0.13), dark: .init(red: 1, green: 110 / 255, blue: 100 / 255))
+    /// Money coming in: the other hue, only on received amounts, the
+    /// incoming arrow and a confirmed status.
+    static let starhashIncoming = Color(light: .init(red: 16 / 255, green: 120 / 255, blue: 56 / 255), dark: .init(red: 0.3, green: 0.85, blue: 0.48))
+    /// Drawn on `starhashIncoming` (the verified tick).
+    static let starhashOnIncoming = Color(light: .white, dark: .brandNight)
 
-    /// Sheets, in Beam's colours: the solid surface cards sit on, the grey
-    /// of secondary text, and the fill of a filled button that is not the
-    /// accent.
-    static let sheetSurface = Color(light: .init(red: 251 / 255, green: 252 / 255, blue: 248 / 255),
-                                    dark: .init(red: 26 / 255, green: 26 / 255, blue: 26 / 255))
-    static let sheetSecondaryText = Color(light: .init(red: 116 / 255, green: 117 / 255, blue: 113 / 255),
-                                          dark: .init(red: 170 / 255, green: 172 / 255, blue: 167 / 255))
-    static let sheetFilledButton = Color(light: .init(red: 38 / 255, green: 38 / 255, blue: 38 / 255),
-                                         dark: .init(red: 233 / 255, green: 235 / 255, blue: 229 / 255))
+    // MARK: Text on Pay
+
+    /// Pay's text: near black on the blue (6.8:1), pale grey on the near
+    /// black.
+    static let payPrimaryText = Color(light: .brandNight, dark: .brandPaper)
+    /// Pay's quieter text: the near black let through to the blue at 4.5:1.
+    static let paySecondaryText = Color(light: .brandNight.opacity(0.78), dark: .init(white: 166 / 255))
+    /// The amount's zero, a placeholder: 3:1, as large text needs.
+    static let payPlaceholderText = Color(light: .brandNight.opacity(0.6), dark: .init(white: 117 / 255))
+    /// Pay's primary button: on the blue it turns over, near black with
+    /// blue text (6.8:1); on the near black it is the blue with near-black
+    /// text, as everywhere else.
+    static let payButtonFill = Color(light: .brandNight, dark: .brandBlue)
+    static let payButtonLabel = Color(light: .brandBlue, dark: .brandNight)
+    /// The keypad's accent, the puff at the top of each blob of ink and
+    /// the flash of a pressed digit: the pale grey on the blue, so a press
+    /// leaves a clean white cloud (a dark puff read as a smudge), and the
+    /// blue glowing on the near black.
+    static let payKeypadAccent = Color(light: .brandPaper, dark: .brandBlue)
+    /// Glass on the blue, tinted a deeper blue so it reads as a darker
+    /// shade of the page rather than a pale (or, with a grey tint, teal)
+    /// hole; untinted on the near black.
+    static let payGlassTint = Color(light: Color(red: 0, green: 110 / 255, blue: 176 / 255).opacity(0.55), dark: .clear)
+    /// The pressed digit's flash: the text colour itself on the blue (a
+    /// pale flash vanished into the white puff), the blue on the near
+    /// black.
+    static let payKeypadFlash = Color(light: .brandNight, dark: .brandBlue)
+    /// A held key's bubble: white on the blue; on the near black, the grey
+    /// the shader's blob starts from, where a white disc would glare.
+    static let payKeyBubble = Color(light: .white, dark: .init(white: 77 / 255))
+    /// Pills and pressed discs on Pay.
+    static let payWash = Color(light: .brandNight.opacity(0.1), dark: .brandPaper.opacity(0.08))
+
+    // MARK: The accent
+
+    /// The accent as a fill: primary buttons, chart bars, a filled check,
+    /// switches. The blue in both appearances.
+    static let starhashInk = Color.brandBlue
+    /// Text and glyphs drawn on `starhashInk`: the near black (6.8:1).
+    static let starhashOnInk = Color.brandNight
+    /// The accent as text, which the bright blue cannot be on light pages
+    /// (2.4:1 on the pale grey): a deeper blue there (5.0:1 on the pale
+    /// grey, 5.4:1 on white), the blue itself on the near black (6.8:1).
+    static let starhashAccentText = Color(light: .init(red: 0, green: 110 / 255, blue: 176 / 255), dark: .brandBlue)
+    /// The accent as a graphic that has to read against its page (chart
+    /// bars, switch tracks, a selection ring, progress): a step deeper
+    /// than the blue in light mode for 3:1 on white and the pale grey, the
+    /// blue itself in dark mode.
+    static let starhashAccentGraphic = Color(light: .init(red: 4 / 255, green: 132 / 255, blue: 195 / 255), dark: .brandBlue)
+
+    /// Letters a search matched: the accent as text.
+    static let pickerMatch = Color.starhashAccentText
+
+    /// Sheets: the solid surface cards sit on (the pale grey, or the near
+    /// black lifted a little less than a card), the grey of secondary text,
+    /// and the fill of a filled button that is not the accent.
+    static let sheetSurface = Color(light: .brandPaper, dark: .init(white: 28 / 255))
+    static let sheetSecondaryText = Color(light: .brandGrey, dark: .init(white: 166 / 255))
+    static let sheetFilledButton = Color(light: .brandNight, dark: .brandPaper)
+    /// The tint of a sheet's glass: the page colour let mostly through, so
+    /// the glass still refracts but reads as the pale grey or near black.
+    static let sheetGlassTint = Color(light: .brandPaper.opacity(0.75), dark: .brandNight.opacity(0.6))
     /// The dotted line between a sheet card's rows.
-    static let sheetDivider = Color(light: .black.opacity(0.22), dark: .white.opacity(0.22))
+    static let sheetDivider = Color(light: .brandNight.opacity(0.22), dark: .brandPaper.opacity(0.22))
 
-    /// The wallets' colours, which fill the primary buttons once a wallet
-    /// is chosen (`PrimaryButtonStyle`), so Pay says which wallet pays:
-    /// MTN's yellow with dark text, Airtel's red with white.
+    /// The wallets' own colours, kept for the carriers' marks (the logos
+    /// carry them); StarHash's buttons are the blue whichever wallet pays.
     static let starhashMTN = Color(red: 1, green: 203 / 255, blue: 5 / 255)
     static let starhashOnMTN = Color(white: 0.08)
     static let starhashAirtel = Color(red: 228 / 255, green: 0, blue: 0)
     static let starhashOnAirtel = Color.white
 
     /// Large empty-state symbols ("No Expenses") and other muted icons.
-    static let starhashMutedIcon = Color(light: .init(white: 0.55), dark: .init(white: 0.62))
+    static let starhashMutedIcon = Color(light: .init(white: 138 / 255), dark: .init(white: 130 / 255))
     /// The close (xmark) glyph: grey and lighter in weight than the other
-    /// header glyphs (back, add, confirm), as in the reference. It lets the
-    /// glass behind it through, as the reference's does on every sheet
-    /// (Accounts, Settings, the paywall, the welcome letter): a grey of 143
-    /// measures 100 on a 51 circle and 106 on a 64 one in dark mode, 168 on
-    /// 230 and 176 on 249 in light mode.
-    static let starhashCloseGlyph = Color(
-        light: Color(white: 0.56).opacity(0.7),
-        dark: Color(white: 0.56).opacity(0.53)
-    )
-    /// Behind a row's non-destructive swipe action (Edit), whose label the
-    /// system draws white: a grey dark enough for that in both appearances.
-    static let starhashSwipeAction = Color(light: .init(white: 0.45), dark: .init(white: 0.32))
-    /// Labels and symbols on the shortcut's expense card: the system's
-    /// secondary label over its card, which the reference card uses
-    /// (measured 0.52 to 0.54 in light mode against 0.45 for
-    /// `starhashSecondaryText`), in both appearances.
-    static let starhashSnippetLabel = Color(light: .init(white: 0.54), dark: .init(white: 0.6))
-
+    /// header glyphs (back, add, confirm).
+    static let starhashCloseGlyph = Color.starhashSecondaryText
 
     /// One colour per appearance, resolved by the system whenever the
     /// appearance changes.

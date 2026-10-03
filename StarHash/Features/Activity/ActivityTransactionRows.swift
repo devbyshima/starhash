@@ -139,7 +139,7 @@ private struct ActivityRowButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .overlay {
-                ActivityCardRowBackground(position: position, fill: .starhashInk.opacity(configuration.isPressed ? 0.06 : 0))
+                ActivityCardRowBackground(position: position, fill: .starhashPrimaryText.opacity(configuration.isPressed ? 0.06 : 0))
                     .allowsHitTesting(false)
             }
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)

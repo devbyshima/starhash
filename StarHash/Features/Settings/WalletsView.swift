@@ -39,10 +39,9 @@ struct WalletsView: View {
             Section {
                 SettingsSectionTitle("Coming soon")
                 ForEach(Array(upcoming.enumerated()), id: \.offset) { index, wallet in
-                    SettingsRow(symbol: wallet.symbol, title: wallet.name) {
+                    SettingsRow(symbol: wallet.symbol, title: wallet.name, muted: true) {
                         SettingsBadge(text: "Coming soon")
                     }
-                    .opacity(0.55)
                     .accessibilityElement(children: .combine)
                     .accessibilityAddTraits(.isStaticText)
                     .settingsCardRow(SettingsCardPosition(index: index, count: upcoming.count))

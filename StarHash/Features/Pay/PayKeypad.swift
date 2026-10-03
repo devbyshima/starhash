@@ -13,7 +13,7 @@ struct PayAmountDisplay: View {
             .starhashFont(96, weight: .bold, design: .rounded, relativeTo: .largeTitle)
             .monospacedDigit()
             .contentTransition(.numericText(value: Double(amount)))
-            .foregroundStyle(amount == 0 ? Color.starhashTertiaryText : Color.starhashPrimaryText)
+            .foregroundStyle(amount == 0 ? Color.payPlaceholderText : Color.payPrimaryText)
             .lineLimit(1)
             // "10,000,000" at the largest text sizes still fits one line.
             .minimumScaleFactor(0.3)
@@ -42,14 +42,16 @@ struct PayCurrencyPill: View {
             } else {
                 Text(Money.currency)
                     .starhashFont(15, weight: .semibold, relativeTo: .subheadline)
-                    .foregroundStyle(Color.starhashSecondaryText)
+                    // Full strength: on the pill's wash the quieter tone
+                    // falls under 4.5:1.
+                    .foregroundStyle(Color.payPrimaryText)
                     .transition(transition)
             }
         }
         .padding(.horizontal, 16)
         // One height for both, so the pill does not jump as it switches.
         .frame(minWidth: 72, minHeight: 36)
-        .background(Color.starhashPrimaryText.opacity(0.08), in: Capsule())
+        .background(Color.payWash, in: Capsule())
         .animation(.smooth(duration: 0.25), value: isEmpty)
         // The amount already reads out with its currency.
         .accessibilityHidden(true)
@@ -75,7 +77,7 @@ struct PayKeypad: View {
     /// and says whether anything changed.
     let onKey: (AmountInput.Key) -> Bool
     var canClear: Bool
-    /// The accent: the main wallet's colour.
+    /// The accent the ink puffs and the digits flash in.
     var tint: Color
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -120,7 +122,7 @@ struct PayKeypad: View {
                     } else {
                         Text(".")
                             .starhashFont(30, weight: .semibold, relativeTo: .title2)
-                            .foregroundStyle(Color.starhashSecondaryText)
+                            .foregroundStyle(Color.paySecondaryText)
                             // Up from the baseline to sit level with the digits.
                             .offset(y: -6)
                     }
@@ -144,7 +146,7 @@ struct PayKeypad: View {
                 })
             }
         }
-        .foregroundStyle(Color.starhashPrimaryText)
+        .foregroundStyle(Color.payPrimaryText)
         .onGeometryChange(for: CGSize.self) { $0.size } action: { size = $0 }
         .background {
             PayInkLayer(drops: drops, tint: tint, radius: bubbleSize / 2)
@@ -177,7 +179,7 @@ struct PayKeypad: View {
         } label: {
             label()
                 // The flash is the accent a little faded, as in the reference.
-                .foregroundStyle(tintedKey == key ? AnyShapeStyle(tint.opacity(0.75)) : AnyShapeStyle(Color.starhashPrimaryText))
+                .foregroundStyle(tintedKey == key ? AnyShapeStyle(Color.payKeypadFlash.opacity(0.75)) : AnyShapeStyle(Color.payPrimaryText))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .frame(minHeight: 64)
                 .contentShape(Rectangle())
@@ -185,7 +187,7 @@ struct PayKeypad: View {
         .buttonStyle(KeypadKeyStyle(
             bubbleSize: bubbleSize,
             // The grey the shader's blob starts from on black.
-            bubbleFill: colorScheme == .dark ? Color(white: 0.3) : .white,
+            bubbleFill: .payKeyBubble,
             reduceMotion: reduceMotion
         ))
     }
@@ -240,7 +242,7 @@ private struct KeypadKeyStyle: ButtonStyle {
             configuration.label
                 .background {
                     Circle()
-                        .fill(Color.starhashInk.opacity(configuration.isPressed ? 0.08 : 0))
+                        .fill(Color.payWash.opacity(configuration.isPressed ? 1 : 0))
                         .frame(width: 76, height: 76)
                 }
                 .scaleEffect(configuration.isPressed ? 0.92 : 1)

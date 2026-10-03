@@ -6,17 +6,10 @@ import SwiftUI
 
 extension View {
     /// Glass behind this view, clipped to `shape`. `tint` colours the glass
-    /// (pass it with its opacity); before iOS 26 it is laid over the material.
-    @ViewBuilder
+    /// (pass it with its opacity), or else the page's `starhashGlassTint`;
+    /// before iOS 26 it is laid over the material.
     func starhashGlass(in shape: some Shape, interactive: Bool = false, tint: Color? = nil) -> some View {
-        if #available(iOS 26.0, *) {
-            self.glassEffect(Glass.regular.tint(tint).interactive(interactive), in: shape)
-        } else {
-            self
-                .background(tint ?? .clear, in: shape)
-                .background(.ultraThinMaterial, in: shape)
-                .overlay(shape.stroke(Color.starhashInk.opacity(0.10), lineWidth: 0.5))
-        }
+        modifier(StarHashGlassModifier(shape: shape, interactive: interactive, tint: tint))
     }
 
     /// Capsule glass, the shape of every toolbar control in the reference.
@@ -32,6 +25,36 @@ extension View {
             self.buttonStyle(.glass)
         } else {
             self.buttonStyle(FallbackGlassButtonStyle())
+        }
+    }
+}
+
+extension EnvironmentValues {
+    /// A tint for every glass shape on a page that sets one: Pay's blue
+    /// would otherwise turn the glass a pale cyan.
+    @Entry var starhashGlassTint: Color?
+    /// On Pay's page, the blue in light mode, where the pages' greys turn
+    /// muddy: views that sit on both (a recipient's tile) switch to Pay's
+    /// text colours.
+    @Entry var starhashOnPay = false
+}
+
+private struct StarHashGlassModifier<S: Shape>: ViewModifier {
+    let shape: S
+    let interactive: Bool
+    let tint: Color?
+
+    @Environment(\.starhashGlassTint) private var pageTint
+
+    func body(content: Content) -> some View {
+        let tint = tint ?? pageTint
+        if #available(iOS 26.0, *) {
+            content.glassEffect(Glass.regular.tint(tint).interactive(interactive), in: shape)
+        } else {
+            content
+                .background(tint ?? .clear, in: shape)
+                .background(.ultraThinMaterial, in: shape)
+                .overlay(shape.stroke(Color.starhashPrimaryText.opacity(0.10), lineWidth: 0.5))
         }
     }
 }
@@ -60,7 +83,7 @@ private struct FallbackGlassButtonStyle: ButtonStyle {
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
             .background(.ultraThinMaterial, in: Capsule())
-            .overlay(Capsule().stroke(Color.starhashInk.opacity(0.10), lineWidth: 0.5))
+            .overlay(Capsule().stroke(Color.starhashPrimaryText.opacity(0.10), lineWidth: 0.5))
             .opacity(configuration.isPressed ? 0.7 : 1)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.snappy(duration: 0.2), value: configuration.isPressed)

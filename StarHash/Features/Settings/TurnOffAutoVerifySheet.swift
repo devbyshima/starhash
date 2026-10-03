@@ -55,8 +55,8 @@ struct TurnOffAutoVerifySheet: View {
                 .sheetCard()
 
                 VStack(spacing: 4) {
-                    // Neutral rather than the wallet's colour: Airtel's red
-                    // would make the safe choice look like the dangerous one.
+                    // Neutral rather than the blue, so the safe choice
+                    // does not look like the one being urged.
                     Button("Keep On") { dismiss() }
                         .buttonStyle(.sheetFilled)
                     SheetTextButton("Turn Off", role: .destructive) {

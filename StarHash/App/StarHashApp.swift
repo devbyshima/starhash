@@ -48,7 +48,7 @@ struct StarHashApp: App {
                 .font(.starhash(.body))
                 .environment(store)
                 .environment(router)
-                .tint(Color.starhashInk)
+                .tint(Color.starhashPrimaryText)
                 .onOpenURL { router.handle($0) }
         }
         .onChange(of: scenePhase) { _, phase in

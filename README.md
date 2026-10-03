@@ -35,7 +35,7 @@ Free and open source.
   have saved (a contact, or someone paid before) comes up at the top by
   name; anything else shows as typed. Recent recipients and contacts
   follow. A contact with several numbers asks which one. The total sits
-  in a bar above the keyboard; matched letters show in the wallet's colour. Picking someone dials at once: the iPhone's
+  in a bar above the keyboard; matched letters show in blue. Picking someone dials at once: the iPhone's
   call prompt, showing the whole code, is the approval.
 - **Fees**: shown only in Activity, and only once MTN's SMS has confirmed a
   payment and given its fee. Pay shows no fees. The keypad takes up to
@@ -56,9 +56,9 @@ Free and open source.
   verification guide, How StarHash Works and Privacy.
 - **Shortcuts and Siri**: Process Carrier SMS, Check MoMo Balance and Pay
   with StarHash actions.
-- Light and dark appearance, monochrome but for the primary buttons, which
-  take the main wallet's colour (MTN yellow or Airtel red) with a soft glow,
-  and set in Space Grotesk. Sheets are clear Liquid Glass with bold titles
+- Light and dark appearance in a four-colour palette: a blue Pay screen in
+  light mode (as Cash App's keypad is green), the near black #171717 in
+  dark mode, blue buttons with a soft glow, and Space Grotesk. Sheets are clear Liquid Glass with bold titles
   on iOS 26 and later.
 
 ## USSD codes

@@ -4,9 +4,11 @@ iOS SwiftUI companion for MTN MoMo and Airtel Money in Rwanda (the owner
 picks one as their wallet): type an amount, pick a recipient, and StarHash
 dials the USSD code; it also keeps the transactions, confirmed
 from MTN's SMS through a Shortcuts automation. No account, no paywall, no
-server. Three tabs: Pay, Activity and Settings. Light and dark, monochrome
-but for the wallet's colour on primary buttons, Space Grotesk, Liquid Glass
-on iOS 26+. The visual reference is Keaser (`~/Dev/apps/keaser`, read
+server. Three tabs: Pay, Activity and Settings. Light and dark in a
+four-colour palette (blue #05A9F4, pale grey #F4F4F4, near black #171717,
+grey #616161): light mode's Pay is the blue, as Cash App's keypad is its
+green, and dark mode is the near black throughout. Space Grotesk, Liquid
+Glass on iOS 26+. The visual reference is Keaser (`~/Dev/apps/keaser`, read
 only): port its patterns, never import its code. The primary button and the
 glass sheets follow Beam (`~/Dev/apps/beam/Apps/iOS`, read only), and so
 does onboarding: its reel, wallet step and permission screen are ports of
@@ -51,13 +53,19 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 - Swift 6 language mode, strict concurrency, no warnings in our sources.
 - SwiftUI has its own `Transaction`: write `StarHashKit.Transaction` in any
   file that imports SwiftUI.
-- Colours only from `StarHash/Design/Theme.swift`. Ink is the one accent;
-  the only other hues are `starhashIncoming` (money in),
-  `starhashDestructive` (money out arrows, destructive actions) and the
-  wallet colours `starhashMTN` and `starhashAirtel`, which fill
-  `.starhashPrimary` buttons and tint onboarding (`OnboardingPalette.tint`)
-  only. Settings switches keep the system green,
-  as Keaser's do.
+- Colours only from `StarHash/Design/Theme.swift`, built from the four
+  palette colours (`brandBlue`, `brandPaper`, `brandNight`, `brandGrey`).
+  Never change their values; a variation (an opacity, a lifted card grey,
+  a deeper blue for text) is fine where contrast needs it, and every text
+  colour must pass WCAG AA on its background (4.5:1, 3:1 for large text and
+  placeholders). The blue fills (`starhashInk`, with `starhashOnInk` text);
+  as text on light pages use `starhashAccentText`, since the bright blue is
+  2.6:1 on white. Pay has its own tokens (`starhashPayBackground`,
+  `payPrimaryText`, `paySecondaryText`, `.starhashPrimaryOnPay`, the
+  `payGlassTint` glass) because its light page is the blue. The only other
+  hues are `starhashIncoming` (money in) and `starhashDestructive` (money
+  out arrows, destructive actions); the carriers' colours live only in
+  their logos. Switches are the blue.
 - Glass only through `starhashGlass`, `starhashGlassButtonStyle`,
   `StarHashGlassContainer` (iOS 18 falls back to materials).
 - Build screens from the existing pieces: `StarHashCircleButton`,

@@ -206,7 +206,7 @@ struct AutoVerificationGuide: View {
         case .waiting:
             Button {} label: {
                 HStack(spacing: 10) {
-                    ProgressView().tint(Color.starhashOnInk)
+                    ProgressView().tint(Color.starhashSecondaryText)
                     Text("Checking")
                 }
             }
@@ -305,7 +305,7 @@ private struct GuideCardScreenshot: View {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 34, weight: .semibold))
                         .symbolRenderingMode(.palette)
-                        .foregroundStyle(.white, Color.starhashIncoming)
+                        .foregroundStyle(Color.starhashOnIncoming, Color.starhashIncoming)
                         .background(Circle().fill(Color.starhashBackground).padding(2))
                         .offset(x: 10, y: -10)
                         .transition(.scale.combined(with: .opacity))
@@ -412,7 +412,7 @@ private struct GuideButtonStyle: ButtonStyle {
 
 // MARK: - Pieces
 
-/// One capsule per step: done and current steps in ink, the rest grey.
+/// One capsule per step: done and current steps in the accent, the rest grey.
 private struct GuideProgress: View {
     let count: Int
     let current: Int
@@ -421,7 +421,7 @@ private struct GuideProgress: View {
         HStack(spacing: 6) {
             ForEach(0..<count, id: \.self) { index in
                 Capsule()
-                    .fill(index <= current ? Color.starhashInk : Color.starhashInk.opacity(0.18))
+                    .fill(index <= current ? Color.starhashAccentGraphic : Color.starhashPrimaryText.opacity(0.15))
                     .frame(height: 5)
             }
         }

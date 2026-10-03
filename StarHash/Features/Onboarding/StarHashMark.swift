@@ -4,8 +4,7 @@ import SwiftUI
 /// square left solid. Drawn from the app icon's Mark.svg (a 1024 grid,
 /// 230 corner radius, bars 110 wide), so it matches the icon at any size.
 ///
-/// The tile is ink by default: white on the dark canvas, as on the icon,
-/// and black in light mode, where a white tile would vanish.
+/// The tile is the accent by default, the brand blue in both appearances.
 struct StarHashMark: View {
     var size: CGFloat
     var color: Color = .starhashInk

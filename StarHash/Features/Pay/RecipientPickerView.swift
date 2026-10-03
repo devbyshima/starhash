@@ -12,7 +12,7 @@ import UIKit
 /// Below, the number or code being typed, recent recipients and contacts,
 /// each under an uppercase label that stays at the top while its rows
 /// scroll (in the header bar, inside the system's soft edge blur), the rows flat on the page, with the letters a search
-/// matched in the wallet's colour. The total floats in a glass bar at the
+/// matched in the accent. The total floats in a glass bar at the
 /// bottom, riding up with the keyboard. All in Beam's design language and
 /// Liquid Glass, like the rest of the app: round glass buttons, a glass
 /// search capsule, and rows fading softly under the header and the bar.
@@ -78,7 +78,7 @@ struct RecipientPickerView: View {
                                 title: recipient.displayName,
                                 subtitle: recipient.name == nil ? kindLabel(recipient) : recipient.formattedDestination,
                                 match: search.nameQuery,
-                                matchColor: wallet.pickerMatch,
+                                matchColor: Color.pickerMatch,
                                 onLongPress: contact(for: recipient).map { found in { showDetails(for: found) } }
                             ) { choose(recipient) }
                         }
@@ -269,7 +269,7 @@ struct RecipientPickerView: View {
                 .font(.title3)
                 .foregroundStyle(Color.sheetSecondaryText)
                 .accessibilityHidden(true)
-            TextField("Type anything, we'll find it", text: $query)
+            TextField("Search", text: $query, prompt: Text("Type anything, we'll find it").foregroundStyle(Color.sheetSecondaryText))
                 .accessibilityLabel("Search name, number or merchant code")
                 .focused($searchFocused)
                 // Numbers first, letters on the keyboard's own ABC key:
@@ -472,7 +472,7 @@ struct RecipientPickerView: View {
                 tile: .symbol(typed.kind == .phone ? "phone" : "storefront"),
                 title: typed.formattedDestination,
                 subtitle: kindLabel(typed),
-                matchColor: wallet.pickerMatch
+                matchColor: Color.pickerMatch
             ) { choose(typed) }
         } header: {
             sectionLabel(typed.kind == .phone ? "Number" : "Merchant code")
@@ -489,7 +489,7 @@ struct RecipientPickerView: View {
                     tile: tile(for: recipient),
                     title: recipient.displayName,
                     subtitle: recipient.formattedDestination + " \u{00B7} " + kindLabel(recipient),
-                    matchColor: wallet.pickerMatch,
+                    matchColor: Color.pickerMatch,
                     onLongPress: contact(for: recipient).map { found in { showDetails(for: found) } }
                 ) { choose(recipient) }
             }
@@ -525,7 +525,7 @@ struct RecipientPickerView: View {
                             title: contact.name,
                             subtitle: contactSubtitle(contact),
                             match: search.nameQuery,
-                            matchColor: wallet.pickerMatch,
+                            matchColor: Color.pickerMatch,
                             onLongPress: { showDetails(for: contact) }
                         ) { pick(contact) }
                     }
@@ -819,7 +819,7 @@ private struct PickerSkeletonRow: View {
 }
 
 /// One tappable recipient, flat on the page: a square avatar, the name with
-/// what the search matched in the wallet's colour, and a grey line under
+/// what the search matched in the accent, and a grey line under
 /// it.
 struct RecipientRow: View {
     indirect enum Tile {
@@ -950,6 +950,8 @@ struct RecipientTile: View {
     let tile: RecipientRow.Tile
     var size: CGFloat = 40
 
+    @Environment(\.starhashOnPay) private var onPay
+
     var body: some View {
         if case .photo(let contactID, let fallback) = tile {
             ContactPhotoTile(contactID: contactID, size: size) {
@@ -967,17 +969,17 @@ struct RecipientTile: View {
             case .monogram(let initials):
                 Text(initials)
                     .font(.starhashFixed(size * 0.36, weight: .semibold))
-                    .foregroundStyle(Color.starhashPrimaryText)
+                    .foregroundStyle(onPay ? Color.payPrimaryText : Color.starhashPrimaryText)
             case .symbol(let symbol):
                 Image(systemName: symbol)
                     .font(.system(size: size * 0.4))
-                    .foregroundStyle(Color.sheetSecondaryText)
+                    .foregroundStyle(onPay ? Color.paySecondaryText : Color.sheetSecondaryText)
             case .photo:
                 EmptyView()
             }
         }
         .frame(width: size, height: size)
-        .background(Color.starhashPrimaryText.opacity(0.1), in: RoundedRectangle(cornerRadius: size * 0.25, style: .continuous))
+        .background(onPay ? Color.payWash : Color.starhashPrimaryText.opacity(0.1), in: RoundedRectangle(cornerRadius: size * 0.25, style: .continuous))
         .accessibilityHidden(true)
     }
 }
@@ -1030,16 +1032,6 @@ private struct SwipeBackEnabler: UIViewControllerRepresentable {
         override func viewWillDisappear(_ animated: Bool) {
             super.viewWillDisappear(animated)
             navigationController?.interactivePopGestureRecognizer?.delegate = savedDelegate
-        }
-    }
-}
-
-extension Recipient.Network {
-    /// The colour of letters a search matched, on this wallet.
-    var pickerMatch: Color {
-        switch self {
-        case .mtn: .pickerMatchMTN
-        case .airtel: .pickerMatchAirtel
         }
     }
 }

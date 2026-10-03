@@ -6,8 +6,8 @@ import SwiftUI
 // button on its right (no close button; a sheet is swiped away), solid
 // cards whose rows are split by dotted lines, small uppercase section
 // labels, 50pt buttons, and Beam's type scale, all on clear Liquid Glass
-// with the grabber showing. The accent is the main wallet's colour where
-// Beam uses its green.
+// with the grabber showing. The accent is StarHash's blue where Beam uses
+// its green.
 
 // MARK: Type
 
@@ -41,8 +41,11 @@ extension View {
         if #available(iOS 26.0, *) {
             self
                 .presentationBackground {
+                    // Tinted toward the page colour: clear glass turned a
+                    // saturated cyan over Pay's blue, and a lifted grey in
+                    // dark mode that its grey text failed on.
                     Color.clear
-                        .glassEffect(.regular, in: Rectangle())
+                        .glassEffect(.regular.tint(.sheetGlassTint), in: Rectangle())
                         .ignoresSafeArea()
                 }
                 .presentationDetents(detents)
@@ -216,13 +219,13 @@ struct SheetIconCircle: View {
 // MARK: Buttons
 
 /// A sheet's button, Beam's: 50pt, a 16pt semibold label, a gradient fill
-/// with a soft glow of the same colour. `.sheetPrimary` takes the main
-/// wallet's colour (ink before one is chosen); `.sheetFilled` is the
+/// with a soft glow of the same colour. `.sheetPrimary` is the accent, the
+/// blue with near-black text; `.sheetFilled` is the
 /// near-black (near-white in dark mode) fill for a choice that is not the
 /// accent.
 struct SheetButtonStyle: ButtonStyle {
     enum Fill {
-        case mainWallet
+        case accent
         case filled
     }
 
@@ -237,18 +240,14 @@ private struct SheetButtonBody: View {
     let configuration: ButtonStyleConfiguration
     let fill: SheetButtonStyle.Fill
 
-    @AppStorage(PreferenceKey.wallet) private var mainWallet = ""
     @Environment(\.isEnabled) private var isEnabled
 
     private var colors: (fill: Color, label: Color, glows: Bool) {
         switch fill {
         case .filled:
             return (.sheetFilledButton, .sheetSurface, true)
-        case .mainWallet:
-            if let wallet = Recipient.Network(rawValue: mainWallet) {
-                return (wallet.buttonFill, wallet.buttonLabel, true)
-            }
-            return (.starhashInk, .starhashOnInk, false)
+        case .accent:
+            return (.starhashInk, .starhashOnInk, true)
         }
     }
 
@@ -261,7 +260,7 @@ private struct SheetButtonBody: View {
             .padding(.horizontal, 16)
             .frame(maxWidth: .infinity)
             .frame(minHeight: 50)
-            .background((isEnabled ? colors.fill : Color.starhashInk.opacity(0.14)).gradient, in: Capsule())
+            .background((isEnabled ? colors.fill : Color.starhashPrimaryText.opacity(0.1)).gradient, in: Capsule())
             .shadow(color: isEnabled && colors.glows ? colors.fill.opacity(0.35) : .clear, radius: 7, y: 3)
             .contentShape(Capsule())
             .opacity(configuration.isPressed ? 0.9 : 1)
@@ -271,7 +270,7 @@ private struct SheetButtonBody: View {
 }
 
 extension ButtonStyle where Self == SheetButtonStyle {
-    static var sheetPrimary: SheetButtonStyle { SheetButtonStyle(fill: .mainWallet) }
+    static var sheetPrimary: SheetButtonStyle { SheetButtonStyle(fill: .accent) }
     static var sheetFilled: SheetButtonStyle { SheetButtonStyle(fill: .filled) }
 }
 

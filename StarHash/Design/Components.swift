@@ -2,52 +2,37 @@ import StarHashKit
 import SwiftUI
 
 /// The full-width primary capsule: "Pay", "Continue", "Get Started". After
-/// Beam's: a gradient in the main wallet's colour (MTN yellow or Airtel
-/// red) with a soft glow of the same colour under it, and ink until a
-/// wallet is chosen. The label is 18pt semibold, as measured in the
-/// reference.
+/// Beam's: a gradient fill with a soft glow of the same colour under it.
+/// The blue with near-black text on every page but light mode's Pay,
+/// whose page is the blue already: there it turns over, near black with
+/// blue text, as the palette pairs them. The label is 18pt semibold, as
+/// measured in the reference.
 struct PrimaryButtonStyle: ButtonStyle {
-    /// Where the fill comes from.
-    enum Tint {
-        /// The main wallet's colour, or ink while none is chosen.
-        case mainWallet
-        /// This wallet's colour, or ink for nil (onboarding's wallet page,
-        /// before the choice is saved).
-        case wallet(Recipient.Network?)
-    }
-
     /// The design height; the paywall's button is taller than the others.
     var height: CGFloat = StarHashMetrics.primaryButtonHeight
-    var tint: Tint = .mainWallet
+    /// On Pay's page, which is the blue in light mode.
+    var onPay = false
 
     func makeBody(configuration: Configuration) -> some View {
-        PrimaryButtonBody(configuration: configuration, height: height, tint: tint)
+        PrimaryButtonBody(configuration: configuration, height: height, onPay: onPay)
     }
 }
 
 private struct PrimaryButtonBody: View {
     let configuration: ButtonStyleConfiguration
     let height: CGFloat
-    let tint: PrimaryButtonStyle.Tint
+    let onPay: Bool
 
-    @AppStorage(PreferenceKey.wallet) private var mainWallet = ""
     @Environment(\.isEnabled) private var isEnabled
 
-    private var wallet: Recipient.Network? {
-        switch tint {
-        case .mainWallet: Recipient.Network(rawValue: mainWallet)
-        case .wallet(let wallet): wallet
-        }
-    }
-
     private var fill: Color {
-        guard isEnabled else { return Color.starhashInk.opacity(0.14) }
-        return wallet?.buttonFill ?? .starhashInk
+        guard isEnabled else { return onPay ? .payWash : Color.starhashPrimaryText.opacity(0.1) }
+        return onPay ? .payButtonFill : .starhashInk
     }
 
     private var label: Color {
-        guard isEnabled else { return .starhashSecondaryText }
-        return wallet?.buttonLabel ?? .starhashOnInk
+        guard isEnabled else { return onPay ? .paySecondaryText : .starhashSecondaryText }
+        return onPay ? .payButtonLabel : .starhashOnInk
     }
 
     var body: some View {
@@ -63,43 +48,25 @@ private struct PrimaryButtonBody: View {
             .frame(minHeight: height)
             .background(fill.gradient, in: Capsule())
             // The glow is the button's own colour, so it lifts off the page
-            // in either appearance; ink and disabled buttons get none.
-            .shadow(color: isEnabled && wallet != nil ? fill.opacity(0.35) : .clear, radius: 7, y: 3)
+            // in either appearance; a disabled button gets none.
+            .shadow(color: isEnabled ? fill.opacity(0.35) : .clear, radius: 7, y: 3)
             .contentShape(Capsule())
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .opacity(configuration.isPressed ? 0.9 : 1)
             .animation(.snappy(duration: 0.16), value: configuration.isPressed)
-            .animation(.smooth(duration: 0.25), value: wallet)
+            .animation(.smooth(duration: 0.2), value: isEnabled)
     }
 }
 
 extension ButtonStyle where Self == PrimaryButtonStyle {
     static var starhashPrimary: PrimaryButtonStyle { PrimaryButtonStyle() }
 
-    /// In `wallet`'s colour rather than the main wallet's.
-    static func starhashPrimary(wallet: Recipient.Network?) -> PrimaryButtonStyle {
-        PrimaryButtonStyle(tint: .wallet(wallet))
-    }
+    /// For Pay's page, the blue in light mode.
+    static var starhashPrimaryOnPay: PrimaryButtonStyle { PrimaryButtonStyle(onPay: true) }
 }
 
-extension Recipient.Network {
-    /// The primary button's fill and label on this wallet.
-    var buttonFill: Color {
-        switch self {
-        case .mtn: .starhashMTN
-        case .airtel: .starhashAirtel
-        }
-    }
-
-    var buttonLabel: Color {
-        switch self {
-        case .mtn: .starhashOnMTN
-        case .airtel: .starhashOnAirtel
-        }
-    }
-}
-
-/// An SF Symbol on a rounded dark tile, as in expense rows and the
+/// An SF Symbol on a raised tile (pale grey on a white card, a lifted
+/// charcoal in dark mode), as in expense rows and the
 /// onboarding sample rows.
 struct SymbolTile: View {
     let symbol: String

@@ -11,12 +11,10 @@ import SwiftUI
 ///   2. `OnboardingPermission`, an iPhone mock playing the Contacts prompt,
 ///      asked for at the moment the screen explains why.
 ///
-/// The tint is ink until a wallet is chosen and the wallet's colour after,
-/// so the flow turns yellow or red as the choice is made.
+/// The tint is StarHash's blue throughout; the wallets show as their logos.
 struct OnboardingView: View {
     let onFinish: () -> Void
 
-    @AppStorage(PreferenceKey.wallet) private var wallet = ""
     @State private var stage = OnboardingLaunch.initialStage
 
     static let stageCount = 3
@@ -32,7 +30,7 @@ struct OnboardingView: View {
               description: "No account and no server. Your PIN only\never goes into your wallet's own prompt."),
     ]
 
-    private var tint: Color { OnboardingPalette.tint(for: Recipient.Network(rawValue: wallet)) }
+    private var tint: Color { OnboardingPalette.tint }
 
     var body: some View {
         ZStack {
@@ -86,15 +84,13 @@ enum OnboardingMetrics {
 
 /// Colours used only by onboarding.
 enum OnboardingPalette {
-    /// The flow's tint: the wallet's colour once one is chosen, ink before.
-    static func tint(for wallet: Recipient.Network?) -> Color {
-        wallet?.buttonFill ?? .starhashInk
-    }
+    /// The flow's tint, the accent, whichever wallet is chosen.
+    static let tint = Color.starhashInk
 
     /// The iPhone mock on the permission screen: its frame and the filled
     /// shapes standing in for the screen's content.
     static let mockBezel = Color(light: .init(white: 0.62), dark: .init(white: 0.42))
-    static let mockEdge = Color.black
+    static let mockEdge = Color(light: .black, dark: .init(white: 10 / 255))
     static let mockFill = Color(light: .black.opacity(0.15), dark: .white.opacity(0.15))
     static let mockTap = Color(white: 0.5).opacity(0.8)
 }

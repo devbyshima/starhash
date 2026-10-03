@@ -113,8 +113,8 @@ struct ActivitySpendingChart: View {
                     y: .value("Sent", Double(bucket.total) / top),
                     width: .ratio(Self.barWidthRatio)
                 )
-                // The pressed bar keeps full ink; the rest step back.
-                .foregroundStyle(Color.starhashInk.opacity(selectedIndex == nil || selectedIndex == bucket.index ? 1 : 0.35))
+                // The pressed bar keeps the full blue; the rest step back.
+                .foregroundStyle(Color.starhashAccentGraphic.opacity(selectedIndex == nil || selectedIndex == bucket.index ? 1 : 0.5))
                 .clipShape(UnevenRoundedRectangle(topLeadingRadius: barRadius, topTrailingRadius: barRadius, style: .continuous))
                 .accessibilityLabel(ActivitySummary.spokenName(of: bucket, period: period, calendar: calendar))
                 .accessibilityValue(Money.formatWithCurrency(bucket.total))
@@ -137,7 +137,7 @@ struct ActivitySpendingChart: View {
         .chartYAxis {
             AxisMarks(position: .trailing, values: ticks.map { Double($0) / top }) { value in
                 AxisGridLine(stroke: StrokeStyle(lineWidth: 2 / 3))
-                    .foregroundStyle(Color.starhashInk.opacity(0.17))
+                    .foregroundStyle(Color.starhashPrimaryText.opacity(0.14))
                 AxisValueLabel {
                     if let position = value.as(Double.self) {
                         Text(Money.compact(Int((position * top).rounded())))

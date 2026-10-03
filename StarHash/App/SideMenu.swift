@@ -62,7 +62,7 @@ struct SideMenu: View {
                         .foregroundStyle(Color.starhashSecondaryText)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 4)
-                        .background(Color.starhashInk.opacity(0.08), in: Capsule())
+                        .background(Color.starhashPrimaryText.opacity(0.08), in: Capsule())
                 }
                 Spacer(minLength: 0)
             }

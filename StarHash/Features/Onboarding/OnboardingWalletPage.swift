@@ -10,7 +10,7 @@ import SwiftUI
 /// family: the symbol in its pulse rings in the middle, the words low, the
 /// choices (each with its carrier's logo) and Continue under them, and the
 /// glow at the bottom edge. As a wallet is picked its logo takes the
-/// symbol's place, and the rings, glow and button take its colour.
+/// symbol's place inside the blue rings.
 ///
 /// Also shown on its own, to an install that finished onboarding before
 /// this page existed.
@@ -20,7 +20,7 @@ struct OnboardingWalletPage: View {
     @AppStorage(PreferenceKey.wallet) private var wallet = ""
     @State private var choice: Recipient.Network?
 
-    private var tint: Color { OnboardingPalette.tint(for: choice) }
+    private var tint: Color { OnboardingPalette.tint }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -65,7 +65,7 @@ struct OnboardingWalletPage: View {
                     option(network)
                 }
                 Button("Continue", action: save)
-                    .buttonStyle(.starhashPrimary(wallet: choice))
+                    .buttonStyle(.starhashPrimary)
                     .disabled(choice == nil)
                     .padding(.top, 8)
             }
@@ -81,7 +81,7 @@ struct OnboardingWalletPage: View {
     }
 
     /// A glass capsule the height of the button below it, as Beam's
-    /// secondary buttons are, ringed in the wallet's colour once chosen.
+    /// secondary buttons are, ringed in the blue once chosen.
     private func option(_ network: Recipient.Network) -> some View {
         let isChosen = choice == network
         return Button {
@@ -99,7 +99,7 @@ struct OnboardingWalletPage: View {
                     .foregroundStyle(Color.starhashSecondaryText)
                 Image(systemName: isChosen ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 22, weight: .medium))
-                    .foregroundStyle(isChosen ? network.buttonFill : Color.starhashTertiaryText)
+                    .foregroundStyle(isChosen ? Color.starhashAccentText : Color.starhashSecondaryText)
                     .contentTransition(.symbolEffect(.replace))
             }
             .lineLimit(1)
@@ -107,7 +107,7 @@ struct OnboardingWalletPage: View {
             .frame(maxWidth: .infinity, minHeight: StarHashMetrics.primaryButtonHeight)
             .contentShape(Capsule())
             .starhashGlass(interactive: true)
-            .overlay(Capsule().strokeBorder(network.buttonFill, lineWidth: 2).opacity(isChosen ? 1 : 0))
+            .overlay(Capsule().strokeBorder(Color.starhashAccentGraphic, lineWidth: 2).opacity(isChosen ? 1 : 0))
         }
         .buttonStyle(PressScaleButtonStyle())
         .accessibilityElement(children: .combine)

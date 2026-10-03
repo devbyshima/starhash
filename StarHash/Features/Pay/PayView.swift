@@ -86,7 +86,7 @@ struct PayView: View {
 
             // Up to 332pt, four rows of about 83, so keys grow to thumb size
             // and the amount keeps the space above.
-            PayKeypad(onKey: press, canClear: !input.isZero, tint: wallet.buttonFill)
+            PayKeypad(onKey: press, canClear: !input.isZero, tint: .payKeypadAccent)
                 .frame(maxHeight: 332)
                 .padding(.horizontal, 8)
                 // Takes its full height before the spacers around the
@@ -101,7 +101,9 @@ struct PayView: View {
         }
         .starhashReadableWidth(StarHashMetrics.narrowReadableWidth)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.starhashBackground.ignoresSafeArea())
+        .background(Color.starhashPayBackground.ignoresSafeArea())
+        .environment(\.starhashGlassTint, .payGlassTint)
+        .environment(\.starhashOnPay, true)
     }
 
     // MARK: Pieces
@@ -120,7 +122,7 @@ struct PayView: View {
                     .starhashFont(18, weight: .semibold, relativeTo: .body)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
-                    .foregroundStyle(Color.starhashPrimaryText)
+                    .foregroundStyle(Color.payPrimaryText)
                     .padding(.horizontal, 12)
                     .frame(maxWidth: .infinity)
                     .frame(minHeight: StarHashMetrics.primaryButtonHeight)
@@ -131,7 +133,7 @@ struct PayView: View {
             .accessibilityHint("Dials \(USSD.balance(for: wallet))")
 
             Button("Pay") { next() }
-                .buttonStyle(.starhashPrimary)
+                .buttonStyle(.starhashPrimaryOnPay)
                 // Held, as in the reference: the white bubble under the
                 // finger and light streaming through the button.
                 .overlay {
@@ -185,7 +187,7 @@ struct PayView: View {
             pay(recipient)
             return
         }
-        SendRipple.shared.play(from: SendRipple.shared.lastTouch, tint: wallet.buttonFill, dark: colorScheme == .dark) {
+        SendRipple.shared.play(from: SendRipple.shared.lastTouch, tint: .brandBlue, dark: colorScheme == .dark) {
             var transaction = Transaction()
             transaction.disablesAnimations = true
             withTransaction(transaction) { pay(recipient) }
@@ -297,12 +299,12 @@ private struct PayChosenRecipient: View {
             )
             Text("To \(recipient.displayName)")
                 .font(.starhash(.subheadline, weight: .semibold))
-                .foregroundStyle(Color.starhashPrimaryText)
+                .foregroundStyle(Color.payPrimaryText)
                 .lineLimit(1)
             Button(action: onClear) {
                 Image(systemName: "xmark.circle.fill")
                     .font(.starhash(.body))
-                    .foregroundStyle(Color.starhashSecondaryText)
+                    .foregroundStyle(Color.paySecondaryText)
                     .frame(minWidth: 32, minHeight: 32)
                     .contentShape(Rectangle())
             }

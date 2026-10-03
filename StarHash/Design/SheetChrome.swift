@@ -94,7 +94,7 @@ struct StarHashRowSeparator: View {
 struct HighlightRowButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .background(Color.starhashInk.opacity(configuration.isPressed ? 0.06 : 0))
+            .background(Color.starhashPrimaryText.opacity(configuration.isPressed ? 0.06 : 0))
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }
 }

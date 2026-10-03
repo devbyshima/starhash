@@ -1,8 +1,8 @@
 import SwiftUI
 
 // Shared look for every page in the Settings tab, after Keaser's: rounded
-// 26pt cards on the settings canvas (white on grouped grey in light mode,
-// charcoal on black in dark mode), rows with a symbol on a faint tile, a
+// 26pt cards on the settings canvas (white on the pale grey in light mode,
+// charcoal on the near black in dark mode), rows with a symbol on a faint tile, a
 // title and a small caption, grey sentence-case section titles. Sheets
 // presented from Settings keep the sheet look instead.
 
@@ -11,13 +11,13 @@ extension Color {
     static var settingsCard: Color { .starhashCard }
     /// The tile behind row symbols and the profile monogram: a visible grey
     /// on a white card, a faint veil on a charcoal one.
-    static let settingsTile = Color(light: .black.opacity(0.08), dark: .white.opacity(0.06))
-    /// Behind every settings page: the grouped grey in light mode, so white
-    /// cards stand out; black in dark mode, under charcoal cards.
-    static let settingsCanvas = Color(light: .init(red: 242 / 255, green: 242 / 255, blue: 247 / 255), dark: .black)
-    /// The track of a switched-on toggle. The system green, as Keaser draws
-    /// its switches: ink would put a white knob on a white track in dark mode.
-    static let settingsToggleOn = Color(uiColor: .systemGreen)
+    static let settingsTile = Color(light: .brandNight.opacity(0.07), dark: .brandPaper.opacity(0.07))
+    /// Behind every settings page: the app's page colour, so cards stand
+    /// out the same way they do on Activity.
+    static var settingsCanvas: Color { .starhashBackground }
+    /// The track of a switched-on toggle: the accent as a graphic, 3:1 on
+    /// a white card, with the white knob showing in either appearance.
+    static let settingsToggleOn = Color.starhashAccentGraphic
 }
 
 /// Where a row sits in its card, so its background rounds the right corners.
@@ -114,6 +114,8 @@ struct SettingsSymbol: View {
     let symbol: String
     var size: CGFloat = 38
     var pointSize: CGFloat = 17
+    /// Greyed, for a row that is not there yet ("Coming soon").
+    var muted = false
 
     @ScaledMetric(relativeTo: .body) private var textScale: CGFloat = 1
 
@@ -121,7 +123,7 @@ struct SettingsSymbol: View {
         let scale = min(textScale, 1.5)
         Image(systemName: symbol)
             .font(.system(size: pointSize * scale, weight: .medium))
-            .foregroundStyle(Color.starhashPrimaryText)
+            .foregroundStyle(muted ? Color.starhashSecondaryText : Color.starhashPrimaryText)
             .frame(width: size * scale, height: size * scale)
             .background(Color.settingsTile, in: RoundedRectangle(cornerRadius: size * scale * 0.3, style: .continuous))
             .accessibilityHidden(true)
@@ -134,12 +136,15 @@ struct SettingsRow<Trailing: View>: View {
     let symbol: String
     let title: String
     var caption: String?
+    /// Greyed with the text colours rather than an opacity, so the row
+    /// still reads at AA ("Coming soon").
+    var muted = false
     @ViewBuilder var trailing: Trailing
 
     var body: some View {
         HStack(spacing: 12) {
-            SettingsSymbol(symbol: symbol)
-            SettingsRowText(title: title, caption: caption)
+            SettingsSymbol(symbol: symbol, muted: muted)
+            SettingsRowText(title: title, caption: caption, muted: muted)
                 .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
             Spacer(minLength: 8)
             trailing
@@ -170,12 +175,13 @@ extension SettingsRow where Trailing == Text {
 struct SettingsRowText: View {
     let title: String
     var caption: String?
+    var muted = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
                 .font(.starhash(.body, weight: .medium))
-                .foregroundStyle(Color.starhashPrimaryText)
+                .foregroundStyle(muted ? Color.starhashSecondaryText : Color.starhashPrimaryText)
             if let caption {
                 Text(caption)
                     .starhashFont(13, relativeTo: .footnote)
