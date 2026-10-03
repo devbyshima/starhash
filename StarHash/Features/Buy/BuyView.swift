@@ -364,14 +364,14 @@ private struct ShortcutEditor: View {
                 .textInputAutocapitalization(.sentences)
                 .submitLabel(.next)
                 .onSubmit { focused = .code }
-            capsuleField("*182*7*1#", text: $code, field: .code)
+            capsuleField("Code, such as *182*7*1#", text: $code, field: .code)
                 .keyboardType(.phonePad)
                 .accessibilityLabel("Code")
             capsuleField("Note (optional)", text: $detail, field: .detail)
                 .textInputAutocapitalization(.sentences)
                 .submitLabel(.done)
 
-            Text(showsCodeHint ? "A code starts with * or #, ends with #, and has only digits, * and # in between." : "The code as you would dial it: starts with * or #, ends with #.")
+            Text(showsCodeHint ? "This isn't a valid code. Use only numbers, * and #, starting with * or # and ending with #." : "Type the code exactly as you would dial it. It must start with * or # and end with #.")
                 .font(.sheetSubheadline)
                 .foregroundStyle(showsCodeHint ? Color.starhashDestructive : Color.sheetSecondaryText)
                 .multilineTextAlignment(.center)
