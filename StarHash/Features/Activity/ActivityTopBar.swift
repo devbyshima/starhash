@@ -1,11 +1,10 @@
 import StarHashKit
 import SwiftUI
 
-/// Activity's floating bar, laid out as the recipient screen's header: the
-/// period picker centred like a title (a glass capsule opening a native
-/// menu), and the search button on the right. Searching, a close button
-/// comes in on the left and the field from the right as the picker goes
-/// out to the left.
+/// Activity's floating bar: GO Club's period control at the leading end
+/// (Day, Week, Month, Year, as D W M Y), and the search button on the
+/// right. Searching, a close button comes in on the left and the field
+/// from the right as the control goes out to the left.
 struct ActivityTopBar: View {
     let period: ActivityPeriod
     let onPeriod: @MainActor (ActivityPeriod) -> Void
@@ -16,10 +15,9 @@ struct ActivityTopBar: View {
     let onCloseSearch: () -> Void
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .leading) {
             if !isSearching {
-                periodMenu
-                    .padding(.horizontal, 56)
+                periodControl
                     .transition(.offset(x: -36).combined(with: .opacity))
             }
             // One glass container, so the buttons and the search capsule
@@ -84,44 +82,13 @@ struct ActivityTopBar: View {
         .starhashGlass(interactive: true)
     }
 
-    // Like a system toolbar, the bar's text stops growing at the largest
-    // standard size so it stays one row tall; the Large Content Viewer shows
-    // each control bigger at accessibility sizes.
-
-    private var periodMenu: some View {
-        Menu {
-            Picker(selection: Binding(get: { period }, set: onPeriod)) {
-                ForEach(ActivityPeriod.allCases) { option in
-                    Text(option.title).tag(option)
-                }
-            } label: {
-                Label("Period", systemImage: "calendar")
-            }
-            .pickerStyle(.inline)
-        } label: {
-            HStack(spacing: 5) {
-                Text(period.title)
-                    .font(.starhash(.body, weight: .medium))
-                    .lineLimit(1)
-                    .contentTransition(.opacity)
-                Image(systemName: "chevron.up.chevron.down")
-                    .font(.starhash(.footnote, weight: .semibold))
-            }
-            .foregroundStyle(Color.starhashPrimaryText)
-            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-            .padding(.horizontal, 17)
-            .frame(minHeight: ActivityLayout.topBarHeight)
-            .fixedSize(horizontal: true, vertical: false)
-            .contentShape(Capsule())
-            .starhashGlass(interactive: true)
-        }
-        .menuOrder(.fixed)
-        .buttonStyle(.plain)
-        .accessibilityLabel("Period")
-        .accessibilityValue(period.title)
-        .accessibilityShowsLargeContentViewer {
-            Label(period.title, systemImage: "chevron.up.chevron.down")
-        }
+    private var periodControl: some View {
+        GlassSegmentedControl(
+            options: ActivityPeriod.choices,
+            selection: period,
+            onSelect: onPeriod,
+            label: \.shortLabel,
+            accessibilityLabel: \.title
+        )
     }
-
 }

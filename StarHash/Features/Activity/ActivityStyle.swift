@@ -223,3 +223,19 @@ struct ActivityStatusBadge: View {
         }
     }
 }
+
+extension ActivityPeriod {
+    /// The periods the control offers: a day, a week, a month and a year.
+    static let choices: [ActivityPeriod] = [.today, .week, .month, .year]
+
+    /// The period control's label: a letter, as GO Club's D W M.
+    var shortLabel: String {
+        switch self {
+        case .today: "D"
+        case .week: "W"
+        case .month: "M"
+        case .year: "Y"
+        case .allTime: "A"
+        }
+    }
+}

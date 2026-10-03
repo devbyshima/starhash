@@ -148,7 +148,7 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 | `-payInk` | presses 8, 5, 3 and 7 on a schedule from 1.5s, to record the keypad's ink without a finger (simulator taps arrive late, in bursts) |
 | `-nearbyHere` | turns Nearby on and places the phone at Kigali Heights, where `SampleData.places()` has visits, for the picker's Nearby section |
 | `-payPick <seconds>` | with `-payPicker`: chooses the first recent recipient after this long, to record the wave |
-| `-activityPeriod today\|week\|month\|year\|all` | Activity period |
+| `-activityPeriod today\|week\|month\|year` | Activity period (the D W M Y control) |
 | `-openFirstTransaction` | open the newest transaction's details |
 | `-confirmDelete` | with `-openFirstTransaction`: the delete question |
 | `-activitySearch <text>` | Activity search with this text |
