@@ -98,7 +98,7 @@ struct RecipientNumberRow: View {
                 .scaledToFit()
                 .frame(width: 26, height: 22)
                 .frame(width: 38, height: 38)
-                .background(Circle().fill(Color.starhashPrimaryText.opacity(0.08)))
+                .background(Circle().fill(Color.sheetChip))
                 .accessibilityHidden(true)
         } else {
             SheetIconCircle(symbol: "storefront")

@@ -41,8 +41,8 @@ extension View {
         if #available(iOS 26.0, *) {
             self
                 .presentationBackground {
-                    // Light: solid white. Dark: toward the page colour, where
-                    // a lifted grey failed its grey text.
+                    // Light: white at 90%. Dark: toward the page colour,
+                    // where a lifted grey failed its grey text.
                     Color.clear
                         .glassEffect(.regular.tint(.sheetGlassTint), in: Rectangle())
                         .ignoresSafeArea()
@@ -211,7 +211,7 @@ struct SheetIconCircle: View {
             .font(.sheetBody)
             .foregroundStyle(tint)
             .frame(width: 38, height: 38)
-            .background(Circle().fill(tint.opacity(0.14)))
+            .background(Circle().fill(Color.sheetChip))
             .accessibilityHidden(true)
     }
 }
@@ -260,7 +260,7 @@ private struct SheetButtonBody: View {
             .padding(.horizontal, 16)
             .frame(maxWidth: .infinity)
             .frame(minHeight: 50)
-            .background((isEnabled ? colors.fill : Color.starhashPrimaryText.opacity(0.1)).gradient, in: Capsule())
+            .background((isEnabled ? colors.fill : Color.sheetChip).gradient, in: Capsule())
             .contentShape(Capsule())
             .opacity(configuration.isPressed ? 0.9 : 1)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)

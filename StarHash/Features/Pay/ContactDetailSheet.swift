@@ -62,7 +62,8 @@ struct ContactDetailSheet: View {
                 tile: enableContacts && contact.hasPhoto
                     ? .photo(contactID: contact.id, fallback: .monogram(contact.initials))
                     : .monogram(contact.initials),
-                size: 80
+                size: 80,
+                fill: .sheetChip
             )
             Text(contact.name)
                 .font(.sheet(21, .bold, relativeTo: .title2))
@@ -138,7 +139,7 @@ struct ContactDetailSheet: View {
                 .scaledToFit()
                 .frame(width: 26, height: 22)
                 .frame(width: 38, height: 38)
-                .background(Circle().fill(Color.starhashPrimaryText.opacity(0.08)))
+                .background(Circle().fill(Color.sheetChip))
                 .accessibilityHidden(true)
         } else {
             SheetIconCircle(symbol: "storefront")

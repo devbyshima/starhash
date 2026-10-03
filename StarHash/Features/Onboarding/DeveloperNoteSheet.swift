@@ -46,7 +46,7 @@ struct DeveloperNoteSheet: View {
                                     .foregroundStyle(Color.sheetSecondaryText)
                                     .padding(.horizontal, 10)
                                     .padding(.vertical, 5)
-                                    .background(Capsule().fill(Color.starhashPrimaryText.opacity(0.08)))
+                                    .background(Capsule().fill(Color.sheetChip))
                                     .frame(minHeight: 44)
                                     .contentShape(Rectangle())
                             }

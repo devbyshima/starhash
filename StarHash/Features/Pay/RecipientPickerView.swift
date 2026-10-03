@@ -848,13 +848,15 @@ private struct RowLongPress: UIGestureRecognizerRepresentable {
 struct RecipientTile: View {
     let tile: RecipientRow.Tile
     var size: CGFloat = 40
+    /// The tile's fill, when the surface asks for its own (a sheet).
+    var fill: Color?
 
     @Environment(\.starhashOnPay) private var onPay
 
     var body: some View {
         if case .photo(let contactID, let fallback) = tile {
             ContactPhotoTile(contactID: contactID, size: size) {
-                RecipientTile(tile: fallback, size: size)
+                RecipientTile(tile: fallback, size: size, fill: fill)
             }
             .accessibilityHidden(true)
         } else {
@@ -878,7 +880,7 @@ struct RecipientTile: View {
             }
         }
         .frame(width: size, height: size)
-        .background(onPay ? Color.payWash : Color.starhashPrimaryText.opacity(0.1), in: RoundedRectangle(cornerRadius: size * 0.25, style: .continuous))
+        .background(fill ?? (onPay ? Color.payWash : Color.starhashPrimaryText.opacity(0.1)), in: RoundedRectangle(cornerRadius: size * 0.25, style: .continuous))
         .accessibilityHidden(true)
     }
 }

@@ -129,17 +129,21 @@ extension Color {
     static let pickerMatch = Color(light: .brandNight, dark: .brandBlue)
     static let pickerMatchBackground = Color(light: .white.opacity(0.55), dark: .clear)
 
-    /// Sheets: the solid surface cards sit on (the pale grey on the white
-    /// sheet, or the near black lifted a little less than a card), the grey
-    /// of secondary text, and the fill of a filled button that is not the
-    /// accent.
-    static let sheetSurface = Color(light: .brandPaper, dark: .init(white: 28 / 255))
+    /// Sheets: the solid surface cards sit on (an ice blue, the brand blue
+    /// at 7% on white, on the white sheet, or the near black lifted a
+    /// little less than a card), the grey of secondary text, and the fill
+    /// of a filled button that is not the accent.
+    static let sheetSurface = Color(light: .init(red: 238 / 255, green: 248 / 255, blue: 254 / 255), dark: .init(white: 28 / 255))
     static let sheetSecondaryText = Color.starhashSecondaryText
+    /// Small fills inside a sheet (icon circles, a monogram tile, a pill, a
+    /// disabled button): a deeper ice blue than the cards in light mode, so
+    /// nothing on a sheet is grey; a faint veil in dark mode.
+    static let sheetChip = Color(light: .init(red: 214 / 255, green: 238 / 255, blue: 253 / 255), dark: .brandPaper.opacity(0.1))
     static let sheetFilledButton = Color(light: .brandNight, dark: .brandPaper)
-    /// A sheet's background. Light: solid white, #FFFFFF, the founder's
-    /// pick (any transparency let the blue page through as aqua). Dark: the
-    /// page colour let mostly through the glass.
-    static let sheetGlassTint = Color(light: .white, dark: .brandNight.opacity(0.6))
+    /// A sheet's glass. Light: white at 90%, the founder's pick, nearly
+    /// white with the page a faint blue behind it. Dark: the page colour
+    /// let mostly through.
+    static let sheetGlassTint = Color(light: Color.white.opacity(0.9), dark: .brandNight.opacity(0.6))
     /// The dotted line between a sheet card's rows.
     static let sheetDivider = Color(light: .brandNight.opacity(0.22), dark: .brandPaper.opacity(0.22))
 
