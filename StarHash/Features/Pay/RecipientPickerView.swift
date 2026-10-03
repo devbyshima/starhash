@@ -91,7 +91,18 @@ struct RecipientPickerView: View {
             .padding(.bottom, 12)
             .starhashReadableWidth()
         }
-        .scrollDismissesKeyboard(.interactively)
+        .scrollDismissesKeyboard(.immediately)
+        // A finger scrolling the list is done typing: the keyboard goes,
+        // and the search with it while nothing is typed, so the list has
+        // the screen. A typed search stays, its matches to scroll through.
+        .onScrollPhaseChange { _, phase in
+            guard phase == .interacting, isSearching else { return }
+            if query.isEmpty {
+                closeSearch()
+            } else {
+                searchFocused = false
+            }
+        }
         .scrollPosition($scrollPosition)
         .onScrollGeometryChange(for: CGFloat.self) { geometry in
             min(max(geometry.contentOffset.y + geometry.contentInsets.top, 0), 24)
@@ -842,12 +853,10 @@ struct RecipientRow: View {
     var onLongPress: (() -> Void)?
     let action: () -> Void
 
-    /// Set when a press is held, so the tap the button still sees when the
-    /// finger lifts, however long it is held, does not pay. Only a quick tap
-    /// pays.
-    /// Cleared when the next touch begins rather than on a timer: the sheet
-    /// the long press opens cancels the touch, and then no tap comes to clear
-    /// it, but every later touch begins with the long press gesture.
+    /// Set when a press is held, so the tap the button may still see when
+    /// the finger lifts, however long it is held, does not pay. Only a quick
+    /// tap pays. Cleared a moment after the hold ends, lifted or cancelled
+    /// (the sheet it opens cancels it), once any tap from it has come.
     @State private var longPressed = false
     @State private var longPresses = 0
 
@@ -885,27 +894,53 @@ struct RecipientRow: View {
             .padding(.horizontal, 22)
             .padding(.vertical, 8)
             .contentShape(Rectangle())
-        }
-        .buttonStyle(HighlightRowButtonStyle())
-        .simultaneousGesture(
-            // 10pt of movement fails it, so a scroll that starts on a row is
-            // never taken for a long press.
-            LongPressGesture(minimumDuration: 0.45, maximumDistance: 10)
-                // Every touch begins here, before its tap can arrive at the
-                // lift, so a long press earlier never counts for this one.
-                .onChanged { _ in longPressed = false }
-                .onEnded { _ in
+            // On the label, inside the button: a gesture on the button
+            // itself would rank below its tap and never be heard.
+            .gesture(
+                RowLongPress {
                     // A hold never pays, on any row: one with details opens
                     // them, one without does nothing when the finger lifts.
                     longPressed = true
                     guard let onLongPress else { return }
                     longPresses += 1
                     onLongPress()
+                } onFinished: {
+                    Task {
+                        try? await Task.sleep(for: .milliseconds(150))
+                        longPressed = false
+                    }
                 }
-        )
+            )
+        }
+        .buttonStyle(HighlightRowButtonStyle())
         .sensoryFeedback(.impact(weight: .medium), trigger: longPresses)
         .accessibilityElement(children: .combine)
         .accessibilityAction(named: "Show contact details") { onLongPress?() }
+    }
+}
+
+/// A row's long press, as UIKit has it: 10pt of movement fails it, and it
+/// gives way to a scroll that starts on the row, as a table row's does.
+/// SwiftUI's own long press, added beside a button's tap, kept hold of the
+/// drag, so the list would not scroll from a row, worst of all with the
+/// keyboard up.
+private struct RowLongPress: UIGestureRecognizerRepresentable {
+    let onBegan: () -> Void
+    let onFinished: () -> Void
+
+    func makeUIGestureRecognizer(context: Context) -> UILongPressGestureRecognizer {
+        let recognizer = UILongPressGestureRecognizer()
+        recognizer.minimumPressDuration = 0.45
+        recognizer.allowableMovement = 10
+        return recognizer
+    }
+
+    func handleUIGestureRecognizerAction(_ recognizer: UILongPressGestureRecognizer, context: Context) {
+        switch recognizer.state {
+        case .began: onBegan()
+        case .ended, .cancelled, .failed: onFinished()
+        default: break
+        }
     }
 }
 
