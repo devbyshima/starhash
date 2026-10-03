@@ -159,6 +159,21 @@ public final class USSDShortcutList {
         return true
     }
 
+    /// Moves a pinned code to where `target` is, the codes between
+    /// shuffling along: dragging one pinned tile over another. Pinned
+    /// codes keep the list's order, so this is their order too.
+    public func movePinned(_ id: USSDShortcut.ID, to target: USSDShortcut.ID) {
+        guard id != target,
+              let from = shortcuts.firstIndex(where: { $0.id == id }),
+              let to = shortcuts.firstIndex(where: { $0.id == target }),
+              shortcuts[from].isPinned, shortcuts[to].isPinned else { return }
+        // Out, then in where the target was: after it when moving down the
+        // list, before it when moving up.
+        let moving = shortcuts.remove(at: from)
+        shortcuts.insert(moving, at: to)
+        save()
+    }
+
     public func remove(_ id: USSDShortcut.ID) {
         shortcuts.removeAll { $0.id == id }
         save()

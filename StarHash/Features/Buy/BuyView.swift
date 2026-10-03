@@ -1,5 +1,6 @@
 import StarHashKit
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// Buy: the codes kept on hand to dial in a tap (`USSDShortcutList`), laid
 /// out as Activity lists transactions, after Keaser's Home: one card of
@@ -32,6 +33,10 @@ struct BuyView: View {
     @State private var pinnedCount = 0
     /// Eight pinned already, when one more was asked for.
     @State private var pinsFull = false
+    /// The pinned code being dragged to a new place, while it is.
+    @State private var draggingPinned: USSDShortcut.ID?
+    /// Bumped as a dragged tile passes another, for a tick each time.
+    @State private var reorderTicks = 0
 
     var body: some View {
         // The header is a Soft Edge bar: the codes scroll under it.
@@ -64,6 +69,7 @@ struct BuyView: View {
         .animation(.smooth(duration: 0.3), value: shortcuts.shortcuts)
         .sensoryFeedback(.impact(flexibility: .rigid), trigger: deletedCount)
         .sensoryFeedback(.impact(weight: .medium), trigger: pinnedCount)
+        .sensoryFeedback(.selection, trigger: reorderTicks)
         .sheet(item: $editing) { draft in
             ShortcutEditor(draft: draft)
         }
@@ -186,7 +192,23 @@ struct BuyView: View {
                         Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
                         Button("Delete", systemImage: "trash", role: .destructive) { afterMenu { delete(shortcut) } }
                     }
+                    // Dragged to a new place: lifted by the system's drag,
+                    // which a long press with no movement leaves to the
+                    // menu, and dropped over another tile, which moves the
+                    // others along.
+                    .onDrag {
+                        draggingPinned = shortcut.id
+                        return NSItemProvider(object: shortcut.id.uuidString as NSString)
+                    }
+                    .onDrop(of: [.text], delegate: PinnedReorder(
+                        target: shortcut.id,
+                        dragging: $draggingPinned,
+                        shortcuts: shortcuts,
+                        onMove: { reorderTicks += 1 }
+                    ))
                     .accessibilityAction(named: "Unpin") { pin(shortcut, false) }
+                    .accessibilityAction(named: "Move Earlier") { movePinned(shortcut, by: -1) }
+                    .accessibilityAction(named: "Move Later") { movePinned(shortcut, by: 1) }
                     .accessibilityAction(named: "Details") { details = shortcut }
                     .accessibilityAction(named: "Delete") { delete(shortcut) }
                     .transition(.asymmetric(
@@ -194,6 +216,16 @@ struct BuyView: View {
                         removal: .scale(scale: 0.8).combined(with: .opacity)
                     ))
             }
+        }
+    }
+
+    /// VoiceOver's reordering: one place earlier or later.
+    private func movePinned(_ shortcut: USSDShortcut, by step: Int) {
+        let pinned = shortcuts.pinned
+        guard let index = pinned.firstIndex(where: { $0.id == shortcut.id }),
+              pinned.indices.contains(index + step) else { return }
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) {
+            shortcuts.movePinned(shortcut.id, to: pinned[index + step].id)
         }
     }
 
@@ -445,6 +477,33 @@ struct PinnedLayout: Layout {
             let y = bounds.minY + CGFloat(row) * (m.tile.height + spacing)
             subviews[index].place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(m.tile))
         }
+    }
+}
+
+/// Dropping a dragged pinned tile: as it passes over another, it takes that
+/// one's place and the rest move along, on the pin spring, so the tiles
+/// part around the finger before it lets go.
+private struct PinnedReorder: DropDelegate {
+    let target: USSDShortcut.ID
+    @Binding var dragging: USSDShortcut.ID?
+    let shortcuts: USSDShortcutList
+    let onMove: () -> Void
+
+    func dropEntered(info: DropInfo) {
+        guard let dragging, dragging != target else { return }
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            shortcuts.movePinned(dragging, to: target)
+        }
+        onMove()
+    }
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        DropProposal(operation: .move)
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        dragging = nil
+        return true
     }
 }
 

@@ -42,6 +42,24 @@ struct USSDShortcutTests {
         #expect(list.setPinned(ids[8], true))
     }
 
+    @Test func reordersPinnedAndRemembers() {
+        let defaults = freshDefaults()
+        let list = USSDShortcutList(defaults: defaults)
+        let ids = list.shortcuts.map(\.id)
+        for id in ids { list.setPinned(id, true) }
+
+        list.movePinned(ids[0], to: ids[2])
+        #expect(list.pinned.map(\.id) == [ids[1], ids[2], ids[0], ids[3]])
+        list.movePinned(ids[3], to: ids[1])
+        #expect(list.pinned.map(\.id) == [ids[3], ids[1], ids[2], ids[0]])
+        #expect(USSDShortcutList(defaults: defaults).pinned.map(\.id) == [ids[3], ids[1], ids[2], ids[0]])
+
+        // An unpinned code is not moved among the pinned.
+        list.setPinned(ids[2], false)
+        list.movePinned(ids[2], to: ids[3])
+        #expect(list.pinned.map(\.id) == [ids[3], ids[1], ids[0]])
+    }
+
     @Test func readsAListSavedBeforePinning() throws {
         let defaults = freshDefaults()
         let old = #"[{"id":"5E2A7C1E-0003-4000-8000-000000000003","name":"Gwamon","code":"*154*0#"}]"#
