@@ -1,17 +1,20 @@
 import SwiftUI
 
-/// The floating bar at the foot of every page, after GO Club's: a glass
-/// capsule of three symbols, Activity, Pay and Settings, with a lens that
-/// slides to the one showing and overshoots a little as it lands. The bar
-/// swells under a finger, and a finger dragged along it carries the lens
-/// with it, choosing wherever it lets go. It shrinks while a page scrolls
-/// down and comes back on the way up, and it steps aside for pushed
-/// screens and Activity's search.
+/// The floating bar at the foot of every page, after GO Club's, measured
+/// from its screen recordings: a capsule of clear Liquid Glass holding
+/// three symbols, Activity, Pay and Settings, and a grey glass lens under
+/// the one showing. The lens's place is wider than the others, so the
+/// symbols shift as it moves, and it moves on a spring that overshoots
+/// about a tenth and settles: overshooting at either end, it stretches
+/// the bar with it, as liquid would. The page changes at once. A finger
+/// dragged along the bar carries the lens and chooses wherever it lets
+/// go. The bar shrinks to 0.8, towards the foot of the screen, while a
+/// page scrolls down, comes back on the way up, and steps aside for
+/// pushed screens and Activity's search.
 struct StarHashTabBar: View {
     @Environment(AppRouter.self) private var router
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    @GestureState private var isPressed = false
     /// Where a finger dragging along the bar holds the lens, while it does.
     @State private var dragX: CGFloat?
 
@@ -19,64 +22,75 @@ struct StarHashTabBar: View {
 
     var body: some View {
         let selected = TabBarItem(router.selectedTab)
+        let selectedIndex = items.firstIndex(of: selected) ?? 0
+        let layout = TabBarLayout(selected: selectedIndex, count: items.count)
+        let lensCenter = dragX.map { min(max($0, layout.centers[0]), layout.centers[items.count - 1]) }
+            ?? layout.centers[selectedIndex]
+
         ZStack(alignment: .topLeading) {
+            TabBarGlass(
+                width: layout.width,
+                lensMinX: lensCenter - TabBarMetrics.lensWidth / 2,
+                lensMaxX: lensCenter + TabBarMetrics.lensWidth / 2
+            )
+
             lens
-                .offset(x: lensCenter(for: selected) - TabBarMetrics.lensWidth / 2, y: TabBarMetrics.inset)
-                .animation(lensAnimation, value: lensCenter(for: selected))
+                .offset(x: lensCenter - TabBarMetrics.lensWidth / 2, y: TabBarMetrics.lensInset)
 
             ForEach(Array(items.enumerated()), id: \.element) { index, item in
-                icon(item, isSelected: item == selected)
-                    .position(x: TabBarMetrics.center(of: index), y: TabBarMetrics.height / 2)
+                icon(item, isSelected: index == selectedIndex)
+                    .position(x: layout.centers[index], y: TabBarMetrics.height / 2)
             }
         }
-        .frame(width: TabBarMetrics.width, height: TabBarMetrics.height, alignment: .topLeading)
+        .frame(width: layout.width, height: TabBarMetrics.height, alignment: .topLeading)
+        .animation(dragX == nil ? lensSpring : .interactiveSpring(response: 0.18), value: lensCenter)
+        .animation(lensSpring, value: layout.width)
         .contentShape(Capsule())
-        .starhashGlass(in: Capsule())
-        .gesture(choosing)
-        .scaleEffect(scale, anchor: .bottom)
-        .animation(.spring(response: 0.35, dampingFraction: 0.65), value: isPressed)
-        .animation(.smooth(duration: 0.3), value: router.isTabBarCompact)
+        .gesture(choosing(layout))
+        // Towards the foot of the screen, not the bar's own: it shrinks
+        // and sinks, as the reference's does.
+        .scaleEffect(
+            router.isTabBarCompact ? TabBarMetrics.compactScale : 1,
+            anchor: UnitPoint(x: 0.5, y: 1 + TabBarMetrics.bottomGap / TabBarMetrics.height)
+        )
+        .animation(reduceMotion ? .smooth(duration: 0.2) : .spring(response: 0.3, dampingFraction: 0.78), value: router.isTabBarCompact)
         .sensoryFeedback(.selection, trigger: selected)
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Tab bar")
     }
 
-    /// The bar swells a touch under a finger, and shrinks while a page
-    /// scrolls down.
-    private var scale: CGFloat {
-        if isPressed { return 1.04 }
-        return router.isTabBarCompact ? TabBarMetrics.compactScale : 1
+    /// The reference's: about a tenth past the mark, back a touch, and
+    /// still in under half a second. A plain ease with Reduce Motion.
+    private var lensSpring: Animation {
+        reduceMotion ? .smooth(duration: 0.2) : .spring(response: 0.4, dampingFraction: 0.61)
     }
 
-    /// Springy, so it overshoots a little and settles, as the reference's
-    /// does; a plain fade of position with Reduce Motion.
-    private var lensAnimation: Animation {
-        if reduceMotion { return .smooth(duration: 0.2) }
-        return dragX == nil ? .spring(response: 0.42, dampingFraction: 0.68) : .interactiveSpring(response: 0.18)
-    }
-
-    private func lensCenter(for selected: TabBarItem) -> CGFloat {
-        if let dragX {
-            return min(max(dragX, TabBarMetrics.center(of: 0)), TabBarMetrics.center(of: items.count - 1))
-        }
-        return TabBarMetrics.center(of: items.firstIndex(of: selected) ?? 0)
-    }
-
+    /// Grey glass: the palette's grey, faint, with the light top edge and
+    /// dark sides glass has.
     private var lens: some View {
         Capsule()
             .fill(Color.tabBarLens)
-            .overlay(Capsule().strokeBorder(Color.tabBarLensEdge, lineWidth: 1))
-            .frame(width: TabBarMetrics.lensWidth, height: TabBarMetrics.height - TabBarMetrics.inset * 2)
+            .overlay {
+                Capsule().strokeBorder(
+                    LinearGradient(
+                        colors: [.tabBarLensEdgeLight, .tabBarLensEdgeDark, .tabBarLensEdgeDark, .tabBarLensEdgeLight.opacity(0.5)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ),
+                    lineWidth: 0.75
+                )
+            }
+            .frame(width: TabBarMetrics.lensWidth, height: TabBarMetrics.height - TabBarMetrics.lensInset * 2)
             .accessibilityHidden(true)
     }
 
     private func icon(_ item: TabBarItem, isSelected: Bool) -> some View {
         let symbol = item.symbol(payPage: router.payPage)
         return Image(systemName: symbol)
-            .font(.system(size: 22, weight: .semibold))
+            .font(.system(size: TabBarMetrics.symbolSize, weight: .semibold))
             .foregroundStyle(Color.starhashPrimaryText)
             .contentTransition(.symbolEffect(.replace))
-            .frame(width: TabBarMetrics.pitch, height: TabBarMetrics.height)
+            .frame(width: TabBarMetrics.itemWidth, height: TabBarMetrics.height)
             .contentShape(Rectangle())
             .accessibilityElement()
             .accessibilityLabel(item.title(payPage: router.payPage))
@@ -89,17 +103,15 @@ struct StarHashTabBar: View {
 
     /// A tap chooses the symbol under it; a drag carries the lens and
     /// chooses wherever the finger lets go.
-    private var choosing: some Gesture {
+    private func choosing(_ layout: TabBarLayout) -> some Gesture {
         DragGesture(minimumDistance: 0)
-            .updating($isPressed) { _, pressed, _ in pressed = true }
             .onChanged { value in
                 if dragX != nil || abs(value.translation.width) > 8 {
                     dragX = value.location.x
                 }
             }
             .onEnded { value in
-                let index = TabBarMetrics.nearestIndex(to: value.location.x, count: items.count)
-                select(items[index])
+                select(items[layout.nearestIndex(to: value.location.x)])
                 dragX = nil
             }
     }
@@ -111,6 +123,84 @@ struct StarHashTabBar: View {
         case .settings: router.show(.settings)
         }
     }
+}
+
+/// The bar's glass, stretched to take in the lens wherever it is: at rest
+/// the lens sits 6pt inside, and overshooting an end it pulls the edge out
+/// with it. Animatable, so the outline follows the lens frame by frame.
+private struct TabBarGlass: View, Animatable {
+    var width: CGFloat
+    var lensMinX: CGFloat
+    var lensMaxX: CGFloat
+
+    var animatableData: AnimatablePair<CGFloat, AnimatablePair<CGFloat, CGFloat>> {
+        get { AnimatablePair(width, AnimatablePair(lensMinX, lensMaxX)) }
+        set {
+            width = newValue.first
+            lensMinX = newValue.second.first
+            lensMaxX = newValue.second.second
+        }
+    }
+
+    var body: some View {
+        let minX = min(0, lensMinX - TabBarMetrics.lensSideInset)
+        let maxX = max(width, lensMaxX + TabBarMetrics.lensSideInset)
+        Color.clear
+            .frame(width: maxX - minX, height: TabBarMetrics.height)
+            // Clear glass, not the app's deep-blue tint: the reference's
+            // frosts whatever is under it.
+            .starhashGlass(in: Capsule(), tint: .clear)
+            .offset(x: minX)
+            .allowsHitTesting(false)
+    }
+}
+
+/// Where each symbol sits for a given selection: the lens's place 93pt
+/// wide and the others 66, 6pt in from the ends, and an unselected end
+/// symbol a further 8pt in. So the bar is a little wider with the middle
+/// chosen, as the reference's is.
+struct TabBarLayout: Equatable {
+    let centers: [CGFloat]
+    let width: CGFloat
+
+    init(selected: Int, count: Int) {
+        var x = TabBarMetrics.lensSideInset
+        var centers: [CGFloat] = []
+        for index in 0..<count {
+            let isSelected = index == selected
+            let isEnd = index == 0 || index == count - 1
+            let outer = isEnd && !isSelected ? TabBarMetrics.endInset : 0
+            let itemWidth = isSelected ? TabBarMetrics.lensWidth : TabBarMetrics.itemWidth
+            if index == 0 { x += outer }
+            centers.append(x + itemWidth / 2)
+            x += itemWidth
+            if index == count - 1 { x += outer }
+        }
+        self.centers = centers
+        self.width = x + TabBarMetrics.lensSideInset
+    }
+
+    func nearestIndex(to x: CGFloat) -> Int {
+        centers.indices.min { abs(centers[$0] - x) < abs(centers[$1] - x) } ?? 0
+    }
+}
+
+/// The reference's measurements, in points: a 75pt capsule whose foot is
+/// 28pt above the screen's, a 93.3 by 59 lens 6pt in from the side and 8
+/// from top and foot, and 66pt for each symbol it is not under.
+enum TabBarMetrics {
+    static let height: CGFloat = 75
+    static let lensWidth: CGFloat = 93.33
+    static let lensSideInset: CGFloat = 6
+    static let lensInset: CGFloat = 8
+    static let itemWidth: CGFloat = 66
+    static let endInset: CGFloat = 8
+    static let symbolSize: CGFloat = 24
+    static let bottomGap: CGFloat = 28
+    static let compactScale: CGFloat = 0.8
+    /// What a page keeps clear at its foot for the bar: its height above
+    /// the safe area's foot (it sits a little into it) and a gap.
+    static let clearance: CGFloat = height - 6 + 12
 }
 
 /// The bar's three places, left to right. Pay's holds Buy too: the button
@@ -143,29 +233,6 @@ enum TabBarItem: CaseIterable, Hashable {
         case .pay: payPage.title
         case .settings: AppTab.settings.title
         }
-    }
-}
-
-/// The reference's measurements: a 74pt capsule, its lens 92 by 62 and 6pt
-/// in from the edge, and a symbol every 70pt.
-enum TabBarMetrics {
-    static let height: CGFloat = 74
-    static let inset: CGFloat = 6
-    static let lensWidth: CGFloat = 92
-    static let pitch: CGFloat = 70
-    static let compactScale: CGFloat = 0.8
-    static var width: CGFloat { inset * 2 + lensWidth + pitch * CGFloat(TabBarItem.allCases.count - 1) }
-    /// What a page keeps clear at its foot for the bar: its height and the
-    /// gap above it.
-    static let clearance: CGFloat = height + 12
-
-    static func center(of index: Int) -> CGFloat {
-        inset + lensWidth / 2 + pitch * CGFloat(index)
-    }
-
-    static func nearestIndex(to x: CGFloat, count: Int) -> Int {
-        let raw = ((x - center(of: 0)) / pitch).rounded()
-        return min(max(Int(raw), 0), count - 1)
     }
 }
 

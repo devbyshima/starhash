@@ -1,7 +1,8 @@
 import SwiftUI
 
 /// Everything after onboarding: the page showing, and the tab bar floating
-/// at its foot. Each page is built the first time it shows and then kept,
+/// at its foot. Pages change at once, as the reference's do, while the
+/// bar's lens travels. Each page is built the first time it shows and then kept,
 /// so it keeps its state (a typed amount, a scroll position) while another
 /// page shows.
 struct TabContainer: View {
@@ -15,9 +16,10 @@ struct TabContainer: View {
             pages
                 .overlay(alignment: .bottom) {
                     StarHashTabBar()
-                        // Phones without a home indicator have no inset
-                        // at the foot, so the bar keeps its own margin.
-                        .padding(.bottom, proxy.safeAreaInsets.bottom > 0 ? 0 : 12)
+                        // 28pt above the screen's foot, as the reference's,
+                        // a little into the home indicator's inset; phones
+                        // without one get a margin of their own.
+                        .padding(.bottom, proxy.safeAreaInsets.bottom > 0 ? TabBarMetrics.bottomGap - proxy.safeAreaInsets.bottom : 12)
                         .offset(y: router.isTabBarHidden ? TabBarMetrics.height + proxy.safeAreaInsets.bottom + 24 : 0)
                         .opacity(router.isTabBarHidden ? 0 : 1)
                         .allowsHitTesting(!router.isTabBarHidden)
@@ -41,7 +43,6 @@ struct TabContainer: View {
                 }
             }
         }
-        .animation(.smooth(duration: 0.18), value: router.selectedTab)
     }
 
     @ViewBuilder

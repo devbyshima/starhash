@@ -79,6 +79,15 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   lines and `settingsCardRow` draws the dotted one. Never a solid line.
 - Glass only through `starhashGlass`, `starhashGlassButtonStyle`,
   `StarHashGlassContainer` (iOS 18 falls back to materials).
+- The tab bar (`StarHash/App/StarHashTabBar.swift`) is measured from GO
+  Club's screen recordings; keep its numbers (`TabBarMetrics`,
+  `TabBarLayout`) and its spring (response 0.4, damping 0.61) as they
+  are. It is the one glass with no tint: clear Liquid Glass, as the
+  reference's. Root pages leave room for it with
+  `starhashTabBarClearance()`, scroll views shrink it with
+  `starhashTabBarFollowsScroll()`, and a page hides it with
+  `router.setHidesTabBar(_:on:)` while a screen is pushed or a search is
+  open.
 - Build screens from the existing pieces: `StarHashCircleButton`,
   `StarHashCard`, `StarHashRowSeparator`, `.starhashPrimary`,
   `.starhashCapsule`, `SymbolTile`, `EmptyStateView`, `starhashBottomBar`.
