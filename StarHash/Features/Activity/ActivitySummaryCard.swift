@@ -113,9 +113,12 @@ struct ActivitySpendingChart: View {
                     y: .value("Sent", Double(bucket.total) / top),
                     width: .ratio(Self.barWidthRatio)
                 )
-                // The pressed bar keeps the full blue; the rest step back.
-                .foregroundStyle(Color.starhashAccentGraphic.opacity(selectedIndex == nil || selectedIndex == bucket.index ? 1 : 0.5))
+                // Drawn like the primary button: the blue as a gradient
+                // with a soft glow of itself under it. The pressed bar
+                // keeps it; the rest step back.
+                .foregroundStyle(Color.starhashInk.gradient.opacity(isProminent(bucket) ? 1 : 0.4))
                 .clipShape(UnevenRoundedRectangle(topLeadingRadius: barRadius, topTrailingRadius: barRadius, style: .continuous))
+                .shadow(color: Color.starhashInk.opacity(isProminent(bucket) ? 0.35 : 0), radius: 7, y: 3)
                 .accessibilityLabel(ActivitySummary.spokenName(of: bucket, period: period, calendar: calendar))
                 .accessibilityValue(Money.formatWithCurrency(bucket.total))
             }
@@ -247,6 +250,12 @@ struct ActivitySpendingChart: View {
         return !zip(labelled, labelled.dropFirst()).allSatisfy { left, right in
             (width(left.label) + width(right.label)) / 2 + 4 <= CGFloat(right.index - left.index) * slot
         }
+    }
+
+    /// Whether a bar is drawn at full strength: all of them, until one is
+    /// pressed.
+    private func isProminent(_ bucket: ActivitySummary.Bucket) -> Bool {
+        selectedIndex == nil || selectedIndex == bucket.index
     }
 
     /// Narrow bars (a month of days) get smaller corners so they stay bars.

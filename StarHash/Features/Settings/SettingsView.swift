@@ -139,7 +139,7 @@ private struct SettingsRootList: View {
                 SettingsToggleRow(
                     symbol: "questionmark.bubble.fill",
                     title: "Ask before deleting",
-                    caption: "Confirm before a transaction is deleted",
+                    caption: "Confirm every delete except a swipe",
                     isOn: $confirmDeletes
                 )
                 .settingsCardRow(.first)

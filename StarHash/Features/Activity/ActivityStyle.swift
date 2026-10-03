@@ -97,16 +97,19 @@ extension View {
 // coordinates them; earlier systems keep only the long-press menu, so both
 // helpers do nothing there.
 extension View {
-    /// Swiping the row towards the leading edge reveals Delete (with the
-    /// same confirmation as the long-press menu). iOS 27 and later; the
-    /// scroll view holding the row needs `activitySwipeActionsContainer()`.
+    /// Beam's swipe on a copied item: swiping the row towards the leading
+    /// edge reveals a red trash, and a full swipe deletes at once. iOS 27
+    /// and later; the scroll view holding the row needs
+    /// `activitySwipeActionsContainer()`.
     @ViewBuilder
     func activitySwipeToDelete(_ onDelete: @escaping () -> Void) -> some View {
         if #available(iOS 27.0, *) {
-            swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            swipeActions(edge: .trailing, allowsFullSwipe: true) {
                 Button(role: .destructive, action: onDelete) {
-                    Label("Delete", systemImage: "trash")
+                    Image(systemName: "trash")
                 }
+                .tint(Color.starhashDestructive)
+                .accessibilityLabel("Delete")
             }
         } else {
             self

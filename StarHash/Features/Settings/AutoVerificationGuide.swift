@@ -48,6 +48,7 @@ struct AutoVerificationGuide: View {
                         GuideStepList(steps: [
                             "Tap **Add Shortcut** below.",
                             "In Shortcuts, tap **Add Shortcut**.",
+                            "To run it silently, open **Automation**, tap StarHash SMS and turn off **Notify When Run**.",
                             "Come back and tap **Continue**.",
                         ])
                         .padding(.top, 20)

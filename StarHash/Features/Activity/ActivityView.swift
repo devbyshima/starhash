@@ -7,8 +7,9 @@ import UIKit
 /// transactions grouped by day. Search replaces all of it with its own
 /// full-screen view while it is open, and the tab bar hides meanwhile.
 ///
-/// A transaction's details open through `AppRouter.openTransactionID`, so a
-/// route from a URL or an intent opens the same sheet a tap does.
+/// A transaction's details are a page pushed on the tab's own stack, opened
+/// through `AppRouter.openTransactionID`, so a route from a URL or an intent
+/// opens the same page a tap does.
 struct ActivityView: View {
     @Environment(StarHashStore.self) private var store
     @Environment(AppRouter.self) private var router
@@ -29,9 +30,7 @@ struct ActivityView: View {
 
     @State private var transactionToDelete: StarHashKit.Transaction?
     @State private var feedbackCount = 0
-    /// Chosen with Pay Again on the details sheet, handed to Pay once the
-    /// sheet has closed.
-    @State private var payAgainRecipient: Recipient?
+    @State private var swipeDeleteCount = 0
     #if DEBUG
     @State private var didApplyDebugLaunch = false
     #endif
@@ -40,22 +39,28 @@ struct ActivityView: View {
     private var calendar: Calendar { .autoupdatingCurrent }
 
     var body: some View {
-        ZStack {
-            Color.starhashBackground.ignoresSafeArea()
-            if isSearching {
-                searchScreen
-                    .transition(.opacity)
-            } else {
-                mainScreen
-                    .transition(.opacity)
+        NavigationStack(path: openTransactionPath) {
+            ZStack {
+                Color.starhashBackground.ignoresSafeArea()
+                if isSearching {
+                    searchScreen
+                        .transition(.opacity)
+                } else {
+                    mainScreen
+                        .transition(.opacity)
+                }
             }
+            .toolbar(.hidden, for: .navigationBar)
+            .navigationDestination(for: UUID.self) { id in
+                TransactionDetailPage(transactionID: id, onPayAgain: payAgain)
+            }
+        }
+        .onChange(of: router.openTransactionID != nil, initial: true) { _, isOpen in
+            router.setPushedScreen(isOpen, on: .activity)
         }
         // Contact photos for the rows, read once access is already granted.
         .task(id: enableContacts) {
             if enableContacts { await PayContacts.shared.loadIfAllowed() }
-        }
-        .sheet(item: openTransaction, onDismiss: handOffPayAgain) { item in
-            TransactionDetailSheet(transactionID: item.id) { payAgainRecipient = $0 }
         }
         .deleteTransactionDialog($transactionToDelete, onDelete: delete)
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
@@ -65,6 +70,7 @@ struct ActivityView: View {
             if phase == .active { now = .now }
         }
         .sensoryFeedback(.success, trigger: feedbackCount)
+        .sensoryFeedback(.impact(flexibility: .rigid), trigger: swipeDeleteCount)
         #if DEBUG
         .onAppear(perform: applyDebugLaunch)
         #endif
@@ -126,7 +132,8 @@ struct ActivityView: View {
                             transactions: section.transactions,
                             onOpen: open,
                             onConfirm: markConfirmed,
-                            onDelete: requestDelete
+                            onDelete: requestDelete,
+                            onSwipeDelete: swipeDelete
                         )
                     }
                 }
@@ -164,21 +171,22 @@ struct ActivityView: View {
             onOpen: open,
             onConfirm: markConfirmed,
             onDelete: requestDelete,
+            onSwipeDelete: swipeDelete,
             onClose: endSearch
         )
     }
 
-    // MARK: Sheet
+    // MARK: Details
 
-    /// The router's open transaction, as a sheet item. A transaction that
+    /// The router's open transaction as the stack's path. A transaction that
     /// no longer exists opens nothing.
-    private var openTransaction: Binding<OpenTransaction?> {
+    private var openTransactionPath: Binding<[UUID]> {
         Binding(
             get: {
-                router.openTransactionID
-                    .flatMap { store.transaction(id: $0) == nil ? nil : OpenTransaction(id: $0) }
+                guard let id = router.openTransactionID, store.transaction(id: id) != nil else { return [] }
+                return [id]
             },
-            set: { router.openTransactionID = $0?.id }
+            set: { router.openTransactionID = $0.last }
         )
     }
 
@@ -188,11 +196,10 @@ struct ActivityView: View {
         router.openTransactionID = transaction.id
     }
 
-    /// After the details sheet closes: Pay Again's recipient goes to Pay,
-    /// which may open a sheet of its own.
-    private func handOffPayAgain() {
-        guard let recipient = payAgainRecipient else { return }
-        payAgainRecipient = nil
+    /// Pay Again on the details page: back to the list, and the recipient
+    /// to Pay.
+    private func payAgain(_ recipient: Recipient) {
+        router.openTransactionID = nil
         router.pay(recipient)
     }
 
@@ -216,6 +223,14 @@ struct ActivityView: View {
         } else {
             delete(transaction)
         }
+    }
+
+    /// A full swipe, or the trash it reveals: gone at once with a firm tap,
+    /// as Beam deletes a copied item. The swipe is the deliberate gesture,
+    /// so it does not ask.
+    private func swipeDelete(_ transaction: StarHashKit.Transaction) {
+        withAnimation(.smooth(duration: 0.3)) { store.delete(id: transaction.id) }
+        swipeDeleteCount += 1
     }
 
     private func delete(_ transaction: StarHashKit.Transaction) {
@@ -256,9 +271,4 @@ struct ActivityView: View {
         }
     }
     #endif
-}
-
-/// `AppRouter.openTransactionID` as an identifiable sheet item.
-private struct OpenTransaction: Identifiable {
-    let id: UUID
 }

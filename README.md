@@ -45,14 +45,17 @@ Free and open source.
 - **Activity**: payments grouped by day with a red arrow out and a green
   arrow in, a bar chart for Today, This Week, This Month, This Year or All
   Time with the total spent and MTN fees, and search across everything.
-- **Transaction details**: who, how much, a category, the fee, date, time,
+  Swipe a payment left for a red trash, or all the way across to delete it
+  at once, as in Beam.
+- **Transaction details**, a page of its own: who, how much, a category, the fee, date, time,
   carrier code, a map of where you paid (when Nearby is on), what you sent
   them this year, Pay Again, Mark as Confirmed and Delete.
 - **Settings**: your profile and this year's totals, My Wallets (MTN MoMo
   or Airtel Money, whichever you pay with, marked Main; banks coming soon),
   switches for saving
   transactions, contacts, Nearby and recent recipients, Ask before deleting
-  (also turned off from the delete question's Don't Ask Again), the auto
+  from a menu or a transaction's page (also turned off from the delete
+  question's Don't Ask Again), the auto
   verification guide, How StarHash Works and Privacy.
 - **Shortcuts and Siri**: Process Carrier SMS, Check MoMo Balance and Pay
   with StarHash actions.
@@ -95,7 +98,10 @@ shown with a real screenshot of Shortcuts:
    (`StarHashShortcut.iCloudLink`) on Shortcuts' Add screen. It is the
    Process Carrier SMS action fed the shortcut's input, with its automation
    built in (iOS 27): when a message containing **RWF** arrives (every
-   M-Money message does), run without asking. Nothing to build.
+   M-Money message does), run without asking. Nothing to build. iOS
+   announces each run until **Notify When Run** is turned off on the
+   automation, a setting a shortcut file cannot carry, so the step list
+   says so.
 2. **Verify Shortcut** runs it with a sample message (never saved) and
    comes back through x-callback-url. Auto-verify only turns on once this
    works.

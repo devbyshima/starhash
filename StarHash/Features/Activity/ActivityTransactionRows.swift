@@ -3,7 +3,8 @@ import SwiftUI
 
 /// Transactions as the rows of one card, with a hairline under each name
 /// between them: one day of Activity's list, or the search results. A row
-/// opens its details; its context menu and swipe confirm or delete it.
+/// opens its details; its context menu confirms or deletes it (asking
+/// first), and a swipe deletes it outright, as Beam's clipboard rows do.
 ///
 /// Place it in a lazy stack with no spacing: each row draws its own slice
 /// of the card, so a long list is still built only as it scrolls in.
@@ -15,6 +16,8 @@ struct ActivityTransactionRows: View {
     let onOpen: (StarHashKit.Transaction) -> Void
     let onConfirm: (StarHashKit.Transaction) -> Void
     let onDelete: (StarHashKit.Transaction) -> Void
+    /// The swipe's delete, which does not ask.
+    let onSwipeDelete: (StarHashKit.Transaction) -> Void
 
     var body: some View {
         ForEach(Array(transactions.enumerated()), id: \.element.id) { index, transaction in
@@ -47,7 +50,7 @@ struct ActivityTransactionRows: View {
                     StarHashRowSeparator(leading: ActivityLayout.rowSeparatorLeading)
                 }
             }
-            .activitySwipeToDelete { onDelete(transaction) }
+            .activitySwipeToDelete { onSwipeDelete(transaction) }
             .transition(.opacity)
         }
     }
@@ -115,7 +118,7 @@ struct ActivityTransactionRow: View {
         return parts.joined(separator: " \u{00B7} ")
     }
 
-    /// The direction arrow (red out, green in, as on the details sheet),
+    /// The direction arrow (red out, green in, as on the details page),
     /// then the amount.
     private var amount: some View {
         HStack(alignment: .firstTextBaseline, spacing: 4) {

@@ -15,6 +15,7 @@ struct ActivitySearchView: View {
     let onOpen: (StarHashKit.Transaction) -> Void
     let onConfirm: (StarHashKit.Transaction) -> Void
     let onDelete: (StarHashKit.Transaction) -> Void
+    let onSwipeDelete: (StarHashKit.Transaction) -> Void
     let onClose: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -50,7 +51,8 @@ struct ActivitySearchView: View {
                         showsDate: true,
                         onOpen: onOpen,
                         onConfirm: onConfirm,
-                        onDelete: onDelete
+                        onDelete: onDelete,
+                        onSwipeDelete: onSwipeDelete
                     )
                 }
                 .padding(.horizontal, StarHashMetrics.screenPadding)

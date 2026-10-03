@@ -74,7 +74,7 @@ final class AppRouter {
     var edgeSwipeOpensMenu: Bool {
         !isMenuOpen && !pagesWithPushedScreens.contains(selectedTab)
     }
-    /// The transaction whose details sheet is open on Activity.
+    /// The transaction whose details page is open on Activity.
     var openTransactionID: UUID?
     /// Someone to pay, asked for outside the Pay tab (Pay Again on a
     /// transaction), until Pay takes it with `takePayRequest()`.

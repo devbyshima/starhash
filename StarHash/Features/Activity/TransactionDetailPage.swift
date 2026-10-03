@@ -3,19 +3,19 @@ import StarHashKit
 import SwiftUI
 import UIKit
 
-/// What tapping a transaction shows, in Beam's sheet language: the title
-/// with a glass "more" menu on its right, then who and how much with the
-/// category, the carrier's details in a card of dotted rows, where it was
-/// paid on a small map, what this year has sent the same recipient, and the
-/// actions (Pay Again, Mark as Confirmed, Delete Transaction).
-struct TransactionDetailSheet: View {
+/// What tapping a transaction shows, a page pushed on Activity's stack: the
+/// system bar with its back button and a "more" menu, then who and how much
+/// with the category, the carrier's details in a card of dotted rows, where
+/// it was paid on a small map, what this year has sent the same recipient,
+/// and the actions (Pay Again, Mark as Confirmed, Delete Transaction). The
+/// pieces are Beam's sheet language, on the page's cards.
+struct TransactionDetailPage: View {
     let transactionID: UUID
-    /// Pay Again: the caller hands the recipient to Pay once this sheet has
-    /// gone, so Pay's own sheet never opens while this one is still closing.
+    /// Pay Again: the caller pops this page and takes the recipient to Pay.
     let onPayAgain: (Recipient) -> Void
 
     @Environment(StarHashStore.self) private var store
-    @Environment(\.dismiss) private var dismiss
+    @Environment(AppRouter.self) private var router
 
     @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
     @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
@@ -25,35 +25,37 @@ struct TransactionDetailSheet: View {
     private var transaction: StarHashKit.Transaction? { store.transaction(id: transactionID) }
 
     var body: some View {
-        VStack(spacing: 0) {
-            SheetHeader("Transaction") {
-                if let transaction { actionsMenu(transaction) }
-            }
-            ScrollView {
-                VStack(spacing: 20) {
-                    if let transaction {
-                        hero(transaction)
-                        detailsCard(transaction)
-                        if let location = transaction.location {
-                            locationSection(location, title: transaction.counterparty.displayName)
-                        }
-                        stats(transaction)
-                        actions(transaction)
+        ScrollView {
+            VStack(spacing: 20) {
+                if let transaction {
+                    hero(transaction)
+                    detailsCard(transaction)
+                    if let location = transaction.location {
+                        locationSection(location, title: transaction.counterparty.displayName)
                     }
+                    stats(transaction)
+                    actions(transaction)
                 }
-                .padding(.horizontal, 18)
-                .padding(.top, 8)
-                .padding(.bottom, 40)
             }
-            .scrollIndicators(.hidden)
-            .scrollBounceBehavior(.basedOnSize)
-            .starhashReadableScrollContent()
+            .padding(.horizontal, StarHashMetrics.screenPadding)
+            .padding(.top, 8)
+            .padding(.bottom, 40)
         }
+        .scrollIndicators(.hidden)
+        .scrollBounceBehavior(.basedOnSize)
+        .starhashReadableScrollContent()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .sheetGlass()
+        .background(Color.starhashBackground.ignoresSafeArea())
+        .navigationTitle("Transaction")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if let transaction {
+                ToolbarItem(placement: .topBarTrailing) { actionsMenu(transaction) }
+            }
+        }
         // Deleted here or elsewhere: nothing left to show.
         .onChange(of: transaction == nil) { _, isGone in
-            if isGone { dismiss() }
+            if isGone { router.openTransactionID = nil }
         }
         .sensoryFeedback(.success, trigger: feedbackCount)
         .deleteTransactionDialog($transactionToDelete) { _ in delete() }
@@ -98,10 +100,9 @@ struct TransactionDetailSheet: View {
                 Label("Delete", systemImage: "trash")
             }
         } label: {
-            SheetGlassGlyph(symbol: "ellipsis")
+            Image(systemName: "ellipsis")
         }
         .menuOrder(.fixed)
-        .buttonStyle(.plain)
         .accessibilityLabel("More")
         .accessibilityShowsLargeContentViewer { Label("More", systemImage: "ellipsis") }
     }
@@ -122,7 +123,7 @@ struct TransactionDetailSheet: View {
                         .font(.system(size: 11, weight: .bold))
                         .foregroundStyle(tint)
                         .frame(width: 24, height: 24)
-                        .background(Color.sheetSurface, in: Circle())
+                        .background(Color.starhashBackground, in: Circle())
                         .overlay(Circle().fill(tint.opacity(0.14)))
                         .offset(x: 4, y: 4)
                         .accessibilityHidden(true)
@@ -229,7 +230,7 @@ struct TransactionDetailSheet: View {
             SheetInfoRow(label: "Status") { statusValue(transaction.status) }
         }
         .padding(.horizontal, 16)
-        .sheetCard()
+        .sheetCard(fill: .starhashCard)
     }
 
     /// A dot and the word, in the status's colour, as Beam shows a state.
@@ -258,7 +259,7 @@ struct TransactionDetailSheet: View {
     // MARK: Location
 
     /// Where it was paid: a still map with a marker, drawn like a snapshot
-    /// (no panning or zooming inside a scrolling sheet).
+    /// (no panning or zooming inside a scrolling page).
     private func locationSection(_ location: StarHashKit.Transaction.Coordinate, title: String) -> some View {
         let coordinate = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
         return VStack(spacing: 8) {
@@ -290,7 +291,7 @@ struct TransactionDetailSheet: View {
                 stat(value: String(ytd.count), label: ytd.count == 1 ? "Payment" : "Payments")
             }
             .padding(16)
-            .sheetCard()
+            .sheetCard(fill: .starhashCard)
         }
     }
 
@@ -335,10 +336,9 @@ struct TransactionDetailSheet: View {
         transaction.direction == .outgoing ? "Pay Again" : "Send Money"
     }
 
-    /// Closes the sheet; the caller then takes the recipient to Pay.
+    /// The caller pops this page and takes the recipient to Pay.
     private func payAgain(_ transaction: StarHashKit.Transaction) {
         onPayAgain(transaction.counterparty)
-        dismiss()
     }
 
     private func markConfirmed(_ transaction: StarHashKit.Transaction) {
