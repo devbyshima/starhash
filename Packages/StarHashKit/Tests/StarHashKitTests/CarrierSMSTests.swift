@@ -131,6 +131,145 @@ import Testing
         #expect(sms.reference == "1203800000")
     }
 
+    // MARK: Airtel Money
+    //
+    // Airtel Africa's template, as its Ugandan and Zambian messages read, in
+    // RWF with the currency first: no Rwandan message has been published.
+
+    @Test func airtelSent() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "SENT.TID 143284610198. RWF 1,000 to JEAN BOSCO  0732561240. Fee RWF 0. Bal RWF 2,214. Date 20-March-2026 20:36."
+        ))
+        #expect(sms.wallet == .airtel)
+        #expect(sms.direction == .outgoing)
+        #expect(sms.amount == 1_000)
+        #expect(sms.fee == 0)
+        #expect(sms.balanceAfter == 2_214)
+        #expect(sms.counterparty.name == "Jean Bosco")
+        #expect(sms.counterparty.destination == "0732561240")
+        #expect(sms.counterparty.kind == .phone)
+        #expect(sms.reference == "143284610198")
+        #expect(sms.date == kigali(2026, 3, 20, 20, 36))
+    }
+
+    @Test func airtelSentNumberFirst() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "SENT.TID 143284610199. RWF2,500 to 250788123456 John DOE. Fee RWF 20. Bal RWF 9,000. Date 21-March-2026 08:05."
+        ))
+        #expect(sms.amount == 2_500)
+        #expect(sms.fee == 20)
+        #expect(sms.counterparty.name == "John Doe")
+        #expect(sms.counterparty.destination == "0788123456")
+    }
+
+    @Test func airtelSentToTheOtherNetwork() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "Sent to JEAN BOSCO in MTN . Amt RWF 2,000. Fee RWF 20. TID 150000000001."
+        ))
+        #expect(sms.direction == .outgoing)
+        #expect(sms.amount == 2_000)
+        #expect(sms.fee == 20)
+        #expect(sms.counterparty.name == "Jean Bosco")
+        #expect(sms.counterparty.destination == "")
+    }
+
+    @Test func airtelMoneySentTo() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "Money sent to JEAN BOSCO on 0732561240. Amount RWF 205. Your bal is RWF 260. TID: PP260727.1512.M73944"
+        ))
+        #expect(sms.amount == 205)
+        #expect(sms.balanceAfter == 260)
+        #expect(sms.counterparty.destination == "0732561240")
+        #expect(sms.reference == "PP260727.1512.M73944")
+    }
+
+    @Test func airtelReceived() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "RECEIVED. TID 143487144326. RWF 40,000 from 732561240, ARIANE ISHIMWE. Bal RWF 40,000. View txns on MyAirtel App"
+        ))
+        #expect(sms.wallet == .airtel)
+        #expect(sms.direction == .incoming)
+        #expect(sms.amount == 40_000)
+        #expect(sms.counterparty.name == "Ariane Ishimwe")
+        // Airtel leaves the 0 off the sender's number.
+        #expect(sms.counterparty.destination == "0732561240")
+        #expect(sms.balanceAfter == 40_000)
+        #expect(sms.date == nil)
+    }
+
+    @Test func airtelReceivedByName() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "You have received RWF 300 from ARIANE ISHIMWE. Txn. ID: CI260726.1522.A37452. Reason: Mobile Money Transfer."
+        ))
+        #expect(sms.wallet == .airtel)
+        #expect(sms.direction == .incoming)
+        #expect(sms.amount == 300)
+        #expect(sms.counterparty.name == "Ariane Ishimwe")
+        #expect(sms.reference == "CI260726.1522.A37452")
+    }
+
+    @Test func airtelMerchantPayment() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "PAID.TID 134346936087. RWF 5,000 to KIGALI COFFEE LTD 300770 Charge RWF 0. Bal RWF 35,415. 07-November-2025 20:27"
+        ))
+        #expect(sms.direction == .outgoing)
+        #expect(sms.amount == 5_000)
+        #expect(sms.fee == 0)
+        #expect(sms.counterparty.name == "Kigali Coffee Ltd")
+        #expect(sms.counterparty.destination == "300770")
+        #expect(sms.counterparty.kind == .merchant)
+        #expect(sms.date == kigali(2025, 11, 7, 20, 27))
+    }
+
+    @Test func airtelMerchantPaymentWithoutCode() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "PAID RWF 5,000 to SIMBA SUPERMARKET Charge RWF 0, TID 145891386684. Bal RWF 1,750 Date: 26-April-2026 10:13."
+        ))
+        #expect(sms.counterparty.name == "Simba Supermarket")
+        #expect(sms.counterparty.destination == "")
+        #expect(sms.reference == "145891386684")
+        #expect(sms.balanceAfter == 1_750)
+        #expect(sms.date == kigali(2026, 4, 26, 10, 13))
+    }
+
+    @Test func airtelTillPayment() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "Payment of RWF 1,500 Till Number 300770 KIGALI COFFEE LTD. Airtel Money bal is RWF 466. TID : MP260727.1129.Y34799."
+        ))
+        #expect(sms.amount == 1_500)
+        #expect(sms.counterparty.name == "Kigali Coffee Ltd")
+        #expect(sms.counterparty.destination == "300770")
+        #expect(sms.balanceAfter == 466)
+        #expect(sms.reference == "MP260727.1129.Y34799")
+    }
+
+    @Test func airtelCashDeposit() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "CASH DEPOSIT of RWF 9,000 from  KCB BANK RWANDA. Bal RWF 11,214. TID 143323980086. 21-March-2026 14:15"
+        ))
+        #expect(sms.direction == .incoming)
+        #expect(sms.amount == 9_000)
+        #expect(sms.counterparty.name == "Kcb Bank Rwanda")
+        #expect(sms.date == kigali(2026, 3, 21, 14, 15))
+    }
+
+    /// Cash taken out at an agent is not a payment, as with MTN.
+    @Test(arguments: [
+        "WITHDRAWN. TID 145041307719. RWF216,000 with Agent ID: 4324353.Fee RWF 3,575.Bal RWF 765. 14-April-2026 18:28.",
+        "Transaction failed. TID 145041307720. RWF 1,000 to JEAN BOSCO 0732561240. Insufficient funds.",
+        "Airtel: Get 2GB for RWF 500 today only. Dial *140#.",
+    ])
+    func airtelMessagesThatAreNotPayments(_ text: String) {
+        #expect(CarrierSMS.parse(text) == nil)
+    }
+
+    @Test func mtnMessagesSayTheyAreMTN() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "TxId: 1203948571. Your payment of 15,000 RWF to PILI-PILI INVEST 020205 has been completed at 2024-10-20 13:12:41. Your new balance: 47,000 RWF. Fee was 0 RWF."
+        ))
+        #expect(sms.wallet == .mtn)
+    }
+
     // MARK: Not transactions
 
     @Test(arguments: [
@@ -147,7 +286,7 @@ import Testing
     }
 
     /// Banks text in RWF too, so the automation hands their messages over
-    /// as well; StarHash only reads MTN MoMo's for now.
+    /// as well; StarHash reads only MTN MoMo's and Airtel Money's.
     @Test(arguments: [
         "BK: Your account 00040-0123456-01 has been debited with RWF 20,000 on 02/10/2026 12:00. Avail Bal: RWF 150,000.",
         "Equity Bank: You have received RWF 50,000 from JOHN DOE on 02-10-2026. Ref: FT2627512345. Bal: RWF 210,500.",

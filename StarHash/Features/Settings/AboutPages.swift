@@ -8,7 +8,7 @@ struct HowStarHashWorksView: View {
         ("number", "Type an amount", "Enter what you want to pay on the keypad. Balance checks your wallet: *182*6*1# on MTN MoMo, the *182# menu on Airtel Money."),
         ("person.fill", "Pick who", "Choose a contact, a recent recipient, or type a number or merchant code. Ten digits or more is a phone number; fewer is a MoMo Pay code."),
         ("phone.fill", "StarHash dials", "StarHash opens the dialer with your wallet's USSD code: *182*1*1*number*amount# to send on your own network, *182*1*2*number*amount# to send to the other one, *182*8*1*code*amount# to pay a merchant. You confirm with your PIN, as always."),
-        ("checkmark.message.fill", "Every payment, logged", "The payment shows in Activity. With auto-verify set up, MTN's confirmation SMS fills in the fee, the reference and your new balance."),
+        ("checkmark.message.fill", "Every payment, logged", "The payment shows in Activity. With auto-verify set up, your wallet's confirmation SMS fills in the fee, the reference and your new balance."),
     ]
 
     var body: some View {
@@ -46,7 +46,7 @@ struct PrivacyView: View {
         ("iphone", "Everything stays on this iPhone", "Transactions, recipients and your profile are saved on this device only. There is no account, no login and no server."),
         ("person.crop.circle", "Contacts", "Read on your iPhone to show who you can pay. They are never copied or uploaded."),
         ("location", "Location", "Only when Nearby is on, and only while you pay. Each payment keeps where it was made, for its map, and a number or code that is not in your contacts is suggested when you are back there. All of it stays on this iPhone, out of backups too. Turning Nearby off forgets it all."),
-        ("message", "Messages", "StarHash cannot read your SMS. Your own Shortcuts automation passes MTN's confirmation messages to it, and you can turn that off at any time."),
+        ("message", "Messages", "StarHash cannot read your SMS. Your own Shortcuts automation passes your wallet's confirmation messages to it, and you can turn that off at any time."),
         ("trash", "Your data, your call", "Delete All Data in Settings erases everything StarHash keeps, or delete the app."),
     ]
 

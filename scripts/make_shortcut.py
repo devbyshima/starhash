@@ -2,7 +2,7 @@
 # Writes the "StarHash SMS" shortcut that auto-verify installs, already set
 # up: one action, StarHash's Process Carrier SMS, fed the shortcut's input,
 # and its automation built in (iOS 27): when a message containing RWF
-# arrives (every M-Money message does), run without asking. Then signs it with
+# arrives (every M-Money and AirtelMoney message does), run without asking. Then signs it with
 # the Mac's `shortcuts sign` (needs this Mac signed in to iCloud), since
 # iOS only imports signed shortcut files.
 #

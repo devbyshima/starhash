@@ -423,7 +423,7 @@ private struct ShortcutItem: View {
                             .lineLimit(2)
                         Text(shortcut.code)
                             .starhashFont(14, weight: .semibold, relativeTo: .subheadline, tracking: 0)
-                            .foregroundStyle(Color.totalCardCaption)
+                            .foregroundStyle(Color.starhashTertiaryText)
                             .lineLimit(1)
                     }
                     Spacer(minLength: 0)
@@ -518,7 +518,11 @@ private struct PinnedTileFace: View {
                 GeometryReader { proxy in
                     let width = proxy.size.width
                     let height = proxy.size.height
-                    let iconSize = min(40, width * 0.26)
+                    // Both in proportion to the tile, so a lone tile
+                    // (160pt wide) carries a symbol and name as big as it
+                    // is, and four to a row (about 88pt) stay neat.
+                    let iconSize = width * 0.3
+                    let nameSize = min(20, max(13, width * 0.125))
                     // Fixed zones, the same on every tile whatever the
                     // name: the symbol centred in the upper part, in a
                     // square box so every symbol shares one centre, and
@@ -533,12 +537,12 @@ private struct PinnedTileFace: View {
                             .frame(height: height * 0.6)
                             .accessibilityHidden(true)
                         Text(shortcut.name)
-                            .starhashFont(width < 110 ? 13 : (width < 140 ? 15 : 17), weight: .semibold, relativeTo: .footnote)
+                            .starhashFont(nameSize, weight: .semibold, relativeTo: .footnote)
                             .foregroundStyle(Color.starhashPrimaryText)
                             .multilineTextAlignment(.center)
                             .lineLimit(2)
                             .minimumScaleFactor(0.8)
-                            .padding(.horizontal, 8)
+                            .padding(.horizontal, width * 0.07)
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     }
                     .frame(width: width, height: height)

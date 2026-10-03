@@ -4,15 +4,19 @@ import Foundation
 /// published prices, for a payment confirmed by hand: the carrier's SMS
 /// gives the real fee, and without one the totals would leave it out.
 ///
-/// Sources, checked 3 October 2026:
+/// Sources, checked 4 October 2026:
 /// - MTN MoMo to MoMo: MTN Rwanda's tariff page (mtn.co.rw/momo-tarrif),
 ///   the on-net column.
 /// - To the other network: since 14 July 2026 every transfer between
 ///   providers runs over eKash (BNR Directive No. 45/2026), capped at 20
 ///   for the sender. The cap is a ceiling; a carrier may charge less.
 /// - Airtel Money to Airtel Money: free, as Airtel Rwanda announced in
-///   June 2021 (up to 2,000,000, three a day); no later tariff was found.
-/// - A merchant code: free for the payer; the merchant pays.
+///   June 2021 (up to 2,000,000, three a day). Its fee page
+///   (airtelmoney.rw/transaction_fees) lists only cash out, wallet to bank
+///   and international transfers, and nothing since says sending is
+///   charged again.
+/// - A merchant code: free for the payer; the merchant pays. Paid over
+///   eKash, neither side is charged.
 public enum Tariff {
     /// The fee for sending `amount` to `recipient` from `wallet`, or nil
     /// when nothing published covers it (MTN above its last band).

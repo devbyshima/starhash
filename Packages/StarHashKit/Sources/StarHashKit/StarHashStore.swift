@@ -189,15 +189,20 @@ public final class StarHashStore {
         }
     }
 
-    /// The pending payment a sent-money message confirms.
+    /// The pending payment a sent-money message confirms. A message that
+    /// leaves the number or code out (a merchant's name alone, a transfer
+    /// to the other network) settles for the same kind of payment.
     private func pendingMatch(for sms: ParsedSMS, at date: Date) -> Int? {
         let window: TimeInterval = 6 * 3600
+        let destination = sms.counterparty.destination
         return transactions.indices
             .filter {
                 let t = transactions[$0]
+                let sameDestination = destination.isEmpty
+                    ? t.counterparty.kind == sms.counterparty.kind
+                    : t.counterparty.destination == destination
                 return t.status == .pending && t.direction == .outgoing && t.amount == sms.amount
-                    && t.counterparty.destination == sms.counterparty.destination
-                    && abs(t.date.timeIntervalSince(date)) < window
+                    && sameDestination && abs(t.date.timeIntervalSince(date)) < window
             }
             .min { abs(transactions[$0].date.timeIntervalSince(date)) < abs(transactions[$1].date.timeIntervalSince(date)) }
     }

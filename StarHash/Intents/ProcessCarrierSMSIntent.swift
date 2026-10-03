@@ -2,13 +2,13 @@ import AppIntents
 import StarHashKit
 
 /// The action a Shortcuts automation runs for every MoMo message: it reads
-/// the SMS text, and when it is an MTN MoMo transaction, logs it (or
-/// confirms the payment StarHash dialled). Runs without opening the app and
-/// shows nothing, so the automation stays silent.
+/// the SMS text, and when it is an MTN MoMo or Airtel Money transaction,
+/// logs it (or confirms the payment StarHash dialled). Runs without opening
+/// the app and shows nothing, so the automation stays silent.
 struct ProcessCarrierSMSIntent: AppIntent {
     static let title: LocalizedStringResource = "Process Carrier SMS"
     static let description = IntentDescription(
-        "Reads an MTN MoMo message and logs the transaction in StarHash. Other messages are ignored.",
+        "Reads an MTN MoMo or Airtel Money message and logs the transaction in StarHash. Other messages are ignored.",
         categoryName: "Transactions"
     )
     static let openAppWhenRun = false

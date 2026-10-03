@@ -617,8 +617,8 @@ struct RecipientPickerView: View {
         .padding(.horizontal, 22)
         .padding(.vertical, 14)
         .frame(minHeight: 72)
-        // The Total card: the page's tinted glass in light mode, the
-        // sheets' near-black glass in dark.
+        // The sheets' colours: solid white in light mode, their near-black
+        // glass in dark.
         .starhashTotalCard(in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         .padding(.horizontal, 16)
         .padding(.bottom, 8)

@@ -1,3 +1,4 @@
+import StarHashKit
 import SwiftUI
 
 /// Asks before auto-verify goes off, in Beam's sheet language and sized to
@@ -8,10 +9,11 @@ struct TurnOffAutoVerifySheet: View {
     let onTurnOff: () -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
     @State private var height: CGFloat = 480
 
     private let losses: [(symbol: String, text: String)] = [
-        ("clock", "Payments won't be confirmed"),
+        ("hourglass", "Payments won't be confirmed"),
         ("arrow.down.left", "Money received won't be logged"),
         ("banknote", "Fees and balance won't fill in"),
     ]
@@ -21,7 +23,7 @@ struct TurnOffAutoVerifySheet: View {
             SheetHeader("Turn Off Auto-verify?")
 
             VStack(spacing: 14) {
-                Text("StarHash will stop reading your M\u{2011}Money messages.")
+                Text("StarHash will stop reading your \(wallet.messagesName) messages.")
                     .font(.sheetSubheadline)
                     .foregroundStyle(Color.sheetBrandText)
                     .multilineTextAlignment(.center)

@@ -184,6 +184,24 @@ import Testing
         #expect(store.transactions.count == 2)
     }
 
+    /// Airtel's merchant messages can leave the code out: the same kind of
+    /// payment, of the same amount, is the one it confirms.
+    @Test func aMessageWithoutTheCodeConfirmsTheSameKindOfPayment() {
+        let store = StarHashStore(fileURL: nil)
+        let toJohn = store.recordPayment(to: john, amount: 15_000, date: noon.addingTimeInterval(-90))
+        let toPili = store.recordPayment(to: pili, amount: 15_000, date: noon.addingTimeInterval(-60))
+        let confirmed = store.apply(ParsedSMS(
+            wallet: .airtel,
+            direction: .outgoing,
+            counterparty: Recipient(name: "Pili-Pili Invest", destination: "", kind: .merchant),
+            amount: 15_000, fee: 0, date: noon, reference: "145891386684"
+        ))
+        #expect(confirmed.id == toPili.id)
+        #expect(confirmed.counterparty.destination == "020205")
+        #expect(store.transaction(id: toJohn.id)?.status == .pending)
+        #expect(store.transactions.count == 2)
+    }
+
     // MARK: Recipients
 
     @Test func recentsSkipRecipientsThatCannotBeDialled() {

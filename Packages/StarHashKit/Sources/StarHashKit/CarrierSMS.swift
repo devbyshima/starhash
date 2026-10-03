@@ -1,7 +1,9 @@
 import Foundation
 
-/// What a carrier (MTN MoMo Rwanda) SMS says happened.
+/// What a carrier SMS (MTN MoMo or Airtel Money, Rwanda) says happened.
 public struct ParsedSMS: Hashable, Sendable {
+    /// Whose message it was.
+    public var wallet: Recipient.Network
     public var direction: Transaction.Direction
     public var counterparty: Recipient
     public var amount: Int
@@ -11,6 +13,7 @@ public struct ParsedSMS: Hashable, Sendable {
     public var balanceAfter: Int?
 
     public init(
+        wallet: Recipient.Network = .mtn,
         direction: Transaction.Direction,
         counterparty: Recipient,
         amount: Int,
@@ -19,6 +22,7 @@ public struct ParsedSMS: Hashable, Sendable {
         reference: String? = nil,
         balanceAfter: Int? = nil
     ) {
+        self.wallet = wallet
         self.direction = direction
         self.counterparty = counterparty
         self.amount = amount
@@ -29,21 +33,43 @@ public struct ParsedSMS: Hashable, Sendable {
     }
 }
 
-/// Reads MTN MoMo Rwanda confirmation messages.
+/// Reads MTN MoMo and Airtel Money confirmation messages, Rwanda's.
 ///
-/// The carrier changes its wording every so often and the messages arrive
-/// with odd spacing ("balance:47000 RWF", "at 2024-10-20 16:13:05 ."), so
-/// parsing is a handful of tolerant patterns rather than one strict grammar:
-/// first find what kind of movement the message describes (its shape), then
-/// pick the fee, balance, date and reference out of the rest wherever they
-/// are. Anything that matches no shape (promotions, OTPs, failed attempts)
-/// is not a transaction.
+/// The carriers change their wording every so often and the messages
+/// arrive with odd spacing ("balance:47000 RWF", "at 2024-10-20 16:13:05 ."),
+/// so parsing is a handful of tolerant patterns rather than one strict
+/// grammar: first tell whose message it is by its marks, then find what
+/// kind of movement it describes (its shape), then pick the fee, balance,
+/// date and reference out of the rest wherever they are. Anything that
+/// matches no shape (promotions, OTPs, failed attempts) is not a
+/// transaction.
+///
+/// Airtel Money's shapes follow the template Airtel Africa sends in every
+/// country it runs Airtel Money in ("SENT.TID 143284610198. UGX 1,000 to
+/// ... Fee UGX 100. Bal UGX 2,214. Date 20-March-2026 20:36." in Uganda),
+/// in RWF, with the currency before the amount as Rwanda's messages write
+/// it. No Rwandan message has been published to check them against, so
+/// they are deliberately loose.
 public enum CarrierSMS {
-    /// Nil when the text is not a MoMo transaction message.
+    /// Nil when the text is not a MoMo or Airtel Money transaction message.
     public static func parse(_ text: String) -> ParsedSMS? {
         let message = normalized(text)
-        guard isMoMo(message), let shape = shape(of: message), shape.amount > 0 else { return nil }
+        // Failed or cancelled attempts mention an amount but moved nothing.
+        if matches(#"\b(failed|unsuccessful|insufficient|cancell?ed|declined)\b"#, message) {
+            return nil
+        }
+        let wallet: Recipient.Network
+        let shape: Shape
+        if isMoMo(message), let found = mtnShape(of: message) {
+            (wallet, shape) = (.mtn, found)
+        } else if isAirtelMoney(message), let found = airtelShape(of: message) {
+            (wallet, shape) = (.airtel, found)
+        } else {
+            return nil
+        }
+        guard shape.amount > 0 else { return nil }
         return ParsedSMS(
+            wallet: wallet,
             direction: shape.direction,
             counterparty: shape.counterparty,
             amount: shape.amount,
@@ -64,6 +90,14 @@ public enum CarrierSMS {
         return marks.contains { message.range(of: $0, options: [.regularExpression, .caseInsensitive]) != nil }
     }
 
+    /// Whether the message is Airtel Money's: its transaction id ("TID",
+    /// "Txn. ID", "Trans ID"), which no bank or MTN message uses, or
+    /// Airtel's own name.
+    static func isAirtelMoney(_ message: String) -> Bool {
+        let marks = [#"\bTID\b"#, #"\bTxn\.?\s*ID\b"#, #"\bTrans\.?\s*ID\b"#, #"\bAirtel\b"#]
+        return marks.contains { message.range(of: $0, options: [.regularExpression, .caseInsensitive]) != nil }
+    }
+
     // MARK: Shapes
 
     private struct Shape {
@@ -76,12 +110,7 @@ public enum CarrierSMS {
     /// followed by RWF. `normalized` puts every amount in that order.
     private static let amount = #"(\d[\d,]*(?:\.\d{1,2})?)\s*RWF"#
 
-    private static func shape(of message: String) -> Shape? {
-        // Failed or cancelled attempts mention an amount but moved nothing.
-        if matches(#"\b(failed|unsuccessful|insufficient|cancell?ed|declined)\b"#, message) {
-            return nil
-        }
-
+    private static func mtnShape(of message: String) -> Shape? {
         // "*165*S*5000 RWF transferred to John Doe (250788123456) from ..."
         if let m = captures(amount + #"\s+transferred to\s+(.+?)\s*\(([^)]*)\)"#, message) {
             return Shape(direction: .outgoing, counterparty: party(name: m[1], number: m[2]), amount: money(m[0]))
@@ -120,12 +149,70 @@ public enum CarrierSMS {
         return nil
     }
 
+    /// A Rwandan mobile number as Airtel writes it: 0732..., 250732... or,
+    /// in money received, 732... with neither, and never part of a longer
+    /// run of digits (a transaction id).
+    private static let airtelNumber = #"\(?(?<!\d)((?:\+?250|0)?7\d{8})(?!\d)\)?"#
+
+    /// Where a name ends in Airtel's messages: at the end of a sentence, or
+    /// where the fee, the balance or the next detail starts.
+    private static let nameEnd = #"(?=\.\s|\.$|,|\s+(?:mobile app\s+)?charge\b|\s+fee\b|\s+bal\b|\s+balance\b|\s+in\b|\s+on\b|\s+date\b|$)"#
+
+    private static func airtelShape(of message: String) -> Shape? {
+        // "Sent to Jean Bosco in MTN . Amt RWF 2,000": to the other network,
+        // which may leave the number out.
+        if let m = captures(#"sent to\s+(.+?)\s+in\s+(?:MTN|Airtel)\b.*?\bamt\.?\s*:?\s*"# + amount, message) {
+            return Shape(direction: .outgoing, counterparty: party(name: m[0], number: ""), amount: money(m[1]))
+        }
+        // "Money sent to Jean Bosco on 0732561240. Amount RWF 2,000."
+        if let m = captures(#"sent to\s+(.+?)\s+on\s+"# + airtelNumber + #".*?\bamount\s*:?\s*"# + amount, message) {
+            return Shape(direction: .outgoing, counterparty: party(name: m[0], number: m[1]), amount: money(m[2]))
+        }
+        // "SENT.TID 143284610198. RWF 1,000 to 0732561240 Jean Bosco. Fee RWF 0."
+        if let m = captures(#"\bsent\b.*?"# + amount + #"\s+to\s+"# + airtelNumber + #"[\s,]+(.+?)"# + nameEnd, message) {
+            return Shape(direction: .outgoing, counterparty: party(name: m[2], number: m[1]), amount: money(m[0]))
+        }
+        // "SENT.TID 143284610198. RWF 1,000 to Jean Bosco 0732561240. Fee RWF 0."
+        if let m = captures(#"\bsent\b.*?"# + amount + #"\s+to\s+(.+?)[\s,]+"# + airtelNumber, message) {
+            return Shape(direction: .outgoing, counterparty: party(name: m[1], number: m[2]), amount: money(m[0]))
+        }
+        // "Payment of RWF 1,500 Till Number 300770 KIGALI COFFEE LTD."
+        if let m = captures(#"payment of\s+"# + amount + #"\s+(?:to\s+)?(?:till number|merchant code|merchant)\s*:?\s*(\d+)\s+(.+?)"# + nameEnd, message) {
+            let name = displayName(m[2])
+            return Shape(direction: .outgoing, counterparty: Recipient(name: name, destination: m[1], kind: .merchant), amount: money(m[0]))
+        }
+        // "PAID.TID 134346936087. RWF 5,000 to KIGALI COFFEE LTD 300770 Charge RWF 0."
+        if let m = captures(#"\bpaid\b.*?"# + amount + #"\s+to\s+(.+?)"# + nameEnd, message) {
+            return Shape(direction: .outgoing, counterparty: merchant(m[1]), amount: money(m[0]))
+        }
+        // "CASH DEPOSIT of RWF 9,000 from KCB BANK RWANDA. Bal RWF 11,214."
+        if let m = captures(#"cash deposit of\s+"# + amount + #"\s+from\s+(.+?)"# + nameEnd, message) {
+            let name = displayName(m[1]) ?? "Cash deposit"
+            return Shape(direction: .incoming, counterparty: Recipient(name: name, destination: "", kind: .merchant), amount: money(m[0]))
+        }
+        // "RECEIVED. TID 143487144326. RWF 40,000 from 732561240, Jean Bosco."
+        if let m = captures(#"\breceived\b.*?"# + amount + #"\s+from\s+"# + airtelNumber + #"[\s,]+(.+?)"# + nameEnd, message) {
+            return Shape(direction: .incoming, counterparty: party(name: m[2], number: m[1]), amount: money(m[0]))
+        }
+        // "...received RWF 40,000 from Jean Bosco 0732561240..."
+        if let m = captures(#"\breceived\b.*?"# + amount + #"\s+from\s+(.+?)[\s,]+"# + airtelNumber, message) {
+            return Shape(direction: .incoming, counterparty: party(name: m[1], number: m[2]), amount: money(m[0]))
+        }
+        // "You have received RWF 300 from Jean Bosco. Txn. ID: CI260726.1522.A37452."
+        if let m = captures(#"\breceived\b.*?"# + amount + #"\s+from\s+(.+?)"# + nameEnd, message) {
+            return Shape(direction: .incoming, counterparty: party(name: m[1], number: ""), amount: money(m[0]))
+        }
+        return nil
+    }
+
     /// A person and the number in brackets. A masked number
     /// ("*********998") keeps its visible digits, which is enough to tell
     /// people apart; the name is what the app shows.
     private static func party(name: String, number: String) -> Recipient {
         let name = displayName(name)
-        let digits = number.filter { $0.isASCII && $0.isNumber }
+        var digits = number.filter { $0.isASCII && $0.isNumber }
+        // Airtel writes a sender's number without its leading 0.
+        if digits.count == 9, digits.first == "7" { digits = "0" + digits }
         if digits.count >= 10, let recipient = Recipient(input: digits, name: name) {
             return recipient
         }
@@ -162,12 +249,15 @@ public enum CarrierSMS {
 
     // MARK: Details
 
+    /// "Fee was: 100 RWF" (MTN), "Fee RWF 100" or "Charge RWF 0" (Airtel).
     private static func fee(in message: String) -> Int? {
-        captures(#"\bfees?\s*(?:was|is|of|paid)?\s*:?\s*"# + amount, message).map { money($0[0]) }
+        captures(#"\b(?:fees?|charge)\s*(?:was|is|of|paid)?\s*:?\s*"# + amount, message).map { money($0[0]) }
     }
 
+    /// "New balance: 12000 RWF" (MTN), "Bal RWF 2,214" or "Your bal is RWF
+    /// 260" (Airtel).
     private static func balance(in message: String) -> Int? {
-        captures(#"new balance\s*(?:is)?\s*:?\s*"# + amount, message).map { money($0[0]) }
+        captures(#"\b(?:balance|bal)\b\s*(?:is)?\s*:?\s*"# + amount, message).map { money($0[0]) }
     }
 
     /// The carrier's id for the movement. The number after "from" in a
@@ -175,17 +265,30 @@ public enum CarrierSMS {
     /// so it is not used: the store treats a repeated reference as a message
     /// it has already applied.
     private static func reference(in message: String) -> String? {
-        captures(#"\b(?:TxId|Financial Transaction Id|Transaction Id|FT Id)\s*[:.]?\s*(\d{5,})"#, message)?[0]
+        if let mtn = captures(#"\b(?:TxId|Financial Transaction Id|Transaction Id|FT Id)\s*[:.]?\s*(\d{5,})"#, message) {
+            return mtn[0]
+        }
+        // Airtel's: "TID 143284610198", "TID: PP260727.1512.M73944".
+        return captures(#"\b(?:TID|Txn\.?\s*ID|Trans\.?\s*ID)\s*:?\s*([A-Z0-9]+(?:\.[A-Z0-9]+)*)"#, message)?[0]
     }
 
-    /// "2024-10-20 16:13:05", in Kigali time (the messages carry no zone).
+    /// "2024-10-20 16:13:05" (MTN) or "20-March-2026 20:36" (Airtel), in
+    /// Kigali time (the messages carry no zone).
     private static func date(in message: String) -> Date? {
-        guard let m = captures(#"(\d{4}-\d{2}-\d{2})[ T](\d{1,2}:\d{2}(?::\d{2})?)"#, message) else { return nil }
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.timeZone = TimeZone(identifier: "Africa/Kigali")
-        formatter.dateFormat = m[1].count > 5 ? "yyyy-MM-dd H:mm:ss" : "yyyy-MM-dd H:mm"
-        return formatter.date(from: m[0] + " " + m[1])
+        if let m = captures(#"(\d{4}-\d{2}-\d{2})[ T](\d{1,2}:\d{2}(?::\d{2})?)"#, message) {
+            formatter.dateFormat = m[1].count > 5 ? "yyyy-MM-dd H:mm:ss" : "yyyy-MM-dd H:mm"
+            return formatter.date(from: m[0] + " " + m[1])
+        }
+        if let m = captures(#"(\d{1,2}-[A-Za-z]{3,9}-\d{4})\s+(\d{1,2}:\d{2})"#, message) {
+            for format in ["d-MMMM-yyyy H:mm", "d-MMM-yyyy H:mm"] {
+                formatter.dateFormat = format
+                if let date = formatter.date(from: m[0] + " " + m[1]) { return date }
+            }
+        }
+        return nil
     }
 
     // MARK: Text helpers

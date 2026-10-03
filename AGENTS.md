@@ -16,10 +16,11 @@ Beam's `LoopOnBoarding`, "find your Mac" step and `PermissionOnBoarding`.
 
 - `Packages/StarHashKit/` - models (`Recipient`, `Transaction`, `Money`),
   `USSD`, `USSDShortcut` and `USSDShortcutList` (Buy's codes, kept in
-  UserDefaults), `AmountInput`, `CarrierSMS` (the SMS parser), `ActivitySummary`
-  and `StarHashStore` (one JSON file, `@Observable @MainActor`). Foundation
-  only, `public` API, Swift Testing tests in `Tests/StarHashKitTests`.
-  Anything testable belongs here.
+  UserDefaults), `AmountInput`, `CarrierSMS` (the SMS parser, MTN MoMo's
+  and Airtel Money's messages), `ActivitySummary` and `StarHashStore` (one
+  JSON file, `@Observable @MainActor`). Foundation only, `public` API,
+  Swift Testing tests in `Tests/StarHashKitTests`. Anything testable
+  belongs here.
 - `StarHash/App` - `StarHashApp`, `AppEnvironment` (the shared store and
   `AppRouter`), preference keys, `DebugLaunch`, `SampleData`.
 - `StarHash/Design` - Theme tokens, glass helpers, the shared components.
@@ -126,12 +127,13 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   (`GlassSegmentedControl`), which moves as the bar does, on the same
   `LensGlass` and `LensMotion`, with a light lens, and plays the system's
   selection tick. Balance, Buy's codes and pinned tiles are the **Total
-  card** (`starhashTotalCard(in:)`, the recipient screen's Total: the
-  page's tinted glass in light mode, the deep blue the period control was
-  first drawn in, small grey text on it `totalCardCaption`; the sheets'
-  near-black glass in dark), and their call buttons black in light mode
-  (`callSolidFill` under `callGlassTint`, a brand blue phone) and blue
-  glass in dark.
+  card** (`starhashTotalCard(in:)`, the recipient screen's Total: solid
+  white in light mode, the sheets' near-black glass in dark), and Buy's
+  call buttons black in light mode (`callSolidFill` under
+  `callGlassTint`, a brand blue phone) and blue glass in dark.
+- Activity's symbol is the clock (`clock.fill`, `clock` for its empty
+  state), as Cash App's: in the tab bar, onboarding and What's New. Keep
+  the clock for Activity alone.
 - Every button is felt as it goes down: the shared button styles play an
   impact (`starhashPressHaptic`; medium for Pay, Balance, Continue and a
   sheet's button, light for round glass buttons and rows), and a plain
@@ -180,7 +182,7 @@ Names the owner uses for parts of the design; find them by these names.
 | --- | --- | --- |
 | **Soft Edge** | the one edge treatment: content fades and blurs under a bar | `starhashSoftEdge()`, `starhashSoftEdgeHeader { }` in `StarHash/Design/Glass.swift` |
 | **Tab bar** (the custom nav) | GO Club's glass tab bar: Activity, Pay, Settings | `StarHash/App/StarHashTabBar.swift`, `NavigationHaptics` |
-| **Total card** | the page's tinted glass in light, black glass in dark | `starhashTotalCard(in:)` in `Glass.swift` |
+| **Total card** | the recipient screen's Total, Balance, Buy's codes and tiles: white in light, black glass in dark | `starhashTotalCard(in:)` in `Glass.swift` |
 | **White glass, black glass** | every container | `starhashContainer(_:in:)` in `Glass.swift` |
 | **Send Ripple** | shelved, not used: the wave up the screen that Pay once played as a recipient was chosen, a Metal shader over snapshots | `StarHash/Design/SendRipple.swift` (how to bring it back is at its top), `StarHash/Design/Shaders/SendRipple.metal` |
 
@@ -198,7 +200,7 @@ Names the owner uses for parts of the design; find them by these names.
 | `-tab pay\|buy\|activity\|settings` | starting page |
 | `-note`, `-reviewNote` | Shima's welcome note over Pay, as onboarding ends, or the two-week note that asks for a rating |
 | `-wallet mtn\|airtel\|none` | the main wallet (UserDefaults; none clears it; `-skipOnboarding` sets mtn when none) |
-| `-onboardingPage 0...4` | onboarding screen (with `-resetOnboarding`): 0 the reel, 1 the wallet, 2 Contacts, 3 Nearby, 4 auto-verify (MTN only) |
+| `-onboardingPage 0...4` | onboarding screen (with `-resetOnboarding`): 0 the reel, 1 the wallet, 2 Contacts, 3 Nearby, 4 auto-verify |
 | `-payAmount <n>` | amount on the keypad |
 | `-payChosen <input>` | a recipient already chosen (Pay Again with no amount) |
 | `-payPicker` | open the recipient picker |

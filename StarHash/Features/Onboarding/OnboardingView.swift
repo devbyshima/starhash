@@ -13,8 +13,8 @@ import SwiftUI
 ///   3. The same for Nearby's location prompt. After Contacts, since Nearby
 ///      leaves contacts out.
 ///   4. Auto-verify, with a message being confirmed on the mock; Set Up
-///      runs the setup over onboarding. MTN only (the SMS reader knows only
-///      MTN's messages), and last, since setting it up leaves for Shortcuts.
+///      runs the setup over onboarding. Last, since setting it up leaves
+///      for Shortcuts.
 ///
 /// A screen whose setting is already on (a replay) offers Continue alone.
 /// The screen reached is saved as it changes, so a flow left unfinished
@@ -39,12 +39,12 @@ struct OnboardingView: View {
     /// Every screen there can be, for the debug launch's range.
     static let stageCount = 5
 
-    /// The screens for this person: auto-verify only with MTN.
-    private var stages: [Stage] {
-        var all: [Stage] = [.reel, .wallet, .contacts, .nearby]
-        if wallet != Recipient.Network.airtel.rawValue { all.append(.autoVerify) }
-        return all
-    }
+    /// The screens, in order. Both wallets' messages can be read, so
+    /// everyone sees auto-verify.
+    private var stages: [Stage] { [.reel, .wallet, .contacts, .nearby, .autoVerify] }
+
+    /// The wallet picked on the wallet screen, MTN MoMo until then.
+    private var chosenWallet: Recipient.Network { Recipient.Network(rawValue: wallet) ?? .mtn }
 
     private var current: Stage { stages[min(stage, stages.count - 1)] }
 
@@ -53,7 +53,7 @@ struct OnboardingView: View {
               description: "Type an amount, pick who gets it,\nand StarHash dials the code for you."),
         .init(symbol: "storefront.fill", title: "Pay anyone",
               description: "Any MTN or Airtel number, or a merchant\ncode. StarHash knows which is which."),
-        .init(symbol: "list.bullet.rectangle.fill", title: "Every payment, logged",
+        .init(symbol: "clock.fill", title: "Every payment, logged",
               description: "Activity keeps each payment by day,\nwith a chart and search."),
         .init(symbol: "lock.shield.fill", title: "Private by design",
               description: "No account and no server. Your PIN only\never goes into your wallet's own prompt."),
@@ -141,7 +141,7 @@ struct OnboardingView: View {
             mock: .message,
             initialDelay: 0.4,
             title: "Confirm payments\nautomatically",
-            description: "Add one shortcut and each M\u{2011}Money message\nconfirms its payment, with the fee.",
+            description: "Add one shortcut and each \(chosenWallet.messagesName) message\nconfirms its payment, with the fee.",
             primaryTitle: autoVerifySetUp ? "Continue" : "Set Up",
             primaryAction: {
                 if autoVerifySetUp { finish() } else { setsUpAutoVerify = true }

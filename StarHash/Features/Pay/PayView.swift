@@ -144,7 +144,7 @@ struct PayView: View {
                     .frame(maxWidth: .infinity)
                     .frame(minHeight: StarHashMetrics.primaryButtonHeight)
                     .contentShape(Capsule())
-                    // The Total card: tinted glass, or black glass in dark.
+                    // The Total card's white, or its black glass.
                     .starhashTotalCard(in: Capsule(), interactive: true)
             }
             .buttonStyle(PressScaleButtonStyle())

@@ -56,10 +56,6 @@ extension Color {
     /// The light rising from the foot of the launch splash: the blue on dark
     /// mode's near black, full white on light mode's blue.
     static let splashGlow = Color(light: .white, dark: .brandBlue)
-    /// Small grey text on the Total card. Light: its tinted glass is a
-    /// deeper blue than the page, where the usual tertiary grey reads at
-    /// under 3:1, so the near black at 88% (4.7:1); dark: the tertiary grey.
-    static let totalCardCaption = Color(light: .brandNight.opacity(0.88), dark: .init(white: 117 / 255))
     /// Buy's call buttons. Light: black, with the brand blue phone (6.8:1);
     /// over the blue page glass alone turns teal, so a solid near black
     /// sits under it. Dark: the blue as glass, with a near-black phone.
@@ -202,10 +198,14 @@ extension Color {
     static let tabBarLens = Color(light: .brandGrey.opacity(0.31), dark: .brandPaper.opacity(0.16))
     static let tabBarLensEdgeLight = Color(light: .white.opacity(0.7), dark: .white.opacity(0.22))
     static let tabBarLensEdgeDark = Color(light: .brandNight.opacity(0.22), dark: .black.opacity(0.3))
-    /// The note sheets' background: solid white in light mode, since
+    /// Over sheet-coloured glass (the recipient screen's Total, Balance,
+    /// Buy's codes) in light mode: Settings' card white, solid, since
     /// white-tinted glass still lets the blue page and its highlights
-    /// through on a device, and the page's own near black in dark, so the
-    /// note reads as a page.
+    /// through on a device. Dark keeps the glass, tinted `sheetGlassTint`.
+    static let sheetSolidFill = Color(light: .white, dark: .clear)
+    /// The note sheets' background: solid white in light mode, as
+    /// `sheetSolidFill`, and the page's own near black in dark, so the note
+    /// reads as a page.
     static let noteSheetBackground = Color(light: .white, dark: .brandNight)
     /// The dotted line between a sheet card's rows.
     static let sheetDivider = Color(light: .brandNight.opacity(0.22), dark: .brandPaper.opacity(0.22))

@@ -46,7 +46,7 @@ public enum ReleaseHistory {
                       detail: "Type an amount, pick who gets it, and StarHash dials your wallet's code for you. Your PIN is only ever typed into your wallet's own prompt."),
                 .init(symbol: "storefront.fill", title: "Numbers and merchant codes",
                       detail: "Type a merchant code or a number, or pick a contact. Saved numbers and codes come up by name, with their photo."),
-                .init(symbol: "list.bullet.rectangle.fill", title: "Every payment in Activity",
+                .init(symbol: "clock.fill", title: "Every payment in Activity",
                       detail: "See what you spent by day, week, month or year, with a chart, search and the details of each payment."),
                 .init(symbol: "checkmark.message.fill", title: "Auto-verify",
                       detail: "Add one shortcut and your M\u{2011}Money messages confirm each payment, with its fee and your new balance."),

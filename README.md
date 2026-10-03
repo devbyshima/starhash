@@ -9,8 +9,8 @@ Native iOS · SwiftUI · iOS 18 and later · no third-party packages
 Type an amount, pick who gets it, and StarHash dials your wallet's code for
 you. MTN's or Airtel's own prompt asks for your PIN, as always; StarHash never sees it and
 never moves money itself. Every payment is kept in Activity, and with a
-Shortcuts automation MTN's confirmation SMS fills in the fee, the reference
-and your new balance. No account, no login, no server: everything stays on
+Shortcuts automation your wallet's confirmation SMS (MTN MoMo's or Airtel
+Money's) fills in the fee, the reference and your new balance. No account, no login, no server: everything stays on
 your iPhone.
 
 Free and open source.
@@ -64,8 +64,8 @@ Free and open source.
   changed by tapping the big one to open a grid of thirty. The list is
   kept on the iPhone, and Delete All Data brings back the four it came
   with.
-- **Fees**: shown only in Activity, once a payment is confirmed: from MTN's
-  SMS, or worked out from the carriers' published prices when it is marked
+- **Fees**: shown only in Activity, once a payment is confirmed: from the
+  carrier's SMS, or worked out from the carriers' published prices when it is marked
   as confirmed by hand (`Tariff` in StarHashKit, sources inside). Pay shows no fees. The keypad takes up to
   10,000,000. Numbers starting 072 or 073 are Airtel, 078 and 079 MTN; a
   number on the other network from your wallet dials
@@ -134,8 +134,8 @@ is sent as `%23`.
 
 ## Auto verification
 
-A payment dialled from StarHash is Pending until MTN's SMS confirms it
-(Airtel Money payments stay Pending until marked as confirmed).
+A payment dialled from StarHash is Pending until the wallet's SMS confirms
+it, MTN MoMo's or Airtel Money's.
 iOS does not let apps read messages, so a Shortcuts automation hands them
 over. Settings, Auto-verify transactions sets it up in two steps, each
 shown with a real screenshot of Shortcuts:
@@ -144,7 +144,7 @@ shown with a real screenshot of Shortcuts:
    (`StarHashShortcut.iCloudLink`) on Shortcuts' Add screen. It is the
    Process Carrier SMS action fed the shortcut's input, with its automation
    built in (iOS 27): when a message containing **RWF** arrives (every
-   M-Money message does), run without asking. Nothing to build. iOS
+   M-Money and AirtelMoney message does), run without asking. Nothing to build. iOS
    announces each run until **Notify When Run** is turned off on the
    automation, a setting a shortcut file cannot carry, so the step list
    says so.
@@ -157,9 +157,15 @@ from `scripts/make_shortcut.py`) as a fallback. Share the shortcut again and
 update the link after changing it: a link is a copy of the shortcut as it
 was when shared.
 
-Each MoMo message then confirms the matching pending payment (same amount
-and number, within six hours) or is logged as a new transaction. A message
-applied twice is only logged once.
+Each MoMo or Airtel Money message then confirms the matching pending
+payment (same amount and number, within six hours; a message that leaves
+the number or merchant code out settles for the same kind of payment) or
+is logged as a new transaction. A message applied twice is only logged
+once. Airtel Money's messages are read with the template Airtel Africa
+sends in every country ("SENT.TID ... RWF 1,000 to NAME 07... Fee ...
+Bal ..."), since no Rwandan sample has been published; `CarrierSMS` keeps
+those patterns loose, and a real message that slips past them is worth a
+test.
 
 ## Build
 

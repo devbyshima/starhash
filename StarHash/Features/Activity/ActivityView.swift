@@ -104,7 +104,7 @@ struct ActivityView: View {
     /// top bar then.
     private var emptyScreen: some View {
         EmptyStateView(
-            symbol: "list.bullet.rectangle",
+            symbol: "clock",
             title: "No Transactions",
             message: "Pay someone from Pay, or set up Auto-verify in Settings to log MoMo messages.",
             style: .large

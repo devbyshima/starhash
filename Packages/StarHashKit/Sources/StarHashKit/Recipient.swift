@@ -31,6 +31,16 @@ public struct Recipient: Codable, Hashable, Sendable {
             case .airtel: "Airtel Money"
             }
         }
+
+        /// What the wallet's confirmation messages are called, after the
+        /// name they arrive under, kept on one line (a hyphen and a space
+        /// that do not break).
+        public var messagesName: String {
+            switch self {
+            case .mtn: "M\u{2011}Money"
+            case .airtel: "Airtel\u{00A0}Money"
+            }
+        }
     }
 
     /// A contact or merchant name, when one is known.

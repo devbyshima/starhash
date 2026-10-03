@@ -171,8 +171,8 @@ struct TransactionDetailPage: View {
 
     private func detailsCard(_ transaction: StarHashKit.Transaction) -> some View {
         var rows: [(String, String)] = []
-        // The fee only once MTN's SMS has confirmed it; until then the row
-        // is left out rather than guessed.
+        // The fee only once the carrier's SMS has confirmed it; until then
+        // the row is left out rather than guessed.
         if transaction.status == .confirmed, let fee = transaction.fee {
             rows.append(("Fee", fee == 0 ? "Free" : Money.formatWithCurrency(fee)))
         }

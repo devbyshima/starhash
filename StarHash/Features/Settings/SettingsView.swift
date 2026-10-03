@@ -110,11 +110,7 @@ private struct SettingsRootList: View {
                 SettingsToggleRow(
                     symbol: "checkmark.message.fill",
                     title: "Auto-verify transactions",
-                    // The SMS reader knows MTN's messages only, so Airtel
-                    // payments would stay pending.
-                    caption: wallet == .mtn
-                        ? "Confirm payments from M\u{2011}Money messages"
-                        : "Reads MTN MoMo messages only, for now",
+                    caption: "Confirm payments from \(wallet.messagesName) messages",
                     isOn: autoVerifyBinding
                 )
                 SettingsToggleRow(

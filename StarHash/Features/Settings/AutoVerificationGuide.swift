@@ -1,3 +1,4 @@
+import StarHashKit
 import SwiftUI
 import UIKit
 
@@ -7,7 +8,8 @@ import UIKit
 ///
 /// 1. Add Shortcut: opens Shortcuts on the shared StarHash SMS shortcut.
 ///    It comes with its automation built in ("When I get a message
-///    containing RWF", which every M-Money message is, run without asking),
+///    containing RWF", which every M-Money and AirtelMoney message is, run
+///    without asking),
 ///    so there is nothing to build or set up.
 /// 2. Verify Shortcut: runs it through Shortcuts with a sample message and
 ///    comes straight back (x-callback-url). Done appears only when the
@@ -29,6 +31,7 @@ struct AutoVerificationGuide: View {
 
     @AppStorage(PreferenceKey.lastVerifiedAt) private var lastVerifiedAt: Double = 0
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
+    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
 
     @State private var step = SettingsLaunch.guideOutcome == nil ? SettingsLaunch.guideStep : 1
     /// Whether Add Shortcut has been tapped, which brings up Continue.
@@ -188,7 +191,7 @@ struct AutoVerificationGuide: View {
                 switch verification {
                 case .verified:
                     GuideStepList(steps: [
-                        "Every M\u{2011}Money message confirms its payment.",
+                        "Every \(wallet.messagesName) message confirms its payment.",
                         "Fees and your balance fill in by themselves.",
                         "Turn it off any time in **Settings**.",
                     ], symbol: "checkmark")
