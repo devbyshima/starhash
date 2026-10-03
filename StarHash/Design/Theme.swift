@@ -129,16 +129,16 @@ extension Color {
     static let pickerMatch = Color(light: .brandNight, dark: .brandBlue)
     static let pickerMatchBackground = Color(light: .white.opacity(0.55), dark: .clear)
 
-    /// Sheets: the solid surface cards sit on (an off-white on the white
-    /// sheet, the founder's pick, or the near black lifted a little less
-    /// than a card), the grey of secondary text, and the fill of a filled
-    /// button that is not the accent.
-    static let sheetSurface = Color(light: .init(red: 250 / 255, green: 248 / 255, blue: 243 / 255), dark: .init(white: 28 / 255))
+    /// Sheets: the solid surface cards sit on (the brand blue on the white
+    /// sheet, the founder's pick, with near-black text at 6.8:1; or the
+    /// near black lifted a little less than a card), the grey of secondary
+    /// text, and the fill of a filled button that is not the accent.
+    static let sheetSurface = Color(light: .brandBlue, dark: .init(white: 28 / 255))
     static let sheetSecondaryText = Color.starhashSecondaryText
     /// Small fills inside a sheet (icon circles, a monogram tile, a pill, a
-    /// disabled button): a deeper off-white in light mode, a faint veil in
-    /// dark mode.
-    static let sheetChip = Color(light: .init(red: 236 / 255, green: 232 / 255, blue: 222 / 255), dark: .brandPaper.opacity(0.1))
+    /// disabled button): a deeper blue than the cards in light mode, with
+    /// near-black text still at 5:1 and over; a faint veil in dark mode.
+    static let sheetChip = Color(light: .init(red: 4 / 255, green: 146 / 255, blue: 212 / 255), dark: .brandPaper.opacity(0.1))
     static let sheetFilledButton = Color(light: .brandNight, dark: .brandPaper)
     /// A disabled sheet button's label, on its `sheetChip` fill.
     static let sheetDisabledLabel = Color(light: .brandNight.opacity(0.6), dark: .init(white: 166 / 255))
