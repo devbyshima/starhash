@@ -132,7 +132,7 @@ struct RecipientPickerView: View {
                 header
                 barLabel
             }
-            .starhashTopFade(holdsToBottom: true)
+            .starhashTopFade()
         }
         // Above the keyboard while it is up, above the home indicator after.
         .starhashBottomBar { totalBar }

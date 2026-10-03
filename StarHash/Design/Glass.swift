@@ -61,8 +61,8 @@ private struct StarHashGlassModifier<S: Shape>: ViewModifier {
 
 /// The top fade's measurements.
 enum StarHashTopFade {
-    /// Below a bar that holds solid to its foot: long enough that rows
-    /// visibly fade as they reach it.
+    /// Below the transaction page's bar, which holds solid to its foot:
+    /// long enough that what scrolls up visibly fades as it reaches it.
     static let heldLength: CGFloat = 40
 }
 
@@ -128,29 +128,14 @@ extension View {
     /// instead of the system's blur. Drawn behind `content` from the top
     /// of the screen; pair it with `starhashHidesTopEdgeEffect()` on the
     /// scroll view underneath.
-    ///
-    /// `holdsToBottom` keeps the page colour solid down to the bar's bottom
-    /// edge, for a bar with text at its foot (the recipient screen's
-    /// section label) that rows would otherwise ghost through, and fades
-    /// out over a longer stretch below it so the fade still shows.
-    func starhashTopFade(holdsToBottom: Bool = false) -> some View {
+    func starhashTopFade() -> some View {
         background(alignment: .top) {
-            Group {
-                if holdsToBottom {
-                    VStack(spacing: 0) {
-                        Color.starhashBackground
-                        LinearGradient(colors: [.starhashBackground, .starhashBackground.opacity(0.85), .starhashBackground.opacity(0)], startPoint: .top, endPoint: .bottom)
-                            .frame(height: StarHashTopFade.heldLength)
-                    }
-                } else {
-                    LinearGradient(
-                        colors: [.starhashBackground, .starhashBackground.opacity(0.85), .starhashBackground.opacity(0)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                }
-            }
-            .padding(.bottom, holdsToBottom ? -StarHashTopFade.heldLength : -18)
+            LinearGradient(
+                colors: [.starhashBackground, .starhashBackground.opacity(0.85), .starhashBackground.opacity(0)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .padding(.bottom, -18)
             .ignoresSafeArea(edges: .top)
             .allowsHitTesting(false)
         }
