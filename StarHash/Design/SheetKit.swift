@@ -278,21 +278,25 @@ extension ButtonStyle where Self == SheetButtonStyle {
 struct SheetTextButton: View {
     let title: String
     var role: ButtonRole?
+    /// Straight on the blue page (the transaction page) rather than a
+    /// white sheet: the red deepens to read on the blue.
+    var onPage = false
     let action: () -> Void
 
-    init(_ title: String, role: ButtonRole? = nil, action: @escaping () -> Void) {
+    init(_ title: String, role: ButtonRole? = nil, onPage: Bool = false, action: @escaping () -> Void) {
         self.title = title
         self.role = role
+        self.onPage = onPage
         self.action = action
     }
 
     var body: some View {
         Button(role: role, action: action) {
             Text(title)
-                // Bold and the deeper red when destructive, to read on the
-                // sheet's tinted glass.
+                // Bold when destructive: the vivid red on a white sheet,
+                // the deeper one on the blue page.
                 .font(.sheet(14, role == .destructive ? .bold : .semibold, relativeTo: .subheadline))
-                .foregroundStyle(role == .destructive ? Color.starhashDestructiveOnPage : Color.sheetSecondaryText)
+                .foregroundStyle(role == .destructive ? (onPage ? Color.starhashDestructiveOnPage : Color.starhashDestructive) : Color.sheetSecondaryText)
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .contentShape(Rectangle())
         }

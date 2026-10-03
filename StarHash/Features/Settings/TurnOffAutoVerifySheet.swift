@@ -58,10 +58,11 @@ struct TurnOffAutoVerifySheet: View {
                 .padding(.top, 4)
             }
             .padding(.horizontal, 18)
-            .padding(.bottom, 4)
         }
         .sheetHeight($height)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .sheetGlass(detents: [.height(height + 8)])
+        // Shorter than Beam's margin: Turn Off's own 44pt tap area and the
+        // home indicator's inset already leave room under it.
+        .sheetGlass(detents: [.height(height - 22)])
     }
 }
