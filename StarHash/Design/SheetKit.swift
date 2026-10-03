@@ -41,8 +41,8 @@ extension View {
         if #available(iOS 26.0, *) {
             self
                 .presentationBackground {
-                    // Light: pale navy glass. Dark: toward the page colour,
-                    // where a lifted grey failed its grey text.
+                    // Light: solid white. Dark: toward the page colour, where
+                    // a lifted grey failed its grey text.
                     Color.clear
                         .glassEffect(.regular.tint(.sheetGlassTint), in: Rectangle())
                         .ignoresSafeArea()
@@ -60,13 +60,7 @@ extension View {
     /// The solid card a sheet's rows sit on. A page using the same pieces
     /// passes its own card colour, since its background is the sheet's.
     func sheetCard(radius: CGFloat = 22, fill: Color = .sheetSurface) -> some View {
-        // A soft shadow in light mode: a white card on the sheet's white
-        // glass had no edge where the glass is palest.
-        background(
-            RoundedRectangle(cornerRadius: radius, style: .continuous)
-                .fill(fill)
-                .shadow(color: .sheetCardShadow, radius: 14, y: 4)
-        )
+        background(fill, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
     }
 
     /// Reports this view's height, so a sheet can size its detent to its
