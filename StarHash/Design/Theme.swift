@@ -36,16 +36,18 @@ extension Color {
 
     // MARK: Text
 
-    static let starhashPrimaryText = Color(light: .brandNight, dark: .brandPaper)
+    /// Near black, white inside a light-mode sheet's black card, pale grey
+    /// in dark mode.
+    static let starhashPrimaryText = Color(light: .brandNight, card: .white, dark: .brandPaper)
     /// The quieter text. Light: the near black let through at 80%, which
     /// sits on whatever is under it, so one colour reads on the blue page
     /// (5.0:1) and on a white card or a pale sheet (9:1 or more); #616161
     /// itself is 2.4:1 on the blue. Dark: a grey lifted from #616161, which
     /// is under 3:1 on the near black (7.4:1 on the page, 4.5:1 or more on
     /// its cards and glass).
-    static let starhashSecondaryText = Color(light: .brandNight.opacity(0.8), dark: .init(white: 166 / 255))
+    static let starhashSecondaryText = Color(light: .brandNight.opacity(0.8), card: .white.opacity(0.8), dark: .init(white: 166 / 255))
     /// Placeholders and muted marks, 3:1 or more on the blue and on cards.
-    static let starhashTertiaryText = Color(light: .brandNight.opacity(0.6), dark: .init(white: 117 / 255))
+    static let starhashTertiaryText = Color(light: .brandNight.opacity(0.6), card: .white.opacity(0.6), dark: .init(white: 117 / 255))
     /// Section titles and the small print under settings cards.
     static let starhashCaptionText = Color.starhashSecondaryText
     /// Money going out and destructive actions, on cards and sheets: one of
@@ -129,23 +131,29 @@ extension Color {
     static let pickerMatch = Color(light: .brandNight, dark: .brandBlue)
     static let pickerMatchBackground = Color(light: .white.opacity(0.55), dark: .clear)
 
-    /// Sheets: the solid surface cards sit on (an ice blue, the brand blue
-    /// at 7% on white, on the white sheet, or the near black lifted a
-    /// little less than a card), the grey of secondary text, and the fill
+    /// Sheets: the solid surface cards sit on (black on the white sheet,
+    /// the founder's pick, with white text inside; or the near black lifted
+    /// a little less than a card), the grey of secondary text, and the fill
     /// of a filled button that is not the accent.
-    static let sheetSurface = Color(light: .init(red: 238 / 255, green: 248 / 255, blue: 254 / 255), dark: .init(white: 28 / 255))
+    static let sheetSurface = Color(light: .brandNight, dark: .init(white: 28 / 255))
     static let sheetSecondaryText = Color.starhashSecondaryText
     /// Small fills inside a sheet (icon circles, a monogram tile, a pill, a
-    /// disabled button): a deeper ice blue than the cards in light mode, so
-    /// nothing on a sheet is grey; a faint veil in dark mode.
-    static let sheetChip = Color(light: .init(red: 214 / 255, green: 238 / 255, blue: 253 / 255), dark: .brandPaper.opacity(0.1))
+    /// disabled button): black on the white sheet, a white veil inside a
+    /// black card, a faint veil in dark mode.
+    static let sheetChip = Color(light: .brandNight, card: .white.opacity(0.14), dark: .brandPaper.opacity(0.1))
     static let sheetFilledButton = Color(light: .brandNight, dark: .brandPaper)
-    /// A sheet's glass. Light: white at 90%, the founder's pick, nearly
-    /// white with the page a faint blue behind it. Dark: the page colour
-    /// let mostly through.
-    static let sheetGlassTint = Color(light: Color.white.opacity(0.9), dark: .brandNight.opacity(0.6))
+    /// A tile standing on the sheet itself (a contact's monogram): black,
+    /// like the cards, whatever surface its text takes.
+    static let sheetTile = Color(light: .brandNight, dark: .brandPaper.opacity(0.1))
+    /// A disabled sheet button's label, on its `sheetChip` fill.
+    static let sheetDisabledLabel = Color(light: .white.opacity(0.6), dark: .init(white: 166 / 255))
+    /// The label on `sheetFilledButton`.
+    static let sheetFilledLabel = Color(light: .white, dark: .init(white: 28 / 255))
+    /// A sheet's background. Light: solid white, the founder's pick. Dark:
+    /// the page colour let mostly through the glass.
+    static let sheetGlassTint = Color(light: .white, dark: .brandNight.opacity(0.6))
     /// The dotted line between a sheet card's rows.
-    static let sheetDivider = Color(light: .brandNight.opacity(0.22), dark: .brandPaper.opacity(0.22))
+    static let sheetDivider = Color(light: .brandNight.opacity(0.22), card: .white.opacity(0.3), dark: .brandPaper.opacity(0.22))
 
     /// The carriers' own colours: their logos, and the rings round the
     /// chosen logo on onboarding's carrier step. StarHash's buttons are the
@@ -159,7 +167,7 @@ extension Color {
     static let starhashOnAirtel = Color.white
 
     /// Large empty-state symbols ("No Expenses") and other muted icons.
-    static let starhashMutedIcon = Color(light: .init(white: 138 / 255), dark: .init(white: 130 / 255))
+    static let starhashMutedIcon = Color(light: .init(white: 138 / 255), card: .white.opacity(0.6), dark: .init(white: 130 / 255))
     /// The close (xmark) glyph: grey and lighter in weight than the other
     /// header glyphs (back, add, confirm).
     static let starhashCloseGlyph = Color.starhashSecondaryText

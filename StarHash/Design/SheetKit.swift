@@ -41,8 +41,8 @@ extension View {
         if #available(iOS 26.0, *) {
             self
                 .presentationBackground {
-                    // Light: white at 90%. Dark: toward the page colour,
-                    // where a lifted grey failed its grey text.
+                    // Light: solid white. Dark: toward the page colour, where
+                    // a lifted grey failed its grey text.
                     Color.clear
                         .glassEffect(.regular.tint(.sheetGlassTint), in: Rectangle())
                         .ignoresSafeArea()
@@ -59,8 +59,12 @@ extension View {
 
     /// The solid card a sheet's rows sit on. A page using the same pieces
     /// passes its own card colour, since its background is the sheet's.
-    func sheetCard(radius: CGFloat = 22, fill: Color = .sheetSurface) -> some View {
-        background(fill, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
+    /// `inverted` cards are the sheet's black ones, whose content takes the
+    /// white text of `StarHashSurface.card`; a page's own cards (the
+    /// transaction page) pass false.
+    func sheetCard(radius: CGFloat = 22, fill: Color = .sheetSurface, inverted: Bool = true) -> some View {
+        starhashSurface(inverted ? .card : .page)
+            .background(fill, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
     }
 
     /// Reports this view's height, so a sheet can size its detent to its
@@ -245,7 +249,7 @@ private struct SheetButtonBody: View {
     private var colors: (fill: Color, label: Color) {
         switch fill {
         case .filled:
-            return (.sheetFilledButton, .sheetSurface)
+            return (.sheetFilledButton, .sheetFilledLabel)
         case .accent:
             return (.starhashInk, .starhashOnInk)
         }
@@ -255,7 +259,7 @@ private struct SheetButtonBody: View {
         let colors = colors
         configuration.label
             .font(.sheetHeadline)
-            .foregroundStyle(isEnabled ? colors.label : Color.sheetSecondaryText)
+            .foregroundStyle(isEnabled ? colors.label : Color.sheetDisabledLabel)
             .multilineTextAlignment(.center)
             .padding(.horizontal, 16)
             .frame(maxWidth: .infinity)

@@ -206,7 +206,7 @@ struct TransactionDetailPage: View {
             SheetInfoRow(label: "Status") { statusValue(transaction.status) }
         }
         .padding(.horizontal, 16)
-        .sheetCard(fill: .starhashCard)
+        .sheetCard(fill: .starhashCard, inverted: false)
     }
 
     /// A dot and the word, in the status's colour, as Beam shows a state.
@@ -267,7 +267,7 @@ struct TransactionDetailPage: View {
                 stat(value: String(ytd.count), label: ytd.count == 1 ? "Payment" : "Payments")
             }
             .padding(16)
-            .sheetCard(fill: .starhashCard)
+            .sheetCard(fill: .starhashCard, inverted: false)
         }
     }
 
