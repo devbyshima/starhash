@@ -13,13 +13,27 @@ public struct USSDShortcut: Codable, Hashable, Identifiable, Sendable {
     /// The SF Symbol it shows, chosen when it is added; none shows a plain
     /// one in the app.
     public var symbol: String?
+    /// Pinned to the top of Buy, where a tap dials it at once.
+    public var isPinned: Bool
 
-    public init(id: UUID = UUID(), name: String, code: String, detail: String? = nil, symbol: String? = nil) {
+    public init(id: UUID = UUID(), name: String, code: String, detail: String? = nil, symbol: String? = nil, isPinned: Bool = false) {
         self.id = id
         self.name = name
         self.code = code
         self.detail = detail
         self.symbol = symbol
+        self.isPinned = isPinned
+    }
+
+    /// A list saved before pinning came in has no `isPinned`: unpinned.
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        code = try container.decode(String.self, forKey: .code)
+        detail = try container.decodeIfPresent(String.self, forKey: .detail)
+        symbol = try container.decodeIfPresent(String.self, forKey: .symbol)
+        isPinned = try container.decodeIfPresent(Bool.self, forKey: .isPinned) ?? false
     }
 
     /// The codes StarHash comes with, MTN MoMo's and MTN's. Fixed ids, so
@@ -121,6 +135,17 @@ public final class USSDShortcutList {
     private static func note(_ detail: String?) -> String? {
         let trimmed = detail?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         return trimmed.isEmpty ? nil : trimmed
+    }
+
+    /// The pinned codes, in the list's order.
+    public var pinned: [USSDShortcut] { shortcuts.filter(\.isPinned) }
+    /// The rest, in the list's order.
+    public var unpinned: [USSDShortcut] { shortcuts.filter { !$0.isPinned } }
+
+    public func setPinned(_ id: USSDShortcut.ID, _ isPinned: Bool) {
+        guard let index = shortcuts.firstIndex(where: { $0.id == id }) else { return }
+        shortcuts[index].isPinned = isPinned
+        save()
     }
 
     public func remove(_ id: USSDShortcut.ID) {

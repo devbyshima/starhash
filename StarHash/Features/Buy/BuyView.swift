@@ -29,6 +29,7 @@ struct BuyView: View {
     /// an alert so it can be dialled by hand.
     @State private var undialledCode: String?
     @State private var deletedCount = 0
+    @State private var pinnedCount = 0
 
     var body: some View {
         VStack(spacing: 0) {
@@ -58,6 +59,7 @@ struct BuyView: View {
         .background(Color.starhashBackground.ignoresSafeArea())
         .animation(.smooth(duration: 0.3), value: shortcuts.shortcuts)
         .sensoryFeedback(.impact(flexibility: .rigid), trigger: deletedCount)
+        .sensoryFeedback(.impact(weight: .medium), trigger: pinnedCount)
         .sheet(item: $editing) { draft in
             ShortcutEditor(draft: draft)
         }
@@ -106,31 +108,34 @@ struct BuyView: View {
     private var list: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
-                Text("Your codes")
-                    .starhashFont(17, weight: .semibold, relativeTo: .headline)
-                    .foregroundStyle(Color.starhashSecondaryText)
-                    .accessibilityAddTraits(.isHeader)
-                    .padding(.leading, 16)
-                    .padding(.bottom, 10)
-
-                VStack(spacing: 10) {
-                    ForEach(shortcuts.shortcuts) { shortcut in
-                        ShortcutItem(
-                            shortcut: shortcut,
-                            onOpen: { details = shortcut },
-                            onDial: { dial(shortcut.code) }
-                        )
-                        .contextMenu {
-                            Button("Dial \(shortcut.code)", systemImage: "phone.arrow.up.right") { dial(shortcut.code) }
-                            Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
-                            Button("Delete", systemImage: "trash", role: .destructive) { delete(shortcut) }
+                if !shortcuts.pinned.isEmpty {
+                    sectionTitle("Pinned")
+                    pinnedGrid
+                        .padding(.bottom, 24)
+                }
+                if !shortcuts.unpinned.isEmpty {
+                    sectionTitle("Your codes")
+                    VStack(spacing: 10) {
+                        ForEach(shortcuts.unpinned) { shortcut in
+                            ShortcutItem(
+                                shortcut: shortcut,
+                                onOpen: { details = shortcut },
+                                onDial: { dial(shortcut.code) }
+                            )
+                            .contextMenu {
+                                Button("Dial \(shortcut.code)", systemImage: "phone.arrow.up.right") { dial(shortcut.code) }
+                                Button("Pin", systemImage: "pin") { pin(shortcut, true) }
+                                Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
+                                Button("Delete", systemImage: "trash", role: .destructive) { delete(shortcut) }
+                            }
+                            .accessibilityAction(named: "Pin") { pin(shortcut, true) }
+                            .accessibilityAction(named: "Delete") { delete(shortcut) }
+                            .buySwipeToPin { pin(shortcut, true) }
+                            .activitySwipeToDelete { delete(shortcut) }
+                            .transition(.opacity.combined(with: .scale(scale: 0.96)))
                         }
-                        .accessibilityAction(named: "Delete") { delete(shortcut) }
-                        .activitySwipeToDelete { delete(shortcut) }
-                        .transition(.opacity.combined(with: .scale(scale: 0.96)))
                     }
                 }
-
             }
             .padding(.horizontal, StarHashMetrics.screenPadding)
             .padding(.top, ActivityLayout.contentTop)
@@ -141,6 +146,40 @@ struct BuyView: View {
         .activitySwipeActionsContainer()
         .starhashReadableScrollContent()
         .starhashTabBarFollowsScroll()
+    }
+
+    private func sectionTitle(_ title: String) -> some View {
+        Text(title)
+            .starhashFont(17, weight: .semibold, relativeTo: .headline)
+            .foregroundStyle(Color.starhashSecondaryText)
+            .accessibilityAddTraits(.isHeader)
+            .padding(.leading, 16)
+            .padding(.bottom, 10)
+    }
+
+    /// The pinned codes, two to a row: a tap dials at once, and their
+    /// options open only on a long press.
+    private var pinnedGrid: some View {
+        LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+            ForEach(shortcuts.pinned) { shortcut in
+                PinnedTile(shortcut: shortcut) { dial(shortcut.code) }
+                    .contextMenu {
+                        Button("Unpin", systemImage: "pin.slash") { pin(shortcut, false) }
+                        Button("Details", systemImage: "info.circle") { details = shortcut }
+                        Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
+                        Button("Delete", systemImage: "trash", role: .destructive) { delete(shortcut) }
+                    }
+                    .accessibilityAction(named: "Unpin") { pin(shortcut, false) }
+                    .accessibilityAction(named: "Details") { details = shortcut }
+                    .accessibilityAction(named: "Delete") { delete(shortcut) }
+                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
+            }
+        }
+    }
+
+    private func pin(_ shortcut: USSDShortcut, _ isPinned: Bool) {
+        withAnimation(.smooth(duration: 0.35)) { shortcuts.setPinned(shortcut.id, isPinned) }
+        pinnedCount += 1
     }
 
     private func runAfterDetails() {
@@ -224,10 +263,73 @@ private struct ShortcutItem: View {
     }
 }
 
+/// A pinned code: a square-ish tile of clear Liquid Glass with its symbol,
+/// a phone on its corner and its name and code under them. A tap dials at
+/// once; its options open on a long press.
+private struct PinnedTile: View {
+    let shortcut: USSDShortcut
+    let onDial: () -> Void
+
+    var body: some View {
+        Button(action: onDial) {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(alignment: .top) {
+                    SymbolTile(symbol: shortcut.symbol ?? ShortcutSymbols.plain, size: 40)
+                    Spacer(minLength: 0)
+                    Image(systemName: "phone.fill")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(Color.starhashOnInk)
+                        .frame(width: 30, height: 30)
+                        .background(Color.starhashInk.gradient, in: Circle())
+                }
+                Spacer(minLength: 12)
+                Text(shortcut.name)
+                    .starhashFont(16, weight: .semibold, relativeTo: .headline)
+                    .foregroundStyle(Color.starhashPrimaryText)
+                    .lineLimit(2)
+                Text(shortcut.code)
+                    .starhashFont(13, weight: .semibold, relativeTo: .footnote, tracking: 0)
+                    .foregroundStyle(Color.starhashTertiaryText)
+                    .lineLimit(1)
+                    .padding(.top, 2)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, minHeight: 124, alignment: .topLeading)
+            .starhashGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous), tint: .clear)
+            .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        }
+        .buttonStyle(PressScaleButtonStyle())
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Dial \(shortcut.name)")
+        .accessibilityValue(shortcut.code)
+        .accessibilityAddTraits(.isButton)
+    }
+}
+
+extension View {
+    /// A swipe in from the left pins a code, as a swipe from the right
+    /// deletes it. iOS 27 and later; the context menu pins on earlier ones.
+    @ViewBuilder
+    func buySwipeToPin(_ onPin: @escaping () -> Void) -> some View {
+        if #available(iOS 27.0, *) {
+            swipeActions(edge: .leading, allowsFullSwipe: true) {
+                Button(action: onPin) {
+                    Image(systemName: "pin.fill")
+                }
+                .tint(Color.starhashInk)
+                .accessibilityLabel("Pin")
+            }
+        } else {
+            self
+        }
+    }
+}
+
 /// A code's details, after Keaser's expense details, sized to what it
-/// shows: a close button, the title and Edit across the top, a card with
-/// the code's symbol and name and its code and note as rows, then Dial
-/// and, in red under it, Delete Code.
+/// shows: a close button, the title and Edit across the top, the code's
+/// symbol and name on their own, a card with its code and note as rows,
+/// then Dial and, in red under it, Delete Code.
 private struct ShortcutDetailSheet: View {
     let shortcut: USSDShortcut
     let onEdit: () -> Void
@@ -242,20 +344,20 @@ private struct ShortcutDetailSheet: View {
             header
 
             VStack(spacing: 14) {
-                VStack(spacing: 0) {
-                    VStack(spacing: 10) {
-                        SymbolTile(symbol: shortcut.symbol ?? ShortcutSymbols.plain, size: 60, background: .sheetChip)
-                        Text(shortcut.name)
-                            .font(.sheet(21, .bold, relativeTo: .title2))
-                            .foregroundStyle(Color.starhashPrimaryText)
-                            .multilineTextAlignment(.center)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .accessibilityAddTraits(.isHeader)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 18)
+                // The symbol and name on their own, above the card.
+                VStack(spacing: 10) {
+                    SymbolTile(symbol: shortcut.symbol ?? ShortcutSymbols.plain, size: 64, background: .sheetSurface)
+                    Text(shortcut.name)
+                        .font(.sheet(21, .bold, relativeTo: .title2))
+                        .foregroundStyle(Color.starhashPrimaryText)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityAddTraits(.isHeader)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.top, 4)
 
-                    SheetDivider()
+                VStack(spacing: 0) {
                     SheetInfoRow("Code", shortcut.code)
                     if let detail = shortcut.detail {
                         SheetDivider()

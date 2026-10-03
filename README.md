@@ -43,9 +43,12 @@ Free and open source.
   call prompt, showing the whole code, is the approval.
 - **Buy**: the codes you dial often, each on its own concise card (its
   symbol, name and code) with its call button apart beside it, in Liquid
-  Glass tinted the accent. The call button dials; tapping a card opens it
-  to edit; holding one offers Dial, Edit and Delete, and a swipe deletes
-  it. It comes with MoMo's
+  Glass tinted the accent. The call button dials; tapping a card opens
+  its details in a small sheet after Keaser's expense details (Edit,
+  Dial, Delete); holding one offers Dial, Pin, Edit and Delete, a swipe
+  from the right deletes it and a swipe from the left pins it. Pinned
+  codes sit at the top, two to a row, and dial at once on a tap; their
+  options open on a long press. It comes with MoMo's
   pending approvals and cash out, MTN's Gwamon' Pack and the airport's
   parking; the + at the top right adds your own in a sheet after Keaser's
   New Category, with a close button and a confirm one: a name, a code that

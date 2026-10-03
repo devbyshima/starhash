@@ -26,7 +26,12 @@ enum AppEnvironment {
         if DebugLaunch.inMemory {
             let name = "StarHashDebugShortcuts"
             UserDefaults().removePersistentDomain(forName: name)
-            return USSDShortcutList(defaults: UserDefaults(suiteName: name) ?? .standard)
+            let list = USSDShortcutList(defaults: UserDefaults(suiteName: name) ?? .standard)
+            // -buyPinned: the first two codes pinned.
+            if DebugLaunch.arguments.contains("-buyPinned") {
+                for shortcut in list.shortcuts.prefix(2) { list.setPinned(shortcut.id, true) }
+            }
+            return list
         }
         #endif
         return USSDShortcutList()
