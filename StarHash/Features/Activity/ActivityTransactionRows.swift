@@ -27,7 +27,6 @@ struct ActivityTransactionRows: View {
             } label: {
                 ActivityTransactionRow(transaction: transaction, showsDate: showsDate)
                     .background(ActivityCardRowBackground(position: position))
-                    .starhashSurface(.card)
             }
             .buttonStyle(ActivityRowButtonStyle(position: position))
             .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: StarHashMetrics.rowRadius, style: .continuous))

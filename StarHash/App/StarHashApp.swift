@@ -36,14 +36,8 @@ struct StarHashApp: App {
     /// UIKit's, outside SwiftUI's font environment.
     private static func useSpaceGroteskInNavigationBars() {
         let bar = UINavigationBar.appearance()
-        // The page's text colour, white on the blue (pale grey in dark
-        // mode), rather than the system's label colour. Built here, as a
-        // SwiftUI colour handed to UIKit loses its page and card switch.
-        let text = UIColor { traits in
-            traits.userInterfaceStyle == .dark ? UIColor(white: 244 / 255, alpha: 1) : .white
-        }
-        bar.titleTextAttributes = [.font: UIFont.starhash(17, weight: 600), .foregroundColor: text]
-        bar.largeTitleTextAttributes = [.font: UIFont.starhash(34, weight: 700), .foregroundColor: text]
+        bar.titleTextAttributes = [.font: UIFont.starhash(17, weight: 600)]
+        bar.largeTitleTextAttributes = [.font: UIFont.starhash(34, weight: 700)]
     }
 
     var body: some Scene {

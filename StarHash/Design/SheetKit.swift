@@ -38,10 +38,8 @@ extension View {
     /// iOS 26, a material.
     @ViewBuilder
     func sheetGlass(detents: Set<PresentationDetent> = [.medium, .large]) -> some View {
-        // A sheet is a pale surface, so its text is the card's.
         if #available(iOS 26.0, *) {
             self
-                .starhashSurface(.card)
                 .presentationBackground {
                     // Tinted toward the page colour: clear glass turned a
                     // saturated cyan over Pay's blue, and a lifted grey in
@@ -54,7 +52,6 @@ extension View {
                 .presentationDragIndicator(.visible)
         } else {
             self
-                .starhashSurface(.card)
                 .presentationBackground(.regularMaterial)
                 .presentationDetents(detents)
                 .presentationDragIndicator(.visible)
@@ -64,8 +61,7 @@ extension View {
     /// The solid card a sheet's rows sit on. A page using the same pieces
     /// passes its own card colour, since its background is the sheet's.
     func sheetCard(radius: CGFloat = 22, fill: Color = .sheetSurface) -> some View {
-        starhashSurface(.card)
-            .background(fill, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
+        background(fill, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
     }
 
     /// Reports this view's height, so a sheet can size its detent to its

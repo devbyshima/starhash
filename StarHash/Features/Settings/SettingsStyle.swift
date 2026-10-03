@@ -86,7 +86,6 @@ extension View {
     /// Places a row in a card at `position`.
     func settingsCardRow(_ position: SettingsCardPosition, insets: EdgeInsets = .settingsRow) -> some View {
         self
-            .starhashSurface(.card)
             .listRowInsets(insets)
             .listRowBackground(SettingsCardRowBackground(position: position))
             .listRowSeparatorTint(Color.starhashListSeparator)
