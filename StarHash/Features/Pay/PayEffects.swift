@@ -18,7 +18,7 @@ enum PayShaders {
     static func prepare() async {
         try? await ShaderLibrary.PayInk(
             .floatArray([0, 0, 0, 0]), .color(.white), .float2(CGPoint.zero),
-            .float(1), .float(1), .float(1), .float(0)
+            .float(1), .float(1), .float(1), .float(0), .float(0)
         ).compile(as: .colorEffect)
         try? await ShaderLibrary.PayButtonSheen(
             .float2(CGPoint.zero), .float(0), .float(0), .float(0)
@@ -58,11 +58,11 @@ struct PayInkLayer: View {
         if drops.isEmpty {
             Color.clear
         } else {
-            // Whiter than the page, as in the reference; only a haze on
-            // black, where white would glare.
+            // Whiter than the page, as in the reference. On black, a faint
+            // light under a glowing accent instead (see the shader).
             let dark = colorScheme == .dark
-            let whiteStrength: Float = dark ? 0.14 : 1
-            let tintStrength: Float = dark ? 0.42 : 0.45
+            let whiteStrength: Float = dark ? 0.09 : 1
+            let tintStrength: Float = dark ? 0.78 : 0.45
             let tint = tint
             let radius = Float(radius)
             TimelineView(.animation) { context in
@@ -79,6 +79,7 @@ struct PayInkLayer: View {
                             .float(radius),
                             .float(whiteStrength),
                             .float(tintStrength),
+                            .float(dark ? 1 : 0),
                             .float(clock)
                         ))
                     }
@@ -102,10 +103,13 @@ struct PayInkLayer: View {
 struct KeyBubble: View {
     let isPressed: Bool
     let size: CGFloat
+    /// White on the light page and on Pay; a soft grey on black, where a
+    /// white disc would glare.
+    var fill: Color = .white
 
     var body: some View {
         Circle()
-            .fill(Color.white)
+            .fill(fill)
             .frame(width: size, height: size)
             .shadow(color: .black.opacity(0.1), radius: 10, y: 4)
             .keyframeAnimator(initialValue: 1.0, trigger: isPressed) { content, scale in

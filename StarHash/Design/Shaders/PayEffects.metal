@@ -57,6 +57,7 @@ static float fbm3(float2 p) {
     float radius,
     float whiteStrength,
     float tintStrength,
+    float dark,
     float time
 ) {
     // One slow field for every blob's wavering edge, worked out once a
@@ -65,6 +66,7 @@ static float fbm3(float2 p) {
 
     float white = 0.0;
     float accent = 0.0;
+    float core = 0.0;
     int pressCount = count / 4;
     for (int i = 0; i < pressCount; i++) {
         float2 key = float2(drops[i * 4], drops[i * 4 + 1]);
@@ -111,15 +113,32 @@ static float fbm3(float2 p) {
         // And a faint rim of it here and there round the body.
         float rim = body * (1.0 - body) * clamp(0.5 + warp * 2.0, 0.0, 1.0) * grow * 0.35;
 
-        white = 1.0 - (1.0 - white) * (1.0 - clamp(body * life, 0.0, 1.0));
+        // On black the blob starts as bright as the grey bubble it was and
+        // settles to a faint light; on the light page it is white throughout.
+        float level = mix(whiteStrength, mix(whiteStrength, 0.3, dark), exp(-age * 9.0));
+        white = 1.0 - (1.0 - white) * (1.0 - clamp(body * life * level, 0.0, 1.0));
         accent = 1.0 - (1.0 - accent) * (1.0 - clamp((puff * puffStrength + rim) * life, 0.0, 1.0));
+        core = max(core, puff * puff * life);
     }
     // Softly out at the layer's edges rather than cut off.
     float2 edges = min(position, size - position);
     float fade = smoothstep(0.0, 40.0, min(edges.x, edges.y));
+    half w = half(white * fade);
+    if (dark > 0.5) {
+        // On black, light rather than haze: the body a faint warm glow and
+        // the accent glowing over it, lighter at its heart. A colour fading
+        // into black goes murky (yellow to olive), so where it thins it
+        // warms toward embers instead, the way light dies away.
+        half a = half(pow(accent, 1.1) * tintStrength * fade);
+        half3 ember = tint.rgb * half3(1.0h, 0.7h, 0.55h);
+        half3 bright = mix(tint.rgb, half3(1.0h), half(0.15 + 0.25 * core));
+        half3 glow = mix(ember, bright, half(smoothstep(0.0, 0.8, accent)));
+        half3 haze = mix(half3(1.0h), tint.rgb, 0.12h);
+        // Premultiplied.
+        return half4(glow * a + haze * w * (1.0h - a), a + w * (1.0h - a));
+    }
     // The accent lies under the white, so the body veils it where they
     // meet.
-    half w = half(white * whiteStrength * fade);
     half a = half(accent * tintStrength * fade) * (1.0h - w * 0.25h);
     // Premultiplied.
     return half4(half3(1.0h) * w + tint.rgb * a, w + a);
@@ -162,8 +181,8 @@ static float fbm3(float2 p) {
 //
 // `reach` is how far the front must go to leave the screen; `clearFrom` is
 // the earliest the mist may clear, once the next screen is in; `seed` makes
-// each wave's rings its own; `dark` is 1 in dark mode, where the wash and
-// mist are dim rather than white.
+// each wave's rings its own; `dark` is 1 in dark mode, which has a palette
+// of its own: light on dark rather than a pale wash.
 [[ stitchable ]] half4 PaySendWave(
     float2 position,
     SwiftUI::Layer layer,
@@ -220,8 +239,46 @@ static float fbm3(float2 p) {
     half4 soft = (layer.sample(moved + across) + layer.sample(moved - across)) * 0.5h;
     color = mix(color, soft, 0.5h);
 
-    half3 light = mix(half3(1.0h), half3(0.13h), half(dark));
-    half3 wash = mix(light, tint.rgb, mix(0.4h, 0.3h, half(dark)));
+    // The mist clears a beat after the front has gone by, and not before
+    // the next screen is in; it is thickest by the finger.
+    float clearing = max(passedAt, clearFrom);
+    float thickness = mix(0.92, 0.5, smoothstep(80.0, reach * 0.75, distance));
+    float mist = behind * (1.0 - smoothstep(clearing, clearing + 0.6, time)) * thickness;
+
+    // Flecks of the accent caught in the settling mist, at the screen's
+    // edges and down by the button only.
+    float2 cell = floor(position / float2(14.0, 6.0));
+    float fleck = hash21(cell + floor(time * 24.0) * 13.1);
+    float edges = smoothstep(0.7, 1.0, abs(position.x / size.x - 0.5) * 2.0) + 1.0 - smoothstep(0.0, 120.0, abs(position.y - origin.y));
+    float flecks = step(1.0 - 0.012 * edges, fleck) * settle * smoothstep(0.3, 0.4, time);
+
+    if (dark > 0.5) {
+        // On black, light on dark rather than a pale wash: a colour faded
+        // into black goes murky (yellow to olive), so the accent comes only
+        // as bright light, in narrow bands, and the rest is shade.
+        half3 glow = mix(tint.rgb, half3(1.0h), 0.35h);
+
+        // Ahead: the screen dimming as the front comes, a breath of the
+        // accent in the shade, and thin bright crests riding out.
+        float dim = ahead * ramp * (0.1 + 0.38 * smoothstep(0.04, 0.45, time));
+        color.rgb = mix(color.rgb, tint.rgb * 0.1h * color.a, half(dim));
+        float crest = pow(max(ring, 0.0), 2.0);
+        color.rgb = mix(color.rgb, glow * color.a, half(crest * 0.4));
+
+        // Behind: the next screen comes up out of the dark.
+        color.rgb = mix(color.rgb, half3(0.02h) * color.a, half(mist * 0.95));
+
+        // The front, a bright narrow line of the accent, there from the
+        // start so the finger's ripple shows at once.
+        float line = exp(-pow((distance - front + 18.0) / 22.0, 2.0)) * smoothstep(0.0, 0.12, time) * (1.0 - smoothstep(0.46, 0.56, time));
+        color.rgb = mix(color.rgb, glow * color.a, half(line * 0.55));
+
+        color.rgb = mix(color.rgb, glow * color.a, half(flecks * 0.8));
+        return color;
+    }
+
+    half3 light = half3(1.0h);
+    half3 wash = mix(light, tint.rgb, 0.4h);
 
     // Ahead: the wash deepening as the front comes, the rings light and
     // accent by turns.
@@ -230,23 +287,13 @@ static float fbm3(float2 p) {
     color.rgb = mix(color.rgb, light * color.a, half(max(ring, 0.0) * 0.28));
     color.rgb = mix(color.rgb, tint.rgb * color.a, half(max(-ring, 0.0) * 0.12));
 
-    // Behind: mist, white from the button's bubble at first and thinner
-    // further up, clearing a beat after the front has gone by, and not
-    // before the next screen is in.
-    float clearing = max(passedAt, clearFrom);
-    float thickness = mix(0.92, 0.5, smoothstep(80.0, reach * 0.75, distance));
-    float mist = behind * (1.0 - smoothstep(clearing, clearing + 0.6, time)) * thickness;
+    // Behind: mist, white from the finger's bubble at first and thinner
+    // further up.
     color.rgb = mix(color.rgb, light * color.a, half(mist));
 
     // The front's deeper band, between the mist and the wash.
     color.rgb = mix(color.rgb, tint.rgb * color.a, half(onFront * 0.45));
 
-    // Flecks of the accent caught in the settling mist, at the screen's
-    // edges and down by the button only.
-    float2 cell = floor(position / float2(14.0, 6.0));
-    float fleck = hash21(cell + floor(time * 24.0) * 13.1);
-    float edges = smoothstep(0.7, 1.0, abs(position.x / size.x - 0.5) * 2.0) + 1.0 - smoothstep(0.0, 120.0, abs(position.y - origin.y));
-    float flecks = step(1.0 - 0.012 * edges, fleck) * settle * smoothstep(0.3, 0.4, time);
     color.rgb = mix(color.rgb, mix(tint.rgb, light, 0.35h) * color.a, half(flecks * 0.8));
     return color;
 }

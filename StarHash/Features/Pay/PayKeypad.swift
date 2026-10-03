@@ -79,6 +79,7 @@ struct PayKeypad: View {
     var tint: Color
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
 
     /// Bumped on every accepted key, so one light tap plays per press.
     @State private var accepted = 0
@@ -181,7 +182,12 @@ struct PayKeypad: View {
                 .frame(minHeight: 64)
                 .contentShape(Rectangle())
         }
-        .buttonStyle(KeypadKeyStyle(bubbleSize: bubbleSize, reduceMotion: reduceMotion))
+        .buttonStyle(KeypadKeyStyle(
+            bubbleSize: bubbleSize,
+            // The grey the shader's blob starts from on black.
+            bubbleFill: colorScheme == .dark ? Color(white: 0.3) : .white,
+            reduceMotion: reduceMotion
+        ))
     }
 
     /// Nearly a row tall, as in the reference.
@@ -226,6 +232,7 @@ struct PayKeypad: View {
 /// shrink instead.
 private struct KeypadKeyStyle: ButtonStyle {
     let bubbleSize: CGFloat
+    let bubbleFill: Color
     let reduceMotion: Bool
 
     func makeBody(configuration: Configuration) -> some View {
@@ -243,7 +250,7 @@ private struct KeypadKeyStyle: ButtonStyle {
                 .opacity(configuration.isPressed ? 0 : 1)
                 .animation(.easeOut(duration: 0.08), value: configuration.isPressed)
                 .overlay {
-                    KeyBubble(isPressed: configuration.isPressed, size: bubbleSize)
+                    KeyBubble(isPressed: configuration.isPressed, size: bubbleSize, fill: bubbleFill)
                 }
         }
     }
