@@ -27,21 +27,24 @@ struct OnboardingView: View {
     @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
     @AppStorage(PreferenceKey.onboardingStage) private var savedStage = 0
+    @AppStorage(PreferenceKey.hasSeenDeveloperNote) private var hasSeenDeveloperNote = false
     @State private var stage = OnboardingLaunch.initialStage ?? UserDefaults.standard.integer(forKey: PreferenceKey.onboardingStage)
     @State private var setsUpAutoVerify = false
     @State private var setupWentBack = false
 
     enum Stage: Int {
-        case reel, wallet, contacts, nearby, autoVerify
+        case reel, wallet, contacts, nearby, autoVerify, note
     }
 
     /// Every screen there can be, for the debug launch's range.
-    static let stageCount = 5
+    static let stageCount = 6
 
-    /// The screens for this person: auto-verify only with MTN.
+    /// The screens for this person: auto-verify only with MTN, and Shima's
+    /// note last.
     private var stages: [Stage] {
         var all: [Stage] = [.reel, .wallet, .contacts, .nearby]
         if wallet != Recipient.Network.airtel.rawValue { all.append(.autoVerify) }
+        all.append(.note)
         return all
     }
 
@@ -81,16 +84,19 @@ struct OnboardingView: View {
                 OnboardingPermission(config: autoVerify)
                     .id(Stage.autoVerify)
                     .transition(.opacity)
+            case .note:
+                DeveloperNoteContent(kind: .welcome, primaryTitle: "Start Using StarHash", primaryAction: finish, glows: true)
+                    .padding(.top, 24)
+                    .transition(.opacity)
             }
         }
         .sensoryFeedback(.impact(weight: .light), trigger: stage)
-        // The setup in full, over onboarding; onboarding ends as it closes,
-        // set up or not (Settings can switch it on later).
         .onChange(of: stage, initial: true) { _, stage in savedStage = stage }
-        // Done or closed, onboarding ends; back from its first step returns
-        // to this page instead.
+        // The setup in full, over onboarding. Done or closed, on to the
+        // note, set up or not (Settings can switch it on later); back from
+        // its first step returns to this page instead.
         .fullScreenCover(isPresented: $setsUpAutoVerify, onDismiss: {
-            if setupWentBack { setupWentBack = false } else { finish() }
+            if setupWentBack { setupWentBack = false } else { advance() }
         }) {
             AutoVerifySetupCover { setupWentBack = true }
         }
@@ -145,10 +151,10 @@ struct OnboardingView: View {
             description: "Add one shortcut and each M\u{2011}Money message\nconfirms its payment, with the fee.",
             primaryTitle: autoVerifySetUp ? "Continue" : "Set Up",
             primaryAction: {
-                if autoVerifySetUp { finish() } else { setsUpAutoVerify = true }
+                if autoVerifySetUp { advance() } else { setsUpAutoVerify = true }
             },
             secondaryTitle: autoVerifySetUp ? nil : "Maybe Later",
-            secondaryAction: finish
+            secondaryAction: advance
         )
     }
 
@@ -156,6 +162,9 @@ struct OnboardingView: View {
     /// the first screen.
     private func finish() {
         savedStage = 0
+        hasSeenDeveloperNote = true
+        // The two weeks before the note asking for a rating start now.
+        ReviewNote.startClockIfNeeded()
         onFinish()
     }
 
@@ -265,8 +274,9 @@ extension View {
 
 // MARK: - Launch arguments
 
-/// `-onboardingPage 0...4` (DEBUG, with `-resetOnboarding`) starts on that
-/// screen: the reel, the wallet, Contacts, Nearby, auto-verify. Without it,
+/// `-onboardingPage 0...5` (DEBUG, with `-resetOnboarding`) starts on that
+/// screen: the reel, the wallet, Contacts, Nearby, auto-verify, the note
+/// (4 is the note with Airtel). Without it,
 /// onboarding starts where it was left.
 @MainActor
 enum OnboardingLaunch {

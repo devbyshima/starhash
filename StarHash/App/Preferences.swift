@@ -7,6 +7,10 @@ enum PreferenceKey {
     /// The onboarding screen reached, so a flow left unfinished (the app
     /// closed or killed partway) picks up there. Cleared when it finishes.
     static let onboardingStage = "onboardingStage"
+    /// When StarHash was first set up (seconds since 1970), for the note
+    /// that asks for a rating two weeks later.
+    static let firstUsedAt = "firstUsedAt"
+    static let hasSeenReviewNote = "hasSeenReviewNote"
     /// Whether the developer note has been seen after onboarding.
     static let hasSeenDeveloperNote = "hasSeenDeveloperNote"
     static let saveTransactions = "saveTransactions"

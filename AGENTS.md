@@ -111,9 +111,9 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 | `-skipOnboarding`, `-resetOnboarding` | start on the tabs, or on onboarding |
 | `-tab pay\|buy\|activity\|settings` | starting page |
 | `-menu` | side menu open |
-| `-note`, `-noteTLDR` | the developer note (full, or on its TL;DR) |
+| `-note`, `-reviewNote` | Shima's welcome note as a sheet, or the two-week note that asks for a rating |
 | `-wallet mtn\|airtel\|none` | the main wallet (UserDefaults; none clears it; `-skipOnboarding` sets mtn when none) |
-| `-onboardingPage 0...4` | onboarding screen (with `-resetOnboarding`): 0 the reel, 1 the wallet, 2 Contacts, 3 Nearby, 4 auto-verify (MTN only) |
+| `-onboardingPage 0...5` | onboarding screen (with `-resetOnboarding`): 0 the reel, 1 the wallet, 2 Contacts, 3 Nearby, 4 auto-verify (MTN only), then Shima's note (5, or 4 with Airtel) |
 | `-payAmount <n>` | amount on the keypad |
 | `-payChosen <input>` | a recipient already chosen (Pay Again with no amount) |
 | `-payPicker` | open the recipient picker |

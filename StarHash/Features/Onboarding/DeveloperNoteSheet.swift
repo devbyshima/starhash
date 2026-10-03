@@ -1,139 +1,212 @@
+import StoreKit
 import SwiftUI
 
-/// A note from the developer, in Beam's sheet language (its About sheet):
-/// the title, the StarHash mark over a short heading, and the note in a
-/// card, with a TL;DR switch for the one-paragraph version and Continue at
-/// the bottom. Shown once over the app right after onboarding, and again
-/// from Settings, About StarHash, Developer Note. Dismissing it (Continue or a
-/// swipe) marks it seen; RootView owns that flag.
-struct DeveloperNoteSheet: View {
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var showsSummary = DeveloperNoteLaunch.showsSummary
+/// Shima's note, in two versions, laid out as a letter: a round picture,
+/// "A note from Shima", the note left aligned, the signature, and a button
+/// with "Write to Shima" under it.
+///
+/// - `welcome`, the last onboarding screen (and Settings, About StarHash,
+///   Developer Note): why StarHash exists, free, open source and private,
+///   and enjoy it. No rating ask.
+/// - `review`, once, after two weeks of use (`ReviewNote`): some of the
+///   same, then the one ask: if you love it, rate it.
+enum DeveloperNoteKind {
+    case welcome
+    case review
+
+    var paragraphs: [LocalizedStringKey] {
+        switch self {
+        case .welcome: [
+            "Hi, I'm Shima, and I made StarHash.",
+            "I built it because I was tired of how hard USSD makes paying. Typing codes and digging through menus for the things you do every day felt wrong, so StarHash does them in a few taps.",
+            "It's free and open source, and it's private: no account, no server, no tracking. Everything stays on your iPhone.",
+            "I hope it makes paying a little easier. Enjoy it.",
+        ]
+        case .review: [
+            "You've been using StarHash for two weeks now. Thank you.",
+            "I made it on my own, because USSD made paying harder than it should be.",
+            "StarHash is free and open source, with no ads, no account and nothing sent off your iPhone. There is nothing to buy.",
+            "So if you love it, a rating on the App Store is all I ask. It helps someone else find an easier way to pay.",
+        ]
+        }
+    }
+}
+
+/// The note's content, shared by onboarding's last screen and the sheets.
+struct DeveloperNoteContent: View {
+    let kind: DeveloperNoteKind
+    let primaryTitle: String
+    let primaryAction: () -> Void
+    /// Onboarding's buttons glow, as its others do.
+    var glows = false
+
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         VStack(spacing: 0) {
-            SheetHeader("Developer Note")
             ScrollView {
-                VStack(spacing: 20) {
-                    VStack(spacing: 10) {
-                        StarHashMark(size: 72)
-                            .accessibilityHidden(true)
-                        Text("Welcome to StarHash 🎉")
-                            .font(.sheet(21, .bold, relativeTo: .title2))
-                            .foregroundStyle(Color.starhashPrimaryText)
-                            .multilineTextAlignment(.center)
-                        Text("A quick note from the developer")
-                            .font(.sheetCaption)
-                            .foregroundStyle(Color.sheetSecondaryText)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 8)
-
+                VStack(alignment: .leading, spacing: 0) {
+                    DeveloperAvatar()
+                        .padding(.bottom, 18)
+                    Text("A note from Shima")
+                        .starhashFont(28, weight: .bold, relativeTo: .title)
+                        .foregroundStyle(Color.starhashPrimaryText)
+                        .accessibilityAddTraits(.isHeader)
+                        .padding(.bottom, 16)
                     VStack(alignment: .leading, spacing: 12) {
-                        HStack(alignment: .firstTextBaseline) {
-                            Text(showsSummary ? "TL;DR" : "The note")
-                                .font(.sheetHeadline)
+                        ForEach(Array(kind.paragraphs.enumerated()), id: \.offset) { _, paragraph in
+                            Text(paragraph)
+                                .font(.starhash(.body))
                                 .foregroundStyle(Color.starhashPrimaryText)
-                                .contentTransition(.opacity)
-                            Spacer(minLength: 8)
-                            Button {
-                                withAnimation(.smooth(duration: 0.4)) { showsSummary.toggle() }
-                            } label: {
-                                Text(showsSummary ? "Full note" : "TL;DR")
-                                    .font(.sheet(11, .bold, relativeTo: .caption))
-                                    .tracking(0.5)
-                                    .foregroundStyle(Color.sheetSecondaryText)
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 5)
-                                    .background(Capsule().fill(Color.sheetChip))
-                                    .frame(minHeight: 44)
-                                    .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-                        }
-                        ZStack(alignment: .topLeading) {
-                            if showsSummary {
-                                NoteText(paragraphs: DeveloperNote.summary)
-                                    .transition(textTransition)
-                            } else {
-                                NoteText(paragraphs: DeveloperNote.paragraphs)
-                                    .transition(textTransition)
-                            }
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(16)
-                    .sheetCard()
+                    // A signature, so a script face: iOS's own Snell
+                    // Roundhand, the one text not set in Space Grotesk.
+                    Text("Shima")
+                        .font(.custom("SnellRoundhand-Bold", size: 44, relativeTo: .largeTitle))
+                        .foregroundStyle(Color.starhashPrimaryText)
+                        .padding(.top, 20)
+                        .accessibilityLabel("Signed, Shima")
                 }
-                .padding(.horizontal, 18)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 30)
                 .padding(.top, 8)
-                .padding(.bottom, 24)
+                .padding(.bottom, 20)
             }
             .scrollIndicators(.hidden)
-            .starhashReadableScrollContent()
+            .scrollBounceBehavior(.basedOnSize)
 
-            Button("Continue") { dismiss() }
-                .buttonStyle(.sheetPrimary)
-                .padding(.horizontal, 18)
-                .padding(.bottom, 8)
-                .starhashReadableWidth(StarHashMetrics.narrowReadableWidth)
+            VStack(spacing: 4) {
+                Button(primaryTitle, action: primaryAction)
+                    .buttonStyle(glows ? .starhashPrimaryGlowing : .starhashPrimary)
+                Button {
+                    openURL(DeveloperNoteLinks.write)
+                } label: {
+                    Text("Write to Shima")
+                        .font(.starhash(.subheadline, weight: .semibold))
+                        .foregroundStyle(Color.starhashSecondaryText)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Opens a new message to Shima on GitHub")
+            }
+            .padding(.horizontal, 30)
+            .padding(.bottom, 8)
+        }
+        .starhashReadableWidth(StarHashMetrics.narrowReadableWidth)
+    }
+}
+
+/// The round picture at the top: the StarHash star on a white disc, until a
+/// photo of Shima takes its place.
+private struct DeveloperAvatar: View {
+    var body: some View {
+        Circle()
+            .fill(Color.white)
+            .frame(width: 60, height: 60)
+            .overlay {
+                StarHashMarkShape()
+                    .fill(Color.brandBlue)
+                    .padding(13)
+            }
+            .shadow(color: .black.opacity(0.08), radius: 6, y: 2)
+            .accessibilityHidden(true)
+    }
+}
+
+enum DeveloperNoteLinks {
+    /// A new issue on StarHash's public repo: writing to Shima without an
+    /// email address in the app's open code.
+    static let write = URL(string: "https://github.com/devbyshima/starhash/issues/new")!
+}
+
+/// The welcome note as a sheet, from Settings, About StarHash, Developer
+/// Note: a close button on the right, and Done.
+struct DeveloperNoteSheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NoteSheetFrame(onClose: { dismiss() }) {
+            DeveloperNoteContent(kind: .welcome, primaryTitle: "Done") { dismiss() }
+        }
+    }
+}
+
+/// The two-week note, with its one ask: Rate StarHash brings up the App
+/// Store's own rating prompt.
+struct ReviewNoteSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.requestReview) private var requestReview
+
+    var body: some View {
+        NoteSheetFrame(onClose: { dismiss() }) {
+            DeveloperNoteContent(kind: .review, primaryTitle: "Rate StarHash") {
+                dismiss()
+                Task {
+                    // Once the sheet has gone, so the prompt is not under it.
+                    try? await Task.sleep(for: .milliseconds(500))
+                    requestReview()
+                }
+            }
+        }
+    }
+}
+
+/// A full-height sheet with the round close button at its top right, as
+/// the reference draws it.
+private struct NoteSheetFrame<Content: View>: View {
+    let onClose: () -> Void
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Spacer()
+                StarHashCircleButton("xmark", label: "Close", action: onClose)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 18)
+            content
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .sheetGlass(detents: [.large])
     }
-
-    private var textTransition: AnyTransition {
-        reduceMotion ? .opacity : AnyTransition(.blurReplace)
-    }
 }
 
-/// Paragraphs with a line between them, in Beam's About text style.
-private struct NoteText: View {
-    let paragraphs: [LocalizedStringKey]
+/// When the two-week note is due: two weeks after StarHash was first set
+/// up, once.
+@MainActor
+enum ReviewNote {
+    static let delay: TimeInterval = 14 * 24 * 3600
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
-                Text(paragraph)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+    /// Marks the start of the two weeks, if not already marked (an install
+    /// from before this note starts counting from now).
+    static func startClockIfNeeded() {
+        let defaults = UserDefaults.standard
+        if defaults.double(forKey: PreferenceKey.firstUsedAt) == 0 {
+            defaults.set(Date.now.timeIntervalSince1970, forKey: PreferenceKey.firstUsedAt)
         }
-        .font(.sheetSubheadline)
-        .foregroundStyle(Color.sheetSecondaryText)
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
-}
 
-/// The note's copy. Markdown bold marks a path in the app.
-private enum DeveloperNote {
-    static var paragraphs: [LocalizedStringKey] { [
-        "Hi there 👋, a quick note from the developer.",
-        "Thank you for giving StarHash a try. It's brand new, so your first impressions mean a lot.",
-        "StarHash makes MoMo quicker. Type an amount, pick who gets it, and it dials the USSD code for you. Your PIN only ever goes into your wallet's own prompt, and StarHash never moves money by itself.",
-        "There's no sign-in, no server and no tracking. Your payments stay on your iPhone, and with auto-verify your M\u{2011}Money messages confirm each one for you.",
-        "StarHash is free and open source. If you have an idea, or something doesn't feel right, you'll find the code on GitHub from **Settings > Source code**. Each update is listed in **Settings > What's New**.",
-        "I'm glad you're here. Happy paying!",
-    ] }
-
-    static var summary: [LocalizedStringKey] { [
-        "Type an amount, pick who, and StarHash dials MoMo for you.\nFree, open source and private. Updates: **Settings > What's New**.",
-    ] }
-}
-
-/// `-note` (DEBUG only) shows the note; `-noteTLDR` opens it on the TL;DR.
-enum DeveloperNoteLaunch {
-    @MainActor static var showsSummary: Bool {
+    static func isDue(now: Date = .now) -> Bool {
         #if DEBUG
-        DebugLaunch.arguments.contains("-noteTLDR")
-        #else
-        false
+        if DebugLaunch.arguments.contains("-reviewNote") { return true }
         #endif
+        let defaults = UserDefaults.standard
+        let start = defaults.double(forKey: PreferenceKey.firstUsedAt)
+        guard start > 0, !defaults.bool(forKey: PreferenceKey.hasSeenReviewNote) else { return false }
+        return now.timeIntervalSince1970 - start >= delay
     }
+}
 
+/// `-note` (DEBUG only) shows the welcome note over the app;
+/// `-reviewNote` the two-week one.
+enum DeveloperNoteLaunch {
     @MainActor static var forcesNote: Bool {
         #if DEBUG
-        DebugLaunch.arguments.contains("-note") || DebugLaunch.arguments.contains("-noteTLDR")
+        DebugLaunch.arguments.contains("-note")
         #else
         false
         #endif
