@@ -192,6 +192,9 @@ enum StarHashMetrics {
     static let cardRadius: CGFloat = 26
     static let rowRadius: CGFloat = 24
     static let primaryButtonHeight: CGFloat = 58
+    /// Every page's title, in the system bar or drawn by the page: 21pt
+    /// bold, a size up and a weight up on the system bar's 17 semibold.
+    static let pageTitleSize: CGFloat = 21
 }
 
 extension Font {

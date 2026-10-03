@@ -259,6 +259,7 @@ struct RecipientPickerView: View {
                     .font(PickerType.title)
                     .foregroundStyle(Color.starhashPrimaryText)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                     .padding(.horizontal, 56)
                     .accessibilityAddTraits(.isHeader)
                     .transition(.offset(x: -36).combined(with: .opacity))
@@ -723,12 +724,12 @@ private struct PickerBand: View {
     }
 }
 
-/// The recipient page's type, one scale for the whole page: the title as a
-/// navigation bar sets it, a 17pt search and row names, 14pt detail under
+/// The recipient page's type, one scale for the whole page: the title as
+/// every page sets it, a 17pt search and row names, 14pt detail under
 /// them, the section labels, and the total with "Total:" as large as the
 /// amount in the weight of its "RWF".
 private enum PickerType {
-    static var title: Font { .sheet(17, .semibold, relativeTo: .headline) }
+    static var title: Font { .starhashPageTitle }
     static var search: Font { .sheet(17, relativeTo: .body) }
     static var section: Font { .sheet(15, .bold, relativeTo: .subheadline) }
     static var rowName: Font { .sheet(17, .semibold, relativeTo: .body) }

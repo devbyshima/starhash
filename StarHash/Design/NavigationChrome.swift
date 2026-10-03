@@ -21,6 +21,14 @@ extension View {
     func starhashBackAndClose(back: @escaping () -> Void, close: (() -> Void)?) -> some View {
         modifier(BackAndClose(back: back, close: close))
     }
+
+    /// An inline navigation bar title set as every page's title is
+    /// (`PageTitle`), drawn by SwiftUI in the bar's middle: UIKit's own
+    /// title came out in the system font on some stacks. The plain title
+    /// stays for VoiceOver and the back menu.
+    func starhashNavigationTitle(_ title: String) -> some View {
+        modifier(NavigationPageTitle(title: title))
+    }
 }
 
 private struct StarHashBackButton: ViewModifier {
@@ -67,7 +75,33 @@ private struct BackAndClose: ViewModifier {
     }
 }
 
+private struct NavigationPageTitle: ViewModifier {
+    let title: String
+
+    func body(content: Content) -> some View {
+        content
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+            .principalTitle { PageTitle(text: title).lineLimit(1) }
+    }
+}
+
 private extension View {
+    /// `title` in the middle of the bar, with no system glass behind it.
+    @ViewBuilder
+    func principalTitle(@ViewBuilder _ title: () -> some View) -> some View {
+        if #available(iOS 26.0, *) {
+            toolbar {
+                ToolbarItem(placement: .principal) { title() }
+                    .sharedBackgroundVisibility(.hidden)
+            }
+        } else {
+            toolbar {
+                ToolbarItem(placement: .principal) { title() }
+            }
+        }
+    }
+
     /// `button` at the trailing end of the bar, with no system glass.
     @ViewBuilder
     func trailingBarButton(@ViewBuilder _ button: () -> some View) -> some View {

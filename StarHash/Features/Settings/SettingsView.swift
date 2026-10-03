@@ -13,8 +13,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack(path: $path) {
             SettingsRootList { path.append(.autoVerify) }
-                .navigationTitle("Settings")
-                .navigationBarTitleDisplayMode(.inline)
+                .starhashNavigationTitle("Settings")
                 .navigationDestination(for: SettingsPage.self) { page in
                     // The setup brings its own back button, which steps
                     // back through it first.

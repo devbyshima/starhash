@@ -28,6 +28,14 @@ struct PageHeader<Center: View, Trailing: View>: View {
     }
 }
 
+extension Font {
+    /// The page title: 21pt bold, following Dynamic Type from the
+    /// headline's size.
+    static var starhashPageTitle: Font {
+        .sheet(StarHashMetrics.pageTitleSize, .bold, relativeTo: .headline)
+    }
+}
+
 extension PageHeader where Trailing == EmptyView {
     init(page: AppTab, @ViewBuilder center: () -> Center) {
         self.init(page: page, center: center) { EmptyView() }
@@ -41,13 +49,14 @@ extension PageHeader where Center == PageTitle, Trailing == EmptyView {
     }
 }
 
-/// A page title as the system navigation bar sets it: Headline, centred.
+/// A page title, as every page sets it (`Font.starhashPageTitle`), centred.
 struct PageTitle: View {
     let text: String
 
     var body: some View {
         Text(text)
-            .font(.starhash(.headline))
+            .font(.starhashPageTitle)
+            .minimumScaleFactor(0.7)
             .foregroundStyle(Color.starhashPrimaryText)
             .accessibilityAddTraits(.isHeader)
     }

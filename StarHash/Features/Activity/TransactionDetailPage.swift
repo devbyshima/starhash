@@ -59,8 +59,7 @@ struct TransactionDetailPage: View {
         .starhashTopFadeUnderNavigationBar(opacity: scrolledUnder)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color.starhashBackground.ignoresSafeArea())
-        .navigationTitle("Transaction")
-        .navigationBarTitleDisplayMode(.inline)
+        .starhashNavigationTitle("Transaction")
         // Deleted here or elsewhere: nothing left to show.
         .onChange(of: transaction == nil) { _, isGone in
             if isGone { router.openTransactionID = nil }

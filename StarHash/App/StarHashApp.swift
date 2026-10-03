@@ -35,11 +35,13 @@ struct StarHashApp: App {
         Self.useSpaceGroteskInNavigationBars()
     }
 
-    /// Navigation bar titles (Settings, the recipient picker) are
-    /// UIKit's, outside SwiftUI's font environment.
+    /// Navigation bar titles (Settings and its pages, a transaction) are
+    /// UIKit's, outside SwiftUI's font environment: the page title's 21pt
+    /// bold, scaled for the text size at launch up to 28.
     private static func useSpaceGroteskInNavigationBars() {
         let bar = UINavigationBar.appearance()
-        bar.titleTextAttributes = [.font: UIFont.starhash(17, weight: 600)]
+        let title = UIFont.starhash(StarHashMetrics.pageTitleSize, weight: 700)
+        bar.titleTextAttributes = [.font: UIFontMetrics(forTextStyle: .headline).scaledFont(for: title, maximumPointSize: 28)]
         bar.largeTitleTextAttributes = [.font: UIFont.starhash(34, weight: 700)]
     }
 

@@ -106,8 +106,7 @@ struct AutoVerificationGuide: View {
         }
         .starhashReadableWidth(StarHashMetrics.narrowReadableWidth)
         .background(Color.starhashBackground.ignoresSafeArea())
-        .navigationTitle("Auto-verify")
-        .navigationBarTitleDisplayMode(.inline)
+        .starhashNavigationTitle("Auto-verify")
         // Back on the left steps back through the setup, then leaves it;
         // close on the right, over onboarding only.
         .starhashBackAndClose(back: goBack, close: onClose)

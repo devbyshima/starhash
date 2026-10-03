@@ -117,9 +117,7 @@ extension View {
     /// Title for a page pushed inside Settings. iOS 26's own back button is
     /// already a round glass chevron, so the system one stays.
     func settingsPage(_ title: String) -> some View {
-        self
-            .navigationTitle(title)
-            .navigationBarTitleDisplayMode(.inline)
+        starhashNavigationTitle(title)
     }
 }
 
