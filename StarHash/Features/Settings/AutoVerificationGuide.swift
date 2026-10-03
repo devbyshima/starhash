@@ -40,10 +40,12 @@ struct AutoVerificationGuide: View {
                 .padding(.top, 8)
             ScrollView {
                 VStack(spacing: 0) {
+                    // Tight enough that step 1 fits on an iPhone Pro with
+                    // room under its card, matching the gap over it.
                     screenshot
-                        .padding(.top, 20)
+                        .padding(.top, 12)
                     texts
-                        .padding(.top, 24)
+                        .padding(.top, 16)
                     if step == 0 {
                         GuideStepList(steps: [
                             "Tap **Add Shortcut** below.",
@@ -55,7 +57,9 @@ struct AutoVerificationGuide: View {
                     }
                 }
                 .padding(.horizontal, 24)
-                .padding(.bottom, 24)
+                // As much room over the buttons as the steps have under
+                // the title.
+                .padding(.bottom, 25)
                 .id(step)
                 .transition(reduceMotion ? .opacity : .push(from: .trailing))
             }
@@ -262,7 +266,7 @@ private struct GuidePhoneScreenshot: View {
     /// What to tap, as a share of the image (0...1 on both axes).
     let highlight: CGRect
 
-    @ScaledMetric(relativeTo: .body) private var height: CGFloat = 290
+    @ScaledMetric(relativeTo: .body) private var height: CGFloat = 283
 
     var body: some View {
         let screen = RoundedRectangle(cornerRadius: 26, style: .continuous)
