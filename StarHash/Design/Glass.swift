@@ -61,13 +61,6 @@ private struct StarHashGlassModifier<S: Shape>: ViewModifier {
     }
 }
 
-/// The top fade's measurements.
-enum StarHashTopFade {
-    /// Below the transaction page's bar, which holds solid to its foot:
-    /// long enough that what scrolls up visibly fades as it reaches it.
-    static let heldLength: CGFloat = 40
-}
-
 /// Groups glass shapes so they blend and morph together on iOS 26.
 struct StarHashGlassContainer<Content: View>: View {
     var spacing: CGFloat = 8
@@ -140,33 +133,6 @@ extension View {
             .padding(.bottom, -18)
             .ignoresSafeArea(edges: .top)
             .allowsHitTesting(false)
-        }
-    }
-
-    /// The same fade under a system navigation bar, laid over a scroll view
-    /// that runs beneath it: the page colour solid to the bar's foot, as on
-    /// the recipient screen (at 85% the title's text let what scrolled
-    /// under it ghost through), then fading out below.
-    /// `opacity` lets a page fade it in as it scrolls, so at rest it never
-    /// lies over the top of the content.
-    func starhashTopFadeUnderNavigationBar(opacity: Double = 1) -> some View {
-        overlay(alignment: .top) {
-            GeometryReader { proxy in
-                VStack(spacing: 0) {
-                    Color.starhashBackground
-                        .frame(height: proxy.safeAreaInsets.top)
-                    LinearGradient(
-                        colors: [.starhashBackground, .starhashBackground.opacity(0.85), .starhashBackground.opacity(0)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .frame(height: StarHashTopFade.heldLength)
-                }
-                .offset(y: -proxy.safeAreaInsets.top)
-            }
-            .opacity(opacity)
-            .allowsHitTesting(false)
-            .accessibilityHidden(true)
         }
     }
 

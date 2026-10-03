@@ -24,7 +24,6 @@ struct TransactionDetailPage: View {
     @State private var feedbackCount = 0
     /// How far the page has scrolled under the bar, 0 to 1 over the first
     /// 24pt: the fade under the bar comes in with it.
-    @State private var scrolledUnder = 0.0
 
     private var transaction: StarHashKit.Transaction? { store.transaction(id: transactionID) }
 
@@ -47,16 +46,9 @@ struct TransactionDetailPage: View {
         }
         .scrollIndicators(.hidden)
         .scrollBounceBehavior(.basedOnSize)
-        // Activity's fade under the bar rather than the system's blur, so
-        // the page reads as part of the same tab.
-        .starhashHidesTopEdgeEffect()
-        .onScrollGeometryChange(for: CGFloat.self) { geometry in
-            min(max(geometry.contentOffset.y + geometry.contentInsets.top, 0), 24)
-        } action: { _, offset in
-            scrolledUnder = Double(offset / 24)
-        }
+        // The soft fade and blur under the bar that Settings has.
+        .starhashSoftTopEdge()
         .starhashReadableScrollContent()
-        .starhashTopFadeUnderNavigationBar(opacity: scrolledUnder)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color.starhashBackground.ignoresSafeArea())
         .starhashNavigationTitle("Transaction")
