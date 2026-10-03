@@ -70,6 +70,11 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   arrows, destructive actions); the carriers' colours live only in their
   logos and the pulse rings round the chosen one on onboarding. Switches
   are `starhashSwitchOn`.
+- Light-mode sheets are deep-blue glass at 70% (`sheetGlassTint`).
+  `sheetGlass` marks a sheet `.starhashSurface(.sheet)`, which turns the
+  text tokens white there (`Color(light:sheet:dark:)` in Surface.swift);
+  `sheetCard` sets `.card` back, so cards keep dark text. Measured AA on
+  device; going lighter than 70% breaks it.
 - Every separator is dotted: `SheetDivider`, or `StarHashRowSeparator`
   (which draws it with insets). Settings lists hide the system's solid
   lines and `settingsCardRow` draws the dotted one. Never a solid line.

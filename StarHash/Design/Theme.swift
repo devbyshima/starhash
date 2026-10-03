@@ -36,21 +36,30 @@ extension Color {
 
     // MARK: Text
 
-    static let starhashPrimaryText = Color(light: .brandNight, dark: .brandPaper)
+    /// Near black on the page and on cards, white on a light-mode sheet's
+    /// deep-blue glass, pale grey in dark mode.
+    static let starhashPrimaryText = Color(light: .brandNight, sheet: .white, dark: .brandPaper)
     /// The quieter text. Light: the near black let through at 80%, which
     /// sits on whatever is under it, so one colour reads on the blue page
     /// (5.0:1) and on a white card or a pale sheet (9:1 or more); #616161
     /// itself is 2.4:1 on the blue. Dark: a grey lifted from #616161, which
     /// is under 3:1 on the near black (7.4:1 on the page, 4.5:1 or more on
     /// its cards and glass).
-    static let starhashSecondaryText = Color(light: .brandNight.opacity(0.8), dark: .init(white: 166 / 255))
+    static let starhashSecondaryText = Color(light: .brandNight.opacity(0.8), sheet: .white.opacity(0.97), dark: .init(white: 166 / 255))
     /// Placeholders and muted marks, 3:1 or more on the blue and on cards.
-    static let starhashTertiaryText = Color(light: .brandNight.opacity(0.6), dark: .init(white: 117 / 255))
+    static let starhashTertiaryText = Color(light: .brandNight.opacity(0.6), sheet: .white.opacity(0.7), dark: .init(white: 117 / 255))
     /// Section titles and the small print under settings cards.
     static let starhashCaptionText = Color.starhashSecondaryText
     /// Money going out and destructive actions, on cards and sheets: one of
     /// the two hues besides the accent, AA on everything it sits on there.
-    static let starhashDestructive = Color(light: .init(red: 0.84, green: 0.16, blue: 0.13), dark: .init(red: 1, green: 110 / 255, blue: 100 / 255))
+    static let starhashDestructive = Color(
+        light: .init(red: 0.84, green: 0.16, blue: 0.13),
+        // A pale red on a sheet's deep-blue glass, where the strong one
+        // would not read; `SheetTextButton` sets it bold, large text at
+        // 3:1 and over.
+        sheet: .init(red: 1, green: 200 / 255, blue: 194 / 255),
+        dark: .init(red: 1, green: 110 / 255, blue: 100 / 255)
+    )
     /// The same, as text straight on the page: no brighter red reaches
     /// 4.5:1 on the blue, so light mode deepens it (4.6:1).
     static let starhashDestructiveOnPage = Color(light: .init(red: 110 / 255, green: 0, blue: 0), dark: .starhashDestructive)
@@ -135,12 +144,14 @@ extension Color {
     static let sheetSurface = Color(light: .brandPaper, dark: .init(white: 28 / 255))
     static let sheetSecondaryText = Color.starhashSecondaryText
     static let sheetFilledButton = Color(light: .brandNight, dark: .brandPaper)
-    /// A sheet's own background. Light: solid white, since glass over the
-    /// blue page came out a pale cyan its cards and greys washed into.
-    /// Dark: the page colour let mostly through the glass.
-    static let sheetGlassTint = Color(light: .white, dark: .brandNight.opacity(0.6))
+    /// A sheet's glass. Light: a deep blue at 70%, the founder's pick for a
+    /// see-through sheet, about as light as it goes with white text still
+    /// at AA on it (measured on device). Dark: the page colour let mostly
+    /// through. Dark: the page colour let
+    /// mostly through.
+    static let sheetGlassTint = Color(light: Color(red: 0, green: 60 / 255, blue: 110 / 255).opacity(0.7), dark: .brandNight.opacity(0.6))
     /// The dotted line between a sheet card's rows.
-    static let sheetDivider = Color(light: .brandNight.opacity(0.22), dark: .brandPaper.opacity(0.22))
+    static let sheetDivider = Color(light: .brandNight.opacity(0.22), sheet: .white.opacity(0.35), dark: .brandPaper.opacity(0.22))
 
     /// The carriers' own colours: their logos, and the rings round the
     /// chosen logo on onboarding's carrier step. StarHash's buttons are the
@@ -154,7 +165,7 @@ extension Color {
     static let starhashOnAirtel = Color.white
 
     /// Large empty-state symbols ("No Expenses") and other muted icons.
-    static let starhashMutedIcon = Color(light: .init(white: 138 / 255), dark: .init(white: 130 / 255))
+    static let starhashMutedIcon = Color(light: .init(white: 138 / 255), sheet: .white.opacity(0.7), dark: .init(white: 130 / 255))
     /// The close (xmark) glyph: grey and lighter in weight than the other
     /// header glyphs (back, add, confirm).
     static let starhashCloseGlyph = Color.starhashSecondaryText

@@ -38,12 +38,14 @@ extension View {
     /// iOS 26, a material.
     @ViewBuilder
     func sheetGlass(detents: Set<PresentationDetent> = [.medium, .large]) -> some View {
+        // Text on the sheet's own glass takes the sheet's colours.
         if #available(iOS 26.0, *) {
             self
+                .starhashSurface(.sheet)
                 .presentationBackground {
-                    // Tinted toward the page colour: clear glass turned a
-                    // saturated cyan over Pay's blue, and a lifted grey in
-                    // dark mode that its grey text failed on.
+                    // Light: deep-blue glass, see-through but dark enough
+                    // for white text. Dark: toward the page colour, where
+                    // a lifted grey failed its grey text.
                     Color.clear
                         .glassEffect(.regular.tint(.sheetGlassTint), in: Rectangle())
                         .ignoresSafeArea()
@@ -52,7 +54,8 @@ extension View {
                 .presentationDragIndicator(.visible)
         } else {
             self
-                .presentationBackground(.regularMaterial)
+                .starhashSurface(.sheet)
+                .presentationBackground(Color.sheetGlassTint)
                 .presentationDetents(detents)
                 .presentationDragIndicator(.visible)
         }
@@ -61,7 +64,9 @@ extension View {
     /// The solid card a sheet's rows sit on. A page using the same pieces
     /// passes its own card colour, since its background is the sheet's.
     func sheetCard(radius: CGFloat = 22, fill: Color = .sheetSurface) -> some View {
-        background(fill, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
+        // Back to the page's colours: the card is pale under the glass.
+        starhashSurface(.card)
+            .background(fill, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
     }
 
     /// Reports this view's height, so a sheet can size its detent to its
@@ -294,7 +299,10 @@ struct SheetTextButton: View {
     var body: some View {
         Button(role: role, action: action) {
             Text(title)
-                .font(.sheet(14, .semibold, relativeTo: .subheadline))
+                // Bold when destructive: 14pt bold is large text, so its
+                // red keeps a visible hue on the sheet's glass and still
+                // passes (3:1).
+                .font(.sheet(14, role == .destructive ? .bold : .semibold, relativeTo: .subheadline))
                 .foregroundStyle(role == .destructive ? (onPage ? Color.starhashDestructiveOnPage : Color.starhashDestructive) : Color.sheetSecondaryText)
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .contentShape(Rectangle())
