@@ -22,7 +22,7 @@ struct ActivitySummaryCard: View {
                     .foregroundStyle(Color.starhashSecondaryText)
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(Money.format(totals.spent))
-                        .starhashFont(40, weight: .bold, relativeTo: .largeTitle)
+                        .starhashFont(48, weight: .bold, relativeTo: .largeTitle, tracking: 0)
                         .foregroundStyle(Color.starhashPrimaryText)
                         // The digits roll to a new total (another period, a
                         // new payment), or fade with Reduce Motion.

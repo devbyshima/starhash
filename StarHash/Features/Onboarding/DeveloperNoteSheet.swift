@@ -62,7 +62,7 @@ struct DeveloperNoteContent: View {
             DeveloperAvatar()
                 .padding(.bottom, 16)
             Text("A note from Shima")
-                .starhashFont(29, weight: .semibold, relativeTo: .title)
+                .starhashFont(29, weight: .bold, relativeTo: .title)
                 .foregroundStyle(Color.starhashPrimaryText)
                 .accessibilityAddTraits(.isHeader)
                 .padding(.bottom, 18)

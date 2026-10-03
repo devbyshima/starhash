@@ -120,11 +120,14 @@ struct TransactionDetailPage: View {
                     .font(.sheetCaption)
                     .foregroundStyle(Color.sheetSecondaryText)
             }
-            // One Text, so the amount and "RWF" shrink together.
+            // One Text, so the amount and "RWF" shrink together. The unit
+            // is half the number's size on its baseline, as GO Club sets
+            // "ml" after an amount, and as Activity's total does.
             (Text(Money.format(transaction.amount))
                 .foregroundStyle(transaction.activityAmountColor)
                 .strikethrough(transaction.status == .failed)
                 + Text(" " + Money.currency)
+                .font(.sheet(22, .semibold, relativeTo: .title2))
                 .foregroundStyle(Color.sheetSecondaryText))
                 .font(.sheet(44, .bold, relativeTo: .largeTitle))
                 .monospacedDigit()

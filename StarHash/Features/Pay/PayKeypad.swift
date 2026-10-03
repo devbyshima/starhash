@@ -10,7 +10,7 @@ struct PayAmountDisplay: View {
 
     var body: some View {
         Text(Money.format(amount))
-            .starhashFont(96, weight: .bold, design: .rounded, relativeTo: .largeTitle)
+            .starhashFont(96, weight: .bold, design: .rounded, relativeTo: .largeTitle, tracking: 0)
             .monospacedDigit()
             .contentTransition(.numericText(value: Double(amount)))
             .foregroundStyle(amount == 0 ? Color.payPlaceholderText : Color.payPrimaryText)

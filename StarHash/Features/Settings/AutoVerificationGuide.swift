@@ -214,6 +214,7 @@ struct AutoVerificationGuide: View {
     private var texts: some View {
         Text(title)
             .font(.starhashTitle)
+            .tracking(StarHashTracking.display(28))
             .foregroundStyle(Color.starhashPrimaryText)
             .accessibilityAddTraits(.isHeader)
             .contentTransition(.opacity)

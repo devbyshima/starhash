@@ -103,7 +103,7 @@ private struct SettingsRootList: View {
                     caption: "Keep a history of what you pay and receive",
                     isOn: $saveTransactions
                 )
-                .settingsCardRow(.first)
+                .settingsCardRow(.firstUnderTitle)
                 SettingsToggleRow(
                     symbol: "checkmark.message.fill",
                     title: "Auto-verify transactions",
@@ -132,7 +132,7 @@ private struct SettingsRootList: View {
                     caption: "Pick who to pay from your contacts",
                     isOn: contactsBinding
                 )
-                .settingsCardRow(.first)
+                .settingsCardRow(.firstUnderTitle)
                 SettingsToggleRow(
                     symbol: "location.fill",
                     title: "Nearby",
@@ -157,7 +157,7 @@ private struct SettingsRootList: View {
                     caption: "Ink spreads behind each key you press",
                     isOn: $keypadInk
                 )
-                .settingsCardRow(.single)
+                .settingsCardRow(.onlyUnderTitle)
             }
 
             Section {
@@ -165,7 +165,7 @@ private struct SettingsRootList: View {
                 NavigationLink(value: SettingsPage.howItWorks) {
                     SettingsRow(symbol: "number.square.fill", title: "How StarHash works", caption: "Amount, recipient, and the USSD code")
                 }
-                .settingsCardRow(.first)
+                .settingsCardRow(.firstUnderTitle)
                 NavigationLink(value: SettingsPage.privacy) {
                     SettingsRow(symbol: "lock.fill", title: "Privacy", caption: "Everything stays on this iPhone")
                 }
@@ -187,17 +187,23 @@ private struct SettingsRootList: View {
                 .settingsCardRow(.last)
             }
 
-            // Last, apart, as an account's delete sits in other apps.
+            // Last and on its own, as GO Club's Logout: a capsule the width
+            // of its words, centred under the cards, filled blood red in
+            // the app's button look (a gradient fill, 18pt semibold).
             Section {
                 Button(role: .destructive) { confirmsDeleteAll = true } label: {
                     Text("Delete All Data")
-                        .font(.starhash(.body, weight: .medium))
-                        .foregroundStyle(Color.starhashDestructive)
-                        .frame(maxWidth: .infinity, minHeight: 52)
-                        .contentShape(Rectangle())
+                        .starhashFont(18, weight: .semibold, relativeTo: .body)
+                        .foregroundStyle(Color.starhashOnDestructive)
+                        .padding(.horizontal, 44)
+                        .frame(minHeight: 57)
+                        .background(Color.starhashDestructiveButton.gradient, in: Capsule())
+                        .contentShape(Capsule())
                 }
-                .buttonStyle(HighlightRowButtonStyle())
-                .settingsCardRow(.single, insets: .settingsTextRow)
+                .buttonStyle(PressScaleButtonStyle())
+                .frame(maxWidth: .infinity)
+                .padding(.top, 24)
+                .settingsPlainRow()
             }
 
             Section {
@@ -207,7 +213,7 @@ private struct SettingsRootList: View {
             }
 
         }
-        .settingsListStyle(sectionSpacing: 14)
+        .settingsListStyle()
         .alert("Are you sure you want to delete all data?", isPresented: $confirmsDeleteAll) {
             Button("Delete", role: .destructive) {
                 withAnimation(.smooth) { AppReset.eraseEverything(store: store, router: router) }

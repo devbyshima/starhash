@@ -1,10 +1,11 @@
 import SwiftUI
 
-// Shared look for every page in the Settings tab, after Keaser's: rounded
-// 26pt cards on the settings canvas (white on the pale grey in light mode,
-// charcoal on the near black in dark mode), rows with a symbol on a faint tile, a
-// title and a small caption, grey sentence-case section titles. Sheets
-// presented from Settings keep the sheet look instead.
+// Shared look for every page in the Settings tab, after GO Club's: rounded
+// 26pt cards 10pt from the screen's edges (white in light mode, charcoal in
+// dark mode), everything in them 20pt in, a section's grey title inside
+// its card at the top, and a dashed line across the card between every
+// row. Rows keep a symbol on a faint tile, a title and a small caption.
+// Sheets presented from Settings keep the sheet look instead.
 
 extension Color {
     /// Cards on a settings page: white in light mode, charcoal in dark mode.
@@ -20,9 +21,15 @@ extension Color {
     static let settingsToggleOn = Color.starhashSwitchOn
 }
 
-/// Where a row sits in its card, so its background rounds the right corners.
+/// Where a row sits in its card, so its background rounds the right
+/// corners and only rows after another draw the line above them.
 enum SettingsCardPosition {
     case single, first, middle, last
+    /// The first row under a `SettingsSectionTitle`, which holds the card's
+    /// top: square above, and no line between the title and the row.
+    case firstUnderTitle
+    /// The only row under a title: square above, rounded below.
+    case onlyUnderTitle
 
     init(index: Int, count: Int) {
         switch (index, count) {
@@ -34,7 +41,8 @@ enum SettingsCardPosition {
     }
 
     var roundsTop: Bool { self == .single || self == .first }
-    var roundsBottom: Bool { self == .single || self == .last }
+    var roundsBottom: Bool { self == .single || self == .last || self == .onlyUnderTitle }
+    var hasLineAbove: Bool { self == .middle || self == .last }
 }
 
 /// One row's slice of a rounded card. Drawing the corners per row (instead
@@ -59,16 +67,17 @@ struct SettingsCardRowBackground: View {
 }
 
 enum SettingsLayout {
-    /// Where a row's text starts past its symbol tile: the 38pt tile and
-    /// the 12pt gap.
-    static let textLeading: CGFloat = 50
+    /// How far everything in a card sits from its edges, GO Club's 20.
+    static let cardInset: CGFloat = 20
+    /// The cards' distance from the screen's edges.
+    static let screenMargin: CGFloat = 10
 }
 
 extension EdgeInsets {
     /// Rows with a leading symbol tile.
-    static let settingsRow = EdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 16)
+    static let settingsRow = EdgeInsets(top: 0, leading: SettingsLayout.cardInset, bottom: 0, trailing: SettingsLayout.cardInset)
     /// Text-only rows and the profile card.
-    static let settingsTextRow = EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16)
+    static let settingsTextRow = settingsRow
 }
 
 extension View {
@@ -76,12 +85,12 @@ extension View {
     /// gap between cards; pages whose sections start with a
     /// `SettingsSectionTitle` use a tighter one, since the title adds its
     /// own height.
-    func settingsListStyle(sectionSpacing: CGFloat = 28, topMargin: CGFloat = 16) -> some View {
+    func settingsListStyle(sectionSpacing: CGFloat = 12, topMargin: CGFloat = 16) -> some View {
         self
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(Color.settingsCanvas.ignoresSafeArea())
-            .starhashReadableScrollContent(base: StarHashMetrics.screenPadding)
+            .starhashReadableScrollContent(base: SettingsLayout.screenMargin)
             .contentMargins(.top, topMargin, for: .scrollContent)
             .listSectionSpacing(sectionSpacing)
             .starhashSoftTopEdge()
@@ -90,18 +99,16 @@ extension View {
     }
 
     /// Places a row in a card at `position`. The list's own solid lines are
-    /// hidden; each row after the first draws the dotted one above it,
-    /// under the text: past the symbol tile on rows with one, at the inset
-    /// on text-only rows.
+    /// hidden; each row after another draws the dashed one above it, right
+    /// across the card inside its 20pt inset, as GO Club's do.
     func settingsCardRow(_ position: SettingsCardPosition, insets: EdgeInsets = .settingsRow) -> some View {
-        let leading = insets.leading == EdgeInsets.settingsRow.leading ? SettingsLayout.textLeading : 0
-        return self
+        self
             .listRowInsets(insets)
             .listRowBackground(SettingsCardRowBackground(position: position))
             .listRowSeparator(.hidden)
             .overlay(alignment: .top) {
-                if position == .middle || position == .last {
-                    StarHashRowSeparator(leading: leading, trailing: 0, overlapsRows: true)
+                if position.hasLineAbove {
+                    StarHashRowSeparator(leading: 0, trailing: 0, overlapsRows: true)
                 }
             }
     }
@@ -179,7 +186,7 @@ extension SettingsRow where Trailing == Text {
     }
 }
 
-/// The row's title (medium, as in Keaser) over its caption.
+/// The row's title (16pt medium, as GO Club's) over its caption.
 struct SettingsRowText: View {
     let title: String
     var caption: String?
@@ -187,16 +194,16 @@ struct SettingsRowText: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
-                .font(.starhash(.body, weight: .medium))
+                .starhashFont(16, weight: .medium, relativeTo: .callout)
                 .foregroundStyle(Color.starhashPrimaryText)
             if let caption {
                 Text(caption)
-                    .starhashFont(13, relativeTo: .footnote)
-                    .foregroundStyle(Color.starhashSecondaryText)
+                    .starhashFont(13.5, weight: .medium, relativeTo: .footnote)
+                    .foregroundStyle(Color.starhashTertiaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .padding(.vertical, 12)
+        .padding(.vertical, 14)
     }
 }
 
@@ -221,9 +228,9 @@ struct SettingsToggleRow: View {
     }
 }
 
-/// Section title in the iOS 26 style (sentence case, grey, semibold), as
-/// the first row of its section, so it sits the same distance from the
-/// card on iOS 18 and iOS 26.
+/// A section's title inside its card, as GO Club sets "App Settings": the
+/// card's first row, small, medium and grey, with no line under it. The
+/// rows under it start at `.firstUnderTitle` (or `.onlyUnderTitle`).
 struct SettingsSectionTitle: View {
     let title: String
 
@@ -233,13 +240,15 @@ struct SettingsSectionTitle: View {
 
     var body: some View {
         Text(title)
-            .starhashFont(17, weight: .semibold, relativeTo: .headline)
-            .foregroundStyle(Color.starhashCaptionText)
-            .padding(.leading, 16)
-            .padding(.top, 13)
-            .frame(maxWidth: .infinity, minHeight: 44, alignment: .topLeading)
+            .starhashFont(14, weight: .medium, relativeTo: .subheadline)
+            .foregroundStyle(Color.starhashTertiaryText)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 20)
+            .padding(.bottom, 2)
             .accessibilityAddTraits(.isHeader)
-            .settingsPlainRow()
+            .listRowInsets(.settingsRow)
+            .listRowBackground(SettingsCardRowBackground(position: .first))
+            .listRowSeparator(.hidden)
     }
 }
 

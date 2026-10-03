@@ -14,7 +14,7 @@ import SwiftUI
 extension Font {
     /// Beam's type scale, in Space Grotesk, for sheets: `size` at the
     /// default text size, scaling like `style`.
-    static func sheet(_ size: CGFloat, _ weight: Font.Weight = .regular, relativeTo style: Font.TextStyle = .body) -> Font {
+    static func sheet(_ size: CGFloat, _ weight: Font.Weight = .medium, relativeTo style: Font.TextStyle = .body) -> Font {
         .custom(starhashFamily, size: size, relativeTo: style).weight(weight)
     }
 
@@ -87,6 +87,7 @@ struct SheetHeader<Trailing: View>: View {
         ZStack {
             Text(title)
                 .font(.sheetLargeTitle)
+                .tracking(StarHashTracking.display(32))
                 .foregroundStyle(Color.starhashPrimaryText)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
@@ -136,7 +137,8 @@ struct SheetDivider: View {
                 path.move(to: CGPoint(x: 0, y: 0.5))
                 path.addLine(to: CGPoint(x: geometry.size.width, y: 0.5))
             }
-            .stroke(style: StrokeStyle(lineWidth: 1, lineCap: .round, dash: [1.5, 5]))
+            // GO Club's dashes: 3pt on, 3pt off.
+            .stroke(style: StrokeStyle(lineWidth: 1, lineCap: .butt, dash: [3, 3]))
             .foregroundStyle(Color.sheetDivider)
         }
         .frame(height: 1)

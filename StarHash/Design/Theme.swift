@@ -53,6 +53,10 @@ extension Color {
     static let starhashDestructive = Color(light: .init(red: 0.84, green: 0.16, blue: 0.13), dark: .init(red: 1, green: 110 / 255, blue: 100 / 255))
     /// The same, as text straight on the page: no brighter red reaches
     /// 4.5:1 on the blue, so light mode deepens it (4.6:1).
+    /// A red button's fill (Delete All Data): blood red, in either
+    /// appearance, with white words on it (10:1).
+    static let starhashDestructiveButton = Color(red: 138 / 255, green: 3 / 255, blue: 3 / 255)
+    static let starhashOnDestructive = Color.white
     static let starhashDestructiveOnPage = Color(light: .init(red: 110 / 255, green: 0, blue: 0), dark: .starhashDestructive)
     /// Money coming in: the other hue, only on received amounts, the
     /// incoming arrow and a confirmed status. Light mode is a deep green
@@ -203,39 +207,61 @@ extension Font {
     // fits and `starhashFont(_:weight:)` for an exact size, never
     // Font.system, so the size still follows Dynamic Type. SF Symbols keep
     // .system sizes.
+    //
+    // The weights follow GO Club's, measured from its screens: text is
+    // medium (500) unless it says otherwise, buttons semibold, headings and
+    // numbers bold, and large headings tighten (`StarHashTracking`).
 
     /// The typeface's family name, as registered from `UIAppFonts`.
     static let starhashFamily = "Space Grotesk"
 
-    /// Space Grotesk at a text style's size, scaling with it. Headline is
-    /// semibold unless told otherwise, as the system's is.
+    /// Space Grotesk at a text style's size, scaling with it: medium, and
+    /// headline semibold, unless told otherwise.
     static func starhash(_ style: Font.TextStyle, weight: Font.Weight? = nil) -> Font {
         .custom(starhashFamily, size: style.starhashDefaultSize, relativeTo: style)
-            .weight(weight ?? (style == .headline ? .semibold : .regular))
+            .weight(weight ?? (style == .headline ? .semibold : .medium))
     }
 
     /// Space Grotesk at a size that never scales, for the onboarding
     /// pictures, which are drawn at one size like an image.
-    static func starhashFixed(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
+    static func starhashFixed(_ size: CGFloat, weight: Font.Weight = .medium) -> Font {
         .custom(starhashFamily, fixedSize: size).weight(weight)
     }
 
-    /// Onboarding and sheet page titles: Title 1 semibold (28pt at the
-    /// default text size).
-    static let starhashTitle = Font.starhash(.title, weight: .semibold)
+    /// Big titles on a page (Auto-verify's steps): Title 1 bold, 28pt at
+    /// the default text size. Pair it with `StarHashTracking.display(28)`.
+    static let starhashTitle = Font.starhash(.title, weight: .bold)
+}
+
+/// How much large headings tighten, after GO Club's: not at all up to
+/// 24pt, then more as they grow, to 2% of the size from 40pt. Numbers keep
+/// their spacing, as GO Club's do; pass `tracking: 0` for them.
+enum StarHashTracking {
+    static func display(_ size: CGFloat) -> CGFloat {
+        let amount = min(max((size - 24) / 16, 0), 1) * 0.02
+        return -size * amount
+    }
+
+    /// Whether a weight is heavy enough to tighten.
+    static func tightens(_ weight: Font.Weight) -> Bool {
+        [.semibold, .bold, .heavy, .black].contains(weight)
+    }
 }
 
 extension View {
     /// An exact design size that still follows Dynamic Type: `size` at the
     /// default text size, scaled like `style` at every other size. Use this
     /// instead of `.font(.system(size:))` for any text.
+    /// `tracking` nil tightens a large semibold or bold heading as
+    /// `StarHashTracking` says; numbers pass 0.
     func starhashFont(
         _ size: CGFloat,
-        weight: Font.Weight = .regular,
+        weight: Font.Weight = .medium,
         design: Font.Design = .default,
-        relativeTo style: Font.TextStyle? = nil
+        relativeTo style: Font.TextStyle? = nil,
+        tracking: CGFloat? = nil
     ) -> some View {
-        modifier(ScaledSystemFont(size: size, weight: weight, design: design, style: style ?? .starhashNearest(to: size)))
+        modifier(ScaledSystemFont(size: size, weight: weight, design: design, style: style ?? .starhashNearest(to: size), tracking: tracking))
     }
 }
 
@@ -243,11 +269,13 @@ private struct ScaledSystemFont: ViewModifier {
     @ScaledMetric private var size: CGFloat
     private let weight: Font.Weight
     private let design: Font.Design
+    private let tracking: CGFloat?
 
-    init(size: CGFloat, weight: Font.Weight, design: Font.Design, style: Font.TextStyle) {
+    init(size: CGFloat, weight: Font.Weight, design: Font.Design, style: Font.TextStyle, tracking: CGFloat?) {
         _size = ScaledMetric(wrappedValue: size, relativeTo: style)
         self.weight = weight
         self.design = design
+        self.tracking = tracking
     }
 
     func body(content: Content) -> some View {
@@ -255,7 +283,9 @@ private struct ScaledSystemFont: ViewModifier {
         if design == .monospaced {
             content.font(.system(size: size, weight: weight, design: design))
         } else {
-            content.font(.custom(Font.starhashFamily, fixedSize: size).weight(weight))
+            content
+                .font(.custom(Font.starhashFamily, fixedSize: size).weight(weight))
+                .tracking(tracking ?? (StarHashTracking.tightens(weight) ? StarHashTracking.display(size) : 0))
         }
     }
 }

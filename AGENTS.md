@@ -74,9 +74,15 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   cards (`sheetSurface`), deeper blue small fills (`sheetChip`) and the
   app's usual dark text; destructive text buttons are bold in the deep
   red.
-- Every separator is dotted: `SheetDivider`, or `StarHashRowSeparator`
-  (which draws it with insets). Settings lists hide the system's solid
-  lines and `settingsCardRow` draws the dotted one. Never a solid line.
+- Every separator is dashed, GO Club's 3pt on and 3pt off: `SheetDivider`,
+  or `StarHashRowSeparator` (which draws it with insets). Settings lists
+  hide the system's solid lines and `settingsCardRow` draws the dashed one
+  right across the card. Never a solid line.
+- Settings follows GO Club's: cards 10pt from the screen's edges,
+  everything 20pt inside them, a section's grey title inside its card as
+  its first row (`SettingsSectionTitle`, then `.firstUnderTitle` or
+  `.onlyUnderTitle`), and Delete All Data on its own as a blood red
+  capsule.
 - Glass only through `starhashGlass`, `starhashGlassButtonStyle`,
   `StarHashGlassContainer` (iOS 18 falls back to materials).
 - The tab bar (`StarHash/App/StarHashTabBar.swift`) is measured from GO
@@ -104,6 +110,11 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   `.sheetFilled` (50pt) and `SheetTextButton`, and the `Font.sheet...`
   type scale (Beam's sizes and weights). Sized-to-content sheets use
   `sheetHeight` and `.height(height + 8)`.
+- Type follows GO Club's weights, measured from its screens: text is
+  medium (the default of `starhash(_:)`, `starhashFont` and `sheet`),
+  buttons semibold, headings and numbers bold, and large headings tighten
+  (`StarHashTracking`; numbers pass `tracking: 0`). Units after an amount
+  are about half its size, on its baseline.
 - Text is Space Grotesk (`StarHash/Resources/Fonts`, a variable font):
   `.font(.starhash(.body))` for a text style, `.starhashFont(size, weight:)`
   for an exact size, so it follows Dynamic Type. Never `Font.system` for
