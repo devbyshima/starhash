@@ -174,9 +174,10 @@ private struct ShortcutItem: View {
                 Image(systemName: "phone.fill")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(Color.starhashOnInk)
+                    // The card's shape and height, so the two read as a pair.
                     .frame(width: 68, height: 68)
-                    .contentShape(Circle())
-                    .starhashGlass(in: Circle(), interactive: true, tint: .callGlassTint)
+                    .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .starhashGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous), interactive: true, tint: .callGlassTint)
             }
             .buttonStyle(HapticPlainButtonStyle(weight: .medium))
             .accessibilityLabel("Dial \(shortcut.name)")
