@@ -95,6 +95,15 @@ import Testing
         #expect(StarHashStore(fileURL: url).transactions.count == 1)
     }
 
+    @Test func clearLocationsRemovesEveryCoordinate() {
+        let store = StarHashStore(fileURL: nil)
+        var paid = store.recordPayment(to: john, amount: 700, date: noon)
+        paid.location = .init(latitude: -1.95, longitude: 30.09)
+        store.update(paid)
+        store.clearLocations()
+        #expect(store.transactions.allSatisfy { $0.location == nil })
+    }
+
     @Test func eraseAllRemovesTheFileAndItsDamagedCopies() throws {
         let url = try temporaryFile()
         let folder = url.deletingLastPathComponent()

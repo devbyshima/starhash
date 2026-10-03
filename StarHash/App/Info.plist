@@ -40,7 +40,7 @@
 	<key>NSContactsUsageDescription</key>
 	<string>StarHash shows your contacts so you can pick who to pay. They stay on your iPhone.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>StarHash can note where you paid, so each payment shows on a map. It stays on your iPhone.</string>
+	<string>StarHash notes where you pay, to suggest who you paid when you are back there and to show each payment on a map. It stays on your iPhone.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>SpaceGrotesk.ttf</string>

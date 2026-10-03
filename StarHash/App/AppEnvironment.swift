@@ -11,6 +11,14 @@ enum AppEnvironment {
         return StarHashStore(fileURL: StarHashStore.defaultFileURL)
     }()
 
+    /// Where numbers and codes were paid, for Nearby.
+    static let places: PlaceMemory = {
+        #if DEBUG
+        if DebugLaunch.inMemory { return DebugLaunch.seededPlaces() }
+        #endif
+        return PlaceMemory(fileURL: PlaceMemory.defaultFileURL)
+    }()
+
     static let router: AppRouter = {
         let router = AppRouter()
         #if DEBUG

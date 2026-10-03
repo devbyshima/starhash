@@ -67,6 +67,14 @@ final class PayContacts {
     /// sender's number ("*********998") but gives their name.
     private var photoContactIDsByName: [String: String] = [:]
 
+    /// Whether `recipient`'s number is saved in Contacts. Nearby remembers
+    /// only numbers and codes that are not: a contact is already a tap away.
+    func isContact(_ recipient: Recipient) -> Bool {
+        contacts.contains { contact in
+            contact.recipients.contains { $0.kind == recipient.kind && $0.destination == recipient.destination }
+        }
+    }
+
     /// The contact with a photo that `recipient`'s number or code belongs
     /// to, or failing that, a contact with a photo and the same name.
     func photoContactID(for recipient: Recipient) -> String? {

@@ -23,7 +23,15 @@ struct PayView: View {
     @State private var undialledCode: String?
     /// Started when the picker opens, so a location fix is usually ready by
     /// the time Pay is tapped; the payment never waits for it.
-    @State private var locationTask: Task<StarHashKit.Transaction.Coordinate?, Never>?
+    @State private var locationTask: Task<LocationFix?, Never>?
+    /// Which locating run is current, so a late answer from an older one
+    /// is ignored.
+    @State private var locatingRun = UUID()
+    /// Places' erase count when locating started: a fix that arrives after
+    /// an erase (Nearby turned off, Delete All Data) is not remembered.
+    @State private var placesGeneration = 0
+    /// That fix once it arrives, for the picker's Nearby section.
+    @State private var nearbyFix: LocationFix?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
     /// Where a finger is on Pay, for the bubble under it.
@@ -37,7 +45,7 @@ struct PayView: View {
                 .navigationDestination(for: PayRoute.self) { route in
                     switch route {
                     case .recipients(let query):
-                        RecipientPickerView(amount: input.value, query: query) { recipient in
+                        RecipientPickerView(amount: input.value, query: query, nearbyFix: nearbyFix) { recipient in
                             payChosen(recipient)
                         }
                     }
@@ -56,7 +64,12 @@ struct PayView: View {
         // Pay Again on a transaction, from the Activity tab.
         .onChange(of: router.payRequest?.id, initial: true) { takePayRequest() }
         .onChange(of: path) { _, path in
-            if path.isEmpty { locationTask = nil }
+            // Back from the picker without paying: its fix is dropped. Not
+            // when Pay Again just chose someone, whose fix is under way.
+            if path.isEmpty, chosenRecipient == nil {
+                locationTask = nil
+                nearbyFix = nil
+            }
             router.setPushedScreen(!path.isEmpty, on: .pay)
         }
         .onAppear(perform: applyDebugLaunch)
@@ -171,10 +184,31 @@ struct PayView: View {
     }
 
     private func openPicker(query: String = "") {
-        if saveTransactions, nearbyLocation, PaymentLocation.isAuthorized {
-            locationTask = Task { await PaymentLocation.current() }
-        }
+        startLocating()
         path = [.recipients(query: query)]
+    }
+
+    /// With Nearby on, a fix for the payment and the picker's suggestions.
+    private func startLocating() {
+        nearbyFix = nil
+        locationTask = nil
+        let run = UUID()
+        locatingRun = run
+        placesGeneration = AppEnvironment.places.generation
+        #if DEBUG
+        if let fix = DebugLaunch.nearbyFix {
+            nearbyFix = fix
+            locationTask = Task { fix }
+            return
+        }
+        #endif
+        guard nearbyLocation, PaymentLocation.isAuthorized else { return }
+        locationTask = Task {
+            await PaymentLocation.current { fix in
+                // The first usable fix reaches the picker at once.
+                if locatingRun == run, nearbyFix == nil { nearbyFix = fix }
+            }
+        }
     }
 
     /// Someone chosen in the picker or its sheets: as in the reference, a
@@ -198,6 +232,9 @@ struct PayView: View {
     private func takePayRequest() {
         guard let request = router.takePayRequest() else { return }
         path = []
+        // Pay Again skips the picker: locate now, while StarHash is still in
+        // front, so the fix is in hand when Pay is tapped.
+        startLocating()
         withAnimation(.smooth(duration: 0.25)) { chosenRecipient = request.recipient }
     }
 
@@ -209,6 +246,7 @@ struct PayView: View {
         let amount = input.value
         guard amount > 0, recipient.isPayable else { return }
         let pendingLocation = locationTask
+        let generation = placesGeneration
         locationTask = nil
 
         var recordedID: UUID?
@@ -229,15 +267,39 @@ struct PayView: View {
             dial(code)
         }
 
-        // The location is filled in once it arrives, never before dialling.
-        if let recordedID, let pendingLocation {
+        // The location is filled in once it arrives, never before dialling:
+        // on the transaction (its map), and in Nearby's memory for a number
+        // or code that is not one of the person's contacts.
+        if let pendingLocation {
             Task {
-                guard let coordinate = await pendingLocation.value,
-                      var transaction = store.transaction(id: recordedID) else { return }
-                transaction.location = coordinate
-                store.update(transaction)
+                guard let fix = await pendingLocation.value,
+                      // Nearby could have been turned off, or everything
+                      // erased, while the fix was coming.
+                      StarHashPreferences.nearbyLocation,
+                      AppEnvironment.places.generation == generation else { return }
+                if let recordedID, var transaction = store.transaction(id: recordedID) {
+                    transaction.location = fix.coordinate
+                    store.update(transaction)
+                }
+                if await Self.remembersPlace(of: recipient) {
+                    AppEnvironment.places.record(
+                        recipient, latitude: fix.latitude, longitude: fix.longitude,
+                        accuracy: fix.accuracy, generation: generation
+                    )
+                }
             }
         }
+    }
+
+    /// Nearby remembers numbers and codes that are not in Contacts. A
+    /// merchant code never is. A number needs the contacts read first; when
+    /// StarHash cannot read them it cannot tell, so it does not remember it.
+    private static func remembersPlace(of recipient: Recipient) async -> Bool {
+        guard recipient.kind == .phone else { return true }
+        let contacts = PayContacts.shared
+        await contacts.loadIfAllowed()
+        guard contacts.hasLoaded, contacts.access == .authorized else { return false }
+        return !contacts.isContact(recipient)
     }
 
     private func dial(_ code: String) {

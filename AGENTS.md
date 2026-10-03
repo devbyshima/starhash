@@ -123,6 +123,7 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 | `-payDetails <name>` | with `-payPicker`: the details sheet of the first contact whose name contains it |
 | `-payToggleSearch` | with `-payPicker`: closes the picker's search after 2s and opens it 1.5s later, to record the header transitions |
 | `-payInk` | presses 8, 5, 3 and 7 on a schedule from 1.5s, to record the keypad's ink without a finger (simulator taps arrive late, in bursts) |
+| `-nearbyHere` | turns Nearby on and places the phone at Kigali Heights, where `SampleData.places()` has visits, for the picker's Nearby section |
 | `-payPick <seconds>` | with `-payPicker`: chooses the first recent recipient after this long, to record the wave |
 | `-activityPeriod today\|week\|month\|year\|all` | Activity period |
 | `-openFirstTransaction` | open the newest transaction's details |

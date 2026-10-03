@@ -85,6 +85,13 @@ public final class StarHashStore {
         save()
     }
 
+    /// Every transaction's location removed, for turning Nearby off.
+    public func clearLocations() {
+        guard transactions.contains(where: { $0.location != nil }) else { return }
+        for i in transactions.indices { transactions[i].location = nil }
+        save()
+    }
+
     /// Everything this store keeps, gone: its transactions, its file, and
     /// any damaged copies set aside beside it. For "Delete All Data".
     public func eraseAll() {

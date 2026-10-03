@@ -48,6 +48,11 @@ Free and open source.
   Time with the total spent and MTN fees, and search across everything.
   Swipe a payment left for a red trash, or all the way across to delete it
   at once, as in Beam.
+- **Nearby** (off until turned on, precise location only): each number or
+  merchant code paid that is not in Contacts is remembered with where it
+  was paid, and suggested at the top of the recipient list when you are
+  back there. Places stay on the iPhone (out of backups), and turning
+  Nearby off forgets them and every payment's location.
 - **Transaction details**, a page of its own: who, how much, a category, the fee, date, time,
   carrier code, a map of where you paid (when Nearby is on), what you sent
   them this year, Pay Again, Mark as Confirmed and Delete.

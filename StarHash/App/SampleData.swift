@@ -23,4 +23,20 @@ enum SampleData {
             Transaction(direction: .outgoing, counterparty: Recipient(name: "Kigali Heights Gym", destination: "556677", kind: .merchant), amount: 30_000, fee: 0, date: day(20, 7, 0), status: .confirmed, source: .app, reference: "1203600099", category: "health"),
         ]
     }
+
+    /// Kigali Heights, where the sample's Nearby places are.
+    static let kigaliHeights = Transaction.Coordinate(latitude: -1.9536, longitude: 30.0928)
+
+    /// Visits for `-nearbyHere`: two tills a few metres apart and one
+    /// across town.
+    static func places(now: Date = .now) -> [PlaceMemory.Visit] {
+        let here = kigaliHeights
+        func north(_ metres: Double) -> Double { here.latitude + metres / 111_320 }
+        return [
+            .init(recipient: Recipient(name: "Pili-Pili Invest", destination: "020205", kind: .merchant), latitude: north(6), longitude: here.longitude, accuracy: 9, date: now.addingTimeInterval(-86_400)),
+            .init(recipient: Recipient(name: "Pili-Pili Invest", destination: "020205", kind: .merchant), latitude: north(4), longitude: here.longitude, accuracy: 7, date: now.addingTimeInterval(-3_600)),
+            .init(recipient: Recipient(name: "Kigali Heights Gym", destination: "556677", kind: .merchant), latitude: north(18), longitude: here.longitude, accuracy: 11, date: now.addingTimeInterval(-172_800)),
+            .init(recipient: Recipient(name: "Simba Supermarket", destination: "009911", kind: .merchant), latitude: here.latitude + 0.02, longitude: here.longitude, accuracy: 10, date: now.addingTimeInterval(-259_200)),
+        ]
+    }
 }

@@ -21,6 +21,9 @@ import UIKit
 /// the full code, is the one approval before MoMo asks for the PIN.
 struct RecipientPickerView: View {
     let amount: Int
+    /// Where the phone is, with Nearby on: recipients paid around here go
+    /// in a Nearby section at the top.
+    var nearbyFix: LocationFix?
     /// Called with the chosen recipient. The caller records, goes back and
     /// dials.
     let onPay: (Recipient) -> Void
@@ -29,6 +32,13 @@ struct RecipientPickerView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
     @AppStorage(PreferenceKey.saveRecents) private var saveRecents = true
+    @AppStorage(PreferenceKey.nearbyLocation) private var nearbyEnabled = false
+    /// The fix the Nearby section is built from. Taken only until the
+    /// list is first touched: a section appearing above rows a finger is
+    /// already on would push the wrong one under it.
+    @State private var shownNearbyFix: LocationFix?
+    @State private var listTouched = false
+    private var places: PlaceMemory { AppEnvironment.places }
     @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
 
     @State private var query: String
@@ -54,8 +64,9 @@ struct RecipientPickerView: View {
     @State private var scrollPosition = ScrollPosition()
     @FocusState private var searchFocused: Bool
 
-    init(amount: Int, query: String = "", onPay: @escaping (Recipient) -> Void) {
+    init(amount: Int, query: String = "", nearbyFix: LocationFix? = nil, onPay: @escaping (Recipient) -> Void) {
         self.amount = amount
+        self.nearbyFix = nearbyFix
         self.onPay = onPay
         _query = State(initialValue: query)
     }
@@ -67,6 +78,20 @@ struct RecipientPickerView: View {
                     savedSection
                 } else if let typed = search.typedRecipient {
                     typedSection(typed)
+                }
+                if !nearby.isEmpty {
+                    Section {
+                        ForEach(nearby, id: \.self) { recipient in
+                            RecipientRow(
+                                tile: tile(for: recipient),
+                                title: recipient.displayName,
+                                subtitle: recipient.name == nil ? kindLabel(recipient) : recipient.formattedDestination,
+                                matchColor: Color.pickerMatch
+                            ) { choose(recipient) }
+                        }
+                    } header: {
+                        sectionLabel("Nearby")
+                    }
                 }
                 if !recents.isEmpty {
                     Section {
@@ -93,7 +118,18 @@ struct RecipientPickerView: View {
         // A finger scrolling the list is done typing: the keyboard goes,
         // and the search with it while nothing is typed, so the list has
         // the screen. A typed search stays, its matches to scroll through.
+        .onChange(of: nearbyFix, initial: true) { _, fix in
+            guard !listTouched, shownNearbyFix == nil else { return }
+            withAnimation(.smooth(duration: 0.3)) { shownNearbyFix = fix }
+        }
+        // Nor after the first moments, when a finger may be on its way to
+        // a row: a fix that slow is used for the payment, not the list.
+        .task {
+            try? await Task.sleep(for: .seconds(2))
+            listTouched = true
+        }
         .onScrollPhaseChange { _, phase in
+            if phase == .interacting { listTouched = true }
             guard phase == .interacting, isSearching else { return }
             if query.isEmpty {
                 closeSearch()
@@ -321,6 +357,7 @@ struct RecipientPickerView: View {
         } else if let typed = search.typedRecipient {
             titles.append(typed.kind == .phone ? "Number" : "Merchant code")
         }
+        if !nearby.isEmpty { titles.append("Nearby") }
         if !recents.isEmpty { titles.append("Recent") }
         if enableContacts {
             switch contacts.access {
@@ -414,7 +451,18 @@ struct RecipientPickerView: View {
 
     private var matchingRecents: [Recipient] {
         guard saveRecents else { return [] }
-        return store.recentRecipients().filter { search.matches($0) && !isTyped($0) }
+        let suggested = nearby
+        return store.recentRecipients().filter { recent in
+            search.matches(recent) && !isTyped(recent) && !suggested.contains { Self.same($0, recent) }
+        }
+    }
+
+    /// Numbers and codes paid where the phone is now, nearest first, from
+    /// the places StarHash remembered on this iPhone. Only before anything
+    /// is typed: a search is looking for someone in particular.
+    private var nearby: [Recipient] {
+        guard nearbyEnabled, search.isEmpty, let fix = shownNearbyFix else { return [] }
+        return places.suggestions(latitude: fix.latitude, longitude: fix.longitude, accuracy: fix.accuracy).map(\.recipient)
     }
 
     private var matchingContactsUnfiltered: [PayContact] {

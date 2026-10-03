@@ -124,7 +124,7 @@ private struct SettingsRootList: View {
                 SettingsToggleRow(
                     symbol: "location.fill",
                     title: "Nearby",
-                    caption: "Note where you paid, to show it on a map",
+                    caption: "Suggest who you paid at the place you're in",
                     isOn: locationBinding
                 )
                 .settingsCardRow(.middle)
@@ -228,7 +228,7 @@ private struct SettingsRootList: View {
             Button("Open Settings") { SettingsAppLink.open() }
             Button("Not Now", role: .cancel) {}
         } message: {
-            Text("Allow StarHash to use your location in the Settings app to note where you pay.")
+            Text("Allow StarHash your precise location in the Settings app, so it can tell one till from the next.")
         }
     }
 
@@ -254,17 +254,24 @@ private struct SettingsRootList: View {
         }
     }
 
-    /// Turning Nearby on asks for when-in-use location; a refusal switches
-    /// it back off and points to the Settings app.
+    /// Turning Nearby on asks for when-in-use location, precise: an
+    /// approximate one cannot tell one till from the next, so a refusal or
+    /// an approximate grant switches it back off and points to the Settings
+    /// app. Turning it off forgets every place it remembered, and where each
+    /// payment was made.
     private var locationBinding: Binding<Bool> {
         Binding {
             nearbyLocation
         } set: { isOn in
             nearbyLocation = isOn
-            guard isOn else { return }
+            guard isOn else {
+                AppEnvironment.places.eraseAll()
+                store.clearLocations()
+                return
+            }
             Task {
                 let allowed = await SettingsLocationAccess.shared.request()
-                if !allowed {
+                if !allowed || !PaymentLocation.isAuthorized {
                     withAnimation { nearbyLocation = false }
                     locationRefused = true
                 }

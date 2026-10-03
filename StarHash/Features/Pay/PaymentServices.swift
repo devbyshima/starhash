@@ -19,32 +19,60 @@ enum USSDDialer {
     }
 }
 
-/// Where a payment was made, when the person allowed it. StarHash never
-/// asks for location here (Settings does that); it only reads it when
-/// When In Use access is already granted, and gives up after a short wait
-/// so a slow fix never holds a payment back.
+/// A location fix: where, and how sure (horizontal accuracy, in metres).
+struct LocationFix: Equatable, Sendable {
+    var latitude: Double
+    var longitude: Double
+    var accuracy: Double
+
+    var coordinate: StarHashKit.Transaction.Coordinate {
+        .init(latitude: latitude, longitude: longitude)
+    }
+}
+
+/// Where the person is while paying, for Nearby: the payment's place, and
+/// the recipients paid around here. StarHash never asks for location here
+/// (Settings does that); it only reads it when When In Use access is
+/// already granted, and gives up after a short wait so a slow fix never
+/// holds a payment back. Precise location only: an approximate one is
+/// kilometres wide and could not tell one till from the next.
 @MainActor
 enum PaymentLocation {
     static var isAuthorized: Bool {
-        switch CLLocationManager().authorizationStatus {
-        case .authorizedWhenInUse, .authorizedAlways: true
-        default: false
+        let manager = CLLocationManager()
+        switch manager.authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways: return manager.accuracyAuthorization == .fullAccuracy
+        default: return false
         }
     }
 
-    /// The first fix within `timeout`, or nil.
-    static func current(timeout: Duration = .seconds(6)) async -> StarHashKit.Transaction.Coordinate? {
+    /// The best fix within `timeout`: it returns as soon as one is within
+    /// `goal` metres, otherwise the most accurate seen. Nil without access
+    /// or without any fix. `onUsable` hears the first fix good enough for
+    /// Nearby, so the picker need not wait for the best one.
+    static func current(
+        timeout: Duration = .seconds(8), goal: Double = 15,
+        onUsable: (@MainActor @Sendable (LocationFix) -> Void)? = nil
+    ) async -> LocationFix? {
         guard isAuthorized else { return nil }
-        return await withTaskGroup(of: StarHashKit.Transaction.Coordinate?.self) { group in
+        return await withTaskGroup(of: LocationFix?.self) { group in
+            let best = BestFix()
             group.addTask {
                 do {
-                    for try await update in CLLocationUpdate.liveUpdates() {
-                        if let location = update.location {
-                            return StarHashKit.Transaction.Coordinate(
-                                latitude: location.coordinate.latitude,
-                                longitude: location.coordinate.longitude
-                            )
+                    for try await update in CLLocationUpdate.liveUpdates(.otherNavigation) {
+                        // A cached fix from before can be anywhere the
+                        // phone was; only a fresh one says where it is.
+                        guard let location = update.location, location.horizontalAccuracy >= 0,
+                              abs(location.timestamp.timeIntervalSinceNow) < 10 else { continue }
+                        let fix = LocationFix(
+                            latitude: location.coordinate.latitude,
+                            longitude: location.coordinate.longitude,
+                            accuracy: location.horizontalAccuracy
+                        )
+                        if await best.offer(fix), fix.accuracy <= PlaceMemory.Visit.maximumAccuracy, let onUsable {
+                            await onUsable(fix)
                         }
+                        if fix.accuracy <= goal { return fix }
                     }
                 } catch {}
                 return nil
@@ -55,7 +83,21 @@ enum PaymentLocation {
             }
             let first = await group.next() ?? nil
             group.cancelAll()
-            return first
+            if let first { return first }
+            return await best.fix
         }
+    }
+}
+
+/// The most accurate fix seen so far, kept across the race in `current`.
+private actor BestFix {
+    private(set) var fix: LocationFix?
+
+    /// Keeps `new` when it beats the best so far; true for the first one
+    /// good enough for Nearby, so that is passed on once.
+    func offer(_ new: LocationFix) -> Bool {
+        let wasUsable = (fix?.accuracy ?? .infinity) <= PlaceMemory.Visit.maximumAccuracy
+        if fix == nil || new.accuracy < fix!.accuracy { fix = new }
+        return !wasUsable && new.accuracy <= PlaceMemory.Visit.maximumAccuracy
     }
 }

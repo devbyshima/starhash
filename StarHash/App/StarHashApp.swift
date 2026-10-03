@@ -25,6 +25,9 @@ struct StarHashApp: App {
             let network = Recipient.Network(rawValue: wallet)
             UserDefaults.standard.set(network?.rawValue ?? "", forKey: PreferenceKey.wallet)
         }
+        if DebugLaunch.arguments.contains("-nearbyHere") {
+            UserDefaults.standard.set(true, forKey: PreferenceKey.nearbyLocation)
+        }
         if DebugLaunch.arguments.contains("-resetOnboarding") {
             UserDefaults.standard.set(false, forKey: PreferenceKey.hasOnboarded)
         }
