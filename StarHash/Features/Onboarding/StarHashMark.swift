@@ -1,21 +1,16 @@
 import SwiftUI
 
-/// The StarHash mark as the app icon shows it: the star over its small
-/// triangle on a rounded tile. Light: a white star on the brand blue.
-/// Dark: a blue star on a dark tile, as the icon's dark appearance draws
-/// it. Drawn from the icon's own artwork (`AppIcon.icon/Assets/Document.svg`),
-/// so it matches the icon at any size.
+/// The StarHash mark: the star over its small triangle, bare, with no tile
+/// behind it. Light: near black, the dark page's colour, since a blue star
+/// would vanish on the blue page. Dark: the blue. Drawn from the icon's own
+/// artwork (`AppIcon.icon/Assets/Document.svg`), so it matches the icon at
+/// any size.
 struct StarHashMark: View {
     var size: CGFloat
 
     var body: some View {
-        RoundedRectangle(cornerRadius: size * 0.2237, style: .continuous)
-            .fill(Color.starhashMarkTile)
-            .overlay {
-                StarHashMarkShape()
-                    .fill(Color.starhashMarkGlyph)
-                    .padding(size * 0.12)
-            }
+        StarHashMarkShape()
+            .fill(Color.starhashMarkGlyph)
             .frame(width: size, height: size)
             .accessibilityElement()
             .accessibilityLabel("StarHash")

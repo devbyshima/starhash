@@ -4,7 +4,7 @@ import SwiftUI
 /// the title, the StarHash mark over a short heading, and the note in a
 /// card, with a TL;DR switch for the one-paragraph version and Continue at
 /// the bottom. Shown once over the app right after onboarding, and again
-/// from Settings, StarHash, Developer Note. Dismissing it (Continue or a
+/// from Settings, About StarHash, Developer Note. Dismissing it (Continue or a
 /// swipe) marks it seen; RootView owns that flag.
 struct DeveloperNoteSheet: View {
     @Environment(\.dismiss) private var dismiss

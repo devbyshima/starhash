@@ -80,3 +80,48 @@ struct PrivacyView: View {
         .settingsPage("Privacy")
     }
 }
+
+/// StarHash itself, one row away from Settings: What's New, the onboarding
+/// again, the developer's note and the source code.
+struct AboutStarHashView: View {
+    @AppStorage(PreferenceKey.hasOnboarded) private var hasOnboarded = true
+    @State private var showsDeveloperNote = false
+
+    var body: some View {
+        List {
+            Section {
+                NavigationLink(value: SettingsPage.whatsNew) {
+                    SettingsRow(symbol: "sparkles", title: "What's New", caption: "What each version brought")
+                }
+                .settingsCardRow(.first)
+                Button {
+                    withAnimation(.smooth) { hasOnboarded = false }
+                } label: {
+                    SettingsRow(symbol: "play.circle.fill", title: "Replay Onboarding", caption: "See the welcome screens again")
+                }
+                .buttonStyle(HighlightRowButtonStyle())
+                .settingsCardRow(.middle)
+                Button { showsDeveloperNote = true } label: {
+                    SettingsRow(symbol: "envelope.open.fill", title: "Developer Note", caption: "A few words on why StarHash exists")
+                }
+                .buttonStyle(HighlightRowButtonStyle())
+                .settingsCardRow(.middle)
+                Link(destination: SettingsLinks.sourceCode) {
+                    SettingsRow(symbol: "chevron.left.forwardslash.chevron.right", title: "Source code", caption: "StarHash is free and open source") {
+                        Image(systemName: "arrow.up.right")
+                            .starhashFont(14, weight: .semibold, relativeTo: .footnote)
+                            .foregroundStyle(Color.starhashTertiaryText)
+                            .accessibilityHidden(true)
+                    }
+                }
+                .buttonStyle(HighlightRowButtonStyle())
+                .settingsCardRow(.last)
+            }
+        }
+        .settingsListStyle()
+        .settingsPage("About StarHash")
+        .sheet(isPresented: $showsDeveloperNote) {
+            DeveloperNoteSheet()
+        }
+    }
+}

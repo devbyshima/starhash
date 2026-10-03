@@ -117,11 +117,10 @@ extension Color {
     /// than the blue for 3:1 there, the blue itself in dark mode.
     static let starhashSwitchOn = Color(light: .init(red: 4 / 255, green: 132 / 255, blue: 195 / 255), dark: .brandBlue)
 
-    /// The StarHash mark's tile and star. Dark: the icon's own, a blue star
-    /// on a dark tile. Light: turned over, a blue star on white, since the
-    /// icon's blue tile would vanish into the blue page.
-    static let starhashMarkTile = Color(light: .white, dark: .init(white: 38 / 255))
-    static let starhashMarkGlyph = Color.brandBlue
+    /// The StarHash mark's star, drawn bare. Dark: the blue. Light: near
+    /// black, the dark page's colour, as a blue star would vanish into the
+    /// blue page.
+    static let starhashMarkGlyph = Color(light: .brandNight, dark: .brandBlue)
 
     /// Letters a search matched. Dark: the blue. Light: near black like the
     /// rest of the name, picked out by `pickerMatchBackground` instead, as

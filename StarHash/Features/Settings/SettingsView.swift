@@ -2,8 +2,8 @@ import StarHashKit
 import SwiftUI
 
 /// Settings, with what was Help: what StarHash saves, the guides (how it
-/// works, auto-verify, privacy), StarHash itself (What's New, onboarding,
-/// the note, the source code, the version) and Delete All Data. (The owner
+/// works, auto-verify, privacy, and About StarHash, which holds What's
+/// New, onboarding, the note and the source code) and Delete All Data. (The owner
 /// and the wallet switcher live on Pay and in the side menu.) Its own
 /// NavigationStack, with each page pushed onto it.
 struct SettingsView: View {
@@ -31,12 +31,14 @@ enum SettingsPage: Hashable {
     case release(String)
     case howItWorks
     case privacy
+    case about
 
     @MainActor @ViewBuilder
     var destination: some View {
         switch self {
         case .howItWorks: HowStarHashWorksView()
         case .privacy: PrivacyView()
+        case .about: AboutStarHashView()
         case .autoVerify: AutoVerificationGuide()
         case .whatsNew: WhatsNewView()
         case .release(let version): ReleaseDetailView(version: version)
@@ -60,10 +62,7 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
     @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
 
-    @AppStorage(PreferenceKey.hasOnboarded) private var hasOnboarded = true
-
     @State private var confirmsDeleteAll = false
-    @State private var showsDeveloperNote = false
     @State private var confirmsAutoVerifyOff = SettingsLaunch.confirmsAutoVerifyOff
     @State private var locationRefused = false
 
@@ -150,40 +149,11 @@ private struct SettingsRootList: View {
                 NavigationLink(value: SettingsPage.privacy) {
                     SettingsRow(symbol: "lock.fill", title: "Privacy", caption: "Everything stays on this iPhone")
                 }
+                .settingsCardRow(.middle)
+                NavigationLink(value: SettingsPage.about) {
+                    SettingsRow(symbol: "star.fill", title: "About StarHash", caption: "What's new, the note and the source code")
+                }
                 .settingsCardRow(.last)
-            }
-
-            Section {
-                SettingsSectionTitle("StarHash")
-                NavigationLink(value: SettingsPage.whatsNew) {
-                    SettingsRow(symbol: "sparkles", title: "What's New", caption: "What each version brought")
-                }
-                .settingsCardRow(.first)
-                Button {
-                    withAnimation(.smooth) { hasOnboarded = false }
-                } label: {
-                    SettingsRow(symbol: "play.circle.fill", title: "Replay Onboarding", caption: "See the welcome screens again")
-                }
-                .buttonStyle(HighlightRowButtonStyle())
-                .settingsCardRow(.middle)
-                Button { showsDeveloperNote = true } label: {
-                    SettingsRow(symbol: "envelope.open.fill", title: "Developer Note", caption: "A few words on why StarHash exists")
-                }
-                .buttonStyle(HighlightRowButtonStyle())
-                .settingsCardRow(.middle)
-                Link(destination: SettingsLinks.sourceCode) {
-                    SettingsRow(symbol: "chevron.left.forwardslash.chevron.right", title: "Source code", caption: "StarHash is free and open source") {
-                        Image(systemName: "arrow.up.right")
-                            .starhashFont(14, weight: .semibold, relativeTo: .footnote)
-                            .foregroundStyle(Color.starhashTertiaryText)
-                            .accessibilityHidden(true)
-                    }
-                }
-                .buttonStyle(HighlightRowButtonStyle())
-                .settingsCardRow(.middle)
-                SettingsRow(symbol: "info.circle.fill", title: "Version", value: SettingsVersion.short)
-                    .settingsCardRow(.last)
-                    .id("starhash")
             }
 
             // Last, apart, as an account's delete sits in other apps.
@@ -202,6 +172,7 @@ private struct SettingsRootList: View {
             Section {
                 SettingsFooter()
                     .settingsPlainRow()
+                    .id("starhash")
             }
 
         }
@@ -211,9 +182,6 @@ private struct SettingsRootList: View {
                 withAnimation(.smooth) { AppReset.eraseEverything(store: store, router: router) }
             }
             Button("Cancel", role: .cancel) {}
-        }
-        .sheet(isPresented: $showsDeveloperNote) {
-            DeveloperNoteSheet()
         }
         .sheet(isPresented: $confirmsAutoVerifyOff) {
             TurnOffAutoVerifySheet {
@@ -311,7 +279,7 @@ struct SettingsFooter: View {
 
 // MARK: - Launch arguments
 
-/// `-settingsPage whatsNew|release|guide|guide2|guide3` (DEBUG only, with
+/// `-settingsPage whatsNew|release|about|guide|guide2|guide3` (DEBUG only, with
 /// `-tab settings`) opens that page or the guide at launch.
 @MainActor
 enum SettingsLaunch {
@@ -327,6 +295,7 @@ enum SettingsLaunch {
         if page == "whatsNew" { return [.whatsNew] }
         if page == "howItWorks" { return [.howItWorks] }
         if page == "privacy" { return [.privacy] }
+        if page == "about" { return [.about] }
         if page == "release" { return [.whatsNew, .release(ReleaseHistory.releases[0].version)] }
         if page?.hasPrefix("guide") == true { return [.autoVerify] }
         return []
