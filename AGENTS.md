@@ -141,6 +141,7 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 | Argument | Effect |
 | --- | --- |
 | `-inMemory` | fresh in-memory store seeded with `SampleData` |
+| `-splash` | the launch splash (any other debug argument skips it, so screenshots see their screen) |
 | `-skipOnboarding`, `-resetOnboarding` | start on the tabs, or on onboarding |
 | `-tab pay\|buy\|activity\|settings` | starting page |
 | `-note`, `-reviewNote` | Shima's welcome note over Pay, as onboarding ends, or the two-week note that asks for a rating |

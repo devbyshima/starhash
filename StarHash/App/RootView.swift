@@ -12,6 +12,8 @@ struct RootView: View {
     @AppStorage(PreferenceKey.hasSeenReviewNote) private var hasSeenReviewNote = false
     @Environment(AppRouter.self) private var router
     @Environment(\.scenePhase) private var scenePhase
+    /// The notes wait for the launch splash to go.
+    @Environment(\.splashActive) private var splashActive
     @State private var forcesNote = DeveloperNoteLaunch.forcesNote
     @State private var showsReviewNote = false
 
@@ -37,7 +39,7 @@ struct RootView: View {
         .sheet(isPresented: welcomeNotePresented) {
             DeveloperNoteSheet(afterOnboarding: true)
         }
-        .sheet(isPresented: $showsReviewNote, onDismiss: { hasSeenReviewNote = true }) {
+        .sheet(isPresented: reviewNotePresented, onDismiss: { hasSeenReviewNote = true }) {
             ReviewNoteSheet()
         }
         .onChange(of: scenePhase, initial: true) { _, phase in
@@ -51,12 +53,19 @@ struct RootView: View {
     /// Owed from the moment onboarding ends until it is closed.
     private var welcomeNotePresented: Binding<Bool> {
         Binding(
-            get: { forcesNote || (hasOnboarded && !wallet.isEmpty && !hasSeenDeveloperNote) },
+            get: { !splashActive && (forcesNote || (hasOnboarded && !wallet.isEmpty && !hasSeenDeveloperNote)) },
             set: { presented in
                 guard !presented else { return }
                 hasSeenDeveloperNote = true
                 forcesNote = false
             }
+        )
+    }
+
+    private var reviewNotePresented: Binding<Bool> {
+        Binding(
+            get: { showsReviewNote && !splashActive },
+            set: { showsReviewNote = $0 }
         )
     }
 

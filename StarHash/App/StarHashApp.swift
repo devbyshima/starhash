@@ -47,14 +47,16 @@ struct StarHashApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                // Text with no font of its own (list rows, fields) is in
-                // Space Grotesk too.
-                .font(.starhash(.body))
-                .environment(store)
-                .environment(router)
-                .tint(Color.starhashPrimaryText)
-                .onOpenURL { router.handle($0) }
+            SplashGate {
+                RootView()
+                    // Text with no font of its own (list rows, fields) is in
+                    // Space Grotesk too.
+                    .font(.starhash(.body))
+                    .environment(store)
+                    .environment(router)
+                    .tint(Color.starhashPrimaryText)
+                    .onOpenURL { router.handle($0) }
+            }
         }
         .onChange(of: scenePhase) { _, phase in
             // The Process Carrier SMS shortcut may have written while we
