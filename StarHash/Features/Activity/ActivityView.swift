@@ -52,8 +52,16 @@ struct ActivityView: View {
                 }
             }
             // One bar for both, as on the recipient screen: searching only
-            // swaps what is in it.
-            .safeAreaInset(edge: .top, spacing: 0) { topBar }
+            // swaps what is in it. With nothing logged there is nothing to
+            // pick a period of or search, so the bar steps aside (unless a
+            // search is open, so it can still be closed).
+            .safeAreaInset(edge: .top, spacing: 0) {
+                if !store.transactions.isEmpty || isSearching {
+                    topBar
+                        .transition(.opacity)
+                }
+            }
+            .animation(.smooth(duration: 0.3), value: store.transactions.isEmpty)
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: UUID.self) { id in
                 TransactionDetailPage(transactionID: id, onPayAgain: payAgain)
@@ -92,8 +100,8 @@ struct ActivityView: View {
         }
     }
 
-    /// Nothing logged yet: the message centred in the space between the
-    /// top bar and the bottom of the screen.
+    /// Nothing logged yet: the message centred on the page, which has no
+    /// top bar then.
     private var emptyScreen: some View {
         EmptyStateView(
             symbol: "list.bullet.rectangle",

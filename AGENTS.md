@@ -141,6 +141,7 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 | Argument | Effect |
 | --- | --- |
 | `-inMemory` | fresh in-memory store seeded with `SampleData` |
+| `-emptyStore` | with `-inMemory`, no transactions (Activity's empty state) |
 | `-splash` | the launch splash (any other debug argument skips it, so screenshots see their screen) |
 | `-skipOnboarding`, `-resetOnboarding` | start on the tabs, or on onboarding |
 | `-tab pay\|buy\|activity\|settings` | starting page |

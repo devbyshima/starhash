@@ -4,6 +4,7 @@ import StarHashKit
 
 /// Launch arguments for screenshots and previews (DEBUG builds only):
 ///   -inMemory        a fresh in-memory store with sample transactions
+///   -emptyStore      with -inMemory, no sample transactions (empty states)
 ///   -tab <name>      pay, activity or settings
 ///   -skipOnboarding  start on the tabs
 @MainActor
@@ -19,6 +20,7 @@ enum DebugLaunch {
 
     static func seededStore() -> StarHashStore {
         let store = StarHashStore(fileURL: nil)
+        guard !arguments.contains("-emptyStore") else { return store }
         for t in SampleData.transactions() { store.add(t) }
         return store
     }
