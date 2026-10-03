@@ -102,12 +102,6 @@ struct BuyView: View {
                     }
                 }
 
-                Text("The call button opens the code's menu in your phone's dialler, which asks for the amount and your PIN; nothing is paid until you confirm there. Tap a code to edit it.")
-                    .starhashFont(13.5, weight: .medium, relativeTo: .footnote)
-                    .foregroundStyle(Color.starhashSecondaryText)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 16)
-                    .padding(.top, 14)
             }
             .padding(.horizontal, StarHashMetrics.screenPadding)
             .padding(.top, ActivityLayout.contentTop)
@@ -134,8 +128,8 @@ struct BuyView: View {
     }
 }
 
-/// One code, on its own: a concise card (its symbol on a tile, its name,
-/// the code) that opens it for editing, and beside it, apart, the button
+/// One code, on its own: a concise card of clear Liquid Glass (its symbol
+/// on a tile, its name, the code) that opens it for editing, and beside it, apart, the button
 /// that dials it, in Liquid Glass tinted the accent, so starting a code is
 /// one clear thing.
 private struct ShortcutItem: View {
@@ -163,7 +157,9 @@ private struct ShortcutItem: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity, minHeight: 68, alignment: .leading)
-                .background(Color.starhashCard, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                // Clear Liquid Glass, as the tab bar's: the page shows
+                // through the card.
+                .starhashGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous), tint: .clear)
                 .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 22, style: .continuous))
                 .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
             }
