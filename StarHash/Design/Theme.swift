@@ -153,10 +153,11 @@ extension Color {
     static let tabBarLens = Color(light: .brandGrey.opacity(0.31), dark: .brandPaper.opacity(0.16))
     static let tabBarLensEdgeLight = Color(light: .white.opacity(0.7), dark: .white.opacity(0.22))
     static let tabBarLensEdgeDark = Color(light: .brandNight.opacity(0.22), dark: .black.opacity(0.3))
-    /// Over the note sheets' glass in light mode: Settings' card white,
-    /// solid, since white-tinted glass still lets the blue page and its
-    /// highlights through on a device. Dark keeps the glass.
-    static let noteSheetFill = Color(light: .white, dark: .clear)
+    /// Over sheet-coloured glass (the note sheets, the recipient screen's
+    /// Total) in light mode: Settings' card white, solid, since
+    /// white-tinted glass still lets the blue page and its highlights
+    /// through on a device. Dark keeps the glass, tinted `sheetGlassTint`.
+    static let sheetSolidFill = Color(light: .white, dark: .clear)
     /// The dotted line between a sheet card's rows.
     static let sheetDivider = Color(light: .brandNight.opacity(0.22), dark: .brandPaper.opacity(0.22))
 

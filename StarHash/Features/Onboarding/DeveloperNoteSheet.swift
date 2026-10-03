@@ -192,7 +192,7 @@ private struct NoteSheetFrame<Content: View>: View {
             content
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(Color.noteSheetFill.ignoresSafeArea())
+        .background(Color.sheetSolidFill.ignoresSafeArea())
         .sheetGlass(detents: [.large])
         .presentationDragIndicator(.hidden)
     }

@@ -623,7 +623,10 @@ struct RecipientPickerView: View {
         .padding(.horizontal, 22)
         .padding(.vertical, 14)
         .frame(minHeight: 72)
-        .starhashGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        // The sheets' colours: solid white in light mode, their near-black
+        // glass in dark.
+        .background(Color.sheetSolidFill, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .starhashGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous), tint: .sheetGlassTint)
         .padding(.horizontal, 16)
         .padding(.bottom, 8)
         .starhashReadableWidth()
