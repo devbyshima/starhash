@@ -59,36 +59,58 @@ struct ActivityCardRowBackground: View {
 /// back.
 private struct DeleteTransactionDialog: ViewModifier {
     @Binding var transaction: StarHashKit.Transaction?
+    let asAlert: Bool
     let onDelete: (StarHashKit.Transaction) -> Void
 
     @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
 
+    private var isPresented: Binding<Bool> {
+        Binding(get: { transaction != nil }, set: { if !$0 { transaction = nil } })
+    }
+
     func body(content: Content) -> some View {
-        content.confirmationDialog(
-            "Delete Transaction?",
-            isPresented: Binding(get: { transaction != nil }, set: { if !$0 { transaction = nil } }),
-            titleVisibility: .visible,
-            presenting: transaction
-        ) { transaction in
-            Button("Delete", role: .destructive) { onDelete(transaction) }
-            Button("Delete, Don't Ask Again", role: .destructive) {
-                confirmDeletes = false
-                onDelete(transaction)
+        if asAlert {
+            content.alert("Delete Transaction?", isPresented: isPresented, presenting: transaction) { transaction in
+                buttons(transaction)
+            } message: { _ in
+                message
             }
-            Button("Cancel", role: .cancel) {}
-        } message: { _ in
-            Text("It is removed from StarHash only.")
+        } else {
+            content.confirmationDialog(
+                "Delete Transaction?",
+                isPresented: isPresented,
+                titleVisibility: .visible,
+                presenting: transaction
+            ) { transaction in
+                buttons(transaction)
+            } message: { _ in
+                message
+            }
         }
     }
+
+    @ViewBuilder
+    private func buttons(_ transaction: StarHashKit.Transaction) -> some View {
+        Button("Delete", role: .destructive) { onDelete(transaction) }
+        Button("Delete, Don't Ask Again", role: .destructive) {
+            confirmDeletes = false
+            onDelete(transaction)
+        }
+        Button("Cancel", role: .cancel) {}
+    }
+
+    private var message: Text { Text("It is removed from StarHash only.") }
 }
 
 extension View {
-    /// Asks before deleting `transaction` while it is set.
+    /// Asks before deleting `transaction` while it is set: a dialog by
+    /// the list, or a centred alert (`asAlert`) on the details page.
     func deleteTransactionDialog(
         _ transaction: Binding<StarHashKit.Transaction?>,
+        asAlert: Bool = false,
         onDelete: @escaping (StarHashKit.Transaction) -> Void
     ) -> some View {
-        modifier(DeleteTransactionDialog(transaction: transaction, onDelete: onDelete))
+        modifier(DeleteTransactionDialog(transaction: transaction, asAlert: asAlert, onDelete: onDelete))
     }
 }
 

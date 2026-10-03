@@ -47,10 +47,8 @@ struct RecipientPickerView: View {
     /// tell which ones have scrolled up into it.
     @State private var labelTops: [String: CGFloat] = [:]
 
-    /// The header bar's height, for the blur behind it.
-    @State private var barHeight: CGFloat = 0
-    /// How far the list has scrolled under the bar, which the blur behind
-    /// it fades in over, so at rest it never touches the first row.
+    /// How far the list has scrolled under the bar (capped at 24), so the
+    /// bar's label stays on the first section while the list is at rest.
     @State private var scrolledUnder: CGFloat = 0
     /// Where the list is scrolled; set only by `-payScroll` (DEBUG).
     @State private var scrollPosition = ScrollPosition()
@@ -111,8 +109,8 @@ struct RecipientPickerView: View {
         }
         .onChange(of: query) { labelTops = [:] }
         // What scrolls under the total fades and blurs into it: the system's
-        // soft edge. At the top the bar draws its own (`HeaderBarBackdrop`),
-        // which can reach below the section label; the system's cannot.
+        // soft edge. At the top the bar draws Activity's fade instead, so the
+        // two pages read the same.
         .starhashHidesTopEdgeEffect()
         .starhashSoftBottomEdge()
         // Centred in what is left between the header and the total (or the
@@ -134,11 +132,7 @@ struct RecipientPickerView: View {
                 header
                 barLabel
             }
-            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { barHeight = $0 }
-            .background(alignment: .top) {
-                HeaderBarBackdrop(height: barHeight)
-                    .opacity(scrolledUnder / 24)
-            }
+            .starhashTopFade(holdsToBottom: true)
         }
         // Above the keyboard while it is up, above the home indicator after.
         .starhashBottomBar { totalBar }
@@ -659,56 +653,6 @@ struct RecipientPickerView: View {
 }
 
 // MARK: - Pieces
-
-/// What the header bar sits on: the soft edge iOS draws under its own bars,
-/// drawn here so it can reach past the section label. A progressive blur and
-/// a veil of the page's colour, both at full strength from under the status
-/// bar down to where the label's text ends, so rows passing under the label
-/// blur away. Below the text it is soft: the blur ends within 12pt, and
-/// only the veil carries on, most of it gone within about 13pt and the rest
-/// eased out by 36pt, with no line where it turns, so the gap under the
-/// label and the row beneath stay light. It fades in over the first 24pt of scrolling, so at
-/// rest it shows nothing and never touches the first row.
-private struct HeaderBarBackdrop: View {
-    /// The bar's own height.
-    let height: CGFloat
-    /// Below the label's text, inside the bar: the label's bottom padding.
-    private let belowText: CGFloat = 8
-    /// How far below the bar the soft part reaches.
-    private let reach: CGFloat = 28
-    /// Up under the status bar, which the bar's frame stops short of.
-    private let overscan: CGFloat = 200
-
-    var body: some View {
-        let total = overscan + height + reach
-        let solid = overscan + height - belowText
-        ZStack {
-            // The blur ends within 12pt of the text; only the veil of the
-            // page's colour carries on below, which is what keeps it soft.
-            VariableBlurView(maxBlurRadius: 6, fadeHeight: 12, softTail: true)
-                .frame(height: solid + 12)
-                .frame(maxHeight: .infinity, alignment: .top)
-            LinearGradient(stops: Self.veil(solid: solid / max(total, 1)), startPoint: .top, endPoint: .bottom)
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: total)
-        .padding(.top, -overscan)
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
-    }
-
-    /// The page's colour at 70% down to the end of the text, then the same
-    /// soft tail as the blur (`softTailStrength`).
-    private static func veil(solid: CGFloat) -> [Gradient.Stop] {
-        let color = Color.starhashBackground
-        var stops: [Gradient.Stop] = [.init(color: color.opacity(0.7), location: 0)]
-        for step in 0...48 {
-            let u = Double(step) / 48
-            stops.append(.init(color: color.opacity(0.7 * softTailStrength(u)), location: solid + CGFloat(u) * (1 - solid)))
-        }
-        return stops
-    }
-}
 
 /// A section's label (Recent, Contacts and the others): uppercase, tracked
 /// and grey, with nothing behind it.

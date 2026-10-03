@@ -4,7 +4,8 @@ import SwiftUI
 import UIKit
 
 /// What tapping a transaction shows, a page pushed on Activity's stack: the
-/// system bar with its back button and a "more" menu, then who and how much
+/// system bar with its back button (no menu: every action is on the page,
+/// and a long press on the code copies it), then who and how much
 /// with the category, the carrier's details in a card of dotted rows, where
 /// it was paid on a small map, what this year has sent the same recipient,
 /// and the actions (Pay Again, Mark as Confirmed, Delete Transaction). The
@@ -43,22 +44,21 @@ struct TransactionDetailPage: View {
         }
         .scrollIndicators(.hidden)
         .scrollBounceBehavior(.basedOnSize)
+        // Activity's fade under the bar rather than the system's blur, so
+        // the page reads as part of the same tab.
+        .starhashHidesTopEdgeEffect()
         .starhashReadableScrollContent()
+        .starhashTopFadeUnderNavigationBar()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color.starhashBackground.ignoresSafeArea())
         .navigationTitle("Transaction")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            if let transaction {
-                ToolbarItem(placement: .topBarTrailing) { actionsMenu(transaction) }
-            }
-        }
         // Deleted here or elsewhere: nothing left to show.
         .onChange(of: transaction == nil) { _, isGone in
             if isGone { router.openTransactionID = nil }
         }
         .sensoryFeedback(.success, trigger: feedbackCount)
-        .deleteTransactionDialog($transactionToDelete) { _ in delete() }
+        .deleteTransactionDialog($transactionToDelete, asAlert: true) { _ in delete() }
         #if DEBUG
         // -confirmDelete (with -openFirstTransaction): the delete question.
         .task {
@@ -67,44 +67,6 @@ struct TransactionDetailPage: View {
             transactionToDelete = transaction
         }
         #endif
-    }
-
-    // MARK: Header menu
-
-    private func actionsMenu(_ transaction: StarHashKit.Transaction) -> some View {
-        Menu {
-            if transaction.counterparty.isPayable {
-                Button {
-                    payAgain(transaction)
-                } label: {
-                    Label(payTitle(transaction), systemImage: "arrow.uturn.forward")
-                }
-            }
-            if transaction.status == .pending {
-                Button {
-                    markConfirmed(transaction)
-                } label: {
-                    Label("Mark as Confirmed", systemImage: "checkmark.circle")
-                }
-            }
-            if let reference = transaction.reference {
-                Button {
-                    UIPasteboard.general.string = reference
-                } label: {
-                    Label("Copy Code", systemImage: "doc.on.doc")
-                }
-            }
-            Button(role: .destructive) {
-                requestDelete(transaction)
-            } label: {
-                Label("Delete", systemImage: "trash")
-            }
-        } label: {
-            Image(systemName: "ellipsis")
-        }
-        .menuOrder(.fixed)
-        .accessibilityLabel("More")
-        .accessibilityShowsLargeContentViewer { Label("More", systemImage: "ellipsis") }
     }
 
     // MARK: Hero
@@ -185,17 +147,23 @@ struct TransactionDetailPage: View {
             }
             .pickerStyle(.inline)
         } label: {
+            // One glass capsule and nothing round it, as Activity's period
+            // menu is: the menu opens out of the label's own shape and
+            // shrinks back into it, so a larger invisible frame round a
+            // smaller drawn pill made it collapse to a blob, leave a ghost
+            // outline and drift as it settled.
             HStack(spacing: 6) {
                 Image(systemName: category?.symbol ?? (customTitle == nil ? "plus" : "tag.fill"))
                 Text(category?.title ?? customTitle ?? "Add Category")
             }
             .font(.sheetSubheadline)
             .foregroundStyle(category == nil && customTitle == nil ? Color.sheetSecondaryText : Color.starhashPrimaryText)
-            .padding(.horizontal, 14)
-            .frame(minHeight: 32)
-            .background(Color.starhashPrimaryText.opacity(0.08), in: Capsule())
-            .frame(minHeight: 44)
+            .lineLimit(1)
+            .padding(.horizontal, 16)
+            .frame(minHeight: 40)
+            .fixedSize()
             .contentShape(Capsule())
+            .starhashGlass(interactive: true)
         }
         .menuOrder(.fixed)
         .buttonStyle(.plain)

@@ -116,6 +116,58 @@ extension View {
         }
     }
 
+    /// Activity's top fade: content scrolling up under the bar fades into
+    /// the page colour, solid behind the bar and clearing 18pt below it,
+    /// instead of the system's blur. Drawn behind `content` from the top
+    /// of the screen; pair it with `starhashHidesTopEdgeEffect()` on the
+    /// scroll view underneath.
+    ///
+    /// `holdsToBottom` keeps the page colour solid down to the bar's bottom
+    /// edge and fades out over the same 18pt below it, for a bar with text
+    /// at its foot (the recipient screen's section label), which rows
+    /// would otherwise ghost through.
+    func starhashTopFade(holdsToBottom: Bool = false) -> some View {
+        background(alignment: .top) {
+            Group {
+                if holdsToBottom {
+                    VStack(spacing: 0) {
+                        Color.starhashBackground
+                        LinearGradient(colors: [.starhashBackground, .starhashBackground.opacity(0.85), .starhashBackground.opacity(0)], startPoint: .top, endPoint: .bottom)
+                            .frame(height: 18)
+                    }
+                } else {
+                    LinearGradient(
+                        colors: [.starhashBackground, .starhashBackground.opacity(0.85), .starhashBackground.opacity(0)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                }
+            }
+            .padding(.bottom, -18)
+            .ignoresSafeArea(edges: .top)
+            .allowsHitTesting(false)
+        }
+    }
+
+    /// The same fade under a system navigation bar, laid over a scroll view
+    /// that runs beneath it: from the top of the screen to 18pt below the
+    /// bar, however tall the bar and status bar are.
+    func starhashTopFadeUnderNavigationBar() -> some View {
+        overlay(alignment: .top) {
+            GeometryReader { proxy in
+                LinearGradient(
+                    colors: [.starhashBackground, .starhashBackground.opacity(0.85), .starhashBackground.opacity(0)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: proxy.safeAreaInsets.top + 18)
+                .offset(y: -proxy.safeAreaInsets.top)
+            }
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+        }
+    }
+
     /// No system scroll edge effect at the top, for a screen whose header
     /// draws its own.
     @ViewBuilder

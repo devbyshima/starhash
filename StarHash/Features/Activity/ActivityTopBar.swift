@@ -18,19 +18,9 @@ struct ActivityTopBar: View {
             }
             .starhashClearsWindowControls()
         }
-        .background(alignment: .top) {
-            // Content scrolling under the bar fades into the canvas instead
-            // of clashing with the glass, like the system's scroll edge
-            // effect.
-            LinearGradient(
-                colors: [.starhashBackground, .starhashBackground.opacity(0.85), .starhashBackground.opacity(0)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .padding(.bottom, -18)
-            .ignoresSafeArea(edges: .top)
-            .allowsHitTesting(false)
-        }
+        // Content scrolling under the bar fades into the canvas instead of
+        // clashing with the glass, like the system's scroll edge effect.
+        .starhashTopFade()
     }
 
     // Like a system toolbar, the bar's text stops growing at the largest

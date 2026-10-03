@@ -113,12 +113,11 @@ struct ActivitySpendingChart: View {
                     y: .value("Sent", Double(bucket.total) / top),
                     width: .ratio(Self.barWidthRatio)
                 )
-                // Drawn like the primary button: the blue as a gradient
-                // with a soft glow of itself under it. The pressed bar
-                // keeps it; the rest step back.
+                // The primary button's blue gradient, with no glow: inside
+                // the card a glow spilled past each bar's edges. The
+                // pressed bar keeps full strength; the rest step back.
                 .foregroundStyle(Color.starhashInk.gradient.opacity(isProminent(bucket) ? 1 : 0.4))
                 .clipShape(UnevenRoundedRectangle(topLeadingRadius: barRadius, topTrailingRadius: barRadius, style: .continuous))
-                .shadow(color: Color.starhashInk.opacity(isProminent(bucket) ? 0.35 : 0), radius: 7, y: 3)
                 .accessibilityLabel(ActivitySummary.spokenName(of: bucket, period: period, calendar: calendar))
                 .accessibilityValue(Money.formatWithCurrency(bucket.total))
             }
