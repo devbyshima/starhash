@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Asks before auto-verify goes off, in Beam's sheet language and sized to
-/// its content: the question under the symbol, a card of the three things
+/// its content: the title and the question at the left, a card of the three things
 /// that stop working, then Keep On (the filled button, the safe choice)
 /// and Turn Off in red under it.
 struct TurnOffAutoVerifySheet: View {
@@ -18,14 +18,11 @@ struct TurnOffAutoVerifySheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            SheetHeader("Auto-verify")
+            SheetHeader("Auto-verify", leading: true)
+                .padding(.horizontal, -2)
 
             VStack(spacing: 20) {
-                VStack(spacing: 10) {
-                    Image(systemName: "checkmark.message")
-                        .font(.system(size: 44))
-                        .foregroundStyle(Color.starhashPrimaryText)
-                        .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 6) {
                     Text("Turn off auto-verify?")
                         .font(.sheetHeadline)
                         .foregroundStyle(Color.starhashPrimaryText)
@@ -33,7 +30,8 @@ struct TurnOffAutoVerifySheet: View {
                         .font(.sheetSubheadline)
                         .foregroundStyle(Color.sheetSecondaryText)
                 }
-                .multilineTextAlignment(.center)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .fixedSize(horizontal: false, vertical: true)
 
                 VStack(spacing: 0) {
