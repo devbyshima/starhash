@@ -484,7 +484,12 @@ private struct ShortcutDetailSheet: View {
             VStack(spacing: 14) {
                 // The symbol and name on their own, above the card.
                 VStack(spacing: 10) {
-                    SymbolTile(symbol: shortcut.symbol ?? ShortcutSymbols.plain, size: 64, background: .sheetSurface)
+                    // The symbol alone, with no tile behind it, as on Buy.
+                    Image(systemName: shortcut.symbol ?? ShortcutSymbols.plain)
+                        .font(.system(size: 40, weight: .semibold))
+                        .foregroundStyle(Color.starhashPrimaryText)
+                        .frame(height: 56)
+                        .accessibilityHidden(true)
                     Text(shortcut.name)
                         .font(.sheet(21, .bold, relativeTo: .title2))
                         .foregroundStyle(Color.starhashPrimaryText)
