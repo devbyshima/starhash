@@ -40,8 +40,10 @@ struct DeveloperNoteContent: View {
     let kind: DeveloperNoteKind
     let primaryTitle: String
     let primaryAction: () -> Void
-    /// Onboarding's note ends on its button alone.
-    var showsWriteLink = true
+    /// Onboarding's note: its button glows, as onboarding's others do, and
+    /// it ends on that button alone. The sheets' is the sheets' own, with
+    /// Write to Shima under it.
+    var onOnboarding = false
 
     @Environment(\.openURL) private var openURL
 
@@ -84,16 +86,14 @@ struct DeveloperNoteContent: View {
                 .accessibilityLabel("Signed, Shima")
 
             VStack(spacing: 0) {
-                Button(action: primaryAction) {
-                    Text(primaryTitle)
-                        .starhashFont(17, weight: .medium, relativeTo: .body)
-                        .foregroundStyle(Color.noteButtonText)
-                        .frame(maxWidth: .infinity, minHeight: 56)
-                        .background(Color.noteButton, in: Capsule())
-                        .contentShape(Capsule())
+                if onOnboarding {
+                    Button(primaryTitle, action: primaryAction)
+                        .buttonStyle(.starhashPrimaryGlowing)
+                } else {
+                    Button(primaryTitle, action: primaryAction)
+                        .buttonStyle(.sheetPrimary)
                 }
-                .buttonStyle(.plain)
-                if showsWriteLink {
+                if !onOnboarding {
                     Button {
                         openURL(DeveloperNoteLinks.write)
                     } label: {
@@ -112,13 +112,6 @@ struct DeveloperNoteContent: View {
         .padding(.horizontal, 30)
         .padding(.vertical, 20)
     }
-}
-
-private extension Color {
-    /// The reference's flat black button with white words. Dark mode turns
-    /// it over: the pale grey with the near black on it.
-    static let noteButton = Color(light: .brandNight, dark: .brandPaper)
-    static let noteButtonText = Color(light: .white, dark: .brandNight)
 }
 
 /// The round picture at the top: the StarHash star on a white disc, until a

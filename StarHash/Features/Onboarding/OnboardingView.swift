@@ -88,7 +88,7 @@ struct OnboardingView: View {
                 // White in light mode, as the note's sheets are, not the blue.
                 DeveloperNoteContent(
                     kind: .welcome, primaryTitle: "Start Using StarHash",
-                    primaryAction: finish, showsWriteLink: false
+                    primaryAction: finish, onOnboarding: true
                 )
                 .background(Color.sheetPage.ignoresSafeArea())
                 .transition(.opacity)
