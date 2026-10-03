@@ -2,8 +2,8 @@ import SwiftUI
 
 /// The launch splash, after Beam's: the StarHash mark on the page's colour
 /// (which the system's launch screen already shows, so the two run on as
-/// one), with a glow rising from the foot of the screen. The mark springs
-/// in with a bloom while a shimmer sweeps it, then the whole splash fades
+/// one), lit from the foot of the screen. The mark springs in, with no
+/// glow of its own, while a shimmer sweeps it, then the whole splash fades
 /// into the app. Reduce Motion keeps it still and short.
 struct SplashView: View {
     let onFinish: () -> Void
@@ -39,7 +39,6 @@ struct SplashView: View {
             .fill(Color.starhashMarkGlyph)
             .frame(width: markSize, height: markSize)
             .modifier(SplashShimmer(size: markSize, time: time, isOn: !reduceMotion))
-            .shadow(color: Color.splashGlow.opacity(appears ? 0.55 : 0), radius: appears ? 34 : 0)
             .scaleEffect(appears ? 1 : 0.72)
             .opacity(appears ? 1 : 0)
     }

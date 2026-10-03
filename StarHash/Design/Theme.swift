@@ -53,9 +53,8 @@ extension Color {
     static let starhashDestructive = Color(light: .init(red: 0.84, green: 0.16, blue: 0.13), dark: .init(red: 1, green: 110 / 255, blue: 100 / 255))
     /// The same, as text straight on the page: no brighter red reaches
     /// 4.5:1 on the blue, so light mode deepens it (4.6:1).
-    /// The glow rising behind the launch splash and blooming round its
-    /// mark: the blue on dark mode's near black, full white on light mode's
-    /// blue.
+    /// The light rising from the foot of the launch splash: the blue on dark
+    /// mode's near black, full white on light mode's blue.
     static let splashGlow = Color(light: .white, dark: .brandBlue)
     /// The period control's lens on the page's tinted glass: white, faint,
     /// with a bright rim, as the system's own selection reads.
