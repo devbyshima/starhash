@@ -171,10 +171,11 @@ struct BuyView: View {
             .padding(.bottom, 10)
     }
 
-    /// The pinned codes in two rows at most (`PinnedLayout`): half as many
-    /// columns as codes, two at least and four at most, every row centred,
-    /// so one pinned code sits in the middle and the rest slide aside as
-    /// more are pinned. A tap dials at once; options open on a long press.
+    /// The pinned codes, four to a row in two rows at most, every row
+    /// centred, bigger the fewer there are (`PinnedLayout`): one pinned code
+    /// sits alone in the middle, and the rest slide aside and shrink as more
+    /// are pinned. A tap dials at once;
+    /// options open on a long press.
     private var pinnedGrid: some View {
         PinnedLayout(spacing: 10) {
             ForEach(shortcuts.pinned) { shortcut in
@@ -266,7 +267,12 @@ private struct ShortcutItem: View {
                 onOpen()
             } label: {
                 HStack(spacing: 14) {
-                    SymbolTile(symbol: shortcut.symbol ?? ShortcutSymbols.plain, size: 40)
+                    // The symbol alone, with no tile behind it.
+                    Image(systemName: shortcut.symbol ?? ShortcutSymbols.plain)
+                        .font(.system(size: 22, weight: .semibold))
+                        .foregroundStyle(Color.starhashPrimaryText)
+                        .frame(width: 40, height: 40)
+                        .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(shortcut.name)
                             .starhashFont(17, weight: .semibold, relativeTo: .headline)
@@ -332,10 +338,10 @@ private struct SharedPressButtonStyle: ButtonStyle {
     }
 }
 
-/// A pinned code: a portrait tile of clear Liquid Glass with its symbol in
-/// the middle and its name at the foot, and nothing else. A tap dials at
+/// A pinned code: a portrait tile of clear Liquid Glass with its bare
+/// symbol in the middle and its name at the foot, and nothing else. A tap dials at
 /// once; its options open on a long press. The symbol and name scale with
-/// the tile, two to four to a row, sized by `PinnedLayout`.
+/// the tile, sized by `PinnedLayout`.
 private struct PinnedTile: View {
     let shortcut: USSDShortcut
     let onDial: () -> Void
@@ -353,16 +359,21 @@ private struct PinnedTile: View {
                         let width = proxy.size.width
                         VStack(spacing: 0) {
                             Spacer(minLength: 0)
-                            SymbolTile(symbol: shortcut.symbol ?? ShortcutSymbols.plain, size: min(64, width * 0.46))
+                            // The symbol alone, with no tile behind it, sized
+                            // with the tile.
+                            Image(systemName: shortcut.symbol ?? ShortcutSymbols.plain)
+                                .font(.system(size: min(40, width * 0.26), weight: .semibold))
+                                .foregroundStyle(Color.starhashPrimaryText)
+                                .accessibilityHidden(true)
                             Spacer(minLength: 0)
                             Text(shortcut.name)
-                                .starhashFont(width < 110 ? 13 : 15, weight: .semibold, relativeTo: .footnote)
+                                .starhashFont(width < 110 ? 13 : (width < 140 ? 15 : 17), weight: .semibold, relativeTo: .footnote)
                                 .foregroundStyle(Color.starhashPrimaryText)
                                 .multilineTextAlignment(.center)
                                 .lineLimit(2)
                                 .minimumScaleFactor(0.8)
                                 .padding(.horizontal, 8)
-                                .padding(.bottom, width < 110 ? 10 : 14)
+                                .padding(.bottom, width < 110 ? 10 : (width < 140 ? 14 : 18))
                         }
                         .frame(width: width, height: proxy.size.height)
                     }
@@ -379,27 +390,35 @@ private struct PinnedTile: View {
     }
 }
 
-/// The pinned tiles: a column count from how many there are (half, two at
-/// least and four at most, so two rows at most), each tile a column wide
-/// and portrait (capped, so two to a row do not stand too tall), and every
-/// row centred, a lone tile in the middle. A layout, so a change of count
-/// slides each tile to its new place inside the change's animation.
+/// The pinned tiles, 3:2 standing, and the fewer there are the bigger: one
+/// or two are a half row wide each, three a third, and four or more a
+/// quarter. Four to a row at most, the rest on a second, and every row
+/// centred, so one to four sit centred in one row and five to eight make a
+/// row of four over a centred row of the rest. A layout, so a change of
+/// count slides and resizes each tile inside the change's animation.
 struct PinnedLayout: Layout {
     var spacing: CGFloat = 10
-    /// Width over height.
-    var aspect: CGFloat = 0.78
-    var maxTileHeight: CGFloat = 170
+    /// Width over height: 3:2, standing, so two wide by three tall.
+    var aspect: CGFloat = 2.0 / 3.0
+    /// A lone tile or two would stand too tall at half the row's width.
+    var maxTileHeight: CGFloat = 240
 
-    static func columns(for count: Int) -> Int {
-        min(4, max(2, (count + 1) / 2))
+    /// Tiles to a row at most.
+    static let perRow = 4
+
+    /// How many of the row's width each tile takes: two for one or two
+    /// tiles, three for three, four from four on.
+    static func sizing(for count: Int) -> Int {
+        min(perRow, max(2, count))
     }
 
-    private func metrics(width: CGFloat, count: Int) -> (columns: Int, tile: CGSize, rows: Int) {
-        let columns = Self.columns(for: count)
-        let tileWidth = max(0, (width - spacing * CGFloat(columns - 1)) / CGFloat(columns))
-        let tile = CGSize(width: tileWidth, height: min(tileWidth / aspect, maxTileHeight))
-        let rows = count == 0 ? 0 : (count + columns - 1) / columns
-        return (columns, tile, rows)
+    private func metrics(width: CGFloat, count: Int) -> (tile: CGSize, rows: Int) {
+        let share = Self.sizing(for: count)
+        let fitted = max(0, (width - spacing * CGFloat(share - 1)) / CGFloat(share))
+        let tileWidth = min(fitted, maxTileHeight * aspect)
+        let tile = CGSize(width: tileWidth, height: tileWidth / aspect)
+        let rows = count == 0 ? 0 : (count + Self.perRow - 1) / Self.perRow
+        return (tile, rows)
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
@@ -412,9 +431,9 @@ struct PinnedLayout: Layout {
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         let m = metrics(width: bounds.width, count: subviews.count)
         for index in subviews.indices {
-            let row = index / m.columns
-            let column = index % m.columns
-            let inRow = min(m.columns, subviews.count - row * m.columns)
+            let row = index / Self.perRow
+            let column = index % Self.perRow
+            let inRow = min(Self.perRow, subviews.count - row * Self.perRow)
             let rowWidth = CGFloat(inRow) * m.tile.width + CGFloat(inRow - 1) * spacing
             let x = bounds.minX + (bounds.width - rowWidth) / 2 + CGFloat(column) * (m.tile.width + spacing)
             let y = bounds.minY + CGFloat(row) * (m.tile.height + spacing)

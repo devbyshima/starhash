@@ -48,8 +48,10 @@ Free and open source.
   Dial, Delete); holding one offers Dial, Pin, Edit and Delete, a swipe
   from the right deletes it and a swipe from the left pins it. Up to
   eight codes can be pinned: they sit at the top as portrait tiles (the
-  symbol and the name), in two rows of two to four with every row
-  centred (one pinned code sits in the middle), sliding into their new
+  symbol and the name), 3:2 and bigger the fewer there are, four to a
+  row in two rows at most, every row centred (one to four make one
+  centred row; five to eight a row of four over a centred row of the
+  rest), sliding into their new
   places as codes are pinned and unpinned, and dial at once on a tap;
   their options open on a long press. A code's card and its call button
   press, and lift into their menu, as one. It comes with MoMo's
