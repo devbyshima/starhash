@@ -82,8 +82,12 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 - The tab bar (`StarHash/App/StarHashTabBar.swift`) is measured from GO
   Club's screen recordings; keep its numbers (`TabBarMetrics`,
   `TabBarLayout`) and its spring (response 0.4, damping 0.61) as they
-  are. It is the one glass with no tint: clear Liquid Glass, as the
-  reference's. Root pages leave room for it with
+  are. The bar is centred inside a frame of its widest width, so its
+  width change rides the spring; never let the page re-centre it, or the
+  symbols jump on the first frame of a switch. Page changes play
+  `NavigationHaptics` (heavy, in layers timed to the lens), never a plain
+  `sensoryFeedback`. It is the one glass with no tint: clear Liquid Glass,
+  as the reference's. Root pages leave room for it with
   `starhashTabBarClearance()`, scroll views shrink it with
   `starhashTabBarFollowsScroll()`, and a page hides it with
   `router.setHidesTabBar(_:on:)` while a screen is pushed or a search is

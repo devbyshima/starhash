@@ -4,11 +4,12 @@ import SwiftUI
 /// from its screen recordings: a capsule of clear Liquid Glass holding
 /// three symbols, Activity, Pay and Settings, and a grey glass lens under
 /// the one showing. The lens's place is wider than the others, so the
-/// symbols shift as it moves, and it moves on a spring that overshoots
-/// about a tenth and settles: overshooting at either end, it stretches
-/// the bar with it, as liquid would. The page changes at once. A finger
-/// dragged along the bar carries the lens and chooses wherever it lets
-/// go. The bar shrinks to 0.8, towards the foot of the screen, while a
+/// symbols glide aside as it moves, on the same spring: it overshoots
+/// about a tenth and settles, and overshooting at either end it stretches
+/// the bar with it, as liquid would. The page
+/// changes at once, with a heavy layered haptic that lands with the lens
+/// (`NavigationHaptics`). A finger dragged along the bar carries the lens,
+/// knocking at each symbol it passes, and chooses wherever it lets go. The bar shrinks to 0.8, towards the foot of the screen, while a
 /// page scrolls down, comes back on the way up, and steps aside for
 /// pushed screens and Activity's search.
 struct StarHashTabBar: View {
@@ -17,6 +18,8 @@ struct StarHashTabBar: View {
 
     /// Where a finger dragging along the bar holds the lens, while it does.
     @State private var dragX: CGFloat?
+    /// The symbol a dragged lens is over, for the knock as it passes one.
+    @State private var dragIndex: Int?
 
     private let items = TabBarItem.allCases
 
@@ -43,10 +46,16 @@ struct StarHashTabBar: View {
             }
         }
         .frame(width: layout.width, height: TabBarMetrics.height, alignment: .topLeading)
-        .animation(dragX == nil ? lensSpring : .interactiveSpring(response: 0.18), value: lensCenter)
-        .animation(lensSpring, value: layout.width)
         .contentShape(Capsule())
         .gesture(choosing(layout))
+        // The bar is narrower with an end chosen. Centred here, in a frame
+        // of the widest bar, so the re-centring rides the same spring as
+        // everything else; left to the page, it would jump the symbols
+        // sideways on the first frame of every switch.
+        .offset(x: (TabBarLayout.widest - layout.width) / 2)
+        .animation(dragX == nil ? lensSpring : .interactiveSpring(response: 0.18), value: lensCenter)
+        .animation(lensSpring, value: layout)
+        .frame(width: TabBarLayout.widest, height: TabBarMetrics.height, alignment: .topLeading)
         // Towards the foot of the screen, not the bar's own: it shrinks
         // and sinks, as the reference's does.
         .scaleEffect(
@@ -54,7 +63,7 @@ struct StarHashTabBar: View {
             anchor: UnitPoint(x: 0.5, y: 1 + TabBarMetrics.bottomGap / TabBarMetrics.height)
         )
         .animation(reduceMotion ? .smooth(duration: 0.2) : .spring(response: 0.3, dampingFraction: 0.78), value: router.isTabBarCompact)
-        .sensoryFeedback(.selection, trigger: selected)
+        .onAppear { NavigationHaptics.shared.prepare() }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Tab bar")
     }
@@ -106,17 +115,24 @@ struct StarHashTabBar: View {
     private func choosing(_ layout: TabBarLayout) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { value in
-                if dragX != nil || abs(value.translation.width) > 8 {
-                    dragX = value.location.x
-                }
+                guard dragX != nil || abs(value.translation.width) > 8 else { return }
+                dragX = value.location.x
+                let index = layout.nearestIndex(to: value.location.x)
+                if let dragIndex, index != dragIndex { NavigationHaptics.shared.passSymbol() }
+                dragIndex = index
             }
             .onEnded { value in
                 select(items[layout.nearestIndex(to: value.location.x)])
                 dragX = nil
+                dragIndex = nil
             }
     }
 
+    /// Another page: it shows at once, and the haptic's layers follow the
+    /// lens there. The page showing already does nothing.
     private func select(_ item: TabBarItem) {
+        guard item != TabBarItem(router.selectedTab) else { return }
+        NavigationHaptics.shared.switchPage(landsWithLens: !reduceMotion)
         switch item {
         case .activity: router.show(.activity)
         case .pay: router.show(router.payPage)
@@ -179,6 +195,11 @@ struct TabBarLayout: Equatable {
         self.centers = centers
         self.width = x + TabBarMetrics.lensSideInset
     }
+
+    /// The bar at its widest, with a middle symbol chosen.
+    static let widest: CGFloat = (0..<TabBarItem.allCases.count)
+        .map { TabBarLayout(selected: $0, count: TabBarItem.allCases.count).width }
+        .max() ?? 0
 
     func nearestIndex(to x: CGFloat) -> Int {
         centers.indices.min { abs(centers[$0] - x) < abs(centers[$1] - x) } ?? 0
@@ -254,11 +275,18 @@ extension View {
 
 private struct TabBarScrollTracking: ViewModifier {
     @Environment(AppRouter.self) private var router
+    /// Only a scroll the person makes moves the bar: a page laying itself
+    /// out (out of sight, or as it first shows) changes its offset too.
+    @State private var isScrolling = false
 
     func body(content: Content) -> some View {
-        content.onScrollGeometryChange(for: CGFloat.self) { geometry in
+        content.onScrollPhaseChange { _, phase in
+            isScrolling = phase == .interacting || phase == .decelerating
+        }
+        .onScrollGeometryChange(for: CGFloat.self) { geometry in
             geometry.contentOffset.y + geometry.contentInsets.top
         } action: { old, new in
+            guard isScrolling else { return }
             if new <= 24 {
                 router.setTabBarCompact(false)
             } else if new > old + 1 {
@@ -281,6 +309,7 @@ struct PayBuySwitcher: View {
     var body: some View {
         let target: AppTab = page == .buy ? .pay : .buy
         SwapGlassButton(symbol: target.symbol, label: "Switch to \(target.title)") {
+            NavigationHaptics.shared.switchPage(landsWithLens: false)
             router.show(target)
         }
     }

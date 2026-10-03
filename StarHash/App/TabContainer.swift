@@ -29,6 +29,13 @@ struct TabContainer: View {
         }
         .background(Color.starhashBackground.ignoresSafeArea())
         .onChange(of: router.selectedTab, initial: true) { _, tab in visited.insert(tab) }
+        // The other pages are built just after launch, out of sight, so
+        // the first switch to one is not held up building it while the
+        // lens is moving.
+        .task {
+            try? await Task.sleep(for: .seconds(1))
+            visited.formUnion(AppTab.allCases)
+        }
     }
 
     private var pages: some View {
