@@ -145,8 +145,8 @@ struct BuyView: View {
 }
 
 /// One code, as Activity's transaction row: its symbol on a tile, its name
-/// over what it does, and the code at the end where an amount would be. At
-/// accessibility text sizes the code moves under the name.
+/// over what it does and the code it dials, and at the end a round call
+/// button, so the row reads as something to tap.
 private struct ShortcutRow: View {
     let shortcut: USSDShortcut
 
@@ -154,34 +154,29 @@ private struct ShortcutRow: View {
 
     var body: some View {
         let isLarge = dynamicTypeSize.isAccessibilitySize
-        HStack(spacing: 16) {
+        HStack(spacing: 14) {
             SymbolTile(symbol: shortcut.symbol ?? ShortcutSymbols.plain, size: 42)
-            VStack(alignment: .leading, spacing: 1) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(shortcut.name)
                     .starhashFont(17, weight: .semibold, relativeTo: .headline)
                     .foregroundStyle(Color.starhashPrimaryText)
-                    .lineLimit(isLarge ? 3 : 1)
+                    .lineLimit(isLarge ? 3 : 2)
                 if let detail = shortcut.detail {
-                    // Two lines, beside the code: what a code does is worth
-                    // reading whole.
                     Text(detail)
                         .starhashFont(15, relativeTo: .subheadline)
                         .foregroundStyle(Color.starhashSecondaryText)
                         .lineLimit(isLarge ? 4 : 2)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                if isLarge {
-                    code
-                        .padding(.top, 4)
-                }
+                // The code it dials, as a transaction row shows its number.
+                Text(shortcut.code)
+                    .starhashFont(14, weight: .semibold, relativeTo: .subheadline, tracking: 0)
+                    .foregroundStyle(Color.starhashTertiaryText)
+                    .lineLimit(1)
+                    .padding(.top, 1)
             }
-            if isLarge {
-                Spacer(minLength: 0)
-            } else {
-                Spacer(minLength: 8)
-                code
-                    .layoutPriority(1)
-            }
+            Spacer(minLength: 8)
+            callButton
         }
         .padding(16)
         .contentShape(Rectangle())
@@ -192,11 +187,15 @@ private struct ShortcutRow: View {
         .accessibilityAddTraits(.isButton)
     }
 
-    private var code: some View {
-        Text(shortcut.code)
-            .starhashFont(16, weight: .semibold, relativeTo: .headline)
-            .foregroundStyle(Color.starhashPrimaryText)
-            .lineLimit(1)
+    /// A round call button in the primary button's colours, so the row reads
+    /// as something to tap; the whole row dials, the button only shows it.
+    private var callButton: some View {
+        Image(systemName: "phone.fill")
+            .font(.system(size: 15, weight: .bold))
+            .foregroundStyle(Color.starhashOnInk)
+            .frame(width: 40, height: 40)
+            .background(Color.starhashInk.gradient, in: Circle())
+            .accessibilityHidden(true)
     }
 }
 
@@ -237,10 +236,11 @@ struct ShortcutDraft: Identifiable {
 }
 
 /// Adds or edits a code, after Keaser's New Category, in StarHash's sheet
-/// language: the title with the confirm button on its right, the chosen
-/// symbol large on its tile, the name, the code and a note as capsule
-/// fields, and the grid of symbols to choose from, the chosen one ringed.
-/// Editing, Delete Code sits under the grid.
+/// language: the title between a close button on the left and the confirm
+/// button on the right, the chosen symbol large on its tile, and the name,
+/// the code and a note as capsule fields. Tapping the symbol opens the grid
+/// of symbols to choose from, the chosen one ringed. Editing, Delete Code
+/// sits at the foot.
 private struct ShortcutEditor: View {
     @Environment(USSDShortcutList.self) private var shortcuts
     @Environment(\.dismiss) private var dismiss
@@ -249,6 +249,8 @@ private struct ShortcutEditor: View {
     @State private var code: String
     @State private var detail: String
     @State private var symbol: String
+    /// The grid of symbols, shown once the big symbol is tapped.
+    @State private var choosesSymbol = false
     @FocusState private var focused: Field?
 
     private let editing: USSDShortcut.ID?
@@ -261,6 +263,9 @@ private struct ShortcutEditor: View {
         _code = State(initialValue: draft.code)
         _detail = State(initialValue: draft.detail)
         _symbol = State(initialValue: draft.symbol)
+        #if DEBUG
+        _choosesSymbol = State(initialValue: DebugLaunch.arguments.contains("-buySymbols"))
+        #endif
     }
 
     private var validCode: String? { USSDShortcut.code(from: code) }
@@ -274,21 +279,16 @@ private struct ShortcutEditor: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            SheetHeader(editing == nil ? "New Code" : "Edit Code") {
-                Button(action: save) {
-                    SheetGlassGlyph(symbol: "checkmark")
-                }
-                .buttonStyle(.hapticPlain)
-                .disabled(!canSave)
-                .opacity(canSave ? 1 : 0.4)
-                .accessibilityLabel(editing == nil ? "Add" : "Save")
-            }
+            header
 
             ScrollView {
                 VStack(spacing: 16) {
                     preview
+                    if choosesSymbol {
+                        symbolGrid
+                            .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .top)))
+                    }
                     fields
-                    symbolGrid
                     if let editing {
                         SheetTextButton("Delete Code", role: .destructive) {
                             shortcuts.remove(editing)
@@ -307,16 +307,68 @@ private struct ShortcutEditor: View {
         .onAppear { if editing == nil { focused = .name } }
     }
 
-    /// The chosen symbol, large on its tile, as Keaser shows a category's.
+    /// Keaser's: the title between a close button and the confirm one, laid
+    /// out as `SheetHeader` lays out its own.
+    private var header: some View {
+        ZStack {
+            Text(editing == nil ? "New Code" : "Edit Code")
+                .font(.sheetLargeTitle)
+                .tracking(StarHashTracking.display(32))
+                .foregroundStyle(Color.starhashPrimaryText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .padding(.horizontal, 52)
+                .accessibilityAddTraits(.isHeader)
+            HStack {
+                Button { dismiss() } label: {
+                    SheetGlassGlyph(symbol: "xmark")
+                }
+                .buttonStyle(.hapticPlain)
+                .accessibilityLabel("Close")
+                Spacer()
+                Button(action: save) {
+                    SheetGlassGlyph(symbol: "checkmark")
+                }
+                .buttonStyle(.hapticPlain)
+                .disabled(!canSave)
+                .opacity(canSave ? 1 : 0.4)
+                .accessibilityLabel(editing == nil ? "Add" : "Save")
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 18)
+        .padding(.bottom, 8)
+    }
+
+    /// The chosen symbol, large on its tile, as Keaser shows a category's,
+    /// with a pencil on its corner: a tap opens the grid to change it, and
+    /// another closes it.
     private var preview: some View {
-        Image(systemName: symbol)
-            .font(.system(size: 40, weight: .semibold))
-            .foregroundStyle(Color.starhashPrimaryText)
-            .contentTransition(.symbolEffect(.replace))
-            .frame(width: 88, height: 88)
-            .background(Color.sheetSurface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .animation(.snappy(duration: 0.2), value: symbol)
-            .accessibilityHidden(true)
+        Button {
+            focused = nil
+            withAnimation(.smooth(duration: 0.3)) { choosesSymbol.toggle() }
+        } label: {
+            Image(systemName: symbol)
+                .font(.system(size: 40, weight: .semibold))
+                .foregroundStyle(Color.starhashPrimaryText)
+                .contentTransition(.symbolEffect(.replace))
+                .frame(width: 88, height: 88)
+                .background(Color.sheetSurface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                .overlay(alignment: .bottomTrailing) {
+                    Image(systemName: choosesSymbol ? "chevron.up" : "pencil")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(Color.starhashOnInk)
+                        .contentTransition(.symbolEffect(.replace))
+                        .frame(width: 28, height: 28)
+                        .background(Color.starhashInk, in: Circle())
+                        .overlay(Circle().strokeBorder(Color.sheetGlassTint, lineWidth: 2))
+                        .offset(x: 6, y: 6)
+                }
+                .animation(.snappy(duration: 0.2), value: symbol)
+        }
+        .buttonStyle(PressScaleButtonStyle())
+        .accessibilityLabel("Symbol")
+        .accessibilityHint(choosesSymbol ? "Closes the symbols" : "Opens the symbols to choose from")
     }
 
     private var fields: some View {
@@ -363,6 +415,11 @@ private struct ShortcutEditor: View {
                 let isChosen = option == symbol
                 Button {
                     symbol = option
+                    // Closes once the ring has landed on the choice.
+                    Task {
+                        try? await Task.sleep(for: .milliseconds(280))
+                        withAnimation(.smooth(duration: 0.3)) { choosesSymbol = false }
+                    }
                 } label: {
                     Image(systemName: option)
                         .font(.system(size: 19, weight: .semibold))

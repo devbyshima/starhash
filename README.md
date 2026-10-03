@@ -42,13 +42,14 @@ Free and open source.
   in a bar above the keyboard; matched letters show in blue. Picking someone dials at once: the iPhone's
   call prompt, showing the whole code, is the approval.
 - **Buy**: the codes you dial often, listed as Activity lists payments
-  (after Keaser's Home): each row its symbol, name and what it does, with
-  the code where the amount would be. A tap dials; holding a row offers
+  (after Keaser's Home): each row its symbol, name, what it does and the
+  code it dials, with a round call button at its end. A tap dials; holding a row offers
   Dial, Edit and Delete, and a swipe deletes it. It comes with MoMo's
   pending approvals and cash out, MTN's Gwamon' Pack and the airport's
   parking; the + at the top right adds your own in a sheet after Keaser's
-  New Category: a symbol from a grid of thirty, a name, a code that starts
-  with * or # and ends with #, and an optional note. The list is
+  New Category, with a close button and a confirm one: a name, a code that
+  starts with * or # and ends with #, an optional note, and a symbol,
+  changed by tapping the big one to open a grid of thirty. The list is
   kept on the iPhone, and Delete All Data brings back the four it came
   with.
 - **Fees**: shown only in Activity, once a payment is confirmed: from MTN's
