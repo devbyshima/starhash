@@ -22,6 +22,9 @@ struct TransactionDetailPage: View {
     @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
     @State private var transactionToDelete: StarHashKit.Transaction?
     @State private var feedbackCount = 0
+    /// How far the page has scrolled under the bar, 0 to 1 over the first
+    /// 24pt: the fade under the bar comes in with it.
+    @State private var scrolledUnder = 0.0
 
     private var transaction: StarHashKit.Transaction? { store.transaction(id: transactionID) }
 
@@ -47,8 +50,13 @@ struct TransactionDetailPage: View {
         // Activity's fade under the bar rather than the system's blur, so
         // the page reads as part of the same tab.
         .starhashHidesTopEdgeEffect()
+        .onScrollGeometryChange(for: CGFloat.self) { geometry in
+            min(max(geometry.contentOffset.y + geometry.contentInsets.top, 0), 24)
+        } action: { _, offset in
+            scrolledUnder = Double(offset / 24)
+        }
         .starhashReadableScrollContent()
-        .starhashTopFadeUnderNavigationBar()
+        .starhashTopFadeUnderNavigationBar(opacity: scrolledUnder)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color.starhashBackground.ignoresSafeArea())
         .navigationTitle("Transaction")
@@ -76,7 +84,7 @@ struct TransactionDetailPage: View {
     @ViewBuilder
     private func heroBadge(_ transaction: StarHashKit.Transaction) -> some View {
         let outgoing = transaction.direction == .outgoing
-        let tint = outgoing ? Color.starhashDestructive : Color.starhashIncoming
+        let tint = outgoing ? Color.starhashDestructiveOnPage : Color.starhashIncoming
         let arrow = Image(systemName: outgoing ? "arrow.up.right" : "arrow.down.left")
         if enableContacts, PayContacts.shared.photoContactID(for: transaction.counterparty) != nil {
             TransactionAvatar(counterparty: transaction.counterparty, size: 72, isCircle: true)
@@ -293,7 +301,7 @@ struct TransactionDetailPage: View {
                 Button("Mark as Confirmed") { markConfirmed(transaction) }
                     .buttonStyle(.sheetFilled)
             }
-            SheetTextButton("Delete Transaction", role: .destructive) {
+            SheetTextButton("Delete Transaction", role: .destructive, onPage: true) {
                 requestDelete(transaction)
             }
         }

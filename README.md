@@ -24,7 +24,7 @@ Free and open source.
 - **Side menu**: the menu button at the top left of every page, or a swipe
   in from the left edge, slides the page aside, as X does. At the top, your
   main wallet (MTN MoMo or Airtel Money), picked once in onboarding (change
-  it in Settings, My Wallets). Then Pay, Buy (coming soon) and Activity,
+  it from the wallet button on Pay). Then Pay, Buy (coming soon) and Activity,
   and Settings and Help at the bottom.
 - **Pay**: a big amount on a keypad, Balance and Pay underneath. The
   button at the top right shows the main wallet's logo and switches wallet
@@ -51,18 +51,16 @@ Free and open source.
 - **Transaction details**, a page of its own: who, how much, a category, the fee, date, time,
   carrier code, a map of where you paid (when Nearby is on), what you sent
   them this year, Pay Again, Mark as Confirmed and Delete.
-- **Settings**: your profile and this year's totals, My Wallets (MTN MoMo
-  or Airtel Money, whichever you pay with, marked Main; banks coming soon),
-  switches for saving
+- **Settings**: your profile and this year's totals, switches for saving
   transactions, contacts, Nearby and recent recipients, Ask before deleting
   from a menu or a transaction's page (also turned off from the delete
   question's Don't Ask Again), the auto
   verification guide, How StarHash Works and Privacy.
 - **Shortcuts and Siri**: Process Carrier SMS, Check MoMo Balance and Pay
   with StarHash actions.
-- Light and dark appearance in a four-colour palette: a blue Pay screen in
-  light mode (as Cash App's keypad is green), the near black #171717 in
-  dark mode, blue buttons with a soft glow, and Space Grotesk. Sheets are clear Liquid Glass with bold titles
+- Light and dark appearance in a four-colour palette: every page blue in
+  light mode (as Cash App is green) with near-black buttons, the near black
+  #171717 in dark mode with blue buttons, and Space Grotesk. Sheets are clear Liquid Glass with bold titles
   on iOS 26 and later.
 
 ## USSD codes

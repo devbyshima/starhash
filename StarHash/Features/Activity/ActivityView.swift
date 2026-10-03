@@ -53,6 +53,7 @@ struct ActivityView: View {
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: UUID.self) { id in
                 TransactionDetailPage(transactionID: id, onPayAgain: payAgain)
+                    .starhashBackButton()
             }
         }
         .onChange(of: router.openTransactionID != nil, initial: true) { _, isOpen in

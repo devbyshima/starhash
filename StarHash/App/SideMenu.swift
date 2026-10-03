@@ -100,20 +100,3 @@ struct SideMenuButton: View {
         }
     }
 }
-
-/// The same, as a navigation bar item, for pages in a NavigationStack
-/// (Settings, Help), where the system draws the glass.
-struct SideMenuToolbarItem: ToolbarContent {
-    @Environment(AppRouter.self) private var router
-
-    var body: some ToolbarContent {
-        ToolbarItem(placement: .topBarLeading) {
-            Button {
-                router.isMenuOpen = true
-            } label: {
-                Image(systemName: "line.3.horizontal")
-            }
-            .accessibilityLabel("Menu")
-        }
-    }
-}

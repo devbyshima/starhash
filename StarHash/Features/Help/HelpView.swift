@@ -12,8 +12,8 @@ struct HelpView: View {
             HelpRootList()
                 .navigationTitle("Help")
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbar { SideMenuToolbarItem() }
-                .navigationDestination(for: HelpPage.self) { $0.destination }
+                .starhashSideMenuToolbar()
+                .navigationDestination(for: HelpPage.self) { $0.destination.starhashBackButton() }
         }
         .onChange(of: path.isEmpty, initial: true) { _, isEmpty in
             router.setPushedScreen(!isEmpty, on: .help)

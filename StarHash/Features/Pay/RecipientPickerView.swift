@@ -810,6 +810,7 @@ struct RecipientRow: View {
         var text = AttributedString(title)
         if !match.isEmpty, let range = text.range(of: match, options: [.caseInsensitive, .diacriticInsensitive]) {
             text[range].foregroundColor = matchColor
+            text[range].backgroundColor = .pickerMatchBackground
         }
         return text
     }
@@ -950,32 +951,6 @@ private struct ContactsAccessCard: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-        }
-    }
-}
-
-/// Keeps the swipe in from the left edge going back on a pushed page that
-/// draws its own header: hiding the navigation bar would otherwise turn it
-/// off. The navigation controller's own delegate is put back as the page
-/// goes, so the root page never starts a swipe with nothing to go back to.
-private struct SwipeBackEnabler: UIViewControllerRepresentable {
-    func makeUIViewController(context: Context) -> Controller { Controller() }
-    func updateUIViewController(_ controller: Controller, context: Context) {}
-
-    final class Controller: UIViewController {
-        private weak var savedDelegate: (any UIGestureRecognizerDelegate)?
-
-        override func viewDidAppear(_ animated: Bool) {
-            super.viewDidAppear(animated)
-            guard let pop = navigationController?.interactivePopGestureRecognizer else { return }
-            savedDelegate = pop.delegate
-            pop.delegate = nil
-            pop.isEnabled = true
-        }
-
-        override func viewWillDisappear(_ animated: Bool) {
-            super.viewWillDisappear(animated)
-            navigationController?.interactivePopGestureRecognizer?.delegate = savedDelegate
         }
     }
 }

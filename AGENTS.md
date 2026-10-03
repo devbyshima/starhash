@@ -6,7 +6,7 @@ dials the USSD code; it also keeps the transactions, confirmed
 from MTN's SMS through a Shortcuts automation. No account, no paywall, no
 server. Three tabs: Pay, Activity and Settings. Light and dark in a
 four-colour palette (blue #05A9F4, pale grey #F4F4F4, near black #171717,
-grey #616161): light mode's Pay is the blue, as Cash App's keypad is its
+grey #616161): light mode is the blue throughout, as Cash App is its
 green, and dark mode is the near black throughout. Space Grotesk, Liquid
 Glass on iOS 26+. The visual reference is Keaser (`~/Dev/apps/keaser`, read
 only): port its patterns, never import its code. The primary button and the
@@ -58,14 +58,18 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   Never change their values; a variation (an opacity, a lifted card grey,
   a deeper blue for text) is fine where contrast needs it, and every text
   colour must pass WCAG AA on its background (4.5:1, 3:1 for large text and
-  placeholders). The blue fills (`starhashInk`, with `starhashOnInk` text);
-  as text on light pages use `starhashAccentText`, since the bright blue is
-  2.6:1 on white. Pay has its own tokens (`starhashPayBackground`,
-  `payPrimaryText`, `paySecondaryText`, `.starhashPrimaryOnPay`, the
-  `payGlassTint` glass) because its light page is the blue. The only other
-  hues are `starhashIncoming` (money in) and `starhashDestructive` (money
-  out arrows, destructive actions); the carriers' colours live only in
-  their logos and the pulse rings round the chosen one on onboarding. Switches are the blue.
+  placeholders). Every light page is the blue, so the accent
+  (`starhashInk`, with `starhashOnInk` text) is near black there and the
+  blue in dark mode; text and marks straight on the page use
+  `starhashAccentText`. Light-mode secondary and tertiary text are the near
+  black at 80% and 60%, which pass on the blue and on white cards alike.
+  Red text on the page is `starhashDestructiveOnPage` (no brighter red
+  reads on the blue). Glass gets the deep-blue `starhashGlassTint` by
+  default, or it turns cyan on the blue. The only other hues are
+  `starhashIncoming` (money in) and `starhashDestructive` (money out
+  arrows, destructive actions); the carriers' colours live only in their
+  logos and the pulse rings round the chosen one on onboarding. Switches
+  are `starhashSwitchOn`.
 - Glass only through `starhashGlass`, `starhashGlassButtonStyle`,
   `StarHashGlassContainer` (iOS 18 falls back to materials).
 - Build screens from the existing pieces: `StarHashCircleButton`,
@@ -119,7 +123,7 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 | `-confirmDelete` | with `-openFirstTransaction`: the delete question |
 | `-activitySearch <text>` | Activity search with this text |
 | `-activityChartSelection last\|<index>` | chart callout on a bar |
-| `-settingsPage wallets\|guide\|guide2\|autoVerifyOff` | a Settings page (with `-tab settings`); guide is Auto-verify at step 1 or 2; autoVerifyOff asks to turn it off |
+| `-settingsPage whatsNew\|release\|guide\|guide2\|autoVerifyOff` | a Settings page (with `-tab settings`); guide is Auto-verify at step 1 or 2; autoVerifyOff asks to turn it off |
 
 Example:
 

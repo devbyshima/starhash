@@ -47,12 +47,14 @@ private struct StarHashGlassModifier<S: Shape>: ViewModifier {
     @Environment(\.starhashGlassTint) private var pageTint
 
     func body(content: Content) -> some View {
-        let tint = tint ?? pageTint
+        // Every page is the blue in light mode, where untinted glass turns
+        // a pale cyan, so the deep-blue tint is the default.
+        let tint: Color = tint ?? pageTint ?? .starhashGlassTint
         if #available(iOS 26.0, *) {
             content.glassEffect(Glass.regular.tint(tint).interactive(interactive), in: shape)
         } else {
             content
-                .background(tint ?? .clear, in: shape)
+                .background(tint, in: shape)
                 .background(.ultraThinMaterial, in: shape)
                 .overlay(shape.stroke(Color.starhashPrimaryText.opacity(0.10), lineWidth: 0.5))
         }
@@ -145,7 +147,9 @@ extension View {
     /// that runs beneath it: the page colour solid to the bar's foot, as on
     /// the recipient screen (at 85% the title's text let what scrolled
     /// under it ghost through), then fading out below.
-    func starhashTopFadeUnderNavigationBar() -> some View {
+    /// `opacity` lets a page fade it in as it scrolls, so at rest it never
+    /// lies over the top of the content.
+    func starhashTopFadeUnderNavigationBar(opacity: Double = 1) -> some View {
         overlay(alignment: .top) {
             GeometryReader { proxy in
                 VStack(spacing: 0) {
@@ -160,6 +164,7 @@ extension View {
                 }
                 .offset(y: -proxy.safeAreaInsets.top)
             }
+            .opacity(opacity)
             .allowsHitTesting(false)
             .accessibilityHidden(true)
         }

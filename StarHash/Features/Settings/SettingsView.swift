@@ -1,10 +1,10 @@
 import StarHashKit
 import SwiftUI
 
-/// Settings: the wallets and what StarHash saves. (The owner lives at the
-/// top of the side menu; how StarHash works, privacy and the version in
-/// Help.) Its own NavigationStack, with My Wallets and the auto-verify
-/// setup pushed onto it.
+/// Settings: what StarHash saves. (The owner and the wallet switcher live
+/// on Pay and in the side menu; how StarHash works, privacy and the
+/// version in Help.) Its own NavigationStack, with the auto-verify setup
+/// and What's New pushed onto it.
 struct SettingsView: View {
     @Environment(AppRouter.self) private var router
     @State private var path: [SettingsPage] = SettingsLaunch.initialPath
@@ -14,8 +14,8 @@ struct SettingsView: View {
             SettingsRootList { path.append(.autoVerify) }
                 .navigationTitle("Settings")
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbar { SideMenuToolbarItem() }
-                .navigationDestination(for: SettingsPage.self) { $0.destination }
+                .starhashSideMenuToolbar()
+                .navigationDestination(for: SettingsPage.self) { $0.destination.starhashBackButton() }
         }
         .onChange(of: path.isEmpty, initial: true) { _, isEmpty in
             router.setPushedScreen(!isEmpty, on: .settings)
@@ -25,7 +25,6 @@ struct SettingsView: View {
 
 /// Every page pushed in the Settings tab.
 enum SettingsPage: Hashable {
-    case wallets
     case autoVerify
     case whatsNew
     case release(String)
@@ -33,7 +32,6 @@ enum SettingsPage: Hashable {
     @MainActor @ViewBuilder
     var destination: some View {
         switch self {
-        case .wallets: WalletsView()
         case .autoVerify: AutoVerificationGuide()
         case .whatsNew: WhatsNewView()
         case .release(let version): ReleaseDetailView(version: version)
@@ -79,14 +77,6 @@ private struct SettingsRootList: View {
 
     private var list: some View {
         List {
-            Section {
-                SettingsSectionTitle("Wallets")
-                NavigationLink(value: SettingsPage.wallets) {
-                    SettingsRow(symbol: "wallet.bifold.fill", title: "My Wallets", caption: "\(wallet.walletName) is your main wallet")
-                }
-                .settingsCardRow(.single)
-            }
-
             Section {
                 SettingsSectionTitle("Transactions")
                 SettingsToggleRow(
@@ -283,7 +273,7 @@ struct SettingsFooter: View {
 
 // MARK: - Launch arguments
 
-/// `-settingsPage wallets|guide|guide2|guide3` (DEBUG only, with
+/// `-settingsPage whatsNew|release|guide|guide2|guide3` (DEBUG only, with
 /// `-tab settings`) opens that page or the guide at launch.
 @MainActor
 enum SettingsLaunch {
@@ -296,7 +286,6 @@ enum SettingsLaunch {
     }
 
     static var initialPath: [SettingsPage] {
-        if page == "wallets" { return [.wallets] }
         if page == "whatsNew" { return [.whatsNew] }
         if page == "release" { return [.whatsNew, .release(ReleaseHistory.releases[0].version)] }
         if page?.hasPrefix("guide") == true { return [.autoVerify] }
