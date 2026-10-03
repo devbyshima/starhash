@@ -51,11 +51,24 @@ enum SettingsCardPosition {
 struct SettingsCardRowBackground: View {
     let position: SettingsCardPosition
     var fill: Color = .settingsCard
+    /// False for a tint drawn over a row (pressed), not the card itself.
+    var isCard = true
+
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
+        if isCard, colorScheme == .dark {
+            // Black glass, painted a row at a time (`BlackGlassSlice`).
+            BlackGlassSlice(roundsTop: position.roundsTop, roundsBottom: position.roundsBottom)
+        } else {
+            slice
+        }
+    }
+
+    private var slice: some View {
         let top = position.roundsTop ? StarHashMetrics.cardRadius : 0
         let bottom = position.roundsBottom ? StarHashMetrics.cardRadius : 0
-        UnevenRoundedRectangle(
+        return UnevenRoundedRectangle(
             topLeadingRadius: top,
             bottomLeadingRadius: bottom,
             bottomTrailingRadius: bottom,

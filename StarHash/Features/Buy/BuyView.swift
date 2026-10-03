@@ -948,7 +948,7 @@ private struct ShortcutEditor: View {
             }
             .frame(width: 112)
             .frame(maxHeight: .infinity)
-            .background(Color.sheetSurface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .starhashContainer(.sheetSurface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
             .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
             .animation(.snappy(duration: 0.2), value: symbol)
             .animation(.snappy(duration: 0.2), value: choosesSymbol)
@@ -993,7 +993,7 @@ private struct ShortcutEditor: View {
             .focused($focused, equals: field)
             .padding(.horizontal, 18)
             .frame(minHeight: 52)
-            .background(Color.sheetSurface, in: Capsule())
+            .starhashContainer(.sheetSurface, in: Capsule())
     }
 
     /// Every symbol a code can wear, five to a row, in a card: a tap

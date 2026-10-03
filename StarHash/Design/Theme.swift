@@ -25,7 +25,7 @@ extension Color {
     static let starhashPayBackground = Color.starhashBackground
     /// Cards, list rows, the chart panel: white on the blue, and the
     /// near black lifted a step so a card reads on its page.
-    static let starhashCard = Color(light: .white, dark: .init(white: 38 / 255))
+    static let starhashCard = Color(light: .white, dark: .init(white: 21 / 255))
     /// Controls sitting on a card (icon tiles, date pill, text fields).
     static let starhashCardRaised = Color(light: .brandPaper, dark: .init(white: 52 / 255))
     /// Hairlines between rows.
@@ -171,6 +171,13 @@ extension Color {
     /// cards' near-white blue in light mode, so they read as the sheet's
     /// own; the usual clear glass in dark.
     static let sheetControlTint = Color(light: .init(red: 232 / 255, green: 246 / 255, blue: 254 / 255), dark: .clear)
+    /// Black glass, every container in dark mode: the near black as glass
+    /// (the dark-mode Total card), and for cards drawn a row at a time its
+    /// look as paint, measured from the glass: a fill a touch under the
+    /// page (21 to its 23) and a light rim.
+    static let blackGlassTint = Color.brandNight.opacity(0.6)
+    static let blackGlassFill = Color(white: 21 / 255)
+    static let blackGlassRim = Color.white.opacity(0.2)
     /// Text and marks straight on a sheet, with nothing behind them (a
     /// title, a hero name, a label, a text button): the brand blue. Dark:
     /// the blue itself (6.8:1 on the sheet). Light: the blue deepened just

@@ -97,6 +97,13 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   capsule.
 - Glass only through `starhashGlass`, `starhashGlassButtonStyle`,
   `StarHashGlassContainer` (iOS 18 falls back to materials).
+- Every container (card, panel, field box) goes through
+  `starhashContainer(_:in:)`: white glass in light mode (Liquid Glass over
+  its solid fill, as the Total card) and **black glass** in dark (the
+  near black as Liquid Glass). Cards drawn a row at a time (Activity's
+  days, Settings' sections) paint the black glass's look per row
+  (`BlackGlassSlice`) in dark and stay plain white in light, as glass on
+  each row would draw seams between them.
 - **Soft Edge** is the one edge treatment: what scrolls under a bar softly
   fades and blurs into it, the system's soft scroll edge (Settings' look).
   Every scroll view and list gets `starhashSoftEdge()`, and a page's own

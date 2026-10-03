@@ -118,6 +118,18 @@ extension View {
         }
     }
 
+    // MARK: Black glass
+
+    /// A container, as the Total card is: in light mode **white glass**,
+    /// Liquid Glass over a solid `lightFill` (a white card, a sheet's pale
+    /// blue card), which gives it the glass's edge and soft shadow; in dark
+    /// **black glass**, the near black as Liquid Glass, a touch darker than
+    /// the page with a light rim. Every card, panel and field box goes
+    /// through this.
+    func starhashContainer(_ lightFill: Color, in shape: some Shape) -> some View {
+        modifier(ContainerSurface(lightFill: lightFill, shape: shape))
+    }
+
     // MARK: Total card
 
     /// The **Total card** surface, the recipient screen's Total: solid white
@@ -157,3 +169,56 @@ extension View {
         }
     }
 }
+
+private struct ContainerSurface<S: Shape>: ViewModifier {
+    let lightFill: Color
+    let shape: S
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    func body(content: Content) -> some View {
+        if colorScheme == .dark {
+            content.starhashGlass(in: shape, tint: .blackGlassTint)
+        } else {
+            content
+                .background(lightFill, in: shape)
+                .starhashGlass(in: shape, tint: lightFill)
+        }
+    }
+}
+
+/// Black glass for a card drawn a row at a time (Activity's days,
+/// Settings' sections), where glass on each slice would draw its rim
+/// between the rows: the glass's own colour, with its light rim along the
+/// card's outer edges only, so the slices read as one black glass card.
+struct BlackGlassSlice: View {
+    let roundsTop: Bool
+    let roundsBottom: Bool
+    var radius: CGFloat = StarHashMetrics.cardRadius
+
+    var body: some View {
+        let top = roundsTop ? radius : 0
+        let bottom = roundsBottom ? radius : 0
+        let shape = UnevenRoundedRectangle(
+            topLeadingRadius: top,
+            bottomLeadingRadius: bottom,
+            bottomTrailingRadius: bottom,
+            topTrailingRadius: top,
+            style: .continuous
+        )
+        shape
+            .fill(Color.blackGlassFill)
+            .overlay {
+                shape
+                    .strokeBorder(Color.blackGlassRim, lineWidth: 1)
+                    // The straight edges between rows are clipped away: only
+                    // the card's own top, foot and sides keep the rim.
+                    .mask {
+                        Rectangle()
+                            .padding(.top, roundsTop ? 0 : 1.5)
+                            .padding(.bottom, roundsBottom ? 0 : 1.5)
+                    }
+            }
+    }
+}
+
