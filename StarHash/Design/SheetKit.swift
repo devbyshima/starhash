@@ -60,7 +60,13 @@ extension View {
     /// The solid card a sheet's rows sit on. A page using the same pieces
     /// passes its own card colour, since its background is the sheet's.
     func sheetCard(radius: CGFloat = 22, fill: Color = .sheetSurface) -> some View {
-        background(fill, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
+        // A soft shadow in light mode: a white card on the sheet's white
+        // glass had no edge where the glass is palest.
+        background(
+            RoundedRectangle(cornerRadius: radius, style: .continuous)
+                .fill(fill)
+                .shadow(color: .sheetCardShadow, radius: 14, y: 4)
+        )
     }
 
     /// Reports this view's height, so a sheet can size its detent to its

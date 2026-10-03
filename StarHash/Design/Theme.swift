@@ -129,16 +129,21 @@ extension Color {
     static let pickerMatch = Color(light: .brandNight, dark: .brandBlue)
     static let pickerMatchBackground = Color(light: .white.opacity(0.55), dark: .clear)
 
-    /// Sheets: the solid surface cards sit on (the pale grey, or the near
-    /// black lifted a little less than a card), the grey of secondary text,
-    /// and the fill of a filled button that is not the accent.
-    static let sheetSurface = Color(light: .brandPaper, dark: .init(white: 28 / 255))
+    /// Sheets: the solid surface cards sit on (white on the light sheet's
+    /// bright glass, where the pale grey looked dull, or the near black
+    /// lifted a little less than a card), the grey of secondary text, and
+    /// the fill of a filled button that is not the accent.
+    static let sheetSurface = Color(light: .white, dark: .init(white: 28 / 255))
     static let sheetSecondaryText = Color.starhashSecondaryText
     static let sheetFilledButton = Color(light: .brandNight, dark: .brandPaper)
-    /// A sheet's glass. Light: navy at 30%, the founder's pick, a pale
-    /// see-through navy that keeps the sheet's dark text (8:1 and more,
-    /// measured on device). Dark: the page colour let mostly through.
-    static let sheetGlassTint = Color(light: Color(red: 0, green: 31 / 255, blue: 91 / 255).opacity(0.3), dark: .brandNight.opacity(0.6))
+    /// A sheet's glass. Light: white at 30%, the founder's pick, which the
+    /// blue page under it turns a bright aqua; the sheet keeps the app's
+    /// dark text, and its cards are white. Dark: the page colour let mostly
+    /// through.
+    static let sheetGlassTint = Color(light: Color.white.opacity(0.3), dark: .brandNight.opacity(0.6))
+    /// Under a sheet card, so a white card keeps its edge on the light
+    /// sheet's white glass; none in dark mode.
+    static let sheetCardShadow = Color(light: .brandNight.opacity(0.08), dark: .clear)
     /// The dotted line between a sheet card's rows.
     static let sheetDivider = Color(light: .brandNight.opacity(0.22), dark: .brandPaper.opacity(0.22))
 

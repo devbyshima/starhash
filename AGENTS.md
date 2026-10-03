@@ -70,9 +70,10 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   arrows, destructive actions); the carriers' colours live only in their
   logos and the pulse rings round the chosen one on onboarding. Switches
   are `starhashSwitchOn`.
-- Light-mode sheets are pale navy glass (`sheetGlassTint`, #001F5B at
-  30%) with the app's usual dark text; destructive text buttons are bold
-  in the deep red.
+- Light-mode sheets are white glass at 30% (`sheetGlassTint`), bright
+  aqua over the blue page, with white cards (`sheetSurface`) and the
+  app's usual dark text; destructive text buttons are bold in the deep
+  red.
 - Every separator is dotted: `SheetDivider`, or `StarHashRowSeparator`
   (which draws it with insets). Settings lists hide the system's solid
   lines and `settingsCardRow` draws the dotted one. Never a solid line.
