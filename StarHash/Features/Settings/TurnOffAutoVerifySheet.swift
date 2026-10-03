@@ -18,7 +18,7 @@ struct TurnOffAutoVerifySheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            SheetHeader("Turn Off Auto-verify")
+            SheetHeader("Turn Off Auto-verify?")
 
             VStack(spacing: 14) {
                 Text("StarHash will stop reading your M\u{2011}Money messages.")
