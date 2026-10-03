@@ -111,7 +111,7 @@ struct OnboardingView: View {
         .init(
             initialDelay: 0.4,
             title: "Suggest who you\npaid here",
-            description: "StarHash remembers where you pay a till or\nnumber. It never leaves your iPhone.",
+            description: "Paid a shop here before? StarHash lists it\nfirst next time. This stays on your iPhone.",
             alertButtons: 3,
             tappedButton: 2,
             primaryTitle: nearbyLocation ? "Continue" : "Turn On",
