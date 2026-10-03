@@ -146,6 +146,17 @@ private struct SettingsRootList: View {
                     SettingsRow(symbol: "lock.fill", title: "Privacy", caption: "Everything stays on this iPhone")
                 }
                 .settingsCardRow(.middle)
+                Link(destination: SettingsLinks.requestFeature) {
+                    SettingsRow(symbol: "lightbulb.fill", title: "Request a Feature", caption: "Tell us what StarHash should do next") {
+                        Image(systemName: "arrow.up.right")
+                            .starhashFont(14, weight: .semibold, relativeTo: .footnote)
+                            .foregroundStyle(Color.starhashTertiaryText)
+                            .accessibilityHidden(true)
+                    }
+                }
+                .buttonStyle(HighlightRowButtonStyle())
+                .accessibilityHint("Opens a feature request form on GitHub")
+                .settingsCardRow(.middle)
                 NavigationLink(value: SettingsPage.about) {
                     SettingsRow(symbol: "star.fill", title: "About StarHash", caption: "What's new, the note and the source code")
                 }
@@ -310,4 +321,16 @@ enum SettingsLaunch {
 enum SettingsLinks {
     /// StarHash's code on GitHub, under the GNU GPL v3.
     static let sourceCode = URL(string: "https://github.com/devbyshima/starhash")!
+
+    /// A new issue from the feature request form (.github/ISSUE_TEMPLATE),
+    /// with the version filled in. Opens in the browser; StarHash itself
+    /// sends nothing.
+    static var requestFeature: URL {
+        var components = URLComponents(string: "https://github.com/devbyshima/starhash/issues/new")!
+        components.queryItems = [
+            URLQueryItem(name: "template", value: "feature_request.yml"),
+            URLQueryItem(name: "version", value: SettingsVersion.short),
+        ]
+        return components.url!
+    }
 }

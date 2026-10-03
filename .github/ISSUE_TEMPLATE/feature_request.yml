@@ -1,0 +1,25 @@
+name: Feature request
+description: Suggest something StarHash could do.
+title: "Feature: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like StarHash to do?
+      placeholder: Describe the feature in a sentence or two.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why would it help you?
+      placeholder: What do you do today, and what gets in the way?
+  - type: input
+    id: version
+    attributes:
+      label: StarHash version
+      description: Filled in when you open this from the app.
+  - type: markdown
+    attributes:
+      value: Please leave out phone numbers, merchant codes and amounts. This page is public.
