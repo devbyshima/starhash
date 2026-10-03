@@ -15,7 +15,7 @@ extension View {
     }
 
     /// The side menu button at the leading end of a root page's bar
-    /// (Settings, Help).
+    /// (Settings).
     func starhashSideMenuToolbar() -> some View {
         modifier(SideMenuToolbar())
     }

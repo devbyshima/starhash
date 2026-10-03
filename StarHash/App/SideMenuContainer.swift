@@ -108,7 +108,6 @@ struct SideMenuContainer: View {
         case .buy: BuyView()
         case .activity: ActivityView()
         case .settings: SettingsView()
-        case .help: HelpView()
         }
     }
 

@@ -32,7 +32,7 @@ struct StarHashApp: App {
         Self.useSpaceGroteskInNavigationBars()
     }
 
-    /// Navigation bar titles (Settings, Help, the recipient picker) are
+    /// Navigation bar titles (Settings, the recipient picker) are
     /// UIKit's, outside SwiftUI's font environment.
     private static func useSpaceGroteskInNavigationBars() {
         let bar = UINavigationBar.appearance()

@@ -109,12 +109,11 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 | --- | --- |
 | `-inMemory` | fresh in-memory store seeded with `SampleData` |
 | `-skipOnboarding`, `-resetOnboarding` | start on the tabs, or on onboarding |
-| `-tab pay\|buy\|activity\|settings\|help` | starting page |
+| `-tab pay\|buy\|activity\|settings` | starting page |
 | `-menu` | side menu open |
 | `-note`, `-noteTLDR` | the developer note (full, or on its TL;DR) |
 | `-wallet mtn\|airtel\|none` | the main wallet (UserDefaults; none clears it; `-skipOnboarding` sets mtn when none) |
 | `-onboardingPage 0...2` | onboarding screen (with `-resetOnboarding`): 0 the reel, 1 the wallet, 2 Contacts |
-| `-helpPage howItWorks\|privacy` | a Help page (with `-tab help`) |
 | `-payAmount <n>` | amount on the keypad |
 | `-payChosen <input>` | a recipient already chosen (Pay Again with no amount) |
 | `-payPicker` | open the recipient picker |
@@ -130,7 +129,7 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 | `-confirmDelete` | with `-openFirstTransaction`: the delete question |
 | `-activitySearch <text>` | Activity search with this text |
 | `-activityChartSelection last\|<index>` | chart callout on a bar |
-| `-settingsPage whatsNew\|release\|guide\|guide2\|autoVerifyOff` | a Settings page (with `-tab settings`); guide is Auto-verify at step 1 or 2; autoVerifyOff asks to turn it off |
+| `-settingsPage whatsNew\|release\|howItWorks\|privacy\|guide\|guide2\|autoVerifyOff` | a Settings page (with `-tab settings`); guide is Auto-verify at step 1 or 2; autoVerifyOff asks to turn it off |
 
 Example:
 

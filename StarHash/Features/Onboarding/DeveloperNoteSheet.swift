@@ -112,7 +112,7 @@ private enum DeveloperNote {
         "Thank you for giving StarHash a try. It's brand new, so your first impressions mean a lot.",
         "StarHash makes MoMo quicker. Type an amount, pick who gets it, and it dials the USSD code for you. Your PIN only ever goes into your wallet's own prompt, and StarHash never moves money by itself.",
         "There's no sign-in, no server and no tracking. Your payments stay on your iPhone, and with auto-verify your M\u{2011}Money messages confirm each one for you.",
-        "StarHash is free and open source. If you have an idea, or something doesn't feel right, you'll find the code on GitHub from **Help > Source code**. Each update is listed in **Settings > What's New**.",
+        "StarHash is free and open source. If you have an idea, or something doesn't feel right, you'll find the code on GitHub from **Settings > Source code**. Each update is listed in **Settings > What's New**.",
         "I'm glad you're here. Happy paying!",
     ] }
 

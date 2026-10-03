@@ -29,7 +29,6 @@ enum AppTab: String, Hashable, CaseIterable, Identifiable {
     case buy
     case activity
     case settings
-    case help
 
     var id: Self { self }
 
@@ -39,7 +38,6 @@ enum AppTab: String, Hashable, CaseIterable, Identifiable {
         case .buy: "Buy"
         case .activity: "Activity"
         case .settings: "Settings"
-        case .help: "Help"
         }
     }
 
@@ -49,7 +47,6 @@ enum AppTab: String, Hashable, CaseIterable, Identifiable {
         case .buy: "bag"
         case .activity: "list.bullet.rectangle"
         case .settings: "gearshape"
-        case .help: "questionmark.circle"
         }
     }
 }
@@ -104,9 +101,14 @@ final class AppRouter {
     }
 
     /// starhash://pay, starhash://buy, starhash://activity,
-    /// starhash://settings, starhash://help, starhash://transaction/<uuid>
+    /// starhash://settings, starhash://transaction/<uuid>. starhash://help,
+    /// from before Help moved into Settings, opens Settings.
     func handle(_ url: URL) {
         guard url.scheme == "starhash" else { return }
+        if url.host() == "help" {
+            show(.settings)
+            return
+        }
         if let tab = url.host().flatMap(AppTab.init(rawValue:)) {
             show(tab)
             return

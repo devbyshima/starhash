@@ -25,7 +25,7 @@ Free and open source.
   in from the left edge, slides the page aside, as X does. At the top, your
   main wallet (MTN MoMo or Airtel Money), picked once in onboarding (change
   it from the wallet button on Pay). Then Pay, Buy (coming soon) and Activity,
-  and Settings and Help at the bottom.
+  and Settings at the bottom.
 - **Pay**: a big amount on a keypad, Balance and Pay underneath. The
   button at the top right shows the main wallet's logo and switches wallet
   from a menu. Pay slides

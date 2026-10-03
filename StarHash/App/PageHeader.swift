@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// The top of the pages without a navigation bar (Pay, Buy, Activity),
-/// drawn to match the system bar on the others (Settings, Help): 44pt tall
+/// drawn to match the system bar on the others (Settings): 44pt tall
 /// at the top of the safe area, 16pt in from the edges, the menu button on
 /// the left, the title or a control centred on the screen, an action (if
 /// any) on the right. The centre keeps clear of the side buttons.

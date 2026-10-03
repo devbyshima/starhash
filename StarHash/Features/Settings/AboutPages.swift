@@ -50,7 +50,7 @@ struct PrivacyView: View {
         ("person.crop.circle", "Contacts", "Read on your iPhone to show who you can pay. They are never copied or uploaded."),
         ("location", "Location", "Only when Nearby is on, and only while you pay, to show each payment on a map."),
         ("message", "Messages", "StarHash cannot read your SMS. Your own Shortcuts automation passes MTN's confirmation messages to it, and you can turn that off at any time."),
-        ("trash", "Your data, your call", "Delete all transactions in Settings, or delete the app to remove everything."),
+        ("trash", "Your data, your call", "Delete All Data in Settings erases everything StarHash keeps, or delete the app."),
     ]
 
     var body: some View {

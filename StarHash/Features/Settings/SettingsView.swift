@@ -1,10 +1,11 @@
 import StarHashKit
 import SwiftUI
 
-/// Settings: what StarHash saves. (The owner and the wallet switcher live
-/// on Pay and in the side menu; how StarHash works, privacy and the
-/// version in Help.) Its own NavigationStack, with the auto-verify setup
-/// and What's New pushed onto it.
+/// Settings, with what was Help: what StarHash saves, the guides (how it
+/// works, auto-verify, privacy), StarHash itself (What's New, onboarding,
+/// the note, the source code, the version) and Delete All Data. (The owner
+/// and the wallet switcher live on Pay and in the side menu.) Its own
+/// NavigationStack, with each page pushed onto it.
 struct SettingsView: View {
     @Environment(AppRouter.self) private var router
     @State private var path: [SettingsPage] = SettingsLaunch.initialPath
@@ -28,10 +29,14 @@ enum SettingsPage: Hashable {
     case autoVerify
     case whatsNew
     case release(String)
+    case howItWorks
+    case privacy
 
     @MainActor @ViewBuilder
     var destination: some View {
         switch self {
+        case .howItWorks: HowStarHashWorksView()
+        case .privacy: PrivacyView()
         case .autoVerify: AutoVerificationGuide()
         case .whatsNew: WhatsNewView()
         case .release(let version): ReleaseDetailView(version: version)
@@ -133,6 +138,22 @@ private struct SettingsRootList: View {
             }
 
             Section {
+                SettingsSectionTitle("Help")
+                NavigationLink(value: SettingsPage.howItWorks) {
+                    SettingsRow(symbol: "number.square.fill", title: "How StarHash works", caption: "Amount, recipient, and the USSD code")
+                }
+                .settingsCardRow(.first)
+                NavigationLink(value: SettingsPage.autoVerify) {
+                    SettingsRow(symbol: "checkmark.message.fill", title: "Set up auto-verify", caption: "Log payments from MoMo messages")
+                }
+                .settingsCardRow(.middle)
+                NavigationLink(value: SettingsPage.privacy) {
+                    SettingsRow(symbol: "lock.fill", title: "Privacy", caption: "Everything stays on this iPhone")
+                }
+                .settingsCardRow(.last)
+            }
+
+            Section {
                 SettingsSectionTitle("StarHash")
                 NavigationLink(value: SettingsPage.whatsNew) {
                     SettingsRow(symbol: "sparkles", title: "What's New", caption: "What each version brought")
@@ -149,8 +170,20 @@ private struct SettingsRootList: View {
                     SettingsRow(symbol: "envelope.open.fill", title: "Developer Note", caption: "A few words on why StarHash exists")
                 }
                 .buttonStyle(HighlightRowButtonStyle())
-                .settingsCardRow(.last)
-                .id("starhash")
+                .settingsCardRow(.middle)
+                Link(destination: SettingsLinks.sourceCode) {
+                    SettingsRow(symbol: "chevron.left.forwardslash.chevron.right", title: "Source code", caption: "StarHash is free and open source") {
+                        Image(systemName: "arrow.up.right")
+                            .starhashFont(14, weight: .semibold, relativeTo: .footnote)
+                            .foregroundStyle(Color.starhashTertiaryText)
+                            .accessibilityHidden(true)
+                    }
+                }
+                .buttonStyle(HighlightRowButtonStyle())
+                .settingsCardRow(.middle)
+                SettingsRow(symbol: "info.circle.fill", title: "Version", value: SettingsVersion.short)
+                    .settingsCardRow(.last)
+                    .id("starhash")
             }
 
             // Last, apart, as an account's delete sits in other apps.
@@ -164,6 +197,11 @@ private struct SettingsRootList: View {
                 }
                 .buttonStyle(HighlightRowButtonStyle())
                 .settingsCardRow(.single, insets: .settingsTextRow)
+            }
+
+            Section {
+                SettingsFooter()
+                    .settingsPlainRow()
             }
 
         }
@@ -280,6 +318,8 @@ enum SettingsLaunch {
 
     static var initialPath: [SettingsPage] {
         if page == "whatsNew" { return [.whatsNew] }
+        if page == "howItWorks" { return [.howItWorks] }
+        if page == "privacy" { return [.privacy] }
         if page == "release" { return [.whatsNew, .release(ReleaseHistory.releases[0].version)] }
         if page?.hasPrefix("guide") == true { return [.autoVerify] }
         return []
@@ -293,4 +333,9 @@ enum SettingsLaunch {
         guard let page, page.hasPrefix("guide"), let n = Int(page.dropFirst(5)) else { return 0 }
         return max(0, min(n - 1, AutoVerificationGuide.stepCount - 1))
     }
+}
+
+enum SettingsLinks {
+    /// StarHash's code on GitHub, under the GNU GPL v3.
+    static let sourceCode = URL(string: "https://github.com/devbyshima/starhash")!
 }

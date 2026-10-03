@@ -2,14 +2,14 @@ import StarHashKit
 import SwiftUI
 
 /// The side menu, laid out like X's: the main pages (Pay, Buy, Activity)
-/// large and bold at the top, and Settings and Help
-/// smaller at the bottom, under a hairline. The page showing has a filled
+/// large and bold at the top, and Settings smaller at the bottom, under a
+/// dotted line. The page showing has a filled
 /// symbol. Taller than the screen (large text), it all scrolls together.
 struct SideMenu: View {
     @Environment(AppRouter.self) private var router
 
     private static let primary: [AppTab] = [.pay, .buy, .activity]
-    private static let secondary: [AppTab] = [.settings, .help]
+    private static let secondary: [AppTab] = [.settings]
 
     var body: some View {
         GeometryReader { viewport in
@@ -81,7 +81,6 @@ extension AppTab {
         case .buy: "bag.fill"
         case .activity: "list.bullet.rectangle.fill"
         case .settings: "gearshape.fill"
-        case .help: "questionmark.circle.fill"
         }
     }
 }

@@ -195,7 +195,7 @@ extension View {
     }
 
     /// The same at the top, for a scroll view under a navigation bar
-    /// (Settings, Help and their pages, the auto-verify setup, the
+    /// (Settings and its pages, the auto-verify setup, the
     /// recipient screen): what scrolls up fades and blurs under the bar, as
     /// it does under Pay's, Buy's and Activity's headers, instead of being
     /// cut off sharp.
