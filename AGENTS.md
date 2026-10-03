@@ -72,10 +72,14 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   pending payment); the carriers' colours live only in their
   logos and the pulse rings round the chosen one on onboarding. Switches
   are `starhashSwitchOn`.
-- Light-mode sheets are solid white (`sheetGlassTint`) with brand blue
-  cards (`sheetSurface`), deeper blue small fills (`sheetChip`) and the
-  app's usual dark text; destructive text buttons are bold in the deep
-  red.
+- Light-mode sheets are solid white (`sheetGlassTint`) with near-white
+  blue cards (`sheetSurface`) and a step deeper small fills (`sheetChip`),
+  the app's usual dark text inside them. Text and marks straight on a
+  sheet, with nothing behind them (titles, hero names, labels, text
+  buttons), are the brand blue (`sheetBrandText`: the blue itself in dark
+  mode, deepened just enough to read on white in light), except Shima's
+  notes, which keep the black and white of a letter; destructive text
+  buttons stay bold in the deep red.
 - Every delete button StarHash draws is `DeleteButton`: the blood red
   capsule with a bin and white words, full width in sheets and pages, the
   width of its words for Delete All Data. Menus, swipes and confirmation
@@ -105,9 +109,11 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   width change rides the spring; never let the page re-centre it, or the
   symbols jump on the first frame of a switch. Page changes play
   `NavigationHaptics` (two layers on the switch, a thump and a rumble; none for the lens's
-  bounce), never a plain `sensoryFeedback`. It and Buy's code cards are the only glass
-  with no tint: clear Liquid Glass, as the reference's. Buy's call buttons
-  are glass tinted the accent (`callGlassTint`). Activity's period control
+  bounce), never a plain `sensoryFeedback`. It is the only glass with no tint: clear
+  Liquid Glass, as the reference's. Buy's codes and pinned tiles are the
+  **Total card** (`starhashTotalCard(in:)`, the recipient screen's Total:
+  solid white in light mode, the sheets' near-black glass in dark), and
+  their call buttons glass tinted the accent (`callGlassTint`). Activity's period control
   (`GlassSegmentedControl`) moves as it does, on the same `LensGlass` and
   `LensMotion`, but in the page's tinted glass with a light lens, as the
   search button beside it, and plays the system's selection tick.

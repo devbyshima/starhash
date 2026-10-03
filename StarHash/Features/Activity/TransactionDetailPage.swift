@@ -227,7 +227,7 @@ struct TransactionDetailPage: View {
     private func locationSection(_ location: StarHashKit.Transaction.Coordinate, title: String) -> some View {
         let coordinate = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
         return VStack(spacing: 8) {
-            SheetSectionLabel("Location")
+            SheetSectionLabel("Location", onPage: true)
             Map(initialPosition: .camera(MapCamera(centerCoordinate: coordinate, distance: 900)), interactionModes: []) {
                 Marker(title, coordinate: coordinate)
                     .tint(Color.starhashInk)
@@ -249,7 +249,7 @@ struct TransactionDetailPage: View {
     private func stats(_ transaction: StarHashKit.Transaction) -> some View {
         let ytd = store.yearToDate(for: transaction.counterparty)
         return VStack(spacing: 8) {
-            SheetSectionLabel("This year")
+            SheetSectionLabel("This year", onPage: true)
             HStack(alignment: .top, spacing: 16) {
                 stat(value: Money.format(ytd.amount), label: "\(Money.currency) sent")
                 stat(value: String(ytd.count), label: ytd.count == 1 ? "Payment" : "Payments")
@@ -287,7 +287,7 @@ struct TransactionDetailPage: View {
             }
             if transaction.status == .pending {
                 Button("Mark as Confirmed") { markConfirmed(transaction) }
-                    .buttonStyle(.sheetFilled)
+                    .buttonStyle(.sheetConfirm)
             }
             DeleteButton("Delete Transaction") { requestDelete(transaction) }
         }

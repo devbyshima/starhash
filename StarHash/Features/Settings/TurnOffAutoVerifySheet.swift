@@ -23,7 +23,7 @@ struct TurnOffAutoVerifySheet: View {
             VStack(spacing: 14) {
                 Text("StarHash will stop reading your M\u{2011}Money messages.")
                     .font(.sheetSubheadline)
-                    .foregroundStyle(Color.sheetSecondaryText)
+                    .foregroundStyle(Color.sheetBrandText)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
 

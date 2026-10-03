@@ -118,6 +118,16 @@ extension View {
         }
     }
 
+    // MARK: Total card
+
+    /// The **Total card** surface, the recipient screen's Total: solid white
+    /// in light mode, the sheets' near-black glass in dark. Buy's codes and
+    /// pinned tiles wear it too.
+    func starhashTotalCard(in shape: some Shape) -> some View {
+        background(Color.sheetSolidFill, in: shape)
+            .starhashGlass(in: shape, tint: .sheetGlassTint)
+    }
+
     // MARK: Soft Edge
 
     /// **Soft Edge**, StarHash's one edge treatment: what scrolls under a

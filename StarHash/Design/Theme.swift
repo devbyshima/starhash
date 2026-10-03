@@ -153,19 +153,34 @@ extension Color {
     static let pickerMatch = Color(light: .brandNight, dark: .brandBlue)
     static let pickerMatchBackground = Color(light: .white.opacity(0.55), dark: .clear)
 
-    /// Sheets: the solid surface cards sit on (the brand blue on the white
-    /// sheet, the founder's pick, with near-black text at 6.8:1; or the
-    /// near black lifted a little less than a card), the grey of secondary
-    /// text, and the fill of a filled button that is not the accent.
-    static let sheetSurface = Color(light: .brandBlue, dark: .init(white: 28 / 255))
+    /// Sheets: the solid surface cards sit on (on the white sheet, a white
+    /// with a breath of the brand blue in it, the near black on it at 17:1;
+    /// or the near black lifted a little less than a card), the grey of
+    /// secondary text, and the fill of a filled button that is not the
+    /// accent.
+    static let sheetSurface = Color(light: .init(red: 232 / 255, green: 246 / 255, blue: 254 / 255), dark: .init(white: 28 / 255))
     static let sheetSecondaryText = Color.starhashSecondaryText
     /// Small fills inside a sheet (icon circles, a monogram tile, a pill, a
-    /// disabled button): a deeper blue than the cards in light mode, with
-    /// near-black text still at 5:1 and over; a faint veil in dark mode.
-    static let sheetChip = Color(light: .init(red: 4 / 255, green: 146 / 255, blue: 212 / 255), dark: .brandPaper.opacity(0.1))
+    /// disabled button): a step deeper than the cards, still near white and
+    /// still blue, in light mode; a faint veil in dark mode.
+    static let sheetChip = Color(light: .init(red: 205 / 255, green: 235 / 255, blue: 252 / 255), dark: .brandPaper.opacity(0.1))
+    /// The glass of a sheet's header buttons (close, confirm, Edit): the
+    /// cards' near-white blue in light mode, so they read as the sheet's
+    /// own; the usual clear glass in dark.
+    static let sheetControlTint = Color(light: .init(red: 232 / 255, green: 246 / 255, blue: 254 / 255), dark: .clear)
+    /// Text and marks straight on a sheet, with nothing behind them (a
+    /// title, a hero name, a label, a text button): the brand blue. Dark:
+    /// the blue itself (6.8:1 on the sheet). Light: the blue deepened just
+    /// enough to read on the white sheet (4.7:1), where the blue itself is
+    /// 2.6:1.
+    static let sheetBrandText = Color(light: .init(red: 0, green: 120 / 255, blue: 190 / 255), dark: .brandBlue)
     static let sheetFilledButton = Color(light: .brandNight, dark: .brandPaper)
     /// A disabled sheet button's label, on its `sheetChip` fill.
     static let sheetDisabledLabel = Color(light: .brandNight.opacity(0.6), dark: .init(white: 166 / 255))
+    /// Mark as Confirmed's fill and words: white and the near black in light
+    /// mode (18:1), the money-in green and the near black in dark (9.8:1).
+    static let confirmButton = Color(light: .white, dark: .init(red: 0.3, green: 0.85, blue: 0.48))
+    static let onConfirmButton = Color.brandNight
     /// The label on `sheetFilledButton`.
     static let sheetFilledLabel = Color(light: .white, dark: .init(white: 28 / 255))
     /// A sheet's background. Light: solid white, the founder's pick. Dark:

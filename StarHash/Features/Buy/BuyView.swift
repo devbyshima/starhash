@@ -388,7 +388,7 @@ struct BuyView: View {
     }
 }
 
-/// One code, on its own: a concise card of clear Liquid Glass (its symbol
+/// One code, on its own: a concise Total card (its symbol
 /// on a tile, its name, the code) that opens its details, and beside it, apart, the button
 /// that dials it, in Liquid Glass tinted the accent, so starting a code is
 /// one clear thing.
@@ -431,9 +431,8 @@ private struct ShortcutItem: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity, minHeight: 68, alignment: .leading)
-                // Clear Liquid Glass, as the tab bar's: the page shows
-                // through the card.
-                .starhashGlass(in: shape, tint: .clear)
+                // The Total card, as the recipient screen's Total.
+                .starhashTotalCard(in: shape)
                 .contentShape(shape)
             }
             .buttonStyle(SharedPressButtonStyle(isPressed: $isPressed))
@@ -481,7 +480,7 @@ private struct SharedPressButtonStyle: ButtonStyle {
     }
 }
 
-/// A pinned code: a portrait tile of clear Liquid Glass with its bare
+/// A pinned code: a portrait Total card with its bare
 /// symbol in the middle and its name at the foot, and nothing else. A tap dials at
 /// once; its options open on a long press. The symbol and name scale with
 /// the tile, sized by `PinnedLayout`.
@@ -506,8 +505,8 @@ private struct PinnedTile: View {
     }
 }
 
-/// What a pinned tile shows, as large as `PinnedLayout` makes it: clear
-/// glass, the symbol and the name, in fixed zones.
+/// What a pinned tile shows, as large as `PinnedLayout` makes it: the
+/// Total card, the symbol and the name, in fixed zones.
 private struct PinnedTileFace: View {
     let shortcut: USSDShortcut
 
@@ -544,7 +543,7 @@ private struct PinnedTileFace: View {
                     .frame(width: width, height: height)
                 }
             }
-            .starhashGlass(in: RoundedRectangle(cornerRadius: 20, style: .continuous), tint: .clear)
+            .starhashTotalCard(in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
@@ -674,12 +673,12 @@ private struct ShortcutDetailSheet: View {
                     // The symbol alone, with no tile behind it, as on Buy.
                     Image(systemName: shortcut.symbol ?? ShortcutSymbols.plain)
                         .font(.system(size: 40, weight: .semibold))
-                        .foregroundStyle(Color.starhashPrimaryText)
+                        .foregroundStyle(Color.sheetBrandText)
                         .frame(height: 56)
                         .accessibilityHidden(true)
                     Text(shortcut.name)
                         .font(.sheet(21, .bold, relativeTo: .title2))
-                        .foregroundStyle(Color.starhashPrimaryText)
+                        .foregroundStyle(Color.sheetBrandText)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                         .accessibilityAddTraits(.isHeader)
@@ -726,7 +725,7 @@ private struct ShortcutDetailSheet: View {
             Text("Code")
                 .font(.sheetLargeTitle)
                 .tracking(StarHashTracking.display(32))
-                .foregroundStyle(Color.starhashPrimaryText)
+                .foregroundStyle(Color.sheetBrandText)
                 .lineLimit(1)
                 .padding(.horizontal, 80)
                 .accessibilityAddTraits(.isHeader)
@@ -744,7 +743,7 @@ private struct ShortcutDetailSheet: View {
                         .padding(.horizontal, 18)
                         .frame(height: 44)
                         .contentShape(Capsule())
-                        .starhashGlass(interactive: true)
+                        .starhashGlass(interactive: true, tint: .sheetControlTint)
                 }
                 .buttonStyle(.hapticPlain)
             }
@@ -891,7 +890,7 @@ private struct ShortcutEditor: View {
             Text(editing == nil ? "New Code" : "Edit Code")
                 .font(.sheetLargeTitle)
                 .tracking(StarHashTracking.display(32))
-                .foregroundStyle(Color.starhashPrimaryText)
+                .foregroundStyle(Color.sheetBrandText)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .padding(.horizontal, 52)

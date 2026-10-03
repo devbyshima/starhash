@@ -88,7 +88,7 @@ struct SheetHeader<Trailing: View>: View {
             Text(title)
                 .font(.sheetLargeTitle)
                 .tracking(StarHashTracking.display(32))
-                .foregroundStyle(Color.starhashPrimaryText)
+                .foregroundStyle(Color.sheetBrandText)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 // Clear of the button on the right, and centred anyway.
@@ -123,7 +123,7 @@ struct SheetGlassGlyph: View {
             .frame(width: 32, height: 32)
             .padding(6)
             .contentShape(Circle())
-            .starhashGlass(in: Circle(), interactive: true)
+            .starhashGlass(in: Circle(), interactive: true, tint: .sheetControlTint)
     }
 }
 
@@ -187,16 +187,20 @@ struct SheetValueText: View {
 /// A small uppercase label over a card.
 struct SheetSectionLabel: View {
     let text: String
+    /// On a page rather than a sheet (the transaction page): the page's
+    /// grey, since the sheets' blue would not read on the blue page.
+    var onPage = false
 
-    init(_ text: String) {
+    init(_ text: String, onPage: Bool = false) {
         self.text = text
+        self.onPage = onPage
     }
 
     var body: some View {
         Text(text.uppercased())
             .font(.sheet(11, .semibold, relativeTo: .caption))
             .tracking(0.8)
-            .foregroundStyle(Color.sheetSecondaryText)
+            .foregroundStyle(onPage ? Color.sheetSecondaryText : Color.sheetBrandText)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 4)
             .accessibilityAddTraits(.isHeader)
@@ -232,6 +236,9 @@ struct SheetButtonStyle: ButtonStyle {
         /// Blood red with white words: every delete button in the app
         /// (`DeleteButton`), whatever page or sheet it is on.
         case destructive
+        /// Mark as Confirmed: white with the near black in light mode, the
+        /// money-in green with the near black in dark.
+        case confirm
     }
 
     var fill: Fill
@@ -286,6 +293,8 @@ private struct SheetButtonBody: View {
             return (.starhashInk, .starhashOnInk)
         case .destructive:
             return (.starhashDestructiveButton, .starhashOnDestructive)
+        case .confirm:
+            return (.confirmButton, .onConfirmButton)
         }
     }
 
@@ -311,6 +320,7 @@ extension ButtonStyle where Self == SheetButtonStyle {
     static var sheetPrimary: SheetButtonStyle { SheetButtonStyle(fill: .accent) }
     static var sheetFilled: SheetButtonStyle { SheetButtonStyle(fill: .filled) }
     static var sheetDestructive: SheetButtonStyle { SheetButtonStyle(fill: .destructive) }
+    static var sheetConfirm: SheetButtonStyle { SheetButtonStyle(fill: .confirm) }
 }
 
 /// The quiet choice under a sheet's button: grey text, or red for a
@@ -336,7 +346,7 @@ struct SheetTextButton: View {
                 // Bold when destructive: the vivid red on a white sheet,
                 // the deeper one on the blue page.
                 .font(.sheet(14, role == .destructive ? .bold : .semibold, relativeTo: .subheadline))
-                .foregroundStyle(role == .destructive ? (onPage ? Color.starhashDestructiveOnPage : Color.starhashDestructive) : Color.sheetSecondaryText)
+                .foregroundStyle(role == .destructive ? (onPage ? Color.starhashDestructiveOnPage : Color.starhashDestructive) : Color.sheetBrandText)
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .contentShape(Rectangle())
         }

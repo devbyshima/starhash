@@ -67,7 +67,7 @@ struct ContactDetailSheet: View {
             )
             Text(contact.name)
                 .font(.sheet(21, .bold, relativeTo: .title2))
-                .foregroundStyle(Color.starhashPrimaryText)
+                .foregroundStyle(Color.sheetBrandText)
                 .multilineTextAlignment(.center)
                 .accessibilityAddTraits(.isHeader)
         }
