@@ -10,10 +10,6 @@ enum ActivityLayout {
     /// Where the hairline between rows starts: past the 16pt margin, the
     /// 42pt symbol tile and the 16pt gap, under the name.
     static let rowSeparatorLeading: CGFloat = 74
-    /// From the top of the safe area to the first search result.
-    static let searchResultsTop: CGFloat = 35
-    /// The search field capsule and the round button beside it.
-    static let searchBarHeight: CGFloat = 48
 }
 
 /// Where a row sits in its card, so its background rounds the right corners.

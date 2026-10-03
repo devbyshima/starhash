@@ -58,6 +58,12 @@ struct SettingsCardRowBackground: View {
     }
 }
 
+enum SettingsLayout {
+    /// Where a row's text starts past its symbol tile: the 38pt tile and
+    /// the 12pt gap.
+    static let textLeading: CGFloat = 50
+}
+
 extension EdgeInsets {
     /// Rows with a leading symbol tile.
     static let settingsRow = EdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 16)
@@ -83,12 +89,21 @@ extension View {
             .environment(\.defaultMinListRowHeight, 44)
     }
 
-    /// Places a row in a card at `position`.
+    /// Places a row in a card at `position`. The list's own solid lines are
+    /// hidden; each row after the first draws the dotted one above it,
+    /// under the text: past the symbol tile on rows with one, at the inset
+    /// on text-only rows.
     func settingsCardRow(_ position: SettingsCardPosition, insets: EdgeInsets = .settingsRow) -> some View {
-        self
+        let leading = insets.leading == EdgeInsets.settingsRow.leading ? SettingsLayout.textLeading : 0
+        return self
             .listRowInsets(insets)
             .listRowBackground(SettingsCardRowBackground(position: position))
-            .listRowSeparatorTint(Color.starhashListSeparator)
+            .listRowSeparator(.hidden)
+            .overlay(alignment: .top) {
+                if position == .middle || position == .last {
+                    StarHashRowSeparator(leading: leading, trailing: 0, overlapsRows: true)
+                }
+            }
     }
 
     /// A list row that is not a card: stat tiles, footers, free text.

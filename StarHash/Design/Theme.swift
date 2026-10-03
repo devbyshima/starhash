@@ -135,9 +135,10 @@ extension Color {
     static let sheetSurface = Color(light: .brandPaper, dark: .init(white: 28 / 255))
     static let sheetSecondaryText = Color.starhashSecondaryText
     static let sheetFilledButton = Color(light: .brandNight, dark: .brandPaper)
-    /// The tint of a sheet's glass: the page colour let mostly through, so
-    /// the glass still refracts but reads as the pale grey or near black.
-    static let sheetGlassTint = Color(light: .brandPaper.opacity(0.75), dark: .brandNight.opacity(0.6))
+    /// A sheet's own background. Light: solid white, since glass over the
+    /// blue page came out a pale cyan its cards and greys washed into.
+    /// Dark: the page colour let mostly through the glass.
+    static let sheetGlassTint = Color(light: .white, dark: .brandNight.opacity(0.6))
     /// The dotted line between a sheet card's rows.
     static let sheetDivider = Color(light: .brandNight.opacity(0.22), dark: .brandPaper.opacity(0.22))
 

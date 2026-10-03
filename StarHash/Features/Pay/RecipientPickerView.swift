@@ -231,7 +231,7 @@ struct RecipientPickerView: View {
             // melt into one another as the search opens and closes.
             StarHashGlassContainer(spacing: 10) {
                 HStack(spacing: 10) {
-                    PickerGlassButton(
+                    SwapGlassButton(
                         symbol: isSearching ? "xmark" : "chevron.left",
                         label: isSearching ? "Close search" : "Back"
                     ) {
@@ -242,7 +242,7 @@ struct RecipientPickerView: View {
                             .transition(.offset(x: 80).combined(with: .opacity))
                     } else {
                         Spacer(minLength: 0)
-                        PickerGlassButton(symbol: "magnifyingglass", label: "Search") { openSearch() }
+                        SwapGlassButton(symbol: "magnifyingglass", label: "Search") { openSearch() }
                             .transition(.opacity)
                     }
                 }
@@ -669,52 +669,6 @@ private struct PickerBand: View {
             .padding(.bottom, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
             .accessibilityAddTraits(.isHeader)
-    }
-}
-
-/// The header's round glass buttons, the same as the menu button and the
-/// wallet switcher on Pay.
-private struct PickerGlassButton: View {
-    let symbol: String
-    let label: String
-    let action: () -> Void
-
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    var body: some View {
-        Button(action: action) {
-            // Keyed by the symbol, so a change (close to back and back again)
-            // swaps one glyph for the other: the old one shrinks, blurs and
-            // fades as the new one grows into focus.
-            ZStack {
-                Image(systemName: symbol)
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(Color.starhashPrimaryText)
-                    .id(symbol)
-                    .transition(reduceMotion ? .opacity : .glyphSwap)
-            }
-            .starhashCircleButton()
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(label)
-    }
-}
-
-/// A glyph coming in from small, soft and clear, or going out the same way.
-private struct GlyphSwap: ViewModifier {
-    var progress: CGFloat
-
-    func body(content: Content) -> some View {
-        content
-            .scaleEffect(1 - 0.45 * progress)
-            .blur(radius: 5 * progress)
-            .opacity(1 - progress)
-    }
-}
-
-private extension AnyTransition {
-    static var glyphSwap: AnyTransition {
-        .modifier(active: GlyphSwap(progress: 1), identity: GlyphSwap(progress: 0))
     }
 }
 

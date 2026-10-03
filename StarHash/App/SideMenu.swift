@@ -21,11 +21,8 @@ struct SideMenu: View {
 
                     Spacer(minLength: 32)
 
-                    Rectangle()
-                        .fill(Color.starhashSeparator)
-                        .frame(height: 1)
+                    SheetDivider()
                         .padding(.bottom, 12)
-                        .accessibilityHidden(true)
 
                     ForEach(Self.secondary) { tab in
                         row(tab, isPrimary: false)

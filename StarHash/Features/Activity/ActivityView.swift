@@ -50,6 +50,9 @@ struct ActivityView: View {
                         .transition(.opacity)
                 }
             }
+            // One bar for both, as on the recipient screen: searching only
+            // swaps what is in it.
+            .safeAreaInset(edge: .top, spacing: 0) { topBar }
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: UUID.self) { id in
                 TransactionDetailPage(transactionID: id, onPayAgain: payAgain)
@@ -100,9 +103,6 @@ struct ActivityView: View {
         .padding(.horizontal, StarHashMetrics.screenPadding)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea(.container, edges: .bottom)
-        .safeAreaInset(edge: .top, spacing: 0) {
-            ActivityTopBar(period: period, onPeriod: choosePeriod, onSearch: beginSearch)
-        }
     }
 
     private var listScreen: some View {
@@ -148,9 +148,6 @@ struct ActivityView: View {
         .starhashSoftBottomEdge()
         .activitySwipeActionsContainer()
         .starhashReadableScrollContent()
-        .safeAreaInset(edge: .top, spacing: 0) {
-            ActivityTopBar(period: period, onPeriod: choosePeriod, onSearch: beginSearch)
-        }
     }
 
     /// "Today", "Yesterday", "Fri 2 Oct", in Keaser's "Latest" style.
@@ -164,16 +161,26 @@ struct ActivityView: View {
             .padding(.bottom, 9.5)
     }
 
+    private var topBar: some View {
+        ActivityTopBar(
+            period: period,
+            onPeriod: choosePeriod,
+            isSearching: isSearching,
+            searchText: $searchText,
+            searchFocused: $searchFocused,
+            onSearch: beginSearch,
+            onCloseSearch: endSearch
+        )
+    }
+
     private var searchScreen: some View {
         ActivitySearchView(
             results: ActivitySummary.search(searchText, in: store.transactions),
-            text: $searchText,
-            isFocused: $searchFocused,
+            text: searchText,
             onOpen: open,
             onConfirm: markConfirmed,
             onDelete: requestDelete,
-            onSwipeDelete: swipeDelete,
-            onClose: endSearch
+            onSwipeDelete: swipeDelete
         )
     }
 
@@ -245,14 +252,14 @@ struct ActivityView: View {
 
     private func beginSearch() {
         searchText = ""
-        withAnimation(.smooth(duration: 0.25)) { isSearching = true }
+        withAnimation(.smooth(duration: 0.32)) { isSearching = true }
         // The field only exists after this update, so focus it on the next.
         Task { @MainActor in searchFocused = true }
     }
 
     private func endSearch() {
         searchFocused = false
-        withAnimation(.smooth(duration: 0.25)) {
+        withAnimation(.smooth(duration: 0.32)) {
             isSearching = false
             searchText = ""
         }

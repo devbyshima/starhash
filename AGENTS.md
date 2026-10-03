@@ -70,6 +70,9 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   arrows, destructive actions); the carriers' colours live only in their
   logos and the pulse rings round the chosen one on onboarding. Switches
   are `starhashSwitchOn`.
+- Every separator is dotted: `SheetDivider`, or `StarHashRowSeparator`
+  (which draws it with insets). Settings lists hide the system's solid
+  lines and `settingsCardRow` draws the dotted one. Never a solid line.
 - Glass only through `starhashGlass`, `starhashGlassButtonStyle`,
   `StarHashGlassContainer` (iOS 18 falls back to materials).
 - Build screens from the existing pieces: `StarHashCircleButton`,
