@@ -1,11 +1,11 @@
 import SwiftUI
 
 /// Buy: airtime, bundles and electricity through MoMo. Not built yet; the
-/// page holds its place in the menu.
+/// switcher at the top left of Pay comes here.
 struct BuyView: View {
     var body: some View {
         VStack(spacing: 0) {
-            PageHeader(title: "Buy")
+            PageHeader(page: .buy, title: "Buy")
 
             // Centred in the space between the header and the bottom of
             // the screen.
@@ -19,6 +19,7 @@ struct BuyView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .ignoresSafeArea(.container, edges: .bottom)
         }
+        .starhashTabBarClearance()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.starhashBackground.ignoresSafeArea())
     }

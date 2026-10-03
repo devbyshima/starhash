@@ -110,7 +110,6 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 | `-inMemory` | fresh in-memory store seeded with `SampleData` |
 | `-skipOnboarding`, `-resetOnboarding` | start on the tabs, or on onboarding |
 | `-tab pay\|buy\|activity\|settings` | starting page |
-| `-menu` | side menu open |
 | `-note`, `-reviewNote` | Shima's welcome note over Pay, as onboarding ends, or the two-week note that asks for a rating |
 | `-wallet mtn\|airtel\|none` | the main wallet (UserDefaults; none clears it; `-skipOnboarding` sets mtn when none) |
 | `-onboardingPage 0...4` | onboarding screen (with `-resetOnboarding`): 0 the reel, 1 the wallet, 2 Contacts, 3 Nearby, 4 auto-verify (MTN only) |

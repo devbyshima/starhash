@@ -12,7 +12,7 @@ struct CheckBalanceIntent: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult {
-        AppEnvironment.router.selectedTab = .pay
+        AppEnvironment.router.show(.pay)
         if let url = USSD.telURL(for: USSD.balance(for: StarHashPreferences.wallet)) {
             await UIApplication.shared.open(url)
         }
@@ -28,7 +28,7 @@ struct OpenPayIntent: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult {
-        AppEnvironment.router.selectedTab = .pay
+        AppEnvironment.router.show(.pay)
         return .result()
     }
 }

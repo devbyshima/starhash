@@ -70,7 +70,7 @@ struct PayView: View {
                 locationTask = nil
                 nearbyFix = nil
             }
-            router.setPushedScreen(!path.isEmpty, on: .pay)
+            router.setHidesTabBar(!path.isEmpty, on: .pay)
         }
         .onAppear(perform: applyDebugLaunch)
         .task { await PayShaders.prepare() }
@@ -78,7 +78,7 @@ struct PayView: View {
 
     private var keypadScreen: some View {
         VStack(spacing: 0) {
-            PageHeader { EmptyView() } trailing: { WalletSwitcher() }
+            PageHeader(page: .pay) { EmptyView() } trailing: { WalletSwitcher() }
 
             Spacer(minLength: 12)
             PayAmountDisplay(amount: input.value)
@@ -107,11 +107,13 @@ struct PayView: View {
                 // amount changes size.
                 .layoutPriority(1)
 
+            // Over the tab bar.
             buttons
                 .padding(.horizontal, StarHashMetrics.screenPadding)
                 .padding(.top, 16)
-                .padding(.bottom, 8)
+                .padding(.bottom, 4)
         }
+        .starhashTabBarClearance()
         .starhashReadableWidth(StarHashMetrics.narrowReadableWidth)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.starhashPayBackground.ignoresSafeArea())

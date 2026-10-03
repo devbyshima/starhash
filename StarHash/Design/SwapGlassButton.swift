@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// The header's round glass buttons, the same as the menu button and the
-/// wallet switcher on Pay.
+/// The header's round glass buttons, the same as the wallet switcher on
+/// Pay.
 struct SwapGlassButton: View {
     let symbol: String
     let label: String

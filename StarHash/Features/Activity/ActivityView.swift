@@ -5,7 +5,8 @@ import UIKit
 /// The Activity tab, modelled on Keaser's Home: the period picker and
 /// search, the spending summary with its chart, and the period's
 /// transactions grouped by day. Search replaces all of it with its own
-/// full-screen view while it is open, and the tab bar hides meanwhile.
+/// full-screen view while it is open, and the tab bar steps aside meanwhile,
+/// as it does for a transaction's page.
 ///
 /// A transaction's details are a page pushed on the tab's own stack, opened
 /// through `AppRouter.openTransactionID`, so a route from a URL or an intent
@@ -59,8 +60,8 @@ struct ActivityView: View {
                     .starhashBackButton()
             }
         }
-        .onChange(of: router.openTransactionID != nil, initial: true) { _, isOpen in
-            router.setPushedScreen(isOpen, on: .activity)
+        .onChange(of: router.openTransactionID != nil || isSearching, initial: true) { _, covers in
+            router.setHidesTabBar(covers, on: .activity)
         }
         // Contact photos for the rows, read once access is already granted.
         .task(id: enableContacts) {
@@ -103,6 +104,7 @@ struct ActivityView: View {
         .padding(.horizontal, StarHashMetrics.screenPadding)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea(.container, edges: .bottom)
+        .starhashTabBarClearance()
     }
 
     private var listScreen: some View {
@@ -146,6 +148,8 @@ struct ActivityView: View {
         }
         .scrollIndicators(.hidden)
         .starhashSoftBottomEdge()
+        .starhashTabBarClearance()
+        .starhashTabBarFollowsScroll()
         .activitySwipeActionsContainer()
         .starhashReadableScrollContent()
     }

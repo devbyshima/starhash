@@ -2,10 +2,10 @@ import StarHashKit
 import SwiftUI
 
 /// Activity's floating bar, laid out as the recipient screen's header: the
-/// menu button on the left, the period picker centred like a title (a
-/// glass capsule opening a native menu), and the search button on the
-/// right. Searching, the menu button turns into a close button and the
-/// field comes in from the right as the picker goes out to the left.
+/// period picker centred like a title (a glass capsule opening a native
+/// menu), and the search button on the right. Searching, a close button
+/// comes in on the left and the field from the right as the picker goes
+/// out to the left.
 struct ActivityTopBar: View {
     let period: ActivityPeriod
     let onPeriod: @MainActor (ActivityPeriod) -> Void
@@ -14,8 +14,6 @@ struct ActivityTopBar: View {
     var searchFocused: FocusState<Bool>.Binding
     let onSearch: () -> Void
     let onCloseSearch: () -> Void
-
-    @Environment(AppRouter.self) private var router
 
     var body: some View {
         ZStack {
@@ -28,13 +26,9 @@ struct ActivityTopBar: View {
             // melt into one another as the search opens and closes.
             StarHashGlassContainer(spacing: 10) {
                 HStack(spacing: 10) {
-                    SwapGlassButton(
-                        symbol: isSearching ? "xmark" : "line.3.horizontal",
-                        label: isSearching ? "Close search" : "Menu"
-                    ) {
-                        if isSearching { onCloseSearch() } else { router.isMenuOpen = true }
-                    }
                     if isSearching {
+                        SwapGlassButton(symbol: "xmark", label: "Close search", action: onCloseSearch)
+                            .transition(.opacity)
                         searchField
                             .transition(.offset(x: 80).combined(with: .opacity))
                     } else {

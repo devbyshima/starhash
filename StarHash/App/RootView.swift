@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Onboarding the first time, the side menu and its pages after. An
+/// Onboarding the first time, the pages and their tab bar after. An
 /// install that finished onboarding before it asked for the wallet is
 /// asked for it once, on its own page. As onboarding ends, Shima's welcome
 /// note opens over Pay; two weeks on, the note asking for a rating shows
@@ -29,7 +29,7 @@ struct RootView: View {
                     .background(Color.starhashBackground.ignoresSafeArea())
                     .transition(.opacity)
             } else {
-                SideMenuContainer()
+                TabContainer()
                     .transition(.opacity)
             }
         }

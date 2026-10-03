@@ -2,7 +2,7 @@ import StarHashKit
 import SwiftUI
 
 /// The button at the top right of Pay: the main wallet's logo alone, in
-/// the same 44pt glass circle as the menu button opposite, and a menu to switch to
+/// the same 44pt glass circle as the Pay and Buy switcher opposite, and a menu to switch to
 /// the other wallet, as My Wallets does. Payments and Balance dial the new
 /// wallet's codes from the next tap.
 struct WalletSwitcher: View {

@@ -3,7 +3,7 @@ import SwiftUI
 
 /// Onboarding's one question about the owner: which wallet they pay with,
 /// MTN MoMo or Airtel Money. It decides the codes StarHash dials and what
-/// the side menu shows. (The number itself is not asked for: dialling never
+/// Pay shows. (The number itself is not asked for: dialling never
 /// needs it, since the call goes out from the SIM in the phone.)
 ///
 /// Laid out as Beam's "find your Mac" step, so it reads as one of the reel's

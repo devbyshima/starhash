@@ -23,15 +23,15 @@ enum AppEnvironment {
         let router = AppRouter()
         #if DEBUG
         if let tab = DebugLaunch.value(after: "-tab").flatMap(AppTab.init(rawValue:)) {
-            router.selectedTab = tab
+            router.show(tab)
         }
-        router.isMenuOpen = DebugLaunch.arguments.contains("-menu")
         #endif
         return router
     }()
 }
 
-/// The pages of the side menu, in its order.
+/// The app's pages. The tab bar shows three places, Pay's holding Buy as
+/// well (`TabBarItem`).
 enum AppTab: String, Hashable, CaseIterable, Identifiable {
     case pay
     case buy
@@ -49,35 +49,40 @@ enum AppTab: String, Hashable, CaseIterable, Identifiable {
         }
     }
 
+    /// The tab bar's symbol, and the Pay and Buy switcher's.
     var symbol: String {
         switch self {
         case .pay: "number"
-        case .buy: "bag"
-        case .activity: "list.bullet.rectangle"
-        case .settings: "gearshape"
+        case .buy: "bag.fill"
+        case .activity: "list.bullet.rectangle.fill"
+        case .settings: "gearshape.fill"
         }
     }
 }
 
-/// Which page shows, whether the side menu is open, and which transaction
-/// (if any) is open. Routes from URLs and intents go through here.
+/// Which page shows, how the tab bar stands, and which transaction (if
+/// any) is open. Routes from URLs and intents go through here.
 @MainActor
 @Observable
 final class AppRouter {
-    var selectedTab: AppTab = .pay
-    var isMenuOpen = false
-    /// Pages showing a pushed screen, where a swipe from the left edge goes
-    /// back instead of opening the menu.
-    private(set) var pagesWithPushedScreens: Set<AppTab> = []
+    private(set) var selectedTab: AppTab = .pay
+    /// Pay or Buy, whichever showed last: the tab bar's middle place
+    /// returns to it.
+    private(set) var payPage: AppTab = .pay
+    /// Pages showing a pushed screen or a search, where the tab bar steps
+    /// aside.
+    private(set) var pagesHidingTabBar: Set<AppTab> = []
+    /// Shrunk while a page scrolls down.
+    private(set) var isTabBarCompact = false
 
-    func setPushedScreen(_ isPushed: Bool, on tab: AppTab) {
-        if isPushed { pagesWithPushedScreens.insert(tab) } else { pagesWithPushedScreens.remove(tab) }
+    func setHidesTabBar(_ hides: Bool, on tab: AppTab) {
+        if hides { pagesHidingTabBar.insert(tab) } else { pagesHidingTabBar.remove(tab) }
     }
 
-    /// Whether a swipe from the left edge opens the menu: only on a page's
-    /// first screen.
-    var edgeSwipeOpensMenu: Bool {
-        !isMenuOpen && !pagesWithPushedScreens.contains(selectedTab)
+    var isTabBarHidden: Bool { pagesHidingTabBar.contains(selectedTab) }
+
+    func setTabBarCompact(_ compact: Bool) {
+        if isTabBarCompact != compact { isTabBarCompact = compact }
     }
     /// The transaction whose details page is open on Activity.
     var openTransactionID: UUID?
@@ -102,10 +107,11 @@ final class AppRouter {
     /// x-callback-url (auto-verify's check). A new value each time.
     private(set) var shortcutCallback: ShortcutCallback?
 
-    /// Shows `tab` and closes the menu.
+    /// Shows `tab`, with the tab bar at full size.
     func show(_ tab: AppTab) {
         selectedTab = tab
-        isMenuOpen = false
+        if tab == .pay || tab == .buy { payPage = tab }
+        setTabBarCompact(false)
     }
 
     /// starhash://pay, starhash://buy, starhash://activity,

@@ -3,9 +3,9 @@ import SwiftUI
 
 /// Settings, with what was Help: what StarHash saves, the guides (how it
 /// works, privacy, and About StarHash, which holds What's
-/// New, onboarding, the note and the source code) and Delete All Data. (The owner
-/// and the wallet switcher live on Pay and in the side menu.) Its own
-/// NavigationStack, with each page pushed onto it.
+/// New, onboarding, the note and the source code) and Delete All Data. (The
+/// wallet switcher lives on Pay.) Its own NavigationStack, with each page
+/// pushed onto it, over which the tab bar steps aside.
 struct SettingsView: View {
     @Environment(AppRouter.self) private var router
     @State private var path: [SettingsPage] = SettingsLaunch.initialPath
@@ -15,7 +15,6 @@ struct SettingsView: View {
             SettingsRootList { path.append(.autoVerify) }
                 .navigationTitle("Settings")
                 .navigationBarTitleDisplayMode(.inline)
-                .starhashSideMenuToolbar()
                 .navigationDestination(for: SettingsPage.self) { page in
                     // The setup brings its own back button, which steps
                     // back through it first.
@@ -27,7 +26,7 @@ struct SettingsView: View {
                 }
         }
         .onChange(of: path.isEmpty, initial: true) { _, isEmpty in
-            router.setPushedScreen(!isEmpty, on: .settings)
+            router.setHidesTabBar(!isEmpty, on: .settings)
         }
     }
 }
@@ -89,6 +88,12 @@ private struct SettingsRootList: View {
     }
 
     private var list: some View {
+        settingsList
+            .starhashTabBarClearance()
+            .starhashTabBarFollowsScroll()
+    }
+
+    private var settingsList: some View {
         List {
             Section {
                 SettingsSectionTitle("Transactions")

@@ -21,12 +21,6 @@ extension View {
     func starhashBackAndClose(back: @escaping () -> Void, close: (() -> Void)?) -> some View {
         modifier(BackAndClose(back: back, close: close))
     }
-
-    /// The side menu button at the leading end of a root page's bar
-    /// (Settings).
-    func starhashSideMenuToolbar() -> some View {
-        modifier(SideMenuToolbar())
-    }
 }
 
 private struct StarHashBackButton: ViewModifier {
@@ -70,20 +64,6 @@ private struct BackAndClose: ViewModifier {
                 }
             }
             .background(SwipeBackEnabler())
-    }
-}
-
-private struct SideMenuToolbar: ViewModifier {
-    @Environment(AppRouter.self) private var router
-
-    func body(content: Content) -> some View {
-        content.barButton {
-            Button { router.isMenuOpen = true } label: {
-                StarHashCircleGlyph(symbol: "line.3.horizontal")
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Menu")
-        }
     }
 }
 

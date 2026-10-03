@@ -1,17 +1,19 @@
 import SwiftUI
 
-/// The top of the pages without a navigation bar (Pay, Buy, Activity),
-/// drawn to match the system bar on the others (Settings): 44pt tall
-/// at the top of the safe area, 16pt in from the edges, the menu button on
-/// the left, the title or a control centred on the screen, an action (if
-/// any) on the right. The centre keeps clear of the side buttons.
+/// The top of Pay and Buy, drawn to match the system bar on the others
+/// (Settings): 44pt tall at the top of the safe area, 16pt in from the
+/// edges, the Pay and Buy switcher on the left, the title or a control
+/// centred on the screen, an action (if any) on the right. The centre
+/// keeps clear of the side buttons.
 struct PageHeader<Center: View, Trailing: View>: View {
+    /// Pay or Buy, for the switcher.
+    let page: AppTab
     @ViewBuilder var center: Center
     @ViewBuilder var trailing: Trailing
 
     var body: some View {
         HStack(spacing: 8) {
-            SideMenuButton()
+            PayBuySwitcher(page: page)
             Spacer(minLength: 0)
             trailing
         }
@@ -27,15 +29,15 @@ struct PageHeader<Center: View, Trailing: View>: View {
 }
 
 extension PageHeader where Trailing == EmptyView {
-    init(@ViewBuilder center: () -> Center) {
-        self.init(center: center) { EmptyView() }
+    init(page: AppTab, @ViewBuilder center: () -> Center) {
+        self.init(page: page, center: center) { EmptyView() }
     }
 }
 
 extension PageHeader where Center == PageTitle, Trailing == EmptyView {
     /// A plain centred title, set like the system bar's.
-    init(title: String) {
-        self.init { PageTitle(text: title) } trailing: { EmptyView() }
+    init(page: AppTab, title: String) {
+        self.init(page: page) { PageTitle(text: title) } trailing: { EmptyView() }
     }
 }
 

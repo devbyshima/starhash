@@ -146,6 +146,11 @@ extension Color {
     /// A sheet's background. Light: solid white, the founder's pick. Dark:
     /// the page colour let mostly through the glass.
     static let sheetGlassTint = Color(light: .white, dark: .brandNight.opacity(0.6))
+    /// The tab bar's lens under the page showing: the text colour, faint,
+    /// so it reads darker on the light glass and lighter on the dark, with
+    /// a bright rim as the reference's has.
+    static let tabBarLens = Color(light: .brandNight.opacity(0.12), dark: .brandPaper.opacity(0.14))
+    static let tabBarLensEdge = Color(light: .white.opacity(0.35), dark: .white.opacity(0.12))
     /// Over the note sheets' glass in light mode: Settings' card white,
     /// solid, since white-tinted glass still lets the blue page and its
     /// highlights through on a device. Dark keeps the glass.

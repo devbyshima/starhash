@@ -71,8 +71,7 @@ enum AppReset {
         }
         try? FileManager.default.removeItem(at: URL.temporaryDirectory.appending(path: "Shortcut", directoryHint: .isDirectory))
         router.openTransactionID = nil
-        router.isMenuOpen = false
-        router.selectedTab = .pay
+        router.show(.pay)
         // Set, not only removed, so every @AppStorage view sees it change
         // and the root swaps to onboarding.
         UserDefaults.standard.set(false, forKey: PreferenceKey.hasOnboarded)

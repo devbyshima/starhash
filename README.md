@@ -21,11 +21,14 @@ Free and open source.
   what it brought (`ReleaseHistory` in StarHashKit; add a release at the top
   when shipping), and can show the welcome screens again.
 
-- **Side menu**: the menu button at the top left of every page, or a swipe
-  in from the left edge, slides the page aside, as X does. At the top, your
-  main wallet (MTN MoMo or Airtel Money), picked once in onboarding (change
-  it from the wallet button on Pay). Then Pay, Buy (coming soon) and Activity,
-  and Settings at the bottom.
+- **Tab bar**: a glass capsule floating at the foot of every page, with
+  Activity on the left, Pay in the middle and Settings on the right. A lens
+  slides to the page showing; a finger dragged along the bar carries it.
+  The bar shrinks while a page scrolls down and steps aside for pushed
+  screens and search. The button at the top left of Pay switches to Buy
+  (coming soon) and back, and the bar's middle returns to whichever showed
+  last. Your main wallet (MTN MoMo or Airtel Money) is picked once in
+  onboarding and changed from the wallet button on Pay.
 - **Pay**: a big amount on a keypad, Balance and Pay underneath. The
   button at the top right shows the main wallet's logo and switches wallet
   from a menu. Pay slides
