@@ -52,8 +52,9 @@ Free and open source.
   row in two rows at most, every row centred (one to four make one
   centred row; five to eight a row of four over a centred row of the
   rest), sliding into their new
-  places as codes are pinned and unpinned, and dragged into a new order
-  (the others part around the dragged tile), and dial at once on a tap;
+  places as codes are pinned and unpinned. Rearrange in a pinned code's
+  menu sets them wiggling, as on the Home Screen: a tile follows the
+  finger, the others part around it, and the check at the top ends it, and dial at once on a tap;
   their options open on a long press. A code's card and its call button
   press, and lift into their menu, as one. It comes with MoMo's
   pending approvals and cash out, MTN's Gwamon' Pack and the airport's

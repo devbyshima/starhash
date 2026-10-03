@@ -1,6 +1,5 @@
 import StarHashKit
 import SwiftUI
-import UniformTypeIdentifiers
 
 /// Buy: the codes kept on hand to dial in a tap (`USSDShortcutList`), laid
 /// out as Activity lists transactions, after Keaser's Home: one card of
@@ -33,10 +32,21 @@ struct BuyView: View {
     @State private var pinnedCount = 0
     /// Eight pinned already, when one more was asked for.
     @State private var pinsFull = false
-    /// The pinned code being dragged to a new place, while it is.
-    @State private var draggingPinned: USSDShortcut.ID?
+    /// Arranging the pinned codes: they wiggle and follow a finger to a new
+    /// place, as on the Home Screen, until Done.
+    @State private var arranging = false
+    /// The pinned code under the finger while arranging, where the finger
+    /// is in the grid, and where on the tile it took hold.
+    @State private var dragID: USSDShortcut.ID?
+    @State private var dragPoint: CGPoint = .zero
+    @State private var grabOffset: CGSize = .zero
+    @State private var gridWidth: CGFloat = 360
+    /// True while a finger is down on a tile, arranging; false again when
+    /// it lifts or the drag is cancelled, which settles the tile either way.
+    @GestureState private var arrangeDragActive = false
     /// Bumped as a dragged tile passes another, for a tick each time.
     @State private var reorderTicks = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         // The header is a Soft Edge bar: the codes scroll under it.
@@ -58,8 +68,14 @@ struct BuyView: View {
         }
         .starhashSoftEdgeHeader {
             PageHeader(page: .buy) { PageTitle(text: "Buy") } trailing: {
-                SwapGlassButton(symbol: "plus", label: "Add a code") {
-                    editing = ShortcutDraft()
+                // Done while arranging the pinned codes, + otherwise; the
+                // glyph swaps in place.
+                SwapGlassButton(symbol: arranging ? "checkmark" : "plus", label: arranging ? "Done" : "Add a code") {
+                    if arranging {
+                        withAnimation(.smooth(duration: 0.3)) { arranging = false }
+                    } else {
+                        editing = ShortcutDraft()
+                    }
                 }
             }
         }
@@ -116,6 +132,7 @@ struct BuyView: View {
             if DebugLaunch.arguments.contains("-buyNew") { editing = ShortcutDraft() }
             if DebugLaunch.arguments.contains("-buyEdit"), let first = shortcuts.shortcuts.first { editing = ShortcutDraft(first) }
             if DebugLaunch.arguments.contains("-buyDetails") { details = shortcuts.shortcuts.first }
+            if DebugLaunch.arguments.contains("-buyArrange"), shortcuts.pinned.count > 1 { arranging = true }
         }
         #endif
     }
@@ -162,6 +179,8 @@ struct BuyView: View {
         }
         .scrollIndicators(.hidden)
         .scrollBounceBehavior(.basedOnSize)
+        // A finger on a tile while arranging moves the tile, not the page.
+        .scrollDisabled(arranging)
         .starhashSoftEdge()
         .activitySwipeActionsContainer()
         .starhashReadableScrollContent()
@@ -180,43 +199,135 @@ struct BuyView: View {
     /// The pinned codes, four to a row in two rows at most, every row
     /// centred, bigger the fewer there are (`PinnedLayout`): one pinned code
     /// sits alone in the middle, and the rest slide aside and shrink as more
-    /// are pinned. A tap dials at once;
-    /// options open on a long press.
+    /// are pinned. A tap dials at once; options open on a long press, among
+    /// them Rearrange. Arranging, the tiles wiggle and the one under the
+    /// finger follows it, drawn over the grid while its own place stays
+    /// empty, as the others part around it.
     private var pinnedGrid: some View {
-        PinnedLayout(spacing: 10) {
-            ForEach(shortcuts.pinned) { shortcut in
-                PinnedTile(shortcut: shortcut) { dial(shortcut.code) }
-                    .contextMenu {
-                        Button("Unpin", systemImage: "pin.slash") { afterMenu { pin(shortcut, false) } }
-                        Button("Details", systemImage: "info.circle") { details = shortcut }
-                        Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
-                        Button(role: .destructive) { afterMenu { delete(shortcut) } } label: { DestructiveMenuLabel("Delete") }
-                    }
-                    // Dragged to a new place: lifted by the system's drag,
-                    // which a long press with no movement leaves to the
-                    // menu, and dropped over another tile, which moves the
-                    // others along.
-                    .onDrag {
-                        draggingPinned = shortcut.id
-                        return NSItemProvider(object: shortcut.id.uuidString as NSString)
-                    }
-                    .onDrop(of: [.text], delegate: PinnedReorder(
-                        target: shortcut.id,
-                        dragging: $draggingPinned,
-                        shortcuts: shortcuts,
-                        onMove: { reorderTicks += 1 }
-                    ))
-                    .accessibilityAction(named: "Unpin") { pin(shortcut, false) }
-                    .accessibilityAction(named: "Move Earlier") { movePinned(shortcut, by: -1) }
-                    .accessibilityAction(named: "Move Later") { movePinned(shortcut, by: 1) }
-                    .accessibilityAction(named: "Details") { details = shortcut }
-                    .accessibilityAction(named: "Delete") { delete(shortcut) }
+        let pinned = shortcuts.pinned
+        return PinnedLayout(spacing: 10) {
+            ForEach(Array(pinned.enumerated()), id: \.element.id) { index, shortcut in
+                pinnedItem(shortcut, index: index)
                     .transition(.asymmetric(
                         insertion: .scale(scale: 0.5).combined(with: .opacity),
                         removal: .scale(scale: 0.8).combined(with: .opacity)
                     ))
             }
         }
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { gridWidth = $0 }
+        .coordinateSpace(.named(PinnedLayout.space))
+        .overlay(alignment: .topLeading) { draggedTile(in: pinned) }
+        .onChange(of: pinned.count) { _, count in
+            if count < 2 { arranging = false }
+        }
+        .onChange(of: arrangeDragActive) { _, active in
+            if !active { settleDraggedTile() }
+        }
+    }
+
+    @ViewBuilder
+    private func pinnedItem(_ shortcut: USSDShortcut, index: Int) -> some View {
+        if arranging {
+            PinnedTileFace(shortcut: shortcut)
+                .modifier(Wiggle(isOn: !reduceMotion && dragID != shortcut.id, seed: index))
+                // Its place stays while it is under the finger, empty; set
+                // outside the wiggle, whose easing would fade it back in.
+                .opacity(dragID == shortcut.id ? 0 : 1)
+                .gesture(arrangeDrag(shortcut))
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(shortcut.name)
+                .accessibilityHint("Drag to move it")
+                .accessibilityAction(named: "Move Earlier") { movePinned(shortcut, by: -1) }
+                .accessibilityAction(named: "Move Later") { movePinned(shortcut, by: 1) }
+        } else {
+            PinnedTile(shortcut: shortcut) { dial(shortcut.code) }
+                .contextMenu {
+                    if shortcuts.pinned.count > 1 {
+                        Button("Rearrange", systemImage: "arrow.left.arrow.right") {
+                            afterMenu { withAnimation(.smooth(duration: 0.3)) { arranging = true } }
+                        }
+                    }
+                    Button("Unpin", systemImage: "pin.slash") { afterMenu { pin(shortcut, false) } }
+                    Button("Details", systemImage: "info.circle") { details = shortcut }
+                    Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
+                    Button(role: .destructive) { afterMenu { delete(shortcut) } } label: { DestructiveMenuLabel("Delete") }
+                }
+                .accessibilityAction(named: "Unpin") { pin(shortcut, false) }
+                .accessibilityAction(named: "Move Earlier") { movePinned(shortcut, by: -1) }
+                .accessibilityAction(named: "Move Later") { movePinned(shortcut, by: 1) }
+                .accessibilityAction(named: "Details") { details = shortcut }
+                .accessibilityAction(named: "Delete") { delete(shortcut) }
+        }
+    }
+
+    /// The tile under the finger, lifted a little, over the grid.
+    @ViewBuilder
+    private func draggedTile(in pinned: [USSDShortcut]) -> some View {
+        if let dragID, let shortcut = pinned.first(where: { $0.id == dragID }) {
+            let size = PinnedLayout(spacing: 10).frames(count: pinned.count, width: gridWidth).first?.size ?? .zero
+            PinnedTileFace(shortcut: shortcut)
+                .frame(width: size.width, height: size.height)
+                .scaleEffect(1.07)
+                .shadow(color: .black.opacity(0.18), radius: 14, y: 8)
+                .position(x: dragPoint.x - grabOffset.width, y: dragPoint.y - grabOffset.height)
+                .allowsHitTesting(false)
+        }
+    }
+
+    /// Settles the lifted tile into its place: on release, or when the drag
+    /// is cancelled.
+    private func settleDraggedTile() {
+        guard let dragID else { return }
+        let pinned = shortcuts.pinned
+        let frames = PinnedLayout(spacing: 10).frames(count: pinned.count, width: gridWidth)
+        guard let index = pinned.firstIndex(where: { $0.id == dragID }), frames.indices.contains(index) else {
+            self.dragID = nil
+            return
+        }
+        let home = CGPoint(x: frames[index].midX + grabOffset.width, y: frames[index].midY + grabOffset.height)
+        withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
+            dragPoint = home
+        } completion: {
+            // The lifted copy and the tile in its place swap in one frame,
+            // with no fade between them.
+            var instant = SwiftUI.Transaction()
+            instant.disablesAnimations = true
+            withTransaction(instant) { self.dragID = nil }
+        }
+    }
+
+    /// Picks the tile up where the finger lands, keeps it under the finger,
+    /// and moves it into whichever place its centre is nearest.
+    private func arrangeDrag(_ shortcut: USSDShortcut) -> some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .named(PinnedLayout.space))
+            .updating($arrangeDragActive) { _, active, _ in active = true }
+            .onChanged { value in
+                let layout = PinnedLayout(spacing: 10)
+                let pinned = shortcuts.pinned
+                let frames = layout.frames(count: pinned.count, width: gridWidth)
+                guard let index = pinned.firstIndex(where: { $0.id == shortcut.id }), frames.indices.contains(index) else { return }
+                if dragID == nil {
+                    let frame = frames[index]
+                    grabOffset = CGSize(width: value.startLocation.x - frame.midX, height: value.startLocation.y - frame.midY)
+                    dragPoint = value.location
+                    dragID = shortcut.id
+                    TapHaptic.play(.medium)
+                    return
+                }
+                dragPoint = value.location
+                let centre = CGPoint(x: value.location.x - grabOffset.width, y: value.location.y - grabOffset.height)
+                let nearest = frames.indices.min { a, b in
+                    hypot(frames[a].midX - centre.x, frames[a].midY - centre.y)
+                        < hypot(frames[b].midX - centre.x, frames[b].midY - centre.y)
+                }
+                if let nearest, nearest != index {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                        shortcuts.movePinned(shortcut.id, to: pinned[nearest].id)
+                    }
+                    reorderTicks += 1
+                }
+            }
+
     }
 
     /// VoiceOver's reordering: one place earlier or later.
@@ -383,40 +494,7 @@ private struct PinnedTile: View {
             TapHaptic.play(.medium)
             onDial()
         } label: {
-            // As large as `PinnedLayout` makes it.
-            Color.clear
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .overlay {
-                    GeometryReader { proxy in
-                        let width = proxy.size.width
-                        let height = proxy.size.height
-                        let iconSize = min(40, width * 0.26)
-                        // Fixed zones, the same on every tile whatever the
-                        // name: the symbol centred in the upper part, in a
-                        // square box so every symbol shares one centre, and
-                        // the name from one line down, top-aligned, so one-
-                        // and two-line names start level.
-                        VStack(spacing: 0) {
-                            Image(systemName: shortcut.symbol ?? ShortcutSymbols.plain)
-                                .font(.system(size: iconSize, weight: .semibold))
-                                .foregroundStyle(Color.starhashPrimaryText)
-                                .frame(width: iconSize * 1.4, height: iconSize * 1.4)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: height * 0.6)
-                                .accessibilityHidden(true)
-                            Text(shortcut.name)
-                                .starhashFont(width < 110 ? 13 : (width < 140 ? 15 : 17), weight: .semibold, relativeTo: .footnote)
-                                .foregroundStyle(Color.starhashPrimaryText)
-                                .multilineTextAlignment(.center)
-                                .lineLimit(2)
-                                .minimumScaleFactor(0.8)
-                                .padding(.horizontal, 8)
-                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                        }
-                        .frame(width: width, height: height)
-                    }
-                }
-                .starhashGlass(in: RoundedRectangle(cornerRadius: 20, style: .continuous), tint: .clear)
+            PinnedTileFace(shortcut: shortcut)
                 .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 20, style: .continuous))
                 .contentShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         }
@@ -425,6 +503,65 @@ private struct PinnedTile: View {
         .accessibilityLabel("Dial \(shortcut.name)")
         .accessibilityValue(shortcut.code)
         .accessibilityAddTraits(.isButton)
+    }
+}
+
+/// What a pinned tile shows, as large as `PinnedLayout` makes it: clear
+/// glass, the symbol and the name, in fixed zones.
+private struct PinnedTileFace: View {
+    let shortcut: USSDShortcut
+
+    var body: some View {
+        Color.clear
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .overlay {
+                GeometryReader { proxy in
+                    let width = proxy.size.width
+                    let height = proxy.size.height
+                    let iconSize = min(40, width * 0.26)
+                    // Fixed zones, the same on every tile whatever the
+                    // name: the symbol centred in the upper part, in a
+                    // square box so every symbol shares one centre, and
+                    // the name from one line down, top-aligned, so one-
+                    // and two-line names start level.
+                    VStack(spacing: 0) {
+                        Image(systemName: shortcut.symbol ?? ShortcutSymbols.plain)
+                            .font(.system(size: iconSize, weight: .semibold))
+                            .foregroundStyle(Color.starhashPrimaryText)
+                            .frame(width: iconSize * 1.4, height: iconSize * 1.4)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: height * 0.6)
+                            .accessibilityHidden(true)
+                        Text(shortcut.name)
+                            .starhashFont(width < 110 ? 13 : (width < 140 ? 15 : 17), weight: .semibold, relativeTo: .footnote)
+                            .foregroundStyle(Color.starhashPrimaryText)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
+                            .padding(.horizontal, 8)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    }
+                    .frame(width: width, height: height)
+                }
+            }
+            .starhashGlass(in: RoundedRectangle(cornerRadius: 20, style: .continuous), tint: .clear)
+    }
+}
+
+/// The Home Screen's wiggle while arranging: a small rock back and forth,
+/// each tile a touch out of step with the next.
+private struct Wiggle: ViewModifier {
+    let isOn: Bool
+    let seed: Int
+
+    /// One view whether rocking or not: swapping views would cancel the
+    /// drag that turns it off.
+    func body(content: Content) -> some View {
+        content.phaseAnimator([false, true]) { view, phase in
+            view.rotationEffect(.degrees(isOn ? (phase ? 1.6 : -1.6) : 0))
+        } animation: { _ in
+            .easeInOut(duration: 0.13 + Double(seed % 3) * 0.015)
+        }
     }
 }
 
@@ -466,44 +603,32 @@ struct PinnedLayout: Layout {
         return CGSize(width: width, height: height)
     }
 
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let m = metrics(width: bounds.width, count: subviews.count)
-        for index in subviews.indices {
+    /// The coordinate space arranging measures the finger in.
+    static let space = "pinned"
+
+    /// Each tile's frame in a grid `width` wide, from its top left: what
+    /// arranging finds the finger's place with, and the layout places by.
+    func frames(count: Int, width: CGFloat) -> [CGRect] {
+        let m = metrics(width: width, count: count)
+        return (0..<count).map { index in
             let row = index / Self.perRow
             let column = index % Self.perRow
-            let inRow = min(Self.perRow, subviews.count - row * Self.perRow)
+            let inRow = min(Self.perRow, count - row * Self.perRow)
             let rowWidth = CGFloat(inRow) * m.tile.width + CGFloat(inRow - 1) * spacing
-            let x = bounds.minX + (bounds.width - rowWidth) / 2 + CGFloat(column) * (m.tile.width + spacing)
-            let y = bounds.minY + CGFloat(row) * (m.tile.height + spacing)
-            subviews[index].place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(m.tile))
+            let x = (width - rowWidth) / 2 + CGFloat(column) * (m.tile.width + spacing)
+            let y = CGFloat(row) * (m.tile.height + spacing)
+            return CGRect(origin: CGPoint(x: x, y: y), size: m.tile)
         }
     }
-}
 
-/// Dropping a dragged pinned tile: as it passes over another, it takes that
-/// one's place and the rest move along, on the pin spring, so the tiles
-/// part around the finger before it lets go.
-private struct PinnedReorder: DropDelegate {
-    let target: USSDShortcut.ID
-    @Binding var dragging: USSDShortcut.ID?
-    let shortcuts: USSDShortcutList
-    let onMove: () -> Void
-
-    func dropEntered(info: DropInfo) {
-        guard let dragging, dragging != target else { return }
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-            shortcuts.movePinned(dragging, to: target)
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let frames = frames(count: subviews.count, width: bounds.width)
+        for (index, frame) in zip(subviews.indices, frames) {
+            subviews[index].place(
+                at: CGPoint(x: bounds.minX + frame.minX, y: bounds.minY + frame.minY),
+                proposal: ProposedViewSize(frame.size)
+            )
         }
-        onMove()
-    }
-
-    func dropUpdated(info: DropInfo) -> DropProposal? {
-        DropProposal(operation: .move)
-    }
-
-    func performDrop(info: DropInfo) -> Bool {
-        dragging = nil
-        return true
     }
 }
 

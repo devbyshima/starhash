@@ -157,6 +157,7 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 | --- | --- |
 | `-inMemory` | fresh in-memory store seeded with `SampleData` |
 | `-emptyStore` | with `-inMemory`, no transactions (Activity's empty state) |
+| `-buyArrange` | with `-tab buy` and two or more pinned: arranging the pinned codes |
 | `-buyPinned [n]` | with `-inMemory`: Buy's first n codes pinned (2 by default, sample codes added past the four defaults) |
 | `-buyNew`, `-buyEdit`, `-buyDetails` | with `-tab buy`: the code editor, new or on the first code (`-buySymbols` opens its symbol grid), or the first code's details |
 | `-splash` | the launch splash (any other debug argument skips it, so screenshots see their screen) |
