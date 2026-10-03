@@ -1,7 +1,7 @@
 import StoreKit
 import SwiftUI
 
-/// Shima's note, in two versions, laid out as a letter: a round picture,
+/// Shima's note, in two versions, laid out as a letter: a round photo,
 /// "A note from Shima", the note left aligned, the signature, and a button
 /// with "Write to Shima" under it.
 ///
@@ -114,19 +114,16 @@ struct DeveloperNoteContent: View {
     }
 }
 
-/// The round picture at the top: the StarHash star on a white disc, until a
-/// photo of Shima takes its place.
+/// The round picture at the top: Shima's photo, whole, in the circle the
+/// reference has its maker in.
 private struct DeveloperAvatar: View {
     var body: some View {
-        Circle()
-            .fill(Color.white)
+        Image("DeveloperPhoto")
+            .resizable()
+            .scaledToFill()
             .frame(width: 60, height: 60)
-            .overlay {
-                StarHashMarkShape()
-                    .fill(Color.brandBlue)
-                    .padding(13)
-            }
-            .overlay { Circle().strokeBorder(Color.black.opacity(0.08), lineWidth: 1) }
+            .clipShape(Circle())
+            .overlay { Circle().strokeBorder(Color.starhashPrimaryText.opacity(0.1), lineWidth: 1) }
             .accessibilityHidden(true)
     }
 }
