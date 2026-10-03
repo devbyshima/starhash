@@ -180,17 +180,24 @@ struct AutoVerificationGuide: View {
         }
     }
 
-    /// The step's action first; Continue (or Done) comes in under it once
-    /// the action is done, and the action steps back to a glass button.
+    /// The step's action; once it is done, Continue (or Try Again) joins
+    /// it side by side, the action stepping back to a glass button, so the
+    /// bar stays one button tall and never covers the steps above it.
+    /// Stacked only when a large text size will not fit them in a row.
     private var buttons: some View {
-        VStack(spacing: 10) {
+        Group {
             if step == 0 {
-                Button("Add Shortcut", action: addShortcut)
-                    .buttonStyle(GuideButtonStyle(prominent: !didAct))
                 if didAct {
-                    Button("Continue") { goTo(1) }
+                    pair {
+                        Button("Add Again", action: addShortcut)
+                            .buttonStyle(GuideButtonStyle(prominent: false))
+                    } primary: {
+                        Button("Continue") { goTo(1) }
+                            .buttonStyle(GuideButtonStyle(prominent: true))
+                    }
+                } else {
+                    Button("Add Shortcut", action: addShortcut)
                         .buttonStyle(GuideButtonStyle(prominent: true))
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             } else {
                 verifyButtons
@@ -200,6 +207,22 @@ struct AutoVerificationGuide: View {
         .animation(.smooth(duration: 0.3), value: verification)
         .padding(.horizontal, 24)
         .padding(.bottom, 8)
+    }
+
+    /// Two buttons in a row, the quieter one first; in a column at large
+    /// text sizes.
+    private func pair(@ViewBuilder _ secondary: () -> some View, @ViewBuilder primary: () -> some View) -> some View {
+        let secondary = secondary(), primary = primary()
+        return ViewThatFits(in: .horizontal) {
+            HStack(spacing: 10) {
+                secondary
+                primary
+            }
+            VStack(spacing: 10) {
+                primary
+                secondary
+            }
+        }
     }
 
     @ViewBuilder
@@ -217,13 +240,16 @@ struct AutoVerificationGuide: View {
             }
             .buttonStyle(GuideButtonStyle(prominent: true))
             .disabled(true)
-        case .idle, .failed:
-            Button(verification == .failed ? "Try Again" : "Verify Shortcut", action: runVerification)
+        case .idle:
+            Button("Verify Shortcut", action: runVerification)
                 .buttonStyle(GuideButtonStyle(prominent: true))
-            if verification == .failed {
-                Button("Add the Shortcut") { goTo(0) }
+        case .failed:
+            pair {
+                Button("Add Shortcut") { goTo(0) }
                     .buttonStyle(GuideButtonStyle(prominent: false))
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            } primary: {
+                Button("Try Again", action: runVerification)
+                    .buttonStyle(GuideButtonStyle(prominent: true))
             }
         }
     }
