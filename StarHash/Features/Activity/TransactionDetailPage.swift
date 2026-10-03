@@ -46,8 +46,7 @@ struct TransactionDetailPage: View {
         }
         .scrollIndicators(.hidden)
         .scrollBounceBehavior(.basedOnSize)
-        // The soft fade and blur under the bar that Settings has.
-        .starhashSoftTopEdge()
+        .starhashSoftEdge()
         .starhashReadableScrollContent()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color.starhashBackground.ignoresSafeArea())

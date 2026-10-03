@@ -34,13 +34,8 @@ struct BuyView: View {
     @State private var pinsFull = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            PageHeader(page: .buy) { PageTitle(text: "Buy") } trailing: {
-                SwapGlassButton(symbol: "plus", label: "Add a code") {
-                    editing = ShortcutDraft()
-                }
-            }
-
+        // The header is a Soft Edge bar: the codes scroll under it.
+        ZStack {
             if shortcuts.shortcuts.isEmpty {
                 EmptyStateView(
                     symbol: "number.square",
@@ -54,6 +49,13 @@ struct BuyView: View {
             } else {
                 list
                     .transition(.opacity)
+            }
+        }
+        .starhashSoftEdgeHeader {
+            PageHeader(page: .buy) { PageTitle(text: "Buy") } trailing: {
+                SwapGlassButton(symbol: "plus", label: "Add a code") {
+                    editing = ShortcutDraft()
+                }
             }
         }
         .starhashTabBarClearance()
@@ -154,6 +156,7 @@ struct BuyView: View {
         }
         .scrollIndicators(.hidden)
         .scrollBounceBehavior(.basedOnSize)
+        .starhashSoftEdge()
         .activitySwipeActionsContainer()
         .starhashReadableScrollContent()
         .starhashTabBarFollowsScroll()

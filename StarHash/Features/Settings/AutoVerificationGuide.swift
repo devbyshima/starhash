@@ -101,7 +101,7 @@ struct AutoVerificationGuide: View {
             } action: { _, height in
                 viewportHeight = height
             }
-            .starhashSoftTopEdge()
+            .starhashSoftEdge()
             .starhashBottomBar { buttonsBar }
         }
         .starhashReadableWidth(StarHashMetrics.narrowReadableWidth)

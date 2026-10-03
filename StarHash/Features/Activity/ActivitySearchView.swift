@@ -55,7 +55,7 @@ struct ActivitySearchView: View {
             }
             .scrollIndicators(.hidden)
             .scrollDismissesKeyboard(.immediately)
-            .starhashSoftBottomEdge()
+            .starhashSoftEdge()
             .activitySwipeActionsContainer()
             .starhashReadableScrollContent()
             .transition(.opacity)

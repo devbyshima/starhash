@@ -42,9 +42,6 @@ struct ActivityTopBar: View {
         .starhashReadableWidth()
         .starhashClearsWindowControls()
         .animation(.smooth(duration: 0.32), value: isSearching)
-        // Content scrolling under the bar fades into the canvas instead of
-        // clashing with the glass, like the system's scroll edge effect.
-        .starhashTopFade()
     }
 
     /// The recipient screen's search bar: a glass capsule with the

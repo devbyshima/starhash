@@ -91,6 +91,11 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   capsule.
 - Glass only through `starhashGlass`, `starhashGlassButtonStyle`,
   `StarHashGlassContainer` (iOS 18 falls back to materials).
+- **Soft Edge** is the one edge treatment: what scrolls under a bar softly
+  fades and blurs into it, the system's soft scroll edge (Settings' look).
+  Every scroll view and list gets `starhashSoftEdge()`, and a page's own
+  header goes in `starhashSoftEdgeHeader { }` so the edge runs under it as
+  under a navigation bar. Never a hand-drawn gradient fade.
 - The tab bar (`StarHash/App/StarHashTabBar.swift`) is measured from GO
   Club's screen recordings; keep its numbers (`TabBarMetrics`,
   `TabBarLayout`) and its spring (response 0.4, damping 0.61) as they

@@ -118,59 +118,32 @@ extension View {
         }
     }
 
-    /// Activity's top fade: content scrolling up under the bar fades into
-    /// the page colour, solid behind the bar and clearing 18pt below it,
-    /// instead of the system's blur. Drawn behind `content` from the top
-    /// of the screen; pair it with `starhashHidesTopEdgeEffect()` on the
-    /// scroll view underneath.
-    func starhashTopFade() -> some View {
-        background(alignment: .top) {
-            LinearGradient(
-                colors: [.starhashBackground, .starhashBackground.opacity(0.85), .starhashBackground.opacity(0)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .padding(.bottom, -18)
-            .ignoresSafeArea(edges: .top)
-            .allowsHitTesting(false)
-        }
-    }
+    // MARK: Soft Edge
 
-    /// No system scroll edge effect at the top, for a screen whose header
-    /// draws its own.
+    /// **Soft Edge**, StarHash's one edge treatment: what scrolls under a
+    /// bar (a navigation bar, a page's own header, the total on the
+    /// recipient screen, a sheet's foot) softly fades and blurs into it, the
+    /// system's own soft scroll edge, as Settings has always had. Put it on
+    /// every scroll view and list. Before iOS 26, nothing.
     @ViewBuilder
-    func starhashHidesTopEdgeEffect() -> some View {
+    func starhashSoftEdge() -> some View {
         if #available(iOS 26.0, *) {
-            scrollEdgeEffectHidden(true, for: .top)
+            scrollEdgeEffectStyle(.soft, for: .all)
         } else {
             self
         }
     }
 
-    /// For a scroll view that runs under a bar at the bottom (the tab bar,
-    /// Search's bar): on iOS 26 and later what scrolls beneath fades and
-    /// blurs into the bar, as under any system bar, instead of showing
-    /// sharp beside the glass.
+    /// A page's own header (Activity's, Buy's, the recipient screen's) as
+    /// a bar the Soft Edge runs under, as under a navigation bar: on iOS 26
+    /// a safe area bar, which the scroll edge effect sees; before, a plain
+    /// inset.
     @ViewBuilder
-    func starhashSoftBottomEdge() -> some View {
+    func starhashSoftEdgeHeader(@ViewBuilder _ header: () -> some View) -> some View {
         if #available(iOS 26.0, *) {
-            scrollEdgeEffectStyle(.soft, for: .bottom)
+            self.safeAreaBar(edge: .top, spacing: 0, content: header)
         } else {
-            self
-        }
-    }
-
-    /// The same at the top, for a scroll view under a navigation bar
-    /// (Settings and its pages, the auto-verify setup, the
-    /// recipient screen): what scrolls up fades and blurs under the bar, as
-    /// it does under Pay's, Buy's and Activity's headers, instead of being
-    /// cut off sharp.
-    @ViewBuilder
-    func starhashSoftTopEdge() -> some View {
-        if #available(iOS 26.0, *) {
-            scrollEdgeEffectStyle(.soft, for: .top)
-        } else {
-            self
+            self.safeAreaInset(edge: .top, spacing: 0, content: header)
         }
     }
 }

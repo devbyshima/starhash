@@ -93,8 +93,7 @@ extension View {
             .starhashReadableScrollContent(base: SettingsLayout.screenMargin)
             .contentMargins(.top, topMargin, for: .scrollContent)
             .listSectionSpacing(sectionSpacing)
-            .starhashSoftTopEdge()
-            .starhashSoftBottomEdge()
+            .starhashSoftEdge()
             .environment(\.defaultMinListRowHeight, 44)
     }
 

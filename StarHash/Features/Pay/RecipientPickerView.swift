@@ -144,11 +144,8 @@ struct RecipientPickerView: View {
             scrolledUnder = offset
         }
         .onChange(of: query) { labelTops = [:] }
-        // What scrolls under the total fades and blurs into it: the system's
-        // soft edge. At the top the bar draws Activity's fade instead, so the
-        // two pages read the same.
-        .starhashHidesTopEdgeEffect()
-        .starhashSoftBottomEdge()
+        // Soft Edge under the header and into the total.
+        .starhashSoftEdge()
         // Centred in what is left between the header and the total (or the
         // keyboard), since it is laid out inside their insets.
         .overlay {
@@ -163,12 +160,11 @@ struct RecipientPickerView: View {
                 .allowsHitTesting(false)
             }
         }
-        .safeAreaInset(edge: .top, spacing: 0) {
+        .starhashSoftEdgeHeader {
             VStack(spacing: 0) {
                 header
                 barLabel
             }
-            .starhashTopFade()
         }
         // Above the keyboard while it is up, above the home indicator after.
         .starhashBottomBar { totalBar }

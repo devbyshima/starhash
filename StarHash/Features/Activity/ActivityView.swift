@@ -55,7 +55,7 @@ struct ActivityView: View {
             // swaps what is in it. With nothing logged there is nothing to
             // pick a period of or search, so the bar steps aside (unless a
             // search is open, so it can still be closed).
-            .safeAreaInset(edge: .top, spacing: 0) {
+            .starhashSoftEdgeHeader {
                 if !store.transactions.isEmpty || isSearching {
                     topBar
                         .transition(.opacity)
@@ -155,7 +155,7 @@ struct ActivityView: View {
             .animation(.smooth(duration: 0.3), value: inPeriod.map(\.id))
         }
         .scrollIndicators(.hidden)
-        .starhashSoftBottomEdge()
+        .starhashSoftEdge()
         .starhashTabBarClearance()
         .starhashTabBarFollowsScroll()
         .activitySwipeActionsContainer()
