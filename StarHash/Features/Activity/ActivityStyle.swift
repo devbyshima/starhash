@@ -205,18 +205,21 @@ extension StarHashKit.Transaction {
     }
 }
 
-/// The small grey capsule beside a pending transaction's name.
+/// The small capsule beside an unconfirmed transaction's name: Pending
+/// filled in the urgent orange, so it stands out from the row; Failed in
+/// red on grey.
 struct ActivityStatusBadge: View {
     let status: StarHashKit.Transaction.Status
 
     var body: some View {
         if status != .confirmed {
-            Text(status == .pending ? "Pending" : "Failed")
-                .starhashFont(12, weight: .semibold, relativeTo: .caption)
-                .foregroundStyle(status == .failed ? Color.starhashDestructive : Color.starhashSecondaryText)
+            let isPending = status == .pending
+            Text(isPending ? "Pending" : "Failed")
+                .starhashFont(12, weight: .bold, relativeTo: .caption)
+                .foregroundStyle(isPending ? Color.starhashOnUrgent : Color.starhashDestructive)
                 .padding(.horizontal, 7)
                 .padding(.vertical, 2)
-                .background(Color.starhashCardRaised, in: Capsule())
+                .background(isPending ? Color.starhashUrgent : Color.starhashCardRaised, in: Capsule())
                 .lineLimit(1)
                 .fixedSize()
                 .accessibilityHidden(true)

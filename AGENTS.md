@@ -66,8 +66,9 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   Red text on the page is `starhashDestructiveOnPage` (no brighter red
   reads on the blue). Glass gets the deep-blue `starhashGlassTint` by
   default, or it turns cyan on the blue. The only other hues are
-  `starhashIncoming` (money in) and `starhashDestructive` (money out
-  arrows, destructive actions); the carriers' colours live only in their
+  `starhashIncoming` (money in), `starhashDestructive` (money out
+  arrows, destructive actions) and `starhashUrgent` (the orange of a
+  pending payment); the carriers' colours live only in their
   logos and the pulse rings round the chosen one on onboarding. Switches
   are `starhashSwitchOn`.
 - Light-mode sheets are solid white (`sheetGlassTint`) with brand blue
@@ -92,8 +93,10 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   width change rides the spring; never let the page re-centre it, or the
   symbols jump on the first frame of a switch. Page changes play
   `NavigationHaptics` (two layers on the switch, a thump and a rumble; none for the lens's
-  bounce), never a plain `sensoryFeedback`. It is the one glass with no tint: clear Liquid Glass,
-  as the reference's. Root pages leave room for it with
+  bounce), never a plain `sensoryFeedback`. It and Activity's period control
+  (`GlassSegmentedControl`, built on the same `LensGlass`, `GlassLens` and
+  `LensMotion`) are the only glass with no tint: clear Liquid Glass, as
+  the reference's. Root pages leave room for it with
   `starhashTabBarClearance()`, scroll views shrink it with
   `starhashTabBarFollowsScroll()`, and a page hides it with
   `router.setHidesTabBar(_:on:)` while a screen is pushed or a search is

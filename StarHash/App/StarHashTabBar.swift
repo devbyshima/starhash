@@ -29,13 +29,16 @@ struct StarHashTabBar: View {
             ?? layout.centers[selectedIndex]
 
         ZStack(alignment: .topLeading) {
-            TabBarGlass(
+            LensGlass(
                 width: layout.width,
+                height: TabBarMetrics.height,
+                sideInset: TabBarMetrics.lensSideInset,
                 lensMinX: lensCenter - TabBarMetrics.lensWidth / 2,
                 lensMaxX: lensCenter + TabBarMetrics.lensWidth / 2
             )
 
-            lens
+            GlassLens()
+                .frame(width: TabBarMetrics.lensWidth, height: TabBarMetrics.height - TabBarMetrics.lensInset * 2)
                 .offset(x: lensCenter - TabBarMetrics.lensWidth / 2, y: TabBarMetrics.lensInset)
 
             ForEach(Array(items.enumerated()), id: \.element) { index, item in
@@ -66,29 +69,8 @@ struct StarHashTabBar: View {
         .accessibilityLabel("Tab bar")
     }
 
-    /// The reference's: about a tenth past the mark, back a touch, and
-    /// still in under half a second. A plain ease with Reduce Motion.
     private var lensSpring: Animation {
-        reduceMotion ? .smooth(duration: 0.2) : .spring(response: 0.4, dampingFraction: 0.61)
-    }
-
-    /// Grey glass: the palette's grey, faint, with the light top edge and
-    /// dark sides glass has.
-    private var lens: some View {
-        Capsule()
-            .fill(Color.tabBarLens)
-            .overlay {
-                Capsule().strokeBorder(
-                    LinearGradient(
-                        colors: [.tabBarLensEdgeLight, .tabBarLensEdgeDark, .tabBarLensEdgeDark, .tabBarLensEdgeLight.opacity(0.5)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    ),
-                    lineWidth: 0.75
-                )
-            }
-            .frame(width: TabBarMetrics.lensWidth, height: TabBarMetrics.height - TabBarMetrics.lensInset * 2)
-            .accessibilityHidden(true)
+        LensMotion.spring(reduceMotion: reduceMotion)
     }
 
     private func icon(_ item: TabBarItem, isSelected: Bool) -> some View {
@@ -132,36 +114,6 @@ struct StarHashTabBar: View {
         case .pay: router.show(router.payPage)
         case .settings: router.show(.settings)
         }
-    }
-}
-
-/// The bar's glass, stretched to take in the lens wherever it is: at rest
-/// the lens sits 6pt inside, and overshooting an end it pulls the edge out
-/// with it. Animatable, so the outline follows the lens frame by frame.
-private struct TabBarGlass: View, Animatable {
-    var width: CGFloat
-    var lensMinX: CGFloat
-    var lensMaxX: CGFloat
-
-    var animatableData: AnimatablePair<CGFloat, AnimatablePair<CGFloat, CGFloat>> {
-        get { AnimatablePair(width, AnimatablePair(lensMinX, lensMaxX)) }
-        set {
-            width = newValue.first
-            lensMinX = newValue.second.first
-            lensMaxX = newValue.second.second
-        }
-    }
-
-    var body: some View {
-        let minX = min(0, lensMinX - TabBarMetrics.lensSideInset)
-        let maxX = max(width, lensMaxX + TabBarMetrics.lensSideInset)
-        Color.clear
-            .frame(width: maxX - minX, height: TabBarMetrics.height)
-            // Clear glass, not the app's deep-blue tint: the reference's
-            // frosts whatever is under it.
-            .starhashGlass(in: Capsule(), tint: .clear)
-            .offset(x: minX)
-            .allowsHitTesting(false)
     }
 }
 

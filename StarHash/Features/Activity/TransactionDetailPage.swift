@@ -108,18 +108,12 @@ struct TransactionDetailPage: View {
     }
 
     private func hero(_ transaction: StarHashKit.Transaction) -> some View {
-        let outgoing = transaction.direction == .outgoing
-        return VStack(spacing: 10) {
+        VStack(spacing: 10) {
             heroBadge(transaction)
-            VStack(spacing: 4) {
-                Text(transaction.counterparty.displayName)
-                    .font(.sheet(21, .bold, relativeTo: .title2))
-                    .foregroundStyle(Color.starhashPrimaryText)
-                    .multilineTextAlignment(.center)
-                Text(outgoing ? (transaction.counterparty.kind == .merchant ? "Paid" : "Sent") : "Received")
-                    .font(.sheetCaption)
-                    .foregroundStyle(Color.sheetSecondaryText)
-            }
+            Text(transaction.counterparty.displayName)
+                .font(.sheet(21, .bold, relativeTo: .title2))
+                .foregroundStyle(Color.starhashPrimaryText)
+                .multilineTextAlignment(.center)
             // One Text, so the amount and "RWF" shrink together. The unit
             // is half the number's size on its baseline, as GO Club sets
             // "ml" after an amount, and as Activity's total does.
@@ -215,7 +209,7 @@ struct TransactionDetailPage: View {
     private func statusValue(_ status: StarHashKit.Transaction.Status) -> some View {
         let color: Color = switch status {
         case .confirmed: .starhashIncoming
-        case .pending: .sheetSecondaryText
+        case .pending: .starhashUrgent
         case .failed: .starhashDestructive
         }
         return HStack(spacing: 6) {

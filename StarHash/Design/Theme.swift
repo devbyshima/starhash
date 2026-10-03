@@ -53,11 +53,16 @@ extension Color {
     static let starhashDestructive = Color(light: .init(red: 0.84, green: 0.16, blue: 0.13), dark: .init(red: 1, green: 110 / 255, blue: 100 / 255))
     /// The same, as text straight on the page: no brighter red reaches
     /// 4.5:1 on the blue, so light mode deepens it (4.6:1).
-    /// The period control's lens: lighter than its glass, as GO Club's is,
-    /// with a bright rim; and the glow its glass takes under a finger.
-    static let segmentedLens = Color(light: .white.opacity(0.42), dark: .white.opacity(0.14))
-    static let segmentedLensEdge = Color(light: .white.opacity(0.6), dark: .white.opacity(0.18))
-    static let segmentedPressedGlow = Color(light: .white.opacity(0.14), dark: .white.opacity(0.06))
+    /// A payment still waiting for its SMS: an urgent orange, filled
+    /// behind a pending badge and for the word on a transaction's page.
+    /// Light: a deep orange, white words on it 5.2:1, itself 5.2:1 on a
+    /// white card. Dark: a bright orange, the near black on it 6.8:1,
+    /// itself 5.8:1 on a charcoal card.
+    static let starhashUrgent = Color(
+        light: .init(red: 194 / 255, green: 65 / 255, blue: 12 / 255),
+        dark: .init(red: 249 / 255, green: 115 / 255, blue: 22 / 255)
+    )
+    static let starhashOnUrgent = Color(light: .white, dark: .brandNight)
     /// A red button's fill (Delete All Data): blood red, in either
     /// appearance, with white words on it (10:1).
     static let starhashDestructiveButton = Color(red: 138 / 255, green: 3 / 255, blue: 3 / 255)
