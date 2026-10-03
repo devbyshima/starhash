@@ -7,9 +7,9 @@ import SwiftUI
 /// symbols glide aside as it moves, on the same spring: it overshoots
 /// about a tenth and settles, and overshooting at either end it stretches
 /// the bar with it, as liquid would. The page
-/// changes at once, with a heavy layered haptic that lands with the lens
-/// (`NavigationHaptics`). A finger dragged along the bar carries the lens,
-/// knocking at each symbol it passes, and chooses wherever it lets go. The bar shrinks to 0.8, towards the foot of the screen, while a
+/// changes at once, with one heavy haptic (`NavigationHaptics`); the
+/// lens's bounce is seen, not felt. A finger dragged along the bar carries
+/// the lens and chooses wherever it lets go. The bar shrinks to 0.8, towards the foot of the screen, while a
 /// page scrolls down, comes back on the way up, and steps aside for
 /// pushed screens and Activity's search.
 struct StarHashTabBar: View {
@@ -18,8 +18,6 @@ struct StarHashTabBar: View {
 
     /// Where a finger dragging along the bar holds the lens, while it does.
     @State private var dragX: CGFloat?
-    /// The symbol a dragged lens is over, for the knock as it passes one.
-    @State private var dragIndex: Int?
 
     private let items = TabBarItem.allCases
 
@@ -117,22 +115,18 @@ struct StarHashTabBar: View {
             .onChanged { value in
                 guard dragX != nil || abs(value.translation.width) > 8 else { return }
                 dragX = value.location.x
-                let index = layout.nearestIndex(to: value.location.x)
-                if let dragIndex, index != dragIndex { NavigationHaptics.shared.passSymbol() }
-                dragIndex = index
             }
             .onEnded { value in
                 select(items[layout.nearestIndex(to: value.location.x)])
                 dragX = nil
-                dragIndex = nil
             }
     }
 
-    /// Another page: it shows at once, and the haptic's layers follow the
-    /// lens there. The page showing already does nothing.
+    /// Another page: it shows at once, with the switch's haptic. The page
+    /// showing already does nothing.
     private func select(_ item: TabBarItem) {
         guard item != TabBarItem(router.selectedTab) else { return }
-        NavigationHaptics.shared.switchPage(landsWithLens: !reduceMotion)
+        NavigationHaptics.shared.switchPage()
         switch item {
         case .activity: router.show(.activity)
         case .pay: router.show(router.payPage)
@@ -309,7 +303,7 @@ struct PayBuySwitcher: View {
     var body: some View {
         let target: AppTab = page == .buy ? .pay : .buy
         SwapGlassButton(symbol: target.symbol, label: "Switch to \(target.title)") {
-            NavigationHaptics.shared.switchPage(landsWithLens: false)
+            NavigationHaptics.shared.switchPage()
             router.show(target)
         }
     }

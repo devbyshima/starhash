@@ -23,8 +23,8 @@ Free and open source.
 
 - **Tab bar**: a glass capsule floating at the foot of every page, with
   Activity on the left, Pay in the middle and Settings on the right. A lens
-  slides to the page showing, with a heavy haptic in layers that land with
-  it; a finger dragged along the bar carries it.
+  slides to the page showing, with one heavy haptic as the page switches;
+  a finger dragged along the bar carries it.
   The bar shrinks while a page scrolls down and steps aside for pushed
   screens and search. The button at the top left of Pay switches to Buy
   (coming soon) and back, and the bar's middle returns to whichever showed
