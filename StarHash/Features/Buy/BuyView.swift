@@ -115,12 +115,10 @@ struct BuyView: View {
     private var list: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
+                // The pinned codes need no title: they lead the page.
                 if !shortcuts.pinned.isEmpty {
-                    VStack(alignment: .leading, spacing: 0) {
-                        sectionTitle("Pinned")
-                        pinnedGrid
-                    }
-                    .padding(.bottom, 24)
+                    pinnedGrid
+                        .padding(.bottom, 24)
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 }
                 if !shortcuts.unpinned.isEmpty {
