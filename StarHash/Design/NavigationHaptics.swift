@@ -2,10 +2,11 @@ import CoreHaptics
 import UIKit
 
 /// The weight of moving between pages, felt in layers that follow the tab
-/// bar's lens: a deep thump with a short low rumble under it as the page
-/// changes, a second, softer hit as the lens lands at the top of its
-/// overshoot, and a faint one as it settles back. Low sharpness throughout,
-/// so it reads heavy rather than clicky. A lighter knock marks each symbol a
+/// bar's lens: a doubled thump at full strength with a full-strength
+/// rumble under it as the page changes, a second heavy hit with its own
+/// rumble as the lens lands at the top of its overshoot, and a lighter one
+/// as it settles back. No sharpness to speak of, so it lands as weight
+/// rather than a click. A knock with a little body marks each symbol a
 /// dragged lens passes. Phones without Core Haptics get a heavy impact.
 @MainActor
 final class NavigationHaptics {
@@ -16,7 +17,6 @@ final class NavigationHaptics {
     private var settledSwitchPattern: CHHapticPattern?
     private var passPattern: CHHapticPattern?
     private let heavy = UIImpactFeedbackGenerator(style: .heavy)
-    private let medium = UIImpactFeedbackGenerator(style: .medium)
 
     /// When the lens's spring (response 0.4, damping 0.61) reaches the top
     /// of its overshoot, and when it swings back past its mark.
@@ -28,7 +28,8 @@ final class NavigationHaptics {
         switchPattern = try? Self.switchPattern(withLanding: true)
         settledSwitchPattern = try? Self.switchPattern(withLanding: false)
         passPattern = try? CHHapticPattern(events: [
-            Self.transient(at: 0, intensity: 0.55, sharpness: 0.3),
+            Self.transient(at: 0, intensity: 0.85, sharpness: 0.1),
+            Self.rumble(at: 0, intensity: 0.5, fadingOver: 0.06),
         ], parameters: [])
     }
 
@@ -51,7 +52,7 @@ final class NavigationHaptics {
 
     /// The lens, dragged, passing over another symbol.
     func passSymbol() {
-        if !play(passPattern) { medium.impactOccurred(intensity: 0.7) }
+        if !play(passPattern) { heavy.impactOccurred(intensity: 0.8) }
     }
 
     // MARK: Engine
@@ -89,26 +90,35 @@ final class NavigationHaptics {
 
     private static func switchPattern(withLanding: Bool) throws -> CHHapticPattern {
         var events = [
-            // The thump: full strength, dull.
-            transient(at: 0, intensity: 1, sharpness: 0.22),
-            // Its weight: a low rumble under it, dying away over 0.12s.
-            CHHapticEvent(
-                eventType: .hapticContinuous,
-                parameters: [
-                    CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.6),
-                    CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.05),
-                    CHHapticEventParameter(parameterID: .sustained, value: 0),
-                    CHHapticEventParameter(parameterID: .decayTime, value: 0.12),
-                ],
-                relativeTime: 0,
-                duration: 0.14
-            ),
+            // The thump: full strength and dull, struck twice 16ms apart so
+            // it lands as one heavier blow.
+            transient(at: 0, intensity: 1, sharpness: 0.05),
+            transient(at: 0.016, intensity: 1, sharpness: 0),
+            // Its weight: a full-strength low rumble under it, dying away
+            // over 0.22s.
+            rumble(at: 0, intensity: 1, fadingOver: 0.22),
         ]
         if withLanding {
-            events.append(transient(at: landing, intensity: 0.6, sharpness: 0.2))
-            events.append(transient(at: settling, intensity: 0.22, sharpness: 0.15))
+            events.append(transient(at: landing, intensity: 0.95, sharpness: 0.05))
+            events.append(rumble(at: landing, intensity: 0.7, fadingOver: 0.1))
+            events.append(transient(at: settling, intensity: 0.5, sharpness: 0))
         }
         return try CHHapticPattern(events: events, parameters: [])
+    }
+
+    /// A low continuous buzz that starts at `intensity` and dies away.
+    private static func rumble(at time: TimeInterval, intensity: Float, fadingOver decay: TimeInterval) -> CHHapticEvent {
+        CHHapticEvent(
+            eventType: .hapticContinuous,
+            parameters: [
+                CHHapticEventParameter(parameterID: .hapticIntensity, value: intensity),
+                CHHapticEventParameter(parameterID: .hapticSharpness, value: 0),
+                CHHapticEventParameter(parameterID: .sustained, value: 0),
+                CHHapticEventParameter(parameterID: .decayTime, value: Float(decay)),
+            ],
+            relativeTime: time,
+            duration: decay + 0.02
+        )
     }
 
     private static func transient(at time: TimeInterval, intensity: Float, sharpness: Float) -> CHHapticEvent {
