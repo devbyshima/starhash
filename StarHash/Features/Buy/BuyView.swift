@@ -467,7 +467,7 @@ extension View {
 /// A code's details, after Keaser's expense details, sized to what it
 /// shows: a close button, the title and Edit across the top, the code's
 /// symbol and name on their own, a card with its code and note as rows,
-/// then Dial and, in red under it, Delete Code.
+/// then Dial and the delete button under it.
 private struct ShortcutDetailSheet: View {
     let shortcut: USSDShortcut
     let onEdit: () -> Void
@@ -513,14 +513,15 @@ private struct ShortcutDetailSheet: View {
                 .padding(.horizontal, 16)
                 .sheetCard()
 
-                VStack(spacing: 4) {
+                VStack(spacing: 10) {
                     Button(action: onDial) {
                         Label("Dial \(shortcut.code)", systemImage: "phone.fill")
                     }
                     .buttonStyle(.sheetPrimary)
-                    SheetTextButton("Delete Code", role: .destructive, action: onDelete)
+                    DeleteButton("Delete Code", action: onDelete)
                 }
                 .padding(.top, 4)
+                .padding(.bottom, 14)
             }
             .padding(.horizontal, 18)
         }
@@ -605,10 +606,10 @@ struct ShortcutDraft: Identifiable {
 
 /// Adds or edits a code, after Keaser's New Category, in StarHash's sheet
 /// language: the title between a close button on the left and the confirm
-/// button on the right, the chosen symbol large on its tile, and the name,
-/// the code and a note as capsule fields. Tapping the symbol opens the grid
-/// of symbols to choose from, the chosen one ringed. Editing, Delete Code
-/// sits at the foot.
+/// button on the right, then the chosen symbol on a tile at the left with
+/// the name, the code and a note as capsule fields beside it. Tapping the
+/// symbol opens the grid of symbols under them, the chosen one ringed.
+/// Editing, Delete Code is the sheet's big red button at the foot.
 private struct ShortcutEditor: View {
     @Environment(USSDShortcutList.self) private var shortcuts
     @Environment(\.dismiss) private var dismiss
@@ -617,6 +618,8 @@ private struct ShortcutEditor: View {
     @State private var code: String
     @State private var detail: String
     @State private var symbol: String
+    /// The content's height, so the sheet opens as tall as what it shows.
+    @State private var height: CGFloat = 420
     /// The grid of symbols, shown once the big symbol is tapped.
     @State private var choosesSymbol = false
     @FocusState private var focused: Field?
@@ -646,32 +649,51 @@ private struct ShortcutEditor: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            header
+        // Sized to what it shows, growing as the symbols open; scrolls only
+        // when that is more than the screen (the largest text sizes).
+        ScrollView {
+            VStack(spacing: 0) {
+                header
 
-            ScrollView {
-                VStack(spacing: 16) {
-                    preview
+                VStack(spacing: 14) {
+                    // The symbol on the left, as tall as the three fields
+                    // beside it.
+                    HStack(alignment: .top, spacing: 12) {
+                        symbolButton
+                        fields
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
+
                     if choosesSymbol {
                         symbolGrid
                             .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .top)))
                     }
-                    fields
+
+                    if showsCodeHint {
+                        hint
+                            .transition(.opacity)
+                    }
+
                     if let editing {
-                        SheetTextButton("Delete Code", role: .destructive) {
+                        DeleteButton("Delete Code") {
                             shortcuts.remove(editing)
                             dismiss()
                         }
+                        .padding(.top, 10)
                     }
                 }
                 .padding(.horizontal, 18)
                 .padding(.top, 8)
-                .padding(.bottom, 24)
+                .padding(.bottom, 20)
             }
-            .scrollIndicators(.hidden)
-            .scrollDismissesKeyboard(.interactively)
+            .sheetHeight($height)
         }
-        .sheetGlass(detents: [.large])
+        .scrollIndicators(.hidden)
+        .scrollBounceBehavior(.basedOnSize)
+        .scrollDismissesKeyboard(.interactively)
+        .sheetGlass(detents: [.height(height + 8)])
+        .animation(.smooth(duration: 0.3), value: height)
+        .animation(.smooth(duration: 0.2), value: showsCodeHint)
         .onAppear { if editing == nil { focused = .name } }
     }
 
@@ -708,31 +730,41 @@ private struct ShortcutEditor: View {
         .padding(.bottom, 8)
     }
 
-    /// The chosen symbol, large on its tile, as Keaser shows a category's,
-    /// with a pencil on its corner: a tap opens the grid to change it, and
-    /// another closes it.
-    private var preview: some View {
+    /// The chosen symbol on a tile as tall as the fields beside it, with
+    /// Change under it: a tap opens the grid of symbols, another closes it.
+    private var symbolButton: some View {
         Button {
             focused = nil
             withAnimation(.smooth(duration: 0.3)) { choosesSymbol.toggle() }
         } label: {
-            Image(systemName: symbol)
-                .font(.system(size: 40, weight: .semibold))
-                .foregroundStyle(Color.starhashPrimaryText)
-                .contentTransition(.symbolEffect(.replace))
-                .frame(width: 88, height: 88)
-                .background(Color.sheetSurface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-                .overlay(alignment: .bottomTrailing) {
+            VStack(spacing: 0) {
+                Spacer(minLength: 8)
+                Image(systemName: symbol)
+                    .font(.system(size: 42, weight: .semibold))
+                    .foregroundStyle(Color.starhashPrimaryText)
+                    .contentTransition(.symbolEffect(.replace))
+                    .frame(height: 56)
+                Spacer(minLength: 8)
+                HStack(spacing: 4) {
                     Image(systemName: choosesSymbol ? "chevron.up" : "pencil")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(Color.starhashOnInk)
+                        .font(.system(size: 11, weight: .bold))
                         .contentTransition(.symbolEffect(.replace))
-                        .frame(width: 28, height: 28)
-                        .background(Color.starhashInk, in: Circle())
-                        .overlay(Circle().strokeBorder(Color.sheetGlassTint, lineWidth: 2))
-                        .offset(x: 6, y: 6)
+                    Text(choosesSymbol ? "Done" : "Change")
+                        .font(.sheet(13, .semibold, relativeTo: .footnote))
+                        .contentTransition(.opacity)
                 }
-                .animation(.snappy(duration: 0.2), value: symbol)
+                .foregroundStyle(Color.starhashOnInk)
+                .padding(.horizontal, 10)
+                .frame(height: 26)
+                .background(Color.starhashInk, in: Capsule())
+                .padding(.bottom, 12)
+            }
+            .frame(width: 112)
+            .frame(maxHeight: .infinity)
+            .background(Color.sheetSurface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .animation(.snappy(duration: 0.2), value: symbol)
+            .animation(.snappy(duration: 0.2), value: choosesSymbol)
         }
         .buttonStyle(PressScaleButtonStyle())
         .accessibilityLabel("Symbol")
@@ -745,32 +777,34 @@ private struct ShortcutEditor: View {
                 .textInputAutocapitalization(.sentences)
                 .submitLabel(.next)
                 .onSubmit { focused = .code }
-            capsuleField("Code, such as *182*7*1#", text: $code, field: .code)
+            capsuleField("Code, e.g. *182*7*1#", text: $code, field: .code)
                 .keyboardType(.phonePad)
                 .accessibilityLabel("Code")
             capsuleField("Note (optional)", text: $detail, field: .detail)
                 .textInputAutocapitalization(.sentences)
                 .submitLabel(.done)
-
-            Text(showsCodeHint ? "This isn't a valid code. Use only numbers, * and #, starting with * or # and ending with #." : "Type the code exactly as you would dial it. It must start with * or # and end with #.")
-                .font(.sheetSubheadline)
-                .foregroundStyle(showsCodeHint ? Color.starhashDestructive : Color.sheetSecondaryText)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 8)
-                .animation(.smooth(duration: 0.2), value: showsCodeHint)
         }
     }
 
-    /// Keaser's field: a capsule the width of the sheet, its text centred.
+    /// Only for a code that is not one: the fields and their placeholder
+    /// say enough otherwise.
+    private var hint: some View {
+        Text("This isn't a valid code. Use only numbers, * and #, starting with * or # and ending with #.")
+            .font(.sheetSubheadline)
+            .foregroundStyle(Color.starhashDestructive)
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, 8)
+    }
+
+    /// Keaser's field: a capsule, its text from the left beside the symbol.
     private func capsuleField(_ prompt: String, text: Binding<String>, field: Field) -> some View {
         TextField(prompt, text: text, prompt: Text(prompt).foregroundStyle(Color.sheetSecondaryText))
             .font(.sheet(17, .medium, relativeTo: .body))
             .foregroundStyle(Color.starhashPrimaryText)
-            .multilineTextAlignment(.center)
             .autocorrectionDisabled()
             .focused($focused, equals: field)
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 18)
             .frame(minHeight: 52)
             .background(Color.sheetSurface, in: Capsule())
     }

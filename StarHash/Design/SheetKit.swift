@@ -229,18 +229,52 @@ struct SheetButtonStyle: ButtonStyle {
     enum Fill {
         case accent
         case filled
+        /// Blood red with white words: every delete button in the app
+        /// (`DeleteButton`), whatever page or sheet it is on.
+        case destructive
     }
 
     var fill: Fill
+    /// False for a button the width of its words, centred (Delete All
+    /// Data, alone under Settings' cards).
+    var fillsWidth = true
 
     func makeBody(configuration: Configuration) -> some View {
-        SheetButtonBody(configuration: configuration, fill: fill)
+        SheetButtonBody(configuration: configuration, fill: fill, fillsWidth: fillsWidth)
+    }
+}
+
+/// Every delete button StarHash draws, one design: the blood red capsule
+/// with a bin and white words. Menus, swipes and confirmation alerts stay
+/// the system's own.
+struct DeleteButton: View {
+    let title: String
+    var fillsWidth = true
+    let action: () -> Void
+
+    init(_ title: String, fillsWidth: Bool = true, action: @escaping () -> Void) {
+        self.title = title
+        self.fillsWidth = fillsWidth
+        self.action = action
+    }
+
+    var body: some View {
+        // An icon and text rather than a Label, which a list would restyle.
+        Button(role: .destructive, action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: "trash")
+                    .accessibilityHidden(true)
+                Text(title)
+            }
+        }
+        .buttonStyle(SheetButtonStyle(fill: .destructive, fillsWidth: fillsWidth))
     }
 }
 
 private struct SheetButtonBody: View {
     let configuration: ButtonStyleConfiguration
     let fill: SheetButtonStyle.Fill
+    let fillsWidth: Bool
 
     @Environment(\.isEnabled) private var isEnabled
 
@@ -250,6 +284,8 @@ private struct SheetButtonBody: View {
             return (.sheetFilledButton, .sheetFilledLabel)
         case .accent:
             return (.starhashInk, .starhashOnInk)
+        case .destructive:
+            return (.starhashDestructiveButton, .starhashOnDestructive)
         }
     }
 
@@ -259,8 +295,8 @@ private struct SheetButtonBody: View {
             .font(.sheetHeadline)
             .foregroundStyle(isEnabled ? colors.label : Color.sheetDisabledLabel)
             .multilineTextAlignment(.center)
-            .padding(.horizontal, 16)
-            .frame(maxWidth: .infinity)
+            .padding(.horizontal, fillsWidth ? 16 : 32)
+            .frame(maxWidth: fillsWidth ? .infinity : nil)
             .frame(minHeight: 50)
             .background((isEnabled ? colors.fill : Color.sheetChip).gradient, in: Capsule())
             .contentShape(Capsule())
@@ -274,6 +310,7 @@ private struct SheetButtonBody: View {
 extension ButtonStyle where Self == SheetButtonStyle {
     static var sheetPrimary: SheetButtonStyle { SheetButtonStyle(fill: .accent) }
     static var sheetFilled: SheetButtonStyle { SheetButtonStyle(fill: .filled) }
+    static var sheetDestructive: SheetButtonStyle { SheetButtonStyle(fill: .destructive) }
 }
 
 /// The quiet choice under a sheet's button: grey text, or red for a

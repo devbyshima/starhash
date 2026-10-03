@@ -199,20 +199,10 @@ private struct SettingsRootList: View {
                 .settingsCardRow(.last)
             }
 
-            // Last and on its own, as GO Club's Logout: a capsule the width
-            // of its words, centred under the cards, filled blood red in
-            // the app's button look (a gradient fill, 18pt semibold).
+            // Last and on its own, as GO Club's Logout: the app's delete
+            // button, the width of its words, centred under the cards.
             Section {
-                Button(role: .destructive) { confirmsDeleteAll = true } label: {
-                    Text("Delete All Data")
-                        .starhashFont(18, weight: .semibold, relativeTo: .body)
-                        .foregroundStyle(Color.starhashOnDestructive)
-                        .padding(.horizontal, 44)
-                        .frame(minHeight: 57)
-                        .background(Color.starhashDestructiveButton.gradient, in: Capsule())
-                        .contentShape(Capsule())
-                }
-                .buttonStyle(PressScaleButtonStyle())
+                DeleteButton("Delete All Data", fillsWidth: false) { confirmsDeleteAll = true }
                 .frame(maxWidth: .infinity)
                 .padding(.top, 24)
                 .settingsPlainRow()
