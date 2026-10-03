@@ -56,10 +56,13 @@ extension Color {
     /// The light rising from the foot of the launch splash: the blue on dark
     /// mode's near black, full white on light mode's blue.
     static let splashGlow = Color(light: .white, dark: .brandBlue)
-    /// The tint of Buy's call buttons: the accent, as Liquid Glass. Light:
-    /// the near black, under the blue glyph; dark: the blue, under the near
-    /// black one.
-    static let callGlassTint = Color(light: .brandNight.opacity(0.85), dark: .brandBlue.opacity(0.9))
+    /// Buy's call buttons. Light: black, as the dark-mode Total card, with
+    /// the brand blue phone (6.8:1); over the blue page glass alone turns
+    /// teal, so a solid near black sits under it, as the Total card's white
+    /// does. Dark: the blue as glass, with a near-black phone.
+    static let callGlassTint = Color(light: .brandNight, dark: .brandBlue.opacity(0.9))
+    static let callSolidFill = Color(light: .brandNight, dark: .clear)
+    static let callGlyph = Color(light: .brandBlue, dark: .brandNight)
     /// The period control's lens on the page's tinted glass: white, faint,
     /// with a bright rim, as the system's own selection reads.
     static let segmentedLens = Color(light: .white.opacity(0.42), dark: .white.opacity(0.14))

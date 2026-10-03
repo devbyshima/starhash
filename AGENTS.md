@@ -113,7 +113,8 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   Liquid Glass, as the reference's. Buy's codes and pinned tiles are the
   **Total card** (`starhashTotalCard(in:)`, the recipient screen's Total:
   solid white in light mode, the sheets' near-black glass in dark), and
-  their call buttons glass tinted the accent (`callGlassTint`). Activity's period control
+  their call buttons black in light mode (`callSolidFill` under
+  `callGlassTint`, a brand blue phone) and blue glass in dark. Activity's period control
   (`GlassSegmentedControl`) moves as it does, on the same `LensGlass` and
   `LensMotion`, but in the page's tinted glass with a light lens, as the
   search button beside it, and plays the system's selection tick.

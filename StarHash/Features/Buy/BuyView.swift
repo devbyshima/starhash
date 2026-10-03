@@ -448,10 +448,11 @@ private struct ShortcutItem: View {
             } label: {
                 Image(systemName: "phone.fill")
                     .font(.system(size: 20, weight: .bold))
-                    .foregroundStyle(Color.starhashOnInk)
+                    .foregroundStyle(Color.callGlyph)
                     // The card's shape and height, so the two read as a pair.
                     .frame(width: 68, height: 68)
                     .contentShape(shape)
+                    .background(Color.callSolidFill, in: shape)
                     .starhashGlass(in: shape, tint: .callGlassTint)
             }
             .buttonStyle(SharedPressButtonStyle(isPressed: $isPressed))
