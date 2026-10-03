@@ -2,7 +2,7 @@ import StarHashKit
 import SwiftUI
 
 /// Settings, with what was Help: what StarHash saves, the guides (how it
-/// works, auto-verify, privacy, and About StarHash, which holds What's
+/// works, privacy, and About StarHash, which holds What's
 /// New, onboarding, the note and the source code) and Delete All Data. (The owner
 /// and the wallet switcher live on Pay and in the side menu.) Its own
 /// NavigationStack, with each page pushed onto it.
@@ -142,10 +142,6 @@ private struct SettingsRootList: View {
                     SettingsRow(symbol: "number.square.fill", title: "How StarHash works", caption: "Amount, recipient, and the USSD code")
                 }
                 .settingsCardRow(.first)
-                NavigationLink(value: SettingsPage.autoVerify) {
-                    SettingsRow(symbol: "checkmark.message.fill", title: "Set up auto-verify", caption: "Log payments from MoMo messages")
-                }
-                .settingsCardRow(.middle)
                 NavigationLink(value: SettingsPage.privacy) {
                     SettingsRow(symbol: "lock.fill", title: "Privacy", caption: "Everything stays on this iPhone")
                 }

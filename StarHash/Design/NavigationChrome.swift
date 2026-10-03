@@ -14,6 +14,18 @@ extension View {
         modifier(StarHashBackButton())
     }
 
+    /// A close button at the leading end of the bar, for a page shown over
+    /// everything (auto-verify's setup during onboarding).
+    func starhashCloseButton(_ action: @escaping () -> Void) -> some View {
+        barButton {
+            Button(action: action) {
+                StarHashCircleGlyph(symbol: "xmark")
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Close")
+        }
+    }
+
     /// The side menu button at the leading end of a root page's bar
     /// (Settings).
     func starhashSideMenuToolbar() -> some View {

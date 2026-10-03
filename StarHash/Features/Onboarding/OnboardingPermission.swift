@@ -3,9 +3,17 @@ import SwiftUI
 /// A permission primer, a port of Beam's `PermissionOnBoarding`: an iPhone
 /// drawn in outline with a system alert popping up on it and a finger
 /// tapping the button to choose, over and over, and the words and buttons on
-/// a soft panel at the bottom. The real prompt comes after Continue.
+/// a soft panel at the bottom. The real prompt comes after Continue. The
+/// `.message` mock plays an M-Money message arriving and its payment being
+/// ticked off instead, for auto-verify.
 struct OnboardingPermission: View {
+    enum Mock {
+        case alert
+        case message
+    }
+
     struct Config {
+        var mock: Mock = .alert
         /// Before the alert first appears, so the screen settles first.
         var initialDelay: Double = 0
         var title: String
@@ -114,7 +122,10 @@ struct OnboardingPermission: View {
                     .padding(-7)
 
                     if showsAlert {
-                        alert
+                        switch config.mock {
+                        case .alert: alert
+                        case .message: message
+                        }
                     }
                 }
                 .frame(width: 402, height: 874)
@@ -210,6 +221,63 @@ struct OnboardingPermission: View {
         .frame(width: 280)
         .padding(20)
         .starhashGlass(in: RoundedRectangle(cornerRadius: 30, style: .continuous))
+    }
+
+    // MARK: The message
+
+    /// A message banner drops in from the top, then a tick lands on it, and
+    /// it lifts away, every 3.4s: an M-Money message confirming a payment.
+    @ViewBuilder
+    private var message: some View {
+        if reduceMotion {
+            messageCard(Frame(opacity: 1, scale: 1, tapOpacity: 1))
+                .frame(maxHeight: .infinity, alignment: .top)
+                .padding(.top, 84)
+        } else {
+            KeyframeAnimator(initialValue: Frame(), repeating: true) { frame in
+                messageCard(frame)
+                    .opacity(frame.opacity)
+                    .offset(y: (frame.scale - 1) * -400)
+            } keyframes: { _ in
+                SpringKeyframe(Frame(opacity: 1, scale: 1), duration: 0.7, spring: .smooth(duration: 0.5, extraBounce: 0.1))
+                SpringKeyframe(Frame(opacity: 1, scale: 1, tapOpacity: 1, tapScale: 1.2), duration: 0.35, spring: .bouncy(duration: 0.35))
+                SpringKeyframe(Frame(opacity: 1, scale: 1, tapOpacity: 1), duration: 1.4, spring: .smooth(duration: 0.3))
+                SpringKeyframe(Frame(), duration: 0.95, spring: .smooth(duration: 0.4, extraBounce: 0))
+            }
+            .frame(maxHeight: .infinity, alignment: .top)
+            .padding(.top, 84)
+        }
+    }
+
+    /// A notification in outline: an app tile, two lines of text, and the
+    /// tick that says the payment it confirms is logged.
+    private func messageCard(_ frame: Frame) -> some View {
+        let fill = OnboardingPalette.mockFill
+        return HStack(alignment: .top, spacing: 14) {
+            RoundedRectangle(cornerRadius: 11, style: .continuous)
+                .fill(fill)
+                .frame(width: 48, height: 48)
+            VStack(alignment: .leading, spacing: 8) {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(fill)
+                    .frame(width: 110, height: 16)
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(fill)
+                    .frame(height: 13)
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(fill)
+                    .frame(height: 13)
+                    .padding(.trailing, 60)
+            }
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 30, weight: .semibold))
+                .foregroundStyle(Color.starhashIncoming)
+                .opacity(frame.tapOpacity)
+                .scaleEffect(frame.tapScale)
+        }
+        .frame(width: 320)
+        .padding(18)
+        .starhashGlass(in: RoundedRectangle(cornerRadius: 26, style: .continuous))
     }
 
     private struct Frame: Animatable {
