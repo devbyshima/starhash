@@ -131,7 +131,6 @@ struct BuyView: View {
                                 onDial: { dial(shortcut.code) }
                             )
                             .contextMenu {
-                                Button("Dial \(shortcut.code)", systemImage: "phone.arrow.up.right") { dial(shortcut.code) }
                                 Button(shortcuts.canPin ? "Pin" : "Pinned is full", systemImage: "pin") { afterMenu { pin(shortcut, true) } }
                                     .disabled(!shortcuts.canPin)
                                 Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }

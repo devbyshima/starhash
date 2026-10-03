@@ -45,7 +45,7 @@ Free and open source.
   symbol, name and code) with its call button apart beside it, in Liquid
   Glass tinted the accent. The call button dials; tapping a card opens
   its details in a small sheet after Keaser's expense details (Edit,
-  Dial, Delete); holding one offers Dial, Pin, Edit and Delete, a swipe
+  Dial, Delete); holding one offers Pin, Edit and Delete, a swipe
   from the right deletes it and a swipe from the left pins it. Up to
   eight codes can be pinned: they sit at the top as portrait tiles (the
   symbol and the name), 3:2 and bigger the fewer there are, four to a
