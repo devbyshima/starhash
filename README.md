@@ -48,8 +48,11 @@ Free and open source.
   Dial, Delete); holding one offers Dial, Pin, Edit and Delete, a swipe
   from the right deletes it and a swipe from the left pins it. Up to
   eight codes can be pinned: they sit at the top as portrait tiles (the
-  symbol and the name), in two rows of two to four, and dial at once on a
-  tap; their options open on a long press. It comes with MoMo's
+  symbol and the name), in two rows of two to four with every row
+  centred (one pinned code sits in the middle), sliding into their new
+  places as codes are pinned and unpinned, and dial at once on a tap;
+  their options open on a long press. A code's card and its call button
+  press, and lift into their menu, as one. It comes with MoMo's
   pending approvals and cash out, MTN's Gwamon' Pack and the airport's
   parking; the + at the top right adds your own in a sheet after Keaser's
   New Category, with a close button and a confirm one: a name, a code that

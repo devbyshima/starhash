@@ -116,9 +116,12 @@ struct BuyView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
                 if !shortcuts.pinned.isEmpty {
-                    sectionTitle("Pinned")
-                    pinnedGrid
-                        .padding(.bottom, 24)
+                    VStack(alignment: .leading, spacing: 0) {
+                        sectionTitle("Pinned")
+                        pinnedGrid
+                    }
+                    .padding(.bottom, 24)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
                 }
                 if !shortcuts.unpinned.isEmpty {
                     sectionTitle("Your codes")
@@ -131,16 +134,19 @@ struct BuyView: View {
                             )
                             .contextMenu {
                                 Button("Dial \(shortcut.code)", systemImage: "phone.arrow.up.right") { dial(shortcut.code) }
-                                Button(shortcuts.canPin ? "Pin" : "Pinned is full", systemImage: "pin") { pin(shortcut, true) }
+                                Button(shortcuts.canPin ? "Pin" : "Pinned is full", systemImage: "pin") { afterMenu { pin(shortcut, true) } }
                                     .disabled(!shortcuts.canPin)
                                 Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
-                                Button("Delete", systemImage: "trash", role: .destructive) { delete(shortcut) }
+                                Button("Delete", systemImage: "trash", role: .destructive) { afterMenu { delete(shortcut) } }
                             }
                             .accessibilityAction(named: "Pin") { pin(shortcut, true) }
                             .accessibilityAction(named: "Delete") { delete(shortcut) }
                             .buySwipeToPin { pin(shortcut, true) }
                             .activitySwipeToDelete { delete(shortcut) }
-                            .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                            .transition(.asymmetric(
+                                insertion: .scale(scale: 0.9, anchor: .top).combined(with: .opacity),
+                                removal: .scale(scale: 0.85).combined(with: .opacity)
+                            ))
                         }
                     }
                 }
@@ -165,33 +171,48 @@ struct BuyView: View {
             .padding(.bottom, 10)
     }
 
-    /// The pinned codes in two rows at most: half as many columns as codes,
-    /// two at least and four at most (two for two, three for six, four for
-    /// eight). A tap dials at once; options open only on a long press.
+    /// The pinned codes in two rows at most (`PinnedLayout`): half as many
+    /// columns as codes, two at least and four at most, every row centred,
+    /// so one pinned code sits in the middle and the rest slide aside as
+    /// more are pinned. A tap dials at once; options open on a long press.
     private var pinnedGrid: some View {
-        let count = shortcuts.pinned.count
-        let columns = min(4, max(2, (count + 1) / 2))
-        return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: columns), spacing: 10) {
+        PinnedLayout(spacing: 10) {
             ForEach(shortcuts.pinned) { shortcut in
                 PinnedTile(shortcut: shortcut) { dial(shortcut.code) }
                     .contextMenu {
-                        Button("Unpin", systemImage: "pin.slash") { pin(shortcut, false) }
+                        Button("Unpin", systemImage: "pin.slash") { afterMenu { pin(shortcut, false) } }
                         Button("Details", systemImage: "info.circle") { details = shortcut }
                         Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
-                        Button("Delete", systemImage: "trash", role: .destructive) { delete(shortcut) }
+                        Button("Delete", systemImage: "trash", role: .destructive) { afterMenu { delete(shortcut) } }
                     }
                     .accessibilityAction(named: "Unpin") { pin(shortcut, false) }
                     .accessibilityAction(named: "Details") { details = shortcut }
                     .accessibilityAction(named: "Delete") { delete(shortcut) }
-                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                    .transition(.asymmetric(
+                        insertion: .scale(scale: 0.5).combined(with: .opacity),
+                        removal: .scale(scale: 0.8).combined(with: .opacity)
+                    ))
             }
+        }
+    }
+
+    /// A change asked for from a context menu, made once the menu has
+    /// closed: made at once, the menu's preview would drift back to where
+    /// the code no longer is while the tiles move under it.
+    private func afterMenu(_ change: @escaping @MainActor () -> Void) {
+        Task {
+            try? await Task.sleep(for: .milliseconds(380))
+            change()
         }
     }
 
     /// Pins or unpins; with eight pinned, a swipe to pin explains instead.
     private func pin(_ shortcut: USSDShortcut, _ isPinned: Bool) {
         var pinned = false
-        withAnimation(.smooth(duration: 0.35)) { pinned = shortcuts.setPinned(shortcut.id, isPinned) }
+        // A spring, so the tiles settle into their new places.
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) {
+            pinned = shortcuts.setPinned(shortcut.id, isPinned)
+        }
         if pinned {
             pinnedCount += 1
         } else {
@@ -232,6 +253,12 @@ private struct ShortcutItem: View {
     let onOpen: () -> Void
     let onDial: () -> Void
 
+    /// Either half held: the card and its call button press together, and
+    /// a long press lifts them together into the menu, as one button.
+    @State private var isPressed = false
+
+    private let shape = RoundedRectangle(cornerRadius: 22, style: .continuous)
+
     var body: some View {
         HStack(spacing: 10) {
             Button {
@@ -257,37 +284,58 @@ private struct ShortcutItem: View {
                 .frame(maxWidth: .infinity, minHeight: 68, alignment: .leading)
                 // Clear Liquid Glass, as the tab bar's: the page shows
                 // through the card.
-                .starhashGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous), tint: .clear)
-                .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 22, style: .continuous))
-                .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .starhashGlass(in: shape, tint: .clear)
+                .contentShape(shape)
             }
-            .buttonStyle(PressScaleButtonStyle(pressHaptic: false))
+            .buttonStyle(SharedPressButtonStyle(isPressed: $isPressed))
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(shortcut.name)
             .accessibilityValue(shortcut.code)
             .accessibilityHint("Shows its details")
             .accessibilityAddTraits(.isButton)
 
-            Button(action: onDial) {
+            Button {
+                TapHaptic.play(.medium)
+                onDial()
+            } label: {
                 Image(systemName: "phone.fill")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(Color.starhashOnInk)
                     // The card's shape and height, so the two read as a pair.
                     .frame(width: 68, height: 68)
-                    .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-                    .starhashGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous), interactive: true, tint: .callGlassTint)
+                    .contentShape(shape)
+                    .starhashGlass(in: shape, tint: .callGlassTint)
             }
-            .buttonStyle(HapticPlainButtonStyle(weight: .medium))
+            .buttonStyle(SharedPressButtonStyle(isPressed: $isPressed))
             .accessibilityLabel("Dial \(shortcut.name)")
             .accessibilityHint("Dials \(shortcut.code)")
         }
+        .scaleEffect(isPressed ? 0.96 : 1)
+        .opacity(isPressed ? 0.88 : 1)
+        .animation(.snappy(duration: 0.18), value: isPressed)
+        // The menu's preview is the whole pair.
+        .contentShape(.contextMenuPreview, shape)
+    }
+}
+
+/// A button that draws nothing while pressed but says so through
+/// `isPressed`, so several buttons can press as one; silent, as each plays
+/// its haptic when its tap lands (a long press opens a menu of its own).
+private struct SharedPressButtonStyle: ButtonStyle {
+    @Binding var isPressed: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .onChange(of: configuration.isPressed) { _, pressed in
+                isPressed = pressed
+            }
     }
 }
 
 /// A pinned code: a portrait tile of clear Liquid Glass with its symbol in
 /// the middle and its name at the foot, and nothing else. A tap dials at
 /// once; its options open on a long press. The symbol and name scale with
-/// the tile, two to four to a row.
+/// the tile, two to four to a row, sized by `PinnedLayout`.
 private struct PinnedTile: View {
     let shortcut: USSDShortcut
     let onDial: () -> Void
@@ -297,10 +345,9 @@ private struct PinnedTile: View {
             TapHaptic.play(.medium)
             onDial()
         } label: {
+            // As large as `PinnedLayout` makes it.
             Color.clear
-                .aspectRatio(0.78, contentMode: .fit)
-                // Two to a row would stand too tall: still portrait, lower.
-                .frame(maxHeight: 170)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .overlay {
                     GeometryReader { proxy in
                         let width = proxy.size.width
@@ -329,6 +376,50 @@ private struct PinnedTile: View {
         .accessibilityLabel("Dial \(shortcut.name)")
         .accessibilityValue(shortcut.code)
         .accessibilityAddTraits(.isButton)
+    }
+}
+
+/// The pinned tiles: a column count from how many there are (half, two at
+/// least and four at most, so two rows at most), each tile a column wide
+/// and portrait (capped, so two to a row do not stand too tall), and every
+/// row centred, a lone tile in the middle. A layout, so a change of count
+/// slides each tile to its new place inside the change's animation.
+struct PinnedLayout: Layout {
+    var spacing: CGFloat = 10
+    /// Width over height.
+    var aspect: CGFloat = 0.78
+    var maxTileHeight: CGFloat = 170
+
+    static func columns(for count: Int) -> Int {
+        min(4, max(2, (count + 1) / 2))
+    }
+
+    private func metrics(width: CGFloat, count: Int) -> (columns: Int, tile: CGSize, rows: Int) {
+        let columns = Self.columns(for: count)
+        let tileWidth = max(0, (width - spacing * CGFloat(columns - 1)) / CGFloat(columns))
+        let tile = CGSize(width: tileWidth, height: min(tileWidth / aspect, maxTileHeight))
+        let rows = count == 0 ? 0 : (count + columns - 1) / columns
+        return (columns, tile, rows)
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let width = proposal.width ?? 360
+        let m = metrics(width: width, count: subviews.count)
+        let height = CGFloat(m.rows) * m.tile.height + CGFloat(max(0, m.rows - 1)) * spacing
+        return CGSize(width: width, height: height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let m = metrics(width: bounds.width, count: subviews.count)
+        for index in subviews.indices {
+            let row = index / m.columns
+            let column = index % m.columns
+            let inRow = min(m.columns, subviews.count - row * m.columns)
+            let rowWidth = CGFloat(inRow) * m.tile.width + CGFloat(inRow - 1) * spacing
+            let x = bounds.minX + (bounds.width - rowWidth) / 2 + CGFloat(column) * (m.tile.width + spacing)
+            let y = bounds.minY + CGFloat(row) * (m.tile.height + spacing)
+            subviews[index].place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(m.tile))
+        }
     }
 }
 
