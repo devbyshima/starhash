@@ -14,8 +14,8 @@ struct LensGlass: View, Animatable {
     var sideInset: CGFloat
     var lensMinX: CGFloat
     var lensMaxX: CGFloat
-    /// Clear by default, as the tab bar's; nil takes the page's tint, as
-    /// the system-looking glass of the buttons beside the period control.
+    /// Clear by default, as the tab bar's and the period control's; nil
+    /// takes the page's tint.
     var tint: Color? = .clear
 
     var animatableData: AnimatablePair<CGFloat, AnimatablePair<CGFloat, CGFloat>> {

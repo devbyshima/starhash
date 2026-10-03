@@ -76,7 +76,8 @@ struct ActivityTopBar: View {
         .padding(.leading, 18)
         .padding(.trailing, 8)
         .frame(maxWidth: .infinity, minHeight: 44)
-        .starhashGlass(interactive: true)
+        // Clear, as the buttons it melts into.
+        .starhashGlass(interactive: true, tint: .clear)
     }
 
     private var periodControl: some View {

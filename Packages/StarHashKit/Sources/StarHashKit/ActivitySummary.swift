@@ -68,7 +68,7 @@ public enum ActivitySummary {
         /// Money sent and merchant payments, fees not included.
         public var spent: Int
         public var received: Int
-        /// MTN's fees on what was sent.
+        /// The carrier's fees on what was sent.
         public var fees: Int
         public var count: Int
 

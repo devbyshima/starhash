@@ -4,7 +4,7 @@ import SwiftUI
 import UIKit
 
 /// The card at the top of Activity: what was sent in the chosen period,
-/// what came in and what MTN charged, and an ink bar chart of how the
+/// what came in and what the carrier charged, and an ink bar chart of how the
 /// spending was spread over the period.
 struct ActivitySummaryCard: View {
     let period: ActivityPeriod
@@ -67,7 +67,7 @@ struct ActivitySummaryCard: View {
     }
 
     private var feesLine: some View {
-        Text("MTN fees \(Money.format(totals.fees))")
+        Text("Fees \(Money.format(totals.fees))")
             .starhashFont(15, relativeTo: .subheadline)
             .foregroundStyle(Color.starhashSecondaryText)
             .lineLimit(1)

@@ -93,14 +93,14 @@ private struct FallbackGlassButtonStyle: ButtonStyle {
 }
 
 extension View {
-    /// The round glass icon button used in sheet headers (close, back,
-    /// confirm, add).
+    /// The round glass icon button of a page's header (search, close,
+    /// back, add, the wallet). Clear Liquid Glass, as the tab bar's.
     func starhashCircleButton() -> some View {
         self
             .font(.system(size: 17, weight: .semibold))
             .frame(width: 44, height: 44)
             .contentShape(Circle())
-            .starhashGlass(in: Circle(), interactive: true)
+            .starhashGlass(in: Circle(), interactive: true, tint: .clear)
     }
 }
 
@@ -132,12 +132,13 @@ extension View {
 
     // MARK: Total card
 
-    /// The **Total card** surface, the recipient screen's Total: solid white
-    /// in light mode, the sheets' near-black glass in dark. Buy's codes and
-    /// pinned tiles wear it too, and so does Balance (`interactive`).
+    /// The **Total card** surface, the recipient screen's Total: in light
+    /// mode the page's own tinted Liquid Glass, the deep blue the period
+    /// control was first drawn in; in dark the sheets' near-black glass.
+    /// Buy's codes and pinned tiles wear it too, and so does Balance
+    /// (`interactive`).
     func starhashTotalCard(in shape: some Shape, interactive: Bool = false) -> some View {
-        background(Color.sheetSolidFill, in: shape)
-            .starhashGlass(in: shape, interactive: interactive, tint: .sheetGlassTint)
+        modifier(TotalCardSurface(shape: shape, interactive: interactive))
     }
 
     // MARK: Soft Edge
@@ -166,6 +167,23 @@ extension View {
             self.safeAreaBar(edge: .top, spacing: 0, content: header)
         } else {
             self.safeAreaInset(edge: .top, spacing: 0, content: header)
+        }
+    }
+}
+
+private struct TotalCardSurface<S: Shape>: ViewModifier {
+    let shape: S
+    let interactive: Bool
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    func body(content: Content) -> some View {
+        if colorScheme == .dark {
+            content.starhashGlass(in: shape, interactive: interactive, tint: .sheetGlassTint)
+        } else {
+            // No tint of its own: the page's, as untinted glass would turn
+            // a pale cyan on the blue.
+            content.starhashGlass(in: shape, interactive: interactive)
         }
     }
 }

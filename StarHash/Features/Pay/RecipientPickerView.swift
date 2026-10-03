@@ -322,7 +322,8 @@ struct RecipientPickerView: View {
         .padding(.leading, 18)
         .padding(.trailing, 8)
         .frame(maxWidth: .infinity, minHeight: 44)
-        .starhashGlass(interactive: true)
+        // Clear, as the header's round buttons.
+        .starhashGlass(interactive: true, tint: .clear)
     }
 
     private func openSearch() {
@@ -616,8 +617,8 @@ struct RecipientPickerView: View {
         .padding(.horizontal, 22)
         .padding(.vertical, 14)
         .frame(minHeight: 72)
-        // The sheets' colours: solid white in light mode, their near-black
-        // glass in dark.
+        // The Total card: the page's tinted glass in light mode, the
+        // sheets' near-black glass in dark.
         .starhashTotalCard(in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         .padding(.horizontal, 16)
         .padding(.bottom, 8)

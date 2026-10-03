@@ -423,7 +423,7 @@ private struct ShortcutItem: View {
                             .lineLimit(2)
                         Text(shortcut.code)
                             .starhashFont(14, weight: .semibold, relativeTo: .subheadline, tracking: 0)
-                            .foregroundStyle(Color.starhashTertiaryText)
+                            .foregroundStyle(Color.totalCardCaption)
                             .lineLimit(1)
                     }
                     Spacer(minLength: 0)

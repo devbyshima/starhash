@@ -99,7 +99,7 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   `StarHashGlassContainer` (iOS 18 falls back to materials).
 - Every container (card, panel, field box) goes through
   `starhashContainer(_:in:)`: white glass in light mode (Liquid Glass over
-  its solid fill, as the Total card) and **black glass** in dark (the
+  its solid fill) and **black glass** in dark (the
   near black as Liquid Glass). A card of rows is one container behind all
   of them, never a slice per row: Settings pages are a `SettingsScroll` of
   `SettingsCard`s (rows keep their 20pt with `settingsRowInset()`,
@@ -118,15 +118,20 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   width change rides the spring; never let the page re-centre it, or the
   symbols jump on the first frame of a switch. Page changes play
   `NavigationHaptics` (two layers on the switch, a thump and a rumble; none for the lens's
-  bounce), never a plain `sensoryFeedback`. It is the only glass with no tint: clear
-  Liquid Glass, as the reference's. Balance, Buy's codes and pinned tiles
-  are the **Total card** (`starhashTotalCard(in:)`, the recipient screen's
-  Total: solid white in light mode, the sheets' near-black glass in dark), and
-  their call buttons black in light mode (`callSolidFill` under
-  `callGlassTint`, a brand blue phone) and blue glass in dark. Activity's period control
-  (`GlassSegmentedControl`) moves as it does, on the same `LensGlass` and
-  `LensMotion`, but in the page's tinted glass with a light lens, as the
-  search button beside it, and plays the system's selection tick.
+  bounce), never a plain `sensoryFeedback`. It is clear Liquid Glass, with
+  no tint, as the reference's, and so are the controls along the top of
+  every page: the round header buttons (`starhashCircleButton()`, so
+  `SwapGlassButton`, the wallet switcher and the back button), the search
+  fields beside them, and Activity's period control
+  (`GlassSegmentedControl`), which moves as the bar does, on the same
+  `LensGlass` and `LensMotion`, with a light lens, and plays the system's
+  selection tick. Balance, Buy's codes and pinned tiles are the **Total
+  card** (`starhashTotalCard(in:)`, the recipient screen's Total: the
+  page's tinted glass in light mode, the deep blue the period control was
+  first drawn in, small grey text on it `totalCardCaption`; the sheets'
+  near-black glass in dark), and their call buttons black in light mode
+  (`callSolidFill` under `callGlassTint`, a brand blue phone) and blue
+  glass in dark.
 - Every button is felt as it goes down: the shared button styles play an
   impact (`starhashPressHaptic`; medium for Pay, Balance, Continue and a
   sheet's button, light for round glass buttons and rows), and a plain
@@ -175,7 +180,7 @@ Names the owner uses for parts of the design; find them by these names.
 | --- | --- | --- |
 | **Soft Edge** | the one edge treatment: content fades and blurs under a bar | `starhashSoftEdge()`, `starhashSoftEdgeHeader { }` in `StarHash/Design/Glass.swift` |
 | **Tab bar** (the custom nav) | GO Club's glass tab bar: Activity, Pay, Settings | `StarHash/App/StarHashTabBar.swift`, `NavigationHaptics` |
-| **Total card** | white in light, black glass in dark | `starhashTotalCard(in:)` in `Glass.swift` |
+| **Total card** | the page's tinted glass in light, black glass in dark | `starhashTotalCard(in:)` in `Glass.swift` |
 | **White glass, black glass** | every container | `starhashContainer(_:in:)` in `Glass.swift` |
 | **Send Ripple** | shelved, not used: the wave up the screen that Pay once played as a recipient was chosen, a Metal shader over snapshots | `StarHash/Design/SendRipple.swift` (how to bring it back is at its top), `StarHash/Design/Shaders/SendRipple.metal` |
 

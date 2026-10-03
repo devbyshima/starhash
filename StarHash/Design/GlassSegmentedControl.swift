@@ -2,8 +2,8 @@ import SwiftUI
 
 /// GO Club's period control, measured from its screen recording (a capsule
 /// 41pt tall of short labels 41pt apart, 16pt medium, over a lens 34pt
-/// tall), in the same glass as the search button beside it, the page's
-/// tinted Liquid Glass, so it looks the system's own, with a light lens.
+/// tall), in the same glass as the search button beside it and the tab
+/// bar, clear Liquid Glass, with a light lens.
 /// It moves as the tab bar does: a spring that overshoots about a tenth and
 /// settles, stretching the glass when it overshoots an end. A change plays
 /// the system's selection tick. A finger dragged along it carries the lens
@@ -34,8 +34,7 @@ struct GlassSegmentedControl<Value: Hashable>: View {
                 height: Metrics.height,
                 sideInset: Metrics.inset,
                 lensMinX: lensCenter - Metrics.segment / 2,
-                lensMaxX: lensCenter + Metrics.segment / 2,
-                tint: nil
+                lensMaxX: lensCenter + Metrics.segment / 2
             )
 
             GlassLens(light: true)

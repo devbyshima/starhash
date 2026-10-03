@@ -72,7 +72,7 @@ Free and open source.
   `*182*1*2*NUMBER*AMOUNT#`.
 - **Activity**: payments grouped by day with a red arrow out and a green
   arrow in, a bar chart for Today, This Week, This Month, This Year or All
-  Time with the total spent and MTN fees, and search across everything.
+  Time with the total spent and fees, and search across everything.
   Swipe a payment left for a red trash, or all the way across to delete it
   at once, as in Beam.
 - **Nearby** (off until turned on, precise location only): each number or
