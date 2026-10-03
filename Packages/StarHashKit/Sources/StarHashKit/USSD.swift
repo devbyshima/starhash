@@ -26,6 +26,34 @@ public enum USSD {
         }
     }
 
+    /// What Buy offers: airtime, data bundles and electricity.
+    public enum Purchase: String, CaseIterable, Identifiable, Sendable {
+        case airtime
+        case bundles
+        case electricity
+
+        public var id: Self { self }
+    }
+
+    /// Opens the menu for a purchase, where the wallet's own prompts ask
+    /// for the number, the amount or the meter, and the PIN. Only paths an
+    /// operator has published are dialled, never a guess that might reach
+    /// another payment:
+    /// - MTN MoMo airtime, *182*2*1#, and data bundles, *182*2*1*2#, as
+    ///   MTN Rwanda gives them.
+    /// - Electricity (Cash Power), *662*1#, Rwanda Energy Group's own code,
+    ///   which takes either wallet.
+    /// - Airtel Money's airtime and bundles, the *182# menu, as Balance:
+    ///   no shorter path could be confirmed.
+    public static func purchase(_ purchase: Purchase, from wallet: Recipient.Network) -> String {
+        switch (purchase, wallet) {
+        case (.electricity, _): "*662*1#"
+        case (.airtime, .mtn): "*182*2*1#"
+        case (.bundles, .mtn): "*182*2*1*2#"
+        case (_, .airtel): "*182#"
+        }
+    }
+
     /// A tel: URL the system dialer accepts, with # escaped.
     public static func telURL(for code: String) -> URL? {
         let escaped = code.replacingOccurrences(of: "#", with: "%23")

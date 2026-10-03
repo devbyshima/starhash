@@ -27,7 +27,7 @@ Free and open source.
   a finger dragged along the bar carries it.
   The bar shrinks while a page scrolls down and steps aside for pushed
   screens and search. The button at the top left of Pay switches to Buy
-  (coming soon) and back, and the bar's middle returns to whichever showed
+  and back, and the bar's middle returns to whichever showed
   last. Your main wallet (MTN MoMo or Airtel Money) is picked once in
   onboarding and changed from the wallet button on Pay.
 - **Pay**: a big amount on a keypad, Balance and Pay underneath. The
@@ -41,6 +41,9 @@ Free and open source.
   follow. A contact with several numbers asks which one. The total sits
   in a bar above the keyboard; matched letters show in blue. Picking someone dials at once: the iPhone's
   call prompt, showing the whole code, is the approval.
+- **Buy**: airtime, data bundles and electricity (Cash Power), each a card
+  that dials its menu from the wallet chosen on Pay, with the code shown on
+  the card. The wallet's prompts take the amount and the PIN.
 - **Fees**: shown only in Activity, once a payment is confirmed: from MTN's
   SMS, or worked out from the carriers' published prices when it is marked
   as confirmed by hand (`Tariff` in StarHashKit, sources inside). Pay shows no fees. The keypad takes up to
@@ -89,6 +92,15 @@ from either wallet. Only which network counts as "other" changes.
 | Pay a merchant code | `*182*8*1*CODE*AMOUNT#` |
 | Check your balance, MTN MoMo | `*182*6*1#` |
 | Check your balance, Airtel Money | `*182#` (the menu: no balance shortcut confirmed) |
+| Buy airtime, MTN MoMo | `*182*2*1#` (MTN Rwanda) |
+| Buy data bundles, MTN MoMo | `*182*2*1*2#` (MTN Rwanda) |
+| Buy electricity (Cash Power), either wallet | `*662*1#` (Rwanda Energy Group) |
+| Buy airtime or bundles, Airtel Money | `*182#` (the menu: no shorter path confirmed) |
+
+Buy opens each menu and leaves the number, the amount or the meter, and
+the PIN to the wallet's own prompts: only the menu paths above have been
+published, so StarHash fills in nothing that could land in the wrong
+place, and Buy is not logged in Activity.
 
 The Airtel codes follow Airtel Rwanda's Airtel Money customer service
 charter (`*182#`, `*182*8*1#` for merchants) and its note that `*182*1*2#`
