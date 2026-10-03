@@ -357,15 +357,21 @@ private struct PinnedTile: View {
                 .overlay {
                     GeometryReader { proxy in
                         let width = proxy.size.width
+                        let height = proxy.size.height
+                        let iconSize = min(40, width * 0.26)
+                        // Fixed zones, the same on every tile whatever the
+                        // name: the symbol centred in the upper part, in a
+                        // square box so every symbol shares one centre, and
+                        // the name from one line down, top-aligned, so one-
+                        // and two-line names start level.
                         VStack(spacing: 0) {
-                            Spacer(minLength: 0)
-                            // The symbol alone, with no tile behind it, sized
-                            // with the tile.
                             Image(systemName: shortcut.symbol ?? ShortcutSymbols.plain)
-                                .font(.system(size: min(40, width * 0.26), weight: .semibold))
+                                .font(.system(size: iconSize, weight: .semibold))
                                 .foregroundStyle(Color.starhashPrimaryText)
+                                .frame(width: iconSize * 1.4, height: iconSize * 1.4)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: height * 0.6)
                                 .accessibilityHidden(true)
-                            Spacer(minLength: 0)
                             Text(shortcut.name)
                                 .starhashFont(width < 110 ? 13 : (width < 140 ? 15 : 17), weight: .semibold, relativeTo: .footnote)
                                 .foregroundStyle(Color.starhashPrimaryText)
@@ -373,9 +379,9 @@ private struct PinnedTile: View {
                                 .lineLimit(2)
                                 .minimumScaleFactor(0.8)
                                 .padding(.horizontal, 8)
-                                .padding(.bottom, width < 110 ? 10 : (width < 140 ? 14 : 18))
+                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                         }
-                        .frame(width: width, height: proxy.size.height)
+                        .frame(width: width, height: height)
                     }
                 }
                 .starhashGlass(in: RoundedRectangle(cornerRadius: 20, style: .continuous), tint: .clear)
