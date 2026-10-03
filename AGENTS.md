@@ -61,8 +61,13 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   placeholders). Every light page is the blue, so the accent
   (`starhashInk`, with `starhashOnInk` text) is near black there and the
   blue in dark mode; text and marks straight on the page use
-  `starhashAccentText`. Light-mode secondary and tertiary text are the near
-  black at 80% and 60%, which pass on the blue and on white cards alike.
+  `starhashAccentText`. Text colours resolve by surface
+  (`StarHash/Design/Surface.swift`): on the blue page light-mode text is
+  WHITE (the founder's choice, 2026-10-03; white on #05A9F4 is 2.6:1,
+  under AA, accepted for the look), and inside anything marked
+  `.starhashSurface(.card)` (cards, `sheetCard`, every sheet, settings
+  rows) it is near black. Mark any new card or sheet, or its text turns
+  white on white.
   Red text on the page is `starhashDestructiveOnPage` (no brighter red
   reads on the blue). Glass gets the deep-blue `starhashGlassTint` by
   default, or it turns cyan on the blue. The only other hues are

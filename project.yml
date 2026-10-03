@@ -55,6 +55,10 @@ targets:
           UIColorName: LaunchBackground
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+        # White status bar in both appearances: light mode's pages are the
+        # blue with white text.
+        UIViewControllerBasedStatusBarAppearance: false
+        UIStatusBarStyle: UIStatusBarStyleLightContent
         ITSAppUsesNonExemptEncryption: false
         UIAppFonts: [SpaceGrotesk.ttf]
         NSContactsUsageDescription: StarHash shows your contacts so you can pick who to pay. They stay on your iPhone.

@@ -59,6 +59,7 @@ struct StarHashCard<Content: View>: View {
 
     var body: some View {
         VStack(spacing: 0) { content }
+            .starhashSurface(.card)
             .background(fill, in: RoundedRectangle(cornerRadius: StarHashMetrics.cardRadius, style: .continuous))
             .clipShape(RoundedRectangle(cornerRadius: StarHashMetrics.cardRadius, style: .continuous))
     }

@@ -36,16 +36,17 @@ extension Color {
 
     // MARK: Text
 
-    static let starhashPrimaryText = Color(light: .brandNight, dark: .brandPaper)
-    /// The quieter text. Light: the near black let through at 80%, which
-    /// sits on whatever is under it, so one colour reads on the blue page
-    /// (5.0:1) and on a white card or a pale sheet (9:1 or more); #616161
-    /// itself is 2.4:1 on the blue. Dark: a grey lifted from #616161, which
-    /// is under 3:1 on the near black (7.4:1 on the page, 4.5:1 or more on
-    /// its cards and glass).
-    static let starhashSecondaryText = Color(light: .brandNight.opacity(0.8), dark: .init(white: 166 / 255))
-    /// Placeholders and muted marks, 3:1 or more on the blue and on cards.
-    static let starhashTertiaryText = Color(light: .brandNight.opacity(0.6), dark: .init(white: 117 / 255))
+    /// Text, by surface (`StarHashSurface`): white on the blue page, near
+    /// black on a white card or pale sheet, pale grey in dark mode. White
+    /// on the blue is 2.6:1, under AA: chosen for the look, see AGENTS.md.
+    static let starhashPrimaryText = Color(page: .white, card: .brandNight, dark: .brandPaper)
+    /// The quieter text: white at 85% on the page, the near black at 80% on
+    /// a card (9:1 or more), and in dark mode a grey lifted from #616161,
+    /// which is under 3:1 on the near black (7.4:1 on the page, 4.5:1 or
+    /// more on its cards and glass).
+    static let starhashSecondaryText = Color(page: .white.opacity(0.85), card: .brandNight.opacity(0.8), dark: .init(white: 166 / 255))
+    /// Placeholders and muted marks.
+    static let starhashTertiaryText = Color(page: .white.opacity(0.65), card: .brandNight.opacity(0.6), dark: .init(white: 117 / 255))
     /// Section titles and the small print under settings cards.
     static let starhashCaptionText = Color.starhashSecondaryText
     /// Money going out and destructive actions, on cards and sheets: one of
@@ -64,13 +65,11 @@ extension Color {
 
     // MARK: Text on Pay
 
-    /// Pay's text: near black on the blue (6.8:1), pale grey on the near
-    /// black.
-    static let payPrimaryText = Color(light: .brandNight, dark: .brandPaper)
-    /// Pay's quieter text: the near black let through to the blue at 4.5:1.
-    static let paySecondaryText = Color(light: .brandNight.opacity(0.78), dark: .init(white: 166 / 255))
-    /// The amount's zero, a placeholder: 3:1, as large text needs.
-    static let payPlaceholderText = Color(light: .brandNight.opacity(0.6), dark: .init(white: 117 / 255))
+    /// Pay's text, the same as every page's.
+    static let payPrimaryText = Color.starhashPrimaryText
+    static let paySecondaryText = Color.starhashSecondaryText
+    /// The amount's zero, a placeholder.
+    static let payPlaceholderText = Color.starhashTertiaryText
     /// Pay's primary button: on the blue it turns over, near black with
     /// blue text (6.8:1); on the near black it is the blue with near-black
     /// text, as everywhere else.
@@ -88,7 +87,7 @@ extension Color {
     /// The pressed digit's flash: the text colour itself on the blue (a
     /// pale flash vanished into the white puff), the blue on the near
     /// black.
-    static let payKeypadFlash = Color(light: .brandNight, dark: .brandBlue)
+    static let payKeypadFlash = Color(page: .white, card: .brandNight, dark: .brandBlue)
     /// A held key's bubble: white on the blue; on the near black, the grey
     /// the shader's blob starts from, where a white disc would glare.
     static let payKeyBubble = Color(light: .white, dark: .init(white: 77 / 255))
@@ -107,9 +106,9 @@ extension Color {
     /// Text and glyphs drawn on `starhashInk`: the blue on near black,
     /// near black on the blue (6.8:1 both ways).
     static let starhashOnInk = Color(light: .brandBlue, dark: .brandNight)
-    /// The accent as text or a thin mark on the page (a chosen check):
-    /// near black on the blue, the blue on the near black.
-    static let starhashAccentText = Color(light: .brandNight, dark: .brandBlue)
+    /// The accent as text or a thin mark (a chosen check): white on the
+    /// blue page, near black on a card, the blue on the near black.
+    static let starhashAccentText = Color(page: .white, card: .brandNight, dark: .brandBlue)
     /// The accent as a graphic that has to read against the page (a
     /// selection ring, progress): the same.
     static let starhashAccentGraphic = Color.starhashAccentText
@@ -126,8 +125,8 @@ extension Color {
     /// Letters a search matched. Dark: the blue. Light: near black like the
     /// rest of the name, picked out by `pickerMatchBackground` instead, as
     /// no colour stands apart from near black and still reads on the blue.
-    static let pickerMatch = Color(light: .brandNight, dark: .brandBlue)
-    static let pickerMatchBackground = Color(light: .white.opacity(0.55), dark: .clear)
+    static let pickerMatch = Color(page: .white, card: .brandNight, dark: .brandBlue)
+    static let pickerMatchBackground = Color(light: .brandNight.opacity(0.22), dark: .clear)
 
     /// Sheets: the solid surface cards sit on (the pale grey, or the near
     /// black lifted a little less than a card), the grey of secondary text,

@@ -52,6 +52,7 @@ struct ActivitySummaryCard: View {
         .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.starhashCard, in: RoundedRectangle(cornerRadius: StarHashMetrics.cardRadius, style: .continuous))
+        .starhashSurface(.card)
     }
 
     private var receivedLine: some View {
