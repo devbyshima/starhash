@@ -54,3 +54,26 @@ enum StarHashPreferences {
         UserDefaults.standard.set(date.timeIntervalSince1970, forKey: PreferenceKey.lastVerifiedAt)
     }
 }
+
+/// "Delete All Data" in Settings: StarHash as a fresh install, as an
+/// account's delete is elsewhere. The transactions file and its set-aside
+/// copies go, every preference goes (the wallet, the switches, auto-verify,
+/// whether onboarding and the note were seen), the shortcut's temporary
+/// copy goes, and the app returns to onboarding. Contacts and the
+/// Shortcuts automation belong to the system and stay.
+@MainActor
+enum AppReset {
+    static func eraseEverything(store: StarHashStore, router: AppRouter) {
+        store.eraseAll()
+        if let domain = Bundle.main.bundleIdentifier {
+            UserDefaults.standard.removePersistentDomain(forName: domain)
+        }
+        try? FileManager.default.removeItem(at: URL.temporaryDirectory.appending(path: "Shortcut", directoryHint: .isDirectory))
+        router.openTransactionID = nil
+        router.isMenuOpen = false
+        router.selectedTab = .pay
+        // Set, not only removed, so every @AppStorage view sees it change
+        // and the root swaps to onboarding.
+        UserDefaults.standard.set(false, forKey: PreferenceKey.hasOnboarded)
+    }
+}

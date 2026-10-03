@@ -44,6 +44,7 @@ private struct SettingsRootList: View {
     let setUpAutoVerify: () -> Void
 
     @Environment(StarHashStore.self) private var store
+    @Environment(AppRouter.self) private var router
 
     @AppStorage(PreferenceKey.saveTransactions) private var saveTransactions = true
     @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
@@ -96,6 +97,13 @@ private struct SettingsRootList: View {
                         : "Reads MTN MoMo messages only, for now",
                     isOn: autoVerifyBinding
                 )
+                .settingsCardRow(.middle)
+                SettingsToggleRow(
+                    symbol: "questionmark.bubble.fill",
+                    title: "Ask before deleting",
+                    caption: "Confirm every delete except a swipe",
+                    isOn: $confirmDeletes
+                )
                 .settingsCardRow(.last)
             }
 
@@ -125,29 +133,6 @@ private struct SettingsRootList: View {
             }
 
             Section {
-                SettingsSectionTitle("Data")
-                SettingsToggleRow(
-                    symbol: "questionmark.bubble.fill",
-                    title: "Ask before deleting",
-                    caption: "Confirm every delete except a swipe",
-                    isOn: $confirmDeletes
-                )
-                .settingsCardRow(.first)
-                Button(role: .destructive) { confirmsDeleteAll = true } label: {
-                    Text("Delete All Transactions")
-                        .font(.starhash(.body))
-                        .foregroundStyle(Color.starhashDestructive)
-                        .frame(maxWidth: .infinity, minHeight: 52)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(HighlightRowButtonStyle())
-                .disabled(store.transactions.isEmpty)
-                .settingsCardRow(.last, insets: .settingsTextRow)
-            } footer: {
-                SettingsFootnote("Transactions are kept only on this iPhone. Deleting them cannot be undone.")
-            }
-
-            Section {
                 SettingsSectionTitle("StarHash")
                 NavigationLink(value: SettingsPage.whatsNew) {
                     SettingsRow(symbol: "sparkles", title: "What's New", caption: "What each version brought")
@@ -168,18 +153,30 @@ private struct SettingsRootList: View {
                 .id("starhash")
             }
 
+            // Last, apart, as an account's delete sits in other apps.
+            Section {
+                Button(role: .destructive) { confirmsDeleteAll = true } label: {
+                    Text("Delete All Data")
+                        .font(.starhash(.body, weight: .medium))
+                        .foregroundStyle(Color.starhashDestructive)
+                        .frame(maxWidth: .infinity, minHeight: 52)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(HighlightRowButtonStyle())
+                .settingsCardRow(.single, insets: .settingsTextRow)
+            } footer: {
+                SettingsFootnote("Erases everything StarHash keeps on this iPhone: transactions, recents, your wallet and settings. StarHash starts again from the welcome screens. Your contacts and the StarHash SMS shortcut are not touched.")
+            }
+
         }
         .settingsListStyle(sectionSpacing: 14)
-        .confirmationDialog(
-            "Delete all transactions?",
-            isPresented: $confirmsDeleteAll,
-            titleVisibility: .visible
-        ) {
-            Button("Delete All Transactions", role: .destructive) {
-                withAnimation(.smooth) { store.deleteAll() }
+        .alert("Delete all data?", isPresented: $confirmsDeleteAll) {
+            Button("Delete All Data", role: .destructive) {
+                withAnimation(.smooth) { AppReset.eraseEverything(store: store, router: router) }
             }
+            Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Your whole history will be removed from this iPhone.")
+            Text("Your transactions, wallet and settings will be erased from this iPhone. This cannot be undone.")
         }
         .sheet(isPresented: $showsDeveloperNote) {
             DeveloperNoteSheet()

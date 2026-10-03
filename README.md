@@ -55,7 +55,10 @@ Free and open source.
   transactions, contacts, Nearby and recent recipients, Ask before deleting
   from a menu or a transaction's page (also turned off from the delete
   question's Don't Ask Again), the auto
-  verification guide, How StarHash Works and Privacy.
+  verification guide, How StarHash Works and Privacy, and at the bottom
+  Delete All Data, which erases everything StarHash keeps on the iPhone
+  (transactions, recents, wallet, settings) and starts again from
+  onboarding, like deleting an account.
 - **Shortcuts and Siri**: Process Carrier SMS, Check MoMo Balance and Pay
   with StarHash actions.
 - Light and dark appearance in a four-colour palette: every page blue in

@@ -95,6 +95,23 @@ import Testing
         #expect(StarHashStore(fileURL: url).transactions.count == 1)
     }
 
+    @Test func eraseAllRemovesTheFileAndItsDamagedCopies() throws {
+        let url = try temporaryFile()
+        let folder = url.deletingLastPathComponent()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        try Data("not json".utf8).write(to: url)
+        let store = StarHashStore(fileURL: url)
+        store.recordPayment(to: john, amount: 700, date: noon)
+        try Data("other".utf8).write(to: folder.appending(path: "unrelated.txt"))
+
+        store.eraseAll()
+
+        #expect(store.transactions.isEmpty)
+        let files = try FileManager.default.contentsOfDirectory(atPath: folder.path)
+        #expect(files == ["unrelated.txt"])
+        #expect(StarHashStore(fileURL: url).transactions.isEmpty)
+    }
+
     /// The phone locked after a restart: the file exists but cannot be
     /// read. A payment logged then must not replace the history on disk.
     @Test func unreadableFileIsMergedOnceReadable() throws {

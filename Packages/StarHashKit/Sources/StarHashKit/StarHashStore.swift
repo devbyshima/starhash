@@ -85,6 +85,19 @@ public final class StarHashStore {
         save()
     }
 
+    /// Everything this store keeps, gone: its transactions, its file, and
+    /// any damaged copies set aside beside it. For "Delete All Data".
+    public func eraseAll() {
+        transactions.removeAll()
+        guard let fileURL else { return }
+        let folder = fileURL.deletingLastPathComponent()
+        let stem = fileURL.deletingPathExtension().lastPathComponent
+        let files = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
+        for file in files where file.lastPathComponent.hasPrefix(stem) {
+            try? FileManager.default.removeItem(at: file)
+        }
+    }
+
     /// A payment just dialled from StarHash, pending until its SMS arrives.
     ///
     /// The amount stays on Pay's keypad after dialling, so a call cancelled
