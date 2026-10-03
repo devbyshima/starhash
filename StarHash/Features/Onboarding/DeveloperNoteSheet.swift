@@ -5,9 +5,9 @@ import SwiftUI
 /// "A note from Shima", the note left aligned, the signature, and a button
 /// with "Write to Shima" under it.
 ///
-/// - `welcome`, the last onboarding screen (and Settings, About StarHash,
+/// - `welcome`, over Pay as onboarding ends (and Settings, About StarHash,
 ///   Developer Note): why StarHash exists, free, open source and private,
-///   and enjoy it. No rating ask, and on onboarding no Write to Shima.
+///   and enjoy it. No rating ask, and after onboarding no Write to Shima.
 /// - `review`, once, after two weeks of use (`ReviewNote`): some of the
 ///   same, then the one ask: if you love it, rate it.
 enum DeveloperNoteKind {
@@ -33,17 +33,15 @@ enum DeveloperNoteKind {
     }
 }
 
-/// The note's content, shared by onboarding's last screen and the sheets.
-/// The letter and its buttons are one block, centred on the page, as the
-/// reference sets them; a long Dynamic Type size scrolls instead.
+/// The note's content, shared by the sheets. The letter and its buttons
+/// are one block, centred on the page, as the reference sets them; a long
+/// Dynamic Type size scrolls instead.
 struct DeveloperNoteContent: View {
     let kind: DeveloperNoteKind
     let primaryTitle: String
     let primaryAction: () -> Void
-    /// Onboarding's note: its button glows, as onboarding's others do, and
-    /// it ends on that button alone. The sheets' is the sheets' own, with
-    /// Write to Shima under it.
-    var onOnboarding = false
+    /// The note onboarding ends on stops at its button.
+    var showsWriteLink = true
 
     @Environment(\.openURL) private var openURL
 
@@ -86,14 +84,9 @@ struct DeveloperNoteContent: View {
                 .accessibilityLabel("Signed, Shima")
 
             VStack(spacing: 0) {
-                if onOnboarding {
-                    Button(primaryTitle, action: primaryAction)
-                        .buttonStyle(.starhashPrimaryGlowing)
-                } else {
-                    Button(primaryTitle, action: primaryAction)
-                        .buttonStyle(.sheetPrimary)
-                }
-                if !onOnboarding {
+                Button(primaryTitle, action: primaryAction)
+                    .buttonStyle(.sheetPrimary)
+                if showsWriteLink {
                     Button {
                         openURL(DeveloperNoteLinks.write)
                     } label: {
@@ -134,14 +127,22 @@ enum DeveloperNoteLinks {
     static let write = URL(string: "https://github.com/devbyshima/starhash/issues/new")!
 }
 
-/// The welcome note as a sheet, from Settings, About StarHash, Developer
-/// Note: a close button on the right, and Done.
+/// The welcome note. As onboarding ends it opens over Pay, ends on Start
+/// Using StarHash, and closes to Pay; from Settings, About StarHash,
+/// Developer Note, it ends on Done with Write to Shima under it.
 struct DeveloperNoteSheet: View {
+    var afterOnboarding = false
+
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NoteSheetFrame(onClose: { dismiss() }) {
-            DeveloperNoteContent(kind: .welcome, primaryTitle: "Done") { dismiss() }
+            DeveloperNoteContent(
+                kind: .welcome,
+                primaryTitle: afterOnboarding ? "Start Using StarHash" : "Done",
+                primaryAction: { dismiss() },
+                showsWriteLink: !afterOnboarding
+            )
         }
     }
 }
@@ -223,8 +224,8 @@ enum ReviewNote {
     }
 }
 
-/// `-note` (DEBUG only) shows the welcome note over the app;
-/// `-reviewNote` the two-week one.
+/// `-note` (DEBUG only) shows the welcome note over Pay, as onboarding
+/// ends; `-reviewNote` the two-week one.
 enum DeveloperNoteLaunch {
     @MainActor static var forcesNote: Bool {
         #if DEBUG
