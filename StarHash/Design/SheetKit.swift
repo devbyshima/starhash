@@ -59,12 +59,8 @@ extension View {
 
     /// The solid card a sheet's rows sit on. A page using the same pieces
     /// passes its own card colour, since its background is the sheet's.
-    /// `inverted` cards are the sheet's black ones, whose content takes the
-    /// white text of `StarHashSurface.card`; a page's own cards (the
-    /// transaction page) pass false.
-    func sheetCard(radius: CGFloat = 22, fill: Color = .sheetSurface, inverted: Bool = true) -> some View {
-        starhashSurface(inverted ? .card : .page)
-            .background(fill, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
+    func sheetCard(radius: CGFloat = 22, fill: Color = .sheetSurface) -> some View {
+        background(fill, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
     }
 
     /// Reports this view's height, so a sheet can size its detent to its

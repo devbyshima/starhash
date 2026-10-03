@@ -63,10 +63,8 @@ struct ContactDetailSheet: View {
                     ? .photo(contactID: contact.id, fallback: .monogram(contact.initials))
                     : .monogram(contact.initials),
                 size: 80,
-                fill: .sheetTile
+                fill: .sheetChip
             )
-            // Black in light mode, so its initials take a card's white.
-            .starhashSurface(.card)
             Text(contact.name)
                 .font(.sheet(21, .bold, relativeTo: .title2))
                 .foregroundStyle(Color.starhashPrimaryText)
