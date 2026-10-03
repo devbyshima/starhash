@@ -76,14 +76,10 @@ extension View {
 /// optional glass button pinned to the right.
 struct SheetHeader<Trailing: View>: View {
     private let title: String
-    private let leading: Bool
     private let trailing: Trailing
 
-    /// `leading` sets the title at the left edge, in line with the sheet's
-    /// content, instead of centred.
-    init(_ title: String, leading: Bool = false, @ViewBuilder trailing: () -> Trailing) {
+    init(_ title: String, @ViewBuilder trailing: () -> Trailing) {
         self.title = title
-        self.leading = leading
         self.trailing = trailing()
     }
 
@@ -95,9 +91,7 @@ struct SheetHeader<Trailing: View>: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 // Clear of the button on the right, and centred anyway.
-                .padding(.leading, leading ? 0 : 52)
-                .padding(.trailing, 52)
-                .frame(maxWidth: .infinity, alignment: leading ? .leading : .center)
+                .padding(.horizontal, 52)
                 .accessibilityAddTraits(.isHeader)
             HStack {
                 Spacer()
@@ -111,8 +105,8 @@ struct SheetHeader<Trailing: View>: View {
 }
 
 extension SheetHeader where Trailing == EmptyView {
-    init(_ title: String, leading: Bool = false) {
-        self.init(title, leading: leading) { EmptyView() }
+    init(_ title: String) {
+        self.init(title) { EmptyView() }
     }
 }
 

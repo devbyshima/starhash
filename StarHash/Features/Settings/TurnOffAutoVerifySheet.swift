@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Asks before auto-verify goes off, in Beam's sheet language and sized to
-/// its content: the title and the question at the left, a card of the three things
+/// its content: the question as the title, what it means under it, a card of the three things
 /// that stop working, then Keep On (the filled button, the safe choice)
 /// and Turn Off in red under it.
 struct TurnOffAutoVerifySheet: View {
@@ -18,21 +18,14 @@ struct TurnOffAutoVerifySheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            SheetHeader("Auto-verify", leading: true)
-                .padding(.horizontal, -2)
+            SheetHeader("Turn Off Auto-verify")
 
-            VStack(spacing: 20) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Turn off auto-verify?")
-                        .font(.sheetHeadline)
-                        .foregroundStyle(Color.starhashPrimaryText)
-                    Text("StarHash will stop reading your M\u{2011}Money messages.")
-                        .font(.sheetSubheadline)
-                        .foregroundStyle(Color.sheetSecondaryText)
-                }
-                .multilineTextAlignment(.leading)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .fixedSize(horizontal: false, vertical: true)
+            VStack(spacing: 14) {
+                Text("StarHash will stop reading your M\u{2011}Money messages.")
+                    .font(.sheetSubheadline)
+                    .foregroundStyle(Color.sheetSecondaryText)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 VStack(spacing: 0) {
                     ForEach(Array(losses.enumerated()), id: \.offset) { index, loss in
@@ -45,7 +38,7 @@ struct TurnOffAutoVerifySheet: View {
                                 .fixedSize(horizontal: false, vertical: true)
                             Spacer(minLength: 0)
                         }
-                        .padding(.vertical, 11)
+                        .padding(.vertical, 8)
                         .accessibilityElement(children: .combine)
                     }
                 }
@@ -62,11 +55,10 @@ struct TurnOffAutoVerifySheet: View {
                         dismiss()
                     }
                 }
-                .padding(.top, 14)
+                .padding(.top, 4)
             }
             .padding(.horizontal, 18)
-            .padding(.top, 4)
-            .padding(.bottom, 16)
+            .padding(.bottom, 4)
         }
         .sheetHeight($height)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
