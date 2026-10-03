@@ -104,6 +104,11 @@ extension Color {
     /// blue itself in dark mode.
     static let starhashAccentGraphic = Color(light: .init(red: 4 / 255, green: 132 / 255, blue: 195 / 255), dark: .brandBlue)
 
+    /// The StarHash mark's tile and star, as the app icon draws them: a
+    /// white star on the blue, or a blue star on a dark tile.
+    static let starhashMarkTile = Color(light: .brandBlue, dark: .init(white: 38 / 255))
+    static let starhashMarkGlyph = Color(light: .white, dark: .brandBlue)
+
     /// Letters a search matched: the accent as text.
     static let pickerMatch = Color.starhashAccentText
 

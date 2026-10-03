@@ -220,7 +220,7 @@ struct SheetIconCircle: View {
 // MARK: Buttons
 
 /// A sheet's button, Beam's: 50pt, a 16pt semibold label, a gradient fill
-/// with a soft glow of the same colour. `.sheetPrimary` is the accent, the
+/// with no glow. `.sheetPrimary` is the accent, the
 /// blue with near-black text; `.sheetFilled` is the
 /// near-black (near-white in dark mode) fill for a choice that is not the
 /// accent.
@@ -243,12 +243,12 @@ private struct SheetButtonBody: View {
 
     @Environment(\.isEnabled) private var isEnabled
 
-    private var colors: (fill: Color, label: Color, glows: Bool) {
+    private var colors: (fill: Color, label: Color) {
         switch fill {
         case .filled:
-            return (.sheetFilledButton, .sheetSurface, true)
+            return (.sheetFilledButton, .sheetSurface)
         case .accent:
-            return (.starhashInk, .starhashOnInk, true)
+            return (.starhashInk, .starhashOnInk)
         }
     }
 
@@ -262,7 +262,6 @@ private struct SheetButtonBody: View {
             .frame(maxWidth: .infinity)
             .frame(minHeight: 50)
             .background((isEnabled ? colors.fill : Color.starhashPrimaryText.opacity(0.1)).gradient, in: Capsule())
-            .shadow(color: isEnabled && colors.glows ? colors.fill.opacity(0.35) : .clear, radius: 7, y: 3)
             .contentShape(Capsule())
             .opacity(configuration.isPressed ? 0.9 : 1)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)

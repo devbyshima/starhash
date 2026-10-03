@@ -47,7 +47,7 @@ struct OnboardingPermission: View {
                     .padding(.bottom, 10)
 
                 Button(config.primaryTitle, action: config.primaryAction)
-                    .buttonStyle(.starhashPrimary)
+                    .buttonStyle(.starhashPrimaryGlowing)
                     .padding(.horizontal, 15)
 
                 if let title = config.secondaryTitle, let action = config.secondaryAction {

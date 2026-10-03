@@ -100,7 +100,8 @@ public enum ActivitySummary {
             switch t.direction {
             case .outgoing:
                 totals.spent += t.amount
-                // Only fees an SMS confirmed; a pending payment has none yet.
+                // Only confirmed payments: by SMS (its fee), or by hand (the
+                // fee from `Tariff`). A pending payment has none yet.
                 if t.status == .confirmed { totals.fees += t.fee ?? 0 }
             case .incoming:
                 totals.received += t.amount

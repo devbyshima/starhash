@@ -2,7 +2,8 @@ import StarHashKit
 import SwiftUI
 
 /// The full-width primary capsule: "Pay", "Continue", "Get Started". After
-/// Beam's: a gradient fill with a soft glow of the same colour under it.
+/// Beam's: a gradient fill, with a soft glow of the same colour under it on
+/// onboarding only (`.starhashPrimaryGlowing`); everywhere else it is flat.
 /// The blue with near-black text on every page but light mode's Pay,
 /// whose page is the blue already: there it turns over, near black with
 /// blue text, as the palette pairs them. The label is 18pt semibold, as
@@ -12,9 +13,11 @@ struct PrimaryButtonStyle: ButtonStyle {
     var height: CGFloat = StarHashMetrics.primaryButtonHeight
     /// On Pay's page, which is the blue in light mode.
     var onPay = false
+    /// The glow under it, kept for onboarding's buttons.
+    var glows = false
 
     func makeBody(configuration: Configuration) -> some View {
-        PrimaryButtonBody(configuration: configuration, height: height, onPay: onPay)
+        PrimaryButtonBody(configuration: configuration, height: height, onPay: onPay, glows: glows)
     }
 }
 
@@ -22,6 +25,7 @@ private struct PrimaryButtonBody: View {
     let configuration: ButtonStyleConfiguration
     let height: CGFloat
     let onPay: Bool
+    let glows: Bool
 
     @Environment(\.isEnabled) private var isEnabled
 
@@ -49,7 +53,7 @@ private struct PrimaryButtonBody: View {
             .background(fill.gradient, in: Capsule())
             // The glow is the button's own colour, so it lifts off the page
             // in either appearance; a disabled button gets none.
-            .shadow(color: isEnabled ? fill.opacity(0.35) : .clear, radius: 7, y: 3)
+            .shadow(color: glows && isEnabled ? fill.opacity(0.35) : .clear, radius: 7, y: 3)
             .contentShape(Capsule())
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .opacity(configuration.isPressed ? 0.9 : 1)
@@ -63,6 +67,9 @@ extension ButtonStyle where Self == PrimaryButtonStyle {
 
     /// For Pay's page, the blue in light mode.
     static var starhashPrimaryOnPay: PrimaryButtonStyle { PrimaryButtonStyle(onPay: true) }
+
+    /// With the glow under it: onboarding's buttons.
+    static var starhashPrimaryGlowing: PrimaryButtonStyle { PrimaryButtonStyle(glows: true) }
 }
 
 /// An SF Symbol on a raised tile (pale grey on a white card, a lifted

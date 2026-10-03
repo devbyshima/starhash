@@ -62,7 +62,7 @@ struct OnboardingReel: View {
         }
         .overlay(alignment: .bottom) {
             Button("Continue", action: onContinue)
-                .buttonStyle(.starhashPrimary)
+                .buttonStyle(.starhashPrimaryGlowing)
                 .padding(.horizontal, OnboardingMetrics.horizontalPadding)
                 .padding(.bottom, 10)
         }

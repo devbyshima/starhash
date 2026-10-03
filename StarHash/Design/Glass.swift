@@ -59,6 +59,13 @@ private struct StarHashGlassModifier<S: Shape>: ViewModifier {
     }
 }
 
+/// The top fade's measurements.
+enum StarHashTopFade {
+    /// Below a bar that holds solid to its foot: long enough that rows
+    /// visibly fade as they reach it.
+    static let heldLength: CGFloat = 40
+}
+
 /// Groups glass shapes so they blend and morph together on iOS 26.
 struct StarHashGlassContainer<Content: View>: View {
     var spacing: CGFloat = 8
@@ -123,9 +130,9 @@ extension View {
     /// scroll view underneath.
     ///
     /// `holdsToBottom` keeps the page colour solid down to the bar's bottom
-    /// edge and fades out over the same 18pt below it, for a bar with text
-    /// at its foot (the recipient screen's section label), which rows
-    /// would otherwise ghost through.
+    /// edge, for a bar with text at its foot (the recipient screen's
+    /// section label) that rows would otherwise ghost through, and fades
+    /// out over a longer stretch below it so the fade still shows.
     func starhashTopFade(holdsToBottom: Bool = false) -> some View {
         background(alignment: .top) {
             Group {
@@ -133,7 +140,7 @@ extension View {
                     VStack(spacing: 0) {
                         Color.starhashBackground
                         LinearGradient(colors: [.starhashBackground, .starhashBackground.opacity(0.85), .starhashBackground.opacity(0)], startPoint: .top, endPoint: .bottom)
-                            .frame(height: 18)
+                            .frame(height: StarHashTopFade.heldLength)
                     }
                 } else {
                     LinearGradient(
@@ -143,24 +150,29 @@ extension View {
                     )
                 }
             }
-            .padding(.bottom, -18)
+            .padding(.bottom, holdsToBottom ? -StarHashTopFade.heldLength : -18)
             .ignoresSafeArea(edges: .top)
             .allowsHitTesting(false)
         }
     }
 
     /// The same fade under a system navigation bar, laid over a scroll view
-    /// that runs beneath it: from the top of the screen to 18pt below the
-    /// bar, however tall the bar and status bar are.
+    /// that runs beneath it: the page colour solid to the bar's foot, as on
+    /// the recipient screen (at 85% the title's text let what scrolled
+    /// under it ghost through), then fading out below.
     func starhashTopFadeUnderNavigationBar() -> some View {
         overlay(alignment: .top) {
             GeometryReader { proxy in
-                LinearGradient(
-                    colors: [.starhashBackground, .starhashBackground.opacity(0.85), .starhashBackground.opacity(0)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(height: proxy.safeAreaInsets.top + 18)
+                VStack(spacing: 0) {
+                    Color.starhashBackground
+                        .frame(height: proxy.safeAreaInsets.top)
+                    LinearGradient(
+                        colors: [.starhashBackground, .starhashBackground.opacity(0.85), .starhashBackground.opacity(0)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: StarHashTopFade.heldLength)
+                }
                 .offset(y: -proxy.safeAreaInsets.top)
             }
             .allowsHitTesting(false)

@@ -68,7 +68,7 @@ struct OnboardingWalletPage: View {
                     option(network)
                 }
                 Button("Continue", action: save)
-                    .buttonStyle(.starhashPrimary)
+                    .buttonStyle(.starhashPrimaryGlowing)
                     .disabled(choice == nil)
                     .padding(.top, 8)
             }

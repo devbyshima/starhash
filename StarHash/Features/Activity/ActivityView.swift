@@ -210,8 +210,12 @@ struct ActivityView: View {
     private func markConfirmed(_ transaction: StarHashKit.Transaction) {
         var confirmed = transaction
         confirmed.status = .confirmed
-        // Confirmed by hand, not by an SMS, so no fee is known.
-        confirmed.fee = nil
+        // No SMS to read the fee from, so it comes from the carriers'
+        // prices, for the wallet that pays now; money received costs
+        // nothing here.
+        confirmed.fee = transaction.direction == .outgoing
+            ? Tariff.fee(sending: transaction.amount, to: transaction.counterparty, from: StarHashPreferences.wallet)
+            : nil
         withAnimation(.smooth(duration: 0.3)) { store.update(confirmed) }
         feedbackCount += 1
     }

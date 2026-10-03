@@ -37,8 +37,9 @@ Free and open source.
   follow. A contact with several numbers asks which one. The total sits
   in a bar above the keyboard; matched letters show in blue. Picking someone dials at once: the iPhone's
   call prompt, showing the whole code, is the approval.
-- **Fees**: shown only in Activity, and only once MTN's SMS has confirmed a
-  payment and given its fee. Pay shows no fees. The keypad takes up to
+- **Fees**: shown only in Activity, once a payment is confirmed: from MTN's
+  SMS, or worked out from the carriers' published prices when it is marked
+  as confirmed by hand (`Tariff` in StarHashKit, sources inside). Pay shows no fees. The keypad takes up to
   10,000,000. Numbers starting 072 or 073 are Airtel, 078 and 079 MTN; a
   number on the other network from your wallet dials
   `*182*1*2*NUMBER*AMOUNT#`.

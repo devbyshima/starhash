@@ -1,53 +1,50 @@
 import SwiftUI
 
-/// The StarHash mark: a rounded tile with a "#" cut out of it, its centre
-/// square left solid. Drawn from the app icon's Mark.svg (a 1024 grid,
-/// 230 corner radius, bars 110 wide), so it matches the icon at any size.
-///
-/// The tile is the accent by default, the brand blue in both appearances.
+/// The StarHash mark as the app icon shows it: the star over its small
+/// triangle on a rounded tile. Light: a white star on the brand blue.
+/// Dark: a blue star on a dark tile, as the icon's dark appearance draws
+/// it. Drawn from the icon's own artwork (`AppIcon.icon/Assets/Document.svg`),
+/// so it matches the icon at any size.
 struct StarHashMark: View {
     var size: CGFloat
-    var color: Color = .starhashInk
 
     var body: some View {
-        StarHashMarkShape()
-            .fill(color, style: FillStyle(eoFill: true))
+        RoundedRectangle(cornerRadius: size * 0.2237, style: .continuous)
+            .fill(Color.starhashMarkTile)
+            .overlay {
+                StarHashMarkShape()
+                    .fill(Color.starhashMarkGlyph)
+                    .padding(size * 0.12)
+            }
             .frame(width: size, height: size)
+            .accessibilityElement()
             .accessibilityLabel("StarHash")
     }
 }
 
-/// The mark's outline in its own square. Even-odd filling cuts the "#"
-/// out of the tile and fills its centre back in, as the SVG's opposite
-/// windings do.
+/// The star and the triangle beneath it, from the icon's 816 by 816
+/// artwork, centred in the rect at its largest square.
 struct StarHashMarkShape: Shape {
     func path(in rect: CGRect) -> Path {
-        let s = min(rect.width, rect.height) / 1024
-        let origin = CGPoint(x: rect.midX - 512 * s, y: rect.midY - 512 * s)
-        func p(_ x: CGFloat, _ y: CGFloat) -> CGPoint {
-            CGPoint(x: origin.x + x * s, y: origin.y + y * s)
+        let s = min(rect.width, rect.height) / 816
+        let origin = CGPoint(x: rect.midX - 408 * s, y: rect.midY - 408 * s)
+        func p(_ point: (CGFloat, CGFloat)) -> CGPoint {
+            CGPoint(x: origin.x + point.0 * s, y: origin.y + point.1 * s)
         }
 
-        var path = Path()
-        path.addRoundedRect(
-            in: CGRect(origin: origin, size: CGSize(width: 1024 * s, height: 1024 * s)),
-            cornerSize: CGSize(width: 230 * s, height: 230 * s),
-            style: .circular
-        )
-
-        // The "#" outline, clockwise from the top of its left bar.
-        let hash: [(CGFloat, CGFloat)] = [
-            (340, 230), (450, 230), (450, 340), (574, 340), (574, 230), (684, 230),
-            (684, 340), (794, 340), (794, 450), (684, 450), (684, 574), (794, 574),
-            (794, 684), (684, 684), (684, 794), (574, 794), (574, 684), (450, 684),
-            (450, 794), (340, 794), (340, 684), (230, 684), (230, 574), (340, 574),
-            (340, 450), (230, 450), (230, 340), (340, 340),
+        let star: [(CGFloat, CGFloat)] = [
+            (285.5, 88.1), (521.5, 88.1), (480.8, 302.1), (645.7, 166.1),
+            (759.1, 364.8), (547, 441.5), (764.3, 516.7), (645.7, 710.3),
+            (404.8, 495.3), (160.5, 710.3), (43.4, 516.8), (260, 441.5),
+            (45, 364.8), (160.8, 166.1), (325.5, 302.1),
         ]
-        path.addLines(hash.map { p($0.0, $0.1) })
-        path.closeSubpath()
+        let triangle: [(CGFloat, CGFloat)] = [(404.4, 563.8), (564.8, 729.4), (242.3, 729.4)]
 
-        // The square in the middle of the "#".
-        path.addRect(CGRect(origin: p(450, 450), size: CGSize(width: 124 * s, height: 124 * s)))
+        var path = Path()
+        path.addLines(star.map(p))
+        path.closeSubpath()
+        path.addLines(triangle.map(p))
+        path.closeSubpath()
         return path
     }
 }
