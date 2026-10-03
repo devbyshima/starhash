@@ -46,9 +46,10 @@ Free and open source.
   Glass tinted the accent. The call button dials; tapping a card opens
   its details in a small sheet after Keaser's expense details (Edit,
   Dial, Delete); holding one offers Dial, Pin, Edit and Delete, a swipe
-  from the right deletes it and a swipe from the left pins it. Pinned
-  codes sit at the top, two to a row, and dial at once on a tap; their
-  options open on a long press. It comes with MoMo's
+  from the right deletes it and a swipe from the left pins it. Up to
+  eight codes can be pinned: they sit at the top as portrait tiles (the
+  symbol and the name), in two rows of two to four, and dial at once on a
+  tap; their options open on a long press. It comes with MoMo's
   pending approvals and cash out, MTN's Gwamon' Pack and the airport's
   parking; the + at the top right adds your own in a sheet after Keaser's
   New Category, with a close button and a confirm one: a name, a code that

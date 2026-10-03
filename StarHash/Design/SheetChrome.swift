@@ -82,12 +82,17 @@ struct StarHashRowSeparator: View {
 }
 
 /// A tappable card row that highlights while pressed, like a list cell.
+/// `pressHaptic` false for a row that also answers a long press.
 struct HighlightRowButtonStyle: ButtonStyle {
+    var pressHaptic = true
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .background(Color.starhashPrimaryText.opacity(configuration.isPressed ? 0.06 : 0))
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
-            .starhashPressHaptic(configuration.isPressed, weight: .light)
+            .sensoryFeedback(trigger: configuration.isPressed) { _, pressed in
+                pressed && pressHaptic ? .impact(weight: .light) : nil
+            }
     }
 }
 
@@ -145,12 +150,18 @@ private extension View {
 }
 
 /// A slight shrink while pressed, for controls that draw their own shape.
+/// `pressHaptic` false for one that also opens a menu on a long press; its
+/// action plays `TapHaptic` instead.
 struct PressScaleButtonStyle: ButtonStyle {
+    var pressHaptic = true
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.94 : 1)
             .opacity(configuration.isPressed ? 0.85 : 1)
             .animation(.snappy(duration: 0.18), value: configuration.isPressed)
-            .starhashPressHaptic(configuration.isPressed)
+            .sensoryFeedback(trigger: configuration.isPressed) { _, pressed in
+                pressed && pressHaptic ? .impact(weight: .medium) : nil
+            }
     }
 }

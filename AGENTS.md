@@ -104,7 +104,9 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   impact (`starhashPressHaptic`; medium for Pay, Balance, Continue and a
   sheet's button, light for round glass buttons and rows), and a plain
   button uses `.hapticPlain`, never `.plain`. Don't add a second haptic
-  for the same tap. Root pages leave room for it with
+  for the same tap: a button that also opens a menu on a long press gets a
+  silent style (`pressHaptic: false`) and plays `TapHaptic` in its action,
+  or the press and the menu would both buzz. Root pages leave room for it with
   `starhashTabBarClearance()`, scroll views shrink it with
   `starhashTabBarFollowsScroll()`, and a page hides it with
   `router.setHidesTabBar(_:on:)` while a screen is pushed or a search is
@@ -144,7 +146,7 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 | --- | --- |
 | `-inMemory` | fresh in-memory store seeded with `SampleData` |
 | `-emptyStore` | with `-inMemory`, no transactions (Activity's empty state) |
-| `-buyPinned` | with `-inMemory`: Buy's first two codes pinned |
+| `-buyPinned [n]` | with `-inMemory`: Buy's first n codes pinned (2 by default, sample codes added past the four defaults) |
 | `-buyNew`, `-buyEdit`, `-buyDetails` | with `-tab buy`: the code editor, new or on the first code (`-buySymbols` opens its symbol grid), or the first code's details |
 | `-splash` | the launch splash (any other debug argument skips it, so screenshots see their screen) |
 | `-skipOnboarding`, `-resetOnboarding` | start on the tabs, or on onboarding |

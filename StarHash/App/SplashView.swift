@@ -24,9 +24,9 @@ struct SplashView: View {
         }
         .ignoresSafeArea()
         .onAppear {
-            withAnimation(.spring(response: 0.75, dampingFraction: 0.58)) { appears = true }
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.62)) { appears = true }
             Task {
-                try? await Task.sleep(for: .seconds(reduceMotion ? 0.6 : 1.9))
+                try? await Task.sleep(for: .seconds(reduceMotion ? 0.4 : 1.0))
                 onFinish()
             }
         }
@@ -108,7 +108,7 @@ struct SplashGate<Content: View>: View {
                 .environment(\.splashActive, showsSplash)
             if showsSplash {
                 SplashView {
-                    withAnimation(.smooth(duration: 0.5)) { showsSplash = false }
+                    withAnimation(.smooth(duration: 0.35)) { showsSplash = false }
                 }
                 .transition(.opacity)
                 .zIndex(100)

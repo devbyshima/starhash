@@ -46,10 +46,9 @@ struct TurnOffAutoVerifySheet: View {
                 .sheetCard()
 
                 VStack(spacing: 4) {
-                    // Neutral rather than the blue, so the safe choice
-                    // does not look like the one being urged.
+                    // The sheets' one button colour, as Buy's sheets have.
                     Button("Keep On") { dismiss() }
-                        .buttonStyle(.sheetFilled)
+                        .buttonStyle(.sheetPrimary)
                     SheetTextButton("Turn Off", role: .destructive) {
                         onTurnOff()
                         dismiss()

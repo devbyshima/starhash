@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // A press is felt the moment it is made: every StarHash button style plays
 // an impact as the button goes down (none when disabled, since a disabled
@@ -29,6 +30,16 @@ struct HapticPlainButtonStyle: ButtonStyle {
                 guard pressed, let weight else { return nil }
                 return .impact(weight: weight)
             }
+    }
+}
+
+/// A tap felt once it lands, for a button that also opens a menu on a long
+/// press: a press haptic there would play on touch-down and then again as
+/// the menu opens. Its style leaves the press silent; its action plays this.
+@MainActor
+enum TapHaptic {
+    static func play(_ style: UIImpactFeedbackGenerator.FeedbackStyle = .light) {
+        UIImpactFeedbackGenerator(style: style).impactOccurred()
     }
 }
 

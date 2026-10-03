@@ -142,10 +142,21 @@ public final class USSDShortcutList {
     /// The rest, in the list's order.
     public var unpinned: [USSDShortcut] { shortcuts.filter { !$0.isPinned } }
 
-    public func setPinned(_ id: USSDShortcut.ID, _ isPinned: Bool) {
-        guard let index = shortcuts.firstIndex(where: { $0.id == id }) else { return }
+    /// How many codes can be pinned: two rows of four at most.
+    public static let maxPinned = 8
+
+    /// Whether one more can be pinned.
+    public var canPin: Bool { pinned.count < Self.maxPinned }
+
+    /// Pins or unpins one. False, and nothing pinned, when eight already
+    /// are.
+    @discardableResult
+    public func setPinned(_ id: USSDShortcut.ID, _ isPinned: Bool) -> Bool {
+        guard let index = shortcuts.firstIndex(where: { $0.id == id }) else { return false }
+        if isPinned, !shortcuts[index].isPinned, !canPin { return false }
         shortcuts[index].isPinned = isPinned
         save()
+        return true
     }
 
     public func remove(_ id: USSDShortcut.ID) {

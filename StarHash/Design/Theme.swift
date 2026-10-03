@@ -183,6 +183,10 @@ extension Color {
     /// white-tinted glass still lets the blue page and its highlights
     /// through on a device. Dark keeps the glass, tinted `sheetGlassTint`.
     static let sheetSolidFill = Color(light: .white, dark: .clear)
+    /// The note sheets' background: solid white in light mode, as
+    /// `sheetSolidFill`, and the page's own near black in dark, so the note
+    /// reads as a page.
+    static let noteSheetBackground = Color(light: .white, dark: .brandNight)
     /// The dotted line between a sheet card's rows.
     static let sheetDivider = Color(light: .brandNight.opacity(0.22), dark: .brandPaper.opacity(0.22))
 

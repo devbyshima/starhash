@@ -30,6 +30,8 @@ struct BuyView: View {
     @State private var undialledCode: String?
     @State private var deletedCount = 0
     @State private var pinnedCount = 0
+    /// Eight pinned already, when one more was asked for.
+    @State private var pinsFull = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -62,6 +64,11 @@ struct BuyView: View {
         .sensoryFeedback(.impact(weight: .medium), trigger: pinnedCount)
         .sheet(item: $editing) { draft in
             ShortcutEditor(draft: draft)
+        }
+        .alert("Pinned is full", isPresented: $pinsFull) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("You can pin up to \(USSDShortcutList.maxPinned) codes. Unpin one to make room.")
         }
         .sheet(item: $details, onDismiss: runAfterDetails) { shortcut in
             ShortcutDetailSheet(
@@ -124,7 +131,8 @@ struct BuyView: View {
                             )
                             .contextMenu {
                                 Button("Dial \(shortcut.code)", systemImage: "phone.arrow.up.right") { dial(shortcut.code) }
-                                Button("Pin", systemImage: "pin") { pin(shortcut, true) }
+                                Button(shortcuts.canPin ? "Pin" : "Pinned is full", systemImage: "pin") { pin(shortcut, true) }
+                                    .disabled(!shortcuts.canPin)
                                 Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
                                 Button("Delete", systemImage: "trash", role: .destructive) { delete(shortcut) }
                             }
@@ -157,10 +165,13 @@ struct BuyView: View {
             .padding(.bottom, 10)
     }
 
-    /// The pinned codes, two to a row: a tap dials at once, and their
-    /// options open only on a long press.
+    /// The pinned codes in two rows at most: half as many columns as codes,
+    /// two at least and four at most (two for two, three for six, four for
+    /// eight). A tap dials at once; options open only on a long press.
     private var pinnedGrid: some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+        let count = shortcuts.pinned.count
+        let columns = min(4, max(2, (count + 1) / 2))
+        return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: columns), spacing: 10) {
             ForEach(shortcuts.pinned) { shortcut in
                 PinnedTile(shortcut: shortcut) { dial(shortcut.code) }
                     .contextMenu {
@@ -177,9 +188,16 @@ struct BuyView: View {
         }
     }
 
+    /// Pins or unpins; with eight pinned, a swipe to pin explains instead.
     private func pin(_ shortcut: USSDShortcut, _ isPinned: Bool) {
-        withAnimation(.smooth(duration: 0.35)) { shortcuts.setPinned(shortcut.id, isPinned) }
-        pinnedCount += 1
+        var pinned = false
+        withAnimation(.smooth(duration: 0.35)) { pinned = shortcuts.setPinned(shortcut.id, isPinned) }
+        if pinned {
+            pinnedCount += 1
+        } else {
+            UINotificationFeedbackGenerator().notificationOccurred(.warning)
+            pinsFull = true
+        }
     }
 
     private func runAfterDetails() {
@@ -216,7 +234,10 @@ private struct ShortcutItem: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            Button(action: onOpen) {
+            Button {
+                TapHaptic.play()
+                onOpen()
+            } label: {
                 HStack(spacing: 14) {
                     SymbolTile(symbol: shortcut.symbol ?? ShortcutSymbols.plain, size: 40)
                     VStack(alignment: .leading, spacing: 2) {
@@ -240,7 +261,7 @@ private struct ShortcutItem: View {
                 .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 22, style: .continuous))
                 .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
             }
-            .buttonStyle(PressScaleButtonStyle())
+            .buttonStyle(PressScaleButtonStyle(pressHaptic: false))
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(shortcut.name)
             .accessibilityValue(shortcut.code)
@@ -263,43 +284,47 @@ private struct ShortcutItem: View {
     }
 }
 
-/// A pinned code: a square-ish tile of clear Liquid Glass with its symbol,
-/// a phone on its corner and its name and code under them. A tap dials at
-/// once; its options open on a long press.
+/// A pinned code: a portrait tile of clear Liquid Glass with its symbol in
+/// the middle and its name at the foot, and nothing else. A tap dials at
+/// once; its options open on a long press. The symbol and name scale with
+/// the tile, two to four to a row.
 private struct PinnedTile: View {
     let shortcut: USSDShortcut
     let onDial: () -> Void
 
     var body: some View {
-        Button(action: onDial) {
-            VStack(alignment: .leading, spacing: 0) {
-                HStack(alignment: .top) {
-                    SymbolTile(symbol: shortcut.symbol ?? ShortcutSymbols.plain, size: 40)
-                    Spacer(minLength: 0)
-                    Image(systemName: "phone.fill")
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundStyle(Color.starhashOnInk)
-                        .frame(width: 30, height: 30)
-                        .background(Color.starhashInk.gradient, in: Circle())
+        Button {
+            TapHaptic.play(.medium)
+            onDial()
+        } label: {
+            Color.clear
+                .aspectRatio(0.78, contentMode: .fit)
+                // Two to a row would stand too tall: still portrait, lower.
+                .frame(maxHeight: 170)
+                .overlay {
+                    GeometryReader { proxy in
+                        let width = proxy.size.width
+                        VStack(spacing: 0) {
+                            Spacer(minLength: 0)
+                            SymbolTile(symbol: shortcut.symbol ?? ShortcutSymbols.plain, size: min(64, width * 0.46))
+                            Spacer(minLength: 0)
+                            Text(shortcut.name)
+                                .starhashFont(width < 110 ? 13 : 15, weight: .semibold, relativeTo: .footnote)
+                                .foregroundStyle(Color.starhashPrimaryText)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.8)
+                                .padding(.horizontal, 8)
+                                .padding(.bottom, width < 110 ? 10 : 14)
+                        }
+                        .frame(width: width, height: proxy.size.height)
+                    }
                 }
-                Spacer(minLength: 12)
-                Text(shortcut.name)
-                    .starhashFont(16, weight: .semibold, relativeTo: .headline)
-                    .foregroundStyle(Color.starhashPrimaryText)
-                    .lineLimit(2)
-                Text(shortcut.code)
-                    .starhashFont(13, weight: .semibold, relativeTo: .footnote, tracking: 0)
-                    .foregroundStyle(Color.starhashTertiaryText)
-                    .lineLimit(1)
-                    .padding(.top, 2)
-            }
-            .padding(14)
-            .frame(maxWidth: .infinity, minHeight: 124, alignment: .topLeading)
-            .starhashGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous), tint: .clear)
-            .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 22, style: .continuous))
-            .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .starhashGlass(in: RoundedRectangle(cornerRadius: 20, style: .continuous), tint: .clear)
+                .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .contentShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         }
-        .buttonStyle(PressScaleButtonStyle())
+        .buttonStyle(PressScaleButtonStyle(pressHaptic: false))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Dial \(shortcut.name)")
         .accessibilityValue(shortcut.code)

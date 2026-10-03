@@ -27,9 +27,19 @@ enum AppEnvironment {
             let name = "StarHashDebugShortcuts"
             UserDefaults().removePersistentDomain(forName: name)
             let list = USSDShortcutList(defaults: UserDefaults(suiteName: name) ?? .standard)
-            // -buyPinned: the first two codes pinned.
+            // -buyPinned [n]: the first n codes pinned (two by default),
+            // with sample codes added when the four defaults are not enough.
             if DebugLaunch.arguments.contains("-buyPinned") {
-                for shortcut in list.shortcuts.prefix(2) { list.setPinned(shortcut.id, true) }
+                let count = DebugLaunch.value(after: "-buyPinned").flatMap(Int.init) ?? 2
+                let samples = [
+                    ("Airtime", "*182*2*1#", "phone.fill"), ("Bundles", "*182*2*1*2#", "wifi"),
+                    ("Cash Power", "*662*1#", "bolt.fill"), ("Balance", "*182*6*1#", "banknote.fill"),
+                    ("Water", "*182*3*1#", "drop.fill"),
+                ]
+                for sample in samples where list.shortcuts.count < count + 1 {
+                    list.add(name: sample.0, code: sample.1, symbol: sample.2)
+                }
+                for shortcut in list.shortcuts.prefix(count) { list.setPinned(shortcut.id, true) }
             }
             return list
         }

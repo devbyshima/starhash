@@ -178,11 +178,7 @@ private struct NoteSheetFrame<Content: View>: View {
             HStack {
                 Spacer()
                 Button(action: onClose) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 21, weight: .medium))
-                        .foregroundStyle(Color.starhashPrimaryText)
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
+                    SheetGlassGlyph(symbol: "xmark")
                 }
                 .buttonStyle(.hapticPlain)
                 .accessibilityLabel("Close")
@@ -192,7 +188,7 @@ private struct NoteSheetFrame<Content: View>: View {
             content
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(Color.sheetSolidFill.ignoresSafeArea())
+        .background(Color.noteSheetBackground.ignoresSafeArea())
         .sheetGlass(detents: [.large])
         .presentationDragIndicator(.hidden)
     }

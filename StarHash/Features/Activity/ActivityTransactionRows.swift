@@ -23,6 +23,9 @@ struct ActivityTransactionRows: View {
         ForEach(Array(transactions.enumerated()), id: \.element.id) { index, transaction in
             let position = ActivityCardPosition(index: index, count: transactions.count)
             Button {
+                // Here, not on touch-down: a long press opens the menu,
+                // which has its own.
+                TapHaptic.play()
                 onOpen(transaction)
             } label: {
                 ActivityTransactionRow(transaction: transaction, showsDate: showsDate)
@@ -146,6 +149,5 @@ struct ActivityRowButtonStyle: ButtonStyle {
                     .allowsHitTesting(false)
             }
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
-            .starhashPressHaptic(configuration.isPressed, weight: .light)
     }
 }

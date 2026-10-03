@@ -862,7 +862,9 @@ struct RecipientRow: View {
                 }
             )
         }
-        .buttonStyle(HighlightRowButtonStyle())
+        // Silent on touch-down: a tap pays (which plays its own) and a long
+        // press plays the one below.
+        .buttonStyle(HighlightRowButtonStyle(pressHaptic: false))
         .sensoryFeedback(.impact(weight: .medium), trigger: longPresses)
         .accessibilityElement(children: .combine)
         .accessibilityAction(named: "Show contact details") { onLongPress?() }

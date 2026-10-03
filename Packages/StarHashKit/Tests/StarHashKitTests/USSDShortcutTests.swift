@@ -29,6 +29,19 @@ struct USSDShortcutTests {
         #expect(list.pinned.isEmpty)
     }
 
+    @Test func pinsEightAtMost() {
+        let list = USSDShortcutList(defaults: freshDefaults())
+        for index in 0..<6 { list.add(name: "Code \(index)", code: "*\(100 + index)#") }
+        let ids = list.shortcuts.map(\.id)
+        #expect(ids.count == 10)
+        for id in ids.prefix(8) { #expect(list.setPinned(id, true)) }
+        #expect(!list.canPin)
+        #expect(!list.setPinned(ids[8], true))
+        #expect(list.pinned.count == 8)
+        #expect(list.setPinned(ids[0], false))
+        #expect(list.setPinned(ids[8], true))
+    }
+
     @Test func readsAListSavedBeforePinning() throws {
         let defaults = freshDefaults()
         let old = #"[{"id":"5E2A7C1E-0003-4000-8000-000000000003","name":"Gwamon","code":"*154*0#"}]"#
