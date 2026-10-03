@@ -9,8 +9,8 @@ import SwiftUI
 /// Laid out as Beam's "find your Mac" step, so it reads as one of the reel's
 /// family: the symbol in its pulse rings in the middle, the words low, the
 /// choices (each with its carrier's logo) and Continue under them, and the
-/// glow at the bottom edge. As a wallet is picked its logo takes the
-/// symbol's place inside the blue rings.
+/// glow at the bottom edge. As a carrier is picked its logo takes the
+/// symbol's place and the rings pulse in the carrier's own colour.
 ///
 /// Also shown on its own, to an install that finished onboarding before
 /// this page existed.
@@ -21,13 +21,16 @@ struct OnboardingWalletPage: View {
     @State private var choice: Recipient.Network?
 
     private var tint: Color { OnboardingPalette.tint }
+    /// The rings: the blue until a carrier is chosen, then its colour.
+    private var ringTint: Color { choice?.carrierColor ?? tint }
 
     var body: some View {
         VStack(spacing: 0) {
             Spacer(minLength: 0)
 
             ZStack {
-                OnboardingPulseRings(tint: tint)
+                OnboardingPulseRings(tint: ringTint)
+                    .animation(.smooth(duration: 0.4), value: choice)
                 // The chosen carrier's logo in the rings; a SIM until then.
                 Group {
                     if let choice {
@@ -47,11 +50,11 @@ struct OnboardingWalletPage: View {
             Spacer(minLength: 0)
 
             VStack(spacing: 12) {
-                Text("Your wallet")
+                Text("Your carrier")
                     .starhashFont(22, weight: .bold, relativeTo: .title2)
                     .foregroundStyle(Color.starhashPrimaryText)
                     .accessibilityAddTraits(.isHeader)
-                Text("Which do you pay with? StarHash dials\nits codes for you.")
+                Text("Which carrier do you pay with? StarHash\ndials its codes for you.")
                     .font(.starhash(.callout))
                     .foregroundStyle(Color.starhashSecondaryText)
             }
@@ -123,6 +126,15 @@ struct OnboardingWalletPage: View {
 }
 
 extension Recipient.Network {
+    /// The carrier's own colour, for its rings on onboarding's carrier
+    /// step; everywhere else it lives only in the logo.
+    var carrierColor: Color {
+        switch self {
+        case .mtn: .starhashMTNRing
+        case .airtel: .starhashAirtel
+        }
+    }
+
     /// A monogram, rather than the network's own logo.
     var symbol: String {
         switch self {

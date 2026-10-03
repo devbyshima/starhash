@@ -65,7 +65,7 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   `payGlassTint` glass) because its light page is the blue. The only other
   hues are `starhashIncoming` (money in) and `starhashDestructive` (money
   out arrows, destructive actions); the carriers' colours live only in
-  their logos. Switches are the blue.
+  their logos and the pulse rings round the chosen one on onboarding. Switches are the blue.
 - Glass only through `starhashGlass`, `starhashGlassButtonStyle`,
   `StarHashGlassContainer` (iOS 18 falls back to materials).
 - Build screens from the existing pieces: `StarHashCircleButton`,
