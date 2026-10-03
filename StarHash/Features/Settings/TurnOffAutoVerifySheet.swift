@@ -61,8 +61,10 @@ struct TurnOffAutoVerifySheet: View {
         }
         .sheetHeight($height)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        // Shorter than Beam's margin: Turn Off's own 44pt tap area and the
-        // home indicator's inset already leave room under it.
-        .sheetGlass(detents: [.height(height - 22)])
+        // Into the home indicator's inset, which otherwise sat as an empty
+        // band under Turn Off. iOS adds that inset to the detent, so the
+        // detent leaves it out; the content keeps its full height.
+        .ignoresSafeArea(.container, edges: .bottom)
+        .sheetGlass(detents: [.height(height - 4)])
     }
 }
