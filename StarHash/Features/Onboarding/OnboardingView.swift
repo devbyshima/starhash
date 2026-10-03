@@ -85,8 +85,7 @@ struct OnboardingView: View {
                     .id(Stage.autoVerify)
                     .transition(.opacity)
             case .note:
-                DeveloperNoteContent(kind: .welcome, primaryTitle: "Start Using StarHash", primaryAction: finish, glows: true)
-                    .padding(.top, 24)
+                DeveloperNoteContent(kind: .welcome, primaryTitle: "Start Using StarHash", primaryAction: finish)
                     .transition(.opacity)
             }
         }

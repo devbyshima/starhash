@@ -20,83 +20,101 @@ enum DeveloperNoteKind {
             "Hi, I'm Shima, and I made StarHash.",
             "I built it because I was tired of how hard USSD makes paying. Typing codes and digging through menus for the things you do every day felt wrong, so StarHash does them in a few taps.",
             "It's free and open source, and it's private: no account, no server, no tracking. Everything stays on your iPhone.",
-            "I hope it makes paying a little easier. Enjoy it.",
+            "I hope it makes paying a little easier. Enjoy it, and if something is off, write to me. I answer you myself.",
         ]
         case .review: [
             "You've been using StarHash for two weeks now. Thank you.",
             "I made it on my own, because USSD made paying harder than it should be.",
             "StarHash is free and open source, with no ads, no account and nothing sent off your iPhone. There is nothing to buy.",
             "So if you love it, a rating on the App Store is all I ask. It helps someone else find an easier way to pay.",
+            "If something is off, write to me first. I answer you myself.",
         ]
         }
     }
 }
 
 /// The note's content, shared by onboarding's last screen and the sheets.
+/// The letter and its buttons are one block, centred on the page, as the
+/// reference sets them; a long Dynamic Type size scrolls instead.
 struct DeveloperNoteContent: View {
     let kind: DeveloperNoteKind
     let primaryTitle: String
     let primaryAction: () -> Void
-    /// Onboarding's buttons glow, as its others do.
-    var glows = false
 
     @Environment(\.openURL) private var openURL
 
     var body: some View {
-        VStack(spacing: 0) {
+        GeometryReader { proxy in
             ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    DeveloperAvatar()
-                        .padding(.bottom, 18)
-                    Text("A note from Shima")
-                        .starhashFont(28, weight: .bold, relativeTo: .title)
-                        .foregroundStyle(Color.starhashPrimaryText)
-                        .accessibilityAddTraits(.isHeader)
-                        .padding(.bottom, 16)
-                    VStack(alignment: .leading, spacing: 12) {
-                        ForEach(Array(kind.paragraphs.enumerated()), id: \.offset) { _, paragraph in
-                            Text(paragraph)
-                                .font(.starhash(.body))
-                                .foregroundStyle(Color.starhashPrimaryText)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
-                    // A signature, so a script face: iOS's own Snell
-                    // Roundhand, the one text not set in Space Grotesk.
-                    Text("Shima")
-                        .font(.custom("SnellRoundhand-Bold", size: 44, relativeTo: .largeTitle))
-                        .foregroundStyle(Color.starhashPrimaryText)
-                        .padding(.top, 20)
-                        .accessibilityLabel("Signed, Shima")
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 30)
-                .padding(.top, 8)
-                .padding(.bottom, 20)
+                letter
+                    .frame(maxWidth: .infinity, minHeight: proxy.size.height)
             }
             .scrollIndicators(.hidden)
             .scrollBounceBehavior(.basedOnSize)
+        }
+        .starhashReadableWidth(StarHashMetrics.narrowReadableWidth)
+    }
 
-            VStack(spacing: 4) {
-                Button(primaryTitle, action: primaryAction)
-                    .buttonStyle(glows ? .starhashPrimaryGlowing : .starhashPrimary)
+    private var letter: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            DeveloperAvatar()
+                .padding(.bottom, 16)
+            Text("A note from Shima")
+                .starhashFont(29, weight: .semibold, relativeTo: .title)
+                .foregroundStyle(Color.starhashPrimaryText)
+                .accessibilityAddTraits(.isHeader)
+                .padding(.bottom, 18)
+            VStack(alignment: .leading, spacing: 10) {
+                ForEach(Array(kind.paragraphs.enumerated()), id: \.offset) { _, paragraph in
+                    Text(paragraph)
+                        .starhashFont(16.5, relativeTo: .body)
+                        .lineSpacing(3)
+                        .foregroundStyle(Color.starhashPrimaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            // A signature, so a script face: iOS's own Snell Roundhand, the
+            // one text not set in Space Grotesk.
+            Text("Shima")
+                .font(.custom("SnellRoundhand", size: 50, relativeTo: .largeTitle))
+                .foregroundStyle(Color.starhashPrimaryText)
+                .padding(.top, 14)
+                .accessibilityLabel("Signed, Shima")
+
+            VStack(spacing: 0) {
+                Button(action: primaryAction) {
+                    Text(primaryTitle)
+                        .starhashFont(17, weight: .medium, relativeTo: .body)
+                        .foregroundStyle(Color.noteButtonText)
+                        .frame(maxWidth: .infinity, minHeight: 56)
+                        .background(Color.noteButton, in: Capsule())
+                        .contentShape(Capsule())
+                }
+                .buttonStyle(.plain)
                 Button {
                     openURL(DeveloperNoteLinks.write)
                 } label: {
                     Text("Write to Shima")
-                        .font(.starhash(.subheadline, weight: .semibold))
+                        .starhashFont(14, relativeTo: .subheadline)
                         .foregroundStyle(Color.starhashSecondaryText)
-                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .frame(maxWidth: .infinity, minHeight: 64)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityHint("Opens a new message to Shima on GitHub")
             }
-            .padding(.horizontal, 30)
-            .padding(.bottom, 8)
+            .padding(.top, 30)
         }
-        .starhashReadableWidth(StarHashMetrics.narrowReadableWidth)
+        .padding(.horizontal, 30)
+        .padding(.vertical, 20)
     }
+}
+
+private extension Color {
+    /// The reference's flat black button with white words. Dark mode turns
+    /// it over: the pale grey with the near black on it.
+    static let noteButton = Color(light: .brandNight, dark: .brandPaper)
+    static let noteButtonText = Color(light: .white, dark: .brandNight)
 }
 
 /// The round picture at the top: the StarHash star on a white disc, until a
@@ -111,7 +129,7 @@ private struct DeveloperAvatar: View {
                     .fill(Color.brandBlue)
                     .padding(13)
             }
-            .shadow(color: .black.opacity(0.08), radius: 6, y: 2)
+            .overlay { Circle().strokeBorder(Color.black.opacity(0.08), lineWidth: 1) }
             .accessibilityHidden(true)
     }
 }
@@ -134,7 +152,7 @@ struct DeveloperNoteSheet: View {
     }
 }
 
-/// The two-week note, with its one ask: Rate StarHash brings up the App
+/// The two-week note, with its one ask: Rate on the App Store brings up the App
 /// Store's own rating prompt.
 struct ReviewNoteSheet: View {
     @Environment(\.dismiss) private var dismiss
@@ -142,7 +160,7 @@ struct ReviewNoteSheet: View {
 
     var body: some View {
         NoteSheetFrame(onClose: { dismiss() }) {
-            DeveloperNoteContent(kind: .review, primaryTitle: "Rate StarHash") {
+            DeveloperNoteContent(kind: .review, primaryTitle: "Rate on the App Store") {
                 dismiss()
                 Task {
                     // Once the sheet has gone, so the prompt is not under it.
@@ -154,8 +172,8 @@ struct ReviewNoteSheet: View {
     }
 }
 
-/// A full-height sheet with the round close button at its top right, as
-/// the reference draws it.
+/// A full-height sheet with a bare close cross at its top right and no
+/// grabber, as the reference draws it.
 private struct NoteSheetFrame<Content: View>: View {
     let onClose: () -> Void
     @ViewBuilder var content: Content
@@ -164,14 +182,23 @@ private struct NoteSheetFrame<Content: View>: View {
         VStack(spacing: 0) {
             HStack {
                 Spacer()
-                StarHashCircleButton("xmark", label: "Close", action: onClose)
+                Button(action: onClose) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 21, weight: .medium))
+                        .foregroundStyle(Color.starhashPrimaryText)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Close")
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 18)
+            .padding(.horizontal, 16)
+            .padding(.top, 20)
             content
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .sheetGlass(detents: [.large])
+        .presentationDragIndicator(.hidden)
     }
 }
 
