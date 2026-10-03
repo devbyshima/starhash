@@ -45,17 +45,33 @@ struct SplashView: View {
     }
 }
 
-/// The page's colour with a soft glow rising from the foot of the screen:
-/// the blue in dark mode, white on light mode's blue.
+/// The page's colour lit from the foot of the screen: in dark mode Beam's
+/// soft blue glow rising out of the bottom edge; in light mode a gradient
+/// that turns the blue to white by the bottom edge, as a glow would not
+/// read on the blue.
 struct SplashBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         ZStack {
             Color.starhashBackground
-            Circle()
-                .fill(Color.splashGlow.gradient)
-                .visualEffect { content, proxy in content.offset(y: proxy.size.height * 1.07) }
-                .frame(maxHeight: .infinity, alignment: .bottom)
-                .blur(radius: 90)
+            if colorScheme == .dark {
+                Circle()
+                    .fill(Color.splashGlow.gradient)
+                    .visualEffect { content, proxy in content.offset(y: proxy.size.height * 1.07) }
+                    .frame(maxHeight: .infinity, alignment: .bottom)
+                    .blur(radius: 90)
+            } else {
+                LinearGradient(
+                    stops: [
+                        .init(color: Color.splashGlow.opacity(0), location: 0.5),
+                        .init(color: Color.splashGlow.opacity(0.55), location: 0.82),
+                        .init(color: Color.splashGlow, location: 1),
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            }
         }
         .ignoresSafeArea()
     }

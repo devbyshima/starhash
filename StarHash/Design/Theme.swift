@@ -54,8 +54,9 @@ extension Color {
     /// The same, as text straight on the page: no brighter red reaches
     /// 4.5:1 on the blue, so light mode deepens it (4.6:1).
     /// The glow rising behind the launch splash and blooming round its
-    /// mark: the blue on dark mode's near black, white on light mode's blue.
-    static let splashGlow = Color(light: .white.opacity(0.55), dark: .brandBlue)
+    /// mark: the blue on dark mode's near black, full white on light mode's
+    /// blue.
+    static let splashGlow = Color(light: .white, dark: .brandBlue)
     /// The period control's lens on the page's tinted glass: white, faint,
     /// with a bright rim, as the system's own selection reads.
     static let segmentedLens = Color(light: .white.opacity(0.42), dark: .white.opacity(0.14))
