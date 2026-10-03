@@ -1,14 +1,14 @@
 import SwiftUI
 
 // Shared look for every page in the Settings tab, after GO Club's: rounded
-// 26pt cards 10pt from the screen's edges (white in light mode, charcoal in
-// dark mode), everything in them 20pt in, a section's grey title inside
+// 26pt cards 10pt from the screen's edges (white glass in light mode, black
+// glass in dark), everything in them 20pt in, a section's grey title inside
 // its card at the top, and a dashed line across the card between every
 // row. Rows keep a symbol on a faint tile, a title and a small caption.
 // Sheets presented from Settings keep the sheet look instead.
 
 extension Color {
-    /// Cards on a settings page: white in light mode, charcoal in dark mode.
+    /// The light-mode fill under a settings card's glass: white.
     static var settingsCard: Color { .starhashCard }
     /// The tile behind row symbols and the profile monogram: a visible grey
     /// on a white card, a faint veil on a charcoal one.
@@ -21,122 +21,122 @@ extension Color {
     static let settingsToggleOn = Color.starhashSwitchOn
 }
 
-/// Where a row sits in its card, so its background rounds the right
-/// corners and only rows after another draw the line above them.
-enum SettingsCardPosition {
-    case single, first, middle, last
-    /// The first row under a `SettingsSectionTitle`, which holds the card's
-    /// top: square above, and no line between the title and the row.
-    case firstUnderTitle
-    /// The only row under a title: square above, rounded below.
-    case onlyUnderTitle
-
-    init(index: Int, count: Int) {
-        switch (index, count) {
-        case (_, ...1): self = .single
-        case (0, _): self = .first
-        case (count - 1, _): self = .last
-        default: self = .middle
-        }
-    }
-
-    var roundsTop: Bool { self == .single || self == .first }
-    var roundsBottom: Bool { self == .single || self == .last || self == .onlyUnderTitle }
-    var hasLineAbove: Bool { self == .middle || self == .last }
-}
-
-/// One row's slice of a rounded card. Drawing the corners per row (instead
-/// of relying on the list's section shape) gives the same 26pt corners on
-/// iOS 18, whose inset-grouped sections are only slightly rounded.
-struct SettingsCardRowBackground: View {
-    let position: SettingsCardPosition
-    var fill: Color = .settingsCard
-    /// False for a tint drawn over a row (pressed), not the card itself.
-    var isCard = true
-
-    @Environment(\.colorScheme) private var colorScheme
-
-    var body: some View {
-        if isCard, colorScheme == .dark {
-            // Black glass, painted a row at a time (`BlackGlassSlice`).
-            BlackGlassSlice(roundsTop: position.roundsTop, roundsBottom: position.roundsBottom)
-        } else {
-            slice
-        }
-    }
-
-    private var slice: some View {
-        let top = position.roundsTop ? StarHashMetrics.cardRadius : 0
-        let bottom = position.roundsBottom ? StarHashMetrics.cardRadius : 0
-        return UnevenRoundedRectangle(
-            topLeadingRadius: top,
-            bottomLeadingRadius: bottom,
-            bottomTrailingRadius: bottom,
-            topTrailingRadius: top,
-            style: .continuous
-        )
-        .fill(fill)
-    }
-}
-
 enum SettingsLayout {
     /// How far everything in a card sits from its edges, GO Club's 20.
     static let cardInset: CGFloat = 20
     /// The cards' distance from the screen's edges.
     static let screenMargin: CGFloat = 10
+    /// The gap between one card and the next.
+    static let cardSpacing: CGFloat = 12
 }
 
-extension EdgeInsets {
-    /// Rows with a leading symbol tile.
-    static let settingsRow = EdgeInsets(top: 0, leading: SettingsLayout.cardInset, bottom: 0, trailing: SettingsLayout.cardInset)
-    /// Text-only rows and the profile card.
-    static let settingsTextRow = settingsRow
+/// A settings page: its cards down a scroll view, `spacing` apart, 10pt
+/// from the screen's edges (a centred column in a wide window) and `top`
+/// under the bar, with the Soft Edge.
+struct SettingsScroll<Content: View>: View {
+    var spacing: CGFloat = SettingsLayout.cardSpacing
+    var top: CGFloat = 16
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: spacing) {
+                content
+            }
+            .padding(.bottom, 20)
+        }
+        .background(Color.settingsCanvas.ignoresSafeArea())
+        .starhashReadableScrollContent(base: SettingsLayout.screenMargin)
+        .contentMargins(.top, top, for: .scrollContent)
+        .starhashSoftEdge()
+    }
+}
+
+/// A card of rows, as GO Club's: the section's grey title inside it at the
+/// top when it has one, and a dashed line right across it between each row
+/// and the next. The whole card is one container (`starhashContainer`),
+/// white glass in light mode and black glass in dark, so it is the same
+/// glass as every other card in the app; a slice behind each row could
+/// only imitate it. Each row keeps the card's 20pt inset itself
+/// (`settingsRowInset()`), so a pressed row tints right across.
+struct SettingsCard<Content: View>: View {
+    let title: String?
+    let content: Content
+
+    init(_ title: String? = nil, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.content = content()
+    }
+
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: StarHashMetrics.cardRadius, style: .continuous)
+        VStack(alignment: .leading, spacing: 0) {
+            if let title {
+                SettingsSectionTitle(title)
+            }
+            Group(subviews: content) { rows in
+                ForEach(rows) { row in
+                    row.overlay(alignment: .top) {
+                        if row.id != rows.first?.id {
+                            StarHashRowSeparator(
+                                leading: SettingsLayout.cardInset,
+                                trailing: SettingsLayout.cardInset,
+                                overlapsRows: true
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        // A pressed row's tint follows the card's corners.
+        .clipShape(shape)
+        .starhashContainer(.settingsCard, in: shape)
+    }
 }
 
 extension View {
-    /// The list look shared by every settings page. `sectionSpacing` is the
-    /// gap between cards; pages whose sections start with a
-    /// `SettingsSectionTitle` use a tighter one, since the title adds its
-    /// own height.
-    func settingsListStyle(sectionSpacing: CGFloat = 12, topMargin: CGFloat = 16) -> some View {
-        self
-            .listStyle(.insetGrouped)
-            .scrollContentBackground(.hidden)
-            .background(Color.settingsCanvas.ignoresSafeArea())
-            .starhashReadableScrollContent(base: SettingsLayout.screenMargin)
-            .contentMargins(.top, topMargin, for: .scrollContent)
-            .listSectionSpacing(sectionSpacing)
-            .starhashSoftEdge()
-            .environment(\.defaultMinListRowHeight, 44)
-    }
-
-    /// Places a row in a card at `position`. The list's own solid lines are
-    /// hidden; each row after another draws the dashed one above it, right
-    /// across the card inside its 20pt inset, as GO Club's do.
-    func settingsCardRow(_ position: SettingsCardPosition, insets: EdgeInsets = .settingsRow) -> some View {
-        self
-            .listRowInsets(insets)
-            .listRowBackground(SettingsCardRowBackground(position: position))
-            .listRowSeparator(.hidden)
-            .overlay(alignment: .top) {
-                if position.hasLineAbove {
-                    StarHashRowSeparator(leading: 0, trailing: 0, overlapsRows: true)
-                }
-            }
-    }
-
-    /// A list row that is not a card: stat tiles, footers, free text.
-    func settingsPlainRow() -> some View {
-        self
-            .listRowInsets(EdgeInsets())
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
+    /// A row's place in a `SettingsCard`: the card's full width, its
+    /// content 20pt in from either edge.
+    func settingsRowInset() -> some View {
+        padding(.horizontal, SettingsLayout.cardInset)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     /// Title for a page pushed inside Settings. iOS 26's own back button is
     /// already a round glass chevron, so the system one stays.
     func settingsPage(_ title: String) -> some View {
         starhashNavigationTitle(title)
+    }
+}
+
+/// A row that opens a page, with the chevron a list puts at its end. The
+/// press plays no impact: Settings taps as the page opens.
+struct SettingsLinkRow: View {
+    let page: SettingsPage
+    let symbol: String
+    let title: String
+    var caption: String?
+
+    var body: some View {
+        NavigationLink(value: page) {
+            SettingsRow(symbol: symbol, title: title, caption: caption) {
+                SettingsChevron()
+            }
+        }
+        .buttonStyle(HighlightRowButtonStyle(pressHaptic: false))
+    }
+}
+
+/// The small grey mark at a row's end: a list's chevron, or the arrow of a
+/// row that leaves the app.
+struct SettingsChevron: View {
+    var symbol = "chevron.right"
+
+    var body: some View {
+        Image(systemName: symbol)
+            .starhashFont(14, weight: .semibold, relativeTo: .footnote)
+            .foregroundStyle(Color.starhashTertiaryText)
+            .accessibilityHidden(true)
     }
 }
 
@@ -172,11 +172,11 @@ struct SettingsRow<Trailing: View>: View {
         HStack(spacing: 12) {
             SettingsSymbol(symbol: symbol)
             SettingsRowText(title: title, caption: caption)
-                .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
             Spacer(minLength: 8)
             trailing
         }
         .frame(minHeight: 68)
+        .settingsRowInset()
         .contentShape(Rectangle())
     }
 }
@@ -233,16 +233,16 @@ struct SettingsToggleRow: View {
                 SettingsSymbol(symbol: symbol)
                 SettingsRowText(title: title, caption: caption)
             }
-            .alignmentGuide(.listRowSeparatorLeading) { _ in 50 }
         }
         .tint(Color.settingsToggleOn)
         .frame(minHeight: 68)
+        .settingsRowInset()
     }
 }
 
 /// A section's title inside its card, as GO Club sets "App Settings": the
-/// card's first row, small, medium and grey, with no line under it. The
-/// rows under it start at `.firstUnderTitle` (or `.onlyUnderTitle`).
+/// card's first row, small, medium and grey, with no line under it
+/// (`SettingsCard` puts it there).
 struct SettingsSectionTitle: View {
     let title: String
 
@@ -254,13 +254,12 @@ struct SettingsSectionTitle: View {
         Text(title)
             .starhashFont(14, weight: .medium, relativeTo: .subheadline)
             .foregroundStyle(Color.starhashTertiaryText)
-            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top, 20)
             .padding(.bottom, 2)
+            // A list row's least height, which the title was first set in.
+            .frame(minHeight: 44)
+            .settingsRowInset()
             .accessibilityAddTraits(.isHeader)
-            .listRowInsets(.settingsRow)
-            .listRowBackground(SettingsCardRowBackground(position: .first))
-            .listRowSeparator(.hidden)
     }
 }
 

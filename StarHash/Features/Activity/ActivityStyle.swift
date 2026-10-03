@@ -12,56 +12,6 @@ enum ActivityLayout {
     static let rowSeparatorLeading: CGFloat = 74
 }
 
-/// Where a row sits in its card, so its background rounds the right corners.
-enum ActivityCardPosition {
-    case single, first, middle, last
-
-    init(index: Int, count: Int) {
-        switch (index, count) {
-        case (_, ...1): self = .single
-        case (0, _): self = .first
-        case (count - 1, _): self = .last
-        default: self = .middle
-        }
-    }
-
-    var roundsTop: Bool { self == .single || self == .first }
-    var roundsBottom: Bool { self == .single || self == .last }
-}
-
-/// One row's slice of a rounded card. Each row draws its own slice, so a
-/// day's card can sit in a lazy stack and still be built row by row.
-struct ActivityCardRowBackground: View {
-    let position: ActivityCardPosition
-    var fill: Color = .starhashCard
-    /// False for a tint drawn over a row (pressed), not the card itself.
-    var isCard = true
-
-    @Environment(\.colorScheme) private var colorScheme
-
-    var body: some View {
-        if isCard, colorScheme == .dark {
-            // Black glass, painted a row at a time (`BlackGlassSlice`).
-            BlackGlassSlice(roundsTop: position.roundsTop, roundsBottom: position.roundsBottom)
-        } else {
-            slice
-        }
-    }
-
-    private var slice: some View {
-        let top = position.roundsTop ? StarHashMetrics.cardRadius : 0
-        let bottom = position.roundsBottom ? StarHashMetrics.cardRadius : 0
-        return UnevenRoundedRectangle(
-            topLeadingRadius: top,
-            bottomLeadingRadius: bottom,
-            bottomTrailingRadius: bottom,
-            topTrailingRadius: top,
-            style: .continuous
-        )
-        .fill(fill)
-    }
-}
-
 /// The question before one transaction is deleted: the title and the
 /// buttons, little else, since the transaction is right there. Don't Ask
 /// Again deletes and stops asking; Settings, Ask Before Deleting, brings it

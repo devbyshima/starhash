@@ -134,10 +134,10 @@ extension View {
 
     /// The **Total card** surface, the recipient screen's Total: solid white
     /// in light mode, the sheets' near-black glass in dark. Buy's codes and
-    /// pinned tiles wear it too.
-    func starhashTotalCard(in shape: some Shape) -> some View {
+    /// pinned tiles wear it too, and so does Balance (`interactive`).
+    func starhashTotalCard(in shape: some Shape, interactive: Bool = false) -> some View {
         background(Color.sheetSolidFill, in: shape)
-            .starhashGlass(in: shape, tint: .sheetGlassTint)
+            .starhashGlass(in: shape, interactive: interactive, tint: .sheetGlassTint)
     }
 
     // MARK: Soft Edge
@@ -186,39 +186,3 @@ private struct ContainerSurface<S: Shape>: ViewModifier {
         }
     }
 }
-
-/// Black glass for a card drawn a row at a time (Activity's days,
-/// Settings' sections), where glass on each slice would draw its rim
-/// between the rows: the glass's own colour, with its light rim along the
-/// card's outer edges only, so the slices read as one black glass card.
-struct BlackGlassSlice: View {
-    let roundsTop: Bool
-    let roundsBottom: Bool
-    var radius: CGFloat = StarHashMetrics.cardRadius
-
-    var body: some View {
-        let top = roundsTop ? radius : 0
-        let bottom = roundsBottom ? radius : 0
-        let shape = UnevenRoundedRectangle(
-            topLeadingRadius: top,
-            bottomLeadingRadius: bottom,
-            bottomTrailingRadius: bottom,
-            topTrailingRadius: top,
-            style: .continuous
-        )
-        shape
-            .fill(Color.blackGlassFill)
-            .overlay {
-                shape
-                    .strokeBorder(Color.blackGlassRim, lineWidth: 1)
-                    // The straight edges between rows are clipped away: only
-                    // the card's own top, foot and sides keep the rim.
-                    .mask {
-                        Rectangle()
-                            .padding(.top, roundsTop ? 0 : 1.5)
-                            .padding(.bottom, roundsBottom ? 0 : 1.5)
-                    }
-            }
-    }
-}
-

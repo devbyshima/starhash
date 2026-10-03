@@ -6,8 +6,10 @@ import SwiftUI
 /// opens its details; its context menu confirms or deletes it (asking
 /// first), and a swipe deletes it outright, as Beam's clipboard rows do.
 ///
-/// Place it in a lazy stack with no spacing: each row draws its own slice
-/// of the card, so a long list is still built only as it scrolls in.
+/// The card is one container (`starhashContainer`), white glass in light
+/// mode and black glass in dark, as every other card is; its rows sit in a
+/// lazy stack, so a long list of results is still built only as it
+/// scrolls in.
 struct ActivityTransactionRows: View {
     let transactions: [StarHashKit.Transaction]
     /// Search results come from many days, so their rows show the date as
@@ -19,9 +21,22 @@ struct ActivityTransactionRows: View {
     /// The swipe's delete, which does not ask.
     let onSwipeDelete: (StarHashKit.Transaction) -> Void
 
+    /// The card's width, for a row lifted into its menu.
+    @State private var width: CGFloat = 0
+
     var body: some View {
+        let shape = RoundedRectangle(cornerRadius: StarHashMetrics.cardRadius, style: .continuous)
+        LazyVStack(spacing: 0) {
+            rows
+        }
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+        // A pressed row's tint follows the card's corners.
+        .clipShape(shape)
+        .starhashContainer(.starhashCard, in: shape)
+    }
+
+    private var rows: some View {
         ForEach(Array(transactions.enumerated()), id: \.element.id) { index, transaction in
-            let position = ActivityCardPosition(index: index, count: transactions.count)
             Button {
                 // Here, not on touch-down: a long press opens the menu,
                 // which has its own.
@@ -29,10 +44,8 @@ struct ActivityTransactionRows: View {
                 onOpen(transaction)
             } label: {
                 ActivityTransactionRow(transaction: transaction, showsDate: showsDate)
-                    .background(ActivityCardRowBackground(position: position))
             }
-            .buttonStyle(ActivityRowButtonStyle(position: position))
-            .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: StarHashMetrics.rowRadius, style: .continuous))
+            .buttonStyle(ActivityRowButtonStyle())
             .contextMenu {
                 if transaction.status == .pending {
                     Button {
@@ -46,6 +59,12 @@ struct ActivityTransactionRows: View {
                 } label: {
                     DestructiveMenuLabel("Delete")
                 }
+            } preview: {
+                // The card is drawn behind all its rows, not each one, so
+                // the lifted row brings the card's colour of its own.
+                ActivityTransactionRow(transaction: transaction, showsDate: showsDate)
+                    .frame(width: width > 0 ? width : nil)
+                    .background(Color.starhashCard)
             }
             // Outside the button, so a lifted row does not carry it.
             .overlay(alignment: .top) {
@@ -137,17 +156,12 @@ struct ActivityTransactionRow: View {
     }
 }
 
-/// A row tints while pressed, like a list cell. Drawn over the row, whose
-/// own slice of the card would hide it behind.
+/// A row tints while pressed, like a list cell; the card clips the tint to
+/// its corners.
 struct ActivityRowButtonStyle: ButtonStyle {
-    let position: ActivityCardPosition
-
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .overlay {
-                ActivityCardRowBackground(position: position, fill: .starhashPrimaryText.opacity(configuration.isPressed ? 0.06 : 0), isCard: false)
-                    .allowsHitTesting(false)
-            }
+            .background(Color.starhashPrimaryText.opacity(configuration.isPressed ? 0.06 : 0))
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }
 }

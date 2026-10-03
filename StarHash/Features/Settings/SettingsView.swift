@@ -24,8 +24,9 @@ struct SettingsView: View {
                     }
                 }
         }
-        // A light tap as a page opens; the list's rows are not buttons of
-        // ours, so they do not play the press haptic themselves.
+        // A light tap as a page opens, which the rows that open pages leave
+        // to this (`SettingsLinkRow`), so the auto-verify switch's push
+        // taps too.
         .sensoryFeedback(.impact(weight: .light), trigger: path.count) { old, new in new > old }
         .onChange(of: path.isEmpty, initial: true) { _, isEmpty in
             router.setHidesTabBar(!isEmpty, on: .settings)
@@ -98,16 +99,14 @@ private struct SettingsRootList: View {
     }
 
     private var settingsList: some View {
-        List {
-            Section {
-                SettingsSectionTitle("Transactions")
+        SettingsScroll {
+            SettingsCard("Transactions") {
                 SettingsToggleRow(
                     symbol: "tray.full.fill",
                     title: "Save transactions",
                     caption: "Keep a history of what you pay and receive",
                     isOn: $saveTransactions
                 )
-                .settingsCardRow(.firstUnderTitle)
                 SettingsToggleRow(
                     symbol: "checkmark.message.fill",
                     title: "Auto-verify transactions",
@@ -118,43 +117,36 @@ private struct SettingsRootList: View {
                         : "Reads MTN MoMo messages only, for now",
                     isOn: autoVerifyBinding
                 )
-                .settingsCardRow(.middle)
                 SettingsToggleRow(
                     symbol: "questionmark.bubble.fill",
                     title: "Ask before deleting",
                     caption: "Confirm every delete except a swipe",
                     isOn: $confirmDeletes
                 )
-                .settingsCardRow(.last)
             }
 
-            Section {
-                SettingsSectionTitle("Recipients")
+            SettingsCard("Recipients") {
                 SettingsToggleRow(
                     symbol: "person.crop.circle.fill",
                     title: "Enable contacts",
                     caption: "Pick who to pay from your contacts",
                     isOn: contactsBinding
                 )
-                .settingsCardRow(.firstUnderTitle)
                 SettingsToggleRow(
                     symbol: "location.fill",
                     title: "Nearby",
                     caption: "Suggest who you paid at the place you're in",
                     isOn: locationBinding
                 )
-                .settingsCardRow(.middle)
                 SettingsToggleRow(
                     symbol: "clock.arrow.circlepath",
                     title: "Save recent recipients",
                     caption: "Show who you paid last at the top",
                     isOn: $saveRecents
                 )
-                .settingsCardRow(.last)
             }
 
-            Section {
-                SettingsSectionTitle("Pay & Buy")
+            SettingsCard("Pay & Buy") {
                 SettingsRow(
                     symbol: "house.fill",
                     title: "Default page",
@@ -162,60 +154,36 @@ private struct SettingsRootList: View {
                 ) {
                     defaultPageMenu
                 }
-                .settingsCardRow(.firstUnderTitle)
                 SettingsToggleRow(
                     symbol: "drop.fill",
                     title: "Ink effect",
                     caption: "Ink spreads behind each key you press",
                     isOn: $keypadInk
                 )
-                .settingsCardRow(.last)
             }
 
-            Section {
-                SettingsSectionTitle("Help")
-                NavigationLink(value: SettingsPage.howItWorks) {
-                    SettingsRow(symbol: "number.square.fill", title: "How StarHash works", caption: "Amount, recipient, and the USSD code")
-                }
-                .settingsCardRow(.firstUnderTitle)
-                NavigationLink(value: SettingsPage.privacy) {
-                    SettingsRow(symbol: "lock.fill", title: "Privacy", caption: "Everything stays on this iPhone")
-                }
-                .settingsCardRow(.middle)
+            SettingsCard("Help") {
+                SettingsLinkRow(page: .howItWorks, symbol: "number.square.fill", title: "How StarHash works", caption: "Amount, recipient, and the USSD code")
+                SettingsLinkRow(page: .privacy, symbol: "lock.fill", title: "Privacy", caption: "Everything stays on this iPhone")
                 Link(destination: SettingsLinks.requestFeature) {
                     SettingsRow(symbol: "lightbulb.fill", title: "Request a Feature", caption: "Tell us what StarHash should do next") {
-                        Image(systemName: "arrow.up.right")
-                            .starhashFont(14, weight: .semibold, relativeTo: .footnote)
-                            .foregroundStyle(Color.starhashTertiaryText)
-                            .accessibilityHidden(true)
+                        SettingsChevron(symbol: "arrow.up.right")
                     }
                 }
                 .buttonStyle(HighlightRowButtonStyle())
                 .accessibilityHint("Opens a feature request form on GitHub")
-                .settingsCardRow(.middle)
-                NavigationLink(value: SettingsPage.about) {
-                    SettingsRow(symbol: "star.fill", title: "About StarHash", caption: "What's new, the note and the source code")
-                }
-                .settingsCardRow(.last)
+                SettingsLinkRow(page: .about, symbol: "star.fill", title: "About StarHash", caption: "What's new, the note and the source code")
             }
 
             // Last and on its own, as GO Club's Logout: the app's delete
             // button, the width of its words, centred under the cards.
-            Section {
-                DeleteButton("Delete All Data", fillsWidth: false) { confirmsDeleteAll = true }
+            DeleteButton("Delete All Data", fillsWidth: false) { confirmsDeleteAll = true }
                 .frame(maxWidth: .infinity)
                 .padding(.top, 24)
-                .settingsPlainRow()
-            }
 
-            Section {
-                SettingsFooter()
-                    .settingsPlainRow()
-                    .id("starhash")
-            }
-
+            SettingsFooter()
+                .id("starhash")
         }
-        .settingsListStyle()
         .alert("Are you sure you want to delete all data?", isPresented: $confirmsDeleteAll) {
             Button("Delete", role: .destructive) {
                 UINotificationFeedbackGenerator().notificationOccurred(.success)

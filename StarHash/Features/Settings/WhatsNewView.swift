@@ -5,25 +5,30 @@ import SwiftUI
 struct WhatsNewView: View {
     var body: some View {
         let releases = ReleaseHistory.releases
-        List {
-            Section {
-                ForEach(Array(releases.enumerated()), id: \.element.id) { index, release in
+        SettingsScroll {
+            SettingsCard {
+                ForEach(releases) { release in
                     NavigationLink(value: SettingsPage.release(release.version)) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(release.title)
-                                .font(.starhash(.body))
-                                .foregroundStyle(Color.starhashPrimaryText)
-                            Text(release.date)
-                                .font(.starhash(.footnote))
-                                .foregroundStyle(Color.starhashSecondaryText)
+                        HStack(spacing: 8) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(release.title)
+                                    .font(.starhash(.body))
+                                    .foregroundStyle(Color.starhashPrimaryText)
+                                Text(release.date)
+                                    .font(.starhash(.footnote))
+                                    .foregroundStyle(Color.starhashSecondaryText)
+                            }
+                            Spacer(minLength: 8)
+                            SettingsChevron()
                         }
-                        .frame(maxWidth: .infinity, minHeight: 66, alignment: .leading)
+                        .frame(minHeight: 66)
+                        .settingsRowInset()
+                        .contentShape(Rectangle())
                     }
-                    .settingsCardRow(SettingsCardPosition(index: index, count: releases.count), insets: .settingsTextRow)
+                    .buttonStyle(HighlightRowButtonStyle(pressHaptic: false))
                 }
             }
         }
-        .settingsListStyle()
         .settingsPage("What's New")
     }
 }
@@ -35,29 +40,27 @@ struct ReleaseDetailView: View {
 
     var body: some View {
         let release = ReleaseHistory.releases.first { $0.version == version }
-        List {
+        SettingsScroll(spacing: 20) {
             if let release {
-                Section {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(release.title)
-                            .starhashFont(28, weight: .bold, relativeTo: .title)
-                            .foregroundStyle(Color.starhashPrimaryText)
-                            .accessibilityAddTraits(.isHeader)
-                        Text(release.date)
-                            .font(.starhash(.subheadline))
-                            .foregroundStyle(Color.starhashSecondaryText)
-                        Text(release.summary)
-                            .font(.starhash(.body))
-                            .foregroundStyle(Color.starhashPrimaryText.opacity(0.85))
-                            .fixedSize(horizontal: false, vertical: true)
-                            .padding(.top, 6)
-                    }
-                    .padding(.horizontal, 16)
-                    .settingsPlainRow()
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(release.title)
+                        .starhashFont(28, weight: .bold, relativeTo: .title)
+                        .foregroundStyle(Color.starhashPrimaryText)
+                        .accessibilityAddTraits(.isHeader)
+                    Text(release.date)
+                        .font(.starhash(.subheadline))
+                        .foregroundStyle(Color.starhashSecondaryText)
+                    Text(release.summary)
+                        .font(.starhash(.body))
+                        .foregroundStyle(Color.starhashPrimaryText.opacity(0.85))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, 6)
                 }
+                .padding(.horizontal, 16)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-                Section {
-                    ForEach(Array(release.highlights.enumerated()), id: \.offset) { index, highlight in
+                SettingsCard {
+                    ForEach(Array(release.highlights.enumerated()), id: \.offset) { _, highlight in
                         HStack(alignment: .top, spacing: 13) {
                             SettingsSymbol(symbol: highlight.symbol)
                             VStack(alignment: .leading, spacing: 3) {
@@ -70,17 +73,14 @@ struct ReleaseDetailView: View {
                                     .fixedSize(horizontal: false, vertical: true)
                             }
                             .padding(.top, 8)
-                            .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
                         }
                         .padding(.vertical, 12)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .settingsRowInset()
                         .accessibilityElement(children: .combine)
-                        .settingsCardRow(SettingsCardPosition(index: index, count: release.highlights.count))
                     }
                 }
             }
         }
-        .settingsListStyle(sectionSpacing: 20)
         .settingsPage(release?.title ?? "What's New")
     }
 }

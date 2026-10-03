@@ -100,10 +100,12 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 - Every container (card, panel, field box) goes through
   `starhashContainer(_:in:)`: white glass in light mode (Liquid Glass over
   its solid fill, as the Total card) and **black glass** in dark (the
-  near black as Liquid Glass). Cards drawn a row at a time (Activity's
-  days, Settings' sections) paint the black glass's look per row
-  (`BlackGlassSlice`) in dark and stay plain white in light, as glass on
-  each row would draw seams between them.
+  near black as Liquid Glass). A card of rows is one container behind all
+  of them, never a slice per row: Settings pages are a `SettingsScroll` of
+  `SettingsCard`s (rows keep their 20pt with `settingsRowInset()`,
+  `SettingsLinkRow` for a row that opens a page), and each of Activity's
+  days is one card (`ActivityTransactionRows`), whose lifted row brings
+  its own background through the menu's preview.
 - **Soft Edge** is the one edge treatment: what scrolls under a bar softly
   fades and blurs into it, the system's soft scroll edge (Settings' look).
   Every scroll view and list gets `starhashSoftEdge()`, and a page's own
@@ -117,9 +119,9 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   symbols jump on the first frame of a switch. Page changes play
   `NavigationHaptics` (two layers on the switch, a thump and a rumble; none for the lens's
   bounce), never a plain `sensoryFeedback`. It is the only glass with no tint: clear
-  Liquid Glass, as the reference's. Buy's codes and pinned tiles are the
-  **Total card** (`starhashTotalCard(in:)`, the recipient screen's Total:
-  solid white in light mode, the sheets' near-black glass in dark), and
+  Liquid Glass, as the reference's. Balance, Buy's codes and pinned tiles
+  are the **Total card** (`starhashTotalCard(in:)`, the recipient screen's
+  Total: solid white in light mode, the sheets' near-black glass in dark), and
   their call buttons black in light mode (`callSolidFill` under
   `callGlassTint`, a brand blue phone) and blue glass in dark. Activity's period control
   (`GlassSegmentedControl`) moves as it does, on the same `LensGlass` and
@@ -165,6 +167,18 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 - Comments explain why, in Keaser's tone. Never use an em dash in comments,
   UI strings or docs.
 
+## Named pieces
+
+Names the owner uses for parts of the design; find them by these names.
+
+| Name | What | Where |
+| --- | --- | --- |
+| **Soft Edge** | the one edge treatment: content fades and blurs under a bar | `starhashSoftEdge()`, `starhashSoftEdgeHeader { }` in `StarHash/Design/Glass.swift` |
+| **Tab bar** (the custom nav) | GO Club's glass tab bar: Activity, Pay, Settings | `StarHash/App/StarHashTabBar.swift`, `NavigationHaptics` |
+| **Total card** | white in light, black glass in dark | `starhashTotalCard(in:)` in `Glass.swift` |
+| **White glass, black glass** | every container | `starhashContainer(_:in:)` in `Glass.swift` |
+| **Send Ripple** | shelved, not used: the wave up the screen that Pay once played as a recipient was chosen, a Metal shader over snapshots | `StarHash/Design/SendRipple.swift` (how to bring it back is at its top), `StarHash/Design/Shaders/SendRipple.metal` |
+
 ## Debug launch arguments (DEBUG builds)
 
 | Argument | Effect |
@@ -190,7 +204,7 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 | `-payToggleSearch` | with `-payPicker`: closes the picker's search after 2s and opens it 1.5s later, to record the header transitions |
 | `-payInk` | presses 8, 5, 3 and 7 on a schedule from 1.5s, to record the keypad's ink without a finger (simulator taps arrive late, in bursts) |
 | `-nearbyHere` | turns Nearby on and places the phone at Kigali Heights, where `SampleData.places()` has visits, for the picker's Nearby section |
-| `-payPick <seconds>` | with `-payPicker`: chooses the first recent recipient after this long, to record the wave |
+| `-payPick <seconds>` | with `-payPicker`: chooses the first recent recipient after this long, to record the way back to the keypad |
 | `-activityPeriod today\|week\|month\|year` | Activity period (the D W M Y control) |
 | `-openFirstTransaction` | open the newest transaction's details |
 | `-confirmDelete` | with `-openFirstTransaction`: the delete question |

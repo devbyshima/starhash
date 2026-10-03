@@ -12,7 +12,7 @@ import StarHashKit
 ///   -payInk              presses a few keys on a schedule, to record the
 ///                        ink without a finger
 ///   -payPick <seconds>   (with -payPicker) chooses the first recent
-///                        recipient after this long, to record the wave
+///                        recipient after this long, to record the way back
 @MainActor
 enum PayDebug {
     static var pressesKeys: Bool { DebugLaunch.arguments.contains("-payInk") }

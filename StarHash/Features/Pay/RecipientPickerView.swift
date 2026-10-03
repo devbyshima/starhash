@@ -174,9 +174,6 @@ struct RecipientPickerView: View {
         .onAppear {
             // Up with the keyboard as the screen slides in.
             if isSearching { searchFocused = true }
-            // Where a finger comes down here, the wave starts from when it
-            // pays.
-            SendRipple.shared.trackTouches()
         }
         .task(id: enableContacts) {
             if enableContacts { await contacts.load() }
@@ -213,7 +210,7 @@ struct RecipientPickerView: View {
             showDetails(for: contact)
         }
         // -payPick <seconds>: the first recent recipient chosen after this
-        // long, to record the wave.
+        // long, to record the way back to the keypad.
         .task {
             guard let seconds = PayDebug.picksAfter else { return }
             try? await Task.sleep(for: .seconds(seconds))
