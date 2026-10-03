@@ -1,8 +1,8 @@
 import CoreHaptics
 import UIKit
 
-/// The weight of moving between pages, felt once, as the page changes: a
-/// doubled thump at full strength with a full-strength rumble under it.
+/// The weight of moving between pages, felt once, as the page changes, in
+/// two layers: a thump at full strength and a full-strength rumble under it.
 /// No sharpness to speak of, so it lands as weight rather than a click.
 /// The lens's bounce is seen, not felt. Phones without Core Haptics get a
 /// heavy impact.
@@ -67,10 +67,8 @@ final class NavigationHaptics {
 
     private static func makeSwitchPattern() throws -> CHHapticPattern {
         let events = [
-            // The thump: full strength and dull, struck twice 16ms apart so
-            // it lands as one heavier blow.
+            // The thump: full strength and dull.
             transient(at: 0, intensity: 1, sharpness: 0.05),
-            transient(at: 0.016, intensity: 1, sharpness: 0),
             // Its weight: a full-strength low rumble under it, dying away
             // over 0.22s.
             rumble(at: 0, intensity: 1, fadingOver: 0.22),
