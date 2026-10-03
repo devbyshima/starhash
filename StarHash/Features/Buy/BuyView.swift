@@ -15,6 +15,16 @@ struct BuyView: View {
 
     /// The sheet open: a new code, or one being edited.
     @State private var editing: ShortcutDraft?
+    /// A code's details, opened by tapping its card.
+    @State private var details: USSDShortcut?
+    /// What the details sheet asked for, done once it has gone: the editor
+    /// opens, or the code dials, only after the sheet is down.
+    @State private var afterDetails: AfterDetails?
+
+    private enum AfterDetails {
+        case edit(ShortcutDraft)
+        case dial(String)
+    }
     /// A code the system would not dial (the simulator, an iPad), shown in
     /// an alert so it can be dialled by hand.
     @State private var undialledCode: String?
@@ -51,6 +61,23 @@ struct BuyView: View {
         .sheet(item: $editing) { draft in
             ShortcutEditor(draft: draft)
         }
+        .sheet(item: $details, onDismiss: runAfterDetails) { shortcut in
+            ShortcutDetailSheet(
+                shortcut: shortcut,
+                onEdit: {
+                    afterDetails = .edit(ShortcutDraft(shortcut))
+                    details = nil
+                },
+                onDial: {
+                    afterDetails = .dial(shortcut.code)
+                    details = nil
+                },
+                onDelete: {
+                    details = nil
+                    delete(shortcut)
+                }
+            )
+        }
         .alert(
             "Can't dial on this device",
             isPresented: Binding(get: { undialledCode != nil }, set: { if !$0 { undialledCode = nil } }),
@@ -65,11 +92,13 @@ struct BuyView: View {
             Text("Dial \(code) on your phone.")
         }
         #if DEBUG
-        // -buyNew: the editor for a new code; -buyEdit: editing the first.
+        // -buyNew: the editor for a new code; -buyEdit: editing the first;
+        // -buyDetails: the first code's details.
         .task {
             try? await Task.sleep(for: .milliseconds(600))
             if DebugLaunch.arguments.contains("-buyNew") { editing = ShortcutDraft() }
             if DebugLaunch.arguments.contains("-buyEdit"), let first = shortcuts.shortcuts.first { editing = ShortcutDraft(first) }
+            if DebugLaunch.arguments.contains("-buyDetails") { details = shortcuts.shortcuts.first }
         }
         #endif
     }
@@ -88,7 +117,7 @@ struct BuyView: View {
                     ForEach(shortcuts.shortcuts) { shortcut in
                         ShortcutItem(
                             shortcut: shortcut,
-                            onEdit: { editing = ShortcutDraft(shortcut) },
+                            onOpen: { details = shortcut },
                             onDial: { dial(shortcut.code) }
                         )
                         .contextMenu {
@@ -114,6 +143,15 @@ struct BuyView: View {
         .starhashTabBarFollowsScroll()
     }
 
+    private func runAfterDetails() {
+        switch afterDetails {
+        case .edit(let draft): editing = draft
+        case .dial(let code): dial(code)
+        case nil: break
+        }
+        afterDetails = nil
+    }
+
     private func delete(_ shortcut: USSDShortcut) {
         withAnimation(.smooth(duration: 0.3)) { shortcuts.remove(shortcut.id) }
         deletedCount += 1
@@ -129,17 +167,17 @@ struct BuyView: View {
 }
 
 /// One code, on its own: a concise card of clear Liquid Glass (its symbol
-/// on a tile, its name, the code) that opens it for editing, and beside it, apart, the button
+/// on a tile, its name, the code) that opens its details, and beside it, apart, the button
 /// that dials it, in Liquid Glass tinted the accent, so starting a code is
 /// one clear thing.
 private struct ShortcutItem: View {
     let shortcut: USSDShortcut
-    let onEdit: () -> Void
+    let onOpen: () -> Void
     let onDial: () -> Void
 
     var body: some View {
         HStack(spacing: 10) {
-            Button(action: onEdit) {
+            Button(action: onOpen) {
                 HStack(spacing: 14) {
                     SymbolTile(symbol: shortcut.symbol ?? ShortcutSymbols.plain, size: 40)
                     VStack(alignment: .leading, spacing: 2) {
@@ -167,7 +205,7 @@ private struct ShortcutItem: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(shortcut.name)
             .accessibilityValue(shortcut.code)
-            .accessibilityHint("Opens it to edit")
+            .accessibilityHint("Shows its details")
             .accessibilityAddTraits(.isButton)
 
             Button(action: onDial) {
@@ -183,6 +221,104 @@ private struct ShortcutItem: View {
             .accessibilityLabel("Dial \(shortcut.name)")
             .accessibilityHint("Dials \(shortcut.code)")
         }
+    }
+}
+
+/// A code's details, after Keaser's expense details, sized to what it
+/// shows: a close button, the title and Edit across the top, a card with
+/// the code's symbol and name and its code and note as rows, then Dial
+/// and, in red under it, Delete Code.
+private struct ShortcutDetailSheet: View {
+    let shortcut: USSDShortcut
+    let onEdit: () -> Void
+    let onDial: () -> Void
+    let onDelete: () -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var height: CGFloat = 440
+
+    var body: some View {
+        VStack(spacing: 0) {
+            header
+
+            VStack(spacing: 14) {
+                VStack(spacing: 0) {
+                    VStack(spacing: 10) {
+                        SymbolTile(symbol: shortcut.symbol ?? ShortcutSymbols.plain, size: 60, background: .sheetChip)
+                        Text(shortcut.name)
+                            .font(.sheet(21, .bold, relativeTo: .title2))
+                            .foregroundStyle(Color.starhashPrimaryText)
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityAddTraits(.isHeader)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 18)
+
+                    SheetDivider()
+                    SheetInfoRow("Code", shortcut.code)
+                    if let detail = shortcut.detail {
+                        SheetDivider()
+                        SheetInfoRow(label: "Note") {
+                            SheetValueText(text: detail)
+                                .multilineTextAlignment(.trailing)
+                        }
+                    }
+                }
+                .padding(.horizontal, 16)
+                .sheetCard()
+
+                VStack(spacing: 4) {
+                    Button(action: onDial) {
+                        Label("Dial \(shortcut.code)", systemImage: "phone.fill")
+                    }
+                    .buttonStyle(.sheetPrimary)
+                    SheetTextButton("Delete Code", role: .destructive, action: onDelete)
+                }
+                .padding(.top, 4)
+            }
+            .padding(.horizontal, 18)
+        }
+        .sheetHeight($height)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        // Into the home indicator's inset, as Turn Off Auto-verify's: iOS
+        // adds that inset to the detent, so the detent leaves it out.
+        .ignoresSafeArea(.container, edges: .bottom)
+        .sheetGlass(detents: [.height(height - 4)])
+    }
+
+    /// Keaser's: close on the left, the title, Edit on the right.
+    private var header: some View {
+        ZStack {
+            Text("Code")
+                .font(.sheetLargeTitle)
+                .tracking(StarHashTracking.display(32))
+                .foregroundStyle(Color.starhashPrimaryText)
+                .lineLimit(1)
+                .padding(.horizontal, 80)
+                .accessibilityAddTraits(.isHeader)
+            HStack {
+                Button { dismiss() } label: {
+                    SheetGlassGlyph(symbol: "xmark")
+                }
+                .buttonStyle(.hapticPlain)
+                .accessibilityLabel("Close")
+                Spacer()
+                Button(action: onEdit) {
+                    Text("Edit")
+                        .font(.sheet(16, .semibold, relativeTo: .body))
+                        .foregroundStyle(Color.starhashPrimaryText)
+                        .padding(.horizontal, 18)
+                        .frame(height: 44)
+                        .contentShape(Capsule())
+                        .starhashGlass(interactive: true)
+                }
+                .buttonStyle(.hapticPlain)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 18)
+        .padding(.bottom, 8)
     }
 }
 
