@@ -62,18 +62,36 @@ struct PayCurrencyPill: View {
 
 /// The 3 by 4 number pad under the currency, across the full width: 1 to
 /// 9, then Clear (a muted "." while there is nothing to clear), 0 and
-/// delete ("<"). No keycaps, like a phone's
-/// dialler on a plain canvas; a key only shows a soft disc while pressed.
+/// delete ("<"). No keycaps, like a phone's dialler on a plain canvas.
+///
+/// As in the reference "SIP, send money": a held key swells into a white
+/// bubble over its digit; as it lifts the digit flashes back in the accent
+/// and the bubble melts into a frosted blob that runs down behind the pad,
+/// a puff of the accent at its top, lingering for seconds
+/// (`PayEffects.swift`). With Reduce Motion, a faint disc behind a held key
+/// instead.
 struct PayKeypad: View {
     /// Called with every key; the caller applies it to its `AmountInput`
     /// and says whether anything changed.
     let onKey: (AmountInput.Key) -> Bool
     var canClear: Bool
+    /// The accent: the main wallet's colour.
+    var tint: Color
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Bumped on every accepted key, so one light tap plays per press.
     @State private var accepted = 0
     /// Bumped when a key changes nothing (past the ceiling, delete at zero).
     @State private var refused = 0
+    /// The ink of recent presses, in the ink layer's space.
+    @State private var drops: [InkDrop] = []
+    /// The key whose digit is still in the accent after its press.
+    @State private var tintedKey: AmountInput.Key?
+    @State private var size: CGSize = .zero
+
+    /// How far the ink may spread past the pad's edges.
+    private let bleed: CGFloat = 90
 
     private let rows: [[Int]] = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
@@ -126,8 +144,30 @@ struct PayKeypad: View {
             }
         }
         .foregroundStyle(Color.starhashPrimaryText)
+        .onGeometryChange(for: CGSize.self) { $0.size } action: { size = $0 }
+        .background {
+            PayInkLayer(drops: drops, tint: tint, radius: bubbleSize / 2)
+                .padding(-bleed)
+        }
+        // Clears the ink once the last blob has thinned away, so the
+        // shader stops drawing.
+        .task(id: drops.last?.id) {
+            guard !drops.isEmpty else { return }
+            try? await Task.sleep(for: .seconds(InkDrop.lifetime))
+            drops.removeAll { Date.now.timeIntervalSince($0.start) >= InkDrop.lifetime }
+        }
         .sensoryFeedback(.impact(weight: .light), trigger: accepted)
         .sensoryFeedback(.impact(flexibility: .rigid, intensity: 0.4), trigger: refused)
+        #if DEBUG
+        .task {
+            guard PayDebug.pressesKeys else { return }
+            try? await Task.sleep(for: .seconds(1.5))
+            for digit in [8, 5, 3, 7] {
+                press(.digit(digit))
+                try? await Task.sleep(for: .seconds(0.9))
+            }
+        }
+        #endif
     }
 
     private func key(_ key: AmountInput.Key, @ViewBuilder label: () -> some View) -> some View {
@@ -135,28 +175,76 @@ struct PayKeypad: View {
             press(key)
         } label: {
             label()
+                // The flash is the accent a little faded, as in the reference.
+                .foregroundStyle(tintedKey == key ? AnyShapeStyle(tint.opacity(0.75)) : AnyShapeStyle(Color.starhashPrimaryText))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .frame(minHeight: 64)
                 .contentShape(Rectangle())
         }
-        .buttonStyle(KeypadKeyStyle())
+        .buttonStyle(KeypadKeyStyle(bubbleSize: bubbleSize, reduceMotion: reduceMotion))
+    }
+
+    /// Nearly a row tall, as in the reference.
+    private var bubbleSize: CGFloat {
+        guard size.height > 0 else { return 64 }
+        return min(size.height / 4 * 0.92, 76)
     }
 
     private func press(_ key: AmountInput.Key) {
         if onKey(key) { accepted += 1 } else { refused += 1 }
+        guard !reduceMotion, size != .zero else { return }
+        // The bubble melts into ink as the key lifts; a dozen blobs at a
+        // time is plenty, and keeps the shader's work small.
+        let now = Date.now
+        drops.removeAll { now.timeIntervalSince($0.start) >= InkDrop.lifetime }
+        drops.append(InkDrop(point: center(of: key), start: now))
+        if drops.count > 12 { drops.removeFirst(drops.count - 12) }
+        // The digit flashes back in the accent, then straight to ink.
+        tintedKey = key
+        withAnimation(.easeOut(duration: 0.08).delay(0.04)) { tintedKey = nil }
+    }
+
+    /// A key's centre in the ink layer's space: the pad is a 3 by 4 grid of
+    /// equal cells, and the layer reaches `bleed` past its edges.
+    private func center(of key: AmountInput.Key) -> CGPoint {
+        let (row, column): (Int, Int) = switch key {
+        case .digit(0): (3, 1)
+        case .digit(let digit): ((digit - 1) / 3, (digit - 1) % 3)
+        case .clear: (3, 0)
+        case .delete: (3, 2)
+        }
+        let cell = CGSize(width: size.width / 3, height: size.height / 4)
+        return CGPoint(
+            x: bleed + (CGFloat(column) + 0.5) * cell.width,
+            y: bleed + (CGFloat(row) + 0.5) * cell.height
+        )
     }
 }
 
-/// A faint disc behind the key while it is held, and a slight shrink.
+/// A held key: the white bubble swelling over its digit, which hides under
+/// it. With Reduce Motion, a faint disc behind the digit and a slight
+/// shrink instead.
 private struct KeypadKeyStyle: ButtonStyle {
+    let bubbleSize: CGFloat
+    let reduceMotion: Bool
+
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .background {
-                Circle()
-                    .fill(Color.starhashInk.opacity(configuration.isPressed ? 0.08 : 0))
-                    .frame(width: 76, height: 76)
-            }
-            .scaleEffect(configuration.isPressed ? 0.92 : 1)
-            .animation(.snappy(duration: 0.15), value: configuration.isPressed)
+        if reduceMotion {
+            configuration.label
+                .background {
+                    Circle()
+                        .fill(Color.starhashInk.opacity(configuration.isPressed ? 0.08 : 0))
+                        .frame(width: 76, height: 76)
+                }
+                .scaleEffect(configuration.isPressed ? 0.92 : 1)
+                .animation(.snappy(duration: 0.15), value: configuration.isPressed)
+        } else {
+            configuration.label
+                .opacity(configuration.isPressed ? 0 : 1)
+                .animation(.easeOut(duration: 0.08), value: configuration.isPressed)
+                .overlay {
+                    KeyBubble(isPressed: configuration.isPressed, size: bubbleSize)
+                }
+        }
     }
 }

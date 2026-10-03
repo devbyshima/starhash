@@ -16,7 +16,15 @@ struct ChooseNumberSheet: View {
             SheetHeader(contact.name)
 
             VStack(spacing: 8) {
-                SheetSectionLabel("Choose a number")
+                // The sheet's question, so larger than a section label: the
+                // size and weight of the recipient page's section labels.
+                Text("Choose a number".uppercased())
+                    .font(.sheet(15, .bold, relativeTo: .subheadline))
+                    .tracking(1)
+                    .foregroundStyle(Color.sheetSecondaryText)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 4)
+                    .accessibilityAddTraits(.isHeader)
                 VStack(spacing: 0) {
                     ForEach(Array(contact.recipients.enumerated()), id: \.element.destination) { index, recipient in
                         if index > 0 { SheetDivider().padding(.leading, 52) }
@@ -42,17 +50,32 @@ struct ChooseNumberSheet: View {
     }
 
     private func row(_ recipient: Recipient) -> some View {
-        Button {
-            onPick(recipient)
-        } label: {
+        RecipientNumberRow(recipient: recipient) { onPick(recipient) }
+    }
+
+    /// "MTN", "Airtel" or "Merchant code": which code StarHash will dial.
+    static func network(of recipient: Recipient) -> String {
+        recipient.network?.name ?? "Merchant code"
+    }
+}
+
+/// One of a contact's numbers on a sheet card: the carrier's logo in a soft
+/// circle (a storefront for a merchant code), the number, its network and a
+/// chevron. Tapping it pays that number.
+struct RecipientNumberRow: View {
+    let recipient: Recipient
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
             HStack(spacing: 14) {
-                leading(recipient)
+                leading
                 Text(recipient.formattedDestination)
                     .font(.sheet(16, .medium))
                     .foregroundStyle(Color.starhashPrimaryText)
                     .monospacedDigit()
                 Spacer(minLength: 8)
-                Text(Self.network(of: recipient))
+                Text(ChooseNumberSheet.network(of: recipient))
                     .font(.sheetBody)
                     .foregroundStyle(Color.sheetSecondaryText)
                 Image(systemName: "chevron.right")
@@ -67,9 +90,8 @@ struct ChooseNumberSheet: View {
         .accessibilityElement(children: .combine)
     }
 
-    /// The carrier's logo in a soft circle; a storefront for a code.
     @ViewBuilder
-    private func leading(_ recipient: Recipient) -> some View {
+    private var leading: some View {
         if let network = recipient.network {
             Image(network.logoAsset)
                 .resizable()
@@ -81,10 +103,5 @@ struct ChooseNumberSheet: View {
         } else {
             SheetIconCircle(symbol: "storefront")
         }
-    }
-
-    /// "MTN", "Airtel" or "Merchant code": which code StarHash will dial.
-    static func network(of recipient: Recipient) -> String {
-        recipient.network?.name ?? "Merchant code"
     }
 }

@@ -93,6 +93,17 @@ extension View {
         }
     }
 
+    /// No system scroll edge effect at the top, for a screen whose header
+    /// draws its own.
+    @ViewBuilder
+    func starhashHidesTopEdgeEffect() -> some View {
+        if #available(iOS 26.0, *) {
+            scrollEdgeEffectHidden(true, for: .top)
+        } else {
+            self
+        }
+    }
+
     /// For a scroll view that runs under a bar at the bottom (the tab bar,
     /// Search's bar): on iOS 26 and later what scrolls beneath fades and
     /// blurs into the bar, as under any system bar, instead of showing

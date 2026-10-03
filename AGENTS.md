@@ -101,6 +101,11 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 | `-payPicker` | open the recipient picker |
 | `-payQuery <text>` | open the picker with this text in its search field |
 | `-payBrowse` | with `-payPicker`: the picker with its search closed (title header) |
+| `-payScroll <points>` | with `-payPicker`: the picker's list scrolled down, a section label pinned |
+| `-payDetails <name>` | with `-payPicker`: the details sheet of the first contact whose name contains it |
+| `-payToggleSearch` | with `-payPicker`: closes the picker's search after 2s and opens it 1.5s later, to record the header transitions |
+| `-payInk` | presses 8, 5, 3 and 7 on a schedule from 1.5s, to record the keypad's ink without a finger (simulator taps arrive late, in bursts) |
+| `-payPick <seconds>` | with `-payPicker`: chooses the first recent recipient after this long, to record the wave |
 | `-activityPeriod today\|week\|month\|year\|all` | Activity period |
 | `-openFirstTransaction` | open the newest transaction's details |
 | `-confirmDelete` | with `-openFirstTransaction`: the delete question |

@@ -24,6 +24,10 @@ struct PayView: View {
     /// Started when the picker opens, so a location fix is usually ready by
     /// the time Pay is tapped; the payment never waits for it.
     @State private var locationTask: Task<StarHashKit.Transaction.Coordinate?, Never>?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
+    /// Where a finger is on Pay, for the bubble under it.
+    @GestureState private var payTouch: CGPoint?
     @State private var didApplyDebugLaunch = false
 
     var body: some View {
@@ -34,7 +38,7 @@ struct PayView: View {
                     switch route {
                     case .recipients(let query):
                         RecipientPickerView(amount: input.value, query: query) { recipient in
-                            pay(recipient)
+                            payChosen(recipient)
                         }
                     }
                 }
@@ -56,6 +60,7 @@ struct PayView: View {
             router.setPushedScreen(!path.isEmpty, on: .pay)
         }
         .onAppear(perform: applyDebugLaunch)
+        .task { await PayShaders.prepare() }
     }
 
     private var keypadScreen: some View {
@@ -81,7 +86,7 @@ struct PayView: View {
 
             // Up to 332pt, four rows of about 83, so keys grow to thumb size
             // and the amount keeps the space above.
-            PayKeypad(onKey: press, canClear: !input.isZero)
+            PayKeypad(onKey: press, canClear: !input.isZero, tint: wallet.buttonFill)
                 .frame(maxHeight: 332)
                 .padding(.horizontal, 8)
                 // Takes its full height before the spacers around the
@@ -125,14 +130,19 @@ struct PayView: View {
             .buttonStyle(PressScaleButtonStyle())
             .accessibilityHint("Dials \(USSD.balance(for: wallet))")
 
-            Button("Pay") {
-                if let chosenRecipient {
-                    pay(chosenRecipient)
-                } else {
-                    openPicker()
-                }
-            }
+            Button("Pay") { next() }
                 .buttonStyle(.starhashPrimary)
+                // Held, as in the reference: the white bubble under the
+                // finger and light streaming through the button.
+                .overlay {
+                    if !reduceMotion { PayPressOverlay(location: payTouch) }
+                }
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 0).updating($payTouch) { value, touch, _ in
+                        touch = value.location
+                    }
+                )
+                // Outermost, so a disabled Pay shows no bubble either.
                 .disabled(input.isZero)
                 .animation(.smooth(duration: 0.2), value: input.isZero)
         }
@@ -149,11 +159,37 @@ struct PayView: View {
         return changed
     }
 
+    /// Pay: the recipient picker, or dialling the chosen recipient.
+    private func next() {
+        if let chosenRecipient {
+            pay(chosenRecipient)
+        } else {
+            openPicker()
+        }
+    }
+
     private func openPicker(query: String = "") {
         if saveTransactions, nearbyLocation, PaymentLocation.isAuthorized {
             locationTask = Task { await PaymentLocation.current() }
         }
         path = [.recipients(query: query)]
+    }
+
+    /// Someone chosen in the picker or its sheets: as in the reference, a
+    /// wave up the screen from where the finger lifted, the keypad coming
+    /// back under it without its slide, the wave being the transition, and
+    /// the call prompt once the screen is still. Straight there with
+    /// Reduce Motion.
+    private func payChosen(_ recipient: Recipient) {
+        guard !reduceMotion else {
+            pay(recipient)
+            return
+        }
+        SendRipple.shared.play(from: SendRipple.shared.lastTouch, tint: wallet.buttonFill, dark: colorScheme == .dark) {
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) { pay(recipient) }
+        }
     }
 
     /// The recipient waits under the amount, and Pay dials them.
@@ -180,9 +216,14 @@ struct PayView: View {
         let code = USSD.payment(to: recipient, amount: amount, from: wallet)
         withAnimation(.smooth(duration: 0.25)) { chosenRecipient = nil }
         path = []
-        // The call prompt (or the alert) comes up once the picker has gone.
+        // The call prompt (or the alert) comes up once the picker has gone,
+        // or the wave has settled.
         Task {
-            try? await Task.sleep(for: .milliseconds(400))
+            if SendRipple.shared.isPlaying {
+                await SendRipple.shared.settled()
+            } else {
+                try? await Task.sleep(for: .milliseconds(400))
+            }
             dial(code)
         }
 

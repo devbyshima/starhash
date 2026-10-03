@@ -40,12 +40,6 @@ extension Color {
     /// Text and glyphs drawn on `starhashInk`.
     static let starhashOnInk = Color(light: .white, dark: .black)
 
-    /// The recipient picker's raised surfaces: its square header buttons
-    /// and search field, avatar tiles and the bands over its sections, a
-    /// step off the page in either appearance.
-    static let pickerSurface = Color(light: .init(white: 0.925), dark: .init(white: 0.075))
-    /// The outline of the picker's square buttons, field and tiles.
-    static let pickerOutline = Color(light: .black.opacity(0.08), dark: .white.opacity(0.1))
     /// Letters a search matched, in the wallet's colour: MTN's yellow is
     /// darkened on a light page, where the bright one would not read.
     static let pickerMatchMTN = Color(light: .init(red: 0.62, green: 0.47, blue: 0), dark: .init(red: 1, green: 203 / 255, blue: 5 / 255))
