@@ -136,7 +136,7 @@ struct ActivityTransactionRow: View {
 
 /// A row tints while pressed, like a list cell. Drawn over the row, whose
 /// own slice of the card would hide it behind.
-private struct ActivityRowButtonStyle: ButtonStyle {
+struct ActivityRowButtonStyle: ButtonStyle {
     let position: ActivityCardPosition
 
     func makeBody(configuration: Configuration) -> some View {

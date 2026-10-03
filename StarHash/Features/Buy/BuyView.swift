@@ -1,12 +1,15 @@
 import StarHashKit
 import SwiftUI
 
-/// Buy: the codes kept on hand to dial in a tap (`USSDShortcutList`). It
-/// comes with MoMo's pending approvals and cash out, MTN's Gwamon' Pack and
-/// the airport's parking, and the + at the top right adds the person's own.
-/// Each card shows its code, so a tap is never a surprise; holding one
-/// edits or deletes it. The wallet or service's own prompts take the
-/// amount and the PIN, so nothing is logged in Activity.
+/// Buy: the codes kept on hand to dial in a tap (`USSDShortcutList`), laid
+/// out as Activity lists transactions, after Keaser's Home: one card of
+/// rows split by the dashed line, each its symbol on a tile, its name and
+/// what it does, and the code where a transaction shows its amount. A tap
+/// dials; holding a row offers Dial, Edit and Delete, and a swipe deletes
+/// it. It comes with MoMo's pending approvals and cash out, MTN's Gwamon'
+/// Pack and the airport's parking; the + at the top right adds one's own,
+/// in Keaser's New Category sheet (`ShortcutEditor`). The menu a code opens
+/// asks for the amount and the PIN, so nothing is logged in Activity.
 struct BuyView: View {
     @Environment(USSDShortcutList.self) private var shortcuts
 
@@ -15,6 +18,7 @@ struct BuyView: View {
     /// A code the system would not dial (the simulator, an iPad), shown in
     /// an alert so it can be dialled by hand.
     @State private var undialledCode: String?
+    @State private var deletedCount = 0
 
     var body: some View {
         VStack(spacing: 0) {
@@ -33,14 +37,17 @@ struct BuyView: View {
                 )
                 .padding(.horizontal, StarHashMetrics.screenPadding)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .transition(.opacity)
             } else {
                 list
+                    .transition(.opacity)
             }
         }
         .starhashTabBarClearance()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.starhashBackground.ignoresSafeArea())
         .animation(.smooth(duration: 0.3), value: shortcuts.shortcuts)
+        .sensoryFeedback(.impact(flexibility: .rigid), trigger: deletedCount)
         .sheet(item: $editing) { draft in
             ShortcutEditor(draft: draft)
         }
@@ -57,36 +64,75 @@ struct BuyView: View {
         } message: { code in
             Text("Dial \(code) on your phone.")
         }
+        #if DEBUG
+        // -buyNew: the editor for a new code; -buyEdit: editing the first.
+        .task {
+            try? await Task.sleep(for: .milliseconds(600))
+            if DebugLaunch.arguments.contains("-buyNew") { editing = ShortcutDraft() }
+            if DebugLaunch.arguments.contains("-buyEdit"), let first = shortcuts.shortcuts.first { editing = ShortcutDraft(first) }
+        }
+        #endif
     }
 
     private var list: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                ForEach(shortcuts.shortcuts) { shortcut in
-                    ShortcutCard(shortcut: shortcut) { dial(shortcut.code) }
-                        .contextMenu {
-                            Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
-                            Button("Delete", systemImage: "trash", role: .destructive) { shortcuts.remove(shortcut.id) }
+            LazyVStack(alignment: .leading, spacing: 0) {
+                Text("Your codes")
+                    .starhashFont(17, weight: .semibold, relativeTo: .headline)
+                    .foregroundStyle(Color.starhashSecondaryText)
+                    .accessibilityAddTraits(.isHeader)
+                    .padding(.leading, 16)
+                    .padding(.bottom, 10)
+
+                let all = shortcuts.shortcuts
+                ForEach(Array(all.enumerated()), id: \.element.id) { index, shortcut in
+                    let position = ActivityCardPosition(index: index, count: all.count)
+                    Button {
+                        dial(shortcut.code)
+                    } label: {
+                        ShortcutRow(shortcut: shortcut)
+                            .background(ActivityCardRowBackground(position: position))
+                    }
+                    .buttonStyle(ActivityRowButtonStyle(position: position))
+                    .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: StarHashMetrics.rowRadius, style: .continuous))
+                    .contextMenu {
+                        Button("Dial \(shortcut.code)", systemImage: "phone.arrow.up.right") { dial(shortcut.code) }
+                        Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
+                        Button("Delete", systemImage: "trash", role: .destructive) { delete(shortcut) }
+                    }
+                    .accessibilityAction(named: "Edit") { editing = ShortcutDraft(shortcut) }
+                    .accessibilityAction(named: "Delete") { delete(shortcut) }
+                    // Outside the button, so a lifted row does not carry it.
+                    .overlay(alignment: .top) {
+                        if index > 0 {
+                            StarHashRowSeparator(leading: ActivityLayout.rowSeparatorLeading)
                         }
-                        .accessibilityAction(named: "Edit") { editing = ShortcutDraft(shortcut) }
-                        .accessibilityAction(named: "Delete") { shortcuts.remove(shortcut.id) }
-                        .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                    }
+                    .activitySwipeToDelete { delete(shortcut) }
+                    .transition(.opacity)
                 }
-                Text("Each opens its menu in your phone's dialler, which asks for the amount and your PIN; nothing is paid until you confirm there. Hold a code to edit or delete it.")
+
+                Text("A tap opens the code's menu in your phone's dialler, which asks for the amount and your PIN; nothing is paid until you confirm there. Hold a code to edit it.")
                     .starhashFont(13.5, weight: .medium, relativeTo: .footnote)
                     .foregroundStyle(Color.starhashSecondaryText)
                     .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 8)
-                    .padding(.top, 8)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 14)
             }
             .padding(.horizontal, StarHashMetrics.screenPadding)
-            .padding(.top, 20)
+            .padding(.top, ActivityLayout.contentTop)
             .padding(.bottom, 16)
-            .starhashReadableWidth(StarHashMetrics.narrowReadableWidth)
         }
         .scrollIndicators(.hidden)
         .scrollBounceBehavior(.basedOnSize)
+        .activitySwipeActionsContainer()
+        .starhashReadableScrollContent()
         .starhashTabBarFollowsScroll()
+    }
+
+    private func delete(_ shortcut: USSDShortcut) {
+        withAnimation(.smooth(duration: 0.3)) { shortcuts.remove(shortcut.id) }
+        deletedCount += 1
     }
 
     private func dial(_ code: String) {
@@ -98,56 +144,76 @@ struct BuyView: View {
     }
 }
 
-/// One code: its symbol on a tile, its name, what it does (for the ones
-/// StarHash comes with) and the code itself, in a card the width of the
-/// page. The whole card is the button.
-private struct ShortcutCard: View {
+/// One code, as Activity's transaction row: its symbol on a tile, its name
+/// over what it does, and the code at the end where an amount would be. At
+/// accessibility text sizes the code moves under the name.
+private struct ShortcutRow: View {
     let shortcut: USSDShortcut
-    let action: () -> Void
+
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: 14) {
-                SymbolTile(symbol: shortcut.symbol ?? "number", size: 46)
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(shortcut.name)
-                        .starhashFont(18, weight: .bold, relativeTo: .headline)
-                        .foregroundStyle(Color.starhashPrimaryText)
-                        .lineLimit(2)
-                    Text(shortcut.detail ?? shortcut.code)
-                        .starhashFont(14, weight: .medium, relativeTo: .subheadline)
-                        .foregroundStyle(Color.starhashTertiaryText)
+        let isLarge = dynamicTypeSize.isAccessibilitySize
+        HStack(spacing: 16) {
+            SymbolTile(symbol: shortcut.symbol ?? ShortcutSymbols.plain, size: 42)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(shortcut.name)
+                    .starhashFont(17, weight: .semibold, relativeTo: .headline)
+                    .foregroundStyle(Color.starhashPrimaryText)
+                    .lineLimit(isLarge ? 3 : 1)
+                if let detail = shortcut.detail {
+                    // Two lines, beside the code: what a code does is worth
+                    // reading whole.
+                    Text(detail)
+                        .starhashFont(15, relativeTo: .subheadline)
+                        .foregroundStyle(Color.starhashSecondaryText)
+                        .lineLimit(isLarge ? 4 : 2)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                Spacer(minLength: 8)
-                VStack(alignment: .trailing, spacing: 6) {
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(Color.starhashTertiaryText)
-                    // The code under the arrow, unless it is already the
-                    // card's second line.
-                    if shortcut.detail != nil {
-                        Text(shortcut.code)
-                            .starhashFont(13, weight: .medium, relativeTo: .footnote)
-                            .foregroundStyle(Color.starhashTertiaryText)
-                            .lineLimit(1)
-                    }
+                if isLarge {
+                    code
+                        .padding(.top, 4)
                 }
             }
-            .padding(.horizontal, 18)
-            .padding(.vertical, 18)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.starhashCard, in: RoundedRectangle(cornerRadius: StarHashMetrics.cardRadius, style: .continuous))
-            .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: StarHashMetrics.cardRadius, style: .continuous))
-            .contentShape(RoundedRectangle(cornerRadius: StarHashMetrics.cardRadius, style: .continuous))
+            if isLarge {
+                Spacer(minLength: 0)
+            } else {
+                Spacer(minLength: 8)
+                code
+                    .layoutPriority(1)
+            }
         }
-        .buttonStyle(PressScaleButtonStyle())
+        .padding(16)
+        .contentShape(Rectangle())
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(shortcut.name)
         .accessibilityValue(shortcut.detail ?? "")
         .accessibilityHint("Dials \(shortcut.code)")
         .accessibilityAddTraits(.isButton)
     }
+
+    private var code: some View {
+        Text(shortcut.code)
+            .starhashFont(16, weight: .semibold, relativeTo: .headline)
+            .foregroundStyle(Color.starhashPrimaryText)
+            .lineLimit(1)
+    }
+}
+
+/// The symbols a code can wear, chosen in the editor's grid: money, bills
+/// and the places a code is dialled for.
+enum ShortcutSymbols {
+    /// For a code with none chosen.
+    static let plain = "number"
+
+    static let all: [String] = [
+        "number", "checkmark.seal.fill", "banknote.fill", "gift.fill", "parkingsign",
+        "phone.fill", "antenna.radiowaves.left.and.right", "wifi", "bolt.fill", "drop.fill",
+        "tv.fill", "cart.fill", "bag.fill", "fork.knife", "car.fill",
+        "bus.fill", "airplane", "fuelpump.fill", "house.fill", "building.columns.fill",
+        "graduationcap.fill", "cross.case.fill", "heart.fill", "ticket.fill", "film.fill",
+        "gamecontroller.fill", "creditcard.fill", "arrow.left.arrow.right", "lock.fill", "star.fill",
+    ]
 }
 
 /// What the editor works on: a new code (no id) or a copy of one to change.
@@ -156,6 +222,8 @@ struct ShortcutDraft: Identifiable {
     var editing: USSDShortcut.ID?
     var name = ""
     var code = ""
+    var detail = ""
+    var symbol = ShortcutSymbols.plain
 
     init() {}
 
@@ -163,69 +231,64 @@ struct ShortcutDraft: Identifiable {
         editing = shortcut.id
         name = shortcut.name
         code = shortcut.code
+        detail = shortcut.detail ?? ""
+        symbol = shortcut.symbol ?? ShortcutSymbols.plain
     }
 }
 
-/// Adds or edits a code, in Beam's sheet language: the title, a card with
-/// the name and the code, a line on what a code looks like, and Add (or
-/// Save) once both are right; Delete under it when editing.
+/// Adds or edits a code, after Keaser's New Category, in StarHash's sheet
+/// language: the title with the confirm button on its right, the chosen
+/// symbol large on its tile, the name, the code and a note as capsule
+/// fields, and the grid of symbols to choose from, the chosen one ringed.
+/// Editing, Delete Code sits under the grid.
 private struct ShortcutEditor: View {
     @Environment(USSDShortcutList.self) private var shortcuts
     @Environment(\.dismiss) private var dismiss
 
     @State private var name: String
     @State private var code: String
-    @State private var height: CGFloat = 420
+    @State private var detail: String
+    @State private var symbol: String
     @FocusState private var focused: Field?
 
     private let editing: USSDShortcut.ID?
 
-    private enum Field { case name, code }
+    private enum Field { case name, code, detail }
 
     init(draft: ShortcutDraft) {
         editing = draft.editing
         _name = State(initialValue: draft.name)
         _code = State(initialValue: draft.code)
+        _detail = State(initialValue: draft.detail)
+        _symbol = State(initialValue: draft.symbol)
     }
 
     private var validCode: String? { USSDShortcut.code(from: code) }
     private var canSave: Bool {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && validCode != nil
     }
-    /// Only once something is typed, and not while it could still become a
-    /// code (no closing # yet).
+    /// Only once the code is closed with a # and still is not one.
     private var showsCodeHint: Bool {
         !code.isEmpty && validCode == nil && code.hasSuffix("#")
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            SheetHeader(editing == nil ? "Add a Code" : "Edit Code")
-
-            VStack(spacing: 14) {
-                VStack(spacing: 0) {
-                    field("Name", text: $name, prompt: "Pending approvals", field: .name)
-                        .textInputAutocapitalization(.sentences)
-                        .submitLabel(.next)
-                        .onSubmit { focused = .code }
-                    SheetDivider()
-                    field("Code", text: $code, prompt: "*182*7*1#", field: .code)
-                        .keyboardType(.phonePad)
+            SheetHeader(editing == nil ? "New Code" : "Edit Code") {
+                Button(action: save) {
+                    SheetGlassGlyph(symbol: "checkmark")
                 }
-                .padding(.horizontal, 16)
-                .sheetCard()
+                .buttonStyle(.hapticPlain)
+                .disabled(!canSave)
+                .opacity(canSave ? 1 : 0.4)
+                .accessibilityLabel(editing == nil ? "Add" : "Save")
+            }
 
-                Text(showsCodeHint ? "A code starts with * or #, ends with #, and has only digits, * and # in between." : "Starts with * or # and ends with #, as you would dial it.")
-                    .font(.sheetSubheadline)
-                    .foregroundStyle(showsCodeHint ? Color.starhashDestructive : Color.sheetSecondaryText)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .animation(.smooth(duration: 0.2), value: showsCodeHint)
-
-                VStack(spacing: 4) {
-                    Button(editing == nil ? "Add" : "Save", action: save)
-                        .buttonStyle(.sheetPrimary)
-                        .disabled(!canSave)
+            ScrollView {
+                VStack(spacing: 16) {
+                    preview
+                    fields
+                    symbolGrid
                     if let editing {
                         SheetTextButton("Delete Code", role: .destructive) {
                             shortcuts.remove(editing)
@@ -233,37 +296,102 @@ private struct ShortcutEditor: View {
                         }
                     }
                 }
-                .padding(.top, 4)
+                .padding(.horizontal, 18)
+                .padding(.top, 8)
+                .padding(.bottom, 24)
             }
-            .padding(.horizontal, 18)
-            .padding(.bottom, 12)
+            .scrollIndicators(.hidden)
+            .scrollDismissesKeyboard(.interactively)
         }
-        .sheetHeight($height)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .sheetGlass(detents: [.height(height + 8)])
-        .onAppear { focused = editing == nil ? .name : nil }
+        .sheetGlass(detents: [.large])
+        .onAppear { if editing == nil { focused = .name } }
     }
 
-    private func field(_ label: String, text: Binding<String>, prompt: String, field: Field) -> some View {
-        HStack(spacing: 12) {
-            Text(label)
-                .font(.sheetBody)
-                .foregroundStyle(Color.starhashPrimaryText)
-                .frame(width: 56, alignment: .leading)
-            TextField(label, text: text, prompt: Text(prompt).foregroundStyle(Color.sheetSecondaryText))
-                .font(.sheetBody)
-                .foregroundStyle(Color.starhashPrimaryText)
-                .autocorrectionDisabled()
-                .focused($focused, equals: field)
+    /// The chosen symbol, large on its tile, as Keaser shows a category's.
+    private var preview: some View {
+        Image(systemName: symbol)
+            .font(.system(size: 40, weight: .semibold))
+            .foregroundStyle(Color.starhashPrimaryText)
+            .contentTransition(.symbolEffect(.replace))
+            .frame(width: 88, height: 88)
+            .background(Color.sheetSurface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .animation(.snappy(duration: 0.2), value: symbol)
+            .accessibilityHidden(true)
+    }
+
+    private var fields: some View {
+        VStack(spacing: 10) {
+            capsuleField("Name", text: $name, field: .name)
+                .textInputAutocapitalization(.sentences)
+                .submitLabel(.next)
+                .onSubmit { focused = .code }
+            capsuleField("*182*7*1#", text: $code, field: .code)
+                .keyboardType(.phonePad)
+                .accessibilityLabel("Code")
+            capsuleField("Note (optional)", text: $detail, field: .detail)
+                .textInputAutocapitalization(.sentences)
+                .submitLabel(.done)
+
+            Text(showsCodeHint ? "A code starts with * or #, ends with #, and has only digits, * and # in between." : "The code as you would dial it: starts with * or #, ends with #.")
+                .font(.sheetSubheadline)
+                .foregroundStyle(showsCodeHint ? Color.starhashDestructive : Color.sheetSecondaryText)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 8)
+                .animation(.smooth(duration: 0.2), value: showsCodeHint)
         }
-        .frame(minHeight: 50)
+    }
+
+    /// Keaser's field: a capsule the width of the sheet, its text centred.
+    private func capsuleField(_ prompt: String, text: Binding<String>, field: Field) -> some View {
+        TextField(prompt, text: text, prompt: Text(prompt).foregroundStyle(Color.sheetSecondaryText))
+            .font(.sheet(17, .medium, relativeTo: .body))
+            .foregroundStyle(Color.starhashPrimaryText)
+            .multilineTextAlignment(.center)
+            .autocorrectionDisabled()
+            .focused($focused, equals: field)
+            .padding(.horizontal, 20)
+            .frame(minHeight: 52)
+            .background(Color.sheetSurface, in: Capsule())
+    }
+
+    /// Every symbol a code can wear, five to a row, in a card: a tap
+    /// chooses it, and the chosen one is ringed.
+    private var symbolGrid: some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 5), spacing: 12) {
+            ForEach(ShortcutSymbols.all, id: \.self) { option in
+                let isChosen = option == symbol
+                Button {
+                    symbol = option
+                } label: {
+                    Image(systemName: option)
+                        .font(.system(size: 19, weight: .semibold))
+                        .foregroundStyle(Color.starhashPrimaryText)
+                        .frame(width: 48, height: 48)
+                        .background(Color.sheetChip.opacity(isChosen ? 1 : 0.55), in: Circle())
+                        .overlay {
+                            Circle()
+                                .strokeBorder(Color.starhashPrimaryText, lineWidth: isChosen ? 2 : 0)
+                                .padding(-4)
+                        }
+                        .frame(width: 56, height: 56)
+                        .contentShape(Circle())
+                }
+                .buttonStyle(.hapticPlain)
+                .accessibilityLabel(option.replacingOccurrences(of: ".fill", with: "").replacingOccurrences(of: ".", with: " "))
+                .accessibilityAddTraits(isChosen ? .isSelected : [])
+            }
+        }
+        .padding(14)
+        .sheetCard()
+        .animation(.snappy(duration: 0.2), value: symbol)
     }
 
     private func save() {
         let saved = if let editing {
-            shortcuts.update(editing, name: name, code: code)
+            shortcuts.update(editing, name: name, code: code, detail: detail, symbol: symbol)
         } else {
-            shortcuts.add(name: name, code: code)
+            shortcuts.add(name: name, code: code, detail: detail, symbol: symbol)
         }
         guard saved else { return }
         // Played here, as the sheet goes, which a view-bound haptic would

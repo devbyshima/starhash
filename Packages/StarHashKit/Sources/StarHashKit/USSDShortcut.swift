@@ -7,10 +7,11 @@ public struct USSDShortcut: Codable, Hashable, Identifiable, Sendable {
     public var id: UUID
     public var name: String
     public var code: String
-    /// What it does ("Approve payments waiting for you"); none for codes
-    /// the person adds.
+    /// What it does ("Approve payments waiting for you"), or the person's
+    /// own note; none if they left it empty.
     public var detail: String?
-    /// An SF Symbol; codes the person adds take a plain one in the app.
+    /// The SF Symbol it shows, chosen when it is added; none shows a plain
+    /// one in the app.
     public var symbol: String?
 
     public init(id: UUID = UUID(), name: String, code: String, detail: String? = nil, symbol: String? = nil) {
@@ -35,7 +36,7 @@ public struct USSDShortcut: Codable, Hashable, Identifiable, Sendable {
             id: UUID(uuidString: "5E2A7C1E-0002-4000-8000-000000000002")!,
             name: "Cash out",
             code: "*182*7*2#",
-            detail: "Start a withdrawal before the agent's prompt",
+            detail: "Start a withdrawal at an agent",
             symbol: "banknote.fill"
         ),
         USSDShortcut(
@@ -50,7 +51,7 @@ public struct USSDShortcut: Codable, Hashable, Identifiable, Sendable {
             name: "Airport parking",
             code: "*182*3*8#",
             detail: "Pay a Kigali airport parking ticket",
-            symbol: "parkingsign.circle.fill"
+            symbol: "parkingsign"
         ),
     ]
 
@@ -90,27 +91,36 @@ public final class USSDShortcutList {
         }
     }
 
-    /// Adds a code at the end. False, and nothing added, for a name left
-    /// empty or a code that is not one.
+    /// Adds a code at the end, with its symbol and an optional note. False,
+    /// and nothing added, for a name left empty or a code that is not one.
     @discardableResult
-    public func add(name: String, code: String) -> Bool {
+    public func add(name: String, code: String, detail: String? = nil, symbol: String? = nil) -> Bool {
         let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty, let code = USSDShortcut.code(from: code) else { return false }
-        shortcuts.append(USSDShortcut(name: name, code: code))
+        shortcuts.append(USSDShortcut(name: name, code: code, detail: Self.note(detail), symbol: symbol))
         save()
         return true
     }
 
-    /// Renames or recodes one. False, and nothing changed, as `add`.
+    /// Changes one: its name, code, note and symbol. False, and nothing
+    /// changed, as `add`.
     @discardableResult
-    public func update(_ id: USSDShortcut.ID, name: String, code: String) -> Bool {
+    public func update(_ id: USSDShortcut.ID, name: String, code: String, detail: String? = nil, symbol: String? = nil) -> Bool {
         let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty, let code = USSDShortcut.code(from: code),
               let index = shortcuts.firstIndex(where: { $0.id == id }) else { return false }
         shortcuts[index].name = name
         shortcuts[index].code = code
+        shortcuts[index].detail = Self.note(detail)
+        shortcuts[index].symbol = symbol
         save()
         return true
+    }
+
+    /// A note with nothing in it is no note.
+    private static func note(_ detail: String?) -> String? {
+        let trimmed = detail?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? nil : trimmed
     }
 
     public func remove(_ id: USSDShortcut.ID) {

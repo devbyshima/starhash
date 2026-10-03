@@ -35,13 +35,17 @@ struct USSDShortcutTests {
         let added = list.shortcuts.last!
         #expect(added.name == "Airtime")
 
-        #expect(list.update(added.id, name: "Top up", code: "*182*2*1*1#"))
+        #expect(added.detail == nil && added.symbol == nil)
+
+        #expect(list.update(added.id, name: "Top up", code: "*182*2*1*1#", detail: "  For my number ", symbol: "phone.fill"))
         list.remove(USSDShortcut.defaults[0].id)
 
         let reloaded = USSDShortcutList(defaults: defaults)
         #expect(reloaded.shortcuts.count == 4)
         #expect(reloaded.shortcuts.last?.name == "Top up")
         #expect(reloaded.shortcuts.last?.code == "*182*2*1*1#")
+        #expect(reloaded.shortcuts.last?.detail == "For my number")
+        #expect(reloaded.shortcuts.last?.symbol == "phone.fill")
         #expect(!reloaded.shortcuts.contains { $0.id == USSDShortcut.defaults[0].id })
 
         reloaded.reset()
