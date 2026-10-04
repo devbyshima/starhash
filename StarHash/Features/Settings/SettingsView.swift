@@ -1,9 +1,10 @@
 import StarHashKit
 import SwiftUI
 
-/// Settings, with what was Help: what StarHash saves, privacy, a feature
-/// request, About StarHash (which holds What's New, onboarding, the note
-/// and the source code) and Delete All Data. (The wallet switcher lives on
+/// Settings: what StarHash saves, its lock, and More (the terms of service,
+/// the privacy policy, a feature request, and About StarHash, which holds
+/// What's New, onboarding, the note and the source code), then Delete All
+/// Data. (The wallet switcher lives on
 /// Pay.) Its own NavigationStack, with each page pushed onto it, over which
 /// the tab bar steps aside.
 struct SettingsView: View {
@@ -39,13 +40,15 @@ enum SettingsPage: Hashable {
     case autoVerify
     case whatsNew
     case release(String)
+    case terms
     case privacy
     case about
 
     @MainActor @ViewBuilder
     var destination: some View {
         switch self {
-        case .privacy: PrivacyView()
+        case .terms: TermsOfServiceView()
+        case .privacy: PrivacyPolicyView()
         case .about: AboutStarHashView()
         case .autoVerify: AutoVerificationGuide()
         case .whatsNew: WhatsNewView()
@@ -161,8 +164,9 @@ private struct SettingsRootList: View {
                 securityRow
             }
 
-            SettingsCard("Help") {
-                SettingsLinkRow(page: .privacy, symbol: "lock.fill", title: "Privacy", caption: "Everything stays on this iPhone")
+            SettingsCard("More") {
+                SettingsLinkRow(page: .terms, symbol: "doc.text.fill", title: "Terms of Service", caption: "The terms for using StarHash")
+                SettingsLinkRow(page: .privacy, symbol: "lock.fill", title: "Privacy Policy", caption: "Everything stays on this iPhone")
                 Link(destination: SettingsLinks.requestFeature) {
                     SettingsRow(symbol: "lightbulb.fill", title: "Request a Feature", caption: "Tell us what StarHash should do next") {
                         SettingsChevron(symbol: "arrow.up.right")
@@ -320,7 +324,7 @@ enum SettingsVersion {
     }
 }
 
-/// The mark, then the name and version on two centred lines (Help).
+/// The mark, then the name and version on two centred lines.
 struct SettingsFooter: View {
     var body: some View {
         VStack(spacing: 16) {
@@ -343,7 +347,7 @@ struct SettingsFooter: View {
 
 // MARK: - Launch arguments
 
-/// `-settingsPage whatsNew|release|about|guide|guide2|guide3` (DEBUG only, with
+/// `-settingsPage whatsNew|release|terms|privacy|about|guide|guide2|guide3` (DEBUG only, with
 /// `-tab settings`) opens that page or the guide at launch.
 @MainActor
 enum SettingsLaunch {
@@ -357,6 +361,7 @@ enum SettingsLaunch {
 
     static var initialPath: [SettingsPage] {
         if page == "whatsNew" { return [.whatsNew] }
+        if page == "terms" { return [.terms] }
         if page == "privacy" { return [.privacy] }
         if page == "about" { return [.about] }
         if page == "release" { return [.whatsNew, .release(ReleaseHistory.releases[0].version)] }

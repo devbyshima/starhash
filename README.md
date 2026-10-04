@@ -91,7 +91,8 @@ Free and open source.
   Reduce Motion), a Face ID lock (Touch ID or the passcode on an iPhone
   without it), off until turned on, which asks as StarHash opens and
   after more than a minute away and hides it in the app switcher, the
-  auto verification guide and Privacy, and at the bottom
+  auto verification guide, and under More the Terms of Service, the
+  Privacy Policy, Request a Feature and About StarHash, and at the bottom
   Delete All Data, which erases everything StarHash keeps on the iPhone
   (transactions, recents, wallet, settings) and starts again from
   onboarding, like deleting an account.

@@ -225,7 +225,7 @@ Names the owner uses for parts of the design; find them by these names.
 | `-confirmDelete` | with `-openFirstTransaction`: the delete question |
 | `-activitySearch <text>` | Activity search with this text |
 | `-activityChartSelection last\|<index>` | chart callout on a bar |
-| `-settingsPage whatsNew\|release\|privacy\|about\|guide\|guide2\|guideFailed\|guideVerified\|autoVerifyOff` | a Settings page (with `-tab settings`); guide is Auto-verify at step 1 or 2, guideFailed/guideVerified step 2 after its check; autoVerifyOff asks to turn it off |
+| `-settingsPage whatsNew\|release\|terms\|privacy\|about\|guide\|guide2\|guideFailed\|guideVerified\|autoVerifyOff` | a Settings page (with `-tab settings`); guide is Auto-verify at step 1 or 2, guideFailed/guideVerified step 2 after its check; autoVerifyOff asks to turn it off |
 
 Example:
 

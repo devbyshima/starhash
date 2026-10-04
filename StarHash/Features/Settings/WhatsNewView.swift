@@ -16,7 +16,7 @@ struct WhatsNewView: View {
                                 Text("Version \(release.version)")
                                     .starhashFont(16, weight: .semibold, relativeTo: .callout)
                                     .foregroundStyle(Color.starhashPrimaryText)
-                                Text(ReleaseDay.text(for: release))
+                                Text(KigaliDay.text(release.date))
                                     .starhashFont(13.5, relativeTo: .footnote)
                                     .foregroundStyle(Color.starhashTertiaryText)
                             }
@@ -68,7 +68,7 @@ struct ReleaseDetailView: View {
                 .starhashFont(30, weight: .bold, relativeTo: .title)
                 .foregroundStyle(Color.starhashPrimaryText)
                 .accessibilityAddTraits(.isHeader)
-            Text(ReleaseDay.text(for: release))
+            Text(KigaliDay.text(release.date))
                 .starhashFont(13.5, weight: .semibold, relativeTo: .footnote)
                 .foregroundStyle(Color.starhashSecondaryText)
                 .padding(.horizontal, 12)
@@ -125,16 +125,17 @@ private struct ReleaseLatestTag: View {
     }
 }
 
-/// A release's day as the reader writes dates ("2 October 2026"), read as
-/// the Kigali day it shipped, whatever zone the iPhone is in.
-enum ReleaseDay {
-    static func text(for release: Release) -> String {
+/// A day kept as "yyyy-MM-dd" (a release, a document taking effect), as
+/// the reader writes dates ("2 October 2026"), read as the Kigali day it
+/// was, whatever zone the iPhone is in.
+enum KigaliDay {
+    static func text(_ date: String) -> String {
         let kigali = TimeZone(identifier: "Africa/Kigali") ?? .current
         let parser = DateFormatter()
         parser.locale = Locale(identifier: "en_US_POSIX")
         parser.timeZone = kigali
         parser.dateFormat = "yyyy-MM-dd"
-        guard let day = parser.date(from: release.date) else { return release.date }
+        guard let day = parser.date(from: date) else { return date }
         var style = Date.FormatStyle.dateTime.day().month(.wide).year()
         style.timeZone = kigali
         return day.formatted(style)
