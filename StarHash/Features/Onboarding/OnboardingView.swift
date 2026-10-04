@@ -106,9 +106,7 @@ struct OnboardingView: View {
                     await SettingsContactsAccess.request()
                     advance()
                 }
-            },
-            secondaryTitle: "Maybe Later",
-            secondaryAction: advance
+            }
         )
     }
 
@@ -122,7 +120,7 @@ struct OnboardingView: View {
             description: "Paid a shop here before? StarHash lists it\nfirst next time. This stays on your iPhone.",
             alertButtons: 3,
             tappedButton: 2,
-            primaryTitle: nearbyLocation ? "Continue" : "Turn On",
+            primaryTitle: "Continue",
             primaryAction: {
                 guard !nearbyLocation else { return advance() }
                 Task {
@@ -130,9 +128,7 @@ struct OnboardingView: View {
                     if allowed, PaymentLocation.isAuthorized { nearbyLocation = true }
                     advance()
                 }
-            },
-            secondaryTitle: nearbyLocation ? nil : "Not Now",
-            secondaryAction: advance
+            }
         )
     }
 

@@ -23,6 +23,9 @@ struct OnboardingPermission: View {
         var tappedButton = 2
         var primaryTitle: String
         var primaryAction: () -> Void
+        /// A quieter second choice under the button (auto-verify's Maybe
+        /// Later). Never on a screen before a system prompt: Apple allows
+        /// those one button, Continue, and no way past the prompt.
         var secondaryTitle: String?
         var secondaryAction: (() -> Void)?
     }
@@ -69,8 +72,12 @@ struct OnboardingPermission: View {
                     .buttonStyle(.hapticPlain)
                 }
             }
-            .frame(height: 270)
-            .padding(15)
+            // A lone button sits where Continue does on the other
+            // onboarding screens, 10 points over the bottom; with a second
+            // choice under it, the two are centred in the panel.
+            .frame(height: 270, alignment: hasSecondary ? .center : .bottom)
+            .padding([.horizontal, .top], 15)
+            .padding(.bottom, hasSecondary ? 15 : 10)
             .frame(maxWidth: .infinity)
             // The phone fades into the page under the words.
             .background {
@@ -88,6 +95,8 @@ struct OnboardingPermission: View {
             showsAlert = true
         }
     }
+
+    private var hasSecondary: Bool { config.secondaryTitle != nil && config.secondaryAction != nil }
 
     // MARK: The iPhone
 

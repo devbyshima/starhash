@@ -63,6 +63,9 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
 ## Rules
 
 - Swift 6 language mode, strict concurrency, no warnings in our sources.
+- A screen shown before a system permission prompt (Contacts, location)
+  has one button, Continue, that opens the prompt: no Maybe Later, Not
+  Now, close or Allow (Apple's pre-alert rule, App Review 5.1.1(iv)).
 - SwiftUI has its own `Transaction`: write `StarHashKit.Transaction` in any
   file that imports SwiftUI.
 - Colours only from `StarHash/Design/Theme.swift`, built from the four
