@@ -21,10 +21,14 @@ struct BuyView: View {
     /// What the details sheet asked for, done once it has gone: the editor
     /// opens, or the code dials, only after the sheet is down.
     @State private var afterDetails: AfterDetails?
+    /// The code the delete question is about, while it is asked.
+    @State private var codeToDelete: USSDShortcut?
+    @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
 
     private enum AfterDetails {
         case edit(ShortcutDraft)
         case dial(String)
+        case delete(USSDShortcut)
     }
     /// A code the system would not dial (the simulator, an iPad), shown in
     /// an alert so it can be dialled by hand.
@@ -108,10 +112,15 @@ struct BuyView: View {
                     details = nil
                 },
                 onDelete: {
+                    afterDetails = .delete(shortcut)
                     details = nil
-                    delete(shortcut)
                 }
             )
+        }
+        .deleteCodeDialog(
+            isPresented: Binding(get: { codeToDelete != nil }, set: { if !$0 { codeToDelete = nil } })
+        ) {
+            if let codeToDelete { delete(codeToDelete) }
         }
         .alert(
             "Can't dial on this device",
@@ -161,10 +170,10 @@ struct BuyView: View {
                                 Button(shortcuts.canPin ? "Pin" : "Pinned is full", systemImage: "pin") { afterMenu { pin(shortcut, true) } }
                                     .disabled(!shortcuts.canPin)
                                 Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
-                                Button(role: .destructive) { afterMenu { delete(shortcut) } } label: { DestructiveMenuLabel("Delete") }
+                                Button(role: .destructive) { afterMenu { requestDelete(shortcut) } } label: { DestructiveMenuLabel("Delete") }
                             }
                             .accessibilityAction(named: "Pin") { pin(shortcut, true) }
-                            .accessibilityAction(named: "Delete") { delete(shortcut) }
+                            .accessibilityAction(named: "Delete") { requestDelete(shortcut) }
                             .buySwipeToPin { pin(shortcut, true) }
                             .activitySwipeToDelete { delete(shortcut) }
                             .transition(.asymmetric(
@@ -252,13 +261,13 @@ struct BuyView: View {
                     Button("Unpin", systemImage: "pin.slash") { afterMenu { pin(shortcut, false) } }
                     Button("Details", systemImage: "info.circle") { details = shortcut }
                     Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
-                    Button(role: .destructive) { afterMenu { delete(shortcut) } } label: { DestructiveMenuLabel("Delete") }
+                    Button(role: .destructive) { afterMenu { requestDelete(shortcut) } } label: { DestructiveMenuLabel("Delete") }
                 }
                 .accessibilityAction(named: "Unpin") { pin(shortcut, false) }
                 .accessibilityAction(named: "Move Earlier") { movePinned(shortcut, by: -1) }
                 .accessibilityAction(named: "Move Later") { movePinned(shortcut, by: 1) }
                 .accessibilityAction(named: "Details") { details = shortcut }
-                .accessibilityAction(named: "Delete") { delete(shortcut) }
+                .accessibilityAction(named: "Delete") { requestDelete(shortcut) }
         }
     }
 
@@ -371,9 +380,20 @@ struct BuyView: View {
         switch afterDetails {
         case .edit(let draft): editing = draft
         case .dial(let code): dial(code)
+        case .delete(let shortcut): requestDelete(shortcut)
         case nil: break
         }
         afterDetails = nil
+    }
+
+    /// Asks first, unless Don't Ask Again was chosen. A swipe deletes at
+    /// once, as in Activity: the swipe is the deliberate gesture.
+    private func requestDelete(_ shortcut: USSDShortcut) {
+        if confirmDeletes {
+            codeToDelete = shortcut
+        } else {
+            delete(shortcut)
+        }
     }
 
     private func delete(_ shortcut: USSDShortcut) {
@@ -815,6 +835,8 @@ private struct ShortcutEditor: View {
     @State private var height: CGFloat = 420
     /// The grid of symbols, shown once the big symbol is tapped.
     @State private var choosesSymbol = false
+    @State private var asksDelete = false
+    @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
     @FocusState private var focused: Field?
 
     private let editing: USSDShortcut.ID?
@@ -869,8 +891,12 @@ private struct ShortcutEditor: View {
 
                     if let editing {
                         DeleteButton("Delete Code") {
-                            shortcuts.remove(editing)
-                            dismiss()
+                            if confirmDeletes {
+                                asksDelete = true
+                            } else {
+                                shortcuts.remove(editing)
+                                dismiss()
+                            }
                         }
                         .padding(.top, 10)
                     }
@@ -885,6 +911,11 @@ private struct ShortcutEditor: View {
         .scrollBounceBehavior(.basedOnSize)
         .scrollDismissesKeyboard(.interactively)
         .sheetGlass(detents: [.height(height + 8)])
+        .deleteCodeDialog(isPresented: $asksDelete, asAlert: true) {
+            guard let editing else { return }
+            shortcuts.remove(editing)
+            dismiss()
+        }
         .animation(.smooth(duration: 0.3), value: height)
         .animation(.smooth(duration: 0.2), value: showsCodeHint)
         .onAppear { if editing == nil { focused = .name } }
@@ -1050,5 +1081,52 @@ private struct ShortcutEditor: View {
         // not outlive.
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         dismiss()
+    }
+}
+
+/// The question before one of Buy's codes is deleted, as Activity asks
+/// before a transaction goes: Don't Ask Again deletes and stops asking;
+/// Settings, Ask Before Deleting, brings it back.
+private struct DeleteCodeDialog: ViewModifier {
+    @Binding var isPresented: Bool
+    let asAlert: Bool
+    let onDelete: () -> Void
+
+    @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
+
+    func body(content: Content) -> some View {
+        if asAlert {
+            content.alert("Delete Code?", isPresented: $isPresented) { buttons } message: { message }
+        } else {
+            content.confirmationDialog("Delete Code?", isPresented: $isPresented, titleVisibility: .visible) {
+                buttons
+            } message: {
+                message
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var buttons: some View {
+        Button("Delete", role: .destructive, action: onDelete)
+        Button("Delete, Don't Ask Again", role: .destructive) {
+            confirmDeletes = false
+            onDelete()
+        }
+        Button("Cancel", role: .cancel) {}
+    }
+
+    private var message: Text { Text("It is removed from Buy.") }
+}
+
+extension View {
+    /// Asks before deleting a code while `isPresented`: a dialog by the
+    /// list, or a centred alert (`asAlert`) over the editor.
+    fileprivate func deleteCodeDialog(
+        isPresented: Binding<Bool>,
+        asAlert: Bool = false,
+        onDelete: @escaping () -> Void
+    ) -> some View {
+        modifier(DeleteCodeDialog(isPresented: isPresented, asAlert: asAlert, onDelete: onDelete))
     }
 }
