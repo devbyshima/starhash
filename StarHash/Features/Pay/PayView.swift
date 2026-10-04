@@ -168,7 +168,9 @@ struct PayView: View {
             .accessibilityHint("Dials \(USSD.balance(for: wallet))")
 
             // Never greyed out: with nothing typed it looks as always, and
-            // a tap shakes the amount, as in the reference.
+            // a tap shakes the amount, as in the reference. It then beats
+            // twice like a heartbeat, on purpose: the press, then the
+            // shake's own softer tap on its widest swing (PayAmountDisplay).
             Button("Pay") { next() }
                 .buttonStyle(.starhashPrimaryOnPay)
                 // Held, as in the reference: light streaming through the
@@ -181,9 +183,6 @@ struct PayView: View {
                         held = true
                     }
                 )
-                // With nothing typed, Pay beats twice like a heartbeat, on
-                // purpose: the press, then the shake's own softer tap on
-                // its widest swing (PayAmountDisplay).
         }
     }
 

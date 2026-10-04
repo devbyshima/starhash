@@ -107,13 +107,13 @@ extension Color {
     /// shade of the page rather than a pale (or, with a grey tint, teal)
     /// hole; untinted on the near black.
     static let payGlassTint = Color(light: Color(red: 0, green: 110 / 255, blue: 176 / 255).opacity(0.55), dark: .clear)
-    /// The pressed digit's flash: the text colour itself on the blue (a
-    /// pale flash vanished into the white puff), the blue on the near
-    /// black.
+    /// The pressed digit's flash as it lifts: the text colour itself on
+    /// the blue, the blue on the near black.
     static let payKeypadFlash = Color(light: .brandNight, dark: .brandBlue)
     /// Glass on any page: Pay's deep-blue tint in light mode.
     static let starhashGlassTint = Color.payGlassTint
-    /// Pills on Pay, and Pay itself while it cannot be pressed.
+    /// Pills and recipient tiles on Pay, and the primary button there
+    /// when disabled.
     static let payWash = Color(light: .brandNight.opacity(0.1), dark: .brandPaper.opacity(0.08))
 
     // MARK: The accent
