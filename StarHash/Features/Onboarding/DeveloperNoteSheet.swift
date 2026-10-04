@@ -125,6 +125,15 @@ enum DeveloperNoteLinks {
     /// A new issue on StarHash's public repo: writing to Shima without an
     /// email address in the app's open code.
     static let write = URL(string: "https://github.com/devbyshima/starhash/issues/new")!
+
+    /// StarHash's App Store id, from its App Store Connect record (App
+    /// Information, Apple ID). Nil until the record exists.
+    static let appStoreID: String? = nil
+
+    /// The App Store's Write a Review page for StarHash, once the id is set.
+    static var writeReview: URL? {
+        appStoreID.flatMap { URL(string: "https://apps.apple.com/app/id\($0)?action=write-review") }
+    }
 }
 
 /// The welcome note. As onboarding ends it opens over Pay, ends on Start
@@ -147,10 +156,13 @@ struct DeveloperNoteSheet: View {
     }
 }
 
-/// The two-week note, with its one ask: Rate on the App Store brings up the App
-/// Store's own rating prompt.
+/// The two-week note, with its one ask: Rate on the App Store opens the App
+/// Store's Write a Review page. iOS may skip its own rating prompt (it
+/// limits how often it shows, and never shows it in TestFlight), so the
+/// prompt is only the stand-in until the App Store id is known.
 struct ReviewNoteSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     @Environment(\.requestReview) private var requestReview
 
     var body: some View {
@@ -160,7 +172,11 @@ struct ReviewNoteSheet: View {
                 Task {
                     // Once the sheet has gone, so the prompt is not under it.
                     try? await Task.sleep(for: .milliseconds(500))
-                    requestReview()
+                    if let page = DeveloperNoteLinks.writeReview {
+                        openURL(page)
+                    } else {
+                        requestReview()
+                    }
                 }
             }
         }

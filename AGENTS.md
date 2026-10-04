@@ -42,6 +42,12 @@ link only: the file is not committed at present, and the share-sheet
 fallback in `StarHashShortcut` runs only when the link is nil and the file
 is bundled.
 
+## App Store id
+
+Set `DeveloperNoteLinks.appStoreID` once StarHash's App Store Connect
+record exists: Rate on the App Store then opens the Write a Review page,
+instead of asking iOS for a rating prompt it may not show.
+
 ## Commands
 
     ./scripts/build.sh                      # xcodegen + simulator build
