@@ -16,7 +16,7 @@ public struct Release: Identifiable, Hashable, Sendable {
 
     /// Marketing version without the "v": "1.0.0".
     public let version: String
-    /// Release day as "yyyy-MM-dd", shown as is under the version.
+    /// Release day as "yyyy-MM-dd", in Kigali; shown written out.
     public let date: String
     public let summary: String
     public let highlights: [Highlight]
@@ -49,7 +49,7 @@ public enum ReleaseHistory {
                 .init(symbol: "clock.fill", title: "Every payment in Activity",
                       detail: "See what you spent by day, week, month or year, with a chart, search and the details of each payment."),
                 .init(symbol: "checkmark.message.fill", title: "Auto-verify",
-                      detail: "Add one shortcut and your M\u{2011}Money messages confirm each payment, with its fee and your new balance."),
+                      detail: "Add one shortcut and your MTN MoMo or Airtel Money messages confirm each payment, with its fee and your new balance."),
                 .init(symbol: "lock.fill", title: "Private by design",
                       detail: "No account, no servers and no tracking. Everything stays on your iPhone."),
                 .init(symbol: "heart.fill", title: "Free and open source",

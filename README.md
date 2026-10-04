@@ -89,7 +89,7 @@ Free and open source.
   question's Don't Ask Again), the default page StarHash opens on (Pay
   or Buy), the keypad's ink effect (off, a key presses as it does with
   Reduce Motion), the auto
-  verification guide, How StarHash Works and Privacy, and at the bottom
+  verification guide and Privacy, and at the bottom
   Delete All Data, which erases everything StarHash keeps on the iPhone
   (transactions, recents, wallet, settings) and starts again from
   onboarding, like deleting an account.

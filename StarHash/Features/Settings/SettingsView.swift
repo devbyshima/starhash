@@ -1,11 +1,11 @@
 import StarHashKit
 import SwiftUI
 
-/// Settings, with what was Help: what StarHash saves, the guides (how it
-/// works, privacy, and About StarHash, which holds What's
-/// New, onboarding, the note and the source code) and Delete All Data. (The
-/// wallet switcher lives on Pay.) Its own NavigationStack, with each page
-/// pushed onto it, over which the tab bar steps aside.
+/// Settings, with what was Help: what StarHash saves, privacy, a feature
+/// request, About StarHash (which holds What's New, onboarding, the note
+/// and the source code) and Delete All Data. (The wallet switcher lives on
+/// Pay.) Its own NavigationStack, with each page pushed onto it, over which
+/// the tab bar steps aside.
 struct SettingsView: View {
     @Environment(AppRouter.self) private var router
     @State private var path: [SettingsPage] = SettingsLaunch.initialPath
@@ -39,14 +39,12 @@ enum SettingsPage: Hashable {
     case autoVerify
     case whatsNew
     case release(String)
-    case howItWorks
     case privacy
     case about
 
     @MainActor @ViewBuilder
     var destination: some View {
         switch self {
-        case .howItWorks: HowStarHashWorksView()
         case .privacy: PrivacyView()
         case .about: AboutStarHashView()
         case .autoVerify: AutoVerificationGuide()
@@ -159,7 +157,6 @@ private struct SettingsRootList: View {
             }
 
             SettingsCard("Help") {
-                SettingsLinkRow(page: .howItWorks, symbol: "number.square.fill", title: "How StarHash works", caption: "Amount, recipient, and the USSD code")
                 SettingsLinkRow(page: .privacy, symbol: "lock.fill", title: "Privacy", caption: "Everything stays on this iPhone")
                 Link(destination: SettingsLinks.requestFeature) {
                     SettingsRow(symbol: "lightbulb.fill", title: "Request a Feature", caption: "Tell us what StarHash should do next") {
@@ -323,7 +320,6 @@ enum SettingsLaunch {
 
     static var initialPath: [SettingsPage] {
         if page == "whatsNew" { return [.whatsNew] }
-        if page == "howItWorks" { return [.howItWorks] }
         if page == "privacy" { return [.privacy] }
         if page == "about" { return [.about] }
         if page == "release" { return [.whatsNew, .release(ReleaseHistory.releases[0].version)] }
