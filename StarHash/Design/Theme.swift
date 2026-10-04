@@ -166,11 +166,10 @@ extension Color {
     /// (the dark-mode Total card).
     static let blackGlassTint = Color.brandNight.opacity(0.6)
     /// Text and marks straight on a sheet, with nothing behind them (a
-    /// title, a hero name, a label, a text button): the brand blue. Dark:
-    /// the blue itself (6.8:1 on the sheet). Light: the blue deepened just
-    /// enough to read on the white sheet (4.7:1), where the blue itself is
-    /// 2.6:1.
-    static let sheetBrandText = Color(light: .init(red: 0, green: 120 / 255, blue: 190 / 255), dark: .brandBlue)
+    /// title, a hero name, a label, a text button). Dark: the blue itself
+    /// (6.8:1 on the sheet). Light: the near black (17:1 on the white
+    /// sheet), as the rest of the sheet's text is.
+    static let sheetBrandText = Color(light: .brandNight, dark: .brandBlue)
     static let sheetFilledButton = Color(light: .brandNight, dark: .brandPaper)
     /// A disabled sheet button's label, on its `sheetChip` fill.
     static let sheetDisabledLabel = Color(light: .brandNight.opacity(0.6), dark: .init(white: 166 / 255))
