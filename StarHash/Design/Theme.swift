@@ -221,8 +221,6 @@ extension Color {
     static let starhashAirtel = Color(red: 228 / 255, green: 0, blue: 0)
     static let starhashOnAirtel = Color.white
 
-    /// Large empty-state symbols ("No Expenses") and other muted icons.
-    static let starhashMutedIcon = Color(light: .init(white: 138 / 255), dark: .init(white: 130 / 255))
     /// The close (xmark) glyph: grey and lighter in weight than the other
     /// header glyphs (back, add, confirm).
     static let starhashCloseGlyph = Color.starhashSecondaryText

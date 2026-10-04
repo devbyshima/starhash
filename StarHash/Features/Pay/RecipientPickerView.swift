@@ -151,7 +151,7 @@ struct RecipientPickerView: View {
         .overlay {
             if showsNoMatches {
                 EmptyStateView(
-                    symbol: "magnifyingglass",
+                    doodle: .matches,
                     title: "No Matches",
                     message: "Type a phone number or a merchant code to pay it directly."
                 )

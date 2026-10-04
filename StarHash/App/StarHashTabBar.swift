@@ -212,6 +212,15 @@ extension View {
         }
     }
 
+    /// Centres an empty state in the space the page has for it: from under
+    /// its header (or the status bar) to the tab bar's top edge, which
+    /// stands `height - 6` above the safe area's foot, so it sits in the
+    /// middle of what shows rather than of a frame running behind the bar.
+    func starhashCentredOverTabBar() -> some View {
+        frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding(.bottom, TabBarMetrics.height - 6)
+    }
+
     /// Shrinks the tab bar while this scroll view scrolls down, and brings
     /// it back on the way up or at the top, as the reference's does.
     func starhashTabBarFollowsScroll() -> some View {

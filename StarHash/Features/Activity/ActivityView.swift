@@ -100,26 +100,47 @@ struct ActivityView: View {
         }
     }
 
-    /// Nothing logged yet: the message centred on the page, which has no
-    /// top bar then.
+    /// Nothing logged yet: the doodle and its words alone, centred between
+    /// the status bar and the tab bar; the page has no top bar then.
     private var emptyScreen: some View {
         EmptyStateView(
-            symbol: "clock",
+            doodle: .transactions,
             title: "No Transactions",
             message: "Pay someone from Pay, or set up Auto-verify in Settings to log MoMo messages."
         )
         .padding(.horizontal, StarHashMetrics.screenPadding)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .ignoresSafeArea(.container, edges: .bottom)
-        .starhashTabBarClearance()
+        .starhashCentredOverTabBar()
     }
 
+    /// Nothing in the chosen period: the empty state alone, centred between
+    /// the top bar (kept, to choose another period) and the tab bar, with
+    /// no summary over it.
+    private func emptyPeriodScreen() -> some View {
+        EmptyStateView(
+            doodle: .period,
+            title: "No Transactions",
+            message: "Nothing was paid or received \(period.emptyPhrase)."
+        )
+        .padding(.horizontal, StarHashMetrics.screenPadding)
+        .starhashCentredOverTabBar()
+    }
+
+    @ViewBuilder
     private var listScreen: some View {
         let all = store.transactions
         let inPeriod = ActivitySummary.transactions(all, in: period, now: now, calendar: calendar)
         let sections = ActivitySummary.groupedByDay(inPeriod, calendar: calendar)
+        if sections.isEmpty {
+            emptyPeriodScreen()
+                .transition(.opacity)
+        } else {
+            periodList(inPeriod: inPeriod, sections: sections)
+                .transition(.opacity)
+        }
+    }
 
-        return ScrollView {
+    private func periodList(inPeriod: [StarHashKit.Transaction], sections: [ActivitySummary.DaySection]) -> some View {
+        ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
                 Group {
                     ActivitySummaryCard(
@@ -128,16 +149,6 @@ struct ActivityView: View {
                         buckets: ActivitySummary.buckets(for: inPeriod, period: period, now: now, calendar: calendar),
                         calendar: calendar
                     )
-                    if sections.isEmpty {
-                        EmptyStateView(
-                            symbol: "clock",
-                            title: "No Transactions",
-                            message: "Nothing was paid or received \(period.emptyPhrase)."
-                        )
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 48)
-                        .padding(.bottom, 24)
-                    }
                     ForEach(sections) { section in
                         dayHeader(section)
                         ActivityTransactionRows(

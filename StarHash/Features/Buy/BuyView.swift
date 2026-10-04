@@ -53,15 +53,18 @@ struct BuyView: View {
         ZStack {
             if shortcuts.shortcuts.isEmpty {
                 EmptyStateView(
-                    symbol: "number.square",
+                    doodle: .codes,
                     title: "No Codes",
                     message: "Add a code you dial often with the + button, and it is a tap away here."
                 )
                 .padding(.horizontal, StarHashMetrics.screenPadding)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .starhashCentredOverTabBar()
                 .transition(.opacity)
             } else {
                 list
+                    // The list scrolls clear of the tab bar; the empty state
+                    // centres itself over it.
+                    .starhashTabBarClearance()
                     .transition(.opacity)
             }
         }
@@ -78,7 +81,6 @@ struct BuyView: View {
                 }
             }
         }
-        .starhashTabBarClearance()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.starhashBackground.ignoresSafeArea())
         .animation(.smooth(duration: 0.3), value: shortcuts.shortcuts)

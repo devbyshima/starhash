@@ -147,6 +147,15 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   `starhashTabBarFollowsScroll()`, and a page hides it with
   `router.setHidesTabBar(_:on:)` while a screen is pushed or a search is
   open.
+- Every empty state is `EmptyStateView`: a doodle (`EmptyDoodle`), a bold
+  title and a line, all 20pt, centred in the space the page has with
+  `starhashCentredOverTabBar()` (under its header, over the tab bar's top
+  edge) and nothing else on the page but its header. The doodles are drawn
+  by `python3 scripts/make_doodles.py` into the asset catalog, a light and
+  a dark SVG each, in the palette's colours, hand-drawn after the owner's
+  reference (rounded lines 7 wide, flat fills, a hand in a dark cuff, a
+  few "look here" strokes, wavy lines only on the subject). Add a new one
+  there, in the same style, and trim its canvas (`VIEWBOX`).
 - Build screens from the existing pieces: `StarHashCircleButton`,
   `StarHashCard`, `StarHashRowSeparator`, `.starhashPrimary`,
   `.starhashCapsule`, `SymbolTile`, `EmptyStateView`, `starhashBottomBar`.

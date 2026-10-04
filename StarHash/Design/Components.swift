@@ -90,21 +90,39 @@ struct SymbolTile: View {
     }
 }
 
-/// Every empty state in StarHash, one look: a grey symbol, a bold title
-/// and a line under it, all 20pt and centred, after the reference's Home
-/// ("No Account", "No Expenses"), with an optional action under them.
+/// The doodles over the empty states, drawn for StarHash by
+/// scripts/make_doodles.py, each with a light and a dark version.
+enum EmptyDoodle: String {
+    /// A hand holding up a near-blank receipt.
+    case transactions = "EmptyTransactions"
+    /// A hand holding a calendar page with nothing marked.
+    case period = "EmptyPeriod"
+    /// A hand holding up a magnifying glass.
+    case search = "EmptySearch"
+    /// A magnifying glass with a question mark in it.
+    case results = "EmptyResults"
+    /// A hand holding a phone, a number being typed.
+    case matches = "EmptyMatches"
+    /// A card with a big # and a + at its corner.
+    case codes = "EmptyCodes"
+}
+
+/// Every empty state in StarHash, one look: a doodle, a bold title and a
+/// line under it, all 20pt and centred, after the reference's Home ("No
+/// Account", "No Expenses"), with an optional action under them.
 struct EmptyStateView<Actions: View>: View {
-    let symbol: String
+    let doodle: EmptyDoodle
     let title: String
     let message: String
     @ViewBuilder var actions: Actions
 
     var body: some View {
         VStack(spacing: 0) {
-            Image(systemName: symbol)
-                .starhashFont(40)
-                .foregroundStyle(Color.starhashMutedIcon)
-                .padding(.bottom, 21)
+            Image(doodle.rawValue)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 168, height: 168)
+                .padding(.bottom, 12)
                 .accessibilityHidden(true)
             Text(title)
                 .starhashFont(20, weight: .bold)
@@ -126,7 +144,7 @@ struct EmptyStateView<Actions: View>: View {
 }
 
 extension EmptyStateView where Actions == EmptyView {
-    init(symbol: String, title: String, message: String) {
-        self.init(symbol: symbol, title: title, message: message) { EmptyView() }
+    init(doodle: EmptyDoodle, title: String, message: String) {
+        self.init(doodle: doodle, title: title, message: message) { EmptyView() }
     }
 }

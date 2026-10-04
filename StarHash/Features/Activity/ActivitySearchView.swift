@@ -27,7 +27,7 @@ struct ActivitySearchView: View {
     private var content: some View {
         if query.isEmpty {
             EmptyStateView(
-                symbol: "magnifyingglass",
+                doodle: .search,
                 title: "Search Transactions",
                 message: "Find a name, number, merchant code, amount or reference."
             )
@@ -36,7 +36,7 @@ struct ActivitySearchView: View {
             .transition(.opacity)
         } else if results.isEmpty {
             EmptyStateView(
-                symbol: "magnifyingglass",
+                doodle: .results,
                 title: "No Results",
                 message: "No transactions match \u{201C}\(query)\u{201D}."
             )
