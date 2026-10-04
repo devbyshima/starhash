@@ -32,6 +32,9 @@ struct ActivityView: View {
     @State private var transactionToDelete: StarHashKit.Transaction?
     @State private var feedbackCount = 0
     @State private var swipeDeleteCount = 0
+    /// Transactions being deleted, whose rows fold away before they go
+    /// (`ActivityTransactionRows`).
+    @State private var leaving: Set<UUID> = []
     #if DEBUG
     @State private var didApplyDebugLaunch = false
     #endif
@@ -144,7 +147,8 @@ struct ActivityView: View {
                             onOpen: open,
                             onConfirm: markConfirmed,
                             onDelete: requestDelete,
-                            onSwipeDelete: swipeDelete
+                            onSwipeDelete: swipeDelete,
+                            leaving: leaving
                         )
                     }
                 }
@@ -192,7 +196,8 @@ struct ActivityView: View {
             onOpen: open,
             onConfirm: markConfirmed,
             onDelete: requestDelete,
-            onSwipeDelete: swipeDelete
+            onSwipeDelete: swipeDelete,
+            leaving: leaving
         )
     }
 
@@ -253,13 +258,25 @@ struct ActivityView: View {
     /// as Beam deletes a copied item. The swipe is the deliberate gesture,
     /// so it does not ask.
     private func swipeDelete(_ transaction: StarHashKit.Transaction) {
-        withAnimation(.smooth(duration: 0.3)) { store.delete(id: transaction.id) }
+        remove(transaction)
         swipeDeleteCount += 1
     }
 
     private func delete(_ transaction: StarHashKit.Transaction) {
-        withAnimation(.smooth(duration: 0.3)) { store.delete(id: transaction.id) }
+        remove(transaction)
         feedbackCount += 1
+    }
+
+    /// The row folds away first, the rows under it rising as it closes;
+    /// then the transaction is deleted, with nothing of it left to see (and
+    /// its day, if it was the last, goes).
+    private func remove(_ transaction: StarHashKit.Transaction) {
+        withAnimation(.smooth(duration: 0.3)) { _ = leaving.insert(transaction.id) }
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(300))
+            withAnimation(.smooth(duration: 0.3)) { store.delete(id: transaction.id) }
+            leaving.remove(transaction.id)
+        }
     }
 
     private func beginSearch() {

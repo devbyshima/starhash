@@ -105,8 +105,11 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   of them, never a slice per row: Settings pages are a `SettingsScroll` of
   `SettingsCard`s (rows keep their 20pt with `settingsRowInset()`,
   `SettingsLinkRow` for a row that opens a page), and each of Activity's
-  days is one card (`ActivityTransactionRows`), whose lifted row brings
-  its own background through the menu's preview.
+  days is one card (`ActivityTransactionRows`). Its rows have no
+  background, so a lifted row brings its own through the menu's preview,
+  a swiped row takes the card's colour while it is aside (`RowSlab`), and
+  a deleted row folds away before the delete (`FoldAway`, marked by
+  `ActivityView`), so nothing of it shows through the rows rising.
 - **Soft Edge** is the one edge treatment: what scrolls under a bar softly
   fades and blurs into it, the system's soft scroll edge (Settings' look).
   Every scroll view and list gets `starhashSoftEdge()`, and a page's own

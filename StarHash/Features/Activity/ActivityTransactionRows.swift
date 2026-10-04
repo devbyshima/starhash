@@ -20,15 +20,21 @@ struct ActivityTransactionRows: View {
     let onDelete: (StarHashKit.Transaction) -> Void
     /// The swipe's delete, which does not ask.
     let onSwipeDelete: (StarHashKit.Transaction) -> Void
+    /// Rows being deleted, which fold away before they go (`ActivityView`).
+    var leaving: Set<UUID> = []
 
     /// The card's width, for a row lifted into its menu.
     @State private var width: CGFloat = 0
+
+    /// The card's own space, where a swiped row's offset shows.
+    static let space = "activityCard"
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: StarHashMetrics.cardRadius, style: .continuous)
         LazyVStack(spacing: 0) {
             rows
         }
+        .coordinateSpace(.named(Self.space))
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
         // A pressed row's tint follows the card's corners.
         .clipShape(shape)
@@ -44,6 +50,7 @@ struct ActivityTransactionRows: View {
                 onOpen(transaction)
             } label: {
                 ActivityTransactionRow(transaction: transaction, showsDate: showsDate)
+                    .modifier(RowSlab(isLeaving: leaving.contains(transaction.id)))
             }
             .buttonStyle(ActivityRowButtonStyle())
             .contextMenu {
@@ -66,15 +73,55 @@ struct ActivityTransactionRows: View {
                     .frame(width: width > 0 ? width : nil)
                     .background(Color.starhashCard)
             }
-            // Outside the button, so a lifted row does not carry it.
+            // Outside the button, so a lifted row does not carry it. Only
+            // under a row that stays: the first row folding away takes the
+            // line with it.
             .overlay(alignment: .top) {
-                if index > 0 {
+                if transactions[..<index].contains(where: { !leaving.contains($0.id) }) {
                     StarHashRowSeparator(leading: ActivityLayout.rowSeparatorLeading)
                 }
             }
             .activitySwipeToDelete { onSwipeDelete(transaction) }
+            .modifier(FoldAway(isFolded: leaving.contains(transaction.id)))
             .transition(.opacity)
         }
+    }
+}
+
+/// A row being deleted folds away: its height closes to nothing as the rows
+/// under it rise into the space, so nothing of it is left to show through
+/// them, as it would if it faded where it stood. Its height is measured
+/// as it is, so the fold starts from it.
+private struct FoldAway: ViewModifier {
+    let isFolded: Bool
+
+    @State private var height: CGFloat = 0
+
+    func body(content: Content) -> some View {
+        content
+            .fixedSize(horizontal: false, vertical: true)
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height = $0 }
+            .frame(height: isFolded ? 0 : (height > 0 ? height : nil), alignment: .top)
+            .clipped()
+            .opacity(isFolded ? 0 : 1)
+    }
+}
+
+/// The card is drawn once behind all its rows, so a row has no background of
+/// its own; while it is swiped aside or leaving, it takes the card's colour
+/// (white, or black glass's near black), and slides as a whole row would
+/// rather than as loose text.
+private struct RowSlab: ViewModifier {
+    let isLeaving: Bool
+
+    @State private var isAside = false
+
+    func body(content: Content) -> some View {
+        content
+            .background(Color.starhashCard.opacity(isAside || isLeaving ? 1 : 0))
+            .onGeometryChange(for: Bool.self) { proxy in
+                abs(proxy.frame(in: .named(ActivityTransactionRows.space)).minX) > 0.5
+            } action: { isAside = $0 }
     }
 }
 

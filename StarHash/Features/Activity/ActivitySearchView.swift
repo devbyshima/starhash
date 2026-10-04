@@ -14,6 +14,7 @@ struct ActivitySearchView: View {
     let onConfirm: (StarHashKit.Transaction) -> Void
     let onDelete: (StarHashKit.Transaction) -> Void
     let onSwipeDelete: (StarHashKit.Transaction) -> Void
+    var leaving: Set<UUID> = []
 
     private var query: String { text.trimmingCharacters(in: .whitespacesAndNewlines) }
 
@@ -46,7 +47,8 @@ struct ActivitySearchView: View {
                         onOpen: onOpen,
                         onConfirm: onConfirm,
                         onDelete: onDelete,
-                        onSwipeDelete: onSwipeDelete
+                        onSwipeDelete: onSwipeDelete,
+                        leaving: leaving
                     )
                 }
                 .padding(.horizontal, StarHashMetrics.screenPadding)
