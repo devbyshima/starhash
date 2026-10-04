@@ -31,6 +31,7 @@ struct ActivityView: View {
 
     @State private var transactionToDelete: StarHashKit.Transaction?
     @State private var feedbackCount = 0
+    @State private var failedCount = 0
     @State private var swipeDeleteCount = 0
     #if DEBUG
     @State private var didApplyDebugLaunch = false
@@ -88,6 +89,7 @@ struct ActivityView: View {
             if phase == .active { now = .now }
         }
         .sensoryFeedback(.success, trigger: feedbackCount)
+        .sensoryFeedback(.warning, trigger: failedCount)
         .sensoryFeedback(.impact(flexibility: .rigid), trigger: swipeDeleteCount)
         #if DEBUG
         .onAppear(perform: applyDebugLaunch)
@@ -160,6 +162,7 @@ struct ActivityView: View {
                             transactions: section.transactions,
                             onOpen: open,
                             onConfirm: markConfirmed,
+                            onFail: markFailed,
                             onDelete: requestDelete,
                             onSwipeDelete: swipeDelete
                         )
@@ -208,6 +211,7 @@ struct ActivityView: View {
             text: searchText,
             onOpen: open,
             onConfirm: markConfirmed,
+            onFail: markFailed,
             onDelete: requestDelete,
             onSwipeDelete: swipeDelete
         )
@@ -258,6 +262,16 @@ struct ActivityView: View {
         feedbackCount += 1
     }
 
+    /// The payment did not go through: it stays in Activity, struck
+    /// through, and counts towards nothing.
+    private func markFailed(_ transaction: StarHashKit.Transaction) {
+        var failed = transaction
+        failed.status = .failed
+        failed.fee = nil
+        withAnimation(.smooth(duration: 0.3)) { store.update(failed) }
+        failedCount += 1
+    }
+
     /// Asks first, unless Don't Ask Again was chosen.
     private func requestDelete(_ transaction: StarHashKit.Transaction) {
         if confirmDeletes {
@@ -296,8 +310,8 @@ struct ActivityView: View {
     }
 
     #if DEBUG
-    /// `-activityPeriod today|week|month|year|all`, `-activitySearch <text>`
-    /// and `-openFirstTransaction`, for screenshots.
+    /// `-activityPeriod today|week|month|year|all`, `-activitySearch <text>`,
+    /// `-openFirstTransaction` and `-openPendingTransaction`, for screenshots.
     private func applyDebugLaunch() {
         guard !didApplyDebugLaunch else { return }
         didApplyDebugLaunch = true
@@ -310,6 +324,10 @@ struct ActivityView: View {
         }
         if DebugLaunch.arguments.contains("-openFirstTransaction"), let first = store.transactions.first {
             router.openTransactionID = first.id
+        }
+        if DebugLaunch.arguments.contains("-openPendingTransaction"),
+           let pending = store.transactions.first(where: { $0.status == .pending }) {
+            router.openTransactionID = pending.id
         }
     }
     #endif

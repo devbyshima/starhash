@@ -8,7 +8,8 @@ import UIKit
 /// and a long press on the code copies it), then who and how much
 /// with the category, the carrier's details in a card of dotted rows, where
 /// it was paid on a small map, what this year has sent the same recipient,
-/// and the actions (Pay Again, Mark as Confirmed, Delete Transaction). The
+/// and the actions (Pay Again, Mark as Confirmed, Mark as Failed, Delete
+/// Transaction). The
 /// pieces are Beam's sheet language, on the page's cards.
 struct TransactionDetailPage: View {
     let transactionID: UUID
@@ -22,10 +23,13 @@ struct TransactionDetailPage: View {
     @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
     @State private var transactionToDelete: StarHashKit.Transaction?
     @State private var feedbackCount = 0
+    @State private var failedCount = 0
     /// How far the page has scrolled under the bar, 0 to 1 over the first
     /// 24pt: the fade under the bar comes in with it.
 
     private var transaction: StarHashKit.Transaction? { store.transaction(id: transactionID) }
+
+    private static let actionsID = "actions"
 
     var body: some View {
         ScrollView {
@@ -38,11 +42,15 @@ struct TransactionDetailPage: View {
                     }
                     stats(transaction)
                     actions(transaction)
+                        .id(Self.actionsID)
                 }
             }
             .padding(.horizontal, StarHashMetrics.screenPadding)
             .padding(.top, 8)
             .padding(.bottom, 40)
+            #if DEBUG
+            .modifier(ScrolledToActions(id: Self.actionsID))
+            #endif
         }
         .scrollIndicators(.hidden)
         .scrollBounceBehavior(.basedOnSize)
@@ -56,6 +64,7 @@ struct TransactionDetailPage: View {
             if isGone { router.openTransactionID = nil }
         }
         .sensoryFeedback(.success, trigger: feedbackCount)
+        .sensoryFeedback(.warning, trigger: failedCount)
         .deleteTransactionDialog($transactionToDelete, asAlert: true) { _ in delete() }
         #if DEBUG
         // -confirmDelete (with -openFirstTransaction): the delete question.
@@ -285,9 +294,15 @@ struct TransactionDetailPage: View {
                 Button(payTitle(transaction)) { payAgain(transaction) }
                     .buttonStyle(.sheetPrimary)
             }
-            if transaction.status == .pending {
+            // A failed payment can still be confirmed, in case it was
+            // marked failed by mistake.
+            if transaction.status != .confirmed {
                 Button("Mark as Confirmed") { markConfirmed(transaction) }
                     .buttonStyle(.sheetConfirm)
+            }
+            // The quiet one: most pending payments go through.
+            if transaction.status == .pending {
+                SheetTextButton("Mark as Failed", onPage: true) { markFailed(transaction) }
             }
             DeleteButton("Delete Transaction") { requestDelete(transaction) }
         }
@@ -301,6 +316,16 @@ struct TransactionDetailPage: View {
     /// The caller pops this page and takes the recipient to Pay.
     private func payAgain(_ transaction: StarHashKit.Transaction) {
         onPayAgain(transaction.counterparty)
+    }
+
+    /// The payment did not go through: it stays, struck through, and
+    /// counts towards nothing.
+    private func markFailed(_ transaction: StarHashKit.Transaction) {
+        var failed = transaction
+        failed.status = .failed
+        failed.fee = nil
+        withAnimation(.smooth(duration: 0.3)) { store.update(failed) }
+        failedCount += 1
     }
 
     private func markConfirmed(_ transaction: StarHashKit.Transaction) {
@@ -339,3 +364,21 @@ struct TransactionDetailPage: View {
         }
     }
 }
+
+#if DEBUG
+/// `-transactionScrolled`: the page scrolled to its foot, to see the
+/// actions, as `-settingsScrolled` does for Settings.
+private struct ScrolledToActions: ViewModifier {
+    let id: String
+
+    func body(content: Content) -> some View {
+        ScrollViewReader { proxy in
+            content.task {
+                guard DebugLaunch.arguments.contains("-transactionScrolled") else { return }
+                try? await Task.sleep(for: .milliseconds(800))
+                proxy.scrollTo(id, anchor: .bottom)
+            }
+        }
+    }
+}
+#endif

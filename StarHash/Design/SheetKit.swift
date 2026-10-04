@@ -323,13 +323,15 @@ extension ButtonStyle where Self == SheetButtonStyle {
     static var sheetConfirm: SheetButtonStyle { SheetButtonStyle(fill: .confirm) }
 }
 
-/// The quiet choice under a sheet's button: grey text, or red for a
-/// destructive one ("Turn Off", "Delete Transaction").
+/// The quiet choice under a sheet's button: blue text on a sheet, the
+/// page's secondary text on the blue page ("Mark as Failed"), or red for a
+/// destructive one ("Turn Off").
 struct SheetTextButton: View {
     let title: String
     var role: ButtonRole?
     /// Straight on the blue page (the transaction page) rather than a
-    /// white sheet: the red deepens to read on the blue.
+    /// white sheet: the red deepens to read on the blue, and other text is
+    /// the page's secondary text, since the sheet's blue would vanish there.
     var onPage = false
     let action: () -> Void
 
@@ -346,7 +348,9 @@ struct SheetTextButton: View {
                 // Bold when destructive: the vivid red on a white sheet,
                 // the deeper one on the blue page.
                 .font(.sheet(14, role == .destructive ? .bold : .semibold, relativeTo: .subheadline))
-                .foregroundStyle(role == .destructive ? (onPage ? Color.starhashDestructiveOnPage : Color.starhashDestructive) : Color.sheetBrandText)
+                .foregroundStyle(role == .destructive
+                    ? (onPage ? Color.starhashDestructiveOnPage : Color.starhashDestructive)
+                    : (onPage ? Color.sheetSecondaryText : Color.sheetBrandText))
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .contentShape(Rectangle())
         }

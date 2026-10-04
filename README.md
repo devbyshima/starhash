@@ -83,7 +83,12 @@ Free and open source.
   transactions. Turning Nearby off forgets both.
 - **Transaction details**, a page of its own: who, how much, a category, the fee, date, time,
   carrier code, a map of where you paid (when Nearby is on), what you sent
-  them this year, Pay Again, Mark as Confirmed and Delete.
+  them this year, Pay Again, Mark as Confirmed, Mark as Failed (a pending
+  payment that did not go through: it stays, struck through, and counts
+  towards nothing) and Delete. A failed payment can still be marked
+  confirmed. In Activity, a long press on a pending payment offers Mark
+  as Confirmed, Mark as Failed and Delete; on a failed one, Mark as
+  Confirmed and Delete.
 - **Settings**: switches for saving
   transactions, contacts, Nearby and recent recipients, Ask before deleting
   from a menu or a transaction's page (also turned off from the delete
@@ -170,7 +175,10 @@ Each MoMo or Airtel Money message then confirms the matching pending
 payment (same amount and number, within six hours; a message that leaves
 the number or merchant code out settles for the same kind of payment) or
 is logged as a new transaction. A message applied twice is only logged
-once. Airtel Money's messages are read with the template Airtel Africa
+once. A message about a failed or cancelled payment is ignored: neither
+carrier has published one to read them by, and a payment wrongly marked
+failed drops out of the totals, so a payment that did not go through stays
+pending until it is marked failed by hand. Airtel Money's messages are read with the template Airtel Africa
 sends in every country ("SENT.TID ... RWF 1,000 to NAME 07... Fee ...
 Bal ..."), since no Rwandan sample has been published; `CarrierSMS` keeps
 those patterns loose, and a real message that slips past them is worth a

@@ -244,6 +244,8 @@ Names the owner uses for parts of the design; find them by these names.
 | `-activityPeriod today\|week\|month\|year\|all` | Activity period (the D W M Y control; `all` or `allTime` for All Time) |
 | `-openFirstTransaction` | open the newest transaction's details |
 | `-confirmDelete` | with `-openFirstTransaction`: the delete question |
+| `-openPendingTransaction` | open the newest pending transaction's details (Mark as Confirmed and Mark as Failed) |
+| `-transactionScrolled` | with either of those: the details page scrolled to its foot, where the actions are |
 | `-activitySearch <text>` | Activity search with this text |
 | `-activityChartSelection last\|<index>` | chart callout on a bar |
 | `-settingsScrolled` | with `-tab settings`: Settings scrolled to the bottom, to check the top edge |
