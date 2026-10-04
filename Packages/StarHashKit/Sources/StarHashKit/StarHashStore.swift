@@ -9,6 +9,11 @@ public final class StarHashStore {
     /// Newest first.
     public private(set) var transactions: [Transaction] = []
 
+    /// Bumped whenever the locations are wiped (Nearby turned off, Delete
+    /// All Data). A payment notes it when it starts locating, so a fix that
+    /// arrives after a wipe is dropped rather than written back.
+    public private(set) var locationsGeneration = 0
+
     @ObservationIgnored private let fileURL: URL?
 
     /// False while the file exists but could not be read: a Shortcuts
@@ -87,6 +92,7 @@ public final class StarHashStore {
 
     /// Every transaction's location removed, for turning Nearby off.
     public func clearLocations() {
+        locationsGeneration += 1
         guard transactions.contains(where: { $0.location != nil }) else { return }
         for i in transactions.indices { transactions[i].location = nil }
         save()
@@ -95,6 +101,7 @@ public final class StarHashStore {
     /// Everything this store keeps, gone: its transactions, its file, and
     /// any damaged copies set aside beside it. For "Delete All Data".
     public func eraseAll() {
+        locationsGeneration += 1
         transactions.removeAll()
         guard let fileURL else { return }
         let folder = fileURL.deletingLastPathComponent()
@@ -164,7 +171,15 @@ public final class StarHashStore {
             match.balanceAfter = sms.balanceAfter
             match.messageDate = sms.date
             match.wallet = sms.wallet
-            if match.counterparty.name == nil { match.counterparty.name = sms.counterparty.name }
+            // A merchant takes the name its code is registered under, from
+            // the message: it can differ from the shop's sign, and it is
+            // what the code shows as from now on (Activity, Recent,
+            // Nearby). A person keeps the name they were paid under.
+            if match.counterparty.kind == .merchant, let name = sms.counterparty.name {
+                match.counterparty.name = name
+            } else if match.counterparty.name == nil {
+                match.counterparty.name = sms.counterparty.name
+            }
             transactions[index] = match
             sortAndSave()
             return match

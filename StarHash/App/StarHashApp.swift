@@ -39,6 +39,9 @@ struct StarHashApp: App {
         }
         #endif
         Self.useSpaceGroteskInNavigationBars()
+        // Nearby's own file from before it was built from the payments:
+        // nothing reads it now, and its places must not outlive it.
+        try? FileManager.default.removeItem(at: URL.applicationSupportDirectory.appending(path: "StarHash/places.json"))
     }
 
     /// Navigation bar titles (Settings and its pages, a transaction) are

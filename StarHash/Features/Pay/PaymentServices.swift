@@ -26,7 +26,7 @@ struct LocationFix: Equatable, Sendable {
     var accuracy: Double
 
     var coordinate: StarHashKit.Transaction.Coordinate {
-        .init(latitude: latitude, longitude: longitude)
+        .init(latitude: latitude, longitude: longitude, accuracy: accuracy)
     }
 }
 
@@ -69,7 +69,7 @@ enum PaymentLocation {
                             longitude: location.coordinate.longitude,
                             accuracy: location.horizontalAccuracy
                         )
-                        if await best.offer(fix), fix.accuracy <= PlaceMemory.Visit.maximumAccuracy, let onUsable {
+                        if await best.offer(fix), fix.accuracy <= Nearby.maximumAccuracy, let onUsable {
                             await onUsable(fix)
                         }
                         if fix.accuracy <= goal { return fix }
@@ -96,8 +96,8 @@ private actor BestFix {
     /// Keeps `new` when it beats the best so far; true for the first one
     /// good enough for Nearby, so that is passed on once.
     func offer(_ new: LocationFix) -> Bool {
-        let wasUsable = (fix?.accuracy ?? .infinity) <= PlaceMemory.Visit.maximumAccuracy
+        let wasUsable = (fix?.accuracy ?? .infinity) <= Nearby.maximumAccuracy
         if fix == nil || new.accuracy < fix!.accuracy { fix = new }
-        return !wasUsable && new.accuracy <= PlaceMemory.Visit.maximumAccuracy
+        return !wasUsable && new.accuracy <= Nearby.maximumAccuracy
     }
 }

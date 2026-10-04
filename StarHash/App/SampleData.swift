@@ -8,9 +8,13 @@ enum SampleData {
             let start = calendar.startOfDay(for: calendar.date(byAdding: .day, value: -offset, to: now) ?? now)
             return calendar.date(bySettingHour: hour, minute: minute, second: 0, of: start) ?? start
         }
-        let kigali = Transaction.Coordinate(latitude: -1.9255, longitude: 30.1080)
+        // A few metres north of Kigali Heights, as a fix of that accuracy
+        // would put them.
+        func atKigaliHeights(north metres: Double, accuracy: Double) -> Transaction.Coordinate {
+            .init(latitude: kigaliHeights.latitude + metres / 111_320, longitude: kigaliHeights.longitude, accuracy: accuracy)
+        }
         return [
-            Transaction(direction: .outgoing, counterparty: Recipient(name: "Pili-Pili Invest", destination: "020205", kind: .merchant), amount: 15_000, fee: 0, date: day(0, 13, 12), status: .confirmed, source: .app, reference: "1203948571", category: "restaurant", location: kigali),
+            Transaction(direction: .outgoing, counterparty: Recipient(name: "Pili-Pili Invest", destination: "020205", kind: .merchant), amount: 15_000, fee: 0, date: day(0, 13, 12), status: .confirmed, source: .app, reference: "1203948571", category: "restaurant", location: atKigaliHeights(north: 4, accuracy: 7)),
             Transaction(direction: .incoming, counterparty: Recipient(name: "Ariane Ishimwe", destination: "0788123998", kind: .phone), amount: 35_000, fee: 0, date: day(0, 10, 4), status: .confirmed, source: .sms, reference: "1203940012"),
             Transaction(direction: .outgoing, counterparty: Recipient(name: "John Doe", destination: "0780123456", kind: .phone), amount: 700, fee: 20, date: day(1, 18, 40), status: .confirmed, source: .app, reference: "1203911187"),
             Transaction(direction: .outgoing, counterparty: Recipient(name: "Poivre Noir", destination: "184522", kind: .merchant), amount: 76_480, fee: 0, date: day(1, 20, 15), status: .confirmed, source: .app, reference: "1203911901", category: "restaurant"),
@@ -20,23 +24,11 @@ enum SampleData {
             Transaction(direction: .outgoing, counterparty: Recipient(name: "Canal+ Rwanda", destination: "123456", kind: .merchant), amount: 20_000, fee: 0, date: day(6, 12, 0), status: .confirmed, source: .sms, reference: "1203801130", category: "bills"),
             Transaction(direction: .incoming, counterparty: Recipient(name: "Grace Uwase", destination: "0785550123", kind: .phone), amount: 120_000, fee: 0, date: day(9, 15, 45), status: .confirmed, source: .sms, reference: "1203755512"),
             Transaction(direction: .outgoing, counterparty: Recipient(name: "Ltd KonGeza", destination: "0785550123", kind: .phone), amount: 5_000, fee: 100, date: day(12, 11, 20), status: .confirmed, source: .app, reference: "1203700001"),
-            Transaction(direction: .outgoing, counterparty: Recipient(name: "Kigali Heights Gym", destination: "556677", kind: .merchant), amount: 30_000, fee: 0, date: day(20, 7, 0), status: .confirmed, source: .app, reference: "1203600099", category: "health"),
+            Transaction(direction: .outgoing, counterparty: Recipient(name: "Kigali Heights Gym", destination: "556677", kind: .merchant), amount: 30_000, fee: 0, date: day(20, 7, 0), status: .confirmed, source: .app, reference: "1203600099", category: "health", location: atKigaliHeights(north: 18, accuracy: 11)),
         ]
     }
 
-    /// Kigali Heights, where the sample's Nearby places are.
+    /// Kigali Heights, where `-nearbyHere` puts the phone: Pili-Pili and
+    /// the gym were paid a few metres from it.
     static let kigaliHeights = Transaction.Coordinate(latitude: -1.9536, longitude: 30.0928)
-
-    /// Visits for `-nearbyHere`: two tills a few metres apart and one
-    /// across town.
-    static func places(now: Date = .now) -> [PlaceMemory.Visit] {
-        let here = kigaliHeights
-        func north(_ metres: Double) -> Double { here.latitude + metres / 111_320 }
-        return [
-            .init(recipient: Recipient(name: "Pili-Pili Invest", destination: "020205", kind: .merchant), latitude: north(6), longitude: here.longitude, accuracy: 9, date: now.addingTimeInterval(-86_400)),
-            .init(recipient: Recipient(name: "Pili-Pili Invest", destination: "020205", kind: .merchant), latitude: north(4), longitude: here.longitude, accuracy: 7, date: now.addingTimeInterval(-3_600)),
-            .init(recipient: Recipient(name: "Kigali Heights Gym", destination: "556677", kind: .merchant), latitude: north(18), longitude: here.longitude, accuracy: 11, date: now.addingTimeInterval(-172_800)),
-            .init(recipient: Recipient(name: "Simba Supermarket", destination: "009911", kind: .merchant), latitude: here.latitude + 0.02, longitude: here.longitude, accuracy: 10, date: now.addingTimeInterval(-259_200)),
-        ]
-    }
 }

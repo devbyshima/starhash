@@ -287,15 +287,14 @@ private struct SettingsRootList: View {
     /// Turning Nearby on asks for when-in-use location, precise: an
     /// approximate one cannot tell one till from the next, so a refusal or
     /// an approximate grant switches it back off and points to the Settings
-    /// app. Turning it off forgets every place it remembered, and where each
-    /// payment was made.
+    /// app. Turning it off forgets where each payment was made, and with it
+    /// every suggestion.
     private var locationBinding: Binding<Bool> {
         Binding {
             nearbyLocation
         } set: { isOn in
             nearbyLocation = isOn
             guard isOn else {
-                AppEnvironment.places.eraseAll()
                 store.clearLocations()
                 return
             }

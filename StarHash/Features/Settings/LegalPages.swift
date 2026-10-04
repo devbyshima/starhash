@@ -155,7 +155,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "Location",
-                text: "Only if you turn on Nearby, and only while you pay. StarHash notes where a payment was made, to show it on a map and to suggest who you paid when you are back there. The places Nearby remembers stay on your iPhone and are left out of backups. Where each payment was made is kept with that payment, so it is part of your backups as your transactions are. Turning Nearby off erases both."
+                text: "Only if you turn on Nearby, and only while you pay. When you pay a merchant code, or a number that is not in your contacts, StarHash notes where the payment was made, to show it on a map and to suggest it when you are back there. Paying one of your contacts never records where you were. Where a payment was made is kept with that payment, on your iPhone and in your backups as your transactions are. Turning Nearby off erases it."
             ),
             .init(
                 title: "Messages",
@@ -171,7 +171,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "Backups",
-                text: "Your transactions (with where each was paid, when Nearby is on) and settings are part of your iPhone's own backups, to iCloud or your computer, which you control. The places Nearby remembers are not."
+                text: "Your transactions (with where each was paid, when Nearby is on) and settings are part of your iPhone's own backups, to iCloud or your computer, which you control."
             ),
             .init(
                 title: "Your choices",

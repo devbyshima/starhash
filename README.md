@@ -75,14 +75,18 @@ Free and open source.
   Time with the total spent and fees, and search across everything.
   Swipe a payment left for a red trash, or all the way across to delete it
   at once, as in Beam.
-- **Nearby** (off until turned on, precise location only): each number or
-  merchant code paid that is not in Contacts is remembered with where it
-  was paid, and suggested at the top of the recipient list when you are
-  back there. Places stay on the iPhone (out of backups); each payment's
-  location is kept with the payment, so it is backed up with the
-  transactions. Turning Nearby off forgets both.
+- **Nearby** (off until turned on, precise location only): a payment to a
+  merchant code, or to a number that is not in Contacts, keeps where it was
+  made, and those are suggested at the top of the recipient list when you
+  are back there. Paying a contact never records where you were. The
+  suggestions come from the saved payments, so deleting one forgets its
+  place, and with Save transactions off there is nothing to suggest. A
+  merchant shows under the name its code is registered under, from its
+  confirmation SMS, which can differ from the shop's sign. The locations
+  are backed up with the transactions; turning Nearby off forgets them.
 - **Transaction details**, a page of its own: who, how much, a category, the fee, date, time,
-  carrier code, a map of where you paid (when Nearby is on), what you sent
+  carrier code, a map of where you paid (Nearby, for a code or a number
+  not in Contacts), what you sent
   them this year, Pay Again, Mark as Confirmed, Mark as Failed (a pending
   payment that did not go through: it stays, struck through, and counts
   towards nothing) and Delete. A failed payment can still be marked

@@ -244,7 +244,7 @@ Names the owner uses for parts of the design; find them by these names.
 | `-payToggleSearch` | with `-payPicker`: closes the picker's search after 2s and opens it 1.5s later, to record the header transitions |
 | `-payShake` | taps Pay with nothing typed three times from 1.5s, about 0.77s apart, to record the amount's shake |
 | `-payInk` | presses 8, 5, 3 and 7 on a schedule from 1.5s, to record the keypad's ink without a finger (simulator taps arrive late, in bursts) |
-| `-nearbyHere` | turns Nearby on and places the phone at Kigali Heights, where `SampleData.places()` has visits, for the picker's Nearby section |
+| `-nearbyHere` | turns Nearby on and places the phone at Kigali Heights, where the sample Pili-Pili and gym payments were made, for the picker's Nearby section |
 | `-payPick <seconds>` | with `-payPicker`: chooses the first recent recipient after this long, to record the way back to the keypad |
 | `-activityPeriod today\|week\|month\|year\|all` | Activity period (the D W M Y control; `all` or `allTime` for All Time) |
 | `-openFirstTransaction` | open the newest transaction's details |

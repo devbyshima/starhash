@@ -24,9 +24,13 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
     public struct Coordinate: Codable, Hashable, Sendable {
         public var latitude: Double
         public var longitude: Double
-        public init(latitude: Double, longitude: Double) {
+        /// The fix's horizontal accuracy, in metres; nil for places saved
+        /// before it was kept.
+        public var accuracy: Double?
+        public init(latitude: Double, longitude: Double, accuracy: Double? = nil) {
             self.latitude = latitude
             self.longitude = longitude
+            self.accuracy = accuracy
         }
     }
 

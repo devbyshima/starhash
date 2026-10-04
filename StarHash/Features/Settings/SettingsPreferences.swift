@@ -113,7 +113,7 @@ enum StarHashPreferences {
 
 /// "Delete All Data" in Settings: StarHash as a fresh install, as an
 /// account's delete is elsewhere. The transactions file and its set-aside
-/// copies go, so do Nearby's remembered places, every preference goes (the wallet, the switches, auto-verify,
+/// copies go (where each payment was made with them), every preference goes (the wallet, the switches, auto-verify,
 /// whether onboarding and the note were seen), the shortcut's temporary
 /// copy goes, and the app returns to onboarding. Contacts and the
 /// Shortcuts automation belong to the system and stay.
@@ -121,7 +121,6 @@ enum StarHashPreferences {
 enum AppReset {
     static func eraseEverything(store: StarHashStore, router: AppRouter) {
         store.eraseAll()
-        AppEnvironment.places.eraseAll()
         AppEnvironment.shortcuts.reset()
         if let domain = Bundle.main.bundleIdentifier {
             UserDefaults.standard.removePersistentDomain(forName: domain)

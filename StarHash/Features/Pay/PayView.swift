@@ -28,9 +28,9 @@ struct PayView: View {
     /// Which locating run is current, so a late answer from an older one
     /// is ignored.
     @State private var locatingRun = UUID()
-    /// Places' erase count when locating started: a fix that arrives after
-    /// an erase (Nearby turned off, Delete All Data) is not remembered.
-    @State private var placesGeneration = 0
+    /// The store's location wipe count when locating started: a fix that
+    /// arrives after a wipe (Nearby turned off, Delete All Data) is dropped.
+    @State private var locationsGeneration = 0
     /// That fix once it arrives, for the picker's Nearby section.
     @State private var nearbyFix: LocationFix?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -223,7 +223,7 @@ struct PayView: View {
         locationTask = nil
         let run = UUID()
         locatingRun = run
-        placesGeneration = AppEnvironment.places.generation
+        locationsGeneration = store.locationsGeneration
         #if DEBUG
         if let fix = DebugLaunch.nearbyFix {
             nearbyFix = fix
@@ -258,7 +258,7 @@ struct PayView: View {
         let amount = input.value
         guard amount > 0, recipient.isPayable else { return }
         let pendingLocation = locationTask
-        let generation = placesGeneration
+        let generation = locationsGeneration
         locationTask = nil
 
         var recordedID: UUID?
@@ -274,33 +274,29 @@ struct PayView: View {
             dial(code)
         }
 
-        // The location is filled in once it arrives, never before dialling:
-        // on the transaction (its map), and in Nearby's memory for a number
-        // or code that is not one of the person's contacts.
-        if let pendingLocation {
+        // The location goes on the payment once it arrives, never before
+        // dialling: its map, and what Nearby suggests from. Only for a
+        // merchant code or a number that is not one of the person's
+        // contacts: paying someone they know never records where they were.
+        if let pendingLocation, let recordedID {
             Task {
                 guard let fix = await pendingLocation.value,
+                      await Self.remembersPlace(of: recipient),
                       // Nearby could have been turned off, or everything
                       // erased, while the fix was coming.
                       StarHashPreferences.nearbyLocation,
-                      AppEnvironment.places.generation == generation else { return }
-                if let recordedID, var transaction = store.transaction(id: recordedID) {
-                    transaction.location = fix.coordinate
-                    store.update(transaction)
-                }
-                if await Self.remembersPlace(of: recipient) {
-                    AppEnvironment.places.record(
-                        recipient, latitude: fix.latitude, longitude: fix.longitude,
-                        accuracy: fix.accuracy, generation: generation
-                    )
-                }
+                      store.locationsGeneration == generation,
+                      var transaction = store.transaction(id: recordedID) else { return }
+                transaction.location = fix.coordinate
+                store.update(transaction)
             }
         }
     }
 
-    /// Nearby remembers numbers and codes that are not in Contacts. A
-    /// merchant code never is. A number needs the contacts read first; when
-    /// StarHash cannot read them it cannot tell, so it does not remember it.
+    /// Whether a payment keeps where it was made: a merchant code always, a
+    /// number only when it is not in Contacts. A number needs the contacts
+    /// read first; when StarHash cannot read them it cannot tell, so the
+    /// place is not kept.
     private static func remembersPlace(of recipient: Recipient) async -> Bool {
         guard recipient.kind == .phone else { return true }
         let contacts = PayContacts.shared

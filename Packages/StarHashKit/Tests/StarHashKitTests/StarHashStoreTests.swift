@@ -76,6 +76,38 @@ import Testing
         #expect(store.transactions.allSatisfy { $0.status == .confirmed })
     }
 
+    /// The shop's sign can say one thing and its code be registered under
+    /// another: the message's name is the code's from then on.
+    @Test func aMerchantTakesTheNameItsCodeIsRegisteredUnder() {
+        let store = StarHashStore(fileURL: nil)
+        store.recordPayment(to: Recipient(name: "Java House", destination: "020205", kind: .merchant), amount: 15_000, date: noon)
+        store.apply(ParsedSMS(
+            direction: .outgoing,
+            counterparty: Recipient(name: "Pili-Pili Invest", destination: "020205", kind: .merchant),
+            amount: 15_000, fee: 0, date: noon.addingTimeInterval(30), reference: "1203948571"
+        ))
+        #expect(store.transactions[0].counterparty.name == "Pili-Pili Invest")
+        #expect(store.recentRecipients().first?.name == "Pili-Pili Invest")
+    }
+
+    @Test func aPersonKeepsTheNameTheyWerePaidUnder() {
+        let store = StarHashStore(fileURL: nil)
+        store.recordPayment(to: john, amount: 5_000, date: noon)
+        var message = sentSMS(amount: 5_000, at: noon.addingTimeInterval(30))
+        message.counterparty.name = "Jean Mugisha"
+        store.apply(message)
+        #expect(store.transactions[0].counterparty.name == "John Doe")
+    }
+
+    @Test func wipingTheLocationsMovesTheGenerationOn() {
+        let store = StarHashStore(fileURL: nil)
+        let start = store.locationsGeneration
+        store.clearLocations()
+        #expect(store.locationsGeneration == start + 1)
+        store.eraseAll()
+        #expect(store.locationsGeneration == start + 2)
+    }
+
     @Test func theFeeComesOnlyFromTheSMS() {
         let store = StarHashStore(fileURL: nil)
         store.recordPayment(to: john, amount: 5_000, date: noon)

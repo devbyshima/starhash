@@ -11,14 +11,6 @@ enum AppEnvironment {
         return StarHashStore(fileURL: StarHashStore.defaultFileURL)
     }()
 
-    /// Where numbers and codes were paid, for Nearby.
-    static let places: PlaceMemory = {
-        #if DEBUG
-        if DebugLaunch.inMemory { return DebugLaunch.seededPlaces() }
-        #endif
-        return PlaceMemory(fileURL: PlaceMemory.defaultFileURL)
-    }()
-
     /// Buy's codes. Debug launches with -inMemory start from the defaults
     /// in a throwaway list.
     static let shortcuts: USSDShortcutList = {

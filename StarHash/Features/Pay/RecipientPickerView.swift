@@ -38,7 +38,6 @@ struct RecipientPickerView: View {
     /// already on would push the wrong one under it.
     @State private var shownNearbyFix: LocationFix?
     @State private var listTouched = false
-    private var places: PlaceMemory { AppEnvironment.places }
     @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
 
     @State private var query: String
@@ -452,11 +451,13 @@ struct RecipientPickerView: View {
     }
 
     /// Numbers and codes paid where the phone is now, nearest first, from
-    /// the places StarHash remembered on this iPhone. Only before anything
-    /// is typed: a search is looking for someone in particular.
+    /// where the saved payments were made. Only before anything is typed: a
+    /// search is looking for someone in particular.
     private var nearby: [Recipient] {
         guard nearbyEnabled, search.isEmpty, let fix = shownNearbyFix else { return [] }
-        return places.suggestions(latitude: fix.latitude, longitude: fix.longitude, accuracy: fix.accuracy).map(\.recipient)
+        return Nearby.suggestions(
+            from: store.transactions, latitude: fix.latitude, longitude: fix.longitude, accuracy: fix.accuracy
+        ).map(\.recipient)
     }
 
     private var matchingContactsUnfiltered: [PayContact] {
