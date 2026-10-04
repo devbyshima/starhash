@@ -7,8 +7,15 @@ import SwiftUI
 /// the keypad (`PayCurrencyPill`).
 struct PayAmountDisplay: View {
     let amount: Int
+    /// Bumped each time Pay is tapped with nothing typed: the amount shakes
+    /// from side to side, as the reference's does.
+    var shakes = 0
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
+        // A copy the keyframes' closure can take with it.
+        let reduceMotion = reduceMotion
         Text(Money.format(amount))
             .starhashFont(96, weight: .bold, design: .rounded, relativeTo: .largeTitle, tracking: 0)
             .monospacedDigit()
@@ -18,9 +25,39 @@ struct PayAmountDisplay: View {
             // "10,000,000" at the largest text sizes still fits one line.
             .minimumScaleFactor(0.3)
             .padding(.horizontal, StarHashMetrics.screenPadding)
+            .keyframeAnimator(initialValue: Shake(), trigger: shakes) { content, shake in
+                // With Reduce Motion it dims and comes back instead.
+                content
+                    .offset(x: reduceMotion ? 0 : shake.x)
+                    .opacity(reduceMotion ? 1 - shake.dim : 1)
+            } keyframes: { _ in
+                KeyframeTrack(\.x) {
+                    for x in Shake.offsets {
+                        CubicKeyframe(x, duration: 1.0 / 60)
+                    }
+                }
+                KeyframeTrack(\.dim) {
+                    CubicKeyframe(0.6, duration: 0.08)
+                    CubicKeyframe(0, duration: 0.28)
+                }
+            }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(Money.formatWithCurrency(amount))
             .accessibilityAddTraits(.updatesFrequently)
+    }
+
+    private struct Shake {
+        var x: CGFloat = 0
+        var dim: Double = 0
+
+        /// Where the amount is, in points, every 60th of a second of the
+        /// shake: measured frame by frame from the reference recording (the
+        /// mean of its three shakes, at 3 pixels to the point). Three
+        /// swings that widen, then a quick ring down, 0.37s in all.
+        static let offsets: [CGFloat] = [
+            0.87, 5.61, 11.45, 12.80, 3.12, -10.03, -15.85, -4.94, 10.90, 17.62, 9.69,
+            0.16, -4.56, -3.85, -0.42, 0.86, 0.99, 0.16, -0.26, -0.32, -0.18, 0,
+        ]
     }
 }
 

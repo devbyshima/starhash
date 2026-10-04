@@ -4,7 +4,8 @@ import SwiftUI
 /// The Pay tab: type an amount, tap Pay, pick who gets it on the screen
 /// that slides in, and StarHash dials the MoMo code. The system's call
 /// prompt, showing the whole code, is the approval; MoMo then asks for the
-/// PIN. Balance dials the balance code. Nothing is sent by StarHash itself.
+/// PIN. Pay with nothing typed shakes the amount instead. Balance dials the
+/// balance code. Nothing is sent by StarHash itself.
 struct PayView: View {
     @Environment(StarHashStore.self) private var store
     @Environment(AppRouter.self) private var router
@@ -35,6 +36,8 @@ struct PayView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Where a finger is on Pay, for the bubble under it.
     @GestureState private var payTouch: CGPoint?
+    /// Pay tapped with nothing typed, which shakes the amount.
+    @State private var zeroShakes = 0
     @State private var didApplyDebugLaunch = false
 
     var body: some View {
@@ -76,6 +79,18 @@ struct PayView: View {
         }
         .onAppear(perform: applyDebugLaunch)
         .task { await PayShaders.prepare() }
+        #if DEBUG
+        // -payShake: Pay tapped with nothing typed, three times from 1.5s,
+        // about as far apart as in the reference, to record the shake.
+        .task {
+            guard PayDebug.shakes else { return }
+            try? await Task.sleep(for: .seconds(1.5))
+            for _ in 0..<3 {
+                next()
+                try? await Task.sleep(for: .seconds(0.77))
+            }
+        }
+        #endif
     }
 
     private var keypadScreen: some View {
@@ -83,7 +98,7 @@ struct PayView: View {
             PageHeader(page: .pay) { EmptyView() } trailing: { WalletSwitcher() }
 
             Spacer(minLength: 12)
-            PayAmountDisplay(amount: input.value)
+            PayAmountDisplay(amount: input.value, shakes: zeroShakes)
             if let chosenRecipient {
                 PayChosenRecipient(recipient: chosenRecipient) {
                     withAnimation(.smooth(duration: 0.25)) { self.chosenRecipient = nil }
@@ -150,6 +165,8 @@ struct PayView: View {
             .buttonStyle(PressScaleButtonStyle())
             .accessibilityHint("Dials \(USSD.balance(for: wallet))")
 
+            // Never greyed out: with nothing typed it looks as always, and
+            // a tap shakes the amount, as in the reference.
             Button("Pay") { next() }
                 .buttonStyle(.starhashPrimaryOnPay)
                 // Held, as in the reference: the white bubble under the
@@ -162,9 +179,8 @@ struct PayView: View {
                         touch = value.location
                     }
                 )
-                // Outermost, so a disabled Pay shows no bubble either.
-                .disabled(input.isZero)
-                .animation(.smooth(duration: 0.2), value: input.isZero)
+                // The keypad's own tap for a key that changes nothing.
+                .sensoryFeedback(.impact(flexibility: .rigid, intensity: 0.4), trigger: zeroShakes)
         }
     }
 
@@ -179,8 +195,14 @@ struct PayView: View {
         return changed
     }
 
-    /// Pay: the recipient picker, or dialling the chosen recipient.
+    /// Pay: the recipient picker, or dialling the chosen recipient. With
+    /// nothing typed, the amount shakes.
     private func next() {
+        guard !input.isZero else {
+            zeroShakes += 1
+            AccessibilityNotification.Announcement("Type an amount first").post()
+            return
+        }
         if let chosenRecipient {
             pay(chosenRecipient)
         } else {
