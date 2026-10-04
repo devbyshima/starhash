@@ -44,7 +44,6 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
     public var balanceAfter: Int?
     /// A free label such as "restaurant".
     public var category: String?
-    public var note: String?
     public var location: Coordinate?
     /// The wallet a payment was dialled with, or whose message it came
     /// from: for its fee when it is confirmed by hand, and so a message
@@ -68,7 +67,6 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
         reference: String? = nil,
         balanceAfter: Int? = nil,
         category: String? = nil,
-        note: String? = nil,
         location: Coordinate? = nil,
         wallet: Recipient.Network? = nil,
         messageDate: Date? = nil
@@ -84,7 +82,6 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
         self.reference = reference
         self.balanceAfter = balanceAfter
         self.category = category
-        self.note = note
         self.location = location
         self.wallet = wallet
         self.messageDate = messageDate

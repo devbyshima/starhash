@@ -335,7 +335,6 @@ public enum ActivitySummary {
                 Money.format(t.amount),
                 t.reference ?? "",
                 t.category ?? "",
-                t.note ?? "",
             ].joined(separator: " ").lowercased()
             return words.allSatisfy { text.contains($0) }
         }

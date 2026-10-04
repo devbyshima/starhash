@@ -147,7 +147,7 @@ extension LegalDocument {
         sections: [
             .init(
                 title: "What StarHash keeps",
-                text: "Your transactions (who, how much, when, whether they are confirmed, and the fee, reference and balance when a message gives them), the categories and notes you add, your recent recipients, Buy's codes and your settings. All of it is saved in StarHash's own storage on your iPhone, and none of it is sent anywhere."
+                text: "Your transactions (who, how much, when, whether they are confirmed, and the fee, reference and balance when a message gives them), the categories you add, your recent recipients, Buy's codes and your settings. All of it is saved in StarHash's own storage on your iPhone, and none of it is sent anywhere."
             ),
             .init(
                 title: "Contacts",
