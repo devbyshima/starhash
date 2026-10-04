@@ -3,17 +3,18 @@ import StarHashKit
 import UIKit
 
 /// Opens StarHash and dials the main wallet's balance code (*182*6*1# on
-/// MTN MoMo).
+/// MTN MoMo, the *182# menu on Airtel Money). Before a wallet is picked it
+/// only opens StarHash, on onboarding, so nothing is dialled on a guess.
 struct CheckBalanceIntent: AppIntent {
-    static let title: LocalizedStringResource = "Check MoMo Balance"
-    static let description = IntentDescription("Dials your wallet's balance code.")
+    static let title: LocalizedStringResource = "Check Wallet Balance"
+    static let description = IntentDescription("Dials your MTN MoMo or Airtel Money balance code.")
     /// The dialer can only be opened from the foreground.
     static let openAppWhenRun = true
 
     @MainActor
     func perform() async throws -> some IntentResult {
         AppEnvironment.router.show(.pay)
-        if let url = USSD.telURL(for: USSD.balance(for: StarHashPreferences.wallet)) {
+        if let wallet = StarHashPreferences.chosenWallet, let url = USSD.telURL(for: USSD.balance(for: wallet)) {
             await UIApplication.shared.open(url)
         }
         return .result()
@@ -49,7 +50,7 @@ struct StarHashShortcuts: AppShortcutsProvider {
             intent: CheckBalanceIntent(),
             phrases: [
                 "Check my balance in \(.applicationName)",
-                "Check my MoMo balance with \(.applicationName)",
+                "Check my wallet balance with \(.applicationName)",
             ],
             shortTitle: "Check Balance",
             systemImageName: "banknote"

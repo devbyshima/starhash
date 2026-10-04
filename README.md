@@ -97,7 +97,7 @@ Free and open source.
   Delete All Data, which erases everything StarHash keeps on the iPhone
   (transactions, recents, wallet, settings) and starts again from
   onboarding, like deleting an account.
-- **Shortcuts and Siri**: Process Carrier SMS, Check MoMo Balance and Pay
+- **Shortcuts and Siri**: Process Carrier SMS, Check Wallet Balance and Pay
   with StarHash actions.
 - Light and dark appearance in a four-colour palette: every page blue in
   light mode (as Cash App is green) with near-black buttons, the near black
@@ -148,7 +148,9 @@ shown with a real screenshot of Shortcuts:
    (`StarHashShortcut.iCloudLink`) on Shortcuts' Add screen. It is the
    Process Carrier SMS action fed the shortcut's input, with its automation
    built in (iOS 27): when a message containing **RWF** arrives (every
-   M-Money and AirtelMoney message does), run without asking. Nothing to build. iOS
+   M-Money and AirtelMoney message does), run without asking. Nothing to
+   build there; on iOS 18 to 26 a shared shortcut cannot carry its
+   automation, so the step lists how to make it in Shortcuts instead. iOS
    announces each run until **Notify When Run** is turned off on the
    automation, a setting a shortcut file cannot carry, so the step list
    says so.

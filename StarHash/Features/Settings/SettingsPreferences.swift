@@ -39,8 +39,12 @@ enum StarHashPreferences {
 
     /// MTN MoMo until the owner picks a wallet, which onboarding asks for
     /// before anything can be dialled.
-    static var wallet: Recipient.Network {
-        UserDefaults.standard.string(forKey: PreferenceKey.wallet).flatMap(Recipient.Network.init(rawValue:)) ?? .mtn
+    static var wallet: Recipient.Network { chosenWallet ?? .mtn }
+
+    /// The wallet the owner picked, nil before onboarding has asked: what a
+    /// Shortcuts or Siri action checks, since it can run before onboarding.
+    static var chosenWallet: Recipient.Network? {
+        UserDefaults.standard.string(forKey: PreferenceKey.wallet).flatMap(Recipient.Network.init(rawValue:))
     }
 
     /// Nil until the shortcut has run once.
