@@ -170,7 +170,12 @@ raise `WAIT`. Look at every screenshot you change, in dark and light.
   text (SF Symbols keep it). Icon-only buttons get an accessibility label.
 - Preferences: read through `@AppStorage(PreferenceKey...)` in views or
   `StarHashPreferences` elsewhere, with the same defaults (everything on
-  except Nearby).
+  except Nearby and the Face ID lock).
+- The Face ID lock (`AppLock`, `StarHash/App/AppLock.swift`) is a window
+  of its own over the app's, so it covers sheets; it asks on launch and
+  after more than a minute away (a payment's trip to the call screen
+  stays under that), covers the app in the app switcher, and its switch
+  in Settings asks for Face ID before it turns on or off.
 - Only dial a `Recipient` whose `isPayable` is true: SMS senders can be
   masked or have no number.
 - Comments explain why, in Keaser's tone. Never use an em dash in comments,
@@ -198,6 +203,7 @@ Names the owner uses for parts of the design; find them by these names.
 | `-buyPinned [n]` | with `-inMemory`: Buy's first n codes pinned (2 by default, sample codes added past the four defaults) |
 | `-buyNew`, `-buyEdit`, `-buyDetails` | with `-tab buy`: the code editor, new or on the first code (`-buySymbols` opens its symbol grid), or the first code's details |
 | `-splash` | the launch splash (any other debug argument skips it, so screenshots see their screen) |
+| `-locked` | the Face ID lock's screen, without asking (any other debug argument keeps the lock away, so screenshots see their screen) |
 | `-skipOnboarding`, `-resetOnboarding` | start on the tabs, or on onboarding |
 | `-tab pay\|buy\|activity\|settings` | starting page |
 | `-note`, `-reviewNote` | Shima's welcome note over Pay, as onboarding ends, or the two-week note that asks for a rating |

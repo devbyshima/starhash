@@ -88,8 +88,10 @@ Free and open source.
   from a menu or a transaction's page (also turned off from the delete
   question's Don't Ask Again), the default page StarHash opens on (Pay
   or Buy), the keypad's ink effect (off, a key presses as it does with
-  Reduce Motion), the auto
-  verification guide and Privacy, and at the bottom
+  Reduce Motion), a Face ID lock (Touch ID or the passcode on an iPhone
+  without it), off until turned on, which asks as StarHash opens and
+  after more than a minute away and hides it in the app switcher, the
+  auto verification guide and Privacy, and at the bottom
   Delete All Data, which erases everything StarHash keeps on the iPhone
   (transactions, recents, wallet, settings) and starts again from
   onboarding, like deleting an account.

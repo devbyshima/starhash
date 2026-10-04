@@ -60,10 +60,11 @@ struct StarHashApp: App {
                     .onOpenURL { router.handle($0) }
             }
         }
-        .onChange(of: scenePhase) { _, phase in
+        .onChange(of: scenePhase, initial: true) { _, phase in
             // The Process Carrier SMS shortcut may have written while we
             // were in the background.
             if phase == .active { store.reloadFromDisk() }
+            AppLock.shared.sceneChanged(to: phase)
         }
     }
 }

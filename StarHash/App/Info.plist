@@ -39,6 +39,8 @@
 	</array>
 	<key>NSContactsUsageDescription</key>
 	<string>StarHash shows your contacts so you can pick who to pay. They stay on your iPhone.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>StarHash asks for Face ID to open, when you turn it on in Settings, so only you see your payments.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>StarHash notes where you pay, to suggest who you paid when you are back there and to show each payment on a map. It stays on your iPhone.</string>
 	<key>UIAppFonts</key>

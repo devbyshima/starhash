@@ -71,6 +71,7 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.lastVerifiedAt) private var lastVerifiedAt: Double = 0
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
     @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
+    @AppStorage(PreferenceKey.appLock) private var appLock = false
 
     @State private var confirmsDeleteAll = false
     @State private var confirmsAutoVerifyOff = SettingsLaunch.confirmsAutoVerifyOff
@@ -156,6 +157,10 @@ private struct SettingsRootList: View {
                 )
             }
 
+            SettingsCard("Security") {
+                securityRow
+            }
+
             SettingsCard("Help") {
                 SettingsLinkRow(page: .privacy, symbol: "lock.fill", title: "Privacy", caption: "Everything stays on this iPhone")
                 Link(destination: SettingsLinks.requestFeature) {
@@ -235,6 +240,38 @@ private struct SettingsRootList: View {
             lastVerifiedAt > 0 && autoVerifySetUp
         } set: { isOn in
             if isOn { setUpAutoVerify() } else { confirmsAutoVerifyOff = true }
+        }
+    }
+
+    /// The app lock's switch, named for what this iPhone has (Face ID,
+    /// Touch ID, or its passcode alone). Without even a passcode there is
+    /// nothing to ask for, so it stays off and says why.
+    private var securityRow: some View {
+        let unlock = DeviceUnlock.current
+        let available = DeviceUnlock.isAvailable
+        return SettingsToggleRow(
+            symbol: unlock.symbol,
+            title: unlock == .passcode ? "Passcode Lock" : unlock.name,
+            caption: available
+                ? (unlock == .passcode ? "Ask for your passcode to open StarHash" : "Ask for \(unlock.name) to open StarHash")
+                : "Set a passcode on this iPhone first",
+            isOn: appLockBinding
+        )
+        .disabled(!available && !appLock)
+    }
+
+    /// Turning the lock on or off asks for Face ID first, so it is the
+    /// owner who changes it; the switch moves only once it is given.
+    private var appLockBinding: Binding<Bool> {
+        Binding {
+            appLock
+        } set: { isOn in
+            let name = DeviceUnlock.current.name
+            Task {
+                let reason = isOn ? "Turn on \(name) for StarHash." : "Turn off \(name) for StarHash."
+                guard await AppLock.authenticate(reason: reason) else { return }
+                withAnimation(.smooth) { appLock = isOn }
+            }
         }
     }
 
