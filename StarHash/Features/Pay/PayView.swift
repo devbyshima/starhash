@@ -239,7 +239,7 @@ struct PayView: View {
 
         var recordedID: UUID?
         if saveTransactions {
-            recordedID = store.recordPayment(to: recipient, amount: amount, retryWindow: 5 * 60).id
+            recordedID = store.recordPayment(to: recipient, amount: amount, wallet: wallet, retryWindow: 5 * 60).id
         }
         let code = USSD.payment(to: recipient, amount: amount, from: wallet)
         withAnimation(.smooth(duration: 0.25)) { chosenRecipient = nil }

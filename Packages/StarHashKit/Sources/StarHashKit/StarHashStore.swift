@@ -112,13 +112,15 @@ public final class StarHashStore {
     /// pending payment from StarHash to the same recipient for the same
     /// amount, dialled less than that long ago, is taken to be that retry:
     /// it moves to `date` instead of a second one being added. It has no fee
-    /// until the SMS confirming it gives one.
+    /// until the SMS confirming it gives one. `wallet` is the wallet it was
+    /// dialled with.
     @discardableResult
     public func recordPayment(
         to recipient: Recipient,
         amount: Int,
         date: Date = .now,
         location: Transaction.Coordinate? = nil,
+        wallet: Recipient.Network? = nil,
         retryWindow: TimeInterval = 0
     ) -> Transaction {
         if retryWindow > 0, let index = transactions.firstIndex(where: {
@@ -131,13 +133,14 @@ public final class StarHashStore {
             retry.date = date
             if retry.counterparty.name == nil { retry.counterparty.name = recipient.name }
             if let location { retry.location = location }
+            if let wallet { retry.wallet = wallet }
             transactions[index] = retry
             sortAndSave()
             return retry
         }
         let transaction = Transaction(
             direction: .outgoing, counterparty: recipient, amount: amount,
-            date: date, status: .pending, source: .app, location: location
+            date: date, status: .pending, source: .app, location: location, wallet: wallet
         )
         add(transaction)
         return transaction
@@ -160,6 +163,7 @@ public final class StarHashStore {
             match.reference = sms.reference
             match.balanceAfter = sms.balanceAfter
             match.messageDate = sms.date
+            match.wallet = sms.wallet
             if match.counterparty.name == nil { match.counterparty.name = sms.counterparty.name }
             transactions[index] = match
             sortAndSave()
@@ -168,7 +172,7 @@ public final class StarHashStore {
         let transaction = Transaction(
             direction: sms.direction, counterparty: sms.counterparty, amount: sms.amount,
             fee: sms.fee, date: date, status: .confirmed, source: .sms,
-            reference: sms.reference, balanceAfter: sms.balanceAfter, messageDate: sms.date
+            reference: sms.reference, balanceAfter: sms.balanceAfter, wallet: sms.wallet, messageDate: sms.date
         )
         add(transaction)
         return transaction
@@ -191,7 +195,8 @@ public final class StarHashStore {
 
     /// The pending payment a sent-money message confirms. A message that
     /// leaves the number or code out (a merchant's name alone, a transfer
-    /// to the other network) settles for the same kind of payment.
+    /// to the other network) settles for the same kind of payment. A
+    /// payment dialled with the other wallet is never the one.
     private func pendingMatch(for sms: ParsedSMS, at date: Date) -> Int? {
         let window: TimeInterval = 6 * 3600
         let destination = sms.counterparty.destination
@@ -202,6 +207,7 @@ public final class StarHashStore {
                     ? t.counterparty.kind == sms.counterparty.kind
                     : t.counterparty.destination == destination
                 return t.status == .pending && t.direction == .outgoing && t.amount == sms.amount
+                    && (t.wallet == nil || t.wallet == sms.wallet)
                     && sameDestination && abs(t.date.timeIntervalSince(date)) < window
             }
             .min { abs(transactions[$0].date.timeIntervalSince(date)) < abs(transactions[$1].date.timeIntervalSince(date)) }

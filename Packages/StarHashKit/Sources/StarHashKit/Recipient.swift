@@ -13,7 +13,7 @@ public struct Recipient: Codable, Hashable, Sendable {
     /// the owner pays from (MTN MoMo or Airtel Money). Each wallet sends to
     /// both, with a different code and fee for its own network and the
     /// other one.
-    public enum Network: String, CaseIterable, Sendable {
+    public enum Network: String, CaseIterable, Codable, Sendable {
         case mtn
         case airtel
 

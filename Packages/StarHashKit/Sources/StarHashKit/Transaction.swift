@@ -46,6 +46,11 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
     public var category: String?
     public var note: String?
     public var location: Coordinate?
+    /// The wallet a payment was dialled with, or whose message it came
+    /// from: for its fee when it is confirmed by hand, and so a message
+    /// only confirms a payment made with its own wallet. Nil for
+    /// transactions saved before it was kept.
+    public var wallet: Recipient.Network?
     /// When the carrier SMS applied to it says the movement happened. Kept
     /// so the same message applied twice is recognised even when it carries
     /// no reference (transfers sent have none). Nil until a message applies.
@@ -65,6 +70,7 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
         category: String? = nil,
         note: String? = nil,
         location: Coordinate? = nil,
+        wallet: Recipient.Network? = nil,
         messageDate: Date? = nil
     ) {
         self.id = id
@@ -80,6 +86,7 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
         self.category = category
         self.note = note
         self.location = location
+        self.wallet = wallet
         self.messageDate = messageDate
     }
 

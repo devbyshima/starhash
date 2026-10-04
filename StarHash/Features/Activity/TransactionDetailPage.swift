@@ -307,10 +307,11 @@ struct TransactionDetailPage: View {
         var confirmed = transaction
         confirmed.status = .confirmed
         // No SMS to read the fee from, so it comes from the carriers'
-        // prices, for the wallet that pays now; money received costs
+        // prices, for the wallet it was dialled with (the one that pays now
+        // for payments saved before that was kept); money received costs
         // nothing here.
         confirmed.fee = transaction.direction == .outgoing
-            ? Tariff.fee(sending: transaction.amount, to: transaction.counterparty, from: StarHashPreferences.wallet)
+            ? Tariff.fee(sending: transaction.amount, to: transaction.counterparty, from: transaction.wallet ?? StarHashPreferences.wallet)
             : nil
         withAnimation(.smooth(duration: 0.3)) { store.update(confirmed) }
         feedbackCount += 1

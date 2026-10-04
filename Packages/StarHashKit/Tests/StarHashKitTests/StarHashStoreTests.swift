@@ -42,6 +42,40 @@ import Testing
         #expect(store.transactions.count == 3)
     }
 
+    @Test func aPaymentKeepsTheWalletItWasDialledWith() throws {
+        let store = StarHashStore(fileURL: nil)
+        let payment = store.recordPayment(to: john, amount: 5_000, date: noon, wallet: .airtel, retryWindow: 300)
+        #expect(payment.wallet == .airtel)
+        let retry = store.recordPayment(to: john, amount: 5_000, date: noon.addingTimeInterval(60), wallet: .mtn, retryWindow: 300)
+        #expect(retry.wallet == .mtn)
+
+        // A payment saved before the wallet was kept still decodes.
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        var json = try #require(JSONSerialization.jsonObject(with: encoder.encode(retry)) as? [String: Any])
+        json["wallet"] = nil
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let old = try decoder.decode(Transaction.self, from: JSONSerialization.data(withJSONObject: json))
+        #expect(old.wallet == nil)
+    }
+
+    @Test func aMessageOnlyConfirmsAPaymentFromItsOwnWallet() {
+        let store = StarHashStore(fileURL: nil)
+        store.recordPayment(to: john, amount: 5_000, date: noon, wallet: .airtel)
+        var mtn = sentSMS(amount: 5_000, at: noon.addingTimeInterval(30))
+        mtn.wallet = .mtn
+        store.apply(mtn)
+        #expect(store.transactions.count == 2)
+        #expect(store.transactions.contains { $0.status == .pending && $0.wallet == .airtel })
+
+        var airtel = sentSMS(amount: 5_000, at: noon.addingTimeInterval(60), reference: "A1")
+        airtel.wallet = .airtel
+        store.apply(airtel)
+        #expect(store.transactions.count == 2)
+        #expect(store.transactions.allSatisfy { $0.status == .confirmed })
+    }
+
     @Test func theFeeComesOnlyFromTheSMS() {
         let store = StarHashStore(fileURL: nil)
         store.recordPayment(to: john, amount: 5_000, date: noon)
