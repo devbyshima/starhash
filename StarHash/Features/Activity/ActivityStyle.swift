@@ -7,9 +7,10 @@ enum ActivityLayout {
     /// From the bottom of the top bar to the summary card.
     static let contentTop: CGFloat = 24
     static let topBarHeight: CGFloat = 44
-    /// Where the hairline between rows starts: past the 16pt margin, the
-    /// 42pt symbol tile and the 16pt gap, under the name.
-    static let rowSeparatorLeading: CGFloat = 74
+    /// Each transaction's card, and the gap between one and the next, as
+    /// Buy's codes.
+    static let cardRadius: CGFloat = 22
+    static let cardSpacing: CGFloat = 10
 }
 
 /// The question before one transaction is deleted: the title and the
