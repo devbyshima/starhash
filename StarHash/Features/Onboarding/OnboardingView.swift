@@ -119,7 +119,6 @@ struct OnboardingView: View {
             title: "Suggest who you\npaid here",
             description: "Paid a shop here before? StarHash lists it\nfirst next time. This stays on your iPhone.",
             alertButtons: 3,
-            tappedButton: 2,
             primaryTitle: "Continue",
             primaryAction: {
                 guard !nearbyLocation else { return advance() }
@@ -183,7 +182,6 @@ enum OnboardingPalette {
     static let mockBezel = Color(light: .init(white: 0.62), dark: .init(white: 0.42))
     static let mockEdge = Color(light: .black, dark: .init(white: 10 / 255))
     static let mockFill = Color(light: .black.opacity(0.15), dark: .white.opacity(0.15))
-    static let mockTap = Color(white: 0.5).opacity(0.8)
 }
 
 /// Three rings growing out from behind the symbol, staggered so one is

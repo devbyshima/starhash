@@ -1,9 +1,9 @@
 import SwiftUI
 
 /// A permission primer, a port of Beam's `PermissionOnBoarding`: an iPhone
-/// drawn in outline with a system alert popping up on it and a finger
-/// tapping the button to choose, over and over, and the words and buttons on
-/// a soft panel at the bottom. The real prompt comes after Continue. The
+/// drawn in outline with a system alert popping up on it, over and over, and
+/// the words and buttons on a soft panel at the bottom. No button on the
+/// alert is picked out: pointing at one would steer the choice. The real prompt comes after Continue. The
 /// `.message` mock plays an M-Money message arriving and its payment being
 /// ticked off instead, for auto-verify.
 struct OnboardingPermission: View {
@@ -18,9 +18,8 @@ struct OnboardingPermission: View {
         var initialDelay: Double = 0
         var title: String
         var description: String
-        /// How many buttons the drawn alert has, and which one is tapped.
+        /// How many buttons the drawn alert has.
         var alertButtons = 2
-        var tappedButton = 2
         var primaryTitle: String
         var primaryAction: () -> Void
         /// A quieter second choice under the button (auto-verify's Maybe
@@ -170,29 +169,27 @@ struct OnboardingPermission: View {
 
     // MARK: The alert
 
-    /// Pops in, a finger taps the chosen button, and it fades, every 3.4s.
+    /// Pops in, stays a moment and fades, every 3.4s.
     @ViewBuilder
     private var alert: some View {
         if reduceMotion {
-            alertCard(Frame(opacity: 1, scale: 1, tapOpacity: 1))
+            alertCard
         } else {
             KeyframeAnimator(initialValue: Frame(), repeating: true) { frame in
-                alertCard(frame)
+                alertCard
                     .opacity(frame.opacity)
                     .scaleEffect(frame.scale)
             } keyframes: { _ in
                 SpringKeyframe(Frame(opacity: 1, scale: 1), duration: 0.7, spring: .smooth(duration: 0.5, extraBounce: 0))
-                SpringKeyframe(Frame(opacity: 1, scale: 1, tapOpacity: 1), duration: 0.1, spring: .smooth(duration: 0.4, extraBounce: 0))
-                SpringKeyframe(Frame(opacity: 1, scale: 1, tapOpacity: 1, tapScale: 0.9), duration: 0.2, spring: .smooth(duration: 0.4, extraBounce: 0))
-                SpringKeyframe(Frame(opacity: 1, scale: 1), duration: 0.4, spring: .smooth(duration: 0.4, extraBounce: 0))
+                SpringKeyframe(Frame(opacity: 1, scale: 1), duration: 0.7, spring: .smooth(duration: 0.4, extraBounce: 0))
                 SpringKeyframe(Frame(), duration: 2, spring: .smooth(duration: 0.4, extraBounce: 0))
             }
         }
     }
 
     /// A system alert in outline: a title, two lines of text and the
-    /// buttons, one of them being tapped.
-    private func alertCard(_ frame: Frame) -> some View {
+    /// buttons.
+    private var alertCard: some View {
         let fill = OnboardingPalette.mockFill
         return VStack(alignment: .leading, spacing: 6) {
             RoundedRectangle(cornerRadius: 5)
@@ -210,20 +207,10 @@ struct OnboardingPermission: View {
 
             let layout = config.alertButtons > 2 ? AnyLayout(VStackLayout(spacing: 10)) : AnyLayout(HStackLayout(spacing: 8))
             layout {
-                ForEach(1...config.alertButtons, id: \.self) { index in
-                    let isTapped = index == config.tappedButton
+                ForEach(1...config.alertButtons, id: \.self) { _ in
                     Capsule()
                         .fill(fill)
                         .frame(height: 45)
-                        .overlay {
-                            if isTapped {
-                                Circle()
-                                    .fill(OnboardingPalette.mockTap)
-                                    .padding(5)
-                                    .opacity(frame.tapOpacity)
-                            }
-                        }
-                        .scaleEffect(isTapped ? frame.tapScale : 1)
                 }
             }
         }
