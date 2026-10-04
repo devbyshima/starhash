@@ -208,7 +208,7 @@ Names the owner uses for parts of the design; find them by these names.
 | --- | --- | --- |
 | **Soft Edge** | the one edge treatment: content fades and blurs under a bar | `starhashSoftEdge()`, `starhashSoftEdgeHeader { }` in `StarHash/Design/Glass.swift` |
 | **Tab bar** (the custom nav) | GO Club's glass tab bar: Activity, Pay, Settings | `StarHash/App/StarHashTabBar.swift`, `NavigationHaptics` |
-| **Total card** | the recipient screen's Total, Balance, Buy's codes and tiles: white in light, black glass in dark | `starhashTotalCard(in:)` in `Glass.swift` |
+| **Total card** | the recipient screen's Total, Balance, Buy's codes and tiles: white in light, black glass in dark (Balance stays white in dark too) | `starhashTotalCard(in:)` in `Glass.swift` |
 | **White glass, black glass** | every container | `starhashContainer(_:in:)` in `Glass.swift` |
 | **Send Ripple** | shelved, not used: the wave up the screen that Pay once played as a recipient was chosen, a Metal shader over snapshots | `StarHash/Design/SendRipple.swift` (how to bring it back is at its top), `StarHash/Design/Shaders/SendRipple.metal` |
 

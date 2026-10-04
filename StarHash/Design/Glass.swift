@@ -134,7 +134,8 @@ extension View {
 
     /// The **Total card** surface, the recipient screen's Total: solid white
     /// in light mode, the sheets' near-black glass in dark. Buy's codes and
-    /// pinned tiles wear it too, and so does Balance (`interactive`).
+    /// pinned tiles wear it too, and so does Balance (`interactive`), which
+    /// Pay holds to the light look in dark mode as well.
     func starhashTotalCard(in shape: some Shape, interactive: Bool = false) -> some View {
         background(Color.sheetSolidFill, in: shape)
             .starhashGlass(in: shape, interactive: interactive, tint: .sheetGlassTint)

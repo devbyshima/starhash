@@ -159,10 +159,12 @@ struct PayView: View {
                     .frame(maxWidth: .infinity)
                     .frame(minHeight: StarHashMetrics.primaryButtonHeight)
                     .contentShape(Capsule())
-                    // The Total card's white, or its black glass.
+                    // The Total card's white.
                     .starhashTotalCard(in: Capsule(), interactive: true)
             }
             .buttonStyle(PressScaleButtonStyle())
+            // White with near-black words in dark mode too, as in light.
+            .environment(\.colorScheme, .light)
             .accessibilityHint("Dials \(USSD.balance(for: wallet))")
 
             // Never greyed out: with nothing typed it looks as always, and
