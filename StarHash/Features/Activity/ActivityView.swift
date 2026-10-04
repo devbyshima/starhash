@@ -68,8 +68,13 @@ struct ActivityView: View {
                     .starhashBackButton()
             }
         }
-        .onChange(of: router.openTransactionID != nil || isSearching, initial: true) { _, covers in
+        .onChange(of: !openTransactionPath.wrappedValue.isEmpty || isSearching, initial: true) { _, covers in
             router.setHidesTabBar(covers, on: .activity)
+        }
+        // A link to a transaction that is not there (deleted, or from
+        // another phone) opens nothing, and is forgotten.
+        .onChange(of: router.openTransactionID, initial: true) { _, id in
+            if let id, store.transaction(id: id) == nil { router.openTransactionID = nil }
         }
         // Contact photos for the rows, read once access is already granted.
         .task(id: enableContacts) {
