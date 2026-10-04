@@ -121,8 +121,8 @@ extension LegalDocument {
                 text: "The USSD codes, fees and limits StarHash uses come from the providers' published information, and the providers may change them without notice. Activity is a record kept for you, from what you dial and the messages you pass to StarHash; your provider's records are the ones that count."
             ),
             .init(
-                title: "Free and open source",
-                text: "StarHash is free, with no account, subscription or advertising. Its source code is published under the GNU General Public License, version 3, which sets out what you may do with the code itself."
+                title: "Free, with source available",
+                text: "StarHash is free, with no account, subscription or advertising. Its source code is published under the PolyForm Noncommercial License 1.0.0, which lets you use and change the code for any non-commercial purpose."
             ),
             .init(
                 title: "No warranty",

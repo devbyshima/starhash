@@ -10,7 +10,7 @@
 [![Platform: iOS 18+](https://img.shields.io/badge/iOS-18%2B-05A9F4?style=flat-square&logo=apple)](#getting-started)
 [![Swift 6](https://img.shields.io/badge/Swift-6-F05138?style=flat-square&logo=swift&logoColor=white)](https://www.swift.org)
 [![SwiftUI](https://img.shields.io/badge/UI-SwiftUI-171717?style=flat-square)](https://developer.apple.com/xcode/swiftui/)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-616161?style=flat-square)](LICENSE)
+[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20Noncommercial-616161?style=flat-square)](LICENSE)
 
 [Features](#features) • [Getting started](#getting-started) • [How it works](#how-it-works) • [Privacy](#privacy) • [Docs](#documentation)
 
@@ -21,7 +21,7 @@
 
 </div>
 
-StarHash is a free, open source iPhone app for paying with MTN MoMo or Airtel Money in Rwanda. Type an amount, pick who gets it, and StarHash dials your wallet's USSD code for you, then keeps every payment in one place.
+StarHash is a free, source-available iPhone app for paying with MTN MoMo or Airtel Money in Rwanda. Type an amount, pick who gets it, and StarHash dials your wallet's USSD code for you, then keeps every payment in one place.
 
 > [!IMPORTANT]
 > StarHash never sees your PIN and never moves money. It only dials the code: the iPhone's call prompt, showing the whole code, is your approval, and your wallet's own prompt asks for your PIN as always.
@@ -99,6 +99,15 @@ The full picture is in [Privacy](docs/privacy.md), and the app carries its own P
 | [Development](docs/development.md) | Requirements, scripts, tests, debug launch arguments and the project layout |
 
 Have an idea? [Request a feature](https://github.com/devbyshima/starhash/issues/new?template=feature_request.yml).
+
+## License
+
+StarHash is source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE).
+You may use, study and change it for any non-commercial purpose. Selling it, or using it in
+anything that earns money, is not allowed. Versions published before this change remain under GPL-3.0.
+
+The StarHash name and icon are not covered by the license: a modified version must use its own
+name and icon.
 
 ## Credits
 

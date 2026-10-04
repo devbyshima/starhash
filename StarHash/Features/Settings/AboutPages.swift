@@ -23,7 +23,7 @@ struct AboutStarHashView: View {
                 }
                 .buttonStyle(HighlightRowButtonStyle())
                 Link(destination: SettingsLinks.sourceCode) {
-                    SettingsRow(symbol: "chevron.left.forwardslash.chevron.right", title: "Source code", caption: "StarHash is free and open source") {
+                    SettingsRow(symbol: "chevron.left.forwardslash.chevron.right", title: "Source code", caption: "StarHash's code is public on GitHub") {
                         SettingsChevron(symbol: "arrow.up.right")
                     }
                 }

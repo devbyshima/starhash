@@ -382,7 +382,7 @@ enum SettingsLaunch {
 }
 
 enum SettingsLinks {
-    /// StarHash's code on GitHub, under the GNU GPL v3.
+    /// StarHash's code on GitHub, under the PolyForm Noncommercial License 1.0.0.
     static let sourceCode = URL(string: "https://github.com/devbyshima/starhash")!
 
     /// A new issue from the feature request form (.github/ISSUE_TEMPLATE),
