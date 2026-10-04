@@ -106,8 +106,7 @@ struct ActivityView: View {
         EmptyStateView(
             symbol: "clock",
             title: "No Transactions",
-            message: "Pay someone from Pay, or set up Auto-verify in Settings to log MoMo messages.",
-            style: .large
+            message: "Pay someone from Pay, or set up Auto-verify in Settings to log MoMo messages."
         )
         .padding(.horizontal, StarHashMetrics.screenPadding)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -130,12 +129,14 @@ struct ActivityView: View {
                         calendar: calendar
                     )
                     if sections.isEmpty {
-                        Text("No transactions \(period.emptyPhrase).")
-                            .font(.starhash(.subheadline))
-                            .foregroundStyle(Color.starhashSecondaryText)
-                            .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 32)
+                        EmptyStateView(
+                            symbol: "clock",
+                            title: "No Transactions",
+                            message: "Nothing was paid or received \(period.emptyPhrase)."
+                        )
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 48)
+                        .padding(.bottom, 24)
                     }
                     ForEach(sections) { section in
                         dayHeader(section)

@@ -152,7 +152,7 @@ struct RecipientPickerView: View {
             if showsNoMatches {
                 EmptyStateView(
                     symbol: "magnifyingglass",
-                    title: "No matches",
+                    title: "No Matches",
                     message: "Type a phone number or a merchant code to pay it directly."
                 )
                 .padding(.horizontal, StarHashMetrics.screenPadding)

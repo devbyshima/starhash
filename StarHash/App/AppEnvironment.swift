@@ -41,6 +41,10 @@ enum AppEnvironment {
                 }
                 for shortcut in list.shortcuts.prefix(count) { list.setPinned(shortcut.id, true) }
             }
+            // -buyEmpty: no codes at all, for Buy's empty state.
+            if DebugLaunch.arguments.contains("-buyEmpty") {
+                for shortcut in list.shortcuts { list.remove(shortcut.id) }
+            }
             return list
         }
         #endif

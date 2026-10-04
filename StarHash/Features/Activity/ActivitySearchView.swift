@@ -26,16 +26,22 @@ struct ActivitySearchView: View {
     @ViewBuilder
     private var content: some View {
         if query.isEmpty {
-            ActivitySearchMessage(
+            EmptyStateView(
+                symbol: "magnifyingglass",
                 title: "Search Transactions",
-                message: "Find a name, number, merchant code, amount or reference"
+                message: "Find a name, number, merchant code, amount or reference."
             )
+            .padding(.horizontal, 24)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .transition(.opacity)
         } else if results.isEmpty {
-            ActivitySearchMessage(
+            EmptyStateView(
+                symbol: "magnifyingglass",
                 title: "No Results",
                 message: "No transactions match \u{201C}\(query)\u{201D}."
             )
+            .padding(.horizontal, 24)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .transition(.opacity)
         } else {
             ScrollView {
@@ -60,36 +66,5 @@ struct ActivitySearchView: View {
             .starhashReadableScrollContent()
             .transition(.opacity)
         }
-    }
-}
-
-/// The magnifier, a bold title and a grey line, centred in the space under
-/// the bar, sized like Activity's other empty state.
-private struct ActivitySearchMessage: View {
-    let title: String
-    let message: String
-
-    var body: some View {
-        VStack(spacing: 0) {
-            Image(systemName: "magnifyingglass")
-                .starhashFont(40)
-                .foregroundStyle(Color.starhashMutedIcon)
-                .padding(.bottom, 21)
-                .accessibilityHidden(true)
-            Text(title)
-                .starhashFont(20, weight: .bold)
-                .foregroundStyle(Color.starhashPrimaryText)
-                .multilineTextAlignment(.center)
-                .accessibilityAddTraits(.isHeader)
-            Text(message)
-                .starhashFont(20)
-                .foregroundStyle(Color.starhashSecondaryText)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 3)
-        }
-        .padding(.horizontal, 24)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .accessibilityElement(children: .combine)
     }
 }

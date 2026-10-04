@@ -55,8 +55,7 @@ struct BuyView: View {
                 EmptyStateView(
                     symbol: "number.square",
                     title: "No Codes",
-                    message: "Add a code you dial often with the + button, and it is a tap away here.",
-                    style: .large
+                    message: "Add a code you dial often with the + button, and it is a tap away here."
                 )
                 .padding(.horizontal, StarHashMetrics.screenPadding)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

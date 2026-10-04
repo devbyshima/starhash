@@ -90,45 +90,43 @@ struct SymbolTile: View {
     }
 }
 
-/// Centred symbol, title, message and optional action for empty screens.
-/// `.large` is Home's version ("No Account", "No Expenses"): a bigger grey
-/// symbol and 20pt text, measured from the reference.
+/// Every empty state in StarHash, one look: a grey symbol, a bold title
+/// and a line under it, all 20pt and centred, after the reference's Home
+/// ("No Account", "No Expenses"), with an optional action under them.
 struct EmptyStateView<Actions: View>: View {
-    enum Style { case regular, large }
-
     let symbol: String
     let title: String
     let message: String
-    var style: Style = .regular
     @ViewBuilder var actions: Actions
 
     var body: some View {
         VStack(spacing: 0) {
             Image(systemName: symbol)
-                .starhashFont(style == .large ? 40 : 28)
-                .foregroundStyle(style == .large ? Color.starhashMutedIcon : Color.starhashPrimaryText)
-                .padding(.bottom, style == .large ? 21 : 14)
+                .starhashFont(40)
+                .foregroundStyle(Color.starhashMutedIcon)
+                .padding(.bottom, 21)
                 .accessibilityHidden(true)
             Text(title)
-                .starhashFont(style == .large ? 20 : 17, weight: .bold)
+                .starhashFont(20, weight: .bold)
                 .foregroundStyle(Color.starhashPrimaryText)
                 .multilineTextAlignment(.center)
+                .accessibilityAddTraits(.isHeader)
             Text(message)
-                .starhashFont(style == .large ? 20 : 15)
+                .starhashFont(20)
                 .foregroundStyle(Color.starhashSecondaryText)
                 .multilineTextAlignment(.center)
-                .padding(.top, style == .large ? 3 : 4)
+                .padding(.top, 3)
                 .fixedSize(horizontal: false, vertical: true)
             actions
-                .padding(.top, style == .large ? 30 : 16)
+                .padding(.top, 30)
         }
-        .frame(maxWidth: style == .large ? 260 : 280)
+        .frame(maxWidth: 260)
         .accessibilityElement(children: .contain)
     }
 }
 
 extension EmptyStateView where Actions == EmptyView {
-    init(symbol: String, title: String, message: String, style: Style = .regular) {
-        self.init(symbol: symbol, title: title, message: message, style: style) { EmptyView() }
+    init(symbol: String, title: String, message: String) {
+        self.init(symbol: symbol, title: title, message: message) { EmptyView() }
     }
 }
