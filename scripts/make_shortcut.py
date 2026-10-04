@@ -8,7 +8,8 @@
 #
 #   python3 scripts/make_shortcut.py
 #
-# Output: StarHash/Resources/StarHash SMS.shortcut, bundled with the app.
+# Output: StarHash/Resources/StarHash SMS.shortcut, the file shared for
+# StarHashShortcut.iCloudLink (bundled only if the link is ever removed).
 # Regenerate it after renaming the intent, the bundle id or the team.
 import os
 import plistlib

@@ -78,12 +78,13 @@ Free and open source.
 - **Nearby** (off until turned on, precise location only): each number or
   merchant code paid that is not in Contacts is remembered with where it
   was paid, and suggested at the top of the recipient list when you are
-  back there. Places stay on the iPhone (out of backups), and turning
-  Nearby off forgets them and every payment's location.
+  back there. Places stay on the iPhone (out of backups); each payment's
+  location is kept with the payment, so it is backed up with the
+  transactions. Turning Nearby off forgets both.
 - **Transaction details**, a page of its own: who, how much, a category, the fee, date, time,
   carrier code, a map of where you paid (when Nearby is on), what you sent
   them this year, Pay Again, Mark as Confirmed and Delete.
-- **Settings**: your profile and this year's totals, switches for saving
+- **Settings**: switches for saving
   transactions, contacts, Nearby and recent recipients, Ask before deleting
   from a menu or a transaction's page (also turned off from the delete
   question's Don't Ask Again), the default page StarHash opens on (Pay
@@ -129,7 +130,7 @@ opens asks for the amount and the PIN; Buy is not logged in Activity.
 The Airtel codes follow Airtel Rwanda's Airtel Money customer service
 charter (`*182#`, `*182*8*1#` for merchants) and its note that `*182*1*2#`
 sends between Airtel Money and MTN MoMo; they still need a check on a real
-Airtel SIM. Auto verification reads MTN's SMS only.
+Airtel SIM. Auto verification reads both wallets' messages (below).
 
 Ten digits or more is a phone number (`+250 788 123 456` becomes
 `0788123456`); fewer is a MoMo Pay merchant code. In the `tel:` link the `#`
@@ -155,8 +156,11 @@ shown with a real screenshot of Shortcuts:
    comes back through x-callback-url. Auto-verify only turns on once this
    works.
 
-The same shortcut ships in the app (`StarHash/Resources/StarHash SMS.shortcut`,
-from `scripts/make_shortcut.py`) as a fallback. Share the shortcut again and
+`scripts/make_shortcut.py` builds and signs the shortcut file
+(`StarHash/Resources/StarHash SMS.shortcut`, not in the repo at present),
+which is what gets shared for the link. The app installs from the link only;
+if the link were removed, it would offer that file through the share sheet,
+so the file would then need bundling again. Share the shortcut again and
 update the link after changing it: a link is a copy of the shortcut as it
 was when shared.
 

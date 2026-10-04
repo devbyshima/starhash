@@ -290,7 +290,7 @@ struct ActivityView: View {
     }
 
     #if DEBUG
-    /// `-activityPeriod today|week|month|year`, `-activitySearch <text>`
+    /// `-activityPeriod today|week|month|year|all`, `-activitySearch <text>`
     /// and `-openFirstTransaction`, for screenshots.
     private func applyDebugLaunch() {
         guard !didApplyDebugLaunch else { return }

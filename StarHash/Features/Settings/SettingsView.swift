@@ -347,7 +347,7 @@ struct SettingsFooter: View {
 
 // MARK: - Launch arguments
 
-/// `-settingsPage whatsNew|release|terms|privacy|about|guide|guide2|guide3` (DEBUG only, with
+/// `-settingsPage whatsNew|release|terms|privacy|about|guide|guide2` (DEBUG only, with
 /// `-tab settings`) opens that page or the guide at launch.
 @MainActor
 enum SettingsLaunch {

@@ -2,7 +2,7 @@ import StarHashKit
 import SwiftUI
 import UIKit
 
-/// Auto-verify setup, a page pushed from Settings or Help, in two steps,
+/// Auto-verify setup, a page pushed from Settings (and onboarding's last step), in two steps,
 /// each shown with a real screenshot of what Shortcuts looks like, one
 /// thing to do, and a Continue (or Done) that appears only once it is done:
 ///

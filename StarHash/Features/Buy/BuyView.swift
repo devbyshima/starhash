@@ -4,9 +4,10 @@ import SwiftUI
 /// Buy: the codes kept on hand to dial in a tap (`USSDShortcutList`), laid
 /// out as Activity lists transactions, after Keaser's Home: one card of
 /// rows split by the dashed line, each its symbol on a tile, its name and
-/// what it does, and the code where a transaction shows its amount. A tap
-/// dials; holding a row offers Dial, Edit and Delete, and a swipe deletes
-/// it. It comes with MoMo's pending approvals and cash out, MTN's Gwamon'
+/// what it does, and the code where a transaction shows its amount. The
+/// call button dials and a tap opens the code's details; holding a row
+/// offers Pin, Edit and Delete, a swipe from the right deletes it and one
+/// from the left pins it (up to eight, as tiles at the top). It comes with MoMo's pending approvals and cash out, MTN's Gwamon'
 /// Pack and the airport's parking; the + at the top right adds one's own,
 /// in Keaser's New Category sheet (`ShortcutEditor`). The menu a code opens
 /// asks for the amount and the PIN, so nothing is logged in Activity.

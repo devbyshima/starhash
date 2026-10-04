@@ -3,7 +3,8 @@
 iOS SwiftUI companion for MTN MoMo and Airtel Money in Rwanda (the owner
 picks one as their wallet): type an amount, pick a recipient, and StarHash
 dials the USSD code; it also keeps the transactions, confirmed
-from MTN's SMS through a Shortcuts automation. No account, no paywall, no
+from the wallet's SMS (MTN MoMo's or Airtel Money's) through a Shortcuts
+automation. No account, no paywall, no
 server. Three tabs: Pay, Activity and Settings. Light and dark in a
 four-colour palette (blue #05A9F4, pale grey #F4F4F4, near black #171717,
 grey #616161): light mode is the blue throughout, as Cash App is its
@@ -32,11 +33,14 @@ script runs `xcodegen generate`, so new files are picked up.
 
 ## Auto-verify shortcut
 
-`StarHash/Resources/StarHash SMS.shortcut` is generated and signed by
-`python3 scripts/make_shortcut.py` (needs the Mac signed in to iCloud). Run
-it again after renaming `ProcessCarrierSMSIntent`, the bundle id or the
-team. Set `StarHashShortcut.iCloudLink` to an iCloud link of the same
-shortcut for a one-tap install.
+`python3 scripts/make_shortcut.py` generates and signs
+`StarHash/Resources/StarHash SMS.shortcut` (needs the Mac signed in to
+iCloud). Run it again after renaming `ProcessCarrierSMSIntent`, the bundle
+id or the team, share the result from Shortcuts, and set
+`StarHashShortcut.iCloudLink` to its iCloud link. The app installs from that
+link only: the file is not committed at present, and the share-sheet
+fallback in `StarHashShortcut` runs only when the link is nil and the file
+is bundled.
 
 ## Commands
 
@@ -222,6 +226,7 @@ Names the owner uses for parts of the design; find them by these names.
 | `-payAmount <n>` | amount on the keypad |
 | `-payChosen <input>` | a recipient already chosen (Pay Again with no amount) |
 | `-payPicker` | open the recipient picker |
+| `-payChooser` | with `-payPicker`: the number chooser for the first contact with several numbers |
 | `-payQuery <text>` | open the picker with this text in its search field |
 | `-payBrowse` | with `-payPicker`: the picker with its search closed (title header) |
 | `-payScroll <points>` | with `-payPicker`: the picker's list scrolled down, a section label pinned |
@@ -230,11 +235,12 @@ Names the owner uses for parts of the design; find them by these names.
 | `-payInk` | presses 8, 5, 3 and 7 on a schedule from 1.5s, to record the keypad's ink without a finger (simulator taps arrive late, in bursts) |
 | `-nearbyHere` | turns Nearby on and places the phone at Kigali Heights, where `SampleData.places()` has visits, for the picker's Nearby section |
 | `-payPick <seconds>` | with `-payPicker`: chooses the first recent recipient after this long, to record the way back to the keypad |
-| `-activityPeriod today\|week\|month\|year` | Activity period (the D W M Y control) |
+| `-activityPeriod today\|week\|month\|year\|all` | Activity period (the D W M Y control; `all` or `allTime` for All Time) |
 | `-openFirstTransaction` | open the newest transaction's details |
 | `-confirmDelete` | with `-openFirstTransaction`: the delete question |
 | `-activitySearch <text>` | Activity search with this text |
 | `-activityChartSelection last\|<index>` | chart callout on a bar |
+| `-settingsScrolled` | with `-tab settings`: Settings scrolled to the bottom, to check the top edge |
 | `-settingsPage whatsNew\|release\|terms\|privacy\|about\|guide\|guide2\|guideFailed\|guideVerified\|autoVerifyOff` | a Settings page (with `-tab settings`); guide is Auto-verify at step 1 or 2, guideFailed/guideVerified step 2 after its check; autoVerifyOff asks to turn it off |
 
 Example:
