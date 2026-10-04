@@ -2,9 +2,10 @@ import SwiftUI
 
 /// The launch splash, after Beam's: the StarHash mark on the page's colour
 /// (which the system's launch screen already shows, so the two run on as
-/// one), lit from the foot of the screen. The mark springs in, with no
-/// glow of its own, while a shimmer sweeps it, then the whole splash fades
-/// into the app. Reduce Motion keeps it still and short.
+/// one), lit from the foot of the screen. The mark, raised in relief and
+/// casting a soft shadow, springs in with no glow of its own while a
+/// shimmer sweeps it, then the whole splash fades into the app. Reduce
+/// Motion keeps it still and short, the relief without the shimmer.
 struct SplashView: View {
     let onFinish: () -> Void
 
@@ -35,10 +36,10 @@ struct SplashView: View {
     }
 
     private func mark(time: Float) -> some View {
-        StarHashMarkShape()
-            .fill(Color.starhashMarkGlyph)
-            .frame(width: markSize, height: markSize)
+        RaisedMark(size: markSize)
             .modifier(SplashShimmer(size: markSize, time: time, isOn: !reduceMotion))
+            // Lifted off the page.
+            .shadow(color: .black.opacity(0.22), radius: 10, y: 7)
             .scaleEffect(appears ? 1 : 0.72)
             .opacity(appears ? 1 : 0)
     }
@@ -76,7 +77,41 @@ struct SplashBackground: View {
     }
 }
 
-/// The shimmer, only while motion is allowed.
+/// The StarHash mark in relief, as an emboss: its face a little lighter
+/// to the top left and deeper to the bottom right, a soft bevel of light
+/// along the edges that face the top left (the mark less a copy of itself
+/// moved down and right) and of shade along those facing away.
+private struct RaisedMark: View {
+    let size: CGFloat
+
+    var body: some View {
+        let shape = StarHashMarkShape()
+        let edge = size * 0.035
+        ZStack {
+            shape.fill(Color.starhashMarkGlyph)
+            shape.fill(LinearGradient(
+                colors: [.white.opacity(0.16), .clear, .black.opacity(0.24)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ))
+            bevel(shape, towards: CGSize(width: edge, height: edge), colour: .white.opacity(0.7), edge: edge)
+            bevel(shape, towards: CGSize(width: -edge, height: -edge), colour: .black.opacity(0.45), edge: edge)
+        }
+        .frame(width: size, height: size)
+    }
+
+    /// The band along the edges facing away from `offset`, softened and
+    /// kept inside the mark.
+    private func bevel(_ shape: StarHashMarkShape, towards offset: CGSize, colour: Color, edge: CGFloat) -> some View {
+        shape.fill(colour)
+            .overlay(shape.offset(offset).fill(.black).blendMode(.destinationOut))
+            .compositingGroup()
+            .blur(radius: edge * 0.6)
+            .mask(shape)
+    }
+}
+
+/// The shimmer (SplashEffects.metal), only while motion is allowed.
 private struct SplashShimmer: ViewModifier {
     let size: CGFloat
     let time: Float
