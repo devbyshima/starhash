@@ -98,8 +98,7 @@ Free and open source.
   from a menu or a transaction's page (also turned off from the delete
   question's Don't Ask Again), the default page StarHash opens on (Pay
   or Buy), the appearance (System, as the iPhone is set, or always Dark
-  or Light), the keypad's ink effect (off, a key presses as it does with
-  Reduce Motion), a Face ID lock (Touch ID or the passcode on an iPhone
+  or Light), a Face ID lock (Touch ID or the passcode on an iPhone
   without it), off until turned on, which asks as StarHash opens and
   after more than a minute away and hides it in the app switcher, the
   auto verification guide, and under More the Terms of Service, the
@@ -212,8 +211,6 @@ simulator Pay shows the code in an alert instead.
 - `Packages/StarHashKit` - models, the store, persistence, the USSD codes,
   the SMS parser and all pure logic.
 - `StarHash` - the SwiftUI app and its App Intents.
-
-See `AGENTS.md` for conventions and the debug launch arguments.
 
 ## License
 

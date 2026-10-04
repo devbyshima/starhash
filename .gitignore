@@ -9,3 +9,7 @@ screenshots/.stage/
 /.scratch/
 screenshots/
 screenshots.prev/
+# AI assistant files stay on this Mac.
+AGENTS.md
+CLAUDE.md
+.claude/

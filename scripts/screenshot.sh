@@ -9,7 +9,7 @@
 #   WAIT=3 ...      # seconds to wait after launch (default 3)
 #
 # Screenshots land in screenshots/<appearance>/<name>.png (1206x2622 on an
-# iPhone 17 Pro). Each agent should use its own SIM and DERIVED.
+# iPhone 17 Pro). Runs side by side each need their own SIM and DERIVED.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
@@ -23,7 +23,7 @@ if [ "${NOBUILD:-0}" != "1" ]; then
   ./scripts/build.sh >/tmp/starhash-build-$$.log 2>&1 || { cat /tmp/starhash-build-$$.log; exit 1; }
 fi
 
-# One simulator session at a time across agents.
+# One simulator session at a time, however many runs are queued.
 SHOTLOCK="$ROOT/.build/shot.lock"
 mkdir -p "$ROOT/.build"
 until mkdir "$SHOTLOCK" 2>/dev/null; do sleep 2; done
