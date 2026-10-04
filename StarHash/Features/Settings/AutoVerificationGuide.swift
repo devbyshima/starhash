@@ -7,10 +7,11 @@ import UIKit
 /// thing to do, and a Continue (or Done) that appears only once it is done:
 ///
 /// 1. Add Shortcut: opens Shortcuts on the shared StarHash SMS shortcut.
-///    It comes with its automation built in ("When I get a message
-///    containing RWF", which every M-Money and AirtelMoney message is, run
-///    without asking),
-///    so there is nothing to build or set up.
+///    On iOS 27 it comes with its automation built in ("When I get a
+///    message containing RWF", which every M-Money and AirtelMoney message
+///    is, run without asking), so there is nothing to build; earlier
+///    systems cannot share an automation, so the steps there walk through
+///    making it in Shortcuts.
 /// 2. Verify Shortcut: runs it through Shortcuts with a sample message and
 ///    comes straight back (x-callback-url). Done appears only when the
 ///    action actually ran; there is no skipping, and auto-verify stays off
@@ -180,12 +181,24 @@ struct AutoVerificationGuide: View {
     @ViewBuilder
     private var stepList: some View {
         if step == 0 {
-            GuideStepList(steps: [
-                "Tap **Add Shortcut** below.",
-                "In Shortcuts, tap **Add Shortcut**.",
-                "To run it silently, open **Automation**, tap StarHash SMS and turn off **Notify When Run**.",
-                "Come back and tap **Continue**.",
-            ])
+            if #available(iOS 27.0, *) {
+                GuideStepList(steps: [
+                    "Tap **Add Shortcut** below.",
+                    "In Shortcuts, tap **Add Shortcut**.",
+                    "To run it silently, open **Automation**, tap StarHash SMS and turn off **Notify When Run**.",
+                    "Come back and tap **Continue**.",
+                ])
+            } else {
+                // Before iOS 27 a shared shortcut cannot carry its
+                // automation, so the owner makes it in Shortcuts.
+                GuideStepList(steps: [
+                    "Tap **Add Shortcut** below, then **Add Shortcut** in Shortcuts.",
+                    "Open **Automation**, tap **+** and choose **Message**.",
+                    "Set **Message Contains** to **RWF**, choose **Run Immediately** and turn off **Notify When Run**.",
+                    "Tap **Next** and pick **StarHash SMS**.",
+                    "Come back and tap **Continue**.",
+                ])
+            }
         } else {
             Group {
                 switch verification {
