@@ -172,10 +172,13 @@ public final class StarHashStore {
             match.messageDate = sms.date
             match.wallet = sms.wallet
             // A merchant takes the name its code is registered under, from
-            // the message: it can differ from the shop's sign, and it is
-            // what the code shows as from now on (Activity, Recent,
-            // Nearby). A person keeps the name they were paid under.
-            if match.counterparty.kind == .merchant, let name = sms.counterparty.name {
+            // a message that names the code: it can differ from the shop's
+            // sign, and it is what the code shows as from now on (Activity,
+            // Recent, Nearby). A message without the code may be another
+            // payment's of the same amount, so it only fills a missing
+            // name. A person keeps the name they were paid under.
+            if match.counterparty.kind == .merchant, !sms.counterparty.destination.isEmpty,
+               let name = sms.counterparty.name {
                 match.counterparty.name = name
             } else if match.counterparty.name == nil {
                 match.counterparty.name = sms.counterparty.name

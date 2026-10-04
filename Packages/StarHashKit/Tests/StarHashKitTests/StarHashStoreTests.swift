@@ -90,6 +90,28 @@ import Testing
         #expect(store.recentRecipients().first?.name == "Pili-Pili Invest")
     }
 
+    /// A message without the code may be another payment's of the same
+    /// amount: it fills a missing name but never replaces one.
+    @Test func aMessageWithoutTheCodeNeverRenamesAMerchant() {
+        let store = StarHashStore(fileURL: nil)
+        let named = store.recordPayment(to: Recipient(name: "Java House", destination: "020205", kind: .merchant), amount: 15_000, date: noon)
+        store.apply(ParsedSMS(
+            direction: .outgoing,
+            counterparty: Recipient(name: "Kongeza Ltd", destination: "", kind: .merchant),
+            amount: 15_000, fee: 0, date: noon.addingTimeInterval(30), reference: "145891386684"
+        ))
+        #expect(store.transaction(id: named.id)?.status == .confirmed)
+        #expect(store.transaction(id: named.id)?.counterparty.name == "Java House")
+
+        let unnamed = store.recordPayment(to: Recipient(destination: "556677", kind: .merchant), amount: 30_000, date: noon)
+        store.apply(ParsedSMS(
+            direction: .outgoing,
+            counterparty: Recipient(name: "Kigali Heights Gym", destination: "", kind: .merchant),
+            amount: 30_000, fee: 0, date: noon.addingTimeInterval(30), reference: "145891386685"
+        ))
+        #expect(store.transaction(id: unnamed.id)?.counterparty.name == "Kigali Heights Gym")
+    }
+
     @Test func aPersonKeepsTheNameTheyWerePaidUnder() {
         let store = StarHashStore(fileURL: nil)
         store.recordPayment(to: john, amount: 5_000, date: noon)

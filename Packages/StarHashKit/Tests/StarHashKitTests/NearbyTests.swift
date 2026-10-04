@@ -50,10 +50,11 @@ struct NearbyTests {
         #expect(suggestions([paid(shop, accuracy: 120)]).isEmpty)
     }
 
-    /// Saved before accuracy was kept: as rough as a fix may be, 50 m.
-    @Test func aPlaceWithoutItsAccuracyCountsAsTheRoughestAllowed() {
-        #expect(suggestions([paid(shop, north: 55, accuracy: nil)]).map(\.recipient) == [shop])
-        #expect(suggestions([paid(shop, north: 70, accuracy: nil)]).isEmpty)
+    /// Saved before accuracy was kept, when no fix was checked and paying a
+    /// contact kept a place too: never suggested, even standing on it.
+    @Test func aPlaceWithoutItsAccuracyIsLeftOut() {
+        #expect(suggestions([paid(shop, accuracy: 8)]).map(\.recipient) == [shop])
+        #expect(suggestions([paid(shop, accuracy: nil)]).isEmpty)
     }
 
     @Test func nearestFirstThenMostPaid() {

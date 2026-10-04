@@ -37,11 +37,10 @@ public enum Nearby {
         guard accuracy >= 0, accuracy <= maximumAccuracy else { return [] }
         var best: [String: Suggestion] = [:]
         for t in transactions where t.direction == .outgoing && t.status != .failed && t.counterparty.isPayable {
-            // A place saved before its accuracy was kept counts as the
-            // roughest one allowed.
-            guard let place = t.location else { continue }
-            let placeAccuracy = place.accuracy ?? maximumAccuracy
-            guard placeAccuracy >= 0, placeAccuracy <= maximumAccuracy else { continue }
+            // A place saved before its accuracy was kept never counts: no
+            // fix was checked then, and paying a contact kept one too.
+            guard let place = t.location, let placeAccuracy = place.accuracy,
+                  placeAccuracy >= 0, placeAccuracy <= maximumAccuracy else { continue }
             let distance = Self.distance(latitude, longitude, place.latitude, place.longitude)
             guard distance <= max(minimumRadius, accuracy + placeAccuracy) else { continue }
             let key = t.counterparty.kind.rawValue + t.counterparty.destination
