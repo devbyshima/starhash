@@ -9,10 +9,6 @@ extension PreferenceKey {
     /// Whether deleting one transaction asks first. Turned off with Don't
     /// Ask Again on the question itself, back on in Settings.
     static let confirmDeletes = "confirmDeletes"
-    /// Whether Pay's keypad plays its ink: the bubble over a held key
-    /// melting into a blob behind the pad. Off, a key presses as it does
-    /// with Reduce Motion.
-    static let keypadInk = "keypadInk"
     /// Where StarHash opens, and where the tab bar's middle place starts:
     /// "pay" or "buy". Pay unless chosen otherwise in Settings.
     static let defaultPage = "defaultPage"

@@ -34,8 +34,8 @@ struct PayView: View {
     /// That fix once it arrives, for the picker's Nearby section.
     @State private var nearbyFix: LocationFix?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    /// Where a finger is on Pay, for the bubble under it.
-    @GestureState private var payTouch: CGPoint?
+    /// Whether a finger is on Pay, for the light through it.
+    @GestureState private var payHeld = false
     /// Pay tapped with nothing typed, which shakes the amount.
     @State private var zeroShakes = 0
     @State private var didApplyDebugLaunch = false
@@ -116,7 +116,7 @@ struct PayView: View {
 
             // Up to 332pt, four rows of about 83, so keys grow to thumb size
             // and the amount keeps the space above.
-            PayKeypad(onKey: press, canClear: !input.isZero, tint: .payKeypadAccent)
+            PayKeypad(onKey: press, canClear: !input.isZero)
                 .frame(maxHeight: 332)
                 .padding(.horizontal, 8)
                 // Takes its full height before the spacers around the
@@ -171,18 +171,19 @@ struct PayView: View {
             // a tap shakes the amount, as in the reference.
             Button("Pay") { next() }
                 .buttonStyle(.starhashPrimaryOnPay)
-                // Held, as in the reference: the white bubble under the
-                // finger and light streaming through the button.
+                // Held, as in the reference: light streaming through the
+                // button, with nothing drawn under the finger.
                 .overlay {
-                    if !reduceMotion { PayPressOverlay(location: payTouch) }
+                    if !reduceMotion { PayPressOverlay(isPressed: payHeld) }
                 }
                 .simultaneousGesture(
-                    DragGesture(minimumDistance: 0).updating($payTouch) { value, touch, _ in
-                        touch = value.location
+                    DragGesture(minimumDistance: 0).updating($payHeld) { _, held, _ in
+                        held = true
                     }
                 )
-                // The keypad's own tap for a key that changes nothing.
-                .sensoryFeedback(.impact(flexibility: .rigid, intensity: 0.4), trigger: zeroShakes)
+                // With nothing typed, Pay beats twice like a heartbeat, on
+                // purpose: the press, then the shake's own softer tap on
+                // its widest swing (PayAmountDisplay).
         }
     }
 

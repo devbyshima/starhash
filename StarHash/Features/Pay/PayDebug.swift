@@ -9,15 +9,12 @@ import StarHashKit
 ///                        first contact with several numbers
 ///   -payChosen <input>   a recipient already chosen, as Pay Again leaves
 ///                        it when no amount is typed
-///   -payInk              presses a few keys on a schedule, to record the
-///                        ink without a finger
 ///   -payShake            taps Pay with nothing typed three times, to
 ///                        record the amount's shake
 ///   -payPick <seconds>   (with -payPicker) chooses the first recent
 ///                        recipient after this long, to record the way back
 @MainActor
 enum PayDebug {
-    static var pressesKeys: Bool { DebugLaunch.arguments.contains("-payInk") }
     static var shakes: Bool { DebugLaunch.arguments.contains("-payShake") }
     static var picksAfter: Double? { DebugLaunch.value(after: "-payPick").flatMap(Double.init) }
 

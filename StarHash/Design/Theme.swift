@@ -103,11 +103,6 @@ extension Color {
     /// text, as everywhere else.
     static let payButtonFill = Color(light: .brandNight, dark: .brandBlue)
     static let payButtonLabel = Color(light: .brandBlue, dark: .brandNight)
-    /// The keypad's accent, the puff at the top of each blob of ink and
-    /// the flash of a pressed digit: the pale grey on the blue, so a press
-    /// leaves a clean white cloud (a dark puff read as a smudge), and the
-    /// blue glowing on the near black.
-    static let payKeypadAccent = Color(light: .brandPaper, dark: .brandBlue)
     /// Glass on the blue, tinted a deeper blue so it reads as a darker
     /// shade of the page rather than a pale (or, with a grey tint, teal)
     /// hole; untinted on the near black.
@@ -116,12 +111,9 @@ extension Color {
     /// pale flash vanished into the white puff), the blue on the near
     /// black.
     static let payKeypadFlash = Color(light: .brandNight, dark: .brandBlue)
-    /// A held key's bubble: white on the blue; on the near black, the grey
-    /// the shader's blob starts from, where a white disc would glare.
-    static let payKeyBubble = Color(light: .white, dark: .init(white: 77 / 255))
     /// Glass on any page: Pay's deep-blue tint in light mode.
     static let starhashGlassTint = Color.payGlassTint
-    /// Pills and pressed discs on Pay.
+    /// Pills on Pay, and Pay itself while it cannot be pressed.
     static let payWash = Color(light: .brandNight.opacity(0.1), dark: .brandPaper.opacity(0.08))
 
     // MARK: The accent

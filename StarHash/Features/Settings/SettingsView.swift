@@ -69,7 +69,6 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
     @AppStorage(PreferenceKey.saveRecents) private var saveRecents = true
     @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
-    @AppStorage(PreferenceKey.keypadInk) private var keypadInk = true
     @AppStorage(PreferenceKey.defaultPage) private var defaultPage = AppTab.pay.rawValue
     @AppStorage(PreferenceKey.appearance) private var appearance = AppAppearance.system
     @AppStorage(PreferenceKey.lastVerifiedAt) private var lastVerifiedAt: Double = 0
@@ -157,12 +156,6 @@ private struct SettingsRootList: View {
                         choices: [AppTab.pay.rawValue, AppTab.buy.rawValue]
                     ) { $0 == AppTab.buy.rawValue ? AppTab.buy.title : AppTab.pay.title }
                 }
-                SettingsToggleRow(
-                    symbol: "drop.fill",
-                    title: "Ink effect",
-                    caption: "Ink spreads behind each key you press",
-                    isOn: $keypadInk
-                )
             }
 
             SettingsCard("Display") {
