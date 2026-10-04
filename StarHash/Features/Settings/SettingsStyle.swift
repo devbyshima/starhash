@@ -127,6 +127,40 @@ struct SettingsLinkRow: View {
     }
 }
 
+/// A choice from a menu at a row's end, as GO Club's settings show one:
+/// the value and the up and down chevron.
+struct SettingsChoiceMenu<Value: Hashable>: View {
+    let title: String
+    @Binding var selection: Value
+    let choices: [Value]
+    let label: (Value) -> String
+
+    var body: some View {
+        Menu {
+            Picker(title, selection: $selection) {
+                ForEach(choices, id: \.self) { choice in
+                    Text(label(choice)).tag(choice)
+                }
+            }
+        } label: {
+            HStack(spacing: 6) {
+                Text(label(selection))
+                    .starhashFont(16, weight: .medium, relativeTo: .callout)
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.system(size: 13, weight: .semibold))
+            }
+            .foregroundStyle(Color.starhashPrimaryText)
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .menuOrder(.fixed)
+        .buttonStyle(.hapticPlain)
+        .sensoryFeedback(.selection, trigger: selection)
+        .accessibilityLabel(title)
+        .accessibilityValue(label(selection))
+    }
+}
+
 /// The small grey mark at a row's end: a list's chevron, or the arrow of a
 /// row that leaves the app.
 struct SettingsChevron: View {

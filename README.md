@@ -93,7 +93,8 @@ Free and open source.
   transactions, contacts, Nearby and recent recipients, Ask before deleting
   from a menu or a transaction's page (also turned off from the delete
   question's Don't Ask Again), the default page StarHash opens on (Pay
-  or Buy), the keypad's ink effect (off, a key presses as it does with
+  or Buy), the appearance (System, as the iPhone is set, or always Dark
+  or Light), the keypad's ink effect (off, a key presses as it does with
   Reduce Motion), a Face ID lock (Touch ID or the passcode on an iPhone
   without it), off until turned on, which asks as StarHash opens and
   after more than a minute away and hides it in the app switcher, the

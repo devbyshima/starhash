@@ -227,6 +227,7 @@ Names the owner uses for parts of the design; find them by these names.
 | `-skipOnboarding`, `-resetOnboarding` | start on the tabs, or on onboarding |
 | `-tab pay\|buy\|activity\|settings` | starting page |
 | `-note`, `-reviewNote` | Shima's welcome note over Pay, as onboarding ends, or the two-week note that asks for a rating |
+| `-appAppearance system\|dark\|light` | Settings' Appearance, saved at launch (not `-appearance`: a launch argument named after a key overrides its saved value for the whole run) |
 | `-wallet mtn\|airtel\|none` | the main wallet (UserDefaults; none clears it; `-skipOnboarding` sets mtn when none) |
 | `-onboardingPage 0...4` | onboarding screen (with `-resetOnboarding`): 0 the reel, 1 the wallet, 2 Contacts, 3 Nearby, 4 auto-verify |
 | `-payAmount <n>` | amount on the keypad |

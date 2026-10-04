@@ -26,6 +26,11 @@ struct StarHashApp: App {
             let network = Recipient.Network(rawValue: wallet)
             UserDefaults.standard.set(network?.rawValue ?? "", forKey: PreferenceKey.wallet)
         }
+        // Not "-appearance": a launch argument named after a key overrides
+        // that key's saved value for the whole run.
+        if let appearance = DebugLaunch.value(after: "-appAppearance") {
+            UserDefaults.standard.set(appearance, forKey: PreferenceKey.appearance)
+        }
         if DebugLaunch.arguments.contains("-nearbyHere") {
             UserDefaults.standard.set(true, forKey: PreferenceKey.nearbyLocation)
         }
@@ -59,6 +64,8 @@ struct StarHashApp: App {
                     .tint(Color.starhashPrimaryText)
                     .onOpenURL { router.handle($0) }
             }
+            // Settings' Appearance, the splash included.
+            .onAppear { AppAppearance.apply(.stored) }
         }
         .onChange(of: scenePhase, initial: true) { _, phase in
             // The Process Carrier SMS shortcut may have written while we

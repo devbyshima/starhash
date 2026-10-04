@@ -1,5 +1,5 @@
-import Foundation
 import StarHashKit
+import SwiftUI
 
 extension PreferenceKey {
     /// When the Process Carrier SMS action last ran (seconds since 1970).
@@ -16,6 +16,46 @@ extension PreferenceKey {
     /// Where StarHash opens, and where the tab bar's middle place starts:
     /// "pay" or "buy". Pay unless chosen otherwise in Settings.
     static let defaultPage = "defaultPage"
+    /// The app's look, an `AppAppearance` raw value: as the iPhone is set
+    /// unless chosen otherwise in Settings.
+    static let appearance = "appearance"
+}
+
+/// The app's look, chosen in Settings: as the iPhone is set, or always
+/// dark or light.
+enum AppAppearance: String, CaseIterable {
+    case system
+    case dark
+    case light
+
+    var title: String {
+        switch self {
+        case .system: "System"
+        case .dark: "Dark"
+        case .light: "Light"
+        }
+    }
+
+    /// The one saved in Settings.
+    static var stored: AppAppearance {
+        UserDefaults.standard.string(forKey: PreferenceKey.appearance).flatMap(AppAppearance.init(rawValue:)) ?? .system
+    }
+
+    /// Puts it on StarHash's windows, so sheets and alerts follow, and
+    /// System hands them back to the iPhone's own setting.
+    @MainActor
+    static func apply(_ appearance: AppAppearance) {
+        let style: UIUserInterfaceStyle = switch appearance {
+        case .system: .unspecified
+        case .dark: .dark
+        case .light: .light
+        }
+        for case let scene as UIWindowScene in UIApplication.shared.connectedScenes {
+            for window in scene.windows {
+                window.overrideUserInterfaceStyle = style
+            }
+        }
+    }
 }
 
 /// Preference values read outside a view (App Intents, permission
@@ -92,5 +132,6 @@ enum AppReset {
         // Set, not only removed, so every @AppStorage view sees it change
         // and the root swaps to onboarding.
         UserDefaults.standard.set(false, forKey: PreferenceKey.hasOnboarded)
+        AppAppearance.apply(.system)
     }
 }
