@@ -14,6 +14,8 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     MARKETING_VERSION: "1.0.0"
+    # The build number counts App Store uploads, not builds: raise it by
+    # one before archiving each upload. Settings shows it after the version.
     CURRENT_PROJECT_VERSION: "1"
     CODE_SIGN_STYLE: Automatic
     DEVELOPMENT_TEAM: 7WHQR6L96K

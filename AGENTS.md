@@ -48,6 +48,16 @@ Set `DeveloperNoteLinks.appStoreID` once StarHash's App Store Connect
 record exists: Rate on the App Store then opens the Write a Review page,
 instead of asking iOS for a rating prompt it may not show.
 
+## Build number
+
+The build number (`CURRENT_PROJECT_VERSION` in `project.yml`, the app's
+`CFBundleVersion`) counts App Store uploads, not dev builds: 1 for the
+first, and one more before archiving each upload after it, since App
+Store Connect refuses a number already used for the same version.
+Settings shows it after the version, "1.0.0 (1)". When Xcode's Manage
+Version and Build Number is on as it uploads, it may raise the uploaded
+number past this one; write the number it used back here.
+
 ## Commands
 
     ./scripts/build.sh                      # xcodegen + simulator build

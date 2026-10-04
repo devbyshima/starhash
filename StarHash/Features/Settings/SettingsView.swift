@@ -315,6 +315,15 @@ enum SettingsVersion {
     static var short: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     }
+
+    /// The build: which App Store upload this is, 1 for the first, raised
+    /// in project.yml for each one after (`CURRENT_PROJECT_VERSION`).
+    static var build: String {
+        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+    }
+
+    /// "1.0.0 (1)", the version and its build.
+    static var full: String { "\(short) (\(build))" }
 }
 
 /// The mark, then the name and version on two centred lines.
@@ -324,7 +333,7 @@ struct SettingsFooter: View {
             StarHashMark(size: 56)
             VStack(spacing: 0) {
                 Text("StarHash")
-                Text(SettingsVersion.short)
+                Text(SettingsVersion.full)
             }
             .font(.starhash(.body))
             .foregroundStyle(Color.starhashSecondaryText)
@@ -334,7 +343,7 @@ struct SettingsFooter: View {
         .padding(.top, 24)
         .padding(.bottom, 24)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("StarHash version \(SettingsVersion.short)")
+        .accessibilityLabel("StarHash version \(SettingsVersion.short), build \(SettingsVersion.build)")
     }
 }
 
@@ -390,7 +399,7 @@ enum SettingsLinks {
         var components = URLComponents(string: "https://github.com/devbyshima/starhash/issues/new")!
         components.queryItems = [
             URLQueryItem(name: "template", value: "feature_request.yml"),
-            URLQueryItem(name: "version", value: SettingsVersion.short),
+            URLQueryItem(name: "version", value: SettingsVersion.full),
         ]
         return components.url!
     }
