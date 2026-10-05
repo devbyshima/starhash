@@ -142,7 +142,7 @@ extension LegalDocument {
     static let privacyPolicy = LegalDocument(
         title: "Privacy Policy",
         symbol: "lock.fill",
-        effective: "2026-10-04",
+        effective: "2026-10-05",
         summary: "StarHash has no account, no server and no tracking. What it keeps stays on your iPhone.",
         sections: [
             .init(
@@ -162,6 +162,10 @@ extension LegalDocument {
                 text: "StarHash cannot read your SMS. If you set up auto-verify, your own Shortcuts automation passes messages containing RWF to StarHash, which reads them on your iPhone to confirm payments. Messages that are not MTN MoMo or Airtel Money transactions are ignored and not kept."
             ),
             .init(
+                title: "Notifications",
+                text: "Only if you allow them. StarHash makes its reminders and summaries on your iPhone from the transactions it already keeps; nothing is sent to it from a server. Choose on its Notifications page what they tell you of, and whether they show amounts on your Lock Screen."
+            ),
+            .init(
                 title: "Face ID",
                 text: "If you turn on the lock, iOS checks your Face ID, Touch ID or passcode. StarHash never sees your face or fingerprint; it is only told whether the check passed."
             ),
@@ -175,7 +179,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "Your choices",
-                text: "In Settings you can stop StarHash saving transactions, using contacts, remembering recent recipients, Nearby and auto-verify at any time. You can delete any transaction, or erase everything with Delete All Data. Deleting the app removes it all too."
+                text: "In Settings you can stop StarHash saving transactions, using contacts, remembering recent recipients, Nearby, auto-verify and each of its notifications at any time. You can delete any transaction, or erase everything with Delete All Data. Deleting the app removes it all too."
             ),
             .init(
                 title: "Children",

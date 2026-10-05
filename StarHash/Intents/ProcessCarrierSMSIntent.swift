@@ -4,7 +4,8 @@ import StarHashKit
 /// The action a Shortcuts automation runs for every MoMo message: it reads
 /// the SMS text, and when it is an MTN MoMo or Airtel Money transaction,
 /// logs it (or confirms the payment StarHash dialled). Runs without opening
-/// the app and shows nothing, so the automation stays silent.
+/// the app and shows nothing of its own, so the automation stays silent;
+/// only a notification the owner turned on says what it did.
 struct ProcessCarrierSMSIntent: AppIntent {
     static let title: LocalizedStringResource = "Process Carrier SMS"
     static let description = IntentDescription(
@@ -31,9 +32,10 @@ struct ProcessCarrierSMSIntent: AppIntent {
     }
 
     /// Silent: the automation runs this for every message containing RWF,
-    /// bank texts included, so it never puts anything on screen. A MoMo
-    /// transaction shows up in Activity; anything else is ignored. (The
-    /// setup guide shows its own success state for the sample.)
+    /// bank texts included, so it never puts a result on screen. A MoMo
+    /// transaction shows up in Activity, with a notification only when one
+    /// is turned on; anything else is ignored. (The setup guide shows its
+    /// own success state for the sample.)
     @MainActor
     func perform() async throws -> some IntentResult {
         // Any run proves the shortcut reaches StarHash; the setup guide
@@ -44,7 +46,13 @@ struct ProcessCarrierSMSIntent: AppIntent {
               StarHashPreferences.autoVerifyOn,
               StarHashPreferences.saveTransactions,
               let sms = CarrierSMS.parse(message) else { return .result() }
-        AppEnvironment.store.apply(sms)
+        let store = AppEnvironment.store
+        let before = store.transactions
+        let applied = store.apply(sms)
+        // The one notification StarHash may add of its own, when asked to
+        // on the Notifications page; the payment's reminder goes with it.
+        await StarHashNotifications.shared.messageApplied(applied, previous: before.first { $0.id == applied.id })
+        await StarHashNotifications.shared.sync()
         return .result()
     }
 }

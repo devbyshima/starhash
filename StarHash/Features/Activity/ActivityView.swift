@@ -248,16 +248,10 @@ struct ActivityView: View {
         withAnimation(reduceMotion ? .easeInOut(duration: 0.25) : .smooth(duration: 0.35)) { period = new }
     }
 
+    /// Its fee from the carriers' prices, for the wallet it was dialled
+    /// with (the one that pays now for payments saved before that was kept).
     private func markConfirmed(_ transaction: StarHashKit.Transaction) {
-        var confirmed = transaction
-        confirmed.status = .confirmed
-        // No SMS to read the fee from, so it comes from the carriers'
-        // prices, for the wallet it was dialled with (the one that pays now
-        // for payments saved before that was kept); money received costs
-        // nothing here.
-        confirmed.fee = transaction.direction == .outgoing
-            ? Tariff.fee(sending: transaction.amount, to: transaction.counterparty, from: transaction.wallet ?? StarHashPreferences.wallet)
-            : nil
+        let confirmed = transaction.confirmedByHand(wallet: StarHashPreferences.wallet)
         withAnimation(.smooth(duration: 0.3)) { store.update(confirmed) }
         feedbackCount += 1
     }
@@ -265,10 +259,7 @@ struct ActivityView: View {
     /// The payment did not go through: it stays in Activity, struck
     /// through, and counts towards nothing.
     private func markFailed(_ transaction: StarHashKit.Transaction) {
-        var failed = transaction
-        failed.status = .failed
-        failed.fee = nil
-        withAnimation(.smooth(duration: 0.3)) { store.update(failed) }
+        withAnimation(.smooth(duration: 0.3)) { store.update(transaction.markedFailed()) }
         failedCount += 1
     }
 

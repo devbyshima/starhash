@@ -1,7 +1,7 @@
 import StarHashKit
 import SwiftUI
 
-/// Settings: what StarHash saves, its lock, and More (the terms of service,
+/// Settings: what StarHash saves, its notifications, its lock, and More (the terms of service,
 /// the privacy policy, a feature request, and About StarHash, which holds
 /// What's New, onboarding, the note and the source code), then Delete All
 /// Data. (The wallet switcher lives on
@@ -38,6 +38,7 @@ struct SettingsView: View {
 /// Every page pushed in the Settings tab.
 enum SettingsPage: Hashable {
     case autoVerify
+    case notifications
     case whatsNew
     case release(String)
     case terms
@@ -51,6 +52,7 @@ enum SettingsPage: Hashable {
         case .privacy: PrivacyPolicyView()
         case .about: AboutStarHashView()
         case .autoVerify: AutoVerificationGuide()
+        case .notifications: NotificationSettingsView()
         case .whatsNew: WhatsNewView()
         case .release(let version): ReleaseDetailView(version: version)
         }
@@ -120,6 +122,12 @@ private struct SettingsRootList: View {
                     title: "Ask before deleting",
                     caption: "Confirm every delete except a swipe",
                     isOn: $confirmDeletes
+                )
+                SettingsLinkRow(
+                    page: .notifications,
+                    symbol: "bell.fill",
+                    title: "Notifications",
+                    caption: "Reminders, confirmations and summaries"
                 )
             }
 
@@ -342,8 +350,8 @@ struct SettingsFooter: View {
 
 // MARK: - Launch arguments
 
-/// `-settingsPage whatsNew|release|terms|privacy|about|guide|guide2` (DEBUG only, with
-/// `-tab settings`) opens that page or the guide at launch.
+/// `-settingsPage whatsNew|release|terms|privacy|about|notifications|guide|guide2`
+/// (DEBUG only, with `-tab settings`) opens that page or the guide at launch.
 @MainActor
 enum SettingsLaunch {
     private static var page: String? {
@@ -359,6 +367,7 @@ enum SettingsLaunch {
         if page == "terms" { return [.terms] }
         if page == "privacy" { return [.privacy] }
         if page == "about" { return [.about] }
+        if page == "notifications" { return [.notifications] }
         if page == "release" { return [.whatsNew, .release(ReleaseHistory.releases[0].version)] }
         if page?.hasPrefix("guide") == true { return [.autoVerify] }
         return []

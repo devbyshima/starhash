@@ -76,4 +76,11 @@ enum SettingsAppLink {
             UIApplication.shared.open(url)
         }
     }
+
+    /// Straight to StarHash's notifications there.
+    static func openNotifications() {
+        if let url = URL(string: UIApplication.openNotificationSettingsURLString) {
+            UIApplication.shared.open(url)
+        }
+    }
 }

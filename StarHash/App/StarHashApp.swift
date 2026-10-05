@@ -39,6 +39,8 @@ struct StarHashApp: App {
         }
         #endif
         Self.useSpaceGroteskInNavigationBars()
+        // Before launch finishes, so a tap that opened StarHash is heard.
+        StarHashNotifications.shared.start()
         // Nearby's own file from before it was built from the payments:
         // nothing reads it now, and its places must not outlive it.
         try? FileManager.default.removeItem(at: URL.applicationSupportDirectory.appending(path: "StarHash/places.json"))
@@ -66,14 +68,23 @@ struct StarHashApp: App {
                     .environment(shortcuts)
                     .tint(Color.starhashPrimaryText)
                     .onOpenURL { router.handle($0) }
+                    // A payment dialled, settled or deleted: its reminder
+                    // and the summaries follow.
+                    .onChange(of: store.transactions) {
+                        Task { await StarHashNotifications.shared.sync() }
+                    }
             }
             // Settings' Appearance, the splash included.
             .onAppear { AppAppearance.apply(.stored) }
         }
         .onChange(of: scenePhase, initial: true) { _, phase in
             // The Process Carrier SMS shortcut may have written while we
-            // were in the background.
-            if phase == .active { store.reloadFromDisk() }
+            // were in the background, and notifications may have been
+            // turned on or off in the Settings app.
+            if phase == .active {
+                store.reloadFromDisk()
+                Task { await StarHashNotifications.shared.sync() }
+            }
             AppLock.shared.sceneChanged(to: phase)
         }
     }

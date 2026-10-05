@@ -93,4 +93,27 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
 
     /// The amount with its sign: negative when money left.
     public var signedAmount: Int { direction == .outgoing ? -amount : amount }
+
+    /// Marked as confirmed by hand (Activity, its details page, or a
+    /// reminder's action). No SMS to read the fee from, so it comes from
+    /// the carriers' prices, for the wallet it was dialled with (`wallet`
+    /// for payments saved before that was kept); money received costs
+    /// nothing here.
+    public func confirmedByHand(wallet fallback: Recipient.Network) -> Transaction {
+        var confirmed = self
+        confirmed.status = .confirmed
+        confirmed.fee = direction == .outgoing
+            ? Tariff.fee(sending: amount, to: counterparty, from: wallet ?? fallback)
+            : nil
+        return confirmed
+    }
+
+    /// Marked as failed: it did not go through, so it stays, struck
+    /// through, and counts towards nothing.
+    public func markedFailed() -> Transaction {
+        var failed = self
+        failed.status = .failed
+        failed.fee = nil
+        return failed
+    }
 }
