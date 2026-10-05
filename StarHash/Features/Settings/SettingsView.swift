@@ -114,7 +114,9 @@ private struct SettingsRootList: View {
                 SettingsToggleRow(
                     symbol: "checkmark.message.fill",
                     title: "Auto-verify transactions",
-                    caption: "Confirm payments from \(wallet.messagesName) messages",
+                    caption: autoVerifyLooksBroken
+                        ? "No \(wallet.messagesName) messages for a week. Check the shortcut"
+                        : "Confirm payments from \(wallet.messagesName) messages",
                     isOn: autoVerifyBinding
                 )
                 SettingsToggleRow(
@@ -229,6 +231,17 @@ private struct SettingsRootList: View {
         } message: {
             Text("Allow StarHash your precise location in the Settings app, so it can tell one till from the next.")
         }
+    }
+
+    /// No message for a week and the last payments all unconfirmed: the
+    /// shortcut has likely stopped, and payments are no longer failed for
+    /// want of a message until one comes (`AutoVerify.looksBroken`).
+    private var autoVerifyLooksBroken: Bool {
+        autoVerifyBinding.wrappedValue && AutoVerify.looksBroken(
+            store.transactions,
+            lastMessageAt: Date(timeIntervalSince1970: lastVerifiedAt),
+            now: .now
+        )
     }
 
     /// On once the setup finished with a working shortcut. Switching it on

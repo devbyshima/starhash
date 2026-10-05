@@ -20,7 +20,9 @@ extension PreferenceKey {
 }
 
 extension StarHashPreferences {
-    /// The Notifications page's choices, with the defaults it shows.
+    /// The Notifications page's choices, with the defaults it shows, and
+    /// whether auto-verify fails unconfirmed payments.
+    @MainActor
     static var notifications: NotificationPlan.Settings {
         let defaults = NotificationPlan.Settings()
         let saved = UserDefaults.standard
@@ -33,7 +35,8 @@ extension StarHashPreferences {
             weeklyDay: saved.object(forKey: PreferenceKey.weeklySummaryDay) as? Int ?? defaults.weeklyDay,
             monthlySummary: bool(PreferenceKey.notifyMonthlySummary, default: defaults.monthlySummary),
             summaryHour: saved.object(forKey: PreferenceKey.summaryHour) as? Int ?? defaults.summaryHour,
-            showsAmounts: bool(PreferenceKey.notificationAmounts, default: defaults.showsAmounts)
+            showsAmounts: bool(PreferenceKey.notificationAmounts, default: defaults.showsAmounts),
+            failsUnconfirmed: PaymentExpiry.isActive
         )
     }
 
@@ -71,18 +74,24 @@ final class StarHashNotifications {
     }
 
     static let reminderCategory = "payment-reminder"
+    /// A payment auto-verify failed, with one button to say it went
+    /// through after all.
+    static let expiredCategory = "payment-expired"
 
     private init() {}
 
     /// At launch, before any notification can be answered: the delegate,
-    /// and the reminder's two buttons. Both ask for Face ID or the
-    /// passcode first, so a locked phone cannot settle a payment.
+    /// the reminder's two buttons and the failed payment's one. All ask
+    /// for Face ID or the passcode first, so a locked phone cannot settle
+    /// a payment.
     func start() {
         center.delegate = responder
         let confirm = UNNotificationAction(identifier: Action.confirm, title: "Mark as Confirmed", options: [.authenticationRequired])
         let fail = UNNotificationAction(identifier: Action.fail, title: "Mark as Failed", options: [.authenticationRequired, .destructive])
+        let wentThrough = UNNotificationAction(identifier: Action.confirm, title: "It Went Through", options: [.authenticationRequired])
         center.setNotificationCategories([
             UNNotificationCategory(identifier: Self.reminderCategory, actions: [confirm, fail], intentIdentifiers: []),
+            UNNotificationCategory(identifier: Self.expiredCategory, actions: [wentThrough], intentIdentifiers: []),
         ])
     }
 
@@ -135,10 +144,20 @@ final class StarHashNotifications {
             try? await center.add(request(for: item))
         }
 
-        let stillPending = Set(transactions.filter { $0.status == .pending }.map(\.id))
+        // A reminder stays while its payment is pending, word that one
+        // failed until it is confirmed after all.
+        let pending = Set(transactions.filter { $0.status == .pending }.map(\.id))
+        let unconfirmed = Set(transactions.filter { $0.status != .confirmed }.map(\.id))
         let settled = await center.deliveredNotifications()
-            .filter { $0.request.content.categoryIdentifier == Self.reminderCategory }
-            .filter { Self.transactionID(of: $0.request.content.userInfo).map { !stillPending.contains($0) } ?? true }
+            .filter { notification in
+                let content = notification.request.content
+                guard let id = Self.transactionID(of: content.userInfo) else { return false }
+                switch content.categoryIdentifier {
+                case Self.reminderCategory: return !pending.contains(id)
+                case Self.expiredCategory: return !unconfirmed.contains(id)
+                default: return false
+                }
+            }
             .map(\.request.identifier)
         center.removeDeliveredNotifications(withIdentifiers: settled)
     }
@@ -160,19 +179,20 @@ final class StarHashNotifications {
     }
 
     /// A tap opens what the notification is about: its transaction, or
-    /// Activity for a summary. A reminder's buttons settle the payment as
-    /// its details page would.
+    /// Activity for a summary. The buttons settle the payment as its
+    /// details page would: a failed one can still be confirmed.
     func answer(action: String, transactionID: UUID?) async {
         let store = AppEnvironment.store
         switch action {
         case Action.confirm, Action.fail:
             // StarHash may have woken in the background just for this.
             store.reloadFromDisk()
-            guard let id = transactionID, let transaction = store.transaction(id: id),
-                  transaction.status == .pending else { return }
-            store.update(action == Action.confirm
-                ? transaction.confirmedByHand(wallet: StarHashPreferences.wallet)
-                : transaction.markedFailed())
+            guard let id = transactionID, let transaction = store.transaction(id: id) else { return }
+            if action == Action.confirm, transaction.status != .confirmed {
+                store.update(transaction.confirmedByHand(wallet: StarHashPreferences.wallet))
+            } else if action == Action.fail, transaction.status == .pending {
+                store.update(transaction.markedFailed())
+            }
             await sync()
         case UNNotificationDefaultActionIdentifier:
             if let id = transactionID, let url = URL(string: "starhash://transaction/\(id.uuidString)") {
@@ -195,8 +215,10 @@ final class StarHashNotifications {
         if let id = item.transactionID {
             content.userInfo = ["transaction": id.uuidString]
         }
-        if item.kind == .paymentReminder {
-            content.categoryIdentifier = Self.reminderCategory
+        switch item.kind {
+        case .paymentReminder: content.categoryIdentifier = Self.reminderCategory
+        case .paymentExpired: content.categoryIdentifier = Self.expiredCategory
+        default: break
         }
         let trigger = item.date.map {
             UNCalendarNotificationTrigger(

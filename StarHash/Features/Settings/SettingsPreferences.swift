@@ -100,6 +100,7 @@ enum StarHashPreferences {
     static func turnOffAutoVerify() {
         UserDefaults.standard.set(false, forKey: PreferenceKey.autoVerifySetUp)
         UserDefaults.standard.set(0.0, forKey: PreferenceKey.lastVerifiedAt)
+        UserDefaults.standard.removeObject(forKey: PreferenceKey.autoVerifySince)
     }
 
     static func markVerified(at date: Date = .now) {

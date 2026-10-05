@@ -165,6 +165,8 @@ public final class StarHashStore {
         if sms.direction == .outgoing, let index = pendingMatch(for: sms, at: date) {
             var match = transactions[index]
             match.status = .confirmed
+            // A payment failed for want of a message had one after all.
+            match.failureReason = nil
             // The fee only ever comes from the SMS.
             match.fee = sms.fee
             match.reference = sms.reference
@@ -196,6 +198,47 @@ public final class StarHashStore {
         return transaction
     }
 
+    /// Applies a message saying a payment did not go through: the payment
+    /// it matches, as `apply` matches one, is marked failed (with the reason
+    /// `.message`). One that matches nothing is ignored: StarHash keeps no
+    /// record of attempts it did not dial. Returns the payment it failed.
+    @discardableResult
+    public func applyFailure(_ sms: ParsedSMS, receivedAt now: Date = .now) -> Transaction? {
+        guard sms.direction == .outgoing, !sms.counterparty.destination.isEmpty,
+              let index = pendingMatch(for: sms, at: sms.date ?? now) else { return nil }
+        var failed = transactions[index].markedFailed()
+        failed.failureReason = .message
+        transactions[index] = failed
+        save()
+        return failed
+    }
+
+    /// Marks failed every payment dialled from StarHash since `since` that
+    /// is still pending `window` after it was dialled (`AutoVerify`): with
+    /// auto-verify on, its message would have come by then. Only the app
+    /// calls this, and only while auto-verify is on and working; payments
+    /// from before it was set up are left as they are. Returns those it
+    /// failed.
+    @discardableResult
+    public func expireUnconfirmed(
+        dialledSince since: Date,
+        now: Date = .now,
+        window: TimeInterval = AutoVerify.confirmationWindow
+    ) -> [Transaction] {
+        var expired: [Transaction] = []
+        for index in transactions.indices {
+            let t = transactions[index]
+            guard t.status == .pending, t.source == .app, t.direction == .outgoing,
+                  t.date >= since, now.timeIntervalSince(t.date) >= window else { continue }
+            var failed = t.markedFailed()
+            failed.failureReason = .noMessage
+            transactions[index] = failed
+            expired.append(failed)
+        }
+        if !expired.isEmpty { save() }
+        return expired
+    }
+
     /// The transaction a message was already applied to: the same carrier
     /// reference, or, for a message without one, the same movement at the
     /// same moment. The automation can run twice for one SMS, and the
@@ -211,10 +254,12 @@ public final class StarHashStore {
         }
     }
 
-    /// The pending payment a sent-money message confirms. A message that
-    /// leaves the number or code out (a merchant's name alone, a transfer
-    /// to the other network) settles for the same kind of payment. A
-    /// payment dialled with the other wallet is never the one.
+    /// The pending payment a sent-money message confirms, or fails. A
+    /// message that leaves the number or code out (a merchant's name alone,
+    /// a transfer to the other network) settles for the same kind of
+    /// payment. A payment dialled with the other wallet is never the one.
+    /// One failed for want of a message counts as pending here, so a late
+    /// message still settles it.
     private func pendingMatch(for sms: ParsedSMS, at date: Date) -> Int? {
         let window: TimeInterval = 6 * 3600
         let destination = sms.counterparty.destination
@@ -224,7 +269,8 @@ public final class StarHashStore {
                 let sameDestination = destination.isEmpty
                     ? t.counterparty.kind == sms.counterparty.kind
                     : t.counterparty.destination == destination
-                return t.status == .pending && t.direction == .outgoing && t.amount == sms.amount
+                let open = t.status == .pending || (t.status == .failed && t.failureReason == .noMessage)
+                return open && t.direction == .outgoing && t.amount == sms.amount
                     && (t.wallet == nil || t.wallet == sms.wallet)
                     && sameDestination && abs(t.date.timeIntervalSince(date)) < window
             }

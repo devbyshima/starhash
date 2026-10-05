@@ -24,6 +24,11 @@ public enum NotificationPlan {
         /// Off keeps amounts and balances off the Lock Screen: the
         /// notifications say what happened, not how much.
         public var showsAmounts: Bool
+        /// Auto-verify is on and working, so a payment no message confirms
+        /// within the hour fails on its own (`AutoVerify`): its reminder
+        /// becomes word that it failed, at the hour, in place of a nudge.
+        /// Not a choice on the page; the app works it out.
+        public var failsUnconfirmed: Bool
 
         public init(
             paymentReminders: Bool = true,
@@ -34,7 +39,8 @@ public enum NotificationPlan {
             weeklyDay: Int = NotificationPlan.defaultWeeklyDay,
             monthlySummary: Bool = true,
             summaryHour: Int = NotificationPlan.defaultSummaryHour,
-            showsAmounts: Bool = true
+            showsAmounts: Bool = true,
+            failsUnconfirmed: Bool = false
         ) {
             self.paymentReminders = paymentReminders
             self.reminderDelay = reminderDelay
@@ -45,6 +51,7 @@ public enum NotificationPlan {
             self.monthlySummary = monthlySummary
             self.summaryHour = summaryHour
             self.showsAmounts = showsAmounts
+            self.failsUnconfirmed = failsUnconfirmed
         }
     }
 
@@ -53,6 +60,8 @@ public enum NotificationPlan {
     public struct Item: Equatable, Sendable {
         public enum Kind: String, Sendable {
             case paymentReminder
+            /// A payment no message confirmed within the hour, failed.
+            case paymentExpired
             case paymentConfirmed
             case moneyReceived
             case weeklySummary
@@ -108,11 +117,27 @@ public enum NotificationPlan {
     }
 
     /// A payment dialled from StarHash with no SMS to confirm it yet:
-    /// asks whether it went through, `reminderDelay` minutes on.
+    /// asks whether it went through, `reminderDelay` minutes on. With
+    /// auto-verify failing such payments, says it failed instead, at the
+    /// hour. Both share an id, so one replaces the other.
     public static func reminder(for transaction: Transaction, settings: Settings) -> Item? {
         guard settings.paymentReminders, transaction.status == .pending,
               transaction.source == .app, transaction.direction == .outgoing else { return nil }
         let name = transaction.counterparty.displayName
+        if settings.failsUnconfirmed {
+            let messages = transaction.wallet.map { "\($0.messagesName) message" } ?? "message"
+            let what = settings.showsAmounts
+                ? "\(Money.formatWithCurrency(transaction.amount)) to \(name)"
+                : "your payment to \(name)"
+            return Item(
+                id: "payment-reminder.\(transaction.id.uuidString)",
+                kind: .paymentExpired,
+                date: transaction.date.addingTimeInterval(AutoVerify.confirmationWindow),
+                title: "Your payment didn't go through",
+                body: "No \(messages) confirmed \(what) within an hour, so StarHash marked it failed.",
+                transactionID: transaction.id
+            )
+        }
         let what = settings.showsAmounts
             ? "\(Money.formatWithCurrency(transaction.amount)) to \(name)"
             : "Your payment to \(name)"

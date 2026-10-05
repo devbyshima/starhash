@@ -298,6 +298,76 @@ import Testing
 
     // MARK: Names
 
+    // MARK: Real MTN MoMo messages (September 2026)
+
+    @Test func realMoneyReceived() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "You have received 2000 RWF from Serein SHIMA BYIRINGIRO (*********062) at 2026-09-30 16:36:29 . Balance:3719 RWF. FT Id: 30911702283"
+        ))
+        #expect(sms.wallet == .mtn)
+        #expect(sms.direction == .incoming)
+        #expect(sms.amount == 2000)
+        #expect(sms.counterparty.name == "Serein Shima Byiringiro")
+        #expect(sms.balanceAfter == 3719)
+        #expect(sms.reference == "30911702283")
+        #expect(sms.date == kigali(2026, 9, 30, 16, 36, 29))
+    }
+
+    @Test func realApprovedMerchantPrompt() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "*164*S*Y'ello, A transaction of 300 RWF by INFORMATION TECHNOLOGY  ENGINEERING CONSTRUCTION   ITEC Ltd was completed at 2026-09-30 12:37:08. Balance:2719 RWF. Fee  0 RWF. FT Id: 30906497755. ET  Id: 250813310.*EN#"
+        ))
+        #expect(sms.direction == .outgoing)
+        #expect(sms.amount == 300)
+        #expect(sms.counterparty.kind == .merchant)
+        #expect(sms.counterparty.name == "Information Technology Engineering Construction Itec Ltd")
+        #expect(sms.fee == 0)
+        #expect(sms.balanceAfter == 2719)
+        #expect(sms.reference == "30906497755")
+        #expect(sms.date == kigali(2026, 9, 30, 12, 37, 8))
+    }
+
+    @Test func realMerchantPayment() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "TxId:30898115353*S*Your payment of 14,886 RWF to EVPLUGIN EMOBILITY SOLUTIONS L 59971 was completed at 2026-09-29 22:07:00.  Balance: 3,019 RWF. Fee 0 RWF.*EN#"
+        ))
+        #expect(sms.direction == .outgoing)
+        #expect(sms.amount == 14_886)
+        #expect(sms.counterparty.kind == .merchant)
+        #expect(sms.counterparty.destination == "59971")
+        #expect(sms.counterparty.name == "Evplugin Emobility Solutions L")
+        #expect(sms.fee == 0)
+        #expect(sms.balanceAfter == 3_019)
+        #expect(sms.reference == "30898115353")
+    }
+
+    @Test(arguments: [
+        ("*165*S*5000 RWF transferred to Eric RIZINDA (250788893323) at 2026-09-24 15:34:33 .Fee: 100RWF.Balance: 66807RWF.Dial *182*1*3# and send money abroad *EN#",
+         5000, 100, 66807, "0788893323", "Eric Rizinda"),
+        ("*165*S*24700 RWF transferred to Jean Claude TUYISENGE (250788301945) at 2026-09-24 15:00:30 .Fee: 250RWF.Balance: 81717RWF.Dial *182*1*3# and send money abroad *EN#",
+         24700, 250, 81717, "0788301945", "Jean Claude Tuyisenge"),
+    ])
+    func realTransferSent(text: String, amount: Int, fee: Int, balance: Int, number: String, name: String) throws {
+        let sms = try #require(CarrierSMS.parse(text))
+        #expect(sms.direction == .outgoing)
+        #expect(sms.amount == amount)
+        #expect(sms.fee == fee)
+        #expect(sms.balanceAfter == balance)
+        #expect(sms.counterparty.destination == number)
+        #expect(sms.counterparty.name == name)
+    }
+
+    @Test func realFailedTransfer() throws {
+        let text = "Your transfer of 10000 RWF to Serein SHIMA BYIRINGIRO (250788335935) has failed at 2026-09-14 11:27:16. Message: . Financial Transaction Id: 30557484114.}."
+        #expect(CarrierSMS.parse(text) == nil)
+        let sms = try #require(CarrierSMS.parseFailure(text))
+        #expect(sms.wallet == .mtn)
+        #expect(sms.amount == 10_000)
+        #expect(sms.counterparty.destination == "0788335935")
+        #expect(sms.reference == "30557484114")
+        #expect(sms.date == kigali(2026, 9, 14, 11, 27, 16))
+    }
+
     @Test func displayNames() {
         #expect(CarrierSMS.displayName("PILI-PILI INVEST") == "Pili-Pili Invest")
         #expect(CarrierSMS.displayName("Ariane ISHIMWE") == "Ariane Ishimwe")

@@ -201,6 +201,10 @@ struct TransactionDetailPage: View {
             }
             SheetDivider()
             SheetInfoRow(label: "Status") { statusValue(transaction.status) }
+            if transaction.status == .failed, let reason = failureText(transaction) {
+                SheetDivider()
+                SheetInfoRow("Reason", reason)
+            }
         }
         .padding(.horizontal, 16)
         .sheetCard(fill: .starhashCard)
@@ -218,6 +222,15 @@ struct TransactionDetailPage: View {
             Text(statusTitle(status))
                 .font(.sheet(16, .medium))
                 .foregroundStyle(color)
+        }
+    }
+
+    /// Why StarHash failed it, when it did rather than its owner.
+    private func failureText(_ transaction: StarHashKit.Transaction) -> String? {
+        switch transaction.failureReason {
+        case .noMessage: "No message within an hour"
+        case .message: "The wallet said it failed"
+        case nil: nil
         }
     }
 

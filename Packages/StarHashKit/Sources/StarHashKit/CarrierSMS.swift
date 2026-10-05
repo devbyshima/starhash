@@ -54,8 +54,9 @@ public enum CarrierSMS {
     /// Nil when the text is not a MoMo or Airtel Money transaction message.
     public static func parse(_ text: String) -> ParsedSMS? {
         let message = normalized(text)
-        // Failed or cancelled attempts mention an amount but moved nothing.
-        if matches(#"\b(failed|unsuccessful|insufficient|cancell?ed|declined)\b"#, message) {
+        // Failed or cancelled attempts mention an amount but moved nothing
+        // (`parseFailure` reads them).
+        if matches(failureWords, message) {
             return nil
         }
         let wallet: Recipient.Network
@@ -80,13 +81,66 @@ public enum CarrierSMS {
         )
     }
 
+    /// A payment that did not go through, as the wallet tells it: "Your
+    /// transfer of 5000 RWF to John Doe (250788123456) failed. Insufficient
+    /// balance." Only a message that names the amount and the number or code
+    /// it was going to, since that is what ties it to the payment StarHash
+    /// dialled; one that says less ("Transaction of 9000 RWF was
+    /// cancelled") is left alone. Always outgoing.
+    public static func parseFailure(_ text: String) -> ParsedSMS? {
+        let message = normalized(text)
+        guard matches(failureWords, message) else { return nil }
+        let wallet: Recipient.Network
+        if isMoMo(message) {
+            wallet = .mtn
+        } else if isAirtelMoney(message) {
+            wallet = .airtel
+        } else {
+            return nil
+        }
+        guard let found = failedPayment(in: message),
+              found.amount > 0, !found.counterparty.destination.isEmpty else { return nil }
+        return ParsedSMS(
+            wallet: wallet,
+            direction: .outgoing,
+            counterparty: found.counterparty,
+            amount: found.amount,
+            date: date(in: message),
+            reference: reference(in: message)
+        )
+    }
+
+    private static let failureWords = #"\b(failed|unsuccessful|insufficient|cancell?ed|declined)\b"#
+
+    /// Where a failed payment was going, in either wallet's wording.
+    private static func failedPayment(in message: String) -> (counterparty: Recipient, amount: Int)? {
+        // "5000 RWF to John Doe (250788123456)"
+        if let m = captures(amount + #"\s+to\s+([^(]+?)\s*\(([^)]*)\)"#, message) {
+            return (party(name: m[1], number: m[2]), money(m[0]))
+        }
+        // "1,000 RWF to 0732561240 Jean Bosco"
+        if let m = captures(amount + #"\s+to\s+"# + airtelNumber + #"[\s,]+(.+?)"# + nameEnd, message) {
+            return (party(name: m[2], number: m[1]), money(m[0]))
+        }
+        // "1,000 RWF to JEAN BOSCO 0732561240"
+        if let m = captures(amount + #"\s+to\s+(.+?)[\s,]+"# + airtelNumber, message) {
+            return (party(name: m[1], number: m[2]), money(m[0]))
+        }
+        // "15,000 RWF to PILI-PILI INVEST 020205": a merchant and its code.
+        if let m = captures(amount + #"\s+to\s+(.+?)\s+(\d{3,9})\b"#, message) {
+            return (Recipient(name: displayName(m[1]), destination: m[2], kind: .merchant), money(m[0]))
+        }
+        return nil
+    }
+
     /// Whether the message is MTN MoMo's own. Banks text in RWF too, and
     /// some of their messages read much like MoMo's ("You have received RWF
     /// 50,000 from ..."), so a message must also carry one of MoMo's marks:
     /// a USSD-style prefix (*165*S*, *164*S*, *113*R*), a TxId, a Financial
-    /// Transaction Id, "mobile money" or "MoMo".
+    /// Transaction Id or its short "FT Id" (money received carries only
+    /// that), "mobile money" or "MoMo".
     static func isMoMo(_ message: String) -> Bool {
-        let marks = [#"^\*\d{3}\*[A-Z]\*"#, #"\bTxId\b"#, #"Financial Transaction Id"#, #"mobile money"#, #"\bMoMo\b"#]
+        let marks = [#"^\*\d{3}\*[A-Z]\*"#, #"\bTxId\b"#, #"Financial Transaction Id"#, #"\bFT Id\b"#, #"mobile money"#, #"\bMoMo\b"#]
         return marks.contains { message.range(of: $0, options: [.regularExpression, .caseInsensitive]) != nil }
     }
 
@@ -122,9 +176,10 @@ public enum CarrierSMS {
         }
 
         // "A transaction of 5000 RWF by KONGEZA LTD on your MOMO account was
-        // successfully completed": a payment the user approved from a
+        // successfully completed", or "... by ITEC Ltd was completed at
+        // 2026-09-30 12:37:08": a payment the user approved from a
         // merchant's prompt.
-        if let m = captures(#"transaction of\s+"# + amount + #"\s+by\s+(.+?)\s+on your\b"#, message) {
+        if let m = captures(#"transaction of\s+"# + amount + #"\s+by\s+(.+?)\s+(?:on your\b|was\s+(?:successfully\s+)?completed)"#, message) {
             return Shape(direction: .outgoing, counterparty: merchant(m[1]), amount: money(m[0]))
         }
 

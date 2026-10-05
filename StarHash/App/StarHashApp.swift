@@ -73,6 +73,13 @@ struct StarHashApp: App {
                     .onChange(of: store.transactions) {
                         Task { await StarHashNotifications.shared.sync() }
                     }
+                    // A payment can pass its hour while StarHash is open.
+                    .task(id: scenePhase == .active) {
+                        while scenePhase == .active, !Task.isCancelled {
+                            try? await Task.sleep(for: .seconds(60))
+                            PaymentExpiry.run()
+                        }
+                    }
             }
             // Settings' Appearance, the splash included.
             .onAppear { AppAppearance.apply(.stored) }
@@ -83,6 +90,7 @@ struct StarHashApp: App {
             // turned on or off in the Settings app.
             if phase == .active {
                 store.reloadFromDisk()
+                PaymentExpiry.run()
                 Task { await StarHashNotifications.shared.sync() }
             }
             AppLock.shared.sceneChanged(to: phase)

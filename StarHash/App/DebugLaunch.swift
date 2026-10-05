@@ -22,6 +22,11 @@ enum DebugLaunch {
         let store = StarHashStore(fileURL: nil)
         guard !arguments.contains("-emptyStore") else { return store }
         for t in SampleData.transactions() { store.add(t) }
+        // -expirePending: the pending sample failed for want of a message,
+        // as auto-verify fails it after the hour.
+        if arguments.contains("-expirePending") {
+            store.expireUnconfirmed(dialledSince: .distantPast)
+        }
         return store
     }
 

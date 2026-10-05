@@ -101,7 +101,7 @@ extension LegalDocument {
     static let termsOfService = LegalDocument(
         title: "Terms of Service",
         symbol: "doc.text.fill",
-        effective: "2026-10-04",
+        effective: "2026-10-05",
         summary: "The terms for using StarHash, in plain words.",
         sections: [
             .init(
@@ -118,7 +118,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "Codes, fees and records",
-                text: "The USSD codes, fees and limits StarHash uses come from the providers' published information, and the providers may change them without notice. Activity is a record kept for you, from what you dial and the messages you pass to StarHash; your provider's records are the ones that count."
+                text: "The USSD codes, fees and limits StarHash uses come from the providers' published information, and the providers may change them without notice. Activity is a record kept for you, from what you dial and the messages you pass to StarHash; your provider's records are the ones that count. With auto-verify on, a payment that no message confirms within an hour is marked failed; if it did go through, mark it as confirmed. StarHash's reminders and summaries are worked out from that record, and iOS decides when they show: a reminder that is late or never comes says nothing about whether a payment went through."
             ),
             .init(
                 title: "Free, with source available",
@@ -126,7 +126,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "No warranty",
-                text: "StarHash is provided as it is, without warranty of any kind. As far as the law allows, its developer is not liable for any loss from using it, including a payment sent to the wrong person or for the wrong amount, a failed or delayed payment, or a record that is missing or wrong."
+                text: "StarHash is provided as it is, without warranty of any kind. As far as the law allows, its developer is not liable for any loss from using it, including a payment sent to the wrong person or for the wrong amount, a failed or delayed payment, a record that is missing or wrong, or a notification that is late, missing or wrong."
             ),
             .init(
                 title: "Your iPhone and your PIN",
@@ -163,7 +163,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "Notifications",
-                text: "Only if you allow them. StarHash makes its reminders and summaries on your iPhone from the transactions it already keeps; nothing is sent to it from a server. Choose on its Notifications page what they tell you of, and whether they show amounts on your Lock Screen."
+                text: "Only if you allow them, which StarHash asks once as you set it up. It makes its reminders and summaries on your iPhone from the transactions it already keeps; nothing is sent to it from a server. Choose on its Notifications page what they tell you of, and whether they show amounts on your Lock Screen."
             ),
             .init(
                 title: "Face ID",

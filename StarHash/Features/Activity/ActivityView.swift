@@ -302,7 +302,8 @@ struct ActivityView: View {
 
     #if DEBUG
     /// `-activityPeriod today|week|month|year|all`, `-activitySearch <text>`,
-    /// `-openFirstTransaction` and `-openPendingTransaction`, for screenshots.
+    /// `-openFirstTransaction`, `-openPendingTransaction` and
+    /// `-openFailedTransaction`, for screenshots.
     private func applyDebugLaunch() {
         guard !didApplyDebugLaunch else { return }
         didApplyDebugLaunch = true
@@ -319,6 +320,10 @@ struct ActivityView: View {
         if DebugLaunch.arguments.contains("-openPendingTransaction"),
            let pending = store.transactions.first(where: { $0.status == .pending }) {
             router.openTransactionID = pending.id
+        }
+        if DebugLaunch.arguments.contains("-openFailedTransaction"),
+           let failed = store.transactions.first(where: { $0.status == .failed }) {
+            router.openTransactionID = failed.id
         }
     }
     #endif

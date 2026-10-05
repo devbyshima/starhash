@@ -21,6 +21,16 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
         case sms
     }
 
+    /// Why a payment failed when StarHash marked it so, rather than its
+    /// owner: nil for one marked by hand.
+    public enum FailureReason: String, Codable, Sendable {
+        /// The wallet's own message said it did not go through.
+        case message
+        /// Auto-verify was on and no message confirmed it within the hour
+        /// (`AutoVerify.confirmationWindow`). A late message still can.
+        case noMessage
+    }
+
     public struct Coordinate: Codable, Hashable, Sendable {
         public var latitude: Double
         public var longitude: Double
@@ -58,6 +68,8 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
     /// so the same message applied twice is recognised even when it carries
     /// no reference (transfers sent have none). Nil until a message applies.
     public var messageDate: Date?
+    /// Set only while it is failed, and only when StarHash failed it.
+    public var failureReason: FailureReason?
 
     public init(
         id: UUID = UUID(),
@@ -73,7 +85,8 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
         category: String? = nil,
         location: Coordinate? = nil,
         wallet: Recipient.Network? = nil,
-        messageDate: Date? = nil
+        messageDate: Date? = nil,
+        failureReason: FailureReason? = nil
     ) {
         self.id = id
         self.direction = direction
@@ -89,6 +102,7 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
         self.location = location
         self.wallet = wallet
         self.messageDate = messageDate
+        self.failureReason = failureReason
     }
 
     /// The amount with its sign: negative when money left.
@@ -102,6 +116,7 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
     public func confirmedByHand(wallet fallback: Recipient.Network) -> Transaction {
         var confirmed = self
         confirmed.status = .confirmed
+        confirmed.failureReason = nil
         confirmed.fee = direction == .outgoing
             ? Tariff.fee(sending: amount, to: counterparty, from: wallet ?? fallback)
             : nil
@@ -114,6 +129,7 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
         var failed = self
         failed.status = .failed
         failed.fee = nil
+        failed.failureReason = nil
         return failed
     }
 }

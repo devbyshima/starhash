@@ -334,6 +334,8 @@ struct AutoVerificationGuide: View {
 
     private func finish() {
         autoVerifySetUp = true
+        // Payments from here on fail if no message confirms them.
+        PaymentExpiry.markSetUp()
         dismiss()
     }
 

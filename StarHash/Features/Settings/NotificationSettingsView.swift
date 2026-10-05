@@ -8,6 +8,7 @@ import UserNotifications
 /// reschedules what is waiting at once.
 struct NotificationSettingsView: View {
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(StarHashStore.self) private var store
 
     @AppStorage(PreferenceKey.notifyPaymentReminders) private var paymentReminders = true
     @AppStorage(PreferenceKey.paymentReminderDelay) private var reminderDelay = NotificationPlan.defaultReminderDelay
@@ -38,10 +39,13 @@ struct NotificationSettingsView: View {
                 SettingsToggleRow(
                     symbol: "bell.badge.fill",
                     title: "Payment reminders",
-                    caption: "When a payment you made is still pending",
+                    caption: failsUnconfirmed
+                        ? "When no \(wallet.messagesName) message confirms a payment within an hour"
+                        : "When a payment you made is still pending",
                     isOn: $paymentReminders
                 )
-                if paymentReminders {
+                // With auto-verify, the hour is the reminder's time.
+                if paymentReminders, !failsUnconfirmed {
                     SettingsRow(symbol: "hourglass", title: "Remind me after", caption: "How long a payment waits first") {
                         SettingsChoiceMenu(
                             title: "Remind me after",
@@ -118,10 +122,6 @@ struct NotificationSettingsView: View {
                     isOn: $sound
                 )
             }
-
-            SettingsFootnote("StarHash makes every notification on this iPhone, from what it already keeps. Nothing comes from a server.")
-                .padding(.horizontal, SettingsLayout.cardInset)
-                .padding(.top, 4)
         }
         #if DEBUG
         // -settingsScrolled: start at the foot, for screenshots.
@@ -158,6 +158,17 @@ struct NotificationSettingsView: View {
     }
 
     private var autoVerifyOn: Bool { autoVerifySetUp && lastVerifiedAt > 0 }
+
+    /// Auto-verify fails a payment no message confirms within the hour, so
+    /// the reminder says that instead (`PaymentExpiry`). Read here from the
+    /// page's own values, so it follows them.
+    private var failsUnconfirmed: Bool {
+        autoVerifyOn && !AutoVerify.looksBroken(
+            store.transactions,
+            lastMessageAt: Date(timeIntervalSince1970: lastVerifiedAt),
+            now: .now
+        )
+    }
 
     /// Above everything while iOS does not let StarHash notify: Turn On
     /// asks the first time, and after a refusal the Settings app is the

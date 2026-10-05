@@ -12,7 +12,8 @@ import SwiftUI
 ///      asked for at the moment the screen explains why.
 ///   3. The same for Nearby's location prompt. After Contacts, since Nearby
 ///      leaves contacts out.
-///   4. Auto-verify, with a message being confirmed on the mock; Set Up
+///   4. The same for notifications' prompt: reminders and summaries.
+///   5. Auto-verify, with a message being confirmed on the mock; Set Up
 ///      runs the setup over onboarding. Last, since setting it up leaves
 ///      for Shortcuts.
 ///
@@ -33,15 +34,15 @@ struct OnboardingView: View {
     @State private var setupWentBack = false
 
     enum Stage: Int {
-        case reel, wallet, contacts, nearby, autoVerify
+        case reel, wallet, contacts, nearby, notifications, autoVerify
     }
 
     /// Every screen there can be, for the debug launch's range.
-    static let stageCount = 5
+    static let stageCount = 6
 
     /// The screens, in order. Both wallets' messages can be read, so
     /// everyone sees auto-verify.
-    private var stages: [Stage] { [.reel, .wallet, .contacts, .nearby, .autoVerify] }
+    private var stages: [Stage] { [.reel, .wallet, .contacts, .nearby, .notifications, .autoVerify] }
 
     /// The wallet picked on the wallet screen, MTN MoMo until then.
     private var chosenWallet: Recipient.Network { Recipient.Network(rawValue: wallet) ?? .mtn }
@@ -77,6 +78,10 @@ struct OnboardingView: View {
             case .nearby:
                 OnboardingPermission(config: nearby)
                     .id(Stage.nearby)
+                    .transition(.opacity)
+            case .notifications:
+                OnboardingPermission(config: notifications)
+                    .id(Stage.notifications)
                     .transition(.opacity)
             case .autoVerify:
                 OnboardingPermission(config: autoVerify)
@@ -125,6 +130,23 @@ struct OnboardingView: View {
                 Task {
                     let allowed = await SettingsLocationAccess.shared.request()
                     if allowed, PaymentLocation.isAuthorized { nearbyLocation = true }
+                    advance()
+                }
+            }
+        )
+    }
+
+    /// Reminders and summaries. Asks iOS, then moves on whatever the
+    /// answer; which ones come is chosen later on the Notifications page.
+    private var notifications: OnboardingPermission.Config {
+        .init(
+            initialDelay: 0.4,
+            title: "Stay on top of\nyour payments",
+            description: "A reminder when a payment is still pending,\nand your week and month summed up.",
+            primaryTitle: "Continue",
+            primaryAction: {
+                Task {
+                    await StarHashNotifications.shared.requestAuthorization()
                     advance()
                 }
             }
@@ -262,9 +284,9 @@ extension View {
 
 // MARK: - Launch arguments
 
-/// `-onboardingPage 0...4` (DEBUG, with `-resetOnboarding`) starts on that
-/// screen: the reel, the wallet, Contacts, Nearby, auto-verify. Without it,
-/// onboarding starts where it was left.
+/// `-onboardingPage 0...5` (DEBUG, with `-resetOnboarding`) starts on that
+/// screen: the reel, the wallet, Contacts, Nearby, notifications,
+/// auto-verify. Without it, onboarding starts where it was left.
 @MainActor
 enum OnboardingLaunch {
     static var initialStage: Int? {

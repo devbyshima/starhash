@@ -44,14 +44,24 @@ struct ProcessCarrierSMSIntent: AppIntent {
 
         guard !AutoVerificationSample.isSample(message),
               StarHashPreferences.autoVerifyOn,
-              StarHashPreferences.saveTransactions,
-              let sms = CarrierSMS.parse(message) else { return .result() }
+              StarHashPreferences.saveTransactions else { return .result() }
         let store = AppEnvironment.store
-        let before = store.transactions
-        let applied = store.apply(sms)
-        // The one notification StarHash may add of its own, when asked to
-        // on the Notifications page; the payment's reminder goes with it.
-        await StarHashNotifications.shared.messageApplied(applied, previous: before.first { $0.id == applied.id })
+        if let sms = CarrierSMS.parse(message) {
+            let before = store.transactions
+            let applied = store.apply(sms)
+            // The one notification StarHash may add of its own, when asked
+            // to on the Notifications page; the payment's reminder goes
+            // with it.
+            await StarHashNotifications.shared.messageApplied(applied, previous: before.first { $0.id == applied.id })
+        } else if let failure = CarrierSMS.parseFailure(message) {
+            // The wallet says a payment StarHash dialled did not go
+            // through; its own message already said so on screen.
+            store.applyFailure(failure)
+        } else {
+            return .result()
+        }
+        // Awake anyway: any payment past its hour fails now too.
+        PaymentExpiry.run()
         await StarHashNotifications.shared.sync()
         return .result()
     }
