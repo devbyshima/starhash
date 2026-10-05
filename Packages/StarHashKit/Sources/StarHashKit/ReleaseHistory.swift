@@ -54,6 +54,8 @@ public enum ReleaseHistory {
                       detail: "See what you spent by day, week, month or year, with a chart, search and the details of each payment."),
                 .init(symbol: "checkmark.message.fill", title: "Auto-verify",
                       detail: "Add one shortcut and your MTN MoMo or Airtel Money messages confirm each payment, with its fee and your new balance."),
+                .init(symbol: "bell.fill", title: "Notifications",
+                      detail: "A reminder when a payment is still pending or didn't go through, and your week and month summed up. Choose which ones come, and whether they show amounts, in Settings."),
                 .init(symbol: "lock.fill", title: "Private by design",
                       detail: "No account, no servers and no tracking. Everything stays on your iPhone."),
                 .init(symbol: "faceid", title: "Face ID lock",

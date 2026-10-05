@@ -57,6 +57,10 @@ struct ReleaseDetailView: View {
                 }
             }
         }
+        #if DEBUG
+        // -settingsScrolled: start at the foot, for screenshots.
+        .defaultScrollAnchor(DebugLaunch.arguments.contains("-settingsScrolled") ? .bottom : nil)
+        #endif
         .settingsPage("Release Notes")
     }
 
