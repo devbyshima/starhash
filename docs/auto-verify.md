@@ -24,6 +24,7 @@ Each message either confirms a pending payment or is logged as a new one.
 - **A message without the number or code** (some merchant and cross-network messages leave it out) settles for a pending payment of the same kind. It can fill in a missing name but never replaces one.
 - **No match**: the message is logged as a new confirmed payment, sent or received.
 - **The same message twice**, because the automation ran again or the action was run by hand, is only logged once.
+- **MoMoAdvance**, MTN's overdraft, sends a message of its own when it pays for a payment your balance could not cover. It is not a second payment: its access fee joins the fee of the payment it paid for, whichever of the two messages arrives first. A loan repaid from your balance is not logged either, since the money was counted when it was spent.
 
 A confirmed payment takes the fee, the carrier's reference and the balance after from the message, and keeps the time it was dialled. A merchant also takes the name its code is registered under, when the message names the code.
 

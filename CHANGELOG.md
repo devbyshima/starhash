@@ -9,6 +9,11 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 ### Added
 
 - What's New: the first launch after an update shows what the version brought, with a video of each new feature. It shows once, and never on a fresh install.
+- Auto-verify reads MoMoAdvance's messages: when MTN's overdraft pays for a payment, its access fee joins that payment's fee, on a row of its own in the payment's details.
+
+### Fixed
+
+- Auto-verify reads more MTN MoMo messages: payments through MoMo's partners (airtime, banks, savings) under the partner's own name, transfers whose message leaves out the number, and refunds.
 
 ## [1.0.0] - Unreleased
 

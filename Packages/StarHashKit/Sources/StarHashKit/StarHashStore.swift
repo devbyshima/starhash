@@ -167,8 +167,9 @@ public final class StarHashStore {
             match.status = .confirmed
             // A payment failed for want of a message had one after all.
             match.failureReason = nil
-            // The fee only ever comes from the SMS.
-            match.fee = sms.fee
+            // The fee only ever comes from the SMS, with MoMoAdvance's on
+            // top when its message came first.
+            match.fee = match.fee(adding: sms.fee)
             match.reference = sms.reference
             match.balanceAfter = sms.balanceAfter
             match.messageDate = sms.date
@@ -211,6 +212,27 @@ public final class StarHashStore {
         transactions[index] = failed
         save()
         return failed
+    }
+
+    /// Applies a MoMoAdvance message: the overdraft's access fee joins the
+    /// fee of the payment it paid for. That is the outgoing payment whose
+    /// own message, already applied, gives the same moment to the second,
+    /// or else the closest one from StarHash still waiting for its message
+    /// (it takes the access fee now and its own fee when that arrives). A
+    /// message applied twice changes nothing; one that matches no payment
+    /// is ignored. Returns the payment it added the fee to.
+    @discardableResult
+    public func applyOverdraft(_ use: OverdraftUse, receivedAt now: Date = .now) -> Transaction? {
+        guard use.accessFee > 0, let index = overdraftMatch(for: use, at: use.date ?? now) else { return nil }
+        var paid = transactions[index]
+        guard paid.accessFee != use.accessFee else { return paid }
+        if paid.status == .confirmed {
+            paid.fee = (paid.walletFee ?? 0) + use.accessFee
+        }
+        paid.accessFee = use.accessFee
+        transactions[index] = paid
+        save()
+        return paid
     }
 
     /// Marks failed every payment dialled from StarHash since `since` that
@@ -273,6 +295,29 @@ public final class StarHashStore {
                 return open && t.direction == .outgoing && t.amount == sms.amount
                     && (t.wallet == nil || t.wallet == sms.wallet)
                     && sameDestination && abs(t.date.timeIntervalSince(date)) < window
+            }
+            .min { abs(transactions[$0].date.timeIntervalSince(date)) < abs(transactions[$1].date.timeIntervalSince(date)) }
+    }
+
+    /// The payment an overdraft paid for. It covered at most the payment
+    /// and its fee (less when the balance paid the rest), which rules out
+    /// a smaller payment made about the same time. Only MTN lends.
+    private func overdraftMatch(for use: OverdraftUse, at date: Date) -> Int? {
+        let mtn = { (t: Transaction) in t.direction == .outgoing && (t.wallet == nil || t.wallet == .mtn) }
+        if let messageDate = use.date, let index = transactions.firstIndex(where: {
+            mtn($0) && $0.status == .confirmed && $0.messageDate == messageDate
+                && use.amount <= $0.amount + ($0.walletFee ?? 0)
+        }) {
+            return index
+        }
+        let window: TimeInterval = 6 * 3600
+        return transactions.indices
+            .filter {
+                let t = transactions[$0]
+                let open = t.status == .pending || (t.status == .failed && t.failureReason == .noMessage)
+                let mostItCost = t.amount + (Tariff.fee(sending: t.amount, to: t.counterparty, from: .mtn) ?? 0)
+                return open && mtn(t) && t.source == .app && t.messageDate == nil
+                    && use.amount <= mostItCost && abs(t.date.timeIntervalSince(date)) < window
             }
             .min { abs(transactions[$0].date.timeIntervalSince(date)) < abs(transactions[$1].date.timeIntervalSince(date)) }
     }

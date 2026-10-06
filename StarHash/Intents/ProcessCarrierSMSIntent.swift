@@ -57,6 +57,10 @@ struct ProcessCarrierSMSIntent: AppIntent {
             // The wallet says a payment StarHash dialled did not go
             // through; its own message already said so on screen.
             store.applyFailure(failure)
+        } else if let overdraft = CarrierSMS.parseOverdraft(message) {
+            // MoMoAdvance paid for a payment: its access fee is part of
+            // what that payment cost.
+            store.applyOverdraft(overdraft)
         } else {
             return .result()
         }

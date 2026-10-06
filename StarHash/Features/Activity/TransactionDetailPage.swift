@@ -182,8 +182,13 @@ struct TransactionDetailPage: View {
         var rows: [(String, String)] = []
         // The fee only once the carrier's SMS has confirmed it; until then
         // the row is left out rather than guessed.
-        if transaction.status == .confirmed, let fee = transaction.fee {
+        // MoMoAdvance's access fee gets a row of its own, so the wallet's
+        // fee reads as its message gave it.
+        if transaction.status == .confirmed, let fee = transaction.walletFee {
             rows.append(("Fee", fee == 0 ? "Free" : Money.formatWithCurrency(fee)))
+            if let accessFee = transaction.accessFee {
+                rows.append(("MoMoAdvance fee", Money.formatWithCurrency(accessFee)))
+            }
         }
         rows += [
             ("Date", transaction.date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated).year())),

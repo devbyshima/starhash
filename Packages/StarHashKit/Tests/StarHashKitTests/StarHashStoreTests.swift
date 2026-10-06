@@ -290,6 +290,60 @@ import Testing
         #expect(store.transactions.count == 2)
     }
 
+    // MARK: MoMoAdvance
+
+    /// MoMoAdvance lending the 5,000 and its fee of 100, at the moment the
+    /// transfer's own message gives.
+    private var overdraft: OverdraftUse {
+        OverdraftUse(amount: 5_100, accessFee: 68, date: noon.addingTimeInterval(30))
+    }
+
+    @Test func anOverdraftAfterThePaymentsMessageAddsToItsFee() throws {
+        let store = StarHashStore(fileURL: nil)
+        store.recordPayment(to: john, amount: 5_000, date: noon, wallet: .mtn)
+        store.apply(sentSMS(amount: 5_000, at: noon.addingTimeInterval(30)))
+        let paid = try #require(store.applyOverdraft(overdraft))
+        #expect(paid.fee == 168)
+        #expect(paid.walletFee == 100)
+        #expect(paid.accessFee == 68)
+
+        // The automation can run twice for one message.
+        store.applyOverdraft(overdraft)
+        #expect(store.transactions.map(\.fee) == [168])
+    }
+
+    @Test func anOverdraftBeforeThePaymentsMessageWaitsForIt() throws {
+        let store = StarHashStore(fileURL: nil)
+        store.recordPayment(to: john, amount: 5_000, date: noon, wallet: .mtn)
+        let pending = try #require(store.applyOverdraft(overdraft))
+        #expect(pending.status == .pending)
+        #expect(pending.fee == nil)
+
+        let paid = store.apply(sentSMS(amount: 5_000, at: noon.addingTimeInterval(30)))
+        #expect(paid.status == .confirmed)
+        #expect(paid.fee == 168)
+        #expect(paid.walletFee == 100)
+    }
+
+    @Test func anOverdraftStaysInAFeeConfirmedByHand() throws {
+        let store = StarHashStore(fileURL: nil)
+        store.recordPayment(to: john, amount: 5_000, date: noon, wallet: .mtn)
+        store.applyOverdraft(overdraft)
+        let payment = try #require(store.transactions.first)
+        #expect(payment.confirmedByHand(wallet: .mtn).fee == 168)
+        #expect(payment.markedFailed().confirmedByHand(wallet: .mtn).fee == 168)
+    }
+
+    /// An overdraft larger than a payment and its fee paid for something
+    /// else: an Airtel payment, or a smaller one made about the same time.
+    @Test func anOverdraftOnlyPaysForAnMTNPaymentItCouldCover() {
+        let store = StarHashStore(fileURL: nil)
+        store.recordPayment(to: john, amount: 500, date: noon, wallet: .mtn)
+        store.recordPayment(to: pili, amount: 5_000, date: noon, wallet: .airtel)
+        #expect(store.applyOverdraft(overdraft) == nil)
+        #expect(store.transactions.allSatisfy { $0.accessFee == nil })
+    }
+
     // MARK: Recipients
 
     @Test func recentsSkipRecipientsThatCannotBeDialled() {

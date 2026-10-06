@@ -49,6 +49,8 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
     public var counterparty: Recipient
     /// Whole RWF, always positive.
     public var amount: Int
+    /// Everything the payment cost on top of its amount: the wallet's fee,
+    /// and MoMoAdvance's `accessFee` when the overdraft paid for it.
     public var fee: Int?
     public var date: Date
     public var status: Status
@@ -70,6 +72,11 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
     public var messageDate: Date?
     /// Set only while it is failed, and only when StarHash failed it.
     public var failureReason: FailureReason?
+    /// What MoMoAdvance, MTN's overdraft, charged when it paid for some or
+    /// all of this payment. Counted in `fee` once the payment is confirmed,
+    /// and kept apart so the payment's own message, whichever of the two
+    /// arrives first, adds to it rather than replacing it.
+    public var accessFee: Int?
 
     public init(
         id: UUID = UUID(),
@@ -86,7 +93,8 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
         location: Coordinate? = nil,
         wallet: Recipient.Network? = nil,
         messageDate: Date? = nil,
-        failureReason: FailureReason? = nil
+        failureReason: FailureReason? = nil,
+        accessFee: Int? = nil
     ) {
         self.id = id
         self.direction = direction
@@ -103,10 +111,21 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
         self.wallet = wallet
         self.messageDate = messageDate
         self.failureReason = failureReason
+        self.accessFee = accessFee
     }
 
     /// The amount with its sign: negative when money left.
     public var signedAmount: Int { direction == .outgoing ? -amount : amount }
+
+    /// The wallet's own fee, without MoMoAdvance's.
+    public var walletFee: Int? { fee.map { $0 - (accessFee ?? 0) } }
+
+    /// `fee` for a payment the wallet charged `walletFee` for, with
+    /// MoMoAdvance's access fee on top when the overdraft paid for it.
+    func fee(adding walletFee: Int?) -> Int? {
+        guard let accessFee else { return walletFee }
+        return (walletFee ?? 0) + accessFee
+    }
 
     /// Marked as confirmed by hand (Activity, its details page, or a
     /// reminder's action). No SMS to read the fee from, so it comes from
@@ -118,7 +137,7 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
         confirmed.status = .confirmed
         confirmed.failureReason = nil
         confirmed.fee = direction == .outgoing
-            ? Tariff.fee(sending: amount, to: counterparty, from: wallet ?? fallback)
+            ? fee(adding: Tariff.fee(sending: amount, to: counterparty, from: wallet ?? fallback))
             : nil
         return confirmed
     }
