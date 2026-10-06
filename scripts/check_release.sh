@@ -20,9 +20,23 @@ if [ -z "$ref" ]; then
   fi
 fi
 
-version=$(sed -nE 's/^ *MARKETING_VERSION: "([^"]+)"/\1/p' project.yml)
-build=$(sed -nE 's/^ *CURRENT_PROJECT_VERSION: "([^"]+)"/\1/p' project.yml)
-whats_new=$(sed -nE 's/^ *version: "([^"]+)",$/\1/p' Packages/StarHashKit/Sources/StarHashKit/ReleaseHistory.swift | head -1)
+# A file as the ref has it: from git when the ref is another commit here
+# (a release branch checked from main), from the working tree when it is
+# what is checked out or does not exist yet (a tag about to be made).
+show() {
+  local commit
+  commit=$(git rev-parse --verify -q "$ref^{commit}" 2>/dev/null || true)
+  if [ -n "$commit" ] && [ "$commit" != "$(git rev-parse HEAD)" ]; then
+    git show "$commit:$1"
+  else
+    cat "$1"
+  fi
+}
+
+version=$(show project.yml | sed -nE 's/^ *MARKETING_VERSION: "([^"]+)"/\1/p')
+build=$(show project.yml | sed -nE 's/^ *CURRENT_PROJECT_VERSION: "([^"]+)"/\1/p')
+whats_new=$(show Packages/StarHashKit/Sources/StarHashKit/ReleaseHistory.swift | sed -nE 's/^ *version: "([^"]+)",$/\1/p' | head -1)
+changelog=$(show CHANGELOG.md)
 
 fail() { echo "::error::$1" >&2; exit 1; }
 
@@ -35,7 +49,7 @@ case "$ref" in
     stage="${BASH_REMATCH[3]:-final}"
     [ "$version" = "$tag_version" ] \
       || fail "tag $tag is for $tag_version, but project.yml says MARKETING_VERSION $version"
-    grep -qE "^## \[$tag_version\]" CHANGELOG.md \
+    grep -qE "^## \[$tag_version\]" <<<"$changelog" \
       || fail "CHANGELOG.md has no section for $tag_version"
     case "$stage" in
       beta)
@@ -50,7 +64,7 @@ case "$ref" in
         channel=production; configuration=Release; scheme="StarHash" ;;
     esac
     if [ "$stage" = final ]; then
-      grep -qE "^## \[$tag_version\] - [0-9]{4}-[0-9]{2}-[0-9]{2}$" CHANGELOG.md \
+      grep -qE "^## \[$tag_version\] - [0-9]{4}-[0-9]{2}-[0-9]{2}$" <<<"$changelog" \
         || fail "CHANGELOG.md's $tag_version section has no release date"
     fi
     ;;
