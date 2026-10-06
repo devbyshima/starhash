@@ -163,32 +163,7 @@ public final class StarHashStore {
         if let existing = alreadyApplied(sms) { return existing }
         let date = sms.date ?? now
         if sms.direction == .outgoing, let index = pendingMatch(for: sms, at: date) {
-            var match = transactions[index]
-            match.status = .confirmed
-            // A payment failed for want of a message had one after all.
-            match.failureReason = nil
-            // The fee only ever comes from the SMS, with MoMoAdvance's on
-            // top when its message came first.
-            match.fee = match.fee(adding: sms.fee)
-            match.reference = sms.reference
-            match.balanceAfter = sms.balanceAfter
-            match.messageDate = sms.date
-            match.wallet = sms.wallet
-            // A merchant takes the name its code is registered under, from
-            // a message that names the code: it can differ from the shop's
-            // sign, and it is what the code shows as from now on (Activity,
-            // Recent, Nearby). A message without the code may be another
-            // payment's of the same amount, so it only fills a missing
-            // name. A person keeps the name they were paid under.
-            if match.counterparty.kind == .merchant, !sms.counterparty.destination.isEmpty,
-               let name = sms.counterparty.name {
-                match.counterparty.name = name
-            } else if match.counterparty.name == nil {
-                match.counterparty.name = sms.counterparty.name
-            }
-            transactions[index] = match
-            sortAndSave()
-            return match
+            return confirm(at: index, with: sms)
         }
         let transaction = Transaction(
             direction: sms.direction, counterparty: sms.counterparty, amount: sms.amount,
@@ -197,6 +172,37 @@ public final class StarHashStore {
         )
         add(transaction)
         return transaction
+    }
+
+    /// Confirms the payment at `index` with the message that says it went
+    /// through, and returns it.
+    private func confirm(at index: Int, with sms: ParsedSMS) -> Transaction {
+        var match = transactions[index]
+        match.status = .confirmed
+        // A failed payment had a message after all.
+        match.failureReason = nil
+        // The fee only ever comes from the SMS, with MoMoAdvance's on
+        // top when its message came first.
+        match.fee = match.fee(adding: sms.fee)
+        match.reference = sms.reference
+        match.balanceAfter = sms.balanceAfter
+        match.messageDate = sms.date
+        match.wallet = sms.wallet
+        // A merchant takes the name its code is registered under, from
+        // a message that names the code: it can differ from the shop's
+        // sign, and it is what the code shows as from now on (Activity,
+        // Recent, Nearby). A message without the code may be another
+        // payment's of the same amount, so it only fills a missing
+        // name. A person keeps the name they were paid under.
+        if match.counterparty.kind == .merchant, !sms.counterparty.destination.isEmpty,
+           let name = sms.counterparty.name {
+            match.counterparty.name = name
+        } else if match.counterparty.name == nil {
+            match.counterparty.name = sms.counterparty.name
+        }
+        transactions[index] = match
+        sortAndSave()
+        return match
     }
 
     /// Applies a message saying a payment did not go through: the payment
@@ -224,6 +230,12 @@ public final class StarHashStore {
     @discardableResult
     public func applyOverdraft(_ use: OverdraftUse, receivedAt now: Date = .now) -> Transaction? {
         guard use.accessFee > 0, let index = overdraftMatch(for: use, at: use.date ?? now) else { return nil }
+        return addAccessFee(of: use, at: index)
+    }
+
+    /// The access fee joins the payment at `index`: in its fee at once when
+    /// it is confirmed, or when its own message confirms it.
+    private func addAccessFee(of use: OverdraftUse, at index: Int) -> Transaction {
         var paid = transactions[index]
         guard paid.accessFee != use.accessFee else { return paid }
         if paid.status == .confirmed {
@@ -233,6 +245,50 @@ public final class StarHashStore {
         transactions[index] = paid
         save()
         return paid
+    }
+
+    // MARK: Verify
+
+    /// Checks a payment against a wallet message its owner pasted (iOS lets
+    /// no app read Messages, so Verify reads the one they copy) and
+    /// applies it, only when it is this payment's: the same amount, the
+    /// same number or code (or the same kind of payment when the message
+    /// leaves it out), the same wallet, and within six hours of when it
+    /// was dialled. A message the automation logged on its own, unable to
+    /// match it, joins the payment instead of standing beside it. Nil when
+    /// the payment is gone.
+    @discardableResult
+    public func verify(_ id: UUID, withMessage text: String) -> Verification? {
+        guard let index = transactions.firstIndex(where: { $0.id == id }) else { return nil }
+        let payment = transactions[index]
+        if let sms = CarrierSMS.parse(text) {
+            guard settles(payment, with: sms, at: sms.date) else {
+                return .anotherPayment(amount: sms.amount, counterparty: sms.counterparty)
+            }
+            if let other = alreadyApplied(sms), other.id != id {
+                guard other.source == .sms else { return .confirmedAnother(other) }
+                transactions.removeAll { $0.id == other.id }
+            }
+            guard let index = transactions.firstIndex(where: { $0.id == id }) else { return nil }
+            return .confirmed(confirm(at: index, with: sms))
+        }
+        if let failure = CarrierSMS.parseFailure(text) {
+            guard settles(payment, with: failure, at: failure.date) else {
+                return .anotherPayment(amount: failure.amount, counterparty: failure.counterparty)
+            }
+            var failed = payment.markedFailed()
+            failed.failureReason = .message
+            transactions[index] = failed
+            save()
+            return .failed(failed)
+        }
+        if let use = CarrierSMS.parseOverdraft(text) {
+            guard use.accessFee > 0, overdraftCovers(payment, use, at: use.date ?? payment.date) else {
+                return .anotherPayment(amount: use.amount, counterparty: nil)
+            }
+            return .overdraft(addAccessFee(of: use, at: index))
+        }
+        return .notAMessage
     }
 
     /// Marks failed every payment dialled from StarHash since `since` that
@@ -283,20 +339,29 @@ public final class StarHashStore {
     /// One failed for want of a message counts as pending here, so a late
     /// message still settles it.
     private func pendingMatch(for sms: ParsedSMS, at date: Date) -> Int? {
-        let window: TimeInterval = 6 * 3600
-        let destination = sms.counterparty.destination
-        return transactions.indices
+        transactions.indices
             .filter {
                 let t = transactions[$0]
-                let sameDestination = destination.isEmpty
-                    ? t.counterparty.kind == sms.counterparty.kind
-                    : t.counterparty.destination == destination
                 let open = t.status == .pending || (t.status == .failed && t.failureReason == .noMessage)
-                return open && t.direction == .outgoing && t.amount == sms.amount
-                    && (t.wallet == nil || t.wallet == sms.wallet)
-                    && sameDestination && abs(t.date.timeIntervalSince(date)) < window
+                return open && settles(t, with: sms, at: date)
             }
             .min { abs(transactions[$0].date.timeIntervalSince(date)) < abs(transactions[$1].date.timeIntervalSince(date)) }
+    }
+
+    /// How far apart a payment and its message can be.
+    private static let matchWindow: TimeInterval = 6 * 3600
+
+    /// Whether a sent-money message is about `payment`: the same amount,
+    /// wallet and number or code, within `matchWindow` of `date` (when the
+    /// message gives one).
+    private func settles(_ payment: Transaction, with sms: ParsedSMS, at date: Date?) -> Bool {
+        let destination = sms.counterparty.destination
+        let sameDestination = destination.isEmpty
+            ? payment.counterparty.kind == sms.counterparty.kind
+            : payment.counterparty.destination == destination
+        return sms.direction == .outgoing && payment.direction == .outgoing && payment.amount == sms.amount
+            && (payment.wallet == nil || payment.wallet == sms.wallet)
+            && sameDestination && abs(payment.date.timeIntervalSince(date ?? payment.date)) < Self.matchWindow
     }
 
     /// The payment an overdraft paid for. It covered at most the payment
@@ -310,16 +375,22 @@ public final class StarHashStore {
         }) {
             return index
         }
-        let window: TimeInterval = 6 * 3600
         return transactions.indices
             .filter {
                 let t = transactions[$0]
                 let open = t.status == .pending || (t.status == .failed && t.failureReason == .noMessage)
-                let mostItCost = t.amount + (Tariff.fee(sending: t.amount, to: t.counterparty, from: .mtn) ?? 0)
-                return open && mtn(t) && t.source == .app && t.messageDate == nil
-                    && use.amount <= mostItCost && abs(t.date.timeIntervalSince(date)) < window
+                return open && t.source == .app && t.messageDate == nil && overdraftCovers(t, use, at: date)
             }
             .min { abs(transactions[$0].date.timeIntervalSince(date)) < abs(transactions[$1].date.timeIntervalSince(date)) }
+    }
+
+    /// Whether MoMoAdvance could have paid for `payment`: an MTN payment
+    /// within `matchWindow` of `date`, costing at least what it lent.
+    private func overdraftCovers(_ payment: Transaction, _ use: OverdraftUse, at date: Date) -> Bool {
+        let fee = payment.walletFee ?? Tariff.fee(sending: payment.amount, to: payment.counterparty, from: .mtn) ?? 0
+        return payment.direction == .outgoing && (payment.wallet == nil || payment.wallet == .mtn)
+            && use.amount <= payment.amount + fee
+            && abs(payment.date.timeIntervalSince(date)) < Self.matchWindow
     }
 
     // MARK: Disk

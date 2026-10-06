@@ -122,6 +122,15 @@ final class AppRouter {
     }
     /// The transaction whose details page is open on Activity.
     var openTransactionID: UUID?
+    /// A payment whose page should open Verify's sheet, until it does.
+    var verifyTransactionID: UUID?
+
+    /// Opens a payment's page on Activity with Verify's sheet over it.
+    func verify(_ id: UUID) {
+        show(.activity)
+        openTransactionID = id
+        verifyTransactionID = id
+    }
     #if DEBUG
     /// `starhash://whatsnew?page=<n>` (DEBUG): What's New over the app at
     /// that page, to look at it without an update.

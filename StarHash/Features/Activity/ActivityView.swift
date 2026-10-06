@@ -30,6 +30,7 @@ struct ActivityView: View {
     @FocusState private var searchFocused: Bool
 
     @State private var transactionToDelete: StarHashKit.Transaction?
+    @State private var transactionToVerify: StarHashKit.Transaction?
     @State private var feedbackCount = 0
     @State private var failedCount = 0
     @State private var swipeDeleteCount = 0
@@ -82,6 +83,7 @@ struct ActivityView: View {
             if enableContacts { await PayContacts.shared.loadIfAllowed() }
         }
         .deleteTransactionDialog($transactionToDelete, onDelete: delete)
+        .sheet(item: $transactionToVerify) { VerifyPaymentSheet(transactionID: $0.id) }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
             now = .now
         }
@@ -161,7 +163,7 @@ struct ActivityView: View {
                         ActivityTransactionRows(
                             transactions: section.transactions,
                             onOpen: open,
-                            onConfirm: markConfirmed,
+                            onVerify: verify,
                             onFail: markFailed,
                             onDelete: requestDelete,
                             onSwipeDelete: swipeDelete
@@ -210,7 +212,7 @@ struct ActivityView: View {
             results: ActivitySummary.search(searchText, in: store.transactions),
             text: searchText,
             onOpen: open,
-            onConfirm: markConfirmed,
+            onVerify: verify,
             onFail: markFailed,
             onDelete: requestDelete,
             onSwipeDelete: swipeDelete
@@ -248,12 +250,10 @@ struct ActivityView: View {
         withAnimation(reduceMotion ? .easeInOut(duration: 0.25) : .smooth(duration: 0.35)) { period = new }
     }
 
-    /// Its fee from the carriers' prices, for the wallet it was dialled
-    /// with (the one that pays now for payments saved before that was kept).
-    private func markConfirmed(_ transaction: StarHashKit.Transaction) {
-        let confirmed = transaction.confirmedByHand(wallet: StarHashPreferences.wallet)
-        withAnimation(.smooth(duration: 0.3)) { store.update(confirmed) }
-        feedbackCount += 1
+    /// Verify's sheet, over the list: the payment is settled by its
+    /// wallet's message.
+    private func verify(_ transaction: StarHashKit.Transaction) {
+        transactionToVerify = transaction
     }
 
     /// The payment did not go through: it stays in Activity, struck

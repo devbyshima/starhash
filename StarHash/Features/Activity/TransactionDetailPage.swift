@@ -8,7 +8,7 @@ import UIKit
 /// and a long press on the code copies it), then who and how much
 /// with the category, the carrier's details in a card of dotted rows, where
 /// it was paid on a small map, what this year has sent the same recipient,
-/// and the actions (Pay Again, Mark as Confirmed, Mark as Failed, Delete
+/// and the actions (Pay Again, Verify, Mark as Failed, Delete
 /// Transaction). The
 /// pieces are Beam's sheet language, on the page's cards.
 struct TransactionDetailPage: View {
@@ -22,6 +22,7 @@ struct TransactionDetailPage: View {
     @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
     @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
     @State private var transactionToDelete: StarHashKit.Transaction?
+    @State private var isVerifying = false
     @State private var feedbackCount = 0
     @State private var failedCount = 0
     /// How far the page has scrolled under the bar, 0 to 1 over the first
@@ -66,9 +67,22 @@ struct TransactionDetailPage: View {
         .sensoryFeedback(.success, trigger: feedbackCount)
         .sensoryFeedback(.warning, trigger: failedCount)
         .deleteTransactionDialog($transactionToDelete, asAlert: true) { _ in delete() }
+        .sheet(isPresented: $isVerifying) { VerifyPaymentSheet(transactionID: transactionID) }
+        // Verify on a reminder opens this page with its sheet.
+        .onChange(of: router.verifyTransactionID, initial: true) { _, id in
+            guard id == transactionID else { return }
+            router.verifyTransactionID = nil
+            isVerifying = true
+        }
         #if DEBUG
-        // -confirmDelete (with -openFirstTransaction): the delete question.
+        // -confirmDelete (with -openFirstTransaction): the delete question;
+        // -verify (with -openPendingTransaction or -openFailedTransaction):
+        // Verify's sheet.
         .task {
+            if DebugLaunch.arguments.contains("-verify") {
+                try? await Task.sleep(for: .milliseconds(600))
+                isVerifying = true
+            }
             guard DebugLaunch.arguments.contains("-confirmDelete") else { return }
             try? await Task.sleep(for: .milliseconds(600))
             transactionToDelete = transaction
@@ -312,10 +326,10 @@ struct TransactionDetailPage: View {
                 Button(payTitle(transaction)) { payAgain(transaction) }
                     .buttonStyle(.sheetPrimary)
             }
-            // A failed payment can still be confirmed, in case it was
-            // marked failed by mistake.
+            // Settled by the wallet's own message. A failed payment can
+            // still be verified, in case it went through after all.
             if transaction.status != .confirmed {
-                Button("Mark as Confirmed") { markConfirmed(transaction) }
+                Button("Verify") { isVerifying = true }
                     .buttonStyle(.sheetConfirm)
             }
             // The quiet one: most pending payments go through.
@@ -341,14 +355,6 @@ struct TransactionDetailPage: View {
     private func markFailed(_ transaction: StarHashKit.Transaction) {
         withAnimation(.smooth(duration: 0.3)) { store.update(transaction.markedFailed()) }
         failedCount += 1
-    }
-
-    /// Its fee from the carriers' prices, for the wallet it was dialled
-    /// with (the one that pays now for payments saved before that was kept).
-    private func markConfirmed(_ transaction: StarHashKit.Transaction) {
-        let confirmed = transaction.confirmedByHand(wallet: StarHashPreferences.wallet)
-        withAnimation(.smooth(duration: 0.3)) { store.update(confirmed) }
-        feedbackCount += 1
     }
 
     private func setCategory(_ category: String?, of transaction: StarHashKit.Transaction) {
