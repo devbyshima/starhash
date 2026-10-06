@@ -28,7 +28,7 @@ jobs:
     runs-on: xcode-27
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       - name: Swift Testing
         working-directory: Packages/StarHashKit
@@ -39,7 +39,7 @@ jobs:
     runs-on: xcode-27
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       - name: Channel
         id: channel
@@ -51,9 +51,15 @@ jobs:
           CONFIG: ${{ steps.channel.outputs.configuration }}
           DERIVED: ${{ github.workspace }}/.build/ci
         run: ./scripts/build.sh
+      - name: Errors
+        if: failure()
+        # As annotations, which show on the pull request without the log.
+        run: |
+          [ -f .build/ci/build.log ] || exit 0
+          grep -E "(error|fatal error):" .build/ci/build.log | sort -u | head -10 | while IFS= read -r line; do echo "::error::$line"; done
       - name: Build log
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-log
           path: .build/ci/build.log

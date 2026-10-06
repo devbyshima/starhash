@@ -34,7 +34,7 @@ jobs:
     runs-on: xcode-27
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
 
       - name: Channel
@@ -83,16 +83,25 @@ jobs:
           rm -rf "$ARCHIVE"
 
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.name.outputs.artifact }}
           path: out/*.zip
           if-no-files-found: error
           retention-days: ${{ steps.channel.outputs.channel == 'production' && 90 || steps.channel.outputs.channel == 'beta' && 30 || 14 }}
 
+      - name: Errors
+        if: failure()
+        # As annotations, which show on the run without the log.
+        run: |
+          for log in .build/ci/build.log archive.log; do
+            [ -f "$log" ] || continue
+            grep -E "(error|fatal error):" "$log" | sort -u | head -10 | while IFS= read -r line; do echo "::error::$line"; done
+          done
+
       - name: Logs
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: logs-${{ github.run_id }}
           path: |

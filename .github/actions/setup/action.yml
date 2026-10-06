@@ -1,5 +1,5 @@
 name: Set up Xcode and XcodeGen
-description: Picks Xcode 27 or later and installs XcodeGen, as docs/development.md asks.
+description: Picks a released Xcode 27 or later, makes sure it can compile Metal, and installs XcodeGen, as docs/development.md asks.
 
 runs:
   using: composite
@@ -7,16 +7,30 @@ runs:
     - name: Select Xcode
       shell: bash
       run: |
-        # The newest Xcode 27 on the runner, if it has several; the
-        # image's default otherwise. StarHash needs the iOS 27 SDK.
-        xcode=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | sort -V | tail -1 || true)
-        if [ -n "$xcode" ]; then sudo xcode-select -s "$xcode/Contents/Developer"; fi
+        # The image's default Xcode, whose simulators and platforms are
+        # installed with it. Only when that is older than 27 is another
+        # picked: the newest released Xcode 27, never a beta, which may
+        # want a platform the image does not have.
+        major() { xcodebuild -version | awk 'NR == 1 { split($2, v, "."); print v[1] }'; }
+        if [ "$(major)" -lt 27 ]; then
+          xcode=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | grep -vi beta | sort -V | tail -1 || true)
+          if [ -n "$xcode" ]; then sudo xcode-select -s "$xcode/Contents/Developer"; fi
+        fi
         xcodebuild -version
-        major=$(xcodebuild -version | awk 'NR == 1 { split($2, v, "."); print v[1] }')
-        if [ "$major" -lt 27 ]; then
+        if [ "$(major)" -lt 27 ]; then
           echo "::error::StarHash needs Xcode 27 or later; this runner has $(xcodebuild -version | head -1)"
           exit 1
         fi
+
+    - name: Metal toolchain
+      shell: bash
+      run: |
+        # The Send Ripple shader is compiled with the app, and Xcode 26 and
+        # later fetch the Metal compiler separately.
+        if ! xcrun metal --version >/dev/null 2>&1; then
+          xcodebuild -downloadComponent MetalToolchain
+        fi
+        xcrun metal --version | head -1
 
     - name: Install XcodeGen
       shell: bash
