@@ -13,6 +13,9 @@ enum PreferenceKey {
     static let hasSeenReviewNote = "hasSeenReviewNote"
     /// Whether the developer note has been seen after onboarding.
     static let hasSeenDeveloperNote = "hasSeenDeveloperNote"
+    /// The marketing version that last launched, so What's New shows once
+    /// after an update (`WhatsNewLaunch`).
+    static let lastRunVersion = "lastRunVersion"
     static let saveTransactions = "saveTransactions"
     static let enableContacts = "enableContacts"
     static let nearbyLocation = "nearbyLocation"

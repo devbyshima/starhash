@@ -122,6 +122,11 @@ final class AppRouter {
     }
     /// The transaction whose details page is open on Activity.
     var openTransactionID: UUID?
+    #if DEBUG
+    /// `starhash://whatsnew?page=<n>` (DEBUG): What's New over the app at
+    /// that page, to look at it without an update.
+    var whatsNewPreviewPage: Int?
+    #endif
     /// Someone to pay, asked for outside the Pay tab (Pay Again on a
     /// transaction), until Pay takes it with `takePayRequest()`.
     private(set) var payRequest: PayRequest?
@@ -152,7 +157,8 @@ final class AppRouter {
 
     /// starhash://pay, starhash://buy, starhash://activity,
     /// starhash://settings, starhash://transaction/<uuid>. starhash://help,
-    /// from before Help moved into Settings, opens Settings.
+    /// from before Help moved into Settings, opens Settings. In DEBUG
+    /// builds, starhash://whatsnew?page=<n> shows What's New.
     func handle(_ url: URL) {
         guard url.scheme == "starhash" else { return }
         if url.host() == "help" {
@@ -172,6 +178,12 @@ final class AppRouter {
                 show(.activity)
                 openTransactionID = id
             }
+        #if DEBUG
+        case "whatsnew":
+            let page = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                .queryItems?.first { $0.name == "page" }?.value.flatMap(Int.init)
+            whatsNewPreviewPage = page ?? 0
+        #endif
         default: break
         }
     }

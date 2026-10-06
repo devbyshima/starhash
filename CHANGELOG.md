@@ -6,6 +6,10 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ## [Unreleased]
 
+### Added
+
+- What's New: the first launch after an update shows what the version brought, with a video of each new feature. It shows once, and never on a fresh install.
+
 ## [1.0.0] - Unreleased
 
 The first release: pay with MTN MoMo or Airtel Money without typing USSD codes, and keep every payment in one place.
