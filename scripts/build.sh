@@ -4,6 +4,8 @@
 #
 #   ./scripts/build.sh
 #   DERIVED=.build/mine ./scripts/build.sh   # a separate build folder, for parallel builds
+#   SCHEME="StarHash Beta" CONFIG=Beta ./scripts/build.sh   # the beta channel's build
+#   ./scripts/build.sh CODE_SIGNING_ALLOWED=NO               # anything after goes to xcodebuild
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -11,6 +13,8 @@ cd "$ROOT"
 mkdir -p .build
 
 DEST="${DEST:-generic/platform=iOS Simulator}"
+SCHEME="${SCHEME:-StarHash}"
+CONFIG="${CONFIG:-Debug}"
 DERIVED="${DERIVED:-$ROOT/.build/main}"
 mkdir -p "$DERIVED"
 LOG="$DERIVED/build.log"
@@ -24,9 +28,9 @@ trap 'rmdir "$LOCK"' EXIT
 # New source files only reach the project when it is generated again.
 xcodegen generate --quiet || exit 1
 
-xcodebuild -project StarHash.xcodeproj -scheme StarHash -configuration Debug \
+xcodebuild -project StarHash.xcodeproj -scheme "$SCHEME" -configuration "$CONFIG" \
   -destination "$DEST" -derivedDataPath "$DERIVED" \
-  -jobs "${JOBS:-4}" build >"$LOG" 2>&1
+  -jobs "${JOBS:-4}" "$@" build >"$LOG" 2>&1
 STATUS=$?
 
 grep -E "^$ROOT/.*(error|warning):" "$LOG" | sort -u
