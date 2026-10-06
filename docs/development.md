@@ -32,15 +32,17 @@ Run `xcodegen generate` again after adding or renaming files. The build script d
 ./scripts/build.sh                      # generate the project and build for the simulator
 DERIVED=.build/mine ./scripts/build.sh  # use a build folder of your own
 ./scripts/test.sh                       # run StarHashKit's tests on the Mac
+./scripts/bump_version.sh 1.2.0         # set the version (build 1), or `build` for the next upload
+./scripts/check_release.sh              # the channel this branch or tag builds, and the release checks
 ```
 
-`build.sh` prints only errors, warnings from StarHash's own sources and the result. Set `DEST` to build for another destination, for example `DEST="generic/platform=iOS"` for a device.
+`build.sh` prints only errors, warnings from StarHash's own sources and the result. Set `DEST` to build for another destination, for example `DEST="generic/platform=iOS"` for a device, and `SCHEME="StarHash Beta" CONFIG=Beta` for the beta channel's build. Anything after it goes to `xcodebuild`.
 
 Builds and screenshots each take a lock in `.build/`, so runs started side by side wait their turn.
 
 ## Tests
 
-The logic lives in `Packages/StarHashKit` (Foundation only) and is covered by Swift Testing: the SMS parser, the store and its message matching, Activity's totals and search, Nearby, recipients, the keypad, Buy's codes and the fee tables. `./scripts/test.sh` runs them on the Mac, with no simulator.
+The logic lives in `Packages/StarHashKit` (Foundation only) and is covered by Swift Testing: the SMS parser, the store and its message matching, Activity's totals and search, Nearby, recipients, the keypad, Buy's codes, the fee tables and the feature flags' rollouts. `./scripts/test.sh` runs them on the Mac, with no simulator. CI runs them on every pull request.
 
 ## Screenshots
 
@@ -74,6 +76,7 @@ Debug builds read these, in Xcode's scheme or after the screenshot script's name
 | `-buyPinned [n]`, `-buyEmpty`, `-buyNew` | Buy with pinned codes or with none (both with `-inMemory`), or with the new-code sheet open |
 | `-settingsPage <page>` | Open a Settings page: `whatsNew`, `terms`, `privacy`, `about`, `guide` and more |
 | `-locked`, `-splash`, `-note`, `-reviewNote` | The lock screen, the launch splash, the developer's note or the rating note |
+| `-featureFlag.<key> YES\|NO` | Switch a feature flag on or off for the run (dev and beta channels) |
 
 Each screen reads its own arguments where it uses them, so to find one not listed here (such as `-buyArrange`, `-payChooser` or `-confirmDelete`), search the sources for its name. The shared ones are in `StarHash/App/DebugLaunch.swift` and the keypad's in `StarHash/Features/Pay/PayDebug.swift`.
 
@@ -107,9 +110,13 @@ Anything that can be tested without the UI belongs in StarHashKit.
 
 ## Releases
 
-- **Version**: `MARKETING_VERSION` in `project.yml`.
-- **Build number**: `CURRENT_PROJECT_VERSION` counts App Store uploads, not builds: 1 for the first upload, and one more before archiving each one after it. App Store Connect refuses a number it already has for the same version. Settings shows it after the version, as in `1.0.0 (1)`.
-- **What's New**: add a release at the top of `ReleaseHistory.releases` in StarHashKit.
+Branches, channels, versions, tags and every release step are in [RELEASING.md](../RELEASING.md), and the branch rules for pull requests in [CONTRIBUTING.md](../CONTRIBUTING.md). In short:
+
+- **Channels**: `main` is dev (the **StarHash** scheme, Debug), the newest `release/X.Y` is beta (**StarHash Beta**, the Beta configuration, for TestFlight), and the App Store build is production (**StarHash**, Release). The configuration sets `STARHASH_CHANNEL`, which Info.plist passes to the app.
+- **Version**: `MARKETING_VERSION` in `project.yml`, set with `./scripts/bump_version.sh`.
+- **Build number**: `CURRENT_PROJECT_VERSION` counts App Store uploads of one version: 1 for its first, and one more before archiving each one after it (`./scripts/bump_version.sh build`). App Store Connect refuses a number it already has for the same version. Settings shows it after the version, as in `1.0.0 (1)`, with the channel after it in dev and beta builds.
+- **What's New**: add a release at the top of `ReleaseHistory.releases` in StarHashKit before the release candidate. **Changelog**: [CHANGELOG.md](../CHANGELOG.md).
+- **Feature flags**: unfinished work merges on `main` behind a flag in `StarHash/App/FeatureFlags.swift`. See [Feature flags](../RELEASING.md#feature-flags).
 - **App Store id**: once the App Store record exists, set `DeveloperNoteLinks.appStoreID` so Rate on the App Store opens the review page.
 
 ## Doodles

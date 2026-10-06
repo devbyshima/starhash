@@ -97,6 +97,9 @@ The full picture is in [Privacy](docs/privacy.md), and the app carries its own P
 | [Auto-verify](docs/auto-verify.md) | The Shortcuts automation, how messages are matched, and using it with your own build |
 | [Privacy](docs/privacy.md) | Permissions, what is stored where, and what never leaves the phone |
 | [Development](docs/development.md) | Requirements, scripts, tests, debug launch arguments and the project layout |
+| [Contributing](CONTRIBUTING.md) | Branch rules, commits, pull requests and feature flags |
+| [Releasing](RELEASING.md) | Release branches, betas, the App Store and hotfixes, step by step |
+| [Changelog](CHANGELOG.md) | What each version changed |
 
 Have an idea? [Request a feature](https://github.com/devbyshima/starhash/issues/new?template=feature_request.yml).
 

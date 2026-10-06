@@ -1,0 +1,42 @@
+name: Bug report
+description: Something in StarHash doesn't work as it should.
+title: "Bug: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      placeholder: What you did, what you expected, and what StarHash did instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to make it happen again
+      placeholder: |
+        1. Open Pay
+        2. ...
+  - type: input
+    id: version
+    attributes:
+      label: StarHash version
+      description: Settings shows it at the bottom, for example "1.0.0 (2)" or "1.1.0 (3) Beta".
+    validations:
+      required: true
+  - type: dropdown
+    id: wallet
+    attributes:
+      label: Wallet
+      options:
+        - MTN MoMo
+        - Airtel Money
+        - Both, or it doesn't matter
+  - type: input
+    id: ios
+    attributes:
+      label: iOS version
+      placeholder: "iOS 26.1"
+  - type: markdown
+    attributes:
+      value: Please leave out phone numbers, merchant codes and amounts. This page is public.
