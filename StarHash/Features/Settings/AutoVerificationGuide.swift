@@ -2,20 +2,22 @@ import StarHashKit
 import SwiftUI
 import UIKit
 
-/// Auto-verify setup, a page pushed from Settings (and onboarding's last step), in two steps,
-/// each shown with a real screenshot of what Shortcuts looks like, one
-/// thing to do, and a Continue (or Done) that appears only once it is done:
+/// Auto-verify setup, a page pushed from Settings (and onboarding's last step), in three steps,
+/// each shown with a picture of what Shortcuts looks like, one thing to
+/// do, and a Continue (or Done) that appears only once it is done:
 ///
-/// 1. Add Shortcut: opens Shortcuts on the shared StarHash SMS shortcut,
-///    then walks through making its automation in Shortcuts ("When I get a
-///    message containing RWF", which every M-Money and AirtelMoney message
-///    is, run immediately). The automation written into the shared file
-///    for iOS 27 never appeared on a real iPhone, so it is made by hand
-///    on every system.
-/// 2. Verify Shortcut: runs it through Shortcuts with a sample message and
-///    comes straight back (x-callback-url). Done appears only when the
-///    action actually ran; there is no skipping, and auto-verify stays off
-///    until it has.
+/// 1. Add Shortcut: opens Shortcuts on the shared StarHash SMS shortcut.
+/// 2. Make the automation: opens Shortcuts and walks through it ("When I
+///    get a message containing RWF", which every M-Money and AirtelMoney
+///    message is, run immediately). iOS offers no link to the Automation
+///    tab, and the automation written into the shared file for iOS 27
+///    never appeared on a real iPhone, so it is made by hand.
+/// 3. Check it works: runs the shortcut through Shortcuts with a sample
+///    message and comes straight back (x-callback-url). That proves the
+///    shortcut, and turns auto-verify on; the automation is proven only by
+///    a real message through it, so the step then waits for one, and until
+///    one comes nothing is failed for want of a message
+///    (`StarHashPreferences.automationProven`).
 struct AutoVerificationGuide: View {
     /// Over onboarding: the close button on the right, which skips the
     /// setup. Pushed from Settings there is none.
@@ -31,11 +33,14 @@ struct AutoVerificationGuide: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @AppStorage(PreferenceKey.lastVerifiedAt) private var lastVerifiedAt: Double = 0
+    @AppStorage(PreferenceKey.lastMessageAt) private var lastMessageAt: Double = 0
+    @AppStorage(PreferenceKey.autoVerifySince) private var autoVerifySince: Double = 0
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
     @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
 
-    @State private var step = SettingsLaunch.guideOutcome == nil ? SettingsLaunch.guideStep : 1
-    /// Whether Add Shortcut has been tapped, which brings up Continue.
+    @State private var step = SettingsLaunch.guideOutcome == nil ? SettingsLaunch.guideStep : Self.checkStep
+    /// Whether the step's action (Add Shortcut, Open Shortcuts) has been
+    /// tapped, which brings up Continue.
     @State private var didAct = false
     /// `lastVerifiedAt` when Verify Shortcut was tapped; nil before.
     @State private var verifyStartedAt: Double?
@@ -61,14 +66,19 @@ struct AutoVerificationGuide: View {
     private static var launchVerification: Verification {
         switch SettingsLaunch.guideOutcome {
         case "guideFailed": .failed
+        case "guideWaiting": .awaitingMessage
         case "guideVerified": .verified
         default: .idle
         }
     }
 
-    private enum Verification { case idle, waiting, verified, failed }
+    /// The check: not run, running, the shortcut ran but no real message
+    /// has come through the automation yet, one has, or the shortcut did
+    /// not run.
+    private enum Verification { case idle, waiting, awaitingMessage, verified, failed }
 
-    static let stepCount = 2
+    static let stepCount = 3
+    private static let checkStep = 2
 
     var body: some View {
         VStack(spacing: 0) {
@@ -115,6 +125,11 @@ struct AutoVerificationGuide: View {
         // close on the right, over onboarding only.
         .starhashBackAndClose(back: goBack, close: onClose)
         .onChange(of: lastVerifiedAt) { checkVerification() }
+        // A real message through the automation, while the step waits.
+        .onChange(of: lastMessageAt) {
+            guard verification == .awaitingMessage, automationProven else { return }
+            withAnimation(.smooth) { verification = .verified }
+        }
         .onChange(of: router.shortcutCallback) { _, callback in
             guard let callback, verification == .waiting else { return }
             // Shortcuts came back: either the action ran (and wrote
@@ -143,7 +158,8 @@ struct AutoVerificationGuide: View {
 
     /// What Shortcuts shows at this step, from a real iPhone: the whole
     /// Add Shortcut screen in a phone frame, its button ringed; then the
-    /// automation the shortcut brings, switched on.
+    /// Automation tab with the automation made, and a check on it once a
+    /// message has come through.
     @ViewBuilder
     private var screenshot: some View {
         if step == 0 {
@@ -159,7 +175,7 @@ struct AutoVerificationGuide: View {
                 label: "Shortcuts' Automation tab: When I get a message containing RWF, run StarHash SMS, switched on",
                 // The switch, on.
                 highlight: CGRect(x: 0.725, y: 0.40, width: 0.185, height: 0.185),
-                isVerified: verification == .verified
+                isVerified: step == Self.checkStep && verification == .verified
             )
         }
     }
@@ -167,9 +183,11 @@ struct AutoVerificationGuide: View {
     private var title: String {
         switch step {
         case 0: "Add StarHash SMS"
+        case 1: "Make the automation"
         default:
             switch verification {
             case .verified: "You're all set"
+            case .awaitingMessage: "Waiting for a message"
             case .failed: "Shortcut didn't run"
             default: "Check it works"
             }
@@ -182,10 +200,15 @@ struct AutoVerificationGuide: View {
     private var stepList: some View {
         if step == 0 {
             GuideStepList(steps: [
-                "Tap **Add Shortcut** below, then **Add Shortcut** in Shortcuts.",
-                "Open **Automation**, tap **+** and choose **Message**.",
-                "Set **Message Contains** to **RWF**, choose **Run Immediately** and turn off **Notify When Run**.",
-                "Tap **Next** and pick **StarHash SMS**.",
+                "Tap **Add Shortcut** below.",
+                "In Shortcuts, tap **Add Shortcut**.",
+                "Come back and tap **Continue**.",
+            ])
+        } else if step == 1 {
+            GuideStepList(steps: [
+                "Tap **Open Shortcuts** below and go to **Automation**.",
+                "Tap **+**, choose **Message**, and set **Message Contains** to **RWF**.",
+                "Choose **Run Immediately**, turn off **Notify When Run**, tap **Next** and pick **StarHash SMS**.",
                 "Come back and tap **Continue**.",
             ])
         } else {
@@ -197,10 +220,16 @@ struct AutoVerificationGuide: View {
                         "Fees and your balance fill in by themselves.",
                         "Turn it off any time in **Settings**.",
                     ], symbol: "checkmark")
+                case .awaitingMessage:
+                    GuideStepList(steps: [
+                        "The shortcut works. A message through the automation proves the rest.",
+                        "Wait for your next \(wallet.messagesName) message, or ask someone to text you **RWF**.",
+                        "Until one comes, StarHash won't mark payments failed on its own.",
+                    ])
                 case .failed:
                     GuideStepList(steps: [
-                        "In Shortcuts, check **StarHash SMS** was added.",
-                        "Open **Automation** and check the RWF automation runs **StarHash SMS** immediately.",
+                        "In Shortcuts, check **StarHash SMS** was added under that name.",
+                        "Run it once there, and allow anything it asks.",
                         "Come back and tap **Try Again**.",
                     ])
                 default:
@@ -261,6 +290,19 @@ struct AutoVerificationGuide: View {
                     Button("Add Shortcut", action: addShortcut)
                         .buttonStyle(GuideButtonStyle(prominent: true))
                 }
+            } else if step == 1 {
+                if didAct {
+                    pair {
+                        Button("Open Again", action: openShortcuts)
+                            .buttonStyle(GuideButtonStyle(prominent: false))
+                    } primary: {
+                        Button("Continue") { goTo(Self.checkStep) }
+                            .buttonStyle(GuideButtonStyle(prominent: true))
+                    }
+                } else {
+                    Button("Open Shortcuts", action: openShortcuts)
+                        .buttonStyle(GuideButtonStyle(prominent: true))
+                }
             } else {
                 verifyButtons
             }
@@ -290,7 +332,9 @@ struct AutoVerificationGuide: View {
     @ViewBuilder
     private var verifyButtons: some View {
         switch verification {
-        case .verified:
+        case .verified, .awaitingMessage:
+            // Waiting needs nothing more here: the message can come any
+            // time, and Settings says auto-verify is waiting until then.
             Button("Done", action: finish)
                 .buttonStyle(GuideButtonStyle(prominent: true))
         case .waiting:
@@ -321,10 +365,14 @@ struct AutoVerificationGuide: View {
         didAct = true
     }
 
+    /// Shortcuts' own screen; iOS has no link to its Automation tab.
+    private func openShortcuts() {
+        if let url = URL(string: "shortcuts://") { openURL(url) }
+        didAct = true
+    }
+
+    /// Auto-verify is already on by now (`checkVerification`).
     private func finish() {
-        autoVerifySetUp = true
-        // Payments from here on fail if no message confirms them.
-        PaymentExpiry.markSetUp()
         dismiss()
     }
 
@@ -352,9 +400,19 @@ struct AutoVerificationGuide: View {
         if let url = StarHashShortcut.verificationURL { openURL(url) }
     }
 
+    /// The shortcut ran: auto-verify goes on, counting from now, and the
+    /// step waits for a real message through the automation, unless one
+    /// has come already.
     private func checkVerification() {
         guard let start = verifyStartedAt, lastVerifiedAt > start else { return }
-        withAnimation(.smooth) { verification = .verified }
+        verifyStartedAt = nil
+        autoVerifySetUp = true
+        PaymentExpiry.markSetUp()
+        withAnimation(.smooth) { verification = automationProven ? .verified : .awaitingMessage }
+    }
+
+    private var automationProven: Bool {
+        StarHashPreferences.automationProven(lastMessageAt: lastMessageAt, since: autoVerifySince)
     }
 }
 

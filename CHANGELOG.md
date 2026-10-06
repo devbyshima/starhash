@@ -15,7 +15,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Fixed
 
-- The auto-verify guide always shows how to make the automation in Shortcuts: the one the shared shortcut was meant to bring on iOS 27 never appeared.
+- The auto-verify guide has a step of its own for making the automation in Shortcuts (the one the shared shortcut was meant to bring on iOS 27 never appeared), and auto-verify waits for a real message through it before failing any payment on its own, so a missing automation no longer fails payments that went through.
 - Auto-verify reads more MTN MoMo messages: payments through MoMo's partners (airtime, banks, savings) under the partner's own name, transfers whose message leaves out the number, and refunds.
 
 ## [1.0.0] - Unreleased

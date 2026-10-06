@@ -42,8 +42,12 @@ struct ProcessCarrierSMSIntent: AppIntent {
         // watches this to show its success state.
         StarHashPreferences.markVerified()
 
-        guard !AutoVerificationSample.isSample(message),
-              StarHashPreferences.autoVerifyOn,
+        guard !AutoVerificationSample.isSample(message) else { return .result() }
+        // A real message, so the automation hands them over: what the
+        // setup's own check cannot prove, and what auto-verify waits for
+        // before failing any payment on its own.
+        StarHashPreferences.markMessageArrived()
+        guard StarHashPreferences.autoVerifyOn,
               StarHashPreferences.saveTransactions else { return .result() }
         let store = AppEnvironment.store
         if let sms = CarrierSMS.parse(message) {

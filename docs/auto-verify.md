@@ -7,10 +7,11 @@ A payment dialled from StarHash is **Pending** until your wallet's SMS confirms 
 
 ## Set it up
 
-Open **Settings › Auto-verify transactions**, or choose **Set Up** on the last onboarding screen. The guide has two steps, each shown with a screenshot of Shortcuts.
+Open **Settings › Auto-verify transactions**, or choose **Set Up** on the last onboarding screen. The guide has three steps, each shown with a picture of Shortcuts.
 
-1. **Add the StarHash SMS shortcut and its automation.** StarHash opens the shared shortcut on Shortcuts' Add screen. It runs the **Process Carrier SMS** action on the message it is given. Then make the automation that hands it every message: **Automation › + › Message**, Message Contains **RWF**, **Run Immediately**, **Notify When Run** off, then pick **StarHash SMS**. The shared shortcut carries no working automation, on iOS 27 either, so it is always made by hand.
-2. **Verify the shortcut.** StarHash runs it with a sample message (never saved) and waits for it to come back. Auto-verify only turns on once this works; if it does not, the guide offers Try Again. This checks the shortcut, not the automation: if payments still go unconfirmed, check the automation is in Shortcuts' **Automation** tab.
+1. **Add the StarHash SMS shortcut.** StarHash opens the shared shortcut on Shortcuts' Add screen. It runs the **Process Carrier SMS** action on the message it is given.
+2. **Make the automation** that hands it every message. **Open Shortcuts** takes you to Shortcuts (iOS has no link straight to its Automation tab): **Automation › + › Message**, Message Contains **RWF**, **Run Immediately**, **Notify When Run** off, then **Next** and **StarHash SMS**. The shared shortcut carries no working automation, on iOS 27 either, so it is always made by hand.
+3. **Check it works.** StarHash runs the shortcut with a sample message (never saved) and waits for it to come back; if it does not, the guide offers Try Again. That turns auto-verify on, but it only proves the shortcut, so StarHash then waits for a real message through the automation: your next wallet message, or any text with **RWF** in it. Until one comes, Settings says auto-verify is waiting and no payment is failed for want of a message.
 
 Every MTN MoMo and Airtel Money transaction message contains "RWF", which is why the automation keys on it.
 
