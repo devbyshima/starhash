@@ -6,6 +6,13 @@ options:
   createIntermediateGroups: true
   developmentLanguage: en
 
+# One configuration per release channel (RELEASING.md). Beta is Release
+# with its own channel, archived from a release branch for TestFlight.
+configs:
+  Debug: debug
+  Beta: release
+  Release: release
+
 packages:
   StarHashKit:
     path: Packages/StarHashKit
@@ -21,16 +28,47 @@ settings:
     DEVELOPMENT_TEAM: 7WHQR6L96K
     SWIFT_APPROACHABLE_CONCURRENCY: YES
     SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY: YES
+  # The channel the app reads from Info.plist (`ReleaseChannel.current`),
+  # which decides where each feature flag starts.
+  configs:
+    Debug:
+      STARHASH_CHANNEL: dev
+    Beta:
+      STARHASH_CHANNEL: beta
+    Release:
+      STARHASH_CHANNEL: production
 
 schemes:
+  # Dev runs and the App Store archive (production channel).
   StarHash:
     build:
       targets:
         StarHash: all
     run:
       config: Debug
+    test:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
     archive:
       config: Release
+  # TestFlight betas from a release branch (beta channel).
+  StarHash Beta:
+    build:
+      targets:
+        StarHash: all
+    run:
+      config: Beta
+    test:
+      config: Beta
+    profile:
+      config: Beta
+    analyze:
+      config: Beta
+    archive:
+      config: Beta
 
 targets:
   StarHash:
@@ -58,6 +96,7 @@ targets:
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         ITSAppUsesNonExemptEncryption: false
+        StarHashChannel: $(STARHASH_CHANNEL)
         UIAppFonts: [SpaceGrotesk.ttf]
         NSContactsUsageDescription: StarHash shows your contacts so you can pick who to pay. They stay on your iPhone.
         NSLocationWhenInUseUsageDescription: StarHash notes where you pay, to suggest who you paid when you are back there and to show each payment on a map. It stays on your iPhone.

@@ -44,6 +44,7 @@ enum SettingsPage: Hashable {
     case terms
     case privacy
     case about
+    case featureFlags
 
     @MainActor @ViewBuilder
     var destination: some View {
@@ -55,6 +56,7 @@ enum SettingsPage: Hashable {
         case .notifications: NotificationSettingsView()
         case .whatsNew: WhatsNewView()
         case .release(let version): ReleaseDetailView(version: version)
+        case .featureFlags: FeatureFlagsView()
         }
     }
 }
@@ -336,8 +338,19 @@ enum SettingsVersion {
         Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
     }
 
-    /// "1.0.0 (1)", the version and its build.
-    static var full: String { "\(short) (\(build))" }
+    /// "StarHash version 1.1.0, build 2, Beta", for VoiceOver.
+    static var spoken: String {
+        let channel = ReleaseChannel.current
+        let spoken = "StarHash version \(short), build \(build)"
+        return channel == .production ? spoken : "\(spoken), \(channel.title)"
+    }
+
+    /// "1.0.0 (1)", the version and its build, then the channel for a dev
+    /// or TestFlight build: "1.1.0 (2) Beta". The App Store's has none.
+    static var full: String {
+        let channel = ReleaseChannel.current
+        return channel == .production ? "\(short) (\(build))" : "\(short) (\(build)) \(channel.title)"
+    }
 }
 
 /// The mark, then the name and version on two centred lines.
@@ -357,13 +370,13 @@ struct SettingsFooter: View {
         .padding(.top, 24)
         .padding(.bottom, 24)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("StarHash version \(SettingsVersion.short), build \(SettingsVersion.build)")
+        .accessibilityLabel(SettingsVersion.spoken)
     }
 }
 
 // MARK: - Launch arguments
 
-/// `-settingsPage whatsNew|release|terms|privacy|about|notifications|guide|guide2`
+/// `-settingsPage whatsNew|release|terms|privacy|about|notifications|flags|guide|guide2`
 /// (DEBUG only, with `-tab settings`) opens that page or the guide at launch.
 @MainActor
 enum SettingsLaunch {
@@ -381,6 +394,7 @@ enum SettingsLaunch {
         if page == "privacy" { return [.privacy] }
         if page == "about" { return [.about] }
         if page == "notifications" { return [.notifications] }
+        if page == "flags" { return [.about, .featureFlags] }
         if page == "release" { return [.whatsNew, .release(ReleaseHistory.releases[0].version)] }
         if page?.hasPrefix("guide") == true { return [.autoVerify] }
         return []
