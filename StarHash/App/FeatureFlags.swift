@@ -30,9 +30,13 @@ enum FeatureFlags {
         flag.isOn(in: .current, override: override(for: flag))
     }
 
-    /// This device's switch for the flag, nil if never touched.
+    /// This device's switch for the flag, nil if never touched. A Debug
+    /// launch argument arrives as the text "YES" or "NO", which
+    /// `bool(forKey:)` reads as it reads a saved switch.
     static func override(for flag: FeatureFlag) -> Bool? {
-        UserDefaults.standard.object(forKey: flag.defaultsKey) as? Bool
+        let defaults = UserDefaults.standard
+        guard defaults.object(forKey: flag.defaultsKey) != nil else { return nil }
+        return defaults.bool(forKey: flag.defaultsKey)
     }
 
     /// Back to each flag's rollout.
@@ -63,6 +67,8 @@ struct FeatureFlagged: DynamicProperty {
     }
 
     var wrappedValue: Bool {
-        flag.isOn(in: .current, override: override)
+        // A launch argument's "YES" is text, which a Bool? AppStorage
+        // reads as nil.
+        flag.isOn(in: .current, override: override ?? FeatureFlags.override(for: flag))
     }
 }
