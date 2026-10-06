@@ -1,0 +1,60 @@
+# Every pull request to main or a release branch: StarHashKit's tests, the
+# app built as the branch it targets ships it, and the version checks.
+# Deliveries from merged code are in deliver.yml (RELEASING.md).
+name: CI
+
+on:
+  pull_request:
+    branches: [main, "release/**"]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    # bash -eo pipefail, so a failing check piped into tee still fails.
+    shell: bash
+
+jobs:
+  test:
+    name: StarHashKit tests
+    # Xcode 27 is on its own image while in preview; move to macos-latest
+    # once that image has it.
+    runs-on: xcode-27
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Swift Testing
+        working-directory: Packages/StarHashKit
+        run: swift test
+
+  build:
+    name: App build
+    runs-on: xcode-27
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Channel
+        id: channel
+        # A pull request to release/X.Y must keep its version X.Y.x.
+        run: ./scripts/check_release.sh "refs/heads/${{ github.base_ref || github.ref_name }}" | tee -a "$GITHUB_OUTPUT"
+      - name: Build for the simulator
+        env:
+          SCHEME: ${{ steps.channel.outputs.scheme }}
+          CONFIG: ${{ steps.channel.outputs.configuration }}
+          DERIVED: ${{ github.workspace }}/.build/ci
+        run: ./scripts/build.sh
+      - name: Build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: .build/ci/build.log
+          retention-days: 7

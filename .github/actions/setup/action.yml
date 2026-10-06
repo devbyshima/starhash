@@ -1,0 +1,28 @@
+name: Set up Xcode and XcodeGen
+description: Picks Xcode 27 or later and installs XcodeGen, as docs/development.md asks.
+
+runs:
+  using: composite
+  steps:
+    - name: Select Xcode
+      shell: bash
+      run: |
+        # The newest Xcode 27 on the runner, if it has several; the
+        # image's default otherwise. StarHash needs the iOS 27 SDK.
+        xcode=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | sort -V | tail -1 || true)
+        if [ -n "$xcode" ]; then sudo xcode-select -s "$xcode/Contents/Developer"; fi
+        xcodebuild -version
+        major=$(xcodebuild -version | awk 'NR == 1 { split($2, v, "."); print v[1] }')
+        if [ "$major" -lt 27 ]; then
+          echo "::error::StarHash needs Xcode 27 or later; this runner has $(xcodebuild -version | head -1)"
+          exit 1
+        fi
+
+    - name: Install XcodeGen
+      shell: bash
+      env:
+        HOMEBREW_NO_AUTO_UPDATE: "1"
+        HOMEBREW_NO_INSTALL_CLEANUP: "1"
+      run: |
+        command -v xcodegen >/dev/null || brew install xcodegen
+        xcodegen --version

@@ -1,0 +1,102 @@
+# A build for each channel from what lands on it (RELEASING.md):
+#
+#   main                       dev         simulator app (Debug)
+#   release/X.Y, vX.Y.Z-beta.N  beta        device archive (Beta, StarHash Beta scheme)
+#   vX.Y.Z-rc.N, vX.Y.Z         production  device archive (Release, StarHash scheme)
+#
+# The archives are unsigned: they prove the channel's configuration builds
+# and keep a record of each one. TestFlight and App Store uploads are made
+# from Xcode, signed with the team's account.
+name: Deliver
+
+on:
+  push:
+    branches: [main, "release/**"]
+    tags: ["v*"]
+  workflow_dispatch:
+
+concurrency:
+  group: deliver-${{ github.ref }}
+  # A newer push to a branch replaces its build; a tag's build always runs.
+  cancel-in-progress: ${{ github.ref_type == 'branch' }}
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    # bash -eo pipefail, so a failing check piped into tee still fails.
+    shell: bash
+
+jobs:
+  deliver:
+    name: Build
+    runs-on: xcode-27
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+
+      - name: Channel
+        id: channel
+        run: ./scripts/check_release.sh "$GITHUB_REF" | tee -a "$GITHUB_OUTPUT"
+
+      - name: StarHashKit tests
+        working-directory: Packages/StarHashKit
+        run: swift test
+
+      - name: Name
+        id: name
+        env:
+          VERSION: ${{ steps.channel.outputs.version }}
+          BUILD: ${{ steps.channel.outputs.build }}
+          CHANNEL: ${{ steps.channel.outputs.channel }}
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            echo "artifact=StarHash-$GITHUB_REF_NAME-build$BUILD" >> "$GITHUB_OUTPUT"
+          else
+            echo "artifact=StarHash-$VERSION-$CHANNEL-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Dev build (simulator)
+        if: steps.channel.outputs.channel == 'dev'
+        env:
+          DERIVED: ${{ github.workspace }}/.build/ci
+        run: |
+          ./scripts/build.sh
+          mkdir -p out
+          ditto -c -k --keepParent .build/ci/Build/Products/Debug-iphonesimulator/StarHash.app "out/${{ steps.name.outputs.artifact }}.zip"
+
+      - name: Archive (unsigned)
+        if: steps.channel.outputs.channel != 'dev'
+        env:
+          SCHEME: ${{ steps.channel.outputs.scheme }}
+          CONFIG: ${{ steps.channel.outputs.configuration }}
+          ARCHIVE: out/${{ steps.name.outputs.artifact }}.xcarchive
+        run: |
+          xcodegen generate --quiet
+          xcodebuild archive -project StarHash.xcodeproj -scheme "$SCHEME" -configuration "$CONFIG" \
+            -destination "generic/platform=iOS" -archivePath "$ARCHIVE" \
+            CODE_SIGNING_ALLOWED=NO > archive.log 2>&1 || { grep -E "error:" archive.log | sort -u; exit 1; }
+          grep -E "^$GITHUB_WORKSPACE/.*warning:" archive.log | sort -u || true
+          ditto -c -k --keepParent "$ARCHIVE" "$ARCHIVE.zip"
+          rm -rf "$ARCHIVE"
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.name.outputs.artifact }}
+          path: out/*.zip
+          if-no-files-found: error
+          retention-days: ${{ steps.channel.outputs.channel == 'production' && 90 || steps.channel.outputs.channel == 'beta' && 30 || 14 }}
+
+      - name: Logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-${{ github.run_id }}
+          path: |
+            .build/ci/build.log
+            archive.log
+          if-no-files-found: ignore
+          retention-days: 7
