@@ -30,6 +30,14 @@ runs:
         if ! xcrun metal --version >/dev/null 2>&1; then
           xcodebuild -downloadComponent MetalToolchain
         fi
+        # A toolchain downloaded a moment ago can still read as missing:
+        # xcrun keeps its earlier lookup cached, and the toolchain takes a
+        # few seconds to be mounted. Forget the lookup and give it a minute.
+        for attempt in 1 2 3 4 5 6; do
+          xcrun --kill-cache metal --version >/dev/null 2>&1 && break
+          echo "Metal toolchain not ready yet (attempt $attempt), waiting"
+          sleep 10
+        done
         xcrun metal --version | head -1
 
     - name: Install XcodeGen
