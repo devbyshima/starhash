@@ -28,7 +28,14 @@ Each message either confirms a pending payment or is logged as a new one.
 
 A confirmed payment takes the fee, the carrier's reference and the balance after from the message, and keeps the time it was dialled. A merchant also takes the name its code is registered under, when the message names the code.
 
-Messages about failed, cancelled or declined payments are ignored. Neither carrier publishes a format to read them by, and a payment wrongly marked failed would drop out of your totals, so a payment that did not go through stays pending until you mark it failed by hand.
+With auto-verify on, a payment that did not go through is marked failed for you, and its details say why:
+
+- **No message within an hour.** A wallet's message comes within a minute or two, so a payment none has confirmed after an hour almost surely never went through: cancelled at the wallet's prompt, a wrong PIN, a dropped call. If its message turns up later, within the six hours a match allows, it still confirms the payment.
+- **The wallet said it failed.** A message saying a payment failed, was cancelled or was declined fails it at once, but only when it names the amount and the number or merchant code, since that is what ties it to the payment you dialled. One that says less is ignored.
+
+A late message never confirms a payment the wallet said failed, or one you marked failed yourself; if one did go through after all, open it and choose **Mark as Confirmed**. Payments dialled before auto-verify was set up are left as they are, and so is every payment while auto-verify is off: each stays pending until you mark it.
+
+If the shortcut seems to have stopped (your last three payments all went unconfirmed and no message has come for a week), StarHash stops failing payments rather than fail ones that probably went through, and Settings says to check the shortcut. Nothing more is marked failed until a message comes again.
 
 > [!WARNING]
 > Airtel Money's messages are read with the template Airtel Africa uses across its countries ("SENT.TID ... RWF 1,000 to NAME 07... Fee ... Bal ..."), since no Rwandan sample has been published. If a real Airtel message is not picked up, please [open an issue](https://github.com/devbyshima/starhash/issues/new) without your numbers or amounts.
