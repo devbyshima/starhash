@@ -10,7 +10,9 @@ import SwiftUI
 /// family: the symbol in its pulse rings in the middle, the words low, the
 /// choices (each with its carrier's logo) and Continue under them, and the
 /// glow at the bottom edge. As a carrier is picked its logo takes the
-/// symbol's place and the rings pulse in the carrier's own colour.
+/// symbol's place and the rings pulse round it: both the near black in
+/// light mode, as the accent is on the blue, and the carrier's own colours
+/// in dark. The choices keep their logos' colours in both.
 ///
 /// Also shown on its own, to an install that finished onboarding before
 /// this page existed.
@@ -19,10 +21,14 @@ struct OnboardingWalletPage: View {
 
     @AppStorage(PreferenceKey.wallet) private var wallet = ""
     @State private var choice: Recipient.Network?
+    @Environment(\.colorScheme) private var colorScheme
 
     private var tint: Color { OnboardingPalette.tint }
-    /// The rings: the blue until a carrier is chosen, then its colour.
-    private var ringTint: Color { choice?.carrierColor ?? tint }
+    /// The rings: the accent until a carrier is chosen, then its ring colour.
+    private var ringTint: Color { choice?.ringColor ?? tint }
+    /// The chosen logo in the near black on the light page, matching its
+    /// rings; nil keeps the carrier's colours on the dark one.
+    private var logoInk: Color? { colorScheme == .light ? .brandNight : nil }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -34,7 +40,7 @@ struct OnboardingWalletPage: View {
                 // The chosen carrier's logo in the rings; a SIM until then.
                 Group {
                     if let choice {
-                        WalletLogo(wallet: choice, height: 56)
+                        WalletLogo(wallet: choice, height: 56, ink: logoInk)
                     } else {
                         Image(systemName: "simcard.fill")
                             .font(.system(size: 72, weight: .medium))
@@ -126,12 +132,14 @@ struct OnboardingWalletPage: View {
 }
 
 extension Recipient.Network {
-    /// The carrier's own colour, for its rings on onboarding's carrier
-    /// step; everywhere else it lives only in the logo.
-    var carrierColor: Color {
+    /// The rings round the chosen logo on onboarding's carrier step: the
+    /// near black in light mode, as the logo in them, and the carrier's own
+    /// colour in dark. Everywhere else the carrier's colour lives only in
+    /// its logo.
+    var ringColor: Color {
         switch self {
-        case .mtn: .starhashMTNRing
-        case .airtel: .starhashAirtel
+        case .mtn: Color(light: .brandNight, dark: .starhashMTN)
+        case .airtel: Color(light: .brandNight, dark: .starhashAirtel)
         }
     }
 

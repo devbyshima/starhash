@@ -41,15 +41,29 @@ struct WalletLogo: View {
     let wallet: Recipient.Network
     /// The logo's height. Airtel's is square, MTN's twice as wide as tall.
     var height: CGFloat
+    /// One colour in place of the carrier's own, for a logo that sits
+    /// straight on the page with nothing behind it. Nil keeps the colours.
+    var ink: Color? = nil
 
     var body: some View {
-        Image(wallet.logoAsset)
-            .resizable()
+        logo
             .scaledToFit()
             // Airtel's is square with the wordmark under the swirl, so a
             // little taller than MTN's oval to read at the same weight.
             .frame(height: wallet == .airtel ? height * 1.4 : height)
             .accessibilityHidden(true)
+    }
+
+    @ViewBuilder private var logo: some View {
+        if let ink {
+            Image(wallet.inkLogoAsset)
+                .renderingMode(.template)
+                .resizable()
+                .foregroundStyle(ink)
+        } else {
+            Image(wallet.logoAsset)
+                .resizable()
+        }
     }
 }
 
@@ -58,6 +72,16 @@ extension Recipient.Network {
     var logoAsset: String {
         switch self {
         case .mtn: "MTNLogo"
+        case .airtel: "AirtelLogo"
+        }
+    }
+
+    /// The logo as one colour. MTN's is its outline and letters alone:
+    /// filling the whole oval with one colour would lose the letters.
+    /// Airtel's is already one colour, so its own logo serves.
+    var inkLogoAsset: String {
+        switch self {
+        case .mtn: "MTNLogoMono"
         case .airtel: "AirtelLogo"
         }
     }

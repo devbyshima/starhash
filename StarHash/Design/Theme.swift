@@ -201,14 +201,12 @@ extension Color {
     /// The dotted line between a sheet card's rows.
     static let sheetDivider = Color(light: .brandNight.opacity(0.22), dark: .brandPaper.opacity(0.22))
 
-    /// The carriers' own colours: their logos, and the rings round the
-    /// chosen logo on onboarding's carrier step. StarHash's buttons are the
-    /// blue whichever carrier pays.
+    /// The carriers' own colours: their logos, and in dark mode the rings
+    /// round the chosen logo on onboarding's carrier step (light mode draws
+    /// both in the near black). StarHash's buttons are the blue whichever
+    /// carrier pays.
     static let starhashMTN = Color(red: 1, green: 203 / 255, blue: 5 / 255)
     static let starhashOnMTN = Color(white: 0.08)
-    /// MTN's yellow as a thin ring: a deeper gold on the pale grey, where
-    /// the yellow itself all but vanishes; the yellow on the near black.
-    static let starhashMTNRing = Color(light: .init(red: 214 / 255, green: 158 / 255, blue: 0), dark: .starhashMTN)
     static let starhashAirtel = Color(red: 228 / 255, green: 0, blue: 0)
     static let starhashOnAirtel = Color.white
 
