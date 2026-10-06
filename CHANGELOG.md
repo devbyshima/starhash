@@ -6,8 +6,6 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ## [Unreleased]
 
-## [1.1.0] - Unreleased
-
 ### Added
 
 - What's New: the first launch after an update shows what the version brought, with a video of each new feature. It shows once, and never on a fresh install.
@@ -28,6 +26,5 @@ The first release: pay with MTN MoMo or Airtel Money without typing USSD codes, 
 - Face ID lock, an Appearance setting (System, Dark or Light), and Shortcuts and Siri actions.
 - No account, no server and no tracking: everything stays on the iPhone.
 
-[Unreleased]: https://github.com/devbyshima/starhash/compare/release/1.1...main
-[1.1.0]: https://github.com/devbyshima/starhash/tree/release/1.1
+[Unreleased]: https://github.com/devbyshima/starhash/compare/release/1.0...main
 [1.0.0]: https://github.com/devbyshima/starhash/tree/release/1.0
