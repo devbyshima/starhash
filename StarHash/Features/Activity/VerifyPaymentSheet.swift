@@ -124,15 +124,10 @@ struct VerifyPaymentSheet: View {
         case .overdraft(let paid):
             let fee = Money.formatWithCurrency(paid.accessFee ?? 0)
             show(Note(text: "MoMoAdvance's fee of \(fee) is added. Now paste the payment's own message.", isProblem: false))
-        case .anotherPayment(let amount, let counterparty):
-            let to = counterparty?.name.map { " to \($0)" } ?? ""
-            show(Note(text: "That message is about \(Money.formatWithCurrency(amount))\(to), not this payment.", isProblem: true))
-        case .confirmedAnother(let other):
-            let time = other.date.formatted(date: .omitted, time: .shortened)
-            show(Note(text: "That message already confirmed the payment of \(Money.formatWithCurrency(other.amount)) at \(time).", isProblem: true))
-        case .notAMessage:
-            let wallet = (transaction?.wallet ?? StarHashPreferences.wallet).messagesName
-            show(Note(text: "That isn't an \(wallet) payment message. Copy the whole message and try again.", isProblem: true))
+        case .anotherPayment, .confirmedAnother, .notAMessage:
+            // Another payment's message, one already used, or not a
+            // wallet's at all: all the same to the owner, the wrong one.
+            show(Note(text: "That's not the right message.", isProblem: true))
         }
     }
 
