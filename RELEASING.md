@@ -149,7 +149,7 @@ Fixes from testing go through pull requests into `release/1.1`, each with a line
 
 The App Store build uses the **StarHash** scheme (production channel), so it is uploaded once more as a release candidate and checked on TestFlight before it goes for review. The build that passes is the one submitted: nothing is rebuilt.
 
-1. Add the version's What's New at the top of `ReleaseHistory.releases` in StarHashKit, dated the day you will submit it, and raise the build:
+1. Add the version's What's New at the top of `ReleaseHistory.releases` in StarHashKit, dated the day you will submit it, with its [What's New sheet](#the-whats-new-sheet) for a new MAJOR.MINOR, and raise the build:
 
    ```bash
    git switch release/1.1
@@ -260,6 +260,49 @@ Nothing has been left behind when these print nothing:
 git log --oneline release/1.2..release/1.1
 git log --oneline main..release/1.2
 ```
+
+## The What's New sheet
+
+The first launch after an update shows a sheet of what the version brought: a first page listing up to four highlights, then a page for each feature with a video of it, and Next to step through. It shows once, and never on a fresh install, where onboarding comes first. An update that skips versions shows the newest one's. The logic is `WhatsNew` in StarHashKit, with its tests.
+
+A release gets one through its `announcement` in `ReleaseHistory.releases`:
+
+```swift
+Release(
+    version: "1.1.0",
+    date: "2026-11-02",
+    summary: "...",
+    highlights: [...],
+    announcement: .init(
+        highlights: [
+            .init(symbol: "person.2.fill", title: "Split a bill", detail: "Pay part of a total to each of several people."),
+        ],
+        pages: [
+            .init(symbol: "person.2.fill", title: "Split a bill",
+                  detail: "Type the total, pick who was there, and StarHash dials each share.",
+                  video: "WhatsNewSplitBill"),
+        ]
+    )
+)
+```
+
+Each page's video is a recording of the feature, framed in an iPhone on white:
+
+1. Run the app in the simulator in light mode, and record the feature at normal speed:
+
+   ```bash
+   xcrun simctl io booted recordVideo --codec h264 split-bill.mov
+   ```
+
+2. Frame it, trimming to the part worth showing. This writes `StarHash/Resources/WhatsNew/WhatsNewSplitBill.mp4`, square and silent:
+
+   ```bash
+   swift -suppress-warnings scripts/make_whats_new_video.swift split-bill.mov WhatsNewSplitBill --start 1 --end 8
+   ```
+
+3. Run `xcodegen generate` (or `./scripts/build.sh`) so the app bundles it, and look at the sheet in a Debug run with `-whatsNew` (`-whatsNewPage 1` opens on the first video), or open `starhash://whatsnew?page=1` on the simulator.
+
+Keep each video short (5 to 10 seconds, it loops) and the page's words to three lines. Prepare all of it on `main` before cutting the branch if you can. Added on the release branch, it counts as release bookkeeping, not a feature.
 
 ## Feature flags
 

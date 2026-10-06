@@ -34,6 +34,7 @@ DERIVED=.build/mine ./scripts/build.sh  # use a build folder of your own
 ./scripts/test.sh                       # run StarHashKit's tests on the Mac
 ./scripts/bump_version.sh 1.2.0         # set the version (build 1), or `build` for the next upload
 ./scripts/check_release.sh              # the channel this branch or tag builds, and the release checks
+swift -suppress-warnings scripts/make_whats_new_video.swift rec.mov WhatsNewName   # a What's New video
 ```
 
 `build.sh` prints only errors, warnings from StarHash's own sources and the result. Set `DEST` to build for another destination, for example `DEST="generic/platform=iOS"` for a device, and `SCHEME="StarHash Beta" CONFIG=Beta` for the beta channel's build. Anything after it goes to `xcodebuild`.
@@ -77,6 +78,7 @@ Debug builds read these, in Xcode's scheme or after the screenshot script's name
 | `-settingsPage <page>` | Open a Settings page: `whatsNew`, `terms`, `privacy`, `about`, `guide` and more |
 | `-locked`, `-splash`, `-note`, `-reviewNote` | The lock screen, the launch splash, the developer's note or the rating note |
 | `-featureFlag.<key> YES\|NO` | Switch a feature flag on or off for the run (dev and beta channels) |
+| `-whatsNew`, `-whatsNewPage <n>` | The What's New sheet over the app (the newest release's, or a sample), on page n. `starhash://whatsnew?page=<n>` opens it in a Debug build that is already running |
 
 Each screen reads its own arguments where it uses them, so to find one not listed here (such as `-buyArrange`, `-payChooser` or `-confirmDelete`), search the sources for its name. The shared ones are in `StarHash/App/DebugLaunch.swift` and the keypad's in `StarHash/Features/Pay/PayDebug.swift`.
 
