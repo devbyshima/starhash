@@ -3,7 +3,7 @@ import SwiftUI
 
 /// Transactions as cards of their own, as Buy's codes are: one day of
 /// Activity's list, or the search results. A card opens its details; its
-/// context menu confirms it, marks it failed or deletes it (asking first),
+/// context menu verifies it, marks it failed or deletes it (asking first),
 /// and a swipe deletes
 /// it outright, the whole card sliding aside and the trash beside it, as a
 /// code does on Buy; deleted, it shrinks and fades as the cards under it
@@ -14,7 +14,8 @@ struct ActivityTransactionRows: View {
     /// well as the time.
     var showsDate = false
     let onOpen: (StarHashKit.Transaction) -> Void
-    let onConfirm: (StarHashKit.Transaction) -> Void
+    /// Verify, on a payment not yet confirmed.
+    let onVerify: (StarHashKit.Transaction) -> Void
     /// Mark as Failed, on a pending payment.
     let onFail: (StarHashKit.Transaction) -> Void
     let onDelete: (StarHashKit.Transaction) -> Void
@@ -46,13 +47,13 @@ struct ActivityTransactionRows: View {
         .buttonStyle(ActivityCardButtonStyle())
         .contentShape(.contextMenuPreview, shape)
         .contextMenu {
-            // A failed payment can still be confirmed, in case it was
-            // marked failed by mistake.
+            // A failed payment can still be verified, in case it went
+            // through after all.
             if transaction.status != .confirmed {
                 Button {
-                    onConfirm(transaction)
+                    onVerify(transaction)
                 } label: {
-                    Label("Mark as Confirmed", systemImage: "checkmark.circle")
+                    Label("Verify", systemImage: "checkmark.message")
                 }
             }
             if transaction.status == .pending {

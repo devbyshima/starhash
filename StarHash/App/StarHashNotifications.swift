@@ -69,29 +69,29 @@ final class StarHashNotifications {
 
     /// A reminder's buttons.
     enum Action {
-        static let confirm = "confirm"
+        static let verify = "verify"
         static let fail = "fail"
     }
 
     static let reminderCategory = "payment-reminder"
-    /// A payment auto-verify failed, with one button to say it went
+    /// A payment auto-verify failed, with one button to verify it went
     /// through after all.
     static let expiredCategory = "payment-expired"
 
     private init() {}
 
     /// At launch, before any notification can be answered: the delegate,
-    /// the reminder's two buttons and the failed payment's one. All ask
-    /// for Face ID or the passcode first, so a locked phone cannot settle
-    /// a payment.
+    /// the reminder's two buttons and the failed payment's one. Verify
+    /// opens StarHash, since its message is pasted there; Mark as Failed
+    /// asks for Face ID or the passcode first, so a locked phone cannot
+    /// settle a payment.
     func start() {
         center.delegate = responder
-        let confirm = UNNotificationAction(identifier: Action.confirm, title: "Mark as Confirmed", options: [.authenticationRequired])
+        let verify = UNNotificationAction(identifier: Action.verify, title: "Verify", options: [.foreground])
         let fail = UNNotificationAction(identifier: Action.fail, title: "Mark as Failed", options: [.authenticationRequired, .destructive])
-        let wentThrough = UNNotificationAction(identifier: Action.confirm, title: "It Went Through", options: [.authenticationRequired])
         center.setNotificationCategories([
-            UNNotificationCategory(identifier: Self.reminderCategory, actions: [confirm, fail], intentIdentifiers: []),
-            UNNotificationCategory(identifier: Self.expiredCategory, actions: [wentThrough], intentIdentifiers: []),
+            UNNotificationCategory(identifier: Self.reminderCategory, actions: [verify, fail], intentIdentifiers: []),
+            UNNotificationCategory(identifier: Self.expiredCategory, actions: [verify], intentIdentifiers: []),
         ])
     }
 
@@ -179,18 +179,20 @@ final class StarHashNotifications {
     }
 
     /// A tap opens what the notification is about: its transaction, or
-    /// Activity for a summary. The buttons settle the payment as its
-    /// details page would: a failed one can still be confirmed.
+    /// Activity for a summary. Verify opens the payment with its sheet, and
+    /// Mark as Failed settles it as its details page would.
     func answer(action: String, transactionID: UUID?) async {
         let store = AppEnvironment.store
         switch action {
-        case Action.confirm, Action.fail:
+        case Action.verify:
+            guard let id = transactionID else { return }
+            store.reloadFromDisk()
+            AppEnvironment.router.verify(id)
+        case Action.fail:
             // StarHash may have woken in the background just for this.
             store.reloadFromDisk()
             guard let id = transactionID, let transaction = store.transaction(id: id) else { return }
-            if action == Action.confirm, transaction.status != .confirmed {
-                store.update(transaction.confirmedByHand(wallet: StarHashPreferences.wallet))
-            } else if action == Action.fail, transaction.status == .pending {
+            if transaction.status == .pending {
                 store.update(transaction.markedFailed())
             }
             await sync()

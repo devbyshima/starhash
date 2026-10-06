@@ -33,6 +33,26 @@ public struct ParsedSMS: Hashable, Sendable {
     }
 }
 
+/// What MoMoAdvance, MTN's overdraft, says it lent: "You have used 2100 RWF
+/// on FRI:11049834/MM with access fee 68 RWF on 2026-10-06 20:15:29 from
+/// MoMoAdvance." Not a movement of its own, since the payment's own
+/// message says what was sent; what it adds is the access fee, which is
+/// part of what that payment cost.
+public struct OverdraftUse: Hashable, Sendable {
+    /// What the overdraft covered: the payment and its fee, or the part of
+    /// them the balance could not.
+    public var amount: Int
+    public var accessFee: Int
+    /// The payment's moment, to the second as its own message gives it.
+    public var date: Date?
+
+    public init(amount: Int, accessFee: Int, date: Date? = nil) {
+        self.amount = amount
+        self.accessFee = accessFee
+        self.date = date
+    }
+}
+
 /// Reads MTN MoMo and Airtel Money confirmation messages, Rwanda's.
 ///
 /// The carriers change their wording every so often and the messages
@@ -110,6 +130,20 @@ public enum CarrierSMS {
         )
     }
 
+    /// MoMoAdvance paying for a payment the balance could not cover, and
+    /// what it charged for it. Nil for any other message, and for one
+    /// without an access fee, which would add nothing.
+    public static func parseOverdraft(_ text: String) -> OverdraftUse? {
+        let message = normalized(text)
+        let isOverdraft = matches(#"\bMoMoAdvance\b"#, message)
+            || (isMoMo(message) && matches(#"\boverdraft\b"#, message))
+        guard isOverdraft,
+              let m = captures(#"\bused\s+"# + amount + #".*?\baccess fee\s*(?:of|is|was)?\s*:?\s*"# + amount, message)
+        else { return nil }
+        let use = OverdraftUse(amount: money(m[0]), accessFee: money(m[1]), date: date(in: message))
+        return use.amount > 0 && use.accessFee > 0 ? use : nil
+    }
+
     private static let failureWords = #"\b(failed|unsuccessful|insufficient|cancell?ed|declined)\b"#
 
     /// Where a failed payment was going, in either wallet's wording.
@@ -127,7 +161,8 @@ public enum CarrierSMS {
             return (party(name: m[1], number: m[2]), money(m[0]))
         }
         // "15,000 RWF to PILI-PILI INVEST 020205": a merchant and its code.
-        if let m = captures(amount + #"\s+to\s+(.+?)\s+(\d{3,9})\b"#, message) {
+        // The code is never the year of a date ("... failed at 2026-04-10").
+        if let m = captures(amount + #"\s+to\s+(.+?)\s+(\d{3,9})\b(?!-)"#, message) {
             return (Recipient(name: displayName(m[1]), destination: m[2], kind: .merchant), money(m[0]))
         }
         return nil
@@ -136,11 +171,11 @@ public enum CarrierSMS {
     /// Whether the message is MTN MoMo's own. Banks text in RWF too, and
     /// some of their messages read much like MoMo's ("You have received RWF
     /// 50,000 from ..."), so a message must also carry one of MoMo's marks:
-    /// a USSD-style prefix (*165*S*, *164*S*, *113*R*), a TxId, a Financial
-    /// Transaction Id or its short "FT Id" (money received carries only
-    /// that), "mobile money" or "MoMo".
+    /// a USSD-style prefix (*165*S*, *164*S*, *113*R*), a TxId or
+    /// TransactionId, a Financial Transaction Id or its short "FT Id" (money
+    /// received carries only that), "mobile money" or "MoMo".
     static func isMoMo(_ message: String) -> Bool {
-        let marks = [#"^\*\d{3}\*[A-Z]\*"#, #"\bTxId\b"#, #"Financial Transaction Id"#, #"\bFT Id\b"#, #"mobile money"#, #"\bMoMo\b"#]
+        let marks = [#"^\*\d{3}\*[A-Z]\*"#, #"\bTxId\b"#, #"\bTransactionId\b"#, #"Financial Transaction Id"#, #"\bFT Id\b"#, #"mobile money"#, #"\bMoMo\b"#]
         return marks.contains { message.range(of: $0, options: [.regularExpression, .caseInsensitive]) != nil }
     }
 
@@ -164,15 +199,29 @@ public enum CarrierSMS {
     /// followed by RWF. `normalized` puts every amount in that order.
     private static let amount = #"(\d[\d,]*(?:\.\d{1,2})?)\s*RWF"#
 
+    /// What MoMo writes after a partner's name ("with token and External
+    /// Transaction Id: ..."), which is no part of it.
+    private static let tokenTail = #"(?:\s+with token\b.*?)?"#
+
     private static func mtnShape(of message: String) -> Shape? {
         // "*165*S*5000 RWF transferred to John Doe (250788123456) from ..."
         if let m = captures(amount + #"\s+transferred to\s+(.+?)\s*\(([^)]*)\)"#, message) {
             return Shape(direction: .outgoing, counterparty: party(name: m[1], number: m[2]), amount: money(m[0]))
         }
 
-        // "Your payment of 15,000 RWF to PILI-PILI INVEST 020205 has been completed"
-        if let m = captures(#"payment of\s+"# + amount + #"\s+to\s+(.+?)\s+(?:has been|was|is)\s+(?:successfully\s+)?completed"#, message) {
+        // "Your payment of 15,000 RWF to PILI-PILI INVEST 020205 has been
+        // completed", or through one of MoMo's partners (airtime, a bank, a
+        // savings account): "... to Bank of Kigali with token and ET Id:
+        // FTCM25276B2ECFD8T was completed".
+        if let m = captures(#"payment of\s+"# + amount + #"\s+to\s+(.+?)"# + tokenTail + #"\s+(?:has been|was|is)\s+(?:successfully\s+)?completed"#, message) {
             return Shape(direction: .outgoing, counterparty: merchant(m[1]), amount: money(m[0]))
+        }
+
+        // "TransactionId: 30363989271 Your payment of 1000 RWF to Jean BOSCO
+        // with token and ET Id:  SUCCESSFUL at 2026-09-05T16:25:29.717+02:00.
+        // Fee:20 RWF.": a transfer to a person, without their number.
+        if let m = captures(#"payment of\s+"# + amount + #"\s+to\s+(.+?)"# + tokenTail + #"\s+SUCCESSFUL\b"#, message) {
+            return Shape(direction: .outgoing, counterparty: party(name: m[1], number: ""), amount: money(m[0]))
         }
 
         // "A transaction of 5000 RWF by KONGEZA LTD on your MOMO account was
@@ -190,6 +239,13 @@ public enum CarrierSMS {
         // The same without the number in brackets.
         if let m = captures(#"received\s+"# + amount + #"\s+from\s+(.+?)\s+(?:on your|at \d{4}-)"#, message) {
             return Shape(direction: .incoming, counterparty: party(name: m[1], number: ""), amount: money(m[0]))
+        }
+
+        // "Y'ello, MTN RWANDACELL  LIMITED has successfully refunded 1000 RWF
+        // to your mobile money account"
+        if let m = captures(#"([A-Za-z][^,.*]*?)\s+has\s+(?:successfully\s+)?refunded\s+"# + amount, message) {
+            let name = displayName(m[0]) ?? "Refund"
+            return Shape(direction: .incoming, counterparty: Recipient(name: name, destination: "", kind: .merchant), amount: money(m[1]))
         }
 
         // "A bank deposit of 20000 RWF has been added to your mobile money account"
@@ -320,7 +376,7 @@ public enum CarrierSMS {
     /// so it is not used: the store treats a repeated reference as a message
     /// it has already applied.
     private static func reference(in message: String) -> String? {
-        if let mtn = captures(#"\b(?:TxId|Financial Transaction Id|Transaction Id|FT Id)\s*[:.]?\s*(\d{5,})"#, message) {
+        if let mtn = captures(#"\b(?:TxId|Financial Transaction Id|Transaction\s?Id|FT Id)\s*[:.]?\s*(\d{5,})"#, message) {
             return mtn[0]
         }
         // Airtel's: "TID 143284610198", "TID: PP260727.1512.M73944".

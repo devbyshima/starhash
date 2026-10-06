@@ -11,7 +11,7 @@ struct ActivitySearchView: View {
     let results: [StarHashKit.Transaction]
     let text: String
     let onOpen: (StarHashKit.Transaction) -> Void
-    let onConfirm: (StarHashKit.Transaction) -> Void
+    let onVerify: (StarHashKit.Transaction) -> Void
     let onFail: (StarHashKit.Transaction) -> Void
     let onDelete: (StarHashKit.Transaction) -> Void
     let onSwipeDelete: (StarHashKit.Transaction) -> Void
@@ -51,7 +51,7 @@ struct ActivitySearchView: View {
                         transactions: results,
                         showsDate: true,
                         onOpen: onOpen,
-                        onConfirm: onConfirm,
+                        onVerify: onVerify,
                         onFail: onFail,
                         onDelete: onDelete,
                         onSwipeDelete: onSwipeDelete

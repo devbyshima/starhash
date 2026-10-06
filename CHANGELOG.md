@@ -9,6 +9,14 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 ### Added
 
 - What's New: the first launch after an update shows what the version brought, with a video of each new feature. It shows once, and never on a fresh install.
+- Auto-verify reads MoMoAdvance's messages: when MTN's overdraft pays for a payment, its access fee joins that payment's fee, on a row of its own in the payment's details.
+
+- Verify replaces Mark as Confirmed: paste the wallet's message for a payment, and StarHash confirms it (or marks it failed) only if the message is that payment's, with its real fee, reference and balance. Confirm Without Message stays as the last resort.
+
+### Fixed
+
+- The auto-verify guide has a step of its own for making the automation in Shortcuts (the one the shared shortcut was meant to bring on iOS 27 never appeared), and auto-verify waits for a real message through it before failing any payment on its own, so a missing automation no longer fails payments that went through.
+- Auto-verify reads more MTN MoMo messages: payments through MoMo's partners (airtime, banks, savings) under the partner's own name, transfers whose message leaves out the number, and refunds.
 
 ## [1.0.0] - Unreleased
 

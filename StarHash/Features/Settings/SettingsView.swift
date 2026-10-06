@@ -76,6 +76,8 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.defaultPage) private var defaultPage = AppTab.pay.rawValue
     @AppStorage(PreferenceKey.appearance) private var appearance = AppAppearance.system
     @AppStorage(PreferenceKey.lastVerifiedAt) private var lastVerifiedAt: Double = 0
+    @AppStorage(PreferenceKey.lastMessageAt) private var lastMessageAt: Double = 0
+    @AppStorage(PreferenceKey.autoVerifySince) private var autoVerifySince: Double = 0
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
     @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
     @AppStorage(PreferenceKey.appLock) private var appLock = false
@@ -116,9 +118,7 @@ private struct SettingsRootList: View {
                 SettingsToggleRow(
                     symbol: "checkmark.message.fill",
                     title: "Auto-verify transactions",
-                    caption: autoVerifyLooksBroken
-                        ? "No \(wallet.messagesName) messages for a week. Check the shortcut"
-                        : "Confirm payments from \(wallet.messagesName) messages",
+                    caption: autoVerifyCaption,
                     isOn: autoVerifyBinding
                 )
                 SettingsToggleRow(
@@ -224,6 +224,7 @@ private struct SettingsRootList: View {
                     StarHashPreferences.turnOffAutoVerify()
                     autoVerifySetUp = false
                     lastVerifiedAt = 0
+                    lastMessageAt = 0
                 }
             }
         }
@@ -241,9 +242,22 @@ private struct SettingsRootList: View {
     private var autoVerifyLooksBroken: Bool {
         autoVerifyBinding.wrappedValue && AutoVerify.looksBroken(
             store.transactions,
-            lastMessageAt: Date(timeIntervalSince1970: lastVerifiedAt),
+            lastMessageAt: Date(timeIntervalSince1970: lastMessageAt),
             now: .now
         )
+    }
+
+    /// What auto-verify is doing: on and proven by a message through the
+    /// automation, on but still waiting for that first message, or quiet
+    /// for a week.
+    private var autoVerifyCaption: String {
+        if autoVerifyBinding.wrappedValue,
+           !StarHashPreferences.automationProven(lastMessageAt: lastMessageAt, since: autoVerifySince) {
+            return "Waiting for a \(wallet.messagesName) message to come through"
+        }
+        return autoVerifyLooksBroken
+            ? "No \(wallet.messagesName) messages for a week. Check the automation"
+            : "Confirm payments from \(wallet.messagesName) messages"
     }
 
     /// On once the setup finished with a working shortcut. Switching it on
@@ -409,10 +423,11 @@ enum SettingsLaunch {
         return max(0, min(n - 1, AutoVerificationGuide.stepCount - 1))
     }
 
-    /// `-settingsPage guideFailed|guideVerified`: step 2 with its check
-    /// already failed or passed, for screenshots.
+    /// `-settingsPage guideFailed|guideWaiting|guideVerified`: the last
+    /// step with its check failed, passed and waiting for a message, or
+    /// passed with one through, for screenshots.
     static var guideOutcome: String? {
-        guard let page, page == "guideFailed" || page == "guideVerified" else { return nil }
+        guard let page, ["guideFailed", "guideWaiting", "guideVerified"].contains(page) else { return nil }
         return page
     }
 }

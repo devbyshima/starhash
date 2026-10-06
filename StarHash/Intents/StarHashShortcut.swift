@@ -2,9 +2,11 @@ import SwiftUI
 import UIKit
 
 /// The ready-made "StarHash SMS" shortcut auto-verify installs and runs:
-/// the Process Carrier SMS action fed the shortcut's input, with its
-/// automation built in (when a message containing RWF arrives, which every
-/// M-Money and AirtelMoney message does, run without asking). It is shared
+/// the Process Carrier SMS action fed the shortcut's input. Its automation
+/// (when a message containing RWF arrives, which every M-Money and
+/// AirtelMoney message does, run immediately) is made by hand, as the
+/// guide shows: the one written into the shared file for iOS 27 never
+/// appeared on a real iPhone. It is shared
 /// from iCloud, so one tap opens Shortcuts' own Add Shortcut screen. With
 /// no link it would fall back to a signed file in the bundle
 /// (scripts/make_shortcut.py) through the share sheet; that file is not

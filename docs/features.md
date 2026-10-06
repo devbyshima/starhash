@@ -68,13 +68,13 @@ Delete All Data brings back the four codes Buy came with.
 - A summary card shows what you spent, what came in and the fees, over a bar chart you can press and slide along.
 - Payments are grouped by day, with a red arrow for money out and a green one for money in. Pending payments carry an orange badge; failed ones are struck through and count towards nothing.
 - Search covers every payment, not just the period: names, numbers, codes, amounts and references.
-- Hold a payment for Mark as Confirmed, Mark as Failed and Delete. On iOS 27, swipe left for a red trash, or all the way across to delete at once.
+- Hold a payment for Verify, Mark as Failed and Delete. On iOS 27, swipe left for a red trash, or all the way across to delete at once.
 
 ## Transaction details
 
 A page of its own for each payment: who, how much, a category (Restaurant, Groceries, Transport, Bills, Shopping, Health, Family, Other), the fee, date and time, the carrier's reference, the number or merchant code, the balance after, the status, a map of where you paid (with Nearby on) and what you sent them this year.
 
-Its actions are Pay Again (Send Money for money you received), Mark as Confirmed, Mark as Failed and Delete. A payment that did not go through can be marked failed; it stays, struck through, and can still be confirmed later.
+Its actions are Pay Again (Send Money for money you received), Verify, Mark as Failed and Delete. Verify settles a payment with its wallet's message, pasted in ([Auto-verify](auto-verify.md#verify-a-payment-by-hand)). A payment that did not go through can be marked failed; it stays, struck through, and can still be verified later.
 
 Deletes ask first, except a swipe, unless you turn that off, in Settings or with Don't Ask Again on the question itself.
 

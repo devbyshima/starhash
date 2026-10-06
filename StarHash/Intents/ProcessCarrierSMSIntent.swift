@@ -42,8 +42,12 @@ struct ProcessCarrierSMSIntent: AppIntent {
         // watches this to show its success state.
         StarHashPreferences.markVerified()
 
-        guard !AutoVerificationSample.isSample(message),
-              StarHashPreferences.autoVerifyOn,
+        guard !AutoVerificationSample.isSample(message) else { return .result() }
+        // A real message, so the automation hands them over: what the
+        // setup's own check cannot prove, and what auto-verify waits for
+        // before failing any payment on its own.
+        StarHashPreferences.markMessageArrived()
+        guard StarHashPreferences.autoVerifyOn,
               StarHashPreferences.saveTransactions else { return .result() }
         let store = AppEnvironment.store
         if let sms = CarrierSMS.parse(message) {
@@ -57,6 +61,10 @@ struct ProcessCarrierSMSIntent: AppIntent {
             // The wallet says a payment StarHash dialled did not go
             // through; its own message already said so on screen.
             store.applyFailure(failure)
+        } else if let overdraft = CarrierSMS.parseOverdraft(message) {
+            // MoMoAdvance paid for a payment: its access fee is part of
+            // what that payment cost.
+            store.applyOverdraft(overdraft)
         } else {
             return .result()
         }
