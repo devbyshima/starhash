@@ -15,10 +15,11 @@ extension PreferenceKey {
 /// looked at.
 @MainActor
 enum PaymentExpiry {
-    /// Whether unconfirmed payments fail on their own: auto-verify is on
-    /// and does not look broken.
+    /// Whether unconfirmed payments fail on their own: auto-verify is on, a
+    /// real message has come through its automation (until then nobody
+    /// knows the automation exists), and it does not look broken.
     static var isActive: Bool {
-        StarHashPreferences.autoVerifyOn && !looksBroken
+        StarHashPreferences.autoVerifyOn && StarHashPreferences.automationProven && !looksBroken
     }
 
     /// Auto-verify is on but no message has come for a week and the last
@@ -27,7 +28,7 @@ enum PaymentExpiry {
     static var looksBroken: Bool {
         StarHashPreferences.autoVerifyOn && AutoVerify.looksBroken(
             AppEnvironment.store.transactions,
-            lastMessageAt: StarHashPreferences.lastVerifiedAt,
+            lastMessageAt: StarHashPreferences.lastMessageAt,
             now: .now
         )
     }

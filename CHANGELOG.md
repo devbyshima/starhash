@@ -22,5 +22,10 @@ The first release: pay with MTN MoMo or Airtel Money without typing USSD codes, 
 - Face ID lock, an Appearance setting (System, Dark or Light), and Shortcuts and Siri actions.
 - No account, no server and no tracking: everything stays on the iPhone.
 
+### Fixed
+
+- The auto-verify guide has a step of its own for making the automation in Shortcuts (the one the shared shortcut was meant to bring on iOS 27 never appeared), and auto-verify waits for a real message through it before failing any payment on its own, so a missing automation no longer fails payments that went through.
+- Auto-verify reads more MTN MoMo messages: payments through MoMo's partners (airtime, banks, savings) under the partner's own name, transfers whose message leaves out the number, and refunds.
+
 [Unreleased]: https://github.com/devbyshima/starhash/compare/release/1.0...main
 [1.0.0]: https://github.com/devbyshima/starhash/tree/release/1.0

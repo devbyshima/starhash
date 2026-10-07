@@ -7,12 +7,11 @@ A payment dialled from StarHash is **Pending** until your wallet's SMS confirms 
 
 ## Set it up
 
-Open **Settings › Auto-verify transactions**, or choose **Set Up** on the last onboarding screen. The guide has two steps, each shown with a screenshot of Shortcuts.
+Open **Settings › Auto-verify transactions**, or choose **Set Up** on the last onboarding screen. The guide has three steps, each shown with a picture of Shortcuts.
 
 1. **Add the StarHash SMS shortcut.** StarHash opens the shared shortcut on Shortcuts' Add screen. It runs the **Process Carrier SMS** action on the message it is given.
-   - **On iOS 27**, the shortcut brings its automation with it: when a message containing **RWF** arrives, run without asking. Turn off **Notify When Run** on the automation, or iOS announces every run.
-   - **On iOS 18 to 26**, a shared shortcut cannot carry its automation, so the guide walks you through making it: **Automation › + › Message**, Message Contains **RWF**, **Run Immediately**, **Notify When Run** off, then pick **StarHash SMS**.
-2. **Verify the shortcut.** StarHash runs it with a sample message (never saved) and waits for it to come back. Auto-verify only turns on once this works; if it does not, the guide offers Try Again.
+2. **Make the automation** that hands it every message. **Open Shortcuts** takes you to Shortcuts (iOS has no link straight to its Automation tab): **Automation › + › Message**, Message Contains **RWF**, **Run Immediately**, **Notify When Run** off, then **Next** and **StarHash SMS**. The shared shortcut carries no working automation, on iOS 27 either, so it is always made by hand.
+3. **Check it works.** StarHash runs the shortcut with a sample message (never saved) and waits for it to come back; if it does not, the guide offers Try Again. That turns auto-verify on, but it only proves the shortcut, so StarHash then waits for a real message through the automation: your next wallet message, or any text with **RWF** in it. Until one comes, Settings says auto-verify is waiting and no payment is failed for want of a message.
 
 Every MTN MoMo and Airtel Money transaction message contains "RWF", which is why the automation keys on it.
 
@@ -44,7 +43,7 @@ If the shortcut seems to have stopped (your last three payments all went unconfi
 The shared shortcut points at the official app. A build signed with a different bundle id needs a shortcut of its own, either way:
 
 - **By hand**: in Shortcuts, make a shortcut named exactly **StarHash SMS** with your build's **Process Carrier SMS** action, fed the Shortcut Input, then add its automation as the iOS 18 to 26 steps above describe (Message Contains **RWF**, **Run Immediately**, **Notify When Run** off). The Verify step runs it by that name.
-- **With the script**: set `BUNDLE_ID` and `TEAM_ID` in `scripts/make_shortcut.py` and run it (the Mac must be signed in to iCloud). It writes and signs `StarHash/Resources/StarHash SMS.shortcut`, with the iOS 27 automation built in. Share it from Shortcuts and set `StarHashShortcut.iCloudLink` to the new link.
+- **With the script**: set `BUNDLE_ID` and `TEAM_ID` in `scripts/make_shortcut.py` and run it (the Mac must be signed in to iCloud). It writes and signs `StarHash/Resources/StarHash SMS.shortcut` (the automation it writes in for iOS 27 has not been seen to work, so make the automation by hand too). Share it from Shortcuts and set `StarHashShortcut.iCloudLink` to the new link.
 
 ```bash
 python3 scripts/make_shortcut.py
