@@ -83,6 +83,11 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.fulltimestudio.starhash
         TARGETED_DEVICE_FAMILY: "1"
         ENABLE_PREVIEWS: YES
+        # One binary in Debug too. With the debug dylib, a device build's
+        # App Intents step finds no AppIntents.framework in the stub it
+        # reads and writes no Metadata.appintents, so Shortcuts cannot find
+        # Process Carrier SMS and auto-verify's shortcut fails.
+        ENABLE_DEBUG_DYLIB: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
     info:

@@ -6,6 +6,9 @@ extension PreferenceKey {
     /// The auto verification guide watches it to know the shortcut works,
     /// and Settings shows Auto-verify as On once it is set.
     static let lastVerifiedAt = "lastVerifiedAt"
+    /// When the automation last handed StarHash a real message (seconds
+    /// since 1970), the setup's sample not counting.
+    static let lastMessageAt = "lastMessageAt"
     /// Whether deleting one transaction asks first. Turned off with Don't
     /// Ask Again on the question itself, back on in Settings.
     static let confirmDeletes = "confirmDeletes"
@@ -96,15 +99,44 @@ enum StarHashPreferences {
         bool(PreferenceKey.autoVerifySetUp, default: false) && lastVerifiedAt != nil
     }
 
-    /// Turned off in Settings: setting it up again checks the shortcut anew.
+    /// Turned off in Settings: setting it up again checks the shortcut anew,
+    /// and waits for a message through the automation anew.
     static func turnOffAutoVerify() {
         UserDefaults.standard.set(false, forKey: PreferenceKey.autoVerifySetUp)
         UserDefaults.standard.set(0.0, forKey: PreferenceKey.lastVerifiedAt)
+        UserDefaults.standard.set(0.0, forKey: PreferenceKey.lastMessageAt)
         UserDefaults.standard.removeObject(forKey: PreferenceKey.autoVerifySince)
     }
 
     static func markVerified(at date: Date = .now) {
         UserDefaults.standard.set(date.timeIntervalSince1970, forKey: PreferenceKey.lastVerifiedAt)
+    }
+
+    /// Nil until the automation has handed StarHash a real message.
+    static var lastMessageAt: Date? {
+        let seconds = UserDefaults.standard.double(forKey: PreferenceKey.lastMessageAt)
+        return seconds > 0 ? Date(timeIntervalSince1970: seconds) : nil
+    }
+
+    static func markMessageArrived(at date: Date = .now) {
+        UserDefaults.standard.set(date.timeIntervalSince1970, forKey: PreferenceKey.lastMessageAt)
+    }
+
+    /// Whether a real message has come through the automation since
+    /// auto-verify was set up. The setup's check runs the shortcut by hand,
+    /// which proves the shortcut but not that an automation hands it the
+    /// messages; until one does, nothing is failed for want of a message.
+    static var automationProven: Bool {
+        automationProven(
+            lastMessageAt: UserDefaults.standard.double(forKey: PreferenceKey.lastMessageAt),
+            since: UserDefaults.standard.double(forKey: PreferenceKey.autoVerifySince)
+        )
+    }
+
+    /// The same from saved values, for views that keep them in
+    /// `@AppStorage` (seconds since 1970, 0 for never).
+    static func automationProven(lastMessageAt: Double, since: Double) -> Bool {
+        lastMessageAt > 0 && lastMessageAt >= since
     }
 }
 

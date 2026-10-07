@@ -23,6 +23,8 @@ struct NotificationSettingsView: View {
     @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
     @AppStorage(PreferenceKey.lastVerifiedAt) private var lastVerifiedAt: Double = 0
+    @AppStorage(PreferenceKey.lastMessageAt) private var lastMessageAt: Double = 0
+    @AppStorage(PreferenceKey.autoVerifySince) private var autoVerifySince: Double = 0
 
     /// What iOS last said, so the page opens as it will stay; nil until
     /// it has answered once.
@@ -163,11 +165,13 @@ struct NotificationSettingsView: View {
     /// the reminder says that instead (`PaymentExpiry`). Read here from the
     /// page's own values, so it follows them.
     private var failsUnconfirmed: Bool {
-        autoVerifyOn && !AutoVerify.looksBroken(
-            store.transactions,
-            lastMessageAt: Date(timeIntervalSince1970: lastVerifiedAt),
-            now: .now
-        )
+        autoVerifyOn
+            && StarHashPreferences.automationProven(lastMessageAt: lastMessageAt, since: autoVerifySince)
+            && !AutoVerify.looksBroken(
+                store.transactions,
+                lastMessageAt: Date(timeIntervalSince1970: lastMessageAt),
+                now: .now
+            )
     }
 
     /// Above everything while iOS does not let StarHash notify: Turn On

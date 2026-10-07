@@ -368,6 +368,69 @@ import Testing
         #expect(sms.date == kigali(2026, 9, 14, 11, 27, 16))
     }
 
+    /// A payment through one of MoMo's partners: the partner's name ends
+    /// where "with token" starts.
+    @Test(arguments: [
+        ("*162*TxId:19349635627*S*Your payment of 100 RWF to Airtime with token  has been completed at 2025-03-07 09:49:55. Fee was 0 RWF. Your new balance: 6312 RWF . Message: - -. *EN#",
+         100, 0, "Airtime", "19349635627"),
+        ("*162*TxId:28293231288*S*Your payment of 56500 RWF to Bank of Kigali  with token  and ET Id: FTCM26153ZNMO2M3O was completed at 2026-06-02 14:33:29. Fee 1000 RWF. Balance: 9855 RWF . Message: - -. *EN#",
+         56_500, 1_000, "Bank of Kigali", "28293231288"),
+        ("*162*TxId:21356253230*S*Your payment of 3000 RWF to RWANDA AIRPORTS COMPANY Limited with token  and External Transaction Id: 651385 has been completed at 2025-06-25 19:03:21. Fee was 0 RWF.",
+         3_000, 0, "Rwanda Airports Company Limited", "21356253230"),
+    ])
+    func realPaymentThroughAPartner(text: String, amount: Int, fee: Int, name: String, reference: String) throws {
+        let sms = try #require(CarrierSMS.parse(text))
+        #expect(sms.direction == .outgoing)
+        #expect(sms.amount == amount)
+        #expect(sms.fee == fee)
+        #expect(sms.counterparty.kind == .merchant)
+        #expect(sms.counterparty.name == name)
+        #expect(sms.reference == reference)
+    }
+
+    /// The same failed has no code to tie it to a payment, and the year of
+    /// its date is not one.
+    @Test func realFailedPaymentThroughAPartner() {
+        let text = "*143*TxId:27229144322*S*Your payment of 4000 RWF to RWANDA AIRPORTS COMPANY Limited with token  has failed at 2026-04-10 10:27:21. Message: - -. *EN#"
+        #expect(CarrierSMS.parse(text) == nil)
+        #expect(CarrierSMS.parseFailure(text) == nil)
+    }
+
+    @Test func realTransferWithoutTheNumber() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "TransactionId: 30329341273 Your payment of 1000 RWF to SEREIN SHIMA BYIRINGIRO with token and ET Id:  SUCCESSFUL at 2026-09-04T08:45:12.498+02:00.Fee:20 RWF. Balance 145829 RWF."
+        ))
+        #expect(sms.wallet == .mtn)
+        #expect(sms.direction == .outgoing)
+        #expect(sms.amount == 1_000)
+        #expect(sms.fee == 20)
+        #expect(sms.balanceAfter == 145_829)
+        #expect(sms.counterparty.kind == .phone)
+        #expect(sms.counterparty.destination == "")
+        #expect(sms.counterparty.name == "Serein Shima Byiringiro")
+        #expect(sms.reference == "30329341273")
+        #expect(sms.date == kigali(2026, 9, 4, 8, 45, 12))
+    }
+
+    @Test func realRefund() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "*165*R*Y'ello, MTN RWANDACELL  LIMITED has successfully refunded 1000 RWF to your mobile money account at 2025-05-15 14:28:09. Message from refunder: Optional.absent(). Your new balance:18501 RWF.Thank you for using MTN MobileMoney.*EN#"
+        ))
+        #expect(sms.direction == .incoming)
+        #expect(sms.amount == 1_000)
+        #expect(sms.counterparty.kind == .merchant)
+        #expect(sms.counterparty.name == "Mtn Rwandacell Limited")
+        #expect(sms.balanceAfter == 18_501)
+    }
+
+    // MARK: Real MTN MoMo messages (October 2026)
+
+    /// A loan repaid from the balance pays back money already counted when
+    /// it was spent, so it is not a payment either.
+    @Test func realLoanRepaymentIsNotAPayment() {
+        #expect(CarrierSMS.parse("10631 RWF has been used to pay your loan at 2026-10-06 19:14:18. Your new balance: 9369 RWF. Financial Transaction Id: 31055953312") == nil)
+    }
+
     @Test func displayNames() {
         #expect(CarrierSMS.displayName("PILI-PILI INVEST") == "Pili-Pili Invest")
         #expect(CarrierSMS.displayName("Ariane ISHIMWE") == "Ariane Ishimwe")
