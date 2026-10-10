@@ -50,6 +50,10 @@ struct RootView: View {
         .sheet(isPresented: reviewNotePresented, onDismiss: { hasSeenReviewNote = true }) {
             ReviewNoteSheet()
         }
+        // A scam warning's notification, tapped.
+        .sheet(item: Binding(get: { router.scamNotice }, set: { router.scamNotice = $0 })) { notice in
+            ScamNoticeSheet(notice: notice)
+        }
         .sheet(isPresented: whatsNewPresented) {
             if let whatsNew {
                 WhatsNewSheet(announcement: whatsNew, window: window, startPage: whatsNewStartPage)

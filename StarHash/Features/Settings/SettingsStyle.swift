@@ -139,12 +139,12 @@ struct SettingsChoiceMenu<Value: Hashable>: View {
         Menu {
             Picker(title, selection: $selection) {
                 ForEach(choices, id: \.self) { choice in
-                    Text(label(choice)).tag(choice)
+                    Text(catalog: label(choice)).tag(choice)
                 }
             }
         } label: {
             HStack(spacing: 6) {
-                Text(label(selection))
+                Text(catalog: label(selection))
                     .starhashFont(16, weight: .medium, relativeTo: .callout)
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.system(size: 13, weight: .semibold))
@@ -156,7 +156,7 @@ struct SettingsChoiceMenu<Value: Hashable>: View {
         .menuOrder(.fixed)
         .buttonStyle(.hapticPlain)
         .sensoryFeedback(.selection, trigger: selection)
-        .accessibilityLabel(title)
+        .accessibilityLabel(LocalizedStringKey(title))
         .accessibilityValue(label(selection))
     }
 }
@@ -225,7 +225,7 @@ extension SettingsRow where Trailing == Text {
     /// A row with a grey value at its end ("On", "1.0.0").
     init(symbol: String, title: String, caption: String? = nil, value: String) {
         self.init(symbol: symbol, title: title, caption: caption) {
-            Text(value)
+            Text(catalog: value)
                 .font(.starhash(.body))
                 .foregroundStyle(Color.starhashSecondaryText)
         }
@@ -239,11 +239,11 @@ struct SettingsRowText: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(title)
+            Text(catalog: title)
                 .starhashFont(16, weight: .medium, relativeTo: .callout)
                 .foregroundStyle(Color.starhashPrimaryText)
             if let caption {
-                Text(caption)
+                Text(catalog: caption)
                     .starhashFont(13.5, weight: .medium, relativeTo: .footnote)
                     .foregroundStyle(Color.starhashTertiaryText)
                     .fixedSize(horizontal: false, vertical: true)
@@ -285,7 +285,7 @@ struct SettingsSectionTitle: View {
     }
 
     var body: some View {
-        Text(title)
+        Text(catalog: title)
             .starhashFont(14, weight: .medium, relativeTo: .subheadline)
             .foregroundStyle(Color.starhashTertiaryText)
             .padding(.top, 20)
@@ -306,7 +306,7 @@ struct SettingsFootnote: View {
     }
 
     var body: some View {
-        Text(text)
+        Text(catalog: text)
             .starhashFont(13, relativeTo: .footnote)
             .lineSpacing(0.5)
             .foregroundStyle(Color.starhashCaptionText)

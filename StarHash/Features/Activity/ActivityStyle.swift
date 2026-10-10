@@ -110,26 +110,63 @@ extension View {
     }
 }
 
-/// The labels a transaction can carry. Stored in `Transaction.category` by
-/// raw value, so a label the app no longer lists still shows (as "Other"'s
-/// symbol and its own name).
-enum TransactionCategory: String, CaseIterable, Identifiable {
-    case restaurant, groceries, transport, bills, shopping, health, family, other
-
-    var id: Self { self }
-
-    var title: String { rawValue.capitalized }
+extension TransactionCategory {
+    /// The category's name, as Activity and Reports show it.
+    var title: String {
+        switch self {
+        case .airtime: String(localized: "Airtime")
+        case .bundles: String(localized: "Bundles")
+        case .electricity: String(localized: "Electricity")
+        case .water: String(localized: "Water")
+        case .tv: String(localized: "TV")
+        case .restaurant: String(localized: "Restaurants")
+        case .groceries: String(localized: "Groceries")
+        case .transport: String(localized: "Transport")
+        case .bills: String(localized: "Bills")
+        case .shopping: String(localized: "Shopping")
+        case .health: String(localized: "Health")
+        case .education: String(localized: "Education")
+        case .family: String(localized: "Family")
+        case .savings: String(localized: "Savings")
+        case .other: String(localized: "Other")
+        }
+    }
 
     var symbol: String {
         switch self {
+        case .airtime: "phone.fill"
+        case .bundles: "antenna.radiowaves.left.and.right"
+        case .electricity: "bolt.fill"
+        case .water: "drop.fill"
+        case .tv: "tv.fill"
         case .restaurant: "fork.knife"
         case .groceries: "cart.fill"
         case .transport: "car.fill"
         case .bills: "doc.text.fill"
         case .shopping: "bag.fill"
         case .health: "heart.fill"
+        case .education: "graduationcap.fill"
         case .family: "person.2.fill"
+        case .savings: "banknote.fill"
         case .other: "ellipsis.circle.fill"
+        }
+    }
+}
+
+extension MonthlyReport.Group {
+    var title: String {
+        switch self {
+        case .category(let category): category.title
+        case .people: String(localized: "People")
+        case .uncategorized: String(localized: "Other payments")
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .category(let category): category.symbol
+        case .people: "person.fill"
+        case .uncategorized: "storefront.fill"
         }
     }
 }
@@ -142,25 +179,24 @@ extension StarHashKit.Transaction {
     }
 
     /// Red out, green in: the only two hues besides ink.
-    var activityArrowColor: Color {
-        direction == .outgoing ? .starhashDestructive : .starhashIncoming
+    var activityArrowColor: AnyShapeStyle {
+        direction == .outgoing ? AnyShapeStyle(Color.starhashDestructive) : AnyShapeStyle(Color.starhashIncoming)
     }
 
     /// The amount's colour: primary text when money left, green when it
     /// came in. Ink stays the only accent.
-    var activityAmountColor: Color {
+    var activityAmountColor: SurfaceColor {
         direction == .outgoing ? .starhashPrimaryText : .starhashIncoming
     }
 
-    var activityCategory: TransactionCategory? {
-        category.flatMap(TransactionCategory.init(rawValue:))
-    }
+    var activityCategory: TransactionCategory? { knownCategory }
 
     /// What VoiceOver reads for a row.
+    @MainActor
     var activityAccessibilityLabel: String {
         var parts = [
-            counterparty.displayName,
-            (direction == .outgoing ? "Sent " : "Received ") + Money.formatWithCurrency(amount),
+            counterparty.shownName,
+            (isPurchase ? String(localized: "Bought ") : direction == .outgoing ? String(localized: "Sent ") : String(localized: "Received ")) + Money.formatWithCurrency(amount),
             date.formatted(date: .abbreviated, time: .shortened),
         ]
         if status == .pending { parts.append("Pending") }

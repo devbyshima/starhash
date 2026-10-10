@@ -1,0 +1,5544 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    " and ": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " na "
+          }
+        }
+      }
+    },
+    "%@ number": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimero ya %@"
+          }
+        }
+      }
+    },
+    "%@ on airtime, bundles and bills": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ku ma-inite, interineti na fagitire"
+          }
+        }
+      }
+    },
+    "%@ sent": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ byoherejwe"
+          }
+        }
+      }
+    },
+    "%@'s own messages come from %@, never from a phone number.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubutumwa nyakuri bwa %@ buturuka kuri %@, ntibujya buturuka kuri nimero ya telefoni."
+          }
+        }
+      }
+    },
+    "%@, %@": {
+      "shouldTranslate": false
+    },
+    "%@, %@, %lld percent": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@, %lld ku ijana"
+          }
+        }
+      }
+    },
+    "%lld": {
+      "shouldTranslate": false
+    },
+    "%lld codes": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kode %lld"
+          }
+        }
+      }
+    },
+    "%lld hours": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amasaha %lld"
+          }
+        }
+      }
+    },
+    "%lld minutes": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iminota %lld"
+          }
+        }
+      }
+    },
+    "%lld payments": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ubwishyu %lld"
+          }
+        }
+      }
+    },
+    "%lld phone numbers": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimero %lld za telefoni"
+          }
+        }
+      }
+    },
+    "%lld transactions": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ibikorwa %lld"
+          }
+        }
+      }
+    },
+    "%lld%%": {},
+    "%lld%% less than %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% munsi ugereranyije na %@"
+          }
+        }
+      }
+    },
+    "%lld%% more than %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% kurusha %@"
+          }
+        }
+      }
+    },
+    ".": {
+      "shouldTranslate": false
+    },
+    "/run-shortcut": {},
+    "0": {
+      "shouldTranslate": false
+    },
+    "07X XXX XXXX": {},
+    "1 code": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kode 1"
+          }
+        }
+      }
+    },
+    "1 hour": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "isaha 1"
+          }
+        }
+      }
+    },
+    "1 payment": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ubwishyu 1"
+          }
+        }
+      }
+    },
+    "1 transaction": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "igikorwa 1"
+          }
+        }
+      }
+    },
+    "9:41": {
+      "shouldTranslate": false
+    },
+    "A few words on why StarHash exists": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impamvu StarHash yakozwe, mu magambo make"
+          }
+        }
+      }
+    },
+    "A merchant's MoMo code, or a friend's StarHash code.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode ya MoMo y'umucuruzi, cyangwa kode ya StarHash y'inshuti."
+          }
+        }
+      }
+    },
+    "A note from Shima": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubutumwa buvuye kuri Shima"
+          }
+        }
+      }
+    },
+    "A reminder when a payment is still pending or didn't go through, and your week and month summed up. Choose which ones come, and whether they show amounts, in Settings.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kwibutswa iyo ubwishyu bugitegerejwe cyangwa butagenze neza, n'incamake y'icyumweru n'ukwezi kwawe. Hitamo ibyo wakira, n'uko bigaragaza amafaranga cyangwa bitayagaragaza, mu Igenamiterere."
+          }
+        }
+      }
+    },
+    "A reminder when a payment is still pending,\nand your week and month summed up.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kwibutswa iyo ubwishyu bugitegerejwe,\nn'incamake y'icyumweru n'ukwezi kwawe."
+          }
+        }
+      }
+    },
+    "About StarHash": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibyerekeye StarHash"
+          }
+        }
+      }
+    },
+    "Activity": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibikorwa"
+          }
+        }
+      }
+    },
+    "Activity keeps each payment by day,\nwith a chart and search.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibikorwa bibika buri bwishyu ku munsi wabwo,\nhamwe n'igishushanyo n'ishakisha."
+          }
+        }
+      }
+    },
+    "Add": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongeraho"
+          }
+        }
+      }
+    },
+    "Add Again": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongeramo nanone"
+          }
+        }
+      }
+    },
+    "Add Category": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongeraho icyiciro"
+          }
+        }
+      }
+    },
+    "Add Shortcut": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Shortcut"
+          }
+        }
+      }
+    },
+    "Add StarHash SMS": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongeramo StarHash SMS"
+          }
+        }
+      }
+    },
+    "Add a code": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongeraho kode"
+          }
+        }
+      }
+    },
+    "Add a code you dial often with the + button, and it is a tap away here.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongeraho kode ukunze gukanda ukoresheje akabuto +, maze uzajye uyibona hano ukanze rimwe gusa."
+          }
+        }
+      }
+    },
+    "Add one shortcut and each %@ message\nconfirms its payment, with the fee.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongeramo shortcut imwe, maze buri butumwa bwa %@\nbwemeze ubwishyu bwabwo, hamwe n'ikiguzi."
+          }
+        }
+      }
+    },
+    "Add one shortcut and your MTN MoMo or Airtel Money messages confirm each payment, with its fee and your new balance.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongeraho shortcut imwe, maze ubutumwa bwa MTN MoMo cyangwa Airtel Money bwemeze buri bwishyu, hamwe n'ikiguzi cyabwo n'amafaranga asigaye nyuma yabwo."
+          }
+        }
+      }
+    },
+    "Add what's in a StarHash file to this iPhone": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongera ibiri muri dosiye ya StarHash kuri iyi iPhone"
+          }
+        }
+      }
+    },
+    "Add your number for your own QR code": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shyiramo nimero yawe ubone kode yawe ya QR"
+          }
+        }
+      }
+    },
+    "Add your number to get a QR code others scan to pay you.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shyiramo nimero yawe ubone kode ya QR abandi basikana kugira ngo bakwishyure."
+          }
+        }
+      }
+    },
+    "Add your number to get a code others scan to pay you. It stays on your iPhone.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongeraho nimero yawe ubone kode abandi basikana bakakwishyura. Iguma kuri iPhone yawe."
+          }
+        }
+      }
+    },
+    "Added %@. Nothing already here was changed.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hongewemo %@. Nta kintu cyari gisanzwe hano cyahinduwe."
+          }
+        }
+      }
+    },
+    "Airtime": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ama-inite"
+          }
+        }
+      }
+    },
+    "Airtime, bundles and bills bought": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ama-inite, interineti na fagitire byaguzwe"
+          }
+        }
+      }
+    },
+    "Allow StarHash the camera in the Settings app to scan a code, or choose a photo of one.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emerera StarHash gukoresha kamera muri porogaramu ya Settings kugira ngo usikane kode, cyangwa uhitemo ifoto yayo."
+          }
+        }
+      }
+    },
+    "Allow StarHash to see your contacts to pay them by name. They stay on your iPhone.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emerera StarHash kubona abo muvugana kugira ngo ubishyure ukoresheje amazina yabo. Baguma kuri iPhone yawe."
+          }
+        }
+      }
+    },
+    "Allow StarHash your precise location in the Settings app, so it can tell one till from the next.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muri porogaramu ya Settings, emerera StarHash kumenya neza aho uri, kugira ngo ibashe gutandukanya iduka rimwe n'irindi."
+          }
+        }
+      }
+    },
+    "Allow notifications": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emera imenyesha"
+          }
+        }
+      }
+    },
+    "Already Up to Date": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byose bisanzwe bihari"
+          }
+        }
+      }
+    },
+    "Amount": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amafaranga"
+          }
+        }
+      }
+    },
+    "Angry": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urakaye"
+          }
+        }
+      }
+    },
+    "Any MTN or Airtel number, or a merchant\ncode. StarHash knows which is which.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimero iyo ari yo yose ya MTN cyangwa Airtel, cyangwa kode\ny'umucuruzi. StarHash imenya itandukaniro."
+          }
+        }
+      }
+    },
+    "Any change to this policy will be shown here, with the day it took effect.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impinduka yose kuri iyi politiki izagaragazwa hano, hamwe n'umunsi yatangiriyeho gukurikizwa."
+          }
+        }
+      }
+    },
+    "Anyone with StarHash scans it to pay you. Their iPhone's Camera opens StarHash on it too.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umuntu wese ufite StarHash ayisikana akakwishyura. Kamera ya iPhone ye nayo ifungura StarHash iyo iyibonye."
+          }
+        }
+      }
+    },
+    "Appearance": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imigaragarire"
+          }
+        }
+      }
+    },
+    "Are you sure you want to delete all data?": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzi neza ko ushaka gusiba amakuru yose?"
+          }
+        }
+      }
+    },
+    "Ask before deleting": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baza mbere yo gusiba"
+          }
+        }
+      }
+    },
+    "Ask for %@ to open StarHash": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saba %@ mbere yo gufungura StarHash"
+          }
+        }
+      }
+    },
+    "Ask for your passcode to open StarHash": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gusaba kode y'ibanga mbere yo gufungura StarHash"
+          }
+        }
+      }
+    },
+    "Ask on StarHash's GitHub page": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baza ku ipaji ya StarHash kuri GitHub"
+          }
+        }
+      }
+    },
+    "Auto-verify": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kugenzura byikora"
+          }
+        }
+      }
+    },
+    "Auto-verify transactions": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kugenzura ibikorwa byikora"
+          }
+        }
+      }
+    },
+    "Average a day": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impuzandengo ku munsi"
+          }
+        }
+      }
+    },
+    "Back": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subira inyuma"
+          }
+        }
+      }
+    },
+    "Backups": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kubika kopi"
+          }
+        }
+      }
+    },
+    "Balance": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reba asigaye"
+          }
+        }
+      }
+    },
+    "Balance after": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amafaranga asigaye nyuma"
+          }
+        }
+      }
+    },
+    "Biggest day, %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umunsi wakoreshejwemo menshi, %@"
+          }
+        }
+      }
+    },
+    "Biggest payment": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu bunini"
+          }
+        }
+      }
+    },
+    "Bills": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fagitire"
+          }
+        }
+      }
+    },
+    "Bought": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waguze"
+          }
+        }
+      }
+    },
+    "Bought ": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byaguzwe "
+          }
+        }
+      }
+    },
+    "Bundles": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interineti"
+          }
+        }
+      }
+    },
+    "Busiest day": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umunsi w'ibikorwa byinshi"
+          }
+        }
+      }
+    },
+    "Buy": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gura"
+          }
+        }
+      }
+    },
+    "Camera is off": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kamera irafunze"
+          }
+        }
+      }
+    },
+    "Can't dial on this device": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iki gikoresho ntigishobora guhamagara"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reka"
+          }
+        }
+      }
+    },
+    "Cash Power": {},
+    "Category": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icyiciro"
+          }
+        }
+      }
+    },
+    "Change": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hindura"
+          }
+        }
+      }
+    },
+    "Changes to these terms": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impinduka kuri aya mabwiriza"
+          }
+        }
+      }
+    },
+    "Changes to this policy": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impinduka kuri iyi politiki"
+          }
+        }
+      }
+    },
+    "Channel": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umuyoboro"
+          }
+        }
+      }
+    },
+    "Check Balance": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reba amafaranga asigaye"
+          }
+        }
+      }
+    },
+    "Check Wallet Balance": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reba amafaranga asigaye kuri konti"
+          }
+        }
+      }
+    },
+    "Check it works": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reba ko ikora"
+          }
+        }
+      }
+    },
+    "Check your balance with your wallet before you send anything back.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Banza urebe amafaranga asigaye kuri konti yawe mbere yo gusubiza amafaranga ayo ari yo yose."
+          }
+        }
+      }
+    },
+    "Checking": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biragenzurwa"
+          }
+        }
+      }
+    },
+    "Children": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abana"
+          }
+        }
+      }
+    },
+    "Choose **Run Immediately**, turn off **Notify When Run**, tap **Next** and pick **StarHash SMS**.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hitamo **Run Immediately**, uzimye **Notify When Run**, ukande **Next** maze uhitemo **StarHash SMS**."
+          }
+        }
+      }
+    },
+    "Choose a face that is you. You can change it any time.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hitamo isura igusa. Wayihindura igihe cyose."
+          }
+        }
+      }
+    },
+    "Choose a file you exported from StarHash's Settings.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hitamo dosiye wohereje uhereye ku Igenamiterere rya StarHash."
+          }
+        }
+      }
+    },
+    "Choose a number": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hitamo nimero"
+          }
+        }
+      }
+    },
+    "Choose a photo of the code instead.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ahubwo hitamo ifoto ya kode."
+          }
+        }
+      }
+    },
+    "Chooses this number for Pay": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ihitamo iyi nimero muri Ishyura"
+          }
+        }
+      }
+    },
+    "Clear": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kuraho"
+          }
+        }
+      }
+    },
+    "Clear search": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siba ibyo washakishaga"
+          }
+        }
+      }
+    },
+    "Close": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Funga"
+          }
+        }
+      }
+    },
+    "Close search": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Funga ishakisha"
+          }
+        }
+      }
+    },
+    "Closes the symbols": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ifunga ibimenyetso"
+          }
+        }
+      }
+    },
+    "Code": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode"
+          }
+        }
+      }
+    },
+    "Code, e.g. *182*7*1#": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode, urugero *182*7*1#"
+          }
+        }
+      }
+    },
+    "Codes, fees and records": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode, ibiguzi n'inyandiko"
+          }
+        }
+      }
+    },
+    "Come back and tap **Continue**.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Garuka ukande **Komeza**."
+          }
+        }
+      }
+    },
+    "Come back and tap **Try Again**.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Garuka hano ukande **Ongera ugerageze**."
+          }
+        }
+      }
+    },
+    "Confirm Without Message": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emeza nta butumwa"
+          }
+        }
+      }
+    },
+    "Confirm every delete except a swipe": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emeza buri gusiba, keretse usibishije kunyerereza urutoki"
+          }
+        }
+      }
+    },
+    "Confirm payments\nautomatically": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emeza ubwishyu\nmu buryo bwikora"
+          }
+        }
+      }
+    },
+    "Confirm payments from %@ messages": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emeza ubwishyu ukoresheje ubutumwa bwa %@"
+          }
+        }
+      }
+    },
+    "Confirmed": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byemejwe"
+          }
+        }
+      }
+    },
+    "Confirmed payments": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu bwemejwe"
+          }
+        }
+      }
+    },
+    "Confounded": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wayobewe"
+          }
+        }
+      }
+    },
+    "Contacts": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abo muvugana"
+          }
+        }
+      }
+    },
+    "Content": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unyuzwe"
+          }
+        }
+      }
+    },
+    "Continue": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Komeza"
+          }
+        }
+      }
+    },
+    "Cool": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uri cool"
+          }
+        }
+      }
+    },
+    "Copy Code": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koporora kode"
+          }
+        }
+      }
+    },
+    "Copy the %@ message about this payment, then paste it here.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koporora ubutumwa bwa %@ bwerekeye ubu bwishyu, hanyuma ubushyire hano."
+          }
+        }
+      }
+    },
+    "Couldn't Open the File": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ntibyashobotse gufungura dosiye"
+          }
+        }
+      }
+    },
+    "Dark": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umwijima"
+          }
+        }
+      }
+    },
+    "Dark, light or as your iPhone is set": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umwijima, urumuri, cyangwa nk'uko iPhone yawe iteye"
+          }
+        }
+      }
+    },
+    "Date": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Itariki"
+          }
+        }
+      }
+    },
+    "Day": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umunsi"
+          }
+        }
+      }
+    },
+    "Default page": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paji ibanza"
+          }
+        }
+      }
+    },
+    "Delete": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siba"
+          }
+        }
+      }
+    },
+    "Delete All Data": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siba amakuru yose"
+          }
+        }
+      }
+    },
+    "Delete Code": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siba kode"
+          }
+        }
+      }
+    },
+    "Delete Code?": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siba kode?"
+          }
+        }
+      }
+    },
+    "Delete Transaction": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siba igikorwa"
+          }
+        }
+      }
+    },
+    "Delete Transaction?": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urashaka gusiba igikorwa?"
+          }
+        }
+      }
+    },
+    "Delete, Don't Ask Again": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siba, ntuzongere kubaza"
+          }
+        }
+      }
+    },
+    "Details": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibisobanuro"
+          }
+        }
+      }
+    },
+    "Developer Note": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubutumwa bw'uwayikoze"
+          }
+        }
+      }
+    },
+    "Dial %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kanda %@"
+          }
+        }
+      }
+    },
+    "Dial %@ on your phone to finish.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kanda %@ kuri telefoni yawe kugira ngo urangize."
+          }
+        }
+      }
+    },
+    "Dial %@ on your phone.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kanda %@ kuri telefoni yawe."
+          }
+        }
+      }
+    },
+    "Dialled": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igihe byakanzwe"
+          }
+        }
+      }
+    },
+    "Dials %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikanda %@"
+          }
+        }
+      }
+    },
+    "Dials your MTN MoMo or Airtel Money balance code.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikanda kode yo kureba amafaranga asigaye kuri MTN MoMo cyangwa Airtel Money."
+          }
+        }
+      }
+    },
+    "Display": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibigaragara"
+          }
+        }
+      }
+    },
+    "Dizzy": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzungera"
+          }
+        }
+      }
+    },
+    "Done": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byarangiye"
+          }
+        }
+      }
+    },
+    "Drag to move it": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kurura uyimure"
+          }
+        }
+      }
+    },
+    "Edit": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hindura"
+          }
+        }
+      }
+    },
+    "Edit Code": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hindura kode"
+          }
+        }
+      }
+    },
+    "Education": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uburezi"
+          }
+        }
+      }
+    },
+    "Effective %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bikurikizwa guhera ku wa %@"
+          }
+        }
+      }
+    },
+    "Electricity": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umuriro"
+          }
+        }
+      }
+    },
+    "Enable contacts": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emerera abo muvugana"
+          }
+        }
+      }
+    },
+    "English or Kinyarwanda, in the Settings app": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icyongereza cyangwa Ikinyarwanda, muri porogaramu ya Settings"
+          }
+        }
+      }
+    },
+    "Enter a Rwandan mobile number: 078, 079, 072 or 073.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andika nimero ya telefoni yo mu Rwanda: 078, 079, 072 cyangwa 073."
+          }
+        }
+      }
+    },
+    "Every %@ message confirms its payment.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buri butumwa bwa %@ bwemeza ubwishyu bwabwo."
+          }
+        }
+      }
+    },
+    "Every flag back to where its rollout puts it": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buri flag isubira uko rollout yayo ibiteganya"
+          }
+        }
+      }
+    },
+    "Every payment by day, week, month or year, with a chart.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu bwose ku munsi, icyumweru, ukwezi cyangwa umwaka, hamwe n'igishushanyo."
+          }
+        }
+      }
+    },
+    "Every payment in Activity": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu bwose muri Ibikorwa"
+          }
+        }
+      }
+    },
+    "Every payment, logged": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buri bwishyu, bwanditswe"
+          }
+        }
+      }
+    },
+    "Everything in this file is already in StarHash.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibiri muri iyi dosiye byose bisanzwe biri muri StarHash."
+          }
+        }
+      }
+    },
+    "Everything stays on this iPhone": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byose biguma kuri iyi iPhone"
+          }
+        }
+      }
+    },
+    "Export data": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohereza amakuru"
+          }
+        }
+      }
+    },
+    "Face ID": {},
+    "Face ID lock": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ifunga rya Face ID"
+          }
+        }
+      }
+    },
+    "Failed": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byanze"
+          }
+        }
+      }
+    },
+    "Family": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umuryango"
+          }
+        }
+      }
+    },
+    "Feature Flags": {},
+    "Fee": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikiguzi"
+          }
+        }
+      }
+    },
+    "Fees": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibiguzi"
+          }
+        }
+      }
+    },
+    "Fees %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibiguzi %@"
+          }
+        }
+      }
+    },
+    "Fees and balance won't fill in": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibiguzi n'amafaranga asigaye ntibizuzuzwa"
+          }
+        }
+      }
+    },
+    "Fees and your balance fill in by themselves.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibiguzi n'amafaranga asigaye byiyuzuza ubwabyo."
+          }
+        }
+      }
+    },
+    "Fees came to %@.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibiguzi byose hamwe byageze kuri %@."
+          }
+        }
+      }
+    },
+    "Find a name, number, merchant code, amount or reference.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shakisha izina, nimero, kode y'umucuruzi, amafaranga cyangwa nimero y'igikorwa."
+          }
+        }
+      }
+    },
+    "Flags": {},
+    "Free": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubuntu"
+          }
+        }
+      }
+    },
+    "Free and open source": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ni ubuntu, kandi kode yayo irafunguye"
+          }
+        }
+      }
+    },
+    "Free, with source available": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ni ubuntu, kode y'inkomoko iraboneka"
+          }
+        }
+      }
+    },
+    "Grinning": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Useka cyane"
+          }
+        }
+      }
+    },
+    "Groceries": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibiribwa"
+          }
+        }
+      }
+    },
+    "Happy": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wishimye"
+          }
+        }
+      }
+    },
+    "Health": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubuzima"
+          }
+        }
+      }
+    },
+    "Hi, I'm Shima, and I made StarHash.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muraho, nitwa Shima, kandi ni njye wakoze StarHash."
+          }
+        }
+      }
+    },
+    "Highlights": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iby'ingenzi"
+          }
+        }
+      }
+    },
+    "How long a payment waits first": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igihe ubwishyu bubanza gutegereza"
+          }
+        }
+      }
+    },
+    "I built it because I was tired of how hard USSD makes paying. Typing codes and digging through menus for the things you do every day felt wrong, so StarHash does them in a few taps.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nayikoze kuko nari narambiwe ukuntu USSD igora kwishyura. Kwandika kode no gushakisha muri menu ku bintu ukora buri munsi byansaga nk'ibidakwiye, ni yo mpamvu StarHash ibikora mu gukanda gake."
+          }
+        }
+      }
+    },
+    "I hope it makes paying a little easier. Enjoy it.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nizeye ko izakorohereza kwishyura ho gato. Uyikoreshe neza."
+          }
+        }
+      }
+    },
+    "I made it on my own, because USSD made paying harder than it should be.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nayikoze ku giti cyanjye, kuko USSD yatumaga kwishyura bigorana kurusha uko byari bikwiye."
+          }
+        }
+      }
+    },
+    "If something is off, write to me first. I answer you myself.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niba hari ikitagenda neza, banza unyandikire. Ngusubiza ubwanjye."
+          }
+        }
+      }
+    },
+    "If you turn on the lock, iOS checks your Face ID, Touch ID or passcode. StarHash never sees your face or fingerprint; it is only told whether the check passed.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nushyiraho ifunga, iOS igenzura Face ID, Touch ID cyangwa kode y'ibanga yawe. StarHash ntijya ibona isura yawe cyangwa igikumwe cyawe; ibwirwa gusa niba igenzura ryagenze neza."
+          }
+        }
+      }
+    },
+    "Import data": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Injiza amakuru"
+          }
+        }
+      }
+    },
+    "Imported": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byinjijwe"
+          }
+        }
+      }
+    },
+    "In Settings you can stop StarHash saving transactions, using contacts, remembering recent recipients, Nearby, auto-verify and each of its notifications at any time. You can delete any transaction, or erase everything with Delete All Data. Deleting the app removes it all too.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mu Igenamiterere, igihe icyo ari cyo cyose ushobora kubuza StarHash kubika ibikorwa, gukoresha abo muvugana no kwibuka abo wishyuye vuba, ndetse ukazimya Hafi aha, Kugenzura byikora na buri menyesha yayo. Ushobora gusiba igikorwa icyo ari cyo cyose, cyangwa ugasiba byose ukoresheje Siba amakuru yose. Gusiba porogaramu na byo bikuraho byose."
+          }
+        }
+      }
+    },
+    "In Shortcuts, check **StarHash SMS** was added under that name.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muri Shortcuts, reba ko **StarHash SMS** yongeweho kuri iryo zina."
+          }
+        }
+      }
+    },
+    "In Shortcuts, tap **Add Shortcut**.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muri Shortcuts, kanda **Add Shortcut**."
+          }
+        }
+      }
+    },
+    "In love": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wakunze"
+          }
+        }
+      }
+    },
+    "It comes straight back here. Nothing is saved.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bihita bigaruka hano. Nta kibikwa."
+          }
+        }
+      }
+    },
+    "It goes in your own QR code, so friends\nscan it to pay you. It stays on your iPhone.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ijya muri kode yawe ya QR, kugira ngo inshuti zawe\nziyisikane zikwishyure. Iguma kuri iPhone yawe."
+          }
+        }
+      }
+    },
+    "It is removed from Buy.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikurwa muri Gura."
+          }
+        }
+      }
+    },
+    "It is removed from StarHash only.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gisibwa muri StarHash gusa."
+          }
+        }
+      }
+    },
+    "It's free, its source code is public, and it's private: no account, no server, no tracking. Everything stays on your iPhone.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ni ubuntu, kode yayo iri ahagaragara, kandi irinda ibanga ryawe: nta kwiyandikisha, nta seriveri, nta gukurikiranwa. Byose biguma kuri iPhone yawe."
+          }
+        }
+      }
+    },
+    "Keep On": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bigumeho"
+          }
+        }
+      }
+    },
+    "Keep a history of what you pay and receive": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bika amateka y'ibyo wishyura n'ibyo wakira"
+          }
+        }
+      }
+    },
+    "Keep the codes you dial often, like cash out and bundles, and dial each one in a tap.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bika kode ukunze gukanda, nko kubikuza n'interineti, maze uzikoreshe ukanze rimwe gusa."
+          }
+        }
+      }
+    },
+    "Keep the codes you dial often, like pending approvals, cash out and bundles, and dial them in a tap. Pin up to eight to the top.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bika kode ukanda kenshi, nk'ibyemezo bitegerejwe, kubikuza n'interineti, maze uzikande mu gukanda rimwe. Shyira hejuru izigera ku munani."
+          }
+        }
+      }
+    },
+    "Language": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ururimi"
+          }
+        }
+      }
+    },
+    "Latest": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iheruka"
+          }
+        }
+      }
+    },
+    "Light": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urumuri"
+          }
+        }
+      }
+    },
+    "Loading contacts": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turimo kuzana abo muvugana"
+          }
+        }
+      }
+    },
+    "Location": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ahantu"
+          }
+        }
+      }
+    },
+    "Location is off": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kumenya aho uri birafunze"
+          }
+        }
+      }
+    },
+    "MTNLogo": {},
+    "MTNLogoMono": {},
+    "Make the automation": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kora automation"
+          }
+        }
+      }
+    },
+    "Map showing where this was paid": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikarita yerekana aho ubu bwishyu bwakorewe"
+          }
+        }
+      }
+    },
+    "Mark as Failed": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byanze"
+          }
+        }
+      }
+    },
+    "Maybe Later": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wenda nyuma"
+          }
+        }
+      }
+    },
+    "Merchant code": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode y'umucuruzi"
+          }
+        }
+      }
+    },
+    "Merchant code %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode y'umucuruzi %@"
+          }
+        }
+      }
+    },
+    "Message": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubutumwa"
+          }
+        }
+      }
+    },
+    "Messages": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubutumwa"
+          }
+        }
+      }
+    },
+    "MoMoAdvance fee": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikiguzi cya MoMoAdvance"
+          }
+        }
+      }
+    },
+    "MoMoAdvance's fee of %@ is added. Now paste the payment's own message.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikiguzi cya MoMoAdvance cya %@ cyongeweho. Noneho shyiramo ubutumwa bw'ubwo bwishyu ubwabwo."
+          }
+        }
+      }
+    },
+    "Money received": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amafaranga yakiriwe"
+          }
+        }
+      }
+    },
+    "Money received won't be logged": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amafaranga wakiriye ntazandikwa"
+          }
+        }
+      }
+    },
+    "Monthly report": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raporo y'ukwezi"
+          }
+        }
+      }
+    },
+    "Monthly summary": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incamake y'ukwezi"
+          }
+        }
+      }
+    },
+    "More": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibindi"
+          }
+        }
+      }
+    },
+    "Most on %@, %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byinshi ku itariki %1$@: %2$@"
+          }
+        }
+      }
+    },
+    "Move Earlier": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shyira imbere"
+          }
+        }
+      }
+    },
+    "Move Later": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yimurire inyuma"
+          }
+        }
+      }
+    },
+    "My Code": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode yanjye"
+          }
+        }
+      }
+    },
+    "My StarHash code": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode yanjye ya StarHash"
+          }
+        }
+      }
+    },
+    "Name": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izina"
+          }
+        }
+      }
+    },
+    "Name (optional)": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izina (si ngombwa)"
+          }
+        }
+      }
+    },
+    "Nearby": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hafi aha"
+          }
+        }
+      }
+    },
+    "Needs auto-verify, under Transactions": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bisaba Kugenzura byikora, mu gice cy'Ibikorwa"
+          }
+        }
+      }
+    },
+    "Neutral": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bisanzwe"
+          }
+        }
+      }
+    },
+    "Never share your PIN. Your wallet never asks for it in a message or a call.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ntukigere uha undi PIN yawe. Konti yawe ntijya iyigusaba mu butumwa cyangwa kuri telefoni."
+          }
+        }
+      }
+    },
+    "New Code": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode nshya"
+          }
+        }
+      }
+    },
+    "Next": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibikurikira"
+          }
+        }
+      }
+    },
+    "Next month": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukwezi gutaha"
+          }
+        }
+      }
+    },
+    "No %@ messages for a week. Check the automation": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta butumwa bwa %@ bwaje mu cyumweru. Reba automation"
+          }
+        }
+      }
+    },
+    "No Code Yet": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta kode urabona"
+          }
+        }
+      }
+    },
+    "No Codes": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta kode"
+          }
+        }
+      }
+    },
+    "No Matches": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta bihuye"
+          }
+        }
+      }
+    },
+    "No Results": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta cyabonetse"
+          }
+        }
+      }
+    },
+    "No Transactions": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta bikorwa"
+          }
+        }
+      }
+    },
+    "No account and no server. Your PIN only\never goes into your wallet's own prompt.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta kwiyandikisha, nta seriveri. PIN yawe uyandika gusa\naho konti yawe ubwayo iyigusaba."
+          }
+        }
+      }
+    },
+    "No account, no servers and no tracking. Everything stays on your iPhone.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta konti, nta seriveri, kandi nta gukurikiranwa. Byose biguma kuri iPhone yawe."
+          }
+        }
+      }
+    },
+    "No camera here": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta kamera ihari"
+          }
+        }
+      }
+    },
+    "No message within an hour": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta butumwa bwaje mu isaha imwe"
+          }
+        }
+      }
+    },
+    "No more USSD menus": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta menu za USSD ukundi"
+          }
+        }
+      }
+    },
+    "No transactions match “%@”.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta bikorwa bihuye na “%@”."
+          }
+        }
+      }
+    },
+    "No warranty": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta garanti"
+          }
+        }
+      }
+    },
+    "None": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta na kimwe"
+          }
+        }
+      }
+    },
+    "Not Now": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubu oya"
+          }
+        }
+      }
+    },
+    "Not a StarHash File": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Si dosiye ya StarHash"
+          }
+        }
+      }
+    },
+    "Not a payment code": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Si kode yo kwishyura"
+          }
+        }
+      }
+    },
+    "Not affiliated": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta sano ifitanye na bo"
+          }
+        }
+      }
+    },
+    "Note": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icyitonderwa"
+          }
+        }
+      }
+    },
+    "Note (optional)": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibisobanuro (si ngombwa)"
+          }
+        }
+      }
+    },
+    "Nothing This Month": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta na kimwe uku kwezi"
+          }
+        }
+      }
+    },
+    "Nothing below arrives until you do": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta menyesha na rimwe riri hano hasi rizaza utarabyemera"
+          }
+        }
+      }
+    },
+    "Nothing is copied. Copy the message in Messages first.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta kintu wakoporoye. Banza ukoporore ubutumwa muri Messages."
+          }
+        }
+      }
+    },
+    "Nothing was paid or received in %@.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta mafaranga yishyuwe cyangwa yakiriwe muri %@."
+          }
+        }
+      }
+    },
+    "Nothing went out in %@.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta mafaranga yasohotse muri %@."
+          }
+        }
+      }
+    },
+    "Nothing. It has no analytics, no advertising and no third-party code that collects data. Request a Feature and the source code open GitHub in your browser, under GitHub's own privacy policy, and every code you dial goes through your phone and your provider, under theirs.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta na kimwe. Nta isesengura ry'imikoreshereze, nta matangazo, kandi nta kode y'ibindi bigo ikusanya amakuru ibamo. Gusaba ikintu gishya no kureba kode y'inkomoko bifungura GitHub muri mushakisha yawe, hakurikijwe politiki y'ibanga ya GitHub ubwayo, kandi buri kode ukanze inyura muri telefoni yawe no ku mutanga serivisi wawe, hakurikijwe politiki yabo."
+          }
+        }
+      }
+    },
+    "Notifications": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imenyesha"
+          }
+        }
+      }
+    },
+    "Notifications are off": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imenyesha zirafunze"
+          }
+        }
+      }
+    },
+    "Number": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimero"
+          }
+        }
+      }
+    },
+    "Numbers and merchant codes": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimero na kode z'abacuruzi"
+          }
+        }
+      }
+    },
+    "Numbers starting 072 or 073": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimero zitangira na 072 cyangwa 073"
+          }
+        }
+      }
+    },
+    "Numbers starting 078 or 079": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimero zitangira na 078 cyangwa 079"
+          }
+        }
+      }
+    },
+    "OK": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sawa"
+          }
+        }
+      }
+    },
+    "Of what went out, %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mu byasohotse, %@"
+          }
+        }
+      }
+    },
+    "Off keeps amounts and balances off the Lock Screen": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iyo bizimye, amafaranga n'ayasigaye ntibigaragara kuri ecran ifunze"
+          }
+        }
+      }
+    },
+    "Only if you allow them, which StarHash asks once as you set it up. It makes its reminders and summaries on your iPhone from the transactions it already keeps; nothing is sent to it from a server. Choose on its Notifications page what they tell you of, and whether they show amounts on your Lock Screen.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gusa iyo ubyemeye, kandi StarHash ibikubaza rimwe gusa igihe uyitunganya. Ikora ibyibutsa n'incamake byayo kuri iPhone yawe, ikoresheje ibikorwa isanzwe ibika; nta kintu na kimwe iyoherezwa kivuye kuri seriveri. Ku rupapuro rwayo rwa Imenyesha, hitamo ibyo ikumenyesha, kandi uhitemo niba yerekana amafaranga kuri Lock Screen yawe."
+          }
+        }
+      }
+    },
+    "Only if you turn on Nearby, and only while you pay. When you pay a merchant code, or a number that is not in your contacts, StarHash notes where the payment was made, to show it on a map and to suggest it when you are back there. Paying one of your contacts never records where you were. Where a payment was made is kept with that payment, on your iPhone and in your backups as your transactions are. Turning Nearby off erases it.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ari uko gusa ufunguye Hafi aha, kandi igihe wishyura gusa. Iyo wishyuye kode y'umucuruzi, cyangwa nimero itari mu bo muvugana, StarHash yandika aho ubwishyu bwakorewe, kugira ngo ihagaragaze ku ikarita kandi ikakwibutsa uwo wishyuye nugaruka aho. Kwishyura umwe mu bo muvugana ntibijya byandika aho wari uri. Aho ubwishyu bwakorewe hibikwa hamwe n'ubwo bwishyu, kuri iPhone yawe no mu bubiko bwawe bw'inyongera (backups), nk'uko ibikorwa byawe bibikwa. Iyo uzimije Hafi aha, ayo makuru arasibwa."
+          }
+        }
+      }
+    },
+    "Open Again": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongera ufungure"
+          }
+        }
+      }
+    },
+    "Open Settings": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fungura Settings"
+          }
+        }
+      }
+    },
+    "Open Shortcuts": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fungura Shortcuts"
+          }
+        }
+      }
+    },
+    "Opens StarHash in the Settings app": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ifungura StarHash muri porogaramu ya Settings"
+          }
+        }
+      }
+    },
+    "Opens StarHash's keypad to pay someone.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ifungura utubuto tw'imibare twa StarHash kugira ngo wishyure umuntu."
+          }
+        }
+      }
+    },
+    "Opens a feature request form on GitHub": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ifungura ifishi yo gusaba ikintu gishya kuri GitHub"
+          }
+        }
+      }
+    },
+    "Opens a new issue on GitHub": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ifungura ikibazo gishya kuri GitHub"
+          }
+        }
+      }
+    },
+    "Opens a new message to Shima on GitHub": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ifungura ubutumwa bushya bwandikiwe Shima kuri GitHub"
+          }
+        }
+      }
+    },
+    "Opens the symbols to choose from": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ifungura ibimenyetso byo guhitamo"
+          }
+        }
+      }
+    },
+    "Optic ID": {},
+    "Other": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibindi"
+          }
+        }
+      }
+    },
+    "Other payments": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubundi bwishyu"
+          }
+        }
+      }
+    },
+    "Pa": {},
+    "Page %lld of %lld": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urupapuro %lld kuri %lld"
+          }
+        }
+      }
+    },
+    "Paid a shop here before? StarHash lists it\nfirst next time. This stays on your iPhone.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wigeze kwishyura iduka hano? StarHash irarishyira\nimbere ubutaha. Ibi biguma kuri iPhone yawe."
+          }
+        }
+      }
+    },
+    "Paid the most": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abo wishyuye kurusha abandi"
+          }
+        }
+      }
+    },
+    "Passcode": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode y'ibanga"
+          }
+        }
+      }
+    },
+    "Passcode Lock": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ifunga rya kode y'ibanga"
+          }
+        }
+      }
+    },
+    "Paste Message": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Komeka ubutumwa"
+          }
+        }
+      }
+    },
+    "Pay": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ishyura"
+          }
+        }
+      }
+    },
+    "Pay %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ishyura %@"
+          }
+        }
+      }
+    },
+    "Pay & Buy": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ishyura & Gura"
+          }
+        }
+      }
+    },
+    "Pay Again": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongera wishyure"
+          }
+        }
+      }
+    },
+    "Pay anyone": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ishyura uwo ari we wese"
+          }
+        }
+      }
+    },
+    "Pay in a few taps": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ishyura ukanze inshuro nke"
+          }
+        }
+      }
+    },
+    "Pay me with StarHash": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyishyura ukoresheje StarHash"
+          }
+        }
+      }
+    },
+    "Pay me with StarHash: %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyishyura ukoresheje StarHash: %@"
+          }
+        }
+      }
+    },
+    "Pay someone from Pay, or set up Auto-verify in Settings to log MoMo messages.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ishyura umuntu uhereye kuri Ishyura, cyangwa utunganye Kugenzura byikora muri Igenamiterere kugira ngo ubutumwa bwa MoMo bwandikwe."
+          }
+        }
+      }
+    },
+    "Pay with StarHash": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ishyura ukoresheje StarHash"
+          }
+        }
+      }
+    },
+    "Pay your contacts\nin a tap": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ishyura abo muvugana\nukanze rimwe"
+          }
+        }
+      }
+    },
+    "Payment": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu"
+          }
+        }
+      }
+    },
+    "Payment reminders": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kwibutswa ubwishyu"
+          }
+        }
+      }
+    },
+    "Payments": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu"
+          }
+        }
+      }
+    },
+    "Payments won't be confirmed": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu ntibuzemezwa"
+          }
+        }
+      }
+    },
+    "Pays them again": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yongera kubishyura"
+          }
+        }
+      }
+    },
+    "Pending": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitegerejwe"
+          }
+        }
+      }
+    },
+    "People": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abantu"
+          }
+        }
+      }
+    },
+    "Period": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igihe"
+          }
+        }
+      }
+    },
+    "Photos": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amafoto"
+          }
+        }
+      }
+    },
+    "Pick who to pay from your contacts": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hitamo uwo wishyura mu bo muvugana"
+          }
+        }
+      }
+    },
+    "Pick who to pay from your contacts.\nThey stay on your iPhone.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hitamo uwo wishyura mu bo muvugana.\nBaguma kuri iPhone yawe."
+          }
+        }
+      }
+    },
+    "Pick your vibe": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hitamo uko umeze"
+          }
+        }
+      }
+    },
+    "Picks another": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hitamo indi"
+          }
+        }
+      }
+    },
+    "Pin": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shyira hejuru"
+          }
+        }
+      }
+    },
+    "Pinned is full": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ahashyizwe hejuru huzuye"
+          }
+        }
+      }
+    },
+    "Play a sound with each notification": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vuza ijwi kuri buri menyesha"
+          }
+        }
+      }
+    },
+    "Previous month": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukwezi gushize"
+          }
+        }
+      }
+    },
+    "Privacy & Sound": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibanga n'amajwi"
+          }
+        }
+      }
+    },
+    "Privacy Policy": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Politiki y'ibanga"
+          }
+        }
+      }
+    },
+    "Private by design": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yubatswe irinda ibanga ryawe"
+          }
+        }
+      }
+    },
+    "Process ${message} from ${sender}": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soma ${message} ya ${sender}"
+          }
+        }
+      }
+    },
+    "Process Carrier SMS": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soma SMS ya konti"
+          }
+        }
+      }
+    },
+    "Profile": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umwirondoro"
+          }
+        }
+      }
+    },
+    "Questions?": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ufite ibibazo?"
+          }
+        }
+      }
+    },
+    "RWF spent in %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RWF zakoreshejwe muri %@"
+          }
+        }
+      }
+    },
+    "Rate on the App Store": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tanga amanota kuri App Store"
+          }
+        }
+      }
+    },
+    "Reads an MTN MoMo or Airtel Money message and logs the transaction in StarHash. Other messages are ignored.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Isoma ubutumwa bwa MTN MoMo cyangwa Airtel Money maze ikandika igikorwa muri StarHash. Ubundi butumwa ntibwitabwaho."
+          }
+        }
+      }
+    },
+    "Rearrange": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tondeka bundi bushya"
+          }
+        }
+      }
+    },
+    "Reason": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impamvu"
+          }
+        }
+      }
+    },
+    "Received": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byakiriwe"
+          }
+        }
+      }
+    },
+    "Received ": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byakiriwe "
+          }
+        }
+      }
+    },
+    "Received %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byakiriwe %@"
+          }
+        }
+      }
+    },
+    "Recent": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abaheruka"
+          }
+        }
+      }
+    },
+    "Recipients": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abo wishyura"
+          }
+        }
+      }
+    },
+    "Release Notes": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibyavuguruwe"
+          }
+        }
+      }
+    },
+    "Remind me after": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unyibutse nyuma ya"
+          }
+        }
+      }
+    },
+    "Reminders, confirmations and summaries": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibyibutsa, ibyemezo n'incamake"
+          }
+        }
+      }
+    },
+    "Remove %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kuraho %@"
+          }
+        }
+      }
+    },
+    "Replay Onboarding": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongera urebe intangiriro"
+          }
+        }
+      }
+    },
+    "Reports": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raporo"
+          }
+        }
+      }
+    },
+    "Request a Feature": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saba ikintu gishya"
+          }
+        }
+      }
+    },
+    "Reset All": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subiza byose uko byari"
+          }
+        }
+      }
+    },
+    "Restaurants": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resitora"
+          }
+        }
+      }
+    },
+    "Run it once there, and allow anything it asks.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yikoreshe rimwe aho, kandi wemere ibyo isaba byose."
+          }
+        }
+      }
+    },
+    "STARHASH TEST": {},
+    "Sad": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubabaye"
+          }
+        }
+      }
+    },
+    "Save": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bika"
+          }
+        }
+      }
+    },
+    "Save recent recipients": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bika abo wishyuye vuba"
+          }
+        }
+      }
+    },
+    "Save transactions": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bika ibikorwa"
+          }
+        }
+      }
+    },
+    "Save your transactions, codes and profile as a file": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bika ibikorwa byawe, kode n'umwirondoro wawe nka dosiye"
+          }
+        }
+      }
+    },
+    "Saved": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byabitswe"
+          }
+        }
+      }
+    },
+    "Savings": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kuzigama"
+          }
+        }
+      }
+    },
+    "Scam warnings": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imiburo y'ubutekamutwe"
+          }
+        }
+      }
+    },
+    "Scan a QR code": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sikana kode ya QR"
+          }
+        }
+      }
+    },
+    "Scan to pay": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sikana wishyure"
+          }
+        }
+      }
+    },
+    "Search": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shakisha"
+          }
+        }
+      }
+    },
+    "Search Transactions": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shakisha ibikorwa"
+          }
+        }
+      }
+    },
+    "Search name, number or merchant code": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shakisha izina, nimero cyangwa kode y'umucuruzi"
+          }
+        }
+      }
+    },
+    "Search transactions": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shakisha ibikorwa"
+          }
+        }
+      }
+    },
+    "Security": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umutekano"
+          }
+        }
+      }
+    },
+    "See the welcome screens again": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongera urebe amapaji y'ikaze"
+          }
+        }
+      }
+    },
+    "See what you spent by day, week, month or year, with a chart and every payment's details.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reba ibyo wakoresheje ku munsi, icyumweru, ukwezi cyangwa umwaka, hamwe n'igishushanyo n'amakuru ya buri bwishyu."
+          }
+        }
+      }
+    },
+    "See what you spent by day, week, month or year, with a chart, search and the details of each payment.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reba ibyo wakoresheje ku munsi, icyumweru, ukwezi cyangwa umwaka, hamwe n'igishushanyo, ishakisha n'ibisobanuro bya buri bwishyu."
+          }
+        }
+      }
+    },
+    "Select a recipient": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hitamo uwo wishyura"
+          }
+        }
+      }
+    },
+    "Send Money": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohereza amafaranga"
+          }
+        }
+      }
+    },
+    "Sender": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uwohereje"
+          }
+        }
+      }
+    },
+    "Sent": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byoherejwe"
+          }
+        }
+      }
+    },
+    "Sent ": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byoherejwe "
+          }
+        }
+      }
+    },
+    "Set Up": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shyiraho"
+          }
+        }
+      }
+    },
+    "Set a passcode on this iPhone first": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Banza ushyire kode y'ibanga kuri iyi iPhone"
+          }
+        }
+      }
+    },
+    "Sets where each flag starts": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igena aho buri flag itangirira"
+          }
+        }
+      }
+    },
+    "Settings": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igenamiterere"
+          }
+        }
+      }
+    },
+    "Share Code": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sangiza kode"
+          }
+        }
+      }
+    },
+    "Shima": {
+      "shouldTranslate": false
+    },
+    "Shima Serein": {},
+    "Shopping": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guhaha"
+          }
+        }
+      }
+    },
+    "Shortcut": {},
+    "Shortcut didn't run": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortcut ntiyakoze"
+          }
+        }
+      }
+    },
+    "Shortcuts opens and runs **StarHash SMS** on a test message.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortcuts irafunguka igakoresha **StarHash SMS** ku butumwa bw'igerageza."
+          }
+        }
+      }
+    },
+    "Shortcuts showing StarHash SMS, with the Add Shortcut button at the bottom": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortcuts yerekana StarHash SMS, ifite akabuto Add Shortcut hasi"
+          }
+        }
+      }
+    },
+    "Shortcuts' Automation tab: When I get a message containing RWF, run StarHash SMS, switched on": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igice cya Automation muri Shortcuts: iyo nakiriye ubutumwa burimo RWF, koresha StarHash SMS, birakora"
+          }
+        }
+      }
+    },
+    "Show amounts": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erekana amafaranga"
+          }
+        }
+      }
+    },
+    "Show contact details": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erekana amakuru y'uwo muvugana"
+          }
+        }
+      }
+    },
+    "Show who you paid last at the top": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erekana hejuru abo wishyuye vuba"
+          }
+        }
+      }
+    },
+    "Shows its details": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yerekana amakuru yayo"
+          }
+        }
+      }
+    },
+    "Signed, Shima": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uwawe, Shima"
+          }
+        }
+      }
+    },
+    "Sleepy": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ufite ibitotsi"
+          }
+        }
+      }
+    },
+    "Smart categories": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibyiciro byikora"
+          }
+        }
+      }
+    },
+    "Smiling": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umwenyura"
+          }
+        }
+      }
+    },
+    "So if you love it, a rating on the App Store is all I ask. It helps someone else find an easier way to pay.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niba rero uyikunze, icyo nsaba gusa ni amanota kuri App Store. Bifasha undi muntu kubona uburyo bworoshye bwo kwishyura."
+          }
+        }
+      }
+    },
+    "Someone who says they sent you money by mistake and asks for it back is the usual trick.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umuntu uvuga ko yakoherereje amafaranga yibeshye, akagusaba kuyamusubiza, ni wo mutego ukunze gukoreshwa."
+          }
+        }
+      }
+    },
+    "Sort payments into categories by their names": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shyira ubwishyu mu byiciro hakurikijwe amazina"
+          }
+        }
+      }
+    },
+    "Sort payments into categories with Apple Intelligence": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shyira ubwishyu mu byiciro ukoresheje Apple Intelligence"
+          }
+        }
+      }
+    },
+    "Sound": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ijwi"
+          }
+        }
+      }
+    },
+    "Source code": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode y'inkomoko"
+          }
+        }
+      }
+    },
+    "Spending day by day": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibyakoreshejwe umunsi ku wundi"
+          }
+        }
+      }
+    },
+    "Spent in %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byakoreshejwe muri %@"
+          }
+        }
+      }
+    },
+    "Spent with StarHash since %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byakoreshejwe na StarHash kuva %@"
+          }
+        }
+      }
+    },
+    "Star-struck": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watangajwe cyane"
+          }
+        }
+      }
+    },
+    "StarHash": {
+      "shouldTranslate": false
+    },
+    "StarHash SMS": {},
+    "StarHash cannot read your SMS. If you set up auto-verify, your own Shortcuts automation passes messages containing RWF to StarHash, which reads them on your iPhone to confirm payments. Messages that are not MTN MoMo or Airtel Money transactions are ignored and not kept.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash ntishobora gusoma SMS zawe. Niba utunganyije Kugenzura byikora, automation yawe bwite ya Shortcuts yoherereza StarHash ubutumwa burimo RWF, nayo ikabusomera kuri iPhone yawe kugira ngo yemeze ubwishyu. Ubutumwa butari ubw'ibikorwa bya MTN MoMo cyangwa Airtel Money burirengagizwa kandi ntibubikwa."
+          }
+        }
+      }
+    },
+    "StarHash couldn't read it. Try saving it to your iPhone first.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash ntiyabashije kuyisoma. Gerageza kubanza kuyibika kuri iPhone yawe."
+          }
+        }
+      }
+    },
+    "StarHash has no account, no server and no tracking. What it keeps stays on your iPhone.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash ntigira konti, ntigira seriveri kandi ntigukurikirana. Ibyo ibika biguma kuri iPhone yawe."
+          }
+        }
+      }
+    },
+    "StarHash is Locked": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash irafunze"
+          }
+        }
+      }
+    },
+    "StarHash is a free app that helps you pay with MTN MoMo and Airtel Money in Rwanda: it fills in the USSD code your wallet uses and opens your iPhone's dialer. By using StarHash you agree to these terms. If you do not agree, please do not use it.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash ni porogaramu y'ubuntu igufasha kwishyura ukoresheje MTN MoMo na Airtel Money mu Rwanda: yuzuza kode ya USSD konti yawe ikoresha, igafungura aho uhamagarira kuri iPhone yawe. Ukoresheje StarHash, uba wemeye aya mabwiriza. Niba utayemera, turakwinginze ntuyikoreshe."
+          }
+        }
+      }
+    },
+    "StarHash is an independent app. It is not made, endorsed or supported by MTN Group, MTN Rwanda, Airtel Africa or Airtel Rwanda. MTN, MoMo, Airtel and Airtel Money are their owners' trademarks, used only to name the services StarHash works with.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash ni porogaramu yigenga. Ntiyakozwe, ntiyemejwe kandi ntishyigikiwe na MTN Group, MTN Rwanda, Airtel Africa cyangwa Airtel Rwanda. MTN, MoMo, Airtel na Airtel Money ni ibirango by'ubucuruzi bya ba nyirabyo, bikoreshwa gusa mu kuvuga serivisi StarHash ikorana na zo."
+          }
+        }
+      }
+    },
+    "StarHash is free, and its code is open for anyone to read and improve.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash ni ubuntu, kandi kode yayo ifunguriye buri wese kuyisoma no kuyinoza."
+          }
+        }
+      }
+    },
+    "StarHash is free, with no account, subscription or advertising. Its source code is published under the PolyForm Noncommercial License 1.0.0, which lets you use and change the code for any non-commercial purpose.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash ni ubuntu, nta konti, nta kwiyandikisha kwishyurwa, nta n'amatangazo. Kode y'inkomoko yayo yashyizwe ahagaragara hakurikijwe uruhushya rwa PolyForm Noncommercial License 1.0.0, rukwemerera gukoresha no guhindura iyo kode ku mpamvu iyo ari yo yose itari iy'ubucuruzi."
+          }
+        }
+      }
+    },
+    "StarHash is free, with public source code, no ads, no account and nothing sent off your iPhone. There is nothing to buy.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash ni ubuntu: kode y'inkomoko yayo iri ahagaragara, nta matangazo, nta konti, kandi nta kintu na kimwe kiva kuri iPhone yawe. Nta kintu cyo kugura kirimo."
+          }
+        }
+      }
+    },
+    "StarHash is meant for people old enough to have a mobile money account, and is not directed at children.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash igenewe abantu bafite imyaka ihagije yo kugira konti ya mobile money, kandi ntigenewe abana."
+          }
+        }
+      }
+    },
+    "StarHash is provided as it is, without warranty of any kind. As far as the law allows, its developer is not liable for any loss from using it, including a payment sent to the wrong person or for the wrong amount, a failed or delayed payment, a record that is missing or wrong, or a notification that is late, missing or wrong.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash itangwa uko iri, nta ngwate y'ubwoko ubwo ari bwo bwose. Mu rugero amategeko yemera, uwayikoze ntaryozwa igihombo icyo ari cyo cyose giturutse ku kuyikoresha, harimo ubwishyu bwoherejwe ku muntu utari we cyangwa bw'amafaranga atari yo, ubwishyu bwanze cyangwa bwatinze, inyandiko ibura cyangwa itari yo, cyangwa imenyesha ritinze, ritaje cyangwa ritari ryo."
+          }
+        }
+      }
+    },
+    "StarHash never holds, sends or receives money. Every payment is made by your mobile money provider, after you check its details on the provider's own prompt and enter your PIN there. Check the amount and who it goes to before you confirm. A payment you confirm is between you and your provider, under its own terms and fees.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash ntijya ibika, yohereza cyangwa yakira amafaranga. Buri bwishyu bukorwa n'ikigo cyawe cya mobile money, nyuma y'uko ugenzura amakuru yabwo ku idirishya ry'icyo kigo ubwacyo, ukinjiza PIN yawe aho. Genzura umubare w'amafaranga n'uwo agenewe mbere yo kwemeza. Ubwishyu wemeje ni hagati yawe n'ikigo cyawe, hakurikijwe amabwiriza n'ibiguzi byacyo."
+          }
+        }
+      }
+    },
+    "StarHash sees only the contacts you chose. You can share more in Settings.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash ibona gusa abo muvugana wahisemo. Ushobora gusangiza abandi muri porogaramu ya Settings."
+          }
+        }
+      }
+    },
+    "StarHash version %@, build %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash verisiyo %@, build %@"
+          }
+        }
+      }
+    },
+    "StarHash will stop reading your %@ messages.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash izareka gusoma ubutumwa bwawe bwa %@."
+          }
+        }
+      }
+    },
+    "StarHash's code is public on GitHub": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode ya StarHash iri ahagaragara kuri GitHub"
+          }
+        }
+      }
+    },
+    "StarHash/places.json": {},
+    "Start Using StarHash": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tangira gukoresha StarHash"
+          }
+        }
+      }
+    },
+    "Status": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uko bihagaze"
+          }
+        }
+      }
+    },
+    "Stay on top of\nyour payments": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kurikirana neza\nubwishyu bwawe"
+          }
+        }
+      }
+    },
+    "Step %lld of %lld": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intambwe ya %1$lld kuri %2$lld"
+          }
+        }
+      }
+    },
+    "Still pending": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biracyategerejwe"
+          }
+        }
+      }
+    },
+    "Suggest who you\npaid here": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibutswa uwo\nwishyuye hano"
+          }
+        }
+      }
+    },
+    "Suggest who you paid at the place you're in": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erekana uwo wishyuye aho uri ubu"
+          }
+        }
+      }
+    },
+    "Summaries": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incamake"
+          }
+        }
+      }
+    },
+    "Surprised": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watangaye"
+          }
+        }
+      }
+    },
+    "Switch to %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jya kuri %@"
+          }
+        }
+      }
+    },
+    "Switches the wallet you pay from": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ihindura konti wishyuriraho"
+          }
+        }
+      }
+    },
+    "Symbol": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikimenyetso"
+          }
+        }
+      }
+    },
+    "System": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nka telefoni"
+          }
+        }
+      }
+    },
+    "TV": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TV"
+          }
+        }
+      }
+    },
+    "Tab bar": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umurongo w'ibice"
+          }
+        }
+      }
+    },
+    "Tap **+**, choose **Message**, and set **Message Contains** to **RWF**.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kanda **+**, hitamo **Message**, maze ushyire **RWF** muri **Message Contains**."
+          }
+        }
+      }
+    },
+    "Tap **Add Shortcut** below.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kanda **Add Shortcut** hepfo."
+          }
+        }
+      }
+    },
+    "Tap **Open Shortcuts** below and go to **Automation**.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kanda **Fungura Shortcuts** hepfo maze ujye kuri **Automation**."
+          }
+        }
+      }
+    },
+    "Tap **Verify Shortcut** below.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kanda **Genzura shortcut** hasi aha."
+          }
+        }
+      }
+    },
+    "Tell us what StarHash should do next": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tubwire icyo StarHash ikwiye gukora ubutaha"
+          }
+        }
+      }
+    },
+    "Terms of Service": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amabwiriza y'ikoreshwa"
+          }
+        }
+      }
+    },
+    "That is %lld%% less than %@.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibyo ni %lld%% munsi y'ayo wakoresheje muri %@."
+          }
+        }
+      }
+    },
+    "That is %lld%% more than %@.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ni %lld%% kurusha %@."
+          }
+        }
+      }
+    },
+    "That is about the same as %@.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bingana hafi n'ibya %@."
+          }
+        }
+      }
+    },
+    "That is an %@ number; you pay with %@.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iyo ni nimero ya %@; wishyura ukoresheje %@."
+          }
+        }
+      }
+    },
+    "That's not the right message.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwo si bwo butumwa bukwiye."
+          }
+        }
+      }
+    },
+    "The USSD codes, fees and limits StarHash uses come from the providers' published information, and the providers may change them without notice. Activity is a record kept for you, from what you dial and the messages you pass to StarHash; your provider's records are the ones that count. With auto-verify on, a payment that no message confirms within an hour is marked failed; if it did go through, mark it as confirmed. StarHash's reminders and summaries are worked out from that record, and iOS decides when they show: a reminder that is late or never comes says nothing about whether a payment went through.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode za USSD, ibiguzi n'imipaka StarHash ikoresha bikomoka ku makuru ibigo bitanga serivisi byatangaje, kandi ibyo bigo bishobora kubihindura nta nteguza. Ibikorwa ni inyandiko ikubikiwe, ikomoka ku byo ukanda n'ubutumwa uha StarHash; inyandiko z'ikigo cyawe ni zo zifite agaciro. Iyo Kugenzura byikora bikora, ubwishyu butemejwe n'ubutumwa ubwo ari bwo bwose mu isaha imwe bushyirwa mu byanze; niba bwarakunze, bushyire mu byemejwe. Ibyibutsa n'incamake bya StarHash bikorwa hashingiwe kuri iyo nyandiko, kandi iOS ni yo ihitamo igihe bigaragara: kwibutswa gutinze cyangwa kutaje na rimwe ntikuvuga niba ubwishyu bwaragenze neza cyangwa butagenze neza."
+          }
+        }
+      }
+    },
+    "The codes you dial often, one tap each, up to eight pinned.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode ukunze gukanda, buri imwe ukanda rimwe gusa, ugashyira hejuru zigera ku munani."
+          }
+        }
+      }
+    },
+    "The day it comes": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umunsi incamake iza"
+          }
+        }
+      }
+    },
+    "The first release of StarHash: pay with MTN MoMo or Airtel Money without typing USSD codes, and keep every payment in one place.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verisiyo ya mbere ya StarHash: ishyura ukoresheje MTN MoMo cyangwa Airtel Money utanditse kode za USSD, kandi ubike ubwishyu bwose ahantu hamwe."
+          }
+        }
+      }
+    },
+    "The money goes to the number you pick.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amafaranga ajya kuri nimero uhisemo."
+          }
+        }
+      }
+    },
+    "The month just ended, on the 1st": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukwezi gushize, ku itariki ya 1"
+          }
+        }
+      }
+    },
+    "The most went to %@, %lld%% of it.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icyiciro cyatwaye menshi ni %1$@, ni ukuvuga %2$lld%% yayo."
+          }
+        }
+      }
+    },
+    "The shortcut works. A message through the automation proves the rest.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortcut irakora. Ubutumwa bunyuze muri automation ni bwo buzemeza ibisigaye."
+          }
+        }
+      }
+    },
+    "The terms for using StarHash": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amabwiriza yo gukoresha StarHash"
+          }
+        }
+      }
+    },
+    "The terms for using StarHash, in plain words.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amabwiriza yo gukoresha StarHash, mu magambo yoroshye."
+          }
+        }
+      }
+    },
+    "The text of the MoMo SMS. In an automation, pass Shortcut Input.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inyandiko ya SMS ya MoMo. Muri automation, ohereza Shortcut Input."
+          }
+        }
+      }
+    },
+    "The wallet said it failed": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konti yavuze ko byanze"
+          }
+        }
+      }
+    },
+    "These terms may change as StarHash does. The current terms are always here, with the day they took effect, and using StarHash after a change means you accept them.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aya mabwiriza ashobora guhinduka uko StarHash ihinduka. Amabwiriza agezweho ahora ari hano, hamwe n'itariki yatangiye gukurikizwa, kandi gukoresha StarHash nyuma y'impinduka bisobanura ko uyemera."
+          }
+        }
+      }
+    },
+    "This code holds no number or merchant code.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iyi kode ntirimo nimero cyangwa kode y'umucuruzi."
+          }
+        }
+      }
+    },
+    "This file is from a newer StarHash. Update from the App Store, then import it again.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iyi dosiye yavuye muri StarHash nshya kuruta iyi. Vugurura StarHash kuri App Store, hanyuma wongere uyinjize."
+          }
+        }
+      }
+    },
+    "This isn't a valid code. Use only numbers, * and #, starting with * or # and ending with #.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iyi si kode yemewe. Koresha imibare, * na # gusa, utangire na * cyangwa # kandi urangize na #."
+          }
+        }
+      }
+    },
+    "This may be a scam": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibi bishobora kuba ubutekamutwe"
+          }
+        }
+      }
+    },
+    "This year": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uyu mwaka"
+          }
+        }
+      }
+    },
+    "Time": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Isaha"
+          }
+        }
+      }
+    },
+    "To": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kuri"
+          }
+        }
+      }
+    },
+    "To %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kuri %@"
+          }
+        }
+      }
+    },
+    "Total %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igiteranyo %@"
+          }
+        }
+      }
+    },
+    "Total:": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igiteranyo:"
+          }
+        }
+      }
+    },
+    "Touch ID": {},
+    "Transaction": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igikorwa"
+          }
+        }
+      }
+    },
+    "Transactions": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibikorwa"
+          }
+        }
+      }
+    },
+    "Transport": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingendo"
+          }
+        }
+      }
+    },
+    "Try Again": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongera ugerageze"
+          }
+        }
+      }
+    },
+    "Try what is not finished yet": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerageza ibitararangira"
+          }
+        }
+      }
+    },
+    "Turn Off": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zimya"
+          }
+        }
+      }
+    },
+    "Turn Off Auto-verify?": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zimya Kugenzura byikora?"
+          }
+        }
+      }
+    },
+    "Turn On": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fungura"
+          }
+        }
+      }
+    },
+    "Turn it off any time in **Settings**.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wabizimya igihe icyo ari cyo cyose muri **Igenamiterere**."
+          }
+        }
+      }
+    },
+    "Turn it on and StarHash remembers where you paid a number or a code, and suggests it when you are back there.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bifungure maze StarHash yibuke aho wishyuriye nimero cyangwa kode, maze iyikwereke nugaruka aho."
+          }
+        }
+      }
+    },
+    "Turn it on in Settings and only your face, fingerprint or passcode opens StarHash.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bifungure muri Igenamiterere, maze isura yawe, igikumwe cyawe cyangwa kode y'ibanga byonyine ni byo bifungura StarHash."
+          }
+        }
+      }
+    },
+    "Turn off %@ for StarHash.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zimya %@ kuri StarHash."
+          }
+        }
+      }
+    },
+    "Turn off the torch": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zimya itoroshi"
+          }
+        }
+      }
+    },
+    "Turn on %@ for StarHash.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fungura %@ kuri StarHash."
+          }
+        }
+      }
+    },
+    "Turn on the torch": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cana itoroshi"
+          }
+        }
+      }
+    },
+    "Turn them on for StarHash in the Settings app": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fungura imenyesha za StarHash muri porogaramu ya Settings"
+          }
+        }
+      }
+    },
+    "Type a merchant code or a number, or pick a contact. Saved numbers and codes come up by name, with their photo.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andika kode y'umucuruzi cyangwa nimero, cyangwa uhitemo uwo muvugana. Nimero na kode wabitse bigaragara mu mazina yabyo, hamwe n'ifoto yabyo."
+          }
+        }
+      }
+    },
+    "Type a phone number or a merchant code to pay it directly.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andika nimero ya telefoni cyangwa kode y'umucuruzi uyishyure ako kanya."
+          }
+        }
+      }
+    },
+    "Type an amount first": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Banza wandike umubare w'amafaranga"
+          }
+        }
+      }
+    },
+    "Type an amount, pick a contact or a merchant code, and StarHash dials your wallet's code for you.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andika amafaranga, hitamo uwo muvugana cyangwa kode y'umucuruzi, maze StarHash igukandire kode ya konti yawe."
+          }
+        }
+      }
+    },
+    "Type an amount, pick who gets it,\nand StarHash dials the code for you.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andika amafaranga, hitamo uyahabwa,\nmaze StarHash igukandire kode."
+          }
+        }
+      }
+    },
+    "Type an amount, pick who gets it, and StarHash dials the code.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andika umubare w'amafaranga, hitamo uwo agenewe, maze StarHash ikande kode."
+          }
+        }
+      }
+    },
+    "Type an amount, pick who gets it, and StarHash dials your wallet's code for you. Your PIN is only ever typed into your wallet's own prompt.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andika amafaranga, hitamo uwo uyoherereza, maze StarHash igukandire kode ya konti yawe. PIN yawe uyandika gusa aho konti yawe ubwayo iyigusaba."
+          }
+        }
+      }
+    },
+    "Type anything, we'll find it": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andika icyo ushaka, turakibona"
+          }
+        }
+      }
+    },
+    "Unlock StarHash to see your payments.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fungura StarHash urebe ubwishyu bwawe."
+          }
+        }
+      }
+    },
+    "Unlock with %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fungura ukoresheje %@"
+          }
+        }
+      }
+    },
+    "Unlock with %@ to see your payments.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fungura ukoresheje %@ kugira ngo urebe ubwishyu bwawe."
+          }
+        }
+      }
+    },
+    "Unpin": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kura hejuru"
+          }
+        }
+      }
+    },
+    "Until one comes, StarHash won't mark payments failed on its own.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mu gihe ubutumwa butaraza, StarHash ntizajya ishyira ubwishyu mu byanze ku bwayo."
+          }
+        }
+      }
+    },
+    "Update StarHash First": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Banza uvugurure StarHash"
+          }
+        }
+      }
+    },
+    "Using StarHash": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gukoresha StarHash"
+          }
+        }
+      }
+    },
+    "Verify": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genzura"
+          }
+        }
+      }
+    },
+    "Verify Shortcut": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genzura shortcut"
+          }
+        }
+      }
+    },
+    "Version %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verisiyo %@"
+          }
+        }
+      }
+    },
+    "Wait for your next %@ message, or ask someone to text you **RWF**.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tegereza ubutumwa bwawe bukurikira bwa %@, cyangwa usabe umuntu akwandikire **RWF**."
+          }
+        }
+      }
+    },
+    "Waiting for SMS": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitegereje SMS"
+          }
+        }
+      }
+    },
+    "Waiting for a %@ message to come through": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dutegereje ubutumwa bwa %@"
+          }
+        }
+      }
+    },
+    "Waiting for a message": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hategerejwe ubutumwa"
+          }
+        }
+      }
+    },
+    "Wallet": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konti"
+          }
+        }
+      }
+    },
+    "Wallet: %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konti: %@"
+          }
+        }
+      }
+    },
+    "Warn me about look-alike MoMo messages, and don't log them": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mburira ku butumwa bwigana ubwa MoMo, kandi ntubwandike"
+          }
+        }
+      }
+    },
+    "Water": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amazi"
+          }
+        }
+      }
+    },
+    "Weekly summary": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incamake y'icyumweru"
+          }
+        }
+      }
+    },
+    "What StarHash keeps": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibyo StarHash ibika"
+          }
+        }
+      }
+    },
+    "What StarHash shares": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibyo StarHash isangiza"
+          }
+        }
+      }
+    },
+    "What a payment to a business was for": {},
+    "What each version brought": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibyo buri verisiyo yazanye"
+          }
+        }
+      }
+    },
+    "What you sent and received in the week": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibyo wohereje n'ibyo wakiriye mu cyumweru"
+          }
+        }
+      }
+    },
+    "What's New": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibishya"
+          }
+        }
+      }
+    },
+    "What's New in StarHash": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibishya muri StarHash"
+          }
+        }
+      }
+    },
+    "What's new, the note and the source code": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibishya, ijambo ry'uwayikoze na kode y'inkomoko"
+          }
+        }
+      }
+    },
+    "When a %@ message brings money in": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iyo ubutumwa bwa %@ buvuga ko wakiriye amafaranga"
+          }
+        }
+      }
+    },
+    "When a %@ message confirms a payment": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iyo ubutumwa bwa %@ bwemeje ubwishyu"
+          }
+        }
+      }
+    },
+    "When a payment you made is still pending": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iyo ubwishyu wakoze bugitegerejwe"
+          }
+        }
+      }
+    },
+    "When no %@ message confirms a payment within an hour": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iyo nta butumwa bwa %@ bwemeje ubwishyu mu isaha imwe"
+          }
+        }
+      }
+    },
+    "When the summaries come": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igihe incamake ziza"
+          }
+        }
+      }
+    },
+    "Where StarHash opens": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aho StarHash ifungukira"
+          }
+        }
+      }
+    },
+    "Where it went": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aho amafaranga yagiye"
+          }
+        }
+      }
+    },
+    "Which carrier do you pay with? StarHash\ndials its codes for you.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wishyura ukoresheje uwuhe murongo? StarHash\nigukandira kode zawo."
+          }
+        }
+      }
+    },
+    "Who sent the message. In an automation, pass Shortcut Input's Sender.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uwohereje ubutumwa. Muri automation, shyiramo Sender ya Shortcut Input."
+          }
+        }
+      }
+    },
+    "Winking": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukonyeza"
+          }
+        }
+      }
+    },
+    "With your permission, StarHash reads your contacts to show who you can pay and to put names and photos on your payments. They are read on your iPhone only and never copied off it.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iyo ubyemeye, StarHash isoma abo muvugana kugira ngo ikwereke abo ushobora kwishyura, no gushyira amazina n'amafoto ku bwishyu bwawe. Basomerwa kuri iPhone yawe gusa kandi ntibigera bakopororwa ngo bayivemo."
+          }
+        }
+      }
+    },
+    "Worn out": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unaniwe"
+          }
+        }
+      }
+    },
+    "Write to Shima": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andikira Shima"
+          }
+        }
+      }
+    },
+    "Writing your summary": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turimo kwandika incamake yawe"
+          }
+        }
+      }
+    },
+    "Written on your iPhone by Apple Intelligence. Check the figures below.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byanditswe kuri iPhone yawe na Apple Intelligence. Genzura imibare iri hasi."
+          }
+        }
+      }
+    },
+    "Written on your iPhone by Apple Intelligence. Check the figures.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byanditswe kuri iPhone yawe na Apple Intelligence. Genzura imibare."
+          }
+        }
+      }
+    },
+    "You": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wowe"
+          }
+        }
+      }
+    },
+    "You are responsible for your iPhone, its passcode and who can use it. StarHash's Face ID lock keeps Activity private, but your wallet is protected by your PIN. Never share your PIN with anyone, including someone who says they are from StarHash or your provider.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ni wowe ushinzwe iPhone yawe, kode y'ibanga yayo n'abemerewe kuyikoresha. Uburyo bwa Face ID bwo gufunga StarHash butuma Ibikorwa biguma ari ibanga, ariko konti yawe irindwa na PIN yawe. Ntukigere uha PIN yawe undi muntu uwo ari we wese, harimo n'uvuga ko aturuka kuri StarHash cyangwa ku kigo gitanga serivisi yawe."
+          }
+        }
+      }
+    },
+    "You can pin up to %lld codes. Unpin one to make room.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ushobora gushyira hejuru kode zigera kuri %lld. Kura imwe hejuru kugira ngo ubone umwanya."
+          }
+        }
+      }
+    },
+    "You paid %@ the most, %@ over %lld payments.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wishyuye %@ kurusha abandi: %@ mu bwishyu %lld."
+          }
+        }
+      }
+    },
+    "You received %@ in %@ and spent nothing.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wakiriye %1$@ muri %2$@ kandi nta cyo wakoresheje."
+          }
+        }
+      }
+    },
+    "You spent %@ in %@, over %lld payments.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wakoresheje %1$@ muri %2$@, mu bwishyu %3$lld."
+          }
+        }
+      }
+    },
+    "You're all set": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byose biteguye"
+          }
+        }
+      }
+    },
+    "You've been using StarHash for two weeks now. Thank you.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umaze ibyumweru bibiri ukoresha StarHash. Urakoze."
+          }
+        }
+      }
+    },
+    "Your Data": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amakuru yawe"
+          }
+        }
+      }
+    },
+    "Your QR code": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode yawe ya QR"
+          }
+        }
+      }
+    },
+    "Your StarHash QR code": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode yawe ya QR ya StarHash"
+          }
+        }
+      }
+    },
+    "Your carrier": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sosiyete yawe y'itumanaho"
+          }
+        }
+      }
+    },
+    "Your choices": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amahitamo yawe"
+          }
+        }
+      }
+    },
+    "Your codes": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode zawe"
+          }
+        }
+      }
+    },
+    "Your face: %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Isura yawe: %@"
+          }
+        }
+      }
+    },
+    "Your iPhone and your PIN": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone yawe na PIN yawe"
+          }
+        }
+      }
+    },
+    "Your month": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukwezi kwawe"
+          }
+        }
+      }
+    },
+    "Your name": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izina ryawe"
+          }
+        }
+      }
+    },
+    "Your number": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimero yawe"
+          }
+        }
+      }
+    },
+    "Your number goes in your QR code, so StarHash knows where others' payments go. Nothing leaves your iPhone.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimero yawe ishyirwa muri kode yawe ya QR, kugira ngo StarHash imenye aho ubwishyu bw'abandi bujya. Nta kintu kiva kuri iPhone yawe."
+          }
+        }
+      }
+    },
+    "Your transactions (who, how much, when, whether they are confirmed, and the fee, reference and balance when a message gives them), the categories you add, your recent recipients, Buy's codes and your settings. All of it is saved in StarHash's own storage on your iPhone, and none of it is sent anywhere.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibikorwa byawe (uwo, angahe, ryari, niba byemejwe, n'ikiguzi, kode y'igikorwa n'amafaranga asigaye iyo ubutumwa bubitanze), ibyiciro wongeyeho, abo wishyuye vuba, kode za Gura n'igenamiterere ryawe. Ibyo byose bibikwa mu bubiko bwa StarHash ubwayo kuri iPhone yawe, kandi nta na kimwe cyoherezwa ahandi."
+          }
+        }
+      }
+    },
+    "Your transactions (with where each was paid, when Nearby is on) and settings are part of your iPhone's own backups, to iCloud or your computer, which you control.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibikorwa byawe (hamwe n'aho buri kimwe cyishyuriwe, iyo Hafi aha ifunguye) n'igenamiterere ryawe biri muri kopi zibikwa na iPhone yawe ubwayo, kuri iCloud cyangwa kuri mudasobwa yawe, ugenzura ubwawe."
+          }
+        }
+      }
+    },
+    "Your wallet's messages confirm each payment for you.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubutumwa bwa konti yawe bukwemereza buri bwishyu."
+          }
+        }
+      }
+    },
+    "Your wallet's messages confirm each payment, with its fee and balance. Thank you for using StarHash.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubutumwa bwa konti yawe bwemeza buri bwishyu, hamwe n'ikiguzi cyabwo n'amafaranga asigaye. Urakoze gukoresha StarHash."
+          }
+        }
+      }
+    },
+    "Your wallet, your payments": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konti yawe, ubwishyu bwawe"
+          }
+        }
+      }
+    },
+    "feature_request.yml": {},
+    "init(coder:) is not used": {},
+    "money sent to people": {},
+    "other payments": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ubundi bwishyu"
+          }
+        }
+      }
+    },
+    "payment-expired": {},
+    "payment-reminder": {},
+    "x-callback-url": {},
+    "x-cancel": {},
+    "x-error": {},
+    "x-success": {}
+  },
+  "version": "1.0"
+}

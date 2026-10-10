@@ -11,25 +11,37 @@ public enum ActivityPeriod: String, CaseIterable, Identifiable, Sendable {
 
     public var id: Self { self }
 
-    /// The period picker's title: "This Week".
+    /// The period picker's title: String(localized: "This Week", bundle: .module).
     public var title: String {
         switch self {
-        case .today: "Today"
-        case .week: "This Week"
-        case .month: "This Month"
-        case .year: "This Year"
-        case .allTime: "All Time"
+        case .today: String(localized: "Today", bundle: .module)
+        case .week: String(localized: "This Week", bundle: .module)
+        case .month: String(localized: "This Month", bundle: .module)
+        case .year: String(localized: "This Year", bundle: .module)
+        case .allTime: String(localized: "All Time", bundle: .module)
         }
     }
 
-    /// Over the summary card's total: "Spent this week".
+    /// Over the summary card's total: String(localized: "Spent this week", bundle: .module).
     public var spentCaption: String {
         switch self {
-        case .today: "Spent today"
-        case .week: "Spent this week"
-        case .month: "Spent this month"
-        case .year: "Spent this year"
-        case .allTime: "Spent in total"
+        case .today: String(localized: "Spent today", bundle: .module)
+        case .week: String(localized: "Spent this week", bundle: .module)
+        case .month: String(localized: "Spent this month", bundle: .module)
+        case .year: String(localized: "Spent this year", bundle: .module)
+        case .allTime: String(localized: "Spent in total", bundle: .module)
+        }
+    }
+
+    /// What an empty period says: "Nothing was paid or received this
+    /// week."
+    public var emptyMessage: String {
+        switch self {
+        case .today: String(localized: "Nothing was paid or received today.", bundle: .module)
+        case .week: String(localized: "Nothing was paid or received this week.", bundle: .module)
+        case .month: String(localized: "Nothing was paid or received this month.", bundle: .module)
+        case .year: String(localized: "Nothing was paid or received this year.", bundle: .module)
+        case .allTime: String(localized: "Nothing was paid or received yet.", bundle: .module)
         }
     }
 
@@ -207,7 +219,7 @@ public enum ActivitySummary {
         let start = bucket.interval.start
         switch period {
         case .today:
-            return "\(string(start, "j", calendar, locale)) to \(string(bucket.interval.end, "j", calendar, locale))"
+            return String(localized: "\(string(start, "j", calendar, locale)) to \(string(bucket.interval.end, "j", calendar, locale))", bundle: .module)
         case .week: return string(start, "EEEEdMMMM", calendar, locale)
         case .month: return string(start, "dMMMM", calendar, locale)
         case .year: return string(start, "MMMMyyyy", calendar, locale)
@@ -304,12 +316,12 @@ public enum ActivitySummary {
         }
     }
 
-    /// A day group's heading: "Today", "Yesterday", "Fri 2 Oct" (in the
+    /// A day group's heading: String(localized: "Today", bundle: .module), String(localized: "Yesterday", bundle: .module), "Fri 2 Oct" (in the
     /// user's own date order), with the year once it is not this year's.
     public static func dayTitle(for day: Date, now: Date, calendar: Calendar, locale: Locale = .current) -> String {
-        if calendar.isDate(day, inSameDayAs: now) { return "Today" }
+        if calendar.isDate(day, inSameDayAs: now) { return String(localized: "Today", bundle: .module) }
         if let yesterday = calendar.date(byAdding: .day, value: -1, to: now), calendar.isDate(day, inSameDayAs: yesterday) {
-            return "Yesterday"
+            return String(localized: "Yesterday", bundle: .module)
         }
         let sameYear = calendar.component(.year, from: day) == calendar.component(.year, from: now)
         return string(day, sameYear ? "EEEdMMM" : "EEEdMMMyyyy", calendar, locale)

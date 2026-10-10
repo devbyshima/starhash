@@ -1,0 +1,99 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%lld/%lld": {
+      "shouldTranslate": false
+    },
+    "Balance": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reba asigaye"
+          }
+        }
+      }
+    },
+    "Buy": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gura"
+          }
+        }
+      }
+    },
+    "Dial your Buy codes in a tap.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koresha kode zawe za Gura ukanze rimwe gusa."
+          }
+        }
+      }
+    },
+    "Dials %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikanda %@"
+          }
+        }
+      }
+    },
+    "More codes": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izindi kode"
+          }
+        }
+      }
+    },
+    "Opens StarHash's scanner to pay a QR code.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ifungura sikaneri ya StarHash ngo wishyure kode ya QR."
+          }
+        }
+      }
+    },
+    "Pages": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amapaji"
+          }
+        }
+      }
+    },
+    "Scan to Pay": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sikana wishyure"
+          }
+        }
+      }
+    },
+    "Show More Codes": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reba izindi kode"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

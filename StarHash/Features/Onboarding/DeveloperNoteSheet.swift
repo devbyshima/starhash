@@ -84,7 +84,7 @@ struct DeveloperNoteContent: View {
                 .accessibilityLabel("Signed, Shima")
 
             VStack(spacing: 0) {
-                Button(primaryTitle, action: primaryAction)
+                Button(LocalizedStringKey(primaryTitle), action: primaryAction)
                     .buttonStyle(.sheetPrimary)
                 if showsWriteLink {
                     Button {
@@ -205,6 +205,7 @@ private struct NoteSheetFrame<Content: View>: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color.noteSheetBackground.ignoresSafeArea())
+        .starhashContainerSurface()
         .sheetGlass(detents: [.large])
         .presentationDragIndicator(.hidden)
     }

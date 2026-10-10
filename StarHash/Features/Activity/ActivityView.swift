@@ -42,7 +42,7 @@ struct ActivityView: View {
     private var calendar: Calendar { .autoupdatingCurrent }
 
     var body: some View {
-        NavigationStack(path: openTransactionPath) {
+        NavigationStack(path: activityPath) {
             ZStack {
                 Color.starhashBackground.ignoresSafeArea()
                 if isSearching {
@@ -65,12 +65,18 @@ struct ActivityView: View {
             }
             .animation(.smooth(duration: 0.3), value: store.transactions.isEmpty)
             .toolbar(.hidden, for: .navigationBar)
-            .navigationDestination(for: UUID.self) { id in
-                TransactionDetailPage(transactionID: id, onPayAgain: payAgain)
-                    .starhashBackButton()
+            .navigationDestination(for: ActivityRoute.self) { route in
+                switch route {
+                case .transaction(let id):
+                    TransactionDetailPage(transactionID: id, onPayAgain: payAgain)
+                        .starhashBackButton()
+                case .report(let month):
+                    ReportsView(month: month)
+                        .starhashBackButton()
+                }
             }
         }
-        .onChange(of: !openTransactionPath.wrappedValue.isEmpty || isSearching, initial: true) { _, covers in
+        .onChange(of: !activityPath.wrappedValue.isEmpty || isSearching, initial: true) { _, covers in
             router.setHidesTabBar(covers, on: .activity)
         }
         // A link to a transaction that is not there (deleted, or from
@@ -128,7 +134,7 @@ struct ActivityView: View {
         EmptyStateView(
             doodle: .period,
             title: "No Transactions",
-            message: "Nothing was paid or received \(period.emptyPhrase)."
+            message: period.emptyMessage
         )
         .padding(.horizontal, StarHashMetrics.screenPadding)
         .starhashCentredOverTabBar()
@@ -203,7 +209,8 @@ struct ActivityView: View {
             searchText: $searchText,
             searchFocused: $searchFocused,
             onSearch: beginSearch,
-            onCloseSearch: endSearch
+            onCloseSearch: endSearch,
+            onReports: { router.showReport(month: now) }
         )
     }
 
@@ -221,15 +228,21 @@ struct ActivityView: View {
 
     // MARK: Details
 
-    /// The router's open transaction as the stack's path. A transaction that
-    /// no longer exists opens nothing.
-    private var openTransactionPath: Binding<[UUID]> {
+    /// The router's open report and transaction as the stack's path: a
+    /// month's report, then a transaction opened from it, or a transaction
+    /// alone. A transaction that no longer exists opens nothing.
+    private var activityPath: Binding<[ActivityRoute]> {
         Binding(
             get: {
-                guard let id = router.openTransactionID, store.transaction(id: id) != nil else { return [] }
-                return [id]
+                var path: [ActivityRoute] = []
+                if let month = router.openReportMonth { path.append(.report(month)) }
+                if let id = router.openTransactionID, store.transaction(id: id) != nil { path.append(.transaction(id)) }
+                return path
             },
-            set: { router.openTransactionID = $0.last }
+            set: { path in
+                router.openReportMonth = path.lazy.compactMap(\.reportMonth).first
+                router.openTransactionID = path.lazy.compactMap(\.transactionID).last
+            }
         )
     }
 
@@ -314,6 +327,9 @@ struct ActivityView: View {
             isSearching = true
             searchText = text
         }
+        if DebugLaunch.arguments.contains("-openReport") {
+            router.showReport(month: now)
+        }
         if DebugLaunch.arguments.contains("-openFirstTransaction"), let first = store.transactions.first {
             router.openTransactionID = first.id
         }
@@ -327,4 +343,19 @@ struct ActivityView: View {
         }
     }
     #endif
+}
+
+/// The pages Activity pushes.
+enum ActivityRoute: Hashable {
+    case transaction(UUID)
+    /// A month's report, by its first day.
+    case report(Date)
+
+    var transactionID: UUID? {
+        if case .transaction(let id) = self { id } else { nil }
+    }
+
+    var reportMonth: Date? {
+        if case .report(let month) = self { month } else { nil }
+    }
 }

@@ -172,16 +172,26 @@ final class StarHashNotifications {
         try? await center.add(request(for: item))
     }
 
+    /// A message that looks like the wallet's may be a scam: says so at
+    /// once, whatever the Notifications page says, since StarHash did not
+    /// log it and the owner may be about to send money back.
+    func warnOfScam(_ warning: ScamWarning) async {
+        let item = NotificationPlan.scamWarning(warning, settings: StarHashPreferences.notifications)
+        guard await authorizationStatus().allowsDelivery else { return }
+        try? await center.add(request(for: item))
+    }
+
     /// Delete All Data: nothing left waiting or showing.
     func removeAll() {
         center.removeAllPendingNotificationRequests()
         center.removeAllDeliveredNotifications()
     }
 
-    /// A tap opens what the notification is about: its transaction, or
-    /// Activity for a summary. Verify opens the payment with its sheet, and
-    /// Mark as Failed settles it as its details page would.
-    func answer(action: String, transactionID: UUID?) async {
+    /// A tap opens what the notification is about: its transaction, a
+    /// summary's month on Reports, or a scam warning's advice. Verify opens
+    /// the payment with its sheet, and Mark as Failed settles it as its
+    /// details page would.
+    func answer(action: String, transactionID: UUID?, kind: NotificationPlan.Item.Kind? = nil, reportMonth: Date? = nil, body: String = "") async {
         let store = AppEnvironment.store
         switch action {
         case Action.verify:
@@ -199,6 +209,10 @@ final class StarHashNotifications {
         case UNNotificationDefaultActionIdentifier:
             if let id = transactionID, let url = URL(string: "starhash://transaction/\(id.uuidString)") {
                 AppEnvironment.router.handle(url)
+            } else if kind == .scamWarning {
+                AppEnvironment.router.scamNotice = ScamNotice(message: body)
+            } else if kind == .weeklySummary || kind == .monthlySummary {
+                AppEnvironment.router.showReport(month: reportMonth ?? .now)
             } else {
                 AppEnvironment.router.show(.activity)
             }
@@ -214,9 +228,11 @@ final class StarHashNotifications {
         content.sound = StarHashPreferences.notificationSound ? .default : nil
         // Payments stack apart from the summaries.
         content.threadIdentifier = item.transactionID == nil ? "summaries" : "payments"
-        if let id = item.transactionID {
-            content.userInfo = ["transaction": id.uuidString]
-        }
+        var userInfo: [String: Any] = ["kind": item.kind.rawValue]
+        if let id = item.transactionID { userInfo["transaction"] = id.uuidString }
+        if let month = item.reportMonth { userInfo["reportMonth"] = month.timeIntervalSince1970 }
+        content.userInfo = userInfo
+        if item.kind == .scamWarning { content.threadIdentifier = "warnings" }
         switch item.kind {
         case .paymentReminder: content.categoryIdentifier = Self.reminderCategory
         case .paymentExpired: content.categoryIdentifier = Self.expiredCategory
@@ -238,22 +254,48 @@ final class StarHashNotifications {
     nonisolated static func transactionID(of userInfo: [AnyHashable: Any]) -> UUID? {
         (userInfo["transaction"] as? String).flatMap(UUID.init(uuidString:))
     }
+
+    nonisolated static func kind(of userInfo: [AnyHashable: Any]) -> NotificationPlan.Item.Kind? {
+        (userInfo["kind"] as? String).flatMap(NotificationPlan.Item.Kind.init(rawValue:))
+    }
+
+    nonisolated static func reportMonth(of userInfo: [AnyHashable: Any]) -> Date? {
+        (userInfo["reportMonth"] as? Double).map(Date.init(timeIntervalSince1970:))
+    }
 }
 
-/// iOS's side of the conversation, apart from the main actor: it shows
-/// StarHash's notifications while the app is open too, and hands a tap or
-/// a button to `StarHashNotifications`.
+/// iOS's side of the conversation: it shows StarHash's notifications while
+/// the app is open too, and hands a tap or a button to
+/// `StarHashNotifications`.
+///
+/// The completion-handler forms, each called back on the main thread. The
+/// async forms Swift offers ran off the main thread and handed iOS its
+/// completion from there, which UserNotifications asserts against: a tap
+/// that launched StarHash brought it down before it could open, so a
+/// notification seemed to open nothing.
 private final class NotificationResponder: NSObject, UNUserNotificationCenterDelegate, Sendable {
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
-        willPresent notification: UNNotification
-    ) async -> UNNotificationPresentationOptions {
-        [.banner, .list, .sound]
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping @Sendable (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .list, .sound])
     }
 
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping @Sendable () -> Void
+    ) {
         let action = response.actionIdentifier
-        let id = StarHashNotifications.transactionID(of: response.notification.request.content.userInfo)
-        await StarHashNotifications.shared.answer(action: action, transactionID: id)
+        let userInfo = response.notification.request.content.userInfo
+        let id = StarHashNotifications.transactionID(of: userInfo)
+        let kind = StarHashNotifications.kind(of: userInfo)
+        let month = StarHashNotifications.reportMonth(of: userInfo)
+        let body = response.notification.request.content.body
+        Task { @MainActor in
+            await StarHashNotifications.shared.answer(action: action, transactionID: id, kind: kind, reportMonth: month, body: body)
+            completionHandler()
+        }
     }
 }

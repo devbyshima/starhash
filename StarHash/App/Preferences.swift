@@ -25,3 +25,14 @@ enum PreferenceKey {
     /// empty until onboarding asks.
     static let wallet = "wallet"
 }
+
+/// The language StarHash shows itself in: English or Kinyarwanda, chosen in
+/// the Settings app (iOS keeps each app's language there).
+enum AppLanguage {
+    /// The language's own name for itself: "English", "Kinyarwanda".
+    static var currentName: String {
+        let code = Bundle.main.preferredLocalizations.first ?? "en"
+        let name = Locale(identifier: code).localizedString(forLanguageCode: code) ?? code
+        return name.prefix(1).uppercased() + name.dropFirst()
+    }
+}

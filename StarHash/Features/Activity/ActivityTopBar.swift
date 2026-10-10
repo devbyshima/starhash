@@ -13,6 +13,8 @@ struct ActivityTopBar: View {
     var searchFocused: FocusState<Bool>.Binding
     let onSearch: () -> Void
     let onCloseSearch: () -> Void
+    /// Opens this month's report.
+    let onReports: () -> Void
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -31,6 +33,8 @@ struct ActivityTopBar: View {
                             .transition(.offset(x: 80).combined(with: .opacity))
                     } else {
                         Spacer(minLength: 0)
+                        SwapGlassButton(symbol: "chart.pie.fill", label: String(localized: "Reports"), action: onReports)
+                            .transition(.opacity)
                         SwapGlassButton(symbol: "magnifyingglass", label: "Search", action: onSearch)
                             .transition(.opacity)
                     }

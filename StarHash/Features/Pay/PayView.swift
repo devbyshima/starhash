@@ -39,6 +39,8 @@ struct PayView: View {
     /// Pay tapped with nothing typed, which shakes the amount.
     @State private var zeroShakes = 0
     @State private var didApplyDebugLaunch = false
+    /// The QR scanner, over everything.
+    @State private var isScanning = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -66,8 +68,22 @@ struct PayView: View {
         } message: { code in
             Text("Dial \(code) on your phone to finish.")
         }
-        // Pay Again on a transaction, from the Activity tab.
+        // Pay Again on a transaction, from the Activity tab, or a
+        // StarHash code opened by the Camera.
         .onChange(of: router.payRequest?.id, initial: true) { takePayRequest() }
+        // The scanner, asked for by a widget or a link.
+        .onChange(of: router.scanRequest, initial: true) {
+            if router.takeScanRequest() {
+                path = []
+                isScanning = true
+            }
+        }
+        .fullScreenCover(isPresented: $isScanning) {
+            QRScannerView { request in
+                isScanning = false
+                take(request)
+            }
+        }
         .onChange(of: path) { _, path in
             // Back from the picker without paying: its fix is dropped. Not
             // when Pay Again just chose someone, whose fix is under way.
@@ -95,7 +111,7 @@ struct PayView: View {
 
     private var keypadScreen: some View {
         VStack(spacing: 0) {
-            PageHeader(page: .pay) { EmptyView() } trailing: { WalletSwitcher() }
+            PageHeader(page: .pay) { EmptyView() } trailing: { ScanButton { isScanning = true } }
 
             Spacer(minLength: 12)
             PayAmountDisplay(amount: input.value, shakes: zeroShakes)
@@ -108,10 +124,10 @@ struct PayView: View {
             }
             Spacer(minLength: 12)
 
-            // The amount sits midway between the top bar and the currency;
-            // the currency, keypad and buttons stack at the bottom, as in a
+            // The amount sits midway between the top bar and the wallet;
+            // the wallet, keypad and buttons stack at the bottom, as in a
             // payment app's keypad screen.
-            PayCurrencyPill(isEmpty: input.isZero)
+            WalletPill()
                 .padding(.bottom, 14)
 
             // Up to 332pt, four rows of about 83, so keys grow to thumb size
@@ -154,17 +170,15 @@ struct PayView: View {
                     .starhashFont(18, weight: .semibold, relativeTo: .body)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
-                    .foregroundStyle(Color.payPrimaryText)
+                    // The Total card is white in either appearance here.
+                    .foregroundStyle(Color.starhashPrimaryText)
                     .padding(.horizontal, 12)
                     .frame(maxWidth: .infinity)
                     .frame(minHeight: StarHashMetrics.primaryButtonHeight)
                     .contentShape(Capsule())
-                    // The Total card's white.
-                    .starhashTotalCard(in: Capsule(), interactive: true)
+                    .modifier(BalanceSurface())
             }
             .buttonStyle(PressScaleButtonStyle())
-            // White with near-black words in dark mode too, as in light.
-            .environment(\.colorScheme, .light)
             .accessibilityHint("Dials \(USSD.balance(for: wallet))")
 
             // Never greyed out: with nothing typed it looks as always, and
@@ -244,10 +258,23 @@ struct PayView: View {
     private func takePayRequest() {
         guard let request = router.takePayRequest() else { return }
         path = []
-        // Pay Again skips the picker: locate now, while StarHash is still in
+        take(PaymentRequest(recipient: request.recipient, amount: request.amount))
+    }
+
+    /// Who a scanned code (or Pay Again) says to pay: chosen under the
+    /// amount, with the amount typed in when the code asks for one, so Pay
+    /// dials them without the recipient screen.
+    private func take(_ request: PaymentRequest) {
+        // Skipping the picker: locate now, while StarHash is still in
         // front, so the fix is in hand when Pay is tapped.
         startLocating()
-        withAnimation(.smooth(duration: 0.25)) { chosenRecipient = request.recipient }
+        withAnimation(.smooth(duration: 0.25)) {
+            chosenRecipient = request.recipient
+            if let amount = request.amount { input = AmountInput(value: amount) }
+        }
+        if request.amount == nil {
+            AccessibilityNotification.Announcement("Paying \(request.recipient.shownName). Type an amount.").post()
+        }
     }
 
     /// Records the payment (pending until its SMS), goes back to the keypad
@@ -324,7 +351,25 @@ struct PayView: View {
         if PayDebug.opensPicker {
             openPicker(query: PayDebug.query ?? "")
         }
+        if DebugLaunch.arguments.contains("-payScan") { isScanning = true }
         #endif
+    }
+}
+
+/// Balance's capsule: clear Liquid Glass in light mode, the blue page
+/// showing through with near-black words on it, as on the tab bar; in dark
+/// mode the Total card's white, with near-black words too.
+private struct BalanceSurface: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+
+    func body(content: Content) -> some View {
+        if colorScheme == .dark {
+            content
+                .starhashTotalCard(in: Capsule(), interactive: true)
+                .environment(\.colorScheme, .light)
+        } else {
+            content.starhashGlass(in: Capsule(), interactive: true, tint: .clear)
+        }
     }
 }
 
@@ -338,6 +383,16 @@ private struct BalanceLabelStyle: LabelStyle {
             if !dynamicTypeSize.isAccessibilitySize { configuration.icon }
             configuration.title
         }
+    }
+}
+
+/// The scanner's button at the top right of Pay, in the round glass the
+/// other header buttons wear.
+private struct ScanButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        SwapGlassButton(symbol: "qrcode.viewfinder", label: "Scan a QR code", action: action)
     }
 }
 
@@ -362,7 +417,7 @@ private struct PayChosenRecipient: View {
                 tile: .for(recipient, photoContactID: enableContacts ? contacts.photoContactID(for: recipient) : nil),
                 size: 28
             )
-            Text("To \(recipient.displayName)")
+            Text("To \(recipient.shownName)")
                 .font(.starhash(.subheadline, weight: .semibold))
                 .foregroundStyle(Color.payPrimaryText)
                 .lineLimit(1)
@@ -374,7 +429,7 @@ private struct PayChosenRecipient: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.hapticPlain)
-            .accessibilityLabel("Remove \(recipient.displayName)")
+            .accessibilityLabel("Remove \(recipient.shownName)")
         }
         .padding(.leading, 6)
         .padding(.trailing, 4)

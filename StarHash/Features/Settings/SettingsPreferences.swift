@@ -18,6 +18,18 @@ extension PreferenceKey {
     /// The app's look, an `AppAppearance` raw value: as the iPhone is set
     /// unless chosen otherwise in Settings.
     static let appearance = "appearance"
+    /// Whether a message that looks like the wallet's but may be a scam is
+    /// held back with a warning. On unless turned off in Settings.
+    static let scamWarnings = "scamWarnings"
+    /// The owner's name and number, for the QR code others scan to pay
+    /// them (`OwnerProfile`).
+    static let profileName = "profileName"
+    static let profileNumber = "profileNumber"
+    /// The face Profile shows, an `AvatarFace` raw value.
+    static let profileAvatar = "profileAvatar"
+    /// Whether the on-device model may name the categories the rules
+    /// cannot (iOS 26 and later, with Apple Intelligence).
+    static let smartCategories = "smartCategories"
 }
 
 /// The app's look, chosen in Settings: as the iPhone is set, or always
@@ -70,6 +82,25 @@ enum StarHashPreferences {
     static var saveRecents: Bool { bool(PreferenceKey.saveRecents, default: true) }
     static var enableContacts: Bool { bool(PreferenceKey.enableContacts, default: true) }
     static var nearbyLocation: Bool { bool(PreferenceKey.nearbyLocation, default: false) }
+    static var scamWarnings: Bool { bool(PreferenceKey.scamWarnings, default: true) }
+    static var smartCategories: Bool { bool(PreferenceKey.smartCategories, default: true) }
+
+    /// The owner's name and number as Settings keeps them.
+    static var profile: OwnerProfile {
+        let defaults = UserDefaults.standard
+        return OwnerProfile(
+            name: defaults.string(forKey: PreferenceKey.profileName),
+            number: defaults.string(forKey: PreferenceKey.profileNumber),
+            avatar: defaults.string(forKey: PreferenceKey.profileAvatar)
+        )
+    }
+
+    static func saveProfile(_ profile: OwnerProfile) {
+        let defaults = UserDefaults.standard
+        defaults.set(profile.name ?? "", forKey: PreferenceKey.profileName)
+        defaults.set(profile.number ?? "", forKey: PreferenceKey.profileNumber)
+        if let avatar = profile.avatar { defaults.set(avatar, forKey: PreferenceKey.profileAvatar) }
+    }
 
     /// Pay or Buy, the page StarHash opens on.
     static var defaultPage: AppTab {
@@ -152,6 +183,8 @@ enum AppReset {
         store.eraseAll()
         StarHashNotifications.shared.removeAll()
         AppEnvironment.shortcuts.reset()
+        SmartCategories.reset()
+        StarHashWidgetData.erase()
         if let domain = Bundle.main.bundleIdentifier {
             UserDefaults.standard.removePersistentDomain(forName: domain)
         }

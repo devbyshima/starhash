@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// The StarHash mark: the star over its small triangle, bare, with no tile
-/// behind it. Light: near black, the dark page's colour, since a blue star
-/// would vanish on the blue page. Dark: the blue. Drawn from the icon's own
+/// behind it. Light: white on the blue page, since a blue star would vanish
+/// there, and the blue on white. Dark: the blue. Drawn from the icon's own
 /// artwork (`AppIcon.icon/Assets/Document.svg`), so it matches the icon at
 /// any size.
 struct StarHashMark: View {
@@ -20,25 +20,33 @@ struct StarHashMark: View {
 /// The star and the triangle beneath it, from the icon's 816 by 816
 /// artwork, centred in the rect at its largest square.
 struct StarHashMarkShape: Shape {
+    /// The artwork's square.
+    static let side: CGFloat = 816
+
+    /// The star, clockwise from the top arm's left corner: each arm's two
+    /// outer corners, then the inner corner before the next arm.
+    static let star: [CGPoint] = [
+        CGPoint(x: 285.5, y: 88.1), CGPoint(x: 521.5, y: 88.1), CGPoint(x: 480.8, y: 302.1),
+        CGPoint(x: 645.7, y: 166.1), CGPoint(x: 759.1, y: 364.8), CGPoint(x: 547, y: 441.5),
+        CGPoint(x: 764.3, y: 516.7), CGPoint(x: 645.7, y: 710.3), CGPoint(x: 404.8, y: 495.3),
+        CGPoint(x: 160.5, y: 710.3), CGPoint(x: 43.4, y: 516.8), CGPoint(x: 260, y: 441.5),
+        CGPoint(x: 45, y: 364.8), CGPoint(x: 160.8, y: 166.1), CGPoint(x: 325.5, y: 302.1),
+    ]
+    static let triangle: [CGPoint] = [
+        CGPoint(x: 404.4, y: 563.8), CGPoint(x: 564.8, y: 729.4), CGPoint(x: 242.3, y: 729.4),
+    ]
+
     func path(in rect: CGRect) -> Path {
-        let s = min(rect.width, rect.height) / 816
-        let origin = CGPoint(x: rect.midX - 408 * s, y: rect.midY - 408 * s)
-        func p(_ point: (CGFloat, CGFloat)) -> CGPoint {
-            CGPoint(x: origin.x + point.0 * s, y: origin.y + point.1 * s)
+        let s = min(rect.width, rect.height) / Self.side
+        let origin = CGPoint(x: rect.midX - Self.side / 2 * s, y: rect.midY - Self.side / 2 * s)
+        func p(_ point: CGPoint) -> CGPoint {
+            CGPoint(x: origin.x + point.x * s, y: origin.y + point.y * s)
         }
 
-        let star: [(CGFloat, CGFloat)] = [
-            (285.5, 88.1), (521.5, 88.1), (480.8, 302.1), (645.7, 166.1),
-            (759.1, 364.8), (547, 441.5), (764.3, 516.7), (645.7, 710.3),
-            (404.8, 495.3), (160.5, 710.3), (43.4, 516.8), (260, 441.5),
-            (45, 364.8), (160.8, 166.1), (325.5, 302.1),
-        ]
-        let triangle: [(CGFloat, CGFloat)] = [(404.4, 563.8), (564.8, 729.4), (242.3, 729.4)]
-
         var path = Path()
-        path.addLines(star.map(p))
+        path.addLines(Self.star.map(p))
         path.closeSubpath()
-        path.addLines(triangle.map(p))
+        path.addLines(Self.triangle.map(p))
         path.closeSubpath()
         return path
     }

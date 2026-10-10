@@ -101,7 +101,7 @@ private struct ReleaseHighlightRow: View {
         HStack(alignment: .center, spacing: 16) {
             SettingsSymbol(symbol: highlight.symbol, size: 46, pointSize: 20)
             VStack(alignment: .leading, spacing: 3) {
-                Text(highlight.title)
+                Text(catalog: highlight.title)
                     .starhashFont(16, weight: .semibold, relativeTo: .callout)
                     .foregroundStyle(Color.starhashPrimaryText)
                 Text(highlight.detail)

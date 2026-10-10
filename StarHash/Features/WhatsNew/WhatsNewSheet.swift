@@ -64,6 +64,7 @@ struct WhatsNewSheet: View {
         // Solid, as the notes' sheets: the page behind would show through
         // clear glass and blur Pay's buttons into the corners.
         .background(Color.noteSheetBackground.ignoresSafeArea())
+        .starhashContainerSurface()
         .sheetGlass(detents: [.height(WhatsNewMetrics.sheetHeight(in: window))])
         .presentationDragIndicator(.hidden)
     }
@@ -170,7 +171,7 @@ private struct WhatsNewSummaryRow: View {
                 .padding(.top, 3)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 0) {
-                Text(highlight.title)
+                Text(catalog: highlight.title)
                     .starhashFont(18, weight: .semibold, relativeTo: .headline)
                     .foregroundStyle(Color.starhashPrimaryText)
                 Text(highlight.detail)
@@ -207,11 +208,11 @@ private struct WhatsNewFeaturePage: View {
                     .padding(.top, WhatsNewMetrics.cardInset)
                 ScrollView {
                     VStack(alignment: .leading, spacing: 6.6) {
-                        Text(feature.title)
+                        Text(catalog: feature.title)
                             .starhashFont(20, weight: .bold, relativeTo: .title3)
                             .foregroundStyle(Color.sheetBrandText)
                             .accessibilityAddTraits(.isHeader)
-                        Text(feature.detail)
+                        Text(catalog: feature.detail)
                             .starhashFont(17, relativeTo: .body)
                             // Cift's 21.9pt from line to line.
                             .lineSpacing(0.2)

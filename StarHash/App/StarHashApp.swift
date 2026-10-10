@@ -34,6 +34,11 @@ struct StarHashApp: App {
         if DebugLaunch.arguments.contains("-nearbyHere") {
             UserDefaults.standard.set(true, forKey: PreferenceKey.nearbyLocation)
         }
+        // -profile: a name and number, for the QR code's screens.
+        if DebugLaunch.arguments.contains("-profile") {
+            UserDefaults.standard.set("Shima Serein", forKey: PreferenceKey.profileName)
+            UserDefaults.standard.set("0788123456", forKey: PreferenceKey.profileNumber)
+        }
         if DebugLaunch.arguments.contains("-resetOnboarding") {
             UserDefaults.standard.set(false, forKey: PreferenceKey.hasOnboarded)
         }
@@ -68,6 +73,9 @@ struct StarHashApp: App {
                     .environment(shortcuts)
                     .tint(Color.starhashPrimaryText)
                     .onOpenURL { router.handle($0) }
+                    #if DEBUG
+                    .debugWidgetGallery()
+                    #endif
                     // A payment dialled, settled or deleted: its reminder
                     // and the summaries follow.
                     .onChange(of: store.transactions) {
@@ -92,6 +100,13 @@ struct StarHashApp: App {
                 store.reloadFromDisk()
                 PaymentExpiry.run()
                 Task { await StarHashNotifications.shared.sync() }
+                // Categories for what came in while away, by the rules and
+                // then by the on-device model.
+                Task { await SmartCategories.run(on: store) }
+            }
+            if phase == .background {
+                // The Buy widget shows the codes as they are now.
+                StarHashWidgetData.publish(shortcuts: shortcuts)
             }
             AppLock.shared.sceneChanged(to: phase)
         }

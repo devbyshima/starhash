@@ -5,6 +5,9 @@ options:
     iOS: "18.0"
   createIntermediateGroups: true
   developmentLanguage: en
+  # English and Kinyarwanda (Localizable.xcstrings in the app and in
+  # StarHashKit), chosen per app in the Settings app.
+  knownRegions: [en, rw, Base]
 
 # One configuration per release channel (RELEASING.md). Beta is Release
 # with its own channel, archived from a release branch for TestFlight.
@@ -28,6 +31,18 @@ settings:
     DEVELOPMENT_TEAM: 7WHQR6L96K
     SWIFT_APPROACHABLE_CONCURRENCY: YES
     SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY: YES
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
+    # The widgets read the app's data through an App Group, which only a
+    # paid Apple Developer Program team can sign: a free personal team's
+    # build fails with one. NO leaves the group out (the widgets then show
+    # Buy's default codes and no spending); YES signs both targets with it.
+    STARHASH_APP_GROUPS: NO
+    STARHASH_APP_GROUP: group.com.fulltimestudio.starhash
+    STARHASH_APP_ENTITLEMENTS_YES: StarHash/App/StarHash.entitlements
+    STARHASH_APP_ENTITLEMENTS_NO: ""
+    STARHASH_WIDGET_ENTITLEMENTS_YES: StarHashWidgets/StarHashWidgets.entitlements
+    STARHASH_WIDGET_ENTITLEMENTS_NO: ""
   # The channel the app reads from Info.plist (`ReleaseChannel.current`),
   # which decides where each feature flag starts.
   configs:
@@ -76,11 +91,16 @@ targets:
     platform: iOS
     sources:
       - path: StarHash
+      # The Buy widget's view, for the widget gallery in Debug builds
+      # (-widgetGallery); each file is empty outside DEBUG.
+      - path: StarHashWidgets/Views
     dependencies:
       - package: StarHashKit
+      - target: StarHashWidgets
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.fulltimestudio.starhash
+        CODE_SIGN_ENTITLEMENTS: $(STARHASH_APP_ENTITLEMENTS_$(STARHASH_APP_GROUPS))
         TARGETED_DEVICE_FAMILY: "1"
         ENABLE_PREVIEWS: YES
         # One binary in Debug too. With the debug dylib, a device build's
@@ -96,17 +116,52 @@ targets:
         CFBundleDisplayName: StarHash
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleLocalizations: [en, rw]
         UILaunchScreen:
           UIColorName: LaunchBackground
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         ITSAppUsesNonExemptEncryption: false
         StarHashChannel: $(STARHASH_CHANNEL)
+        StarHashAppGroup: $(STARHASH_APP_GROUP)
         UIAppFonts: [SpaceGrotesk.ttf]
         NSContactsUsageDescription: StarHash shows your contacts so you can pick who to pay. They stay on your iPhone.
         NSLocationWhenInUseUsageDescription: StarHash notes where you pay, to suggest who you paid when you are back there and to show each payment on a map. It stays on your iPhone.
+        NSCameraUsageDescription: StarHash uses the camera to scan a QR code, to see who to pay. Nothing is recorded or kept.
         NSFaceIDUsageDescription: StarHash asks for Face ID to open, when you turn it on in Settings, so only you see your payments.
         LSApplicationQueriesSchemes: [tel]
         CFBundleURLTypes:
           - CFBundleURLName: com.fulltimestudio.starhash
             CFBundleURLSchemes: [starhash]
+
+  # Buy's codes on the Home Screen, and Scan to Pay in Control Center.
+  # Shares the app's colours (Theme.swift) and typeface.
+  StarHashWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: StarHashWidgets
+      - path: StarHash/Design/Theme.swift
+      - path: StarHash/Resources/Fonts/SpaceGrotesk.ttf
+        buildPhase: resources
+    dependencies:
+      - package: StarHashKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.fulltimestudio.starhash.widgets
+        # The views in Views/ compile here always, and into the app only
+        # for Debug's widget gallery.
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: $(inherited) WIDGET_EXTENSION
+        CODE_SIGN_ENTITLEMENTS: $(STARHASH_WIDGET_ENTITLEMENTS_$(STARHASH_APP_GROUPS))
+        TARGETED_DEVICE_FAMILY: "1"
+        SKIP_INSTALL: YES
+    info:
+      path: StarHashWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: StarHash
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+        UIAppFonts: [SpaceGrotesk.ttf]
+        StarHashAppGroup: $(STARHASH_APP_GROUP)

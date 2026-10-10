@@ -45,10 +45,12 @@ enum SettingsPage: Hashable {
     case privacy
     case about
     case featureFlags
+    case profile
 
     @MainActor @ViewBuilder
     var destination: some View {
         switch self {
+        case .profile: ProfileView()
         case .terms: TermsOfServiceView()
         case .privacy: PrivacyPolicyView()
         case .about: AboutStarHashView()
@@ -67,8 +69,14 @@ private struct SettingsRootList: View {
 
     @Environment(StarHashStore.self) private var store
     @Environment(AppRouter.self) private var router
+    @Environment(USSDShortcutList.self) private var shortcuts
 
     @AppStorage(PreferenceKey.saveTransactions) private var saveTransactions = true
+    @AppStorage(PreferenceKey.scamWarnings) private var scamWarnings = true
+    @AppStorage(PreferenceKey.smartCategories) private var smartCategories = true
+    @AppStorage(PreferenceKey.profileName) private var profileName = ""
+    @AppStorage(PreferenceKey.profileNumber) private var profileNumber = ""
+    @AppStorage(PreferenceKey.profileAvatar) private var profileAvatar = AvatarFace.standard.rawValue
     @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
     @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
     @AppStorage(PreferenceKey.saveRecents) private var saveRecents = true
@@ -83,6 +91,9 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.appLock) private var appLock = false
 
     @State private var confirmsDeleteAll = false
+    @State private var exportDocument: BackupDocument?
+    @State private var isImporting = false
+    @State private var importOutcome: DataTransfer.Outcome?
     @State private var confirmsAutoVerifyOff = SettingsLaunch.confirmsAutoVerifyOff
     @State private var locationRefused = false
 
@@ -108,98 +119,14 @@ private struct SettingsRootList: View {
 
     private var settingsList: some View {
         SettingsScroll {
-            SettingsCard("Transactions") {
-                SettingsToggleRow(
-                    symbol: "tray.full.fill",
-                    title: "Save transactions",
-                    caption: "Keep a history of what you pay and receive",
-                    isOn: $saveTransactions
-                )
-                SettingsToggleRow(
-                    symbol: "checkmark.message.fill",
-                    title: "Auto-verify transactions",
-                    caption: autoVerifyCaption,
-                    isOn: autoVerifyBinding
-                )
-                SettingsToggleRow(
-                    symbol: "questionmark.bubble.fill",
-                    title: "Ask before deleting",
-                    caption: "Confirm every delete except a swipe",
-                    isOn: $confirmDeletes
-                )
-                SettingsLinkRow(
-                    page: .notifications,
-                    symbol: "bell.fill",
-                    title: "Notifications",
-                    caption: "Reminders, confirmations and summaries"
-                )
-            }
-
-            SettingsCard("Recipients") {
-                SettingsToggleRow(
-                    symbol: "person.crop.circle.fill",
-                    title: "Enable contacts",
-                    caption: "Pick who to pay from your contacts",
-                    isOn: contactsBinding
-                )
-                SettingsToggleRow(
-                    symbol: "location.fill",
-                    title: "Nearby",
-                    caption: "Suggest who you paid at the place you're in",
-                    isOn: locationBinding
-                )
-                SettingsToggleRow(
-                    symbol: "clock.arrow.circlepath",
-                    title: "Save recent recipients",
-                    caption: "Show who you paid last at the top",
-                    isOn: $saveRecents
-                )
-            }
-
-            SettingsCard("Pay & Buy") {
-                SettingsRow(
-                    symbol: "house.fill",
-                    title: "Default page",
-                    caption: "Where StarHash opens"
-                ) {
-                    SettingsChoiceMenu(
-                        title: "Default page",
-                        selection: $defaultPage,
-                        choices: [AppTab.pay.rawValue, AppTab.buy.rawValue]
-                    ) { $0 == AppTab.buy.rawValue ? AppTab.buy.title : AppTab.pay.title }
-                }
-            }
-
-            SettingsCard("Display") {
-                SettingsRow(
-                    symbol: "circle.lefthalf.filled",
-                    title: "Appearance",
-                    caption: "Dark, light or as your iPhone is set"
-                ) {
-                    SettingsChoiceMenu(
-                        title: "Appearance",
-                        selection: $appearance,
-                        choices: AppAppearance.allCases
-                    ) { $0.title }
-                }
-            }
-
-            SettingsCard("Security") {
-                securityRow
-            }
-
-            SettingsCard("More") {
-                SettingsLinkRow(page: .terms, symbol: "doc.text.fill", title: "Terms of Service", caption: "The terms for using StarHash")
-                SettingsLinkRow(page: .privacy, symbol: "lock.fill", title: "Privacy Policy", caption: "Everything stays on this iPhone")
-                Link(destination: SettingsLinks.requestFeature) {
-                    SettingsRow(symbol: "lightbulb.fill", title: "Request a Feature", caption: "Tell us what StarHash should do next") {
-                        SettingsChevron(symbol: "arrow.up.right")
-                    }
-                }
-                .buttonStyle(HighlightRowButtonStyle())
-                .accessibilityHint("Opens a feature request form on GitHub")
-                SettingsLinkRow(page: .about, symbol: "star.fill", title: "About StarHash", caption: "What's new, the note and the source code")
-            }
+            profileCard
+            transactionsCard
+            recipientsCard
+            payBuyCard
+            displayCard
+            securityCard
+            dataCard
+            moreCard
 
             // Last and on its own, as GO Club's Logout: the app's delete
             // button, the width of its words, centred under the cards.
@@ -211,6 +138,24 @@ private struct SettingsRootList: View {
                 .id("starhash")
         }
         .onChange(of: appearance) { _, appearance in AppAppearance.apply(appearance) }
+        .fileExporter(
+            isPresented: Binding(get: { exportDocument != nil }, set: { if !$0 { exportDocument = nil } }),
+            document: exportDocument,
+            contentType: .json,
+            defaultFilename: StarHashBackup.fileName()
+        ) { result in
+            if case .success = result { UINotificationFeedbackGenerator().notificationOccurred(.success) }
+        }
+        .fileImporter(isPresented: $isImporting, allowedContentTypes: [.json]) { result in
+            guard case .success(let url) = result else { return }
+            withAnimation(.smooth) {
+                importOutcome = DataTransfer.importFile(at: url, store: store, shortcuts: shortcuts)
+            }
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        }
+        .alert(item: $importOutcome) { outcome in
+            Alert(title: Text(outcome.title), message: Text(outcome.message), dismissButton: .default(Text("OK")))
+        }
         .alert("Are you sure you want to delete all data?", isPresented: $confirmsDeleteAll) {
             Button("Delete", role: .destructive) {
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
@@ -236,6 +181,185 @@ private struct SettingsRootList: View {
         }
     }
 
+    /// The owner's face, name and number, opening Profile.
+    private var profileCard: some View {
+        SettingsCard {
+            NavigationLink(value: SettingsPage.profile) {
+                HStack(spacing: 12) {
+                    AvatarView(face: AvatarFace(rawValue: profileAvatar) ?? .standard, size: 46)
+                        .accessibilityHidden(true)
+                    SettingsRowText(
+                        title: profileName.isEmpty ? String(localized: "Profile") : profileName,
+                        caption: Recipient.ownNumber(profileNumber).map { "\($0.formattedDestination) \u{00B7} " + String(localized: "Your QR code") }
+                            ?? String(localized: "Add your number for your own QR code")
+                    )
+                    Spacer(minLength: 8)
+                    SettingsChevron()
+                }
+                .frame(minHeight: 72)
+                .settingsRowInset()
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(HighlightRowButtonStyle(pressHaptic: false))
+        }
+    }
+
+    private var transactionsCard: some View {
+    SettingsCard("Transactions") {
+        SettingsToggleRow(
+            symbol: "tray.full.fill",
+            title: "Save transactions",
+            caption: "Keep a history of what you pay and receive",
+            isOn: $saveTransactions
+        )
+        SettingsToggleRow(
+            symbol: "checkmark.message.fill",
+            title: "Auto-verify transactions",
+            caption: autoVerifyCaption,
+            isOn: autoVerifyBinding
+        )
+        SettingsToggleRow(
+            symbol: "questionmark.bubble.fill",
+            title: "Ask before deleting",
+            caption: "Confirm every delete except a swipe",
+            isOn: $confirmDeletes
+        )
+        SettingsToggleRow(
+            symbol: "sparkles",
+            title: "Smart categories",
+            caption: SmartCategories.isAvailable
+                ? "Sort payments into categories with Apple Intelligence"
+                : "Sort payments into categories by their names",
+            isOn: $smartCategories
+        )
+        SettingsLinkRow(
+            page: .notifications,
+            symbol: "bell.fill",
+            title: "Notifications",
+            caption: "Reminders, confirmations and summaries"
+        )
+    }
+    }
+
+    private var recipientsCard: some View {
+    SettingsCard("Recipients") {
+        SettingsToggleRow(
+            symbol: "person.crop.circle.fill",
+            title: "Enable contacts",
+            caption: "Pick who to pay from your contacts",
+            isOn: contactsBinding
+        )
+        SettingsToggleRow(
+            symbol: "location.fill",
+            title: "Nearby",
+            caption: "Suggest who you paid at the place you're in",
+            isOn: locationBinding
+        )
+        SettingsToggleRow(
+            symbol: "clock.arrow.circlepath",
+            title: "Save recent recipients",
+            caption: "Show who you paid last at the top",
+            isOn: $saveRecents
+        )
+    }
+    }
+
+    private var payBuyCard: some View {
+    SettingsCard("Pay & Buy") {
+        SettingsRow(
+            symbol: "house.fill",
+            title: "Default page",
+            caption: "Where StarHash opens"
+        ) {
+            SettingsChoiceMenu(
+                title: "Default page",
+                selection: $defaultPage,
+                choices: [AppTab.pay.rawValue, AppTab.buy.rawValue]
+            ) { $0 == AppTab.buy.rawValue ? AppTab.buy.title : AppTab.pay.title }
+        }
+    }
+    }
+
+    private var displayCard: some View {
+    SettingsCard("Display") {
+        SettingsRow(
+            symbol: "circle.lefthalf.filled",
+            title: "Appearance",
+            caption: "Dark, light or as your iPhone is set"
+        ) {
+            SettingsChoiceMenu(
+                title: "Appearance",
+                selection: $appearance,
+                choices: AppAppearance.allCases
+            ) { $0.title }
+        }
+        // iOS keeps each app's language in the Settings app, which
+        // offers English and Kinyarwanda for StarHash.
+        Button { SettingsAppLink.open() } label: {
+            SettingsRow(symbol: "globe", title: "Language", caption: "English or Kinyarwanda, in the Settings app") {
+                HStack(spacing: 8) {
+                    Text(AppLanguage.currentName)
+                        .font(.starhash(.body))
+                        .foregroundStyle(Color.starhashSecondaryText)
+                    SettingsChevron(symbol: "arrow.up.right")
+                }
+            }
+        }
+        .buttonStyle(HighlightRowButtonStyle())
+        .accessibilityHint("Opens StarHash in the Settings app")
+    }
+    }
+
+    private var securityCard: some View {
+    SettingsCard("Security") {
+        securityRow
+        SettingsToggleRow(
+            symbol: "exclamationmark.shield.fill",
+            title: "Scam warnings",
+            caption: "Warn me about look-alike MoMo messages, and don't log them",
+            isOn: $scamWarnings
+        )
+    }
+    }
+
+    private var dataCard: some View {
+    SettingsCard("Your Data") {
+        Button(action: export) {
+            SettingsRow(symbol: "square.and.arrow.up.fill", title: "Export data", caption: "Save your transactions, codes and profile as a file") {
+                SettingsChevron()
+            }
+        }
+        .buttonStyle(HighlightRowButtonStyle())
+        Button { isImporting = true } label: {
+            SettingsRow(symbol: "square.and.arrow.down.fill", title: "Import data", caption: "Add what's in a StarHash file to this iPhone") {
+                SettingsChevron()
+            }
+        }
+        .buttonStyle(HighlightRowButtonStyle())
+    }
+    }
+
+    private var moreCard: some View {
+    SettingsCard("More") {
+        SettingsLinkRow(page: .terms, symbol: "doc.text.fill", title: "Terms of Service", caption: "The terms for using StarHash")
+        SettingsLinkRow(page: .privacy, symbol: "lock.fill", title: "Privacy Policy", caption: "Everything stays on this iPhone")
+        Link(destination: SettingsLinks.requestFeature) {
+            SettingsRow(symbol: "lightbulb.fill", title: "Request a Feature", caption: "Tell us what StarHash should do next") {
+                SettingsChevron(symbol: "arrow.up.right")
+            }
+        }
+        .buttonStyle(HighlightRowButtonStyle())
+        .accessibilityHint("Opens a feature request form on GitHub")
+        SettingsLinkRow(page: .about, symbol: "star.fill", title: "About StarHash", caption: "What's new, the note and the source code")
+    }
+    }
+
+    /// Export: the file is made now, then the system's save sheet asks
+    /// where it goes.
+    private func export() {
+        exportDocument = try? DataTransfer.export(store: store, shortcuts: shortcuts)
+    }
+
     /// No message for a week and the last payments all unconfirmed: the
     /// shortcut has likely stopped, and payments are no longer failed for
     /// want of a message until one comes (`AutoVerify.looksBroken`).
@@ -253,11 +377,11 @@ private struct SettingsRootList: View {
     private var autoVerifyCaption: String {
         if autoVerifyBinding.wrappedValue,
            !StarHashPreferences.automationProven(lastMessageAt: lastMessageAt, since: autoVerifySince) {
-            return "Waiting for a \(wallet.messagesName) message to come through"
+            return String(localized: "Waiting for a \(wallet.messagesName) message to come through")
         }
         return autoVerifyLooksBroken
-            ? "No \(wallet.messagesName) messages for a week. Check the automation"
-            : "Confirm payments from \(wallet.messagesName) messages"
+            ? String(localized: "No \(wallet.messagesName) messages for a week. Check the automation")
+            : String(localized: "Confirm payments from \(wallet.messagesName) messages")
     }
 
     /// On once the setup finished with a working shortcut. Switching it on
@@ -281,7 +405,7 @@ private struct SettingsRootList: View {
             symbol: unlock.symbol,
             title: unlock == .passcode ? "Passcode Lock" : unlock.name,
             caption: available
-                ? (unlock == .passcode ? "Ask for your passcode to open StarHash" : "Ask for \(unlock.name) to open StarHash")
+                ? (unlock == .passcode ? String(localized: "Ask for your passcode to open StarHash") : String(localized: "Ask for \(unlock.name) to open StarHash"))
                 : "Set a passcode on this iPhone first",
             isOn: appLockBinding
         )
@@ -296,7 +420,7 @@ private struct SettingsRootList: View {
         } set: { isOn in
             let name = DeviceUnlock.current.name
             Task {
-                let reason = isOn ? "Turn on \(name) for StarHash." : "Turn off \(name) for StarHash."
+                let reason = isOn ? String(localized: "Turn on \(name) for StarHash.") : String(localized: "Turn off \(name) for StarHash.")
                 guard await AppLock.authenticate(reason: reason) else { return }
                 withAnimation(.smooth) { appLock = isOn }
             }
@@ -355,7 +479,7 @@ enum SettingsVersion {
     /// "StarHash version 1.1.0, build 2, Beta", for VoiceOver.
     static var spoken: String {
         let channel = ReleaseChannel.current
-        let spoken = "StarHash version \(short), build \(build)"
+        let spoken = String(localized: "StarHash version \(short), build \(build)")
         return channel == .production ? spoken : "\(spoken), \(channel.title)"
     }
 
@@ -408,6 +532,7 @@ enum SettingsLaunch {
         if page == "privacy" { return [.privacy] }
         if page == "about" { return [.about] }
         if page == "notifications" { return [.notifications] }
+        if page == "profile" { return [.profile] }
         if page == "flags" { return [.about, .featureFlags] }
         if page == "release" { return [.whatsNew, .release(ReleaseHistory.releases[0].version)] }
         if page?.hasPrefix("guide") == true { return [.autoVerify] }

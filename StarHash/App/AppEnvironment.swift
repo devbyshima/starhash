@@ -122,6 +122,32 @@ final class AppRouter {
     }
     /// The transaction whose details page is open on Activity.
     var openTransactionID: UUID?
+    /// The month whose report is open on Activity (Reports), by its first
+    /// day.
+    var openReportMonth: Date?
+    /// A scam warning's advice, over the app, from its notification.
+    var scamNotice: ScamNotice?
+    /// Pay's QR scanner, asked for from outside Pay (a widget, a link),
+    /// until Pay opens it. A new value each time.
+    private(set) var scanRequest: UUID?
+
+    /// Opens Reports on Activity at `month`'s report.
+    func showReport(month: Date) {
+        show(.activity)
+        openTransactionID = nil
+        openReportMonth = Calendar.current.dateInterval(of: .month, for: month)?.start ?? month
+    }
+
+    /// Opens Pay with its QR scanner up.
+    func scan() {
+        show(.pay)
+        scanRequest = UUID()
+    }
+
+    func takeScanRequest() -> Bool {
+        defer { scanRequest = nil }
+        return scanRequest != nil
+    }
     /// A payment whose page should open Verify's sheet, until it does.
     var verifyTransactionID: UUID?
 
@@ -140,10 +166,11 @@ final class AppRouter {
     /// transaction), until Pay takes it with `takePayRequest()`.
     private(set) var payRequest: PayRequest?
 
-    /// Switches to Pay with `recipient` chosen under the amount; Pay then
-    /// dials them once there is an amount.
-    func pay(_ recipient: Recipient) {
-        payRequest = PayRequest(recipient: recipient)
+    /// Switches to Pay with `recipient` chosen under the amount, and the
+    /// amount when one is asked for (a scanned code's); Pay then dials them
+    /// once there is an amount.
+    func pay(_ recipient: Recipient, amount: Int? = nil) {
+        payRequest = PayRequest(recipient: recipient, amount: amount)
         show(.pay)
     }
 
@@ -166,12 +193,29 @@ final class AppRouter {
 
     /// starhash://pay, starhash://buy, starhash://activity,
     /// starhash://settings, starhash://transaction/<uuid>. starhash://help,
-    /// from before Help moved into Settings, opens Settings. In DEBUG
-    /// builds, starhash://whatsnew?page=<n> shows What's New.
+    /// from before Help moved into Settings, opens Settings. A StarHash QR
+    /// code's link, starhash://pay?to=<number or code>, chooses who to pay;
+    /// starhash://scan opens the scanner, starhash://report the month's
+    /// report, and starhash://dial?code=<code> (or a tel: link a widget
+    /// hands over) dials a code. In DEBUG builds,
+    /// starhash://whatsnew?page=<n> shows What's New.
     func handle(_ url: URL) {
+        if url.scheme == "tel" {
+            Task { _ = await USSDDialer.open(url) }
+            return
+        }
         guard url.scheme == "starhash" else { return }
+        let query = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
         if url.host() == "help" {
             show(.settings)
+            return
+        }
+        if url.host() == "pay", query.contains(where: { $0.name == "to" }) {
+            if let request = PaymentQR.parse(url.absoluteString) {
+                pay(request.recipient, amount: request.amount)
+            } else {
+                show(.pay)
+            }
             return
         }
         if let tab = url.host().flatMap(AppTab.init(rawValue:)) {
@@ -186,6 +230,15 @@ final class AppRouter {
             if let id = UUID(uuidString: url.lastPathComponent) {
                 show(.activity)
                 openTransactionID = id
+            }
+        case "scan":
+            scan()
+        case "report":
+            showReport(month: .now)
+        case "dial":
+            if let code = query.first(where: { $0.name == "code" })?.value.flatMap(USSDShortcut.code(from:)),
+               let tel = USSD.telURL(for: code) {
+                Task { _ = await USSDDialer.open(tel) }
             }
         #if DEBUG
         case "whatsnew":
@@ -203,6 +256,15 @@ final class AppRouter {
 struct PayRequest: Identifiable, Equatable {
     let id = UUID()
     let recipient: Recipient
+    /// The amount a scanned code asked for, typed in for them.
+    var amount: Int?
+}
+
+/// A scam warning's advice, shown over the app from its notification.
+struct ScamNotice: Identifiable, Equatable {
+    let id = UUID()
+    /// What the notification said.
+    let message: String
 }
 
 /// How a shortcut StarHash ran through x-callback-url finished.

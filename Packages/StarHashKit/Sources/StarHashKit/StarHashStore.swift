@@ -90,6 +90,23 @@ public final class StarHashStore {
         save()
     }
 
+    /// Adds the transactions this store does not have yet (Import), by id,
+    /// and by carrier reference for one logged on both phones from the same
+    /// message, and saves once. Returns how many it added.
+    @discardableResult
+    public func merge(_ incoming: [Transaction]) -> Int {
+        var ids = Set(transactions.map(\.id))
+        let references = Set(transactions.compactMap(\.reference))
+        var added = 0
+        for transaction in incoming where ids.insert(transaction.id).inserted {
+            if let reference = transaction.reference, references.contains(reference) { continue }
+            transactions.append(transaction)
+            added += 1
+        }
+        if added > 0 { sortAndSave() }
+        return added
+    }
+
     /// Every transaction's location removed, for turning Nearby off.
     public func clearLocations() {
         locationsGeneration += 1
@@ -168,7 +185,8 @@ public final class StarHashStore {
         let transaction = Transaction(
             direction: sms.direction, counterparty: sms.counterparty, amount: sms.amount,
             fee: sms.fee, date: date, status: .confirmed, source: .sms,
-            reference: sms.reference, balanceAfter: sms.balanceAfter, wallet: sms.wallet, messageDate: sms.date
+            reference: sms.reference, balanceAfter: sms.balanceAfter, category: sms.category,
+            wallet: sms.wallet, messageDate: sms.date
         )
         add(transaction)
         return transaction
@@ -188,6 +206,8 @@ public final class StarHashStore {
         match.balanceAfter = sms.balanceAfter
         match.messageDate = sms.date
         match.wallet = sms.wallet
+        // A category chosen by hand stays; one the message gives fills a gap.
+        if match.category == nil { match.category = sms.category }
         // A merchant takes the name its code is registered under, from
         // a message that names the code: it can differ from the shop's
         // sign, and it is what the code shows as from now on (Activity,

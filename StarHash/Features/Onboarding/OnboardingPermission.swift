@@ -40,7 +40,7 @@ struct OnboardingPermission: View {
                 .accessibilityHidden(true)
 
             VStack(spacing: 15) {
-                Text(config.title)
+                Text(catalog: config.title)
                     .starhashFont(28, weight: .bold, relativeTo: .title)
                     .foregroundStyle(Color.starhashPrimaryText)
                     .multilineTextAlignment(.center)
@@ -48,7 +48,7 @@ struct OnboardingPermission: View {
                     .minimumScaleFactor(0.7)
                     .accessibilityAddTraits(.isHeader)
 
-                Text(config.description)
+                Text(catalog: config.description)
                     .font(.starhash(.footnote))
                     .foregroundStyle(Color.starhashSecondaryText)
                     .multilineTextAlignment(.center)
@@ -56,13 +56,13 @@ struct OnboardingPermission: View {
                     .minimumScaleFactor(0.7)
                     .padding(.bottom, 10)
 
-                Button(config.primaryTitle, action: config.primaryAction)
+                Button(LocalizedStringKey(config.primaryTitle), action: config.primaryAction)
                     .buttonStyle(.starhashPrimaryGlowing)
                     .padding(.horizontal, 15)
 
                 if let title = config.secondaryTitle, let action = config.secondaryAction {
                     Button(action: action) {
-                        Text(title)
+                        Text(catalog: title)
                             .font(.starhash(.subheadline, weight: .semibold))
                             .foregroundStyle(Color.starhashSecondaryText)
                             .frame(minHeight: 44)
