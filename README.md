@@ -30,15 +30,14 @@ StarHash is a free, source-available iPhone app for paying with MTN MoMo or Airt
 
 - **Pay in a few taps**: type an amount, pick a contact, a recent recipient or a merchant code, and the code is dialled at once. A contact's saved name always comes first.
 - **Scan to pay**: scan a merchant's MoMo QR code or a friend's StarHash code, type the amount (or have it filled in) and pay, with no recipient screen.
-- **Your own QR code**: add your number in onboarding or Settings' Profile, and others scan your code to pay you.
+- **Your own QR code**: add your number in onboarding or Settings' Profile, with your photo, and others scan your code to pay you. It stands as a little tree of blocks that turns into the QR code at a tap.
 - **Both wallets**: MTN MoMo or Airtel Money, switched from Pay, with the right code for numbers on either network.
 - **Activity**: every payment by day, a chart for today, this week, month or year, and search across everything. Airtime, bundles, electricity, water and TV show as bought, not sent, and payments sort into categories (by Apple Intelligence on iOS 26 and later).
-- **Reports**: each month broken down by category and recipient, compared with the month before, with a summary written on the iPhone.
 - **Auto-verify**: a Shortcuts automation passes your wallet's SMS to StarHash, which confirms each payment with its fee, reference and new balance.
 - **Buy**: the codes you dial often (pending approvals, cash out, bundles), one tap each, with up to eight pinned to the top.
 - **Nearby**: an opt-in suggestion of the shops you paid where you are standing, never of your contacts.
 - **Scam warnings**: a message that looks like MoMo's but comes from someone's own number is never logged, and you are warned before you send anything back.
-- **Widgets**: Buy's codes on the Home Screen, dialled and paged without opening the app, and Scan to Pay in Control Center.
+- **Widgets**: Buy's codes on the Home Screen, each its symbol and name, dialled without opening the app; Scan to Pay as a small widget and in Control Center.
 - **Export and import**: everything StarHash keeps, as one file you can move to another iPhone.
 - **English and Kinyarwanda**, chosen in the Settings app.
 - **Private by design**: no account, no server, no tracking, and an optional Face ID lock.
