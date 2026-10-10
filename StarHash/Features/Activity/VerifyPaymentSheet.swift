@@ -31,12 +31,6 @@ struct VerifyPaymentSheet: View {
 
             if let transaction {
                 VStack(spacing: 14) {
-                    Text("Copy the \((transaction.wallet ?? StarHashPreferences.wallet).messagesName) message about this payment, then paste it here.")
-                        .font(.sheetSubheadline)
-                        .foregroundStyle(Color.sheetBrandText)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-
                     paymentCard(transaction)
 
                     if let note {

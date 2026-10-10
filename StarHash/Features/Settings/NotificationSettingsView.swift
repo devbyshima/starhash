@@ -20,7 +20,6 @@ struct NotificationSettingsView: View {
     @AppStorage(PreferenceKey.summaryHour) private var summaryHour = NotificationPlan.defaultSummaryHour
     @AppStorage(PreferenceKey.notificationAmounts) private var showsAmounts = true
     @AppStorage(PreferenceKey.notificationSound) private var sound = true
-    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
     @AppStorage(PreferenceKey.lastVerifiedAt) private var lastVerifiedAt: Double = 0
     @AppStorage(PreferenceKey.lastMessageAt) private var lastMessageAt: Double = 0
@@ -41,14 +40,11 @@ struct NotificationSettingsView: View {
                 SettingsToggleRow(
                     symbol: "bell.badge.fill",
                     title: "Payment reminders",
-                    caption: failsUnconfirmed
-                        ? String(localized: "When no \(wallet.messagesName) message confirms a payment within an hour")
-                        : "When a payment you made is still pending",
                     isOn: $paymentReminders
                 )
                 // With auto-verify, the hour is the reminder's time.
                 if paymentReminders, !failsUnconfirmed {
-                    SettingsRow(symbol: "hourglass", title: "Remind me after", caption: "How long a payment waits first") {
+                    SettingsRow(symbol: "hourglass", title: "Remind me after") {
                         SettingsChoiceMenu(
                             title: "Remind me after",
                             selection: $reminderDelay,
@@ -60,17 +56,11 @@ struct NotificationSettingsView: View {
                 SettingsToggleRow(
                     symbol: "checkmark.seal.fill",
                     title: "Confirmed payments",
-                    caption: autoVerifyOn
-                        ? String(localized: "When a \(wallet.messagesName) message confirms a payment")
-                        : "Needs auto-verify, under Transactions",
                     isOn: $confirmedPayments
                 )
                 SettingsToggleRow(
                     symbol: "arrow.down.circle.fill",
                     title: "Money received",
-                    caption: autoVerifyOn
-                        ? String(localized: "When a \(wallet.messagesName) message brings money in")
-                        : "Needs auto-verify, under Transactions",
                     isOn: $moneyReceived
                 )
             }
@@ -79,11 +69,10 @@ struct NotificationSettingsView: View {
                 SettingsToggleRow(
                     symbol: "chart.bar.fill",
                     title: "Weekly summary",
-                    caption: "What you sent and received in the week",
                     isOn: $weeklySummary
                 )
                 if weeklySummary {
-                    SettingsRow(symbol: "calendar", title: "Day", caption: "The day it comes") {
+                    SettingsRow(symbol: "calendar", title: "Day") {
                         SettingsChoiceMenu(
                             title: "Day",
                             selection: $weeklyDay,
@@ -95,11 +84,10 @@ struct NotificationSettingsView: View {
                 SettingsToggleRow(
                     symbol: "chart.line.uptrend.xyaxis",
                     title: "Monthly summary",
-                    caption: "The month just ended, on the 1st",
                     isOn: $monthlySummary
                 )
                 if weeklySummary || monthlySummary {
-                    SettingsRow(symbol: "sunset.fill", title: "Time", caption: "When the summaries come") {
+                    SettingsRow(symbol: "sunset.fill", title: "Time") {
                         SettingsChoiceMenu(
                             title: "Time",
                             selection: $summaryHour,
@@ -114,13 +102,11 @@ struct NotificationSettingsView: View {
                 SettingsToggleRow(
                     symbol: "eye.fill",
                     title: "Show amounts",
-                    caption: "Off keeps amounts and balances off the Lock Screen",
                     isOn: $showsAmounts
                 )
                 SettingsToggleRow(
                     symbol: "speaker.wave.2.fill",
                     title: "Sound",
-                    caption: "Play a sound with each notification",
                     isOn: $sound
                 )
             }
@@ -181,10 +167,7 @@ struct NotificationSettingsView: View {
         SettingsCard {
             SettingsRow(
                 symbol: "bell.slash.fill",
-                title: denied ? "Notifications are off" : "Allow notifications",
-                caption: denied
-                    ? "Turn them on for StarHash in the Settings app"
-                    : "Nothing below arrives until you do"
+                title: denied ? "Notifications are off" : "Allow notifications"
             ) {
                 Button(denied ? "Open Settings" : "Turn On") {
                     if denied {

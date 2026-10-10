@@ -11,7 +11,7 @@ struct WhatsNewView: View {
                 ForEach(releases) { release in
                     NavigationLink(value: SettingsPage.release(release.version)) {
                         HStack(spacing: 14) {
-                            SettingsSymbol(symbol: "sparkles", size: 44, pointSize: 19)
+                            SettingsSymbol(symbol: "sparkles", size: 44)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Version \(release.version)")
                                     .starhashFont(16, weight: .semibold, relativeTo: .callout)
@@ -99,7 +99,7 @@ private struct ReleaseHighlightRow: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 16) {
-            SettingsSymbol(symbol: highlight.symbol, size: 46, pointSize: 20)
+            SettingsSymbol(symbol: highlight.symbol, size: 46)
             VStack(alignment: .leading, spacing: 3) {
                 Text(catalog: highlight.title)
                     .starhashFont(16, weight: .semibold, relativeTo: .callout)

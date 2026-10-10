@@ -2,14 +2,13 @@ import StarHashKit
 import SwiftUI
 
 /// Asks before auto-verify goes off, in Beam's sheet language and sized to
-/// its content: the question as the title, what it means under it, a card of the three things
+/// its content: the question as the title, a card of the three things
 /// that stop working, then Keep On (the filled button, the safe choice)
 /// and Turn Off in red under it.
 struct TurnOffAutoVerifySheet: View {
     let onTurnOff: () -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
     @State private var height: CGFloat = 480
 
     private let losses: [(symbol: String, text: String)] = [
@@ -23,12 +22,6 @@ struct TurnOffAutoVerifySheet: View {
             SheetHeader("Turn Off Auto-verify?")
 
             VStack(spacing: 14) {
-                Text("StarHash will stop reading your \(wallet.messagesName) messages.")
-                    .font(.sheetSubheadline)
-                    .foregroundStyle(Color.sheetBrandText)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-
                 VStack(spacing: 0) {
                     ForEach(Array(losses.enumerated()), id: \.offset) { index, loss in
                         if index > 0 { SheetDivider().padding(.leading, 52) }

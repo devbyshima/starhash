@@ -43,7 +43,7 @@ struct LegalDocumentView: View {
             }
             SettingsCard {
                 Link(destination: DeveloperNoteLinks.write) {
-                    SettingsRow(symbol: "bubble.left.and.bubble.right.fill", title: "Questions?", caption: "Ask on StarHash's GitHub page") {
+                    SettingsRow(symbol: "bubble.left.and.bubble.right.fill", title: "Questions?") {
                         SettingsChevron(symbol: "arrow.up.right")
                     }
                 }
@@ -56,7 +56,7 @@ struct LegalDocumentView: View {
 
     private var header: some View {
         VStack(spacing: 0) {
-            SettingsSymbol(symbol: document.symbol, size: 64, pointSize: 28)
+            SettingsSymbol(symbol: document.symbol, size: 64)
                 .padding(.bottom, 18)
             Text(catalog: document.title)
                 .starhashFont(30, weight: .bold, relativeTo: .title)

@@ -1,14 +1,16 @@
 import SwiftUI
 
 // Shared look for every page in the Settings tab, after GO Club's: rounded
-// 26pt cards 10pt from the screen's edges (white glass in light mode, black
-// glass in dark), everything in them 20pt in, a section's grey title inside
-// its card at the top, and a dashed line across the card between every
-// row. Rows keep a symbol on a faint tile, a title and a small caption.
-// Sheets presented from Settings keep the sheet look instead.
+// 26pt cards 10pt from the screen's edges, flat in the cards' foreground
+// (#F2F3F6 in light mode, #3A3A3A in dark), everything in them 20pt in, a
+// section's grey title inside its card at the top, and a dashed line
+// across the card between every row. Rows are an icon in the green glass
+// style (`SettingsIcons`) and a title; a small line under it only when a
+// row has something to report (auto-verify waiting). Sheets presented
+// from Settings keep the sheet look instead.
 
 extension Color {
-    /// The light-mode fill under a settings card's glass: white.
+    /// A settings card's fill: the cards' foreground.
     static var settingsCard: Color { .starhashCard }
     /// The tile behind row symbols and the profile monogram: a visible grey
     /// on a white card, a faint veil on a charcoal one.
@@ -16,8 +18,8 @@ extension Color {
     /// Behind every settings page: the app's page colour, so cards stand
     /// out the same way they do on Activity.
     static var settingsCanvas: Color { .starhashBackground }
-    /// The track of a switched-on toggle: the accent as a graphic, 3:1 on
-    /// a white card, with the white knob showing in either appearance.
+    /// The track of a switched-on toggle: the accent, with the white knob
+    /// showing on it in either appearance.
     static let settingsToggleOn = Color.starhashSwitchOn
 }
 
@@ -28,6 +30,8 @@ enum SettingsLayout {
     static let screenMargin: CGFloat = 10
     /// The gap between one card and the next.
     static let cardSpacing: CGFloat = 12
+    /// A row's least height, the icon with room round it.
+    static let rowHeight: CGFloat = 60
 }
 
 /// A settings page: its cards down a scroll view, `spacing` apart, 10pt
@@ -55,10 +59,9 @@ struct SettingsScroll<Content: View>: View {
 /// A card of rows, as GO Club's: the section's grey title inside it at the
 /// top when it has one, and a dashed line right across it between each row
 /// and the next. The whole card is one container (`starhashContainer`),
-/// white glass in light mode and black glass in dark, so it is the same
-/// glass as every other card in the app; a slice behind each row could
-/// only imitate it. Each row keeps the card's 20pt inset itself
-/// (`settingsRowInset()`), so a pressed row tints right across.
+/// the same flat foreground as every other card in the app. Each row keeps
+/// the card's 20pt inset itself (`settingsRowInset()`), so a pressed row
+/// tints right across.
 struct SettingsCard<Content: View>: View {
     let title: String?
     let content: Content
@@ -174,28 +177,24 @@ struct SettingsChevron: View {
     }
 }
 
-/// An SF Symbol on the faint square tile the reference puts behind row
-/// icons. It grows with the text beside it, up to half as big again.
+/// A row's icon: the symbol's drawing in the green glass style
+/// (`SettingsIconImage`), all one colour. It grows with the text beside
+/// it, up to half as big again.
 struct SettingsSymbol: View {
     let symbol: String
-    var size: CGFloat = 38
-    var pointSize: CGFloat = 17
+    var size: CGFloat = 36
 
     @ScaledMetric(relativeTo: .body) private var textScale: CGFloat = 1
 
     var body: some View {
-        let scale = min(textScale, 1.5)
-        Image(systemName: symbol)
-            .font(.system(size: pointSize * scale, weight: .medium))
-            .foregroundStyle(Color.starhashPrimaryText)
-            .frame(width: size * scale, height: size * scale)
-            .background(Color.settingsTile, in: RoundedRectangle(cornerRadius: size * scale * 0.3, style: .continuous))
+        SettingsIconImage(symbol: symbol, size: size * min(textScale, 1.5))
             .accessibilityHidden(true)
     }
 }
 
-/// Symbol, title, a small caption under it and whatever trails the row (a
-/// value, a badge, nothing before a `NavigationLink`'s chevron).
+/// Icon, title, a small status line under it when there is one, and
+/// whatever trails the row (a value, a badge, nothing before a
+/// `NavigationLink`'s chevron).
 struct SettingsRow<Trailing: View>: View {
     let symbol: String
     let title: String
@@ -209,7 +208,7 @@ struct SettingsRow<Trailing: View>: View {
             Spacer(minLength: 8)
             trailing
         }
-        .frame(minHeight: 68)
+        .frame(minHeight: SettingsLayout.rowHeight)
         .settingsRowInset()
         .contentShape(Rectangle())
     }
@@ -232,7 +231,7 @@ extension SettingsRow where Trailing == Text {
     }
 }
 
-/// The row's title (16pt medium, as GO Club's) over its caption.
+/// The row's title (16pt medium, as GO Club's) over its status line.
 struct SettingsRowText: View {
     let title: String
     var caption: String?
@@ -253,8 +252,8 @@ struct SettingsRowText: View {
     }
 }
 
-/// A row with a switch: symbol, title, caption, toggle. The whole row is
-/// the toggle's label, so VoiceOver reads it as one switch.
+/// A row with a switch: icon, title, toggle. The whole row is the toggle's
+/// label, so VoiceOver reads it as one switch.
 struct SettingsToggleRow: View {
     let symbol: String
     let title: String
@@ -269,7 +268,7 @@ struct SettingsToggleRow: View {
             }
         }
         .tint(Color.settingsToggleOn)
-        .frame(minHeight: 68)
+        .frame(minHeight: SettingsLayout.rowHeight)
         .settingsRowInset()
     }
 }

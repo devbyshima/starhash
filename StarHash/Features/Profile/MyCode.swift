@@ -3,23 +3,9 @@ import StarHashKit
 import SwiftUI
 import UIKit
 
-/// A QR code drawn crisp at any size: the code's own modules scaled up
-/// without smoothing, black on white.
-struct QRCodeImage: View {
-    let text: String
-
-    var body: some View {
-        if let image = Self.image(for: text) {
-            Image(uiImage: image)
-                .interpolation(.none)
-                .resizable()
-                .scaledToFit()
-                .accessibilityHidden(true)
-        } else {
-            Color.clear
-        }
-    }
-
+/// The owner's code as a plain image to share: black on white, its
+/// modules scaled up without smoothing, as any scanner reads best.
+enum QRCodeImage {
     /// The code as an image, a few modules' quiet zone round it, or nil if
     /// it would not encode.
     static func image(for text: String, scale: CGFloat = 12) -> UIImage? {
@@ -29,45 +15,6 @@ struct QRCodeImage: View {
         guard let output = filter.outputImage?.transformed(by: CGAffineTransform(scaleX: scale, y: scale)),
               let cgImage = CIContext().createCGImage(output, from: output.extent) else { return nil }
         return UIImage(cgImage: cgImage)
-    }
-}
-
-/// The owner's code as a card: the QR on white, their name and number under
-/// it, and the wallet that receives. Shown in Settings' Profile and from
-/// the scanner's My Code, always white, as a code reads best.
-struct MyCodeCard: View {
-    let recipient: Recipient
-    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
-
-    var body: some View {
-        VStack(spacing: 14) {
-            QRCodeImage(text: PaymentQR.link(for: recipient).absoluteString)
-                .frame(maxWidth: 240, maxHeight: 240)
-                .overlay {
-                    // The mark in the middle, on a white tile, as payment
-                    // codes carry their brand. Error correction M leaves
-                    // room for it.
-                    StarHashMark(size: 34)
-                        .padding(7)
-                        .background(.white, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                }
-                .accessibilityElement()
-                .accessibilityLabel("Your StarHash QR code")
-            VStack(spacing: 2) {
-                Text(recipient.name ?? "Pay me with StarHash")
-                    .font(.sheet(20, .bold, relativeTo: .title3))
-                    .foregroundStyle(Color.brandNight)
-                    .multilineTextAlignment(.center)
-                Text(recipient.formattedDestination + " \u{00B7} " + (recipient.network ?? wallet).walletName)
-                    .font(.sheet(15, .medium, relativeTo: .subheadline))
-                    .foregroundStyle(Color.brandNight.opacity(0.7))
-            }
-        }
-        .padding(24)
-        .frame(maxWidth: .infinity)
-        .background(.white, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
-        .environment(\.starhashSurface, .container)
-        .environment(\.colorScheme, .light)
     }
 }
 
@@ -88,7 +35,8 @@ struct MyCodeShareButton: View {
     }
 }
 
-/// The scanner's My Code: the owner's code for someone else to scan, or,
+/// The scanner's My Code: the owner's code as the voxel tree on the sheet
+/// itself, turning into the QR code at a tap, with Share under it; or,
 /// before they have given their number, a field for it.
 struct MyCodeSheet: View {
     @AppStorage(PreferenceKey.profileName) private var name = ""
@@ -101,19 +49,12 @@ struct MyCodeSheet: View {
         VStack(spacing: 18) {
             SheetHeader("My Code")
             if let recipient {
-                MyCodeCard(recipient: recipient)
+                QRTreeView(text: PaymentQR.link(for: recipient).absoluteString)
+                    .frame(maxWidth: 320)
                 MyCodeShareButton(recipient: recipient)
                     .buttonStyle(.sheetPrimary)
-                Text("Anyone with StarHash scans it to pay you. Their iPhone's Camera opens StarHash on it too.")
-                    .font(.sheetFootnote)
-                    .foregroundStyle(Color.sheetSecondaryText)
-                    .multilineTextAlignment(.center)
             } else {
                 ProfileFields(name: $name, number: $number, onSheet: true)
-                Text("Add your number to get a code others scan to pay you. It stays on your iPhone.")
-                    .font(.sheetFootnote)
-                    .foregroundStyle(Color.sheetSecondaryText)
-                    .multilineTextAlignment(.center)
             }
         }
         .padding(.horizontal, 20)
@@ -132,6 +73,9 @@ struct ProfileFields: View {
     var onSheet = false
     /// The name's field too; Profile types the name large in its header.
     var showsName = true
+    /// The number in the middle of its field, with no symbol, as Profile
+    /// sets everything down the middle.
+    var centred = false
 
     @FocusState private var focus: Field?
     @State private var draftNumber = ""
@@ -189,7 +133,7 @@ struct ProfileFields: View {
             if let problem {
                 Text(problem)
                     .font(.starhash(.footnote))
-                    .foregroundStyle(onSheet ? AnyShapeStyle(Color.starhashDestructive) : AnyShapeStyle(Color.starhashDestructiveOnPage))
+                    .foregroundStyle(Color.starhashDestructive)
                     .padding(.horizontal, 6)
                     .transition(.opacity)
             }
@@ -202,14 +146,17 @@ struct ProfileFields: View {
 
     private func field(_ label: String, text: Binding<String>, prompt: String, symbol: String) -> some View {
         HStack(spacing: 12) {
-            Image(systemName: symbol)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(Color.starhashSecondaryText)
-                .frame(width: 22)
-                .accessibilityHidden(true)
+            if !centred {
+                Image(systemName: symbol)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(Color.starhashSecondaryText)
+                    .frame(width: 22)
+                    .accessibilityHidden(true)
+            }
             TextField(label, text: text, prompt: Text(catalog: prompt).foregroundStyle(Color.starhashTertiaryText))
                 .starhashFont(17, weight: .medium, relativeTo: .body)
                 .foregroundStyle(Color.starhashPrimaryText)
+                .multilineTextAlignment(centred ? .center : .leading)
                 .accessibilityLabel(label)
         }
         .padding(.horizontal, 18)
@@ -218,7 +165,8 @@ struct ProfileFields: View {
     }
 }
 
-/// A field's box: a sheet's card in a sheet, glass on the page.
+/// A field's box: a sheet's card in a sheet, the cards' solid foreground
+/// on the page.
 private struct ProfileFieldBackground: ViewModifier {
     let onSheet: Bool
 
@@ -226,7 +174,7 @@ private struct ProfileFieldBackground: ViewModifier {
         if onSheet {
             content.sheetCard(radius: 29)
         } else {
-            content.starhashGlass(interactive: true)
+            content.starhashContainer(.starhashCard, in: Capsule())
         }
     }
 }

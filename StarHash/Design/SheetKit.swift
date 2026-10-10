@@ -6,8 +6,7 @@ import SwiftUI
 // button on its right (no close button; a sheet is swiped away), solid
 // cards whose rows are split by dotted lines, small uppercase section
 // labels, 50pt buttons, and Beam's type scale, all on clear Liquid Glass
-// with the grabber showing. The accent is StarHash's blue where Beam uses
-// its green.
+// with the grabber showing. The accent is StarHash's green, as Beam's.
 
 // MARK: Type
 
@@ -187,11 +186,11 @@ struct SheetValueText: View {
     }
 }
 
-/// A small uppercase label over a card.
+/// A small uppercase label over a card, in the quieter grey.
 struct SheetSectionLabel: View {
     let text: String
-    /// On a page rather than a sheet (the transaction page): the page's
-    /// grey, since the sheets' blue would not read on the blue page.
+    /// On a page rather than a sheet (the transaction page). The same grey
+    /// either way; kept so callers can say where they are.
     var onPage = false
 
     init(_ text: String, onPage: Bool = false) {
@@ -203,7 +202,7 @@ struct SheetSectionLabel: View {
         Text(text.uppercased())
             .font(.sheet(11, .semibold, relativeTo: .caption))
             .tracking(0.8)
-            .foregroundStyle(onPage ? Color.sheetSecondaryText : Color.sheetBrandText)
+            .foregroundStyle(Color.sheetSecondaryText)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 4)
             .accessibilityAddTraits(.isHeader)
@@ -229,7 +228,7 @@ struct SheetIconCircle: View {
 
 /// A sheet's button, Beam's: 50pt, a 16pt semibold label, a gradient fill
 /// with no glow. `.sheetPrimary` is the accent, the
-/// blue with near-black text; `.sheetFilled` is the
+/// green with near-black text; `.sheetFilled` is the
 /// near-black (near-white in dark mode) fill for a choice that is not the
 /// accent.
 struct SheetButtonStyle: ButtonStyle {
@@ -327,15 +326,13 @@ extension ButtonStyle where Self == SheetButtonStyle {
     static var sheetConfirm: SheetButtonStyle { SheetButtonStyle(fill: .confirm) }
 }
 
-/// The quiet choice under a sheet's button: blue text on a sheet, the
-/// page's secondary text on the blue page ("Mark as Failed"), or red for a
-/// destructive one ("Turn Off").
+/// The quiet choice under a sheet's button: the accent's text colour ("Mark
+/// as Failed"), or red for a destructive one ("Turn Off").
 struct SheetTextButton: View {
     let title: String
     var role: ButtonRole?
-    /// Straight on the blue page (the transaction page) rather than a
-    /// white sheet: the red deepens to read on the blue, and other text is
-    /// the page's secondary text, since the sheet's blue would vanish there.
+    /// Straight on the page (the transaction page) rather than a sheet.
+    /// The same colours either way; kept so callers can say where they are.
     var onPage = false
     let action: () -> Void
 
@@ -349,12 +346,11 @@ struct SheetTextButton: View {
     var body: some View {
         Button(role: role, action: action) {
             Text(catalog: title)
-                // Bold when destructive: the vivid red on a white sheet,
-                // the deeper one on the blue page.
+                // Bold when destructive.
                 .font(.sheet(14, role == .destructive ? .bold : .semibold, relativeTo: .subheadline))
                 .foregroundStyle(role == .destructive
-                    ? AnyShapeStyle(onPage ? Color.starhashDestructiveOnPage : Color.starhashDestructive)
-                    : AnyShapeStyle(onPage ? Color.sheetSecondaryText : Color.sheetBrandText))
+                    ? AnyShapeStyle(Color.starhashDestructive)
+                    : AnyShapeStyle(Color.starhashAccentText))
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .contentShape(Rectangle())
         }

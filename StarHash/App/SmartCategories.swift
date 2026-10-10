@@ -5,8 +5,7 @@ import FoundationModels
 #endif
 
 /// Sorts payments into categories (`TransactionCategory`), so Activity can
-/// tell airtime bought from money sent and Reports can say where the money
-/// went. The rules (`TransactionCategorizer`) go first, on every payment;
+/// tell airtime bought from money sent. The rules (`TransactionCategorizer`) go first, on every payment;
 /// on iOS 26 and later with Apple Intelligence, the on-device model names
 /// what the rules cannot from the merchant's name alone. Nothing leaves the
 /// iPhone: the model runs on it, and only a name is asked about, never an

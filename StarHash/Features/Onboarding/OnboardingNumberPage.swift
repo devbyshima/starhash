@@ -4,11 +4,12 @@ import SwiftUI
 /// Onboarding's number step, after the wallet: the owner's name and wallet
 /// number, for the QR code others scan to pay them (Settings' Profile keeps
 /// them after). Dialling never needs the number, since the call goes out
-/// from the SIM in the phone, so it can wait: Maybe Later moves on without
-/// it.
+/// from the SIM in the phone, so it can wait: Continue moves on with or
+/// without it.
 ///
-/// Laid out as the wallet step: a symbol in its pulse rings, the words low,
-/// the fields and Continue under them, and the glow at the bottom edge.
+/// Laid out exactly as the wallet step, so nothing jumps between them: a
+/// symbol in its pulse rings, the title low, the fields and Continue under
+/// it, Continue 10 points over the bottom, and the glow at the bottom edge.
 struct OnboardingNumberPage: View {
     let onDone: () -> Void
 
@@ -40,9 +41,6 @@ struct OnboardingNumberPage: View {
                     .starhashFont(22, weight: .bold, relativeTo: .title2)
                     .foregroundStyle(Color.starhashPrimaryText)
                     .accessibilityAddTraits(.isHeader)
-                Text("It goes in your own QR code, so friends\nscan it to pay you. It stays on your iPhone.")
-                    .font(.starhash(.callout))
-                    .foregroundStyle(Color.starhashSecondaryText)
             }
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
@@ -53,18 +51,7 @@ struct OnboardingNumberPage: View {
                 ProfileFields(name: $name, number: $number)
                 Button("Continue", action: onDone)
                     .buttonStyle(.starhashPrimaryGlowing)
-                    .disabled(!hasNumber)
                     .padding(.top, 8)
-                Button(action: onDone) {
-                    Text("Maybe Later")
-                        .font(.starhash(.subheadline, weight: .semibold))
-                        .foregroundStyle(Color.starhashSecondaryText)
-                        .frame(minHeight: 44)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.hapticPlain)
-                .opacity(hasNumber ? 0 : 1)
-                .disabled(hasNumber)
             }
             .padding(.horizontal, OnboardingMetrics.horizontalPadding)
             .padding(.bottom, 10)

@@ -151,8 +151,7 @@ struct RecipientPickerView: View {
             if showsNoMatches {
                 EmptyStateView(
                     doodle: .matches,
-                    title: "No Matches",
-                    message: "Type a phone number or a merchant code to pay it directly."
+                    title: "No Matches"
                 )
                 .padding(.horizontal, StarHashMetrics.screenPadding)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -541,7 +540,7 @@ struct RecipientPickerView: View {
         case .denied:
             Section {
                 ContactsAccessCard(
-                    message: "Allow StarHash to see your contacts to pay them by name. They stay on your iPhone."
+                    message: "Contacts are off"
                 )
                 .padding(.horizontal, 10)
             } header: {
@@ -568,7 +567,7 @@ struct RecipientPickerView: View {
                     }
                     if contacts.access == .limited && search.isEmpty {
                         ContactsAccessCard(
-                            message: "StarHash sees only the contacts you chose. You can share more in Settings."
+                            message: "Only some contacts are shared"
                         )
                         .padding(.horizontal, 10)
                     }
@@ -933,7 +932,7 @@ struct RecipientTile: View {
     }
 }
 
-/// Shown in place of contacts when access is off or limited: why, and a
+/// Shown in place of contacts when access is off or limited: which, and a
 /// way to the app's page in Settings, the only place it can be changed.
 private struct ContactsAccessCard: View {
     let message: String

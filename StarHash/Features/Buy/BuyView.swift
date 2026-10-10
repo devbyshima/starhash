@@ -59,8 +59,7 @@ struct BuyView: View {
             if shortcuts.shortcuts.isEmpty {
                 EmptyStateView(
                     doodle: .codes,
-                    title: "No Codes",
-                    message: "Add a code you dial often with the + button, and it is a tap away here."
+                    title: "No Codes"
                 )
                 .padding(.horizontal, StarHashMetrics.screenPadding)
                 .starhashCentredOverTabBar()
@@ -432,10 +431,10 @@ private struct ShortcutItem: View {
                 onOpen()
             } label: {
                 HStack(spacing: 14) {
-                    // The symbol alone, with no tile behind it.
+                    // The symbol alone, in the accent, with no tile behind it.
                     Image(systemName: shortcut.symbol ?? ShortcutSymbols.plain)
                         .font(.system(size: 22, weight: .semibold))
-                        .foregroundStyle(Color.starhashPrimaryText)
+                        .foregroundStyle(Color.starhashAccentGraphic)
                         .frame(width: 40, height: 40)
                         .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 2) {
@@ -553,7 +552,7 @@ private struct PinnedTileFace: View {
                     VStack(spacing: 0) {
                         Image(systemName: shortcut.symbol ?? ShortcutSymbols.plain)
                             .font(.system(size: iconSize, weight: .semibold))
-                            .foregroundStyle(Color.starhashPrimaryText)
+                            .foregroundStyle(Color.starhashAccentGraphic)
                             .frame(width: iconSize * 1.4, height: iconSize * 1.4)
                             .frame(maxWidth: .infinity)
                             .frame(height: height * 0.6)

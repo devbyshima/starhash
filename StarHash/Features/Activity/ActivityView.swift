@@ -70,9 +70,6 @@ struct ActivityView: View {
                 case .transaction(let id):
                     TransactionDetailPage(transactionID: id, onPayAgain: payAgain)
                         .starhashBackButton()
-                case .report(let month):
-                    ReportsView(month: month)
-                        .starhashBackButton()
                 }
             }
         }
@@ -120,8 +117,7 @@ struct ActivityView: View {
     private var emptyScreen: some View {
         EmptyStateView(
             doodle: .transactions,
-            title: "No Transactions",
-            message: "Pay someone from Pay, or set up Auto-verify in Settings to log MoMo messages."
+            title: "No Transactions"
         )
         .padding(.horizontal, StarHashMetrics.screenPadding)
         .starhashCentredOverTabBar()
@@ -133,8 +129,7 @@ struct ActivityView: View {
     private func emptyPeriodScreen() -> some View {
         EmptyStateView(
             doodle: .period,
-            title: "No Transactions",
-            message: period.emptyMessage
+            title: "No Transactions"
         )
         .padding(.horizontal, StarHashMetrics.screenPadding)
         .starhashCentredOverTabBar()
@@ -209,8 +204,7 @@ struct ActivityView: View {
             searchText: $searchText,
             searchFocused: $searchFocused,
             onSearch: beginSearch,
-            onCloseSearch: endSearch,
-            onReports: { router.showReport(month: now) }
+            onCloseSearch: endSearch
         )
     }
 
@@ -228,19 +222,15 @@ struct ActivityView: View {
 
     // MARK: Details
 
-    /// The router's open report and transaction as the stack's path: a
-    /// month's report, then a transaction opened from it, or a transaction
-    /// alone. A transaction that no longer exists opens nothing.
+    /// The router's open transaction as the stack's path. A transaction
+    /// that no longer exists opens nothing.
     private var activityPath: Binding<[ActivityRoute]> {
         Binding(
             get: {
-                var path: [ActivityRoute] = []
-                if let month = router.openReportMonth { path.append(.report(month)) }
-                if let id = router.openTransactionID, store.transaction(id: id) != nil { path.append(.transaction(id)) }
-                return path
+                guard let id = router.openTransactionID, store.transaction(id: id) != nil else { return [] }
+                return [.transaction(id)]
             },
             set: { path in
-                router.openReportMonth = path.lazy.compactMap(\.reportMonth).first
                 router.openTransactionID = path.lazy.compactMap(\.transactionID).last
             }
         )
@@ -327,9 +317,6 @@ struct ActivityView: View {
             isSearching = true
             searchText = text
         }
-        if DebugLaunch.arguments.contains("-openReport") {
-            router.showReport(month: now)
-        }
         if DebugLaunch.arguments.contains("-openFirstTransaction"), let first = store.transactions.first {
             router.openTransactionID = first.id
         }
@@ -348,14 +335,8 @@ struct ActivityView: View {
 /// The pages Activity pushes.
 enum ActivityRoute: Hashable {
     case transaction(UUID)
-    /// A month's report, by its first day.
-    case report(Date)
 
     var transactionID: UUID? {
         if case .transaction(let id) = self { id } else { nil }
-    }
-
-    var reportMonth: Date? {
-        if case .report(let month) = self { month } else { nil }
     }
 }

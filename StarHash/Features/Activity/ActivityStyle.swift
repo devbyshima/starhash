@@ -111,7 +111,7 @@ extension View {
 }
 
 extension TransactionCategory {
-    /// The category's name, as Activity and Reports show it.
+    /// The category's name, as Activity shows it.
     var title: String {
         switch self {
         case .airtime: String(localized: "Airtime")
@@ -149,24 +149,6 @@ extension TransactionCategory {
         case .family: "person.2.fill"
         case .savings: "banknote.fill"
         case .other: "ellipsis.circle.fill"
-        }
-    }
-}
-
-extension MonthlyReport.Group {
-    var title: String {
-        switch self {
-        case .category(let category): category.title
-        case .people: String(localized: "People")
-        case .uncategorized: String(localized: "Other payments")
-        }
-    }
-
-    var symbol: String {
-        switch self {
-        case .category(let category): category.symbol
-        case .people: "person.fill"
-        case .uncategorized: "storefront.fill"
         }
     }
 }

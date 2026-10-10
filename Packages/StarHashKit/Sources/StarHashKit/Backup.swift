@@ -78,14 +78,13 @@ public struct OwnerProfile: Codable, Hashable, Sendable {
     public var name: String?
     /// A Rwandan mobile number in local form (0788123456).
     public var number: String?
-    /// The face the owner picked for their profile, by the app's name for
-    /// it.
-    public var avatar: String?
+    /// The owner's photo, a small JPEG.
+    public var photo: Data?
 
-    public init(name: String? = nil, number: String? = nil, avatar: String? = nil) {
+    public init(name: String? = nil, number: String? = nil, photo: Data? = nil) {
         self.name = name
         self.number = number
-        self.avatar = avatar
+        self.photo = photo
     }
 
     /// Who pays the owner: their number, named, when it is one.

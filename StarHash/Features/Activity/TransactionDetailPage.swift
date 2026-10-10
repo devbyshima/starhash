@@ -271,7 +271,7 @@ struct TransactionDetailPage: View {
             SheetSectionLabel("Location", onPage: true)
             Map(initialPosition: .camera(MapCamera(centerCoordinate: coordinate, distance: 900)), interactionModes: []) {
                 Marker(title, coordinate: coordinate)
-                    .tint(Color.brandBlue)
+                    .tint(Color.brandAccent)
             }
             .mapStyle(.standard(pointsOfInterest: .excludingAll))
             .mapControlVisibility(.hidden)

@@ -17,7 +17,6 @@ struct OnboardingPermission: View {
         /// Before the alert first appears, so the screen settles first.
         var initialDelay: Double = 0
         var title: String
-        var description: String
         /// How many buttons the drawn alert has.
         var alertButtons = 2
         var primaryTitle: String
@@ -48,13 +47,6 @@ struct OnboardingPermission: View {
                     .minimumScaleFactor(0.7)
                     .accessibilityAddTraits(.isHeader)
 
-                Text(catalog: config.description)
-                    .font(.starhash(.footnote))
-                    .foregroundStyle(Color.starhashSecondaryText)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.7)
-                    .padding(.bottom, 10)
 
                 Button(LocalizedStringKey(config.primaryTitle), action: config.primaryAction)
                     .buttonStyle(.starhashPrimaryGlowing)
