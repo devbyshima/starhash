@@ -8,6 +8,8 @@ import SwiftUI
 ///   0. `OnboardingReel`, the looping feature reel: pulse rings behind a
 ///      bouncing symbol, the selling points pushing in beneath it.
 ///   1. `OnboardingWalletPage`, which wallet pays (MTN MoMo or Airtel Money).
+///   1½. `OnboardingNumberPage`, the owner's name and number, for their own
+///      QR code (Maybe Later skips it).
 ///   2. `OnboardingPermission`, an iPhone mock playing the Contacts prompt,
 ///      asked for at the moment the screen explains why.
 ///   3. The same for Nearby's location prompt. After Contacts, since Nearby
@@ -34,15 +36,15 @@ struct OnboardingView: View {
     @State private var setupWentBack = false
 
     enum Stage: Int {
-        case reel, wallet, contacts, nearby, notifications, autoVerify
+        case reel, wallet, number, contacts, nearby, notifications, autoVerify
     }
 
     /// Every screen there can be, for the debug launch's range.
-    static let stageCount = 6
+    static let stageCount = 7
 
     /// The screens, in order. Both wallets' messages can be read, so
     /// everyone sees auto-verify.
-    private var stages: [Stage] { [.reel, .wallet, .contacts, .nearby, .notifications, .autoVerify] }
+    private var stages: [Stage] { [.reel, .wallet, .number, .contacts, .nearby, .notifications, .autoVerify] }
 
     /// The wallet picked on the wallet screen, MTN MoMo until then.
     private var chosenWallet: Recipient.Network { Recipient.Network(rawValue: wallet) ?? .mtn }
@@ -71,6 +73,9 @@ struct OnboardingView: View {
                     .transition(.opacity)
             case .wallet:
                 OnboardingWalletPage(onDone: advance)
+                    .transition(.opacity)
+            case .number:
+                OnboardingNumberPage(onDone: advance)
                     .transition(.opacity)
             case .contacts:
                 OnboardingPermission(config: contacts)
@@ -158,7 +163,7 @@ struct OnboardingView: View {
             mock: .message,
             initialDelay: 0.4,
             title: "Confirm payments\nautomatically",
-            description: "Add one shortcut and each \(chosenWallet.messagesName) message\nconfirms its payment, with the fee.",
+            description: String(localized: "Add one shortcut and each \(chosenWallet.messagesName) message\nconfirms its payment, with the fee."),
             primaryTitle: autoVerifySetUp ? "Continue" : "Set Up",
             primaryAction: {
                 if autoVerifySetUp { finish() } else { setsUpAutoVerify = true }
@@ -197,7 +202,7 @@ enum OnboardingMetrics {
 /// Colours used only by onboarding.
 enum OnboardingPalette {
     /// The flow's tint, the accent, whichever wallet is chosen.
-    static let tint = Color.starhashInk
+    static let tint = Color.starhashInk.onPage
 
     /// The iPhone mock on the permission screen: its frame and the filled
     /// shapes standing in for the screen's content.
@@ -284,9 +289,9 @@ extension View {
 
 // MARK: - Launch arguments
 
-/// `-onboardingPage 0...5` (DEBUG, with `-resetOnboarding`) starts on that
-/// screen: the reel, the wallet, Contacts, Nearby, notifications,
-/// auto-verify. Without it, onboarding starts where it was left.
+/// `-onboardingPage 0...6` (DEBUG, with `-resetOnboarding`) starts on that
+/// screen: the reel, the wallet, the number, Contacts, Nearby,
+/// notifications, auto-verify. Without it, onboarding starts where it was left.
 @MainActor
 enum OnboardingLaunch {
     static var initialStage: Int? {
