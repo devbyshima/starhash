@@ -53,6 +53,8 @@ struct GlassSegmentedControl<Value: Hashable>: View {
         .contentShape(Capsule())
         .gesture(choosing)
         .sensoryFeedback(.selection, trigger: selection)
+        // Clear glass, as the tab bar's: near-black letters in light mode.
+        .starhashContainerSurface()
         .accessibilityElement(children: .contain)
     }
 

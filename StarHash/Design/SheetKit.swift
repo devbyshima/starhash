@@ -40,6 +40,8 @@ extension View {
     func sheetGlass(detents: Set<PresentationDetent> = [.medium, .large]) -> some View {
         if #available(iOS 26.0, *) {
             self
+                // White in light mode: its text is a container's.
+                .starhashContainerSurface()
                 .presentationBackground {
                     // Light: solid white. Dark: toward the page colour, where
                     // a lifted grey failed its grey text.
@@ -51,6 +53,7 @@ extension View {
                 .presentationDragIndicator(.visible)
         } else {
             self
+                .starhashContainerSurface()
                 .presentationBackground(Color.sheetGlassTint)
                 .presentationDetents(detents)
                 .presentationDragIndicator(.visible)
@@ -85,7 +88,7 @@ struct SheetHeader<Trailing: View>: View {
 
     var body: some View {
         ZStack {
-            Text(title)
+            Text(catalog: title)
                 .font(.sheetLargeTitle)
                 .tracking(StarHashTracking.display(32))
                 .foregroundStyle(Color.sheetBrandText)
@@ -153,7 +156,7 @@ struct SheetInfoRow<Trailing: View>: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(label)
+            Text(catalog: label)
                 .font(.sheetBody)
                 .foregroundStyle(Color.starhashPrimaryText)
             Spacer(minLength: 12)
@@ -175,7 +178,7 @@ struct SheetValueText: View {
     let text: String
 
     var body: some View {
-        Text(text)
+        Text(catalog: text)
             .font(.sheetBody)
             .foregroundStyle(Color.sheetSecondaryText)
             .lineLimit(1)
@@ -210,12 +213,12 @@ struct SheetSectionLabel: View {
 /// A symbol in a softly tinted circle, leading a card's heading row.
 struct SheetIconCircle: View {
     let symbol: String
-    var tint: Color = .starhashPrimaryText
+    var tint: Color?
 
     var body: some View {
         Image(systemName: symbol)
             .font(.sheetBody)
-            .foregroundStyle(tint)
+            .foregroundStyle(tint.map(AnyShapeStyle.init) ?? AnyShapeStyle(Color.starhashPrimaryText))
             .frame(width: 38, height: 38)
             .background(Circle().fill(Color.sheetChip))
             .accessibilityHidden(true)
@@ -271,7 +274,7 @@ struct DeleteButton: View {
             HStack(spacing: 8) {
                 Image(systemName: "trash")
                     .accessibilityHidden(true)
-                Text(title)
+                Text(catalog: title)
             }
         }
         .buttonStyle(SheetButtonStyle(fill: .destructive, fillsWidth: fillsWidth))
@@ -284,13 +287,14 @@ private struct SheetButtonBody: View {
     let fillsWidth: Bool
 
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.self) private var environment
 
     private var colors: (fill: Color, label: Color) {
         switch fill {
         case .filled:
             return (.sheetFilledButton, .sheetFilledLabel)
         case .accent:
-            return (.starhashInk, .starhashOnInk)
+            return (Color.starhashInk.color(in: environment), Color.starhashOnInk.color(in: environment))
         case .destructive:
             return (.starhashDestructiveButton, .starhashOnDestructive)
         case .confirm:
@@ -344,13 +348,13 @@ struct SheetTextButton: View {
 
     var body: some View {
         Button(role: role, action: action) {
-            Text(title)
+            Text(catalog: title)
                 // Bold when destructive: the vivid red on a white sheet,
                 // the deeper one on the blue page.
                 .font(.sheet(14, role == .destructive ? .bold : .semibold, relativeTo: .subheadline))
                 .foregroundStyle(role == .destructive
-                    ? (onPage ? Color.starhashDestructiveOnPage : Color.starhashDestructive)
-                    : (onPage ? Color.sheetSecondaryText : Color.sheetBrandText))
+                    ? AnyShapeStyle(onPage ? Color.starhashDestructiveOnPage : Color.starhashDestructive)
+                    : AnyShapeStyle(onPage ? Color.sheetSecondaryText : Color.sheetBrandText))
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .contentShape(Rectangle())
         }

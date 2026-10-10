@@ -199,7 +199,7 @@ struct BuyView: View {
     }
 
     private func sectionTitle(_ title: String) -> some View {
-        Text(title)
+        Text(catalog: title)
             .starhashFont(17, weight: .semibold, relativeTo: .headline)
             .foregroundStyle(Color.starhashSecondaryText)
             .accessibilityAddTraits(.isHeader)
@@ -1023,7 +1023,7 @@ private struct ShortcutEditor: View {
 
     /// Keaser's field: a capsule, its text from the left beside the symbol.
     private func capsuleField(_ prompt: String, text: Binding<String>, field: Field) -> some View {
-        TextField(prompt, text: text, prompt: Text(prompt).foregroundStyle(Color.sheetSecondaryText))
+        TextField(prompt, text: text, prompt: Text(catalog: prompt).foregroundStyle(Color.sheetSecondaryText))
             .font(.sheet(17, .medium, relativeTo: .body))
             .foregroundStyle(Color.starhashPrimaryText)
             .autocorrectionDisabled()

@@ -1,9 +1,9 @@
 import StarHashKit
 import SwiftUI
 
-/// Onboarding's one question about the owner: which wallet they pay with,
-/// MTN MoMo or Airtel Money. It decides the codes StarHash dials and what
-/// Pay shows. (The number itself is not asked for: dialling never
+/// Onboarding's question about the owner's wallet: MTN MoMo or Airtel
+/// Money. It decides the codes StarHash dials and what Pay shows. (Their
+/// number is asked for next, for their own QR code only: dialling never
 /// needs it, since the call goes out from the SIM in the phone.)
 ///
 /// Laid out as Beam's "find your Mac" step, so it reads as one of the reel's
@@ -28,7 +28,7 @@ struct OnboardingWalletPage: View {
     private var ringTint: Color { choice?.ringColor ?? tint }
     /// The chosen logo in the near black on the light page, matching its
     /// rings; nil keeps the carrier's colours on the dark one.
-    private var logoInk: Color? { colorScheme == .light ? .brandNight : nil }
+    private var logoInk: Color? { colorScheme == .light ? .white : nil }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -138,8 +138,8 @@ extension Recipient.Network {
     /// its logo.
     var ringColor: Color {
         switch self {
-        case .mtn: Color(light: .brandNight, dark: .starhashMTN)
-        case .airtel: Color(light: .brandNight, dark: .starhashAirtel)
+        case .mtn: Color(light: .white, dark: .starhashMTN)
+        case .airtel: Color(light: .white, dark: .starhashAirtel)
         }
     }
 

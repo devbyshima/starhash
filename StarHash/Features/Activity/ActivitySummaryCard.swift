@@ -88,6 +88,7 @@ struct ActivitySpendingChart: View {
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.self) private var environment
     /// The width of the bar area, measured once the chart is laid out.
     @State private var plotWidth: CGFloat = 0
     /// The bar under a pressing finger, if any.
@@ -116,7 +117,7 @@ struct ActivitySpendingChart: View {
                 // The primary button's blue gradient, with no glow: inside
                 // the card a glow spilled past each bar's edges. The
                 // pressed bar keeps full strength; the rest step back.
-                .foregroundStyle(Color.starhashInk.gradient.opacity(isProminent(bucket) ? 1 : 0.4))
+                .foregroundStyle(Color.starhashInk.color(in: environment).gradient.opacity(isProminent(bucket) ? 1 : 0.4))
                 .clipShape(UnevenRoundedRectangle(topLeadingRadius: barRadius, topTrailingRadius: barRadius, style: .continuous))
                 .accessibilityLabel(ActivitySummary.spokenName(of: bucket, period: period, calendar: calendar))
                 .accessibilityValue(Money.formatWithCurrency(bucket.total))
@@ -276,6 +277,8 @@ private struct ActivityChartCallout: View {
 
     private static let shape = RoundedRectangle(cornerRadius: 11, style: .continuous)
 
+    @Environment(\.self) private var environment
+
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
             Text(title)
@@ -290,7 +293,7 @@ private struct ActivityChartCallout: View {
         .fixedSize()
         .padding(.horizontal, 10)
         .padding(.vertical, 7)
-        .starhashGlass(in: Self.shape, tint: Color.starhashInk.opacity(0.1))
+        .starhashGlass(in: Self.shape, tint: Color.starhashInk.color(in: environment).opacity(0.1))
     }
 }
 

@@ -28,15 +28,16 @@ private struct PrimaryButtonBody: View {
     let glows: Bool
 
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.self) private var environment
 
     private var fill: Color {
-        guard isEnabled else { return onPay ? .payWash : Color.starhashPrimaryText.opacity(0.1) }
-        return onPay ? .payButtonFill : .starhashInk
+        guard isEnabled else { return onPay ? .payWash : Color.starhashPrimaryText.color(in: environment).opacity(0.1) }
+        return onPay ? .payButtonFill : Color.starhashInk.color(in: environment)
     }
 
     private var label: Color {
-        guard isEnabled else { return onPay ? .paySecondaryText : .starhashSecondaryText }
-        return onPay ? .payButtonLabel : .starhashOnInk
+        guard isEnabled else { return onPay ? .paySecondaryText : Color.starhashSecondaryText.color(in: environment) }
+        return onPay ? .payButtonLabel : Color.starhashOnInk.color(in: environment)
     }
 
     var body: some View {
@@ -124,12 +125,12 @@ struct EmptyStateView<Actions: View>: View {
                 .frame(width: 168, height: 168)
                 .padding(.bottom, 12)
                 .accessibilityHidden(true)
-            Text(title)
+            Text(catalog: title)
                 .starhashFont(20, weight: .bold)
                 .foregroundStyle(Color.starhashPrimaryText)
                 .multilineTextAlignment(.center)
                 .accessibilityAddTraits(.isHeader)
-            Text(message)
+            Text(catalog: message)
                 .starhashFont(20)
                 .foregroundStyle(Color.starhashSecondaryText)
                 .multilineTextAlignment(.center)

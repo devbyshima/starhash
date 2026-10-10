@@ -50,10 +50,18 @@ private struct StarHashGlassModifier<S: Shape>: ViewModifier {
         // Every page is the blue in light mode, where untinted glass turns
         // a pale cyan, so the deep-blue tint is the default.
         let tint: Color = tint ?? pageTint ?? .starhashGlassTint
+        // Clear glass over the blue page is a pale lavender, where white
+        // fades: what is on it takes a container's near black in light
+        // mode, as on the tab bar. Tinted glass stays a deep blue, white on
+        // it.
+        let surface: StarHashSurface = tint == .clear ? .container : .page
         if #available(iOS 26.0, *) {
-            content.glassEffect(Glass.regular.tint(tint).interactive(interactive), in: shape)
+            content
+                .environment(\.starhashSurface, surface)
+                .glassEffect(Glass.regular.tint(tint).interactive(interactive), in: shape)
         } else {
             content
+                .environment(\.starhashSurface, surface)
                 .background(tint, in: shape)
                 .background(.ultraThinMaterial, in: shape)
                 .overlay(shape.stroke(Color.starhashPrimaryText.opacity(0.10), lineWidth: 0.5))
@@ -137,7 +145,8 @@ extension View {
     /// pinned tiles wear it too, and so does Balance (`interactive`), which
     /// Pay holds to the light look in dark mode as well.
     func starhashTotalCard(in shape: some Shape, interactive: Bool = false) -> some View {
-        background(Color.sheetSolidFill, in: shape)
+        starhashContainerSurface()
+            .background(Color.sheetSolidFill, in: shape)
             .starhashGlass(in: shape, interactive: interactive, tint: .sheetGlassTint)
     }
 
@@ -179,9 +188,12 @@ private struct ContainerSurface<S: Shape>: ViewModifier {
 
     func body(content: Content) -> some View {
         if colorScheme == .dark {
-            content.starhashGlass(in: shape, tint: .blackGlassTint)
+            content
+                .starhashContainerSurface()
+                .starhashGlass(in: shape, tint: .blackGlassTint)
         } else {
             content
+                .starhashContainerSurface()
                 .background(lightFill, in: shape)
                 .starhashGlass(in: shape, tint: lightFill)
         }

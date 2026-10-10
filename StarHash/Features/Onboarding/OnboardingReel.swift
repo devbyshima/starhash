@@ -102,13 +102,13 @@ struct OnboardingReel: View {
 
     private func words(_ phase: Phase) -> some View {
         VStack(spacing: 12) {
-            Text(phase.title)
+            Text(catalog: phase.title)
                 .starhashFont(22, weight: .bold, relativeTo: .title2)
                 .foregroundStyle(Color.starhashPrimaryText)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .accessibilityAddTraits(.isHeader)
-            Text(phase.description)
+            Text(catalog: phase.description)
                 .font(.starhash(.callout))
                 .foregroundStyle(Color.starhashSecondaryText)
                 .lineLimit(2)

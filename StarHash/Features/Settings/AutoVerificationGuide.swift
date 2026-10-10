@@ -246,7 +246,7 @@ struct AutoVerificationGuide: View {
     }
 
     private var texts: some View {
-        Text(title)
+        Text(catalog: title)
             .font(.starhashTitle)
             .tracking(StarHashTracking.display(28))
             .foregroundStyle(Color.starhashPrimaryText)
@@ -620,7 +620,7 @@ private struct GuideProgress: View {
         HStack(spacing: 6) {
             ForEach(0..<count, id: \.self) { index in
                 Capsule()
-                    .fill(index <= current ? Color.starhashAccentGraphic : Color.starhashPrimaryText.opacity(0.15))
+                    .fill(index <= current ? AnyShapeStyle(Color.starhashAccentGraphic) : AnyShapeStyle(Color.starhashPrimaryText.opacity(0.15)))
                     .frame(height: 5)
             }
         }

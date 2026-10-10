@@ -40,9 +40,9 @@ struct VerifyPaymentSheet: View {
                     paymentCard(transaction)
 
                     if let note {
-                        Text(note.text)
+                        Text(catalog: note.text)
                             .font(.sheet(14, .semibold, relativeTo: .subheadline))
-                            .foregroundStyle(note.isProblem ? Color.starhashDestructive : Color.sheetBrandText)
+                            .foregroundStyle(note.isProblem ? AnyShapeStyle(Color.starhashDestructive) : AnyShapeStyle(Color.sheetBrandText))
                             .multilineTextAlignment(.center)
                             .fixedSize(horizontal: false, vertical: true)
                             .transition(.opacity)
@@ -123,7 +123,7 @@ struct VerifyPaymentSheet: View {
             dismiss()
         case .overdraft(let paid):
             let fee = Money.formatWithCurrency(paid.accessFee ?? 0)
-            show(Note(text: "MoMoAdvance's fee of \(fee) is added. Now paste the payment's own message.", isProblem: false))
+            show(Note(text: String(localized: "MoMoAdvance's fee of \(fee) is added. Now paste the payment's own message."), isProblem: false))
         case .anotherPayment, .confirmedAnother, .notAMessage:
             // Another payment's message, one already used, or not a
             // wallet's at all: all the same to the owner, the wrong one.

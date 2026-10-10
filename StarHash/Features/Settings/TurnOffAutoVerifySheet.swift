@@ -34,7 +34,7 @@ struct TurnOffAutoVerifySheet: View {
                         if index > 0 { SheetDivider().padding(.leading, 52) }
                         HStack(spacing: 14) {
                             SheetIconCircle(symbol: loss.symbol)
-                            Text(loss.text)
+                            Text(catalog: loss.text)
                                 .font(.sheetBody)
                                 .foregroundStyle(Color.starhashPrimaryText)
                                 .fixedSize(horizontal: false, vertical: true)

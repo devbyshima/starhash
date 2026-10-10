@@ -65,6 +65,9 @@ struct StarHashTabBar: View {
         )
         .animation(reduceMotion ? .smooth(duration: 0.2) : .spring(response: 0.3, dampingFraction: 0.78), value: router.isTabBarCompact)
         .onAppear { NavigationHaptics.shared.prepare() }
+        // Clear glass, pale over the blue page: near-black symbols in
+        // light mode, which also read over a white card scrolling under.
+        .starhashContainerSurface()
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Tab bar")
     }
@@ -82,11 +85,11 @@ struct StarHashTabBar: View {
             .frame(width: TabBarMetrics.itemWidth, height: TabBarMetrics.height)
             .contentShape(Rectangle())
             .accessibilityElement()
-            .accessibilityLabel(item.title(payPage: router.payPage))
+            .accessibilityLabel(LocalizedStringKey(item.title(payPage: router.payPage)))
             .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
             .accessibilityAction { select(item) }
             .accessibilityShowsLargeContentViewer {
-                Label(item.title(payPage: router.payPage), systemImage: symbol)
+                Label(LocalizedStringKey(item.title(payPage: router.payPage)), systemImage: symbol)
             }
     }
 
@@ -263,7 +266,7 @@ struct PayBuySwitcher: View {
 
     var body: some View {
         let target: AppTab = page == .buy ? .pay : .buy
-        SwapGlassButton(symbol: target.symbol, label: "Switch to \(target.title)", pressHaptic: false) {
+        SwapGlassButton(symbol: target.symbol, label: String(localized: "Switch to \(target.title)"), pressHaptic: false) {
             NavigationHaptics.shared.switchPage()
             router.show(target)
         }

@@ -27,11 +27,11 @@ struct LegalDocumentView: View {
             SettingsCard {
                 ForEach(Array(document.sections.enumerated()), id: \.offset) { _, section in
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(section.title)
+                        Text(catalog: section.title)
                             .starhashFont(16, weight: .semibold, relativeTo: .callout)
                             .foregroundStyle(Color.starhashPrimaryText)
                             .accessibilityAddTraits(.isHeader)
-                        Text(section.text)
+                        Text(catalog: section.text)
                             .starhashFont(14.5, relativeTo: .subheadline)
                             .lineSpacing(2)
                             .foregroundStyle(Color.starhashSecondaryText)
@@ -58,7 +58,7 @@ struct LegalDocumentView: View {
         VStack(spacing: 0) {
             SettingsSymbol(symbol: document.symbol, size: 64, pointSize: 28)
                 .padding(.bottom, 18)
-            Text(document.title)
+            Text(catalog: document.title)
                 .starhashFont(30, weight: .bold, relativeTo: .title)
                 .foregroundStyle(Color.starhashPrimaryText)
                 .multilineTextAlignment(.center)
@@ -70,7 +70,7 @@ struct LegalDocumentView: View {
                 .padding(.vertical, 5)
                 .background(Color.settingsTile, in: Capsule())
                 .padding(.top, 10)
-            Text(document.summary)
+            Text(catalog: document.summary)
                 .font(.starhash(.body))
                 .foregroundStyle(Color.starhashSecondaryText)
                 .multilineTextAlignment(.center)

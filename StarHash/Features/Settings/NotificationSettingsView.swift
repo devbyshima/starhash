@@ -42,7 +42,7 @@ struct NotificationSettingsView: View {
                     symbol: "bell.badge.fill",
                     title: "Payment reminders",
                     caption: failsUnconfirmed
-                        ? "When no \(wallet.messagesName) message confirms a payment within an hour"
+                        ? String(localized: "When no \(wallet.messagesName) message confirms a payment within an hour")
                         : "When a payment you made is still pending",
                     isOn: $paymentReminders
                 )
@@ -61,7 +61,7 @@ struct NotificationSettingsView: View {
                     symbol: "checkmark.seal.fill",
                     title: "Confirmed payments",
                     caption: autoVerifyOn
-                        ? "When a \(wallet.messagesName) message confirms a payment"
+                        ? String(localized: "When a \(wallet.messagesName) message confirms a payment")
                         : "Needs auto-verify, under Transactions",
                     isOn: $confirmedPayments
                 )
@@ -69,7 +69,7 @@ struct NotificationSettingsView: View {
                     symbol: "arrow.down.circle.fill",
                     title: "Money received",
                     caption: autoVerifyOn
-                        ? "When a \(wallet.messagesName) message brings money in"
+                        ? String(localized: "When a \(wallet.messagesName) message brings money in")
                         : "Needs auto-verify, under Transactions",
                     isOn: $moneyReceived
                 )
@@ -210,9 +210,9 @@ struct NotificationSettingsView: View {
 
     /// "10 minutes", "1 hour".
     private static func delayTitle(_ minutes: Int) -> String {
-        guard minutes >= 60 else { return "\(minutes) minutes" }
+        guard minutes >= 60 else { return String(localized: "\(minutes) minutes") }
         let hours = minutes / 60
-        return hours == 1 ? "1 hour" : "\(hours) hours"
+        return hours == 1 ? String(localized: "1 hour") : String(localized: "\(hours) hours")
     }
 
     /// The week's days from the one the calendar starts on, as `Calendar`

@@ -39,7 +39,7 @@ struct ActivitySearchView: View {
             EmptyStateView(
                 doodle: .results,
                 title: "No Results",
-                message: "No transactions match \u{201C}\(query)\u{201D}."
+                message: String(localized: "No transactions match \u{201C}\(query)\u{201D}.")
             )
             .padding(.horizontal, 24)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
