@@ -91,10 +91,16 @@ struct ActivityTransactionRow: View {
     var body: some View {
         let isLarge = dynamicTypeSize.isAccessibilitySize
         HStack(spacing: 16) {
-            TransactionAvatar(counterparty: transaction.counterparty, size: 42)
+            if transaction.isPurchase, let category = transaction.knownCategory {
+                // Bought, not sent: what was bought stands for who.
+                SymbolTile(symbol: category.symbol, size: 42)
+                    .accessibilityHidden(true)
+            } else {
+                TransactionAvatar(counterparty: transaction.counterparty, size: 42)
+            }
             VStack(alignment: .leading, spacing: 1) {
                 HStack(spacing: 6) {
-                    Text(transaction.counterparty.displayName)
+                    Text(transaction.counterparty.shownName)
                         .starhashFont(17, weight: .semibold, relativeTo: .headline)
                         .foregroundStyle(Color.starhashPrimaryText)
                         .lineLimit(isLarge ? 3 : 1)
@@ -131,7 +137,9 @@ struct ActivityTransactionRow: View {
     /// recipient already shows its number as the name, so only the time.
     private var detailLine: String {
         var parts: [String] = []
-        if transaction.counterparty.name?.isEmpty == false {
+        if transaction.isPurchase {
+            parts.append(String(localized: "Bought"))
+        } else if transaction.counterparty.name?.isEmpty == false, !transaction.counterparty.destination.isEmpty {
             parts.append(transaction.counterparty.formattedDestination)
         }
         parts.append(showsDate

@@ -38,6 +38,18 @@ action = {
             "Value": {"attachmentsByRange": {"{0, 1}": {"Type": "ExtensionInput"}}, "string": "￼"},
             "WFSerializationType": "WFTextTokenString",
         },
+        # And `sender`, set to Shortcut Input's Sender, so StarHash can tell
+        # a look-alike from someone's own number from M-Money's own.
+        "sender": {
+            "Value": {
+                "attachmentsByRange": {"{0, 1}": {
+                    "Type": "ExtensionInput",
+                    "Aggrandizements": [{"Type": "WFPropertyVariableAggrandizement", "PropertyName": "Sender"}],
+                }},
+                "string": "￼",
+            },
+            "WFSerializationType": "WFTextTokenString",
+        },
     },
 }
 

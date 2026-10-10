@@ -21,14 +21,24 @@ struct ProcessCarrierSMSIntent: AppIntent {
     )
     var message: String
 
+    /// Who sent it, so a look-alike from someone's own number is caught.
+    /// Optional: a shortcut set up before StarHash asked for it passes
+    /// none, and then only the message's wording is checked.
+    @Parameter(
+        title: "Sender",
+        description: "Who sent the message. In an automation, pass Shortcut Input's Sender."
+    )
+    var sender: String?
+
     static var parameterSummary: some ParameterSummary {
-        Summary("Process \(\.$message)")
+        Summary("Process \(\.$message) from \(\.$sender)")
     }
 
     init() {}
 
-    init(message: String) {
+    init(message: String, sender: String? = nil) {
         self.message = message
+        self.sender = sender
     }
 
     /// Silent: the automation runs this for every message containing RWF,
@@ -49,6 +59,13 @@ struct ProcessCarrierSMSIntent: AppIntent {
         StarHashPreferences.markMessageArrived()
         guard StarHashPreferences.autoVerifyOn,
               StarHashPreferences.saveTransactions else { return .result() }
+        // A look-alike of the wallet's message (from someone's own number,
+        // or asking for money back) is never logged, and the owner is
+        // warned before they send anything back.
+        if StarHashPreferences.scamWarnings, let warning = ScamCheck.check(message, sender: sender) {
+            await StarHashNotifications.shared.warnOfScam(warning)
+            return .result()
+        }
         let store = AppEnvironment.store
         if let sms = CarrierSMS.parse(message) {
             let before = store.transactions

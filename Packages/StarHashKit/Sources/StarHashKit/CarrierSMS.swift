@@ -11,6 +11,9 @@ public struct ParsedSMS: Hashable, Sendable {
     public var date: Date?
     public var reference: String?
     public var balanceAfter: Int?
+    /// What it was for, when the message or the name it was paid to says
+    /// (airtime, a bundle, electricity): a `TransactionCategory` raw value.
+    public var category: String?
 
     public init(
         wallet: Recipient.Network = .mtn,
@@ -20,7 +23,8 @@ public struct ParsedSMS: Hashable, Sendable {
         fee: Int? = nil,
         date: Date? = nil,
         reference: String? = nil,
-        balanceAfter: Int? = nil
+        balanceAfter: Int? = nil,
+        category: String? = nil
     ) {
         self.wallet = wallet
         self.direction = direction
@@ -30,6 +34,12 @@ public struct ParsedSMS: Hashable, Sendable {
         self.date = date
         self.reference = reference
         self.balanceAfter = balanceAfter
+        self.category = category
+    }
+
+    /// Bought rather than sent: airtime, a bundle, electricity, water, TV.
+    public var isPurchase: Bool {
+        direction == .outgoing && (category.flatMap(TransactionCategory.init(rawValue:))?.isPurchase ?? false)
     }
 }
 
@@ -89,6 +99,17 @@ public enum CarrierSMS {
             return nil
         }
         guard shape.amount > 0 else { return nil }
+        // What it was for: a purchase by the message's own words ("bought
+        // ... airtime"), anything else sent by the name it was paid to.
+        // Only a purchase reads the whole message: MoMo's transfers end
+        // with an advert for airtime and bundles. Money received has none.
+        let category: TransactionCategory? = if shape.isPurchase {
+            TransactionCategorizer.category(name: shape.counterparty.name, message: message)
+        } else if shape.direction == .outgoing {
+            TransactionCategorizer.category(name: shape.counterparty.name, kind: shape.counterparty.kind)
+        } else {
+            nil
+        }
         return ParsedSMS(
             wallet: wallet,
             direction: shape.direction,
@@ -97,7 +118,8 @@ public enum CarrierSMS {
             fee: fee(in: message),
             date: date(in: message),
             reference: reference(in: message),
-            balanceAfter: balance(in: message)
+            balanceAfter: balance(in: message),
+            category: category?.rawValue
         )
     }
 
@@ -193,6 +215,8 @@ public enum CarrierSMS {
         var direction: Transaction.Direction
         var counterparty: Recipient
         var amount: Int
+        /// Something bought (`purchaseShape`) rather than paid to someone.
+        var isPurchase = false
     }
 
     /// An amount as the carrier writes it ("5000", "15,000", "5000.00"),
@@ -203,7 +227,32 @@ public enum CarrierSMS {
     /// Transaction Id: ..."), which is no part of it.
     private static let tokenTail = #"(?:\s+with token\b.*?)?"#
 
+    /// Something bought with the wallet, in either wallet's wording: "You
+    /// have bought 1,000 RWF of airtime for 0788123456", "You have
+    /// purchased a Data Bundle of 500 RWF", "Cash Power token bought for
+    /// 5,000 RWF". What was bought stands as the counterparty, with no
+    /// number to pay again.
+    private static func purchaseShape(of message: String) -> Shape? {
+        let item: String
+        let value: String
+        if let m = captures(#"\b(?:bought|purchased)\s+"# + amount + #"\s+(?:of\s+|worth of\s+|for\s+)?(?:an?\s+)?([A-Za-z+][A-Za-z+ ]*?)(?=\s+(?:for|to|on|at|from|with)\b|[.,;]|$)"#, message) {
+            (value, item) = (m[0], m[1])
+        } else if let m = captures(#"\b(?:bought|purchased)\s+(?:an?\s+|your\s+)?([A-Za-z+][A-Za-z+ ]*?)\s+(?:of|worth|for)\s+"# + amount, message) {
+            (item, value) = (m[0], m[1])
+        } else if let m = captures(#"\b([A-Za-z+][A-Za-z+ ]*?)\s+(?:token\s+)?(?:bought|purchased)\s+(?:successfully\s+)?(?:for|of)\s+"# + amount, message) {
+            (item, value) = (m[0], m[1])
+        } else {
+            return nil
+        }
+        var name = displayName(item.replacingOccurrences(of: #"^(?:you have|you|your)\s+"#, with: "", options: [.regularExpression, .caseInsensitive]))
+        // "airtime" reads as "Airtime" in Activity.
+        if let lower = name, lower == lower.lowercased() { name = lower.capitalized }
+        return Shape(direction: .outgoing, counterparty: Recipient(name: name ?? "Purchase", destination: "", kind: .merchant), amount: money(value), isPurchase: true)
+    }
+
     private static func mtnShape(of message: String) -> Shape? {
+        if let bought = purchaseShape(of: message) { return bought }
+
         // "*165*S*5000 RWF transferred to John Doe (250788123456) from ..."
         if let m = captures(amount + #"\s+transferred to\s+(.+?)\s*\(([^)]*)\)"#, message) {
             return Shape(direction: .outgoing, counterparty: party(name: m[1], number: m[2]), amount: money(m[0]))
@@ -270,6 +319,7 @@ public enum CarrierSMS {
     private static let nameEnd = #"(?=\.\s|\.$|,|\s+(?:mobile app\s+)?charge\b|\s+fee\b|\s+bal\b|\s+balance\b|\s+in\b|\s+on\b|\s+date\b|$)"#
 
     private static func airtelShape(of message: String) -> Shape? {
+        if let bought = purchaseShape(of: message) { return bought }
         // "Sent to Jean Bosco in MTN . Amt RWF 2,000": to the other network,
         // which may leave the number out.
         if let m = captures(#"sent to\s+(.+?)\s+in\s+(?:MTN|Airtel)\b.*?\bamt\.?\s*:?\s*"# + amount, message) {

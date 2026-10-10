@@ -39,7 +39,7 @@ struct TransactionDetailPage: View {
                     hero(transaction)
                     detailsCard(transaction)
                     if let location = transaction.location {
-                        locationSection(location, title: transaction.counterparty.displayName)
+                        locationSection(location, title: transaction.counterparty.shownName)
                     }
                     stats(transaction)
                     actions(transaction)
@@ -97,7 +97,7 @@ struct TransactionDetailPage: View {
     @ViewBuilder
     private func heroBadge(_ transaction: StarHashKit.Transaction) -> some View {
         let outgoing = transaction.direction == .outgoing
-        let tint = outgoing ? Color.starhashDestructiveOnPage : Color.starhashIncoming
+        let tint = outgoing ? AnyShapeStyle(Color.starhashDestructiveOnPage) : AnyShapeStyle(Color.starhashIncoming)
         let arrow = Image(systemName: outgoing ? "arrow.up.right" : "arrow.down.left")
         if enableContacts, PayContacts.shared.photoContactID(for: transaction.counterparty) != nil {
             TransactionAvatar(counterparty: transaction.counterparty, size: 72, isCircle: true)
@@ -124,7 +124,7 @@ struct TransactionDetailPage: View {
     private func hero(_ transaction: StarHashKit.Transaction) -> some View {
         VStack(spacing: 10) {
             heroBadge(transaction)
-            Text(transaction.counterparty.displayName)
+            Text(transaction.counterparty.shownName)
                 .font(.sheet(21, .bold, relativeTo: .title2))
                 .foregroundStyle(Color.starhashPrimaryText)
                 .multilineTextAlignment(.center)
@@ -159,7 +159,7 @@ struct TransactionDetailPage: View {
                 set: { setCategory($0, of: transaction) }
             )) {
                 Text("None").tag(String?.none)
-                ForEach(TransactionCategory.allCases) { option in
+                ForEach(TransactionCategory.choices) { option in
                     Label(option.title, systemImage: option.symbol).tag(String?.some(option.rawValue))
                 }
             }
@@ -231,10 +231,10 @@ struct TransactionDetailPage: View {
 
     /// A dot and the word, in the status's colour, as Beam shows a state.
     private func statusValue(_ status: StarHashKit.Transaction.Status) -> some View {
-        let color: Color = switch status {
-        case .confirmed: .starhashIncoming
-        case .pending: .starhashUrgent
-        case .failed: .starhashDestructive
+        let color: AnyShapeStyle = switch status {
+        case .confirmed: AnyShapeStyle(Color.starhashIncoming)
+        case .pending: AnyShapeStyle(Color.starhashUrgentText)
+        case .failed: AnyShapeStyle(Color.starhashDestructive)
         }
         return HStack(spacing: 6) {
             Circle().fill(color).frame(width: 7, height: 7)
@@ -271,7 +271,7 @@ struct TransactionDetailPage: View {
             SheetSectionLabel("Location", onPage: true)
             Map(initialPosition: .camera(MapCamera(centerCoordinate: coordinate, distance: 900)), interactionModes: []) {
                 Marker(title, coordinate: coordinate)
-                    .tint(Color.starhashInk)
+                    .tint(Color.brandBlue)
             }
             .mapStyle(.standard(pointsOfInterest: .excludingAll))
             .mapControlVisibility(.hidden)
@@ -292,7 +292,7 @@ struct TransactionDetailPage: View {
         return VStack(spacing: 8) {
             SheetSectionLabel("This year", onPage: true)
             HStack(alignment: .top, spacing: 16) {
-                stat(value: Money.format(ytd.amount), label: "\(Money.currency) sent")
+                stat(value: Money.format(ytd.amount), label: String(localized: "\(Money.currency) sent"))
                 stat(value: String(ytd.count), label: ytd.count == 1 ? "Payment" : "Payments")
             }
             .padding(16)
@@ -323,7 +323,7 @@ struct TransactionDetailPage: View {
             // A sender read from an SMS may be masked or have no number at
             // all; there is nothing safe to dial then.
             if transaction.counterparty.isPayable {
-                Button(payTitle(transaction)) { payAgain(transaction) }
+                Button(LocalizedStringKey(payTitle(transaction))) { payAgain(transaction) }
                     .buttonStyle(.sheetPrimary)
             }
             // Settled by the wallet's own message. A failed payment can
