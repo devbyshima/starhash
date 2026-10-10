@@ -83,8 +83,8 @@ struct RecipientPickerView: View {
                         ForEach(nearby, id: \.self) { recipient in
                             RecipientRow(
                                 tile: tile(for: recipient),
-                                title: recipient.displayName,
-                                subtitle: recipient.name == nil ? kindLabel(recipient) : recipient.formattedDestination,
+                                title: recipient.shownName,
+                                subtitle: recipient.shownName == recipient.formattedDestination ? kindLabel(recipient) : recipient.formattedDestination,
                                 matchColor: Color.pickerMatch
                             ) { choose(recipient) }
                         }
@@ -97,8 +97,8 @@ struct RecipientPickerView: View {
                         ForEach(recents, id: \.self) { recipient in
                             RecipientRow(
                                 tile: tile(for: recipient),
-                                title: recipient.displayName,
-                                subtitle: recipient.name == nil ? kindLabel(recipient) : recipient.formattedDestination,
+                                title: recipient.shownName,
+                                subtitle: recipient.shownName == recipient.formattedDestination ? kindLabel(recipient) : recipient.formattedDestination,
                                 match: search.nameQuery,
                                 matchColor: Color.pickerMatch,
                                 onLongPress: contact(for: recipient).map { found in { showDetails(for: found) } }
@@ -632,9 +632,9 @@ struct RecipientPickerView: View {
 
     /// "0788 123 456", "Merchant code 020205", or "3 phone numbers".
     private func contactSubtitle(_ contact: PayContact) -> String {
-        guard contact.recipients.count == 1 else { return "\(contact.recipients.count) phone numbers" }
+        guard contact.recipients.count == 1 else { return String(localized: "\(contact.recipients.count) phone numbers") }
         let only = contact.recipients[0]
-        return only.kind == .merchant ? "Merchant code \(only.destination)" : only.formattedDestination
+        return only.kind == .merchant ? String(localized: "Merchant code \(only.destination)") : only.formattedDestination
     }
 
     /// A storefront for merchants, initials for named people, a phone for
@@ -648,7 +648,7 @@ struct RecipientPickerView: View {
     /// fee the payment gets.
     private func kindLabel(_ recipient: Recipient) -> String {
         guard let network = recipient.network else { return "Merchant code" }
-        return "\(network.name) number"
+        return String(localized: "\(network.name) number")
     }
 
     private func pick(_ contact: PayContact) {
@@ -791,7 +791,7 @@ struct RecipientRow: View {
     let subtitle: String
     /// Letters to mark in the title: what the search typed.
     var match: String = ""
-    var matchColor: Color = .starhashPrimaryText
+    var matchColor: SurfaceColor = Color.starhashPrimaryText
     /// A long press, for a row that is a saved contact: their details.
     var onLongPress: (() -> Void)?
     let action: () -> Void
@@ -802,13 +802,14 @@ struct RecipientRow: View {
     /// (the sheet it opens cancels it), once any tap from it has come.
     @State private var longPressed = false
     @State private var longPresses = 0
+    @Environment(\.self) private var environment
 
     /// The title with the first stretch the search matched coloured, the
     /// way the search matches: ignoring case and accents.
     private var styledTitle: AttributedString {
         var text = AttributedString(title)
         if !match.isEmpty, let range = text.range(of: match, options: [.caseInsensitive, .diacriticInsensitive]) {
-            text[range].foregroundColor = matchColor
+            text[range].foregroundColor = matchColor.color(in: environment)
             text[range].backgroundColor = .pickerMatchBackground
         }
         return text
@@ -827,7 +828,7 @@ struct RecipientRow: View {
                         .font(PickerType.rowName)
                         .foregroundStyle(Color.starhashPrimaryText)
                         .lineLimit(1)
-                    Text(subtitle)
+                    Text(catalog: subtitle)
                         .font(PickerType.rowDetail)
                         .foregroundStyle(Color.sheetSecondaryText)
                         .lineLimit(1)
@@ -917,17 +918,17 @@ struct RecipientTile: View {
             case .monogram(let initials):
                 Text(initials)
                     .font(.starhashFixed(size * 0.36, weight: .semibold))
-                    .foregroundStyle(onPay ? Color.payPrimaryText : Color.starhashPrimaryText)
+                    .foregroundStyle(onPay ? AnyShapeStyle(Color.payPrimaryText) : AnyShapeStyle(Color.starhashPrimaryText))
             case .symbol(let symbol):
                 Image(systemName: symbol)
                     .font(.system(size: size * 0.4))
-                    .foregroundStyle(onPay ? Color.paySecondaryText : Color.sheetSecondaryText)
+                    .foregroundStyle(onPay ? AnyShapeStyle(Color.paySecondaryText) : AnyShapeStyle(Color.sheetSecondaryText))
             case .photo:
                 EmptyView()
             }
         }
         .frame(width: size, height: size)
-        .background(fill ?? (onPay ? Color.payWash : Color.starhashPrimaryText.opacity(0.1)), in: RoundedRectangle(cornerRadius: size * 0.25, style: .continuous))
+        .background(fill.map(AnyShapeStyle.init) ?? (onPay ? AnyShapeStyle(Color.payWash) : AnyShapeStyle(Color.starhashPrimaryText.opacity(0.1))), in: RoundedRectangle(cornerRadius: size * 0.25, style: .continuous))
         .accessibilityHidden(true)
     }
 }
@@ -941,7 +942,7 @@ private struct ContactsAccessCard: View {
         StarHashCard(fill: .starhashCard) {
             VStack(alignment: .leading, spacing: 12) {
                 Label {
-                    Text(message)
+                    Text(catalog: message)
                         .font(.starhash(.subheadline))
                         .foregroundStyle(Color.starhashSecondaryText)
                         .fixedSize(horizontal: false, vertical: true)

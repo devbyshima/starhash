@@ -48,6 +48,13 @@ final class PayContacts {
         didSet {
             var withPhotos: [String: String] = [:]
             var byName: [String: String] = [:]
+            var names: [String: String] = [:]
+            for contact in contacts {
+                for recipient in contact.recipients {
+                    names[recipient.kind.rawValue + recipient.destination] = names[recipient.kind.rawValue + recipient.destination] ?? contact.name
+                }
+            }
+            contactNames = names
             for contact in contacts where contact.hasPhoto {
                 for recipient in contact.recipients {
                     withPhotos[recipient.kind.rawValue + recipient.destination] = withPhotos[recipient.kind.rawValue + recipient.destination] ?? contact.id
@@ -66,6 +73,16 @@ final class PayContacts {
     /// The same by name, for money received: MTN's SMS hides most of the
     /// sender's number ("*********998") but gives their name.
     private var photoContactIDsByName: [String: String] = [:]
+    /// Each saved number's or code's name in Contacts, by kind and
+    /// destination.
+    private var contactNames: [String: String] = [:]
+
+    /// The name `recipient`'s number or code is saved under in Contacts,
+    /// nil when it is not saved there.
+    func contactName(for recipient: Recipient) -> String? {
+        guard !recipient.destination.isEmpty else { return nil }
+        return contactNames[recipient.kind.rawValue + recipient.destination]
+    }
 
     /// Whether `recipient`'s number is saved in Contacts. Nearby remembers
     /// only numbers and codes that are not: a contact is already a tap away.
@@ -207,5 +224,19 @@ struct RecipientSearch {
 
     func matches(_ contact: PayContact) -> Bool {
         matches(name: contact.name, destinations: contact.recipients.map(\.destination))
+    }
+}
+
+extension Recipient {
+    /// The name to show: the one its number or code is saved under in
+    /// Contacts, while contacts are on, ahead of any other (the name a
+    /// wallet's message gave, or a merchant's registered name), since it is
+    /// the name the owner chose; otherwise `displayName`.
+    @MainActor
+    var shownName: String {
+        if StarHashPreferences.enableContacts, let saved = PayContacts.shared.contactName(for: self) {
+            return saved
+        }
+        return displayName
     }
 }
