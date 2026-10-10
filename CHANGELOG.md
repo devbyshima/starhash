@@ -8,9 +8,29 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Added
 
+- Scan to Pay: the scan button on Pay reads a merchant's MoMo QR code or a friend's StarHash code, and Pay dials them with no recipient screen, the amount filled in when the code carries one. Photos reads a code from a picture.
+- Your own QR code, for others to scan and pay you: your name and number, asked for in onboarding and kept in Settings' new Profile, where the code can be shared. Profile shows your name large under a face you pick ("Pick your vibe").
+- Reports: each month in large, bold figures, day by day, broken down by category and recipient, compared with the month before, with a summary written on the iPhone (by Apple Intelligence on iOS 26 and later). The weekly and monthly summaries open it.
+- Purchases of airtime, bundles, electricity, water and TV show as bought rather than sent, and payments sort into categories, by their names and, with Smart categories, by Apple Intelligence.
+- Scam warnings: a message that looks like MoMo's but comes from someone's own number, or asks for money back, is never logged, and a notification warns you before you send anything back.
+- Export and import: everything StarHash keeps as one file, in Settings' Your Data.
+- Widgets: Buy's codes on the Home Screen with nothing else on the card, each dialled in a tap and paged with More without opening StarHash, and Scan to Pay in Control Center.
+- Kinyarwanda, chosen in the Settings app.
 - What's New: the first launch after an update shows what the version brought, with a video of each new feature. It shows once, and never on a fresh install.
 - Auto-verify reads MoMoAdvance's messages: when MTN's overdraft pays for a payment, its access fee joins that payment's fee, on a row of its own in the payment's details.
 - Verify replaces Mark as Confirmed: paste the wallet's message for a payment, and StarHash confirms it (or marks it failed) only if the message is that payment's, with its real fee, reference and balance. Confirm Without Message stays as the last resort.
+
+### Changed
+
+- A new blue, #3020FE, with white text on it in light mode, and new status colours: green for money in, yellow for pending, red for money out and deletes.
+- Pay's wallet switcher is now the logo above the keypad, where RWF was, and Balance is clear glass in light mode.
+- A new launch animation: a stroke sweeps round the screen, and as it lands the StarHash star snaps together out of a dot.
+- New drawings for the empty screens, hand-drawn in the page's own blues.
+- A number saved in your Contacts always shows under the name you saved it with.
+
+### Fixed
+
+- Tapping a StarHash notification opens the app again, on what it is about.
 
 ## [1.0.0] - Unreleased
 

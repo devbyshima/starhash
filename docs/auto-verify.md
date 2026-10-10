@@ -34,6 +34,12 @@ With auto-verify on, a payment that did not go through is marked failed for you,
 
 A late message never confirms a payment the wallet said failed, or one you marked failed yourself; if one did go through after all, verify it with its message (below). Payments dialled before auto-verify was set up are left as they are, and so is every payment while auto-verify is off: each stays pending until you mark it.
 
+## Scam warnings
+
+The automation hands StarHash every message with **RWF** in it, whoever sent it, so a fake MoMo message can reach it too: the "I sent you money by mistake, send it back" trick, where a message that looks like MoMo's comes from someone's own number. StarHash checks each one first (`ScamCheck` in StarHashKit). A message that reads like a wallet's but came from a phone number or an email, or from a name that is not the wallet's when it reads as a whole transaction, or that asks for the money back, is never logged: StarHash warns you with a notification instead, and tapping it explains the trick and offers to check your balance. Scam warnings is a switch under Security in Settings, on by default.
+
+The sender comes from the shortcut's **Sender** input (Shortcut Input's Sender). A shortcut added before StarHash asked for it passes none, so only the wording is checked until the shortcut is added again.
+
 If the shortcut seems to have stopped (your last three payments all went unconfirmed and no message has come for a week), StarHash stops failing payments rather than fail ones that probably went through, and Settings says to check the shortcut. Nothing more is marked failed until a message comes again.
 
 ## Verify a payment by hand
@@ -49,7 +55,7 @@ StarHash reads it as the automation would and applies it only when it is this pa
 
 The shared shortcut points at the official app. A build signed with a different bundle id needs a shortcut of its own, either way:
 
-- **By hand**: in Shortcuts, make a shortcut named exactly **StarHash SMS** with your build's **Process Carrier SMS** action, fed the Shortcut Input, then add its automation as the iOS 18 to 26 steps above describe (Message Contains **RWF**, **Run Immediately**, **Notify When Run** off). The Verify step runs it by that name.
+- **By hand**: in Shortcuts, make a shortcut named exactly **StarHash SMS** with your build's **Process Carrier SMS** action, fed the Shortcut Input as its Message and the Shortcut Input's **Sender** as its Sender, then add its automation as the iOS 18 to 26 steps above describe (Message Contains **RWF**, **Run Immediately**, **Notify When Run** off). The Verify step runs it by that name.
 - **With the script**: set `BUNDLE_ID` and `TEAM_ID` in `scripts/make_shortcut.py` and run it (the Mac must be signed in to iCloud). It writes and signs `StarHash/Resources/StarHash SMS.shortcut` (the automation it writes in for iOS 27 has not been seen to work, so make the automation by hand too). Share it from Shortcuts and set `StarHashShortcut.iCloudLink` to the new link.
 
 ```bash

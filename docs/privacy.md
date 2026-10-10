@@ -9,6 +9,7 @@ StarHash has no account, no server and no tracking. What it keeps stays on your 
 | Contacts | During onboarding, or from **Enable contacts** | Picking who to pay. Contacts are read on the phone; StarHash keeps no copy of them, only the name and number on a payment you make |
 | Location, while using the app | On onboarding's Nearby screen, or when you turn **Nearby** on in Settings | Suggesting who you paid where you are, and the map on a payment. Precise location is required; Always is never asked |
 | Face ID | Only when you turn the lock on or off, and when it opens StarHash | Keeping your payments to yourself. StarHash only learns pass or fail |
+| Camera | The first time you open the QR scanner | Reading a payment QR code. Nothing is recorded or kept; a code chosen from Photos is read the same way, through the system's picker |
 
 Each permission screen in onboarding has a single **Continue** button that opens the system prompt.
 
@@ -16,7 +17,9 @@ Each permission screen in onboarding has a single **Continue** button that opens
 
 - **Payments**: one JSON file in the app's Application Support folder, holding who, how much, when, the status, and the fee, reference and balance when a message gives them. With Nearby on, a payment to a merchant code or to a number not in your Contacts also keeps where it was made. A file that cannot be read is set aside rather than overwritten, so it can be recovered.
 - **Settings and Buy's codes**: the app's preferences. Recent recipients are not stored separately: they are read from the payments file.
-- **Messages**: only the ones your own Shortcuts automation passes in. Anything that is not a MoMo or Airtel Money transaction is ignored and not kept.
+- **Your profile**: the name and number you give for your QR code, in the app's preferences. They leave the phone only in a code you show or share.
+- **Messages**: only the ones your own Shortcuts automation passes in, and who sent them. Anything that is not a MoMo or Airtel Money transaction is ignored and not kept, and so is a message held back as a possible scam.
+- **Widgets**: with an App Group, Buy's codes and your wallet, which the Buy widget reads, in the group's preferences on the phone.
 
 The payments file is protected until the phone is first unlocked after a restart, so a message that arrives while the phone is locked can still be logged.
 
@@ -29,7 +32,10 @@ StarHash has no networking code, no analytics, no advertising and no third-party
 - dialling a code through the iPhone's call prompt;
 - opening GitHub in your browser (Request a Feature, the developer's note, the source code) or the shared shortcut in Shortcuts;
 - Apple's own rating prompt;
-- the map on a payment's page, which Apple Maps draws from its own servers around the saved spot.
+- the map on a payment's page, which Apple Maps draws from its own servers around the saved spot;
+- **Export data**, which saves a file wherever you choose (Files, iCloud Drive, AirDrop), and sharing your QR code.
+
+Smart categories and the reports' summaries use Apple's on-device model (Apple Intelligence, iOS 26 and later). It runs on the iPhone: the categories send it only a merchant's name, and the summaries the month's totals.
 
 ## Nearby, in detail
 

@@ -14,7 +14,11 @@ StarHash is an iPhone app (portrait only, iOS 18 and later), written in Swift 6 
 
 The Xcode project is generated from `project.yml` and is not committed.
 
-1. Set your own `DEVELOPMENT_TEAM` and the StarHash target's `PRODUCT_BUNDLE_IDENTIFIER` in `project.yml`. Automatic signing with a free personal team is enough: there are no entitlements or App Groups.
+1. Set your own `DEVELOPMENT_TEAM` and the StarHash target's `PRODUCT_BUNDLE_IDENTIFIER` in `project.yml` (and the widgets' `com.fulltimestudio.starhash.widgets` to match). Automatic signing with a free personal team is enough while `STARHASH_APP_GROUPS` is `NO`, as it is by default.
+
+### Widgets and the App Group
+
+The Buy widget (`StarHashWidgets/`) reads Buy's codes from the app through an App Group, which only a paid Apple Developer Program team can sign. With `STARHASH_APP_GROUPS: NO` in `project.yml` the build carries no entitlements and the widget shows StarHash's default codes. On a paid team, set it to `YES` (and `STARHASH_APP_GROUP` to a group your team owns): both targets are then signed with the group and the widget shows your own codes.
 2. Generate the project and open it:
    ```bash
    xcodegen generate
@@ -64,18 +68,23 @@ Debug builds read these, in Xcode's scheme or after the screenshot script's name
 | `-inMemory` | A fresh store with sample payments (made-up numbers and amounts) |
 | `-emptyStore` | With `-inMemory`: no payments, for the empty states |
 | `-skipOnboarding`, `-resetOnboarding` | Start on the tabs, or on onboarding |
-| `-onboardingPage 0...4` | With `-resetOnboarding`: the onboarding screen to open on |
+| `-onboardingPage 0...6` | With `-resetOnboarding`: the onboarding screen to open on (2 is the number step) |
 | `-tab pay\|buy\|activity\|settings` | The page to start on |
 | `-wallet mtn\|airtel\|none` | The main wallet |
 | `-appAppearance system\|dark\|light` | The Appearance setting |
 | `-payAmount <n>` | An amount on the keypad |
 | `-payPicker`, `-payQuery <text>` | Open the recipient screen, optionally with a search |
+| `-payScan`, `-scanCode <text>` | Open the QR scanner, and read this code as if the camera saw it (no camera needed) |
+| `-profile` | A sample name and number in Profile, for the QR code's screens |
+| `-pickAvatar` | With `-settingsPage profile`: the face picker, "Pick your vibe" |
+| `-openReport` | With `-tab activity`: this month's report |
 | `-nearbyHere` | Turn Nearby on and place the phone where two sample payments were made |
 | `-activityPeriod today\|week\|month\|year\|all` | Activity's period |
 | `-activitySearch <text>` | Activity's search |
 | `-openFirstTransaction`, `-openPendingTransaction` | Open a payment's details |
 | `-buyPinned [n]`, `-buyEmpty`, `-buyNew` | Buy with pinned codes or with none (both with `-inMemory`), or with the new-code sheet open |
-| `-settingsPage <page>` | Open a Settings page: `whatsNew`, `terms`, `privacy`, `about`, `guide` and more |
+| `-settingsPage <page>` | Open a Settings page: `profile`, `whatsNew`, `terms`, `privacy`, `about`, `guide` and more |
+| `-AppleLanguages "(rw)"` | Run in Kinyarwanda |
 | `-locked`, `-splash`, `-note`, `-reviewNote` | The lock screen, the launch splash, the developer's note or the rating note |
 | `-featureFlag.<key> YES\|NO` | Switch a feature flag on or off for the run (dev and beta channels) |
 | `-whatsNew`, `-whatsNewPage <n>` | The What's New sheet over the app (the newest release's, or a sample), on page n. `starhash://whatsnew?page=<n>` opens it in a Debug build that is already running |
@@ -101,9 +110,10 @@ project.yml               XcodeGen spec: targets, settings, Info.plist keys
 Packages/StarHashKit/     models, store, USSD codes, SMS parser, totals, fees (Foundation only)
 StarHash/App/             app entry, tab bar, routing, lock, debug launch, sample data
 StarHash/Design/          palette, fonts, Liquid Glass helpers, sheets, shared components, shaders
-StarHash/Features/        Pay, Buy, Activity, Settings and Onboarding
+StarHash/Features/        Pay (with the QR scanner), Buy, Activity, Reports, Profile, Safety, Settings and Onboarding
 StarHash/Intents/         App Intents for Shortcuts and Siri
-StarHash/Resources/       asset catalog, app icon, Space Grotesk
+StarHash/Resources/       asset catalog, app icon, Space Grotesk, Localizable.xcstrings (English and Kinyarwanda)
+StarHashWidgets/          the Buy widget (its view in Views/, shared with the app's -widgetGallery) and the Scan to Pay control
 scripts/                  build, test, screenshot, doodles and shortcut scripts
 docs/                     this documentation
 ```
