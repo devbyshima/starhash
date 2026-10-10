@@ -1,28 +1,32 @@
 import StarHashKit
 import SwiftUI
 
-/// The button at the top right of Pay: the main wallet's logo alone, in
-/// the same 44pt glass circle as the Pay and Buy switcher opposite, and a menu to switch to
-/// the other wallet, as My Wallets does. Payments and Balance dial the new
-/// wallet's codes from the next tap.
-struct WalletSwitcher: View {
+/// The wallet as a pill just above Pay's keypad, where the amount's
+/// currency once sat: the carrier's logo alone, and a menu to switch to the
+/// other wallet. Payments and Balance dial the new
+/// wallet's codes from the next tap. (Rwanda's one currency needs no pill
+/// of its own; the amount reads out with it.)
+struct WalletPill: View {
     @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
 
     var body: some View {
         Menu {
             Picker("Wallet", selection: $wallet) {
                 ForEach(Recipient.Network.allCases, id: \.self) { network in
-                    Label(network.name, image: network.logoAsset)
+                    Label(network.walletName, image: network.logoAsset)
                 }
             }
         } label: {
-            // Fitted inside the circle: MTN's oval by its width, Airtel's
-            // square by its height, so both sit with the same margin.
+            // The logo alone, in the pill the flag once sat in: the menu
+            // names the wallets.
             Image(wallet.logoAsset)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 30, height: 26)
-                .starhashCircleButton()
+                .frame(width: 40, height: 22)
+                .padding(.horizontal, 16)
+                .frame(minWidth: 72, minHeight: 36)
+                .background(Color.payWash, in: Capsule())
+                .contentShape(Capsule())
                 .animation(.smooth(duration: 0.25), value: wallet)
         }
         .menuOrder(.fixed)
