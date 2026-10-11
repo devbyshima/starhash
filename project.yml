@@ -122,6 +122,9 @@ targets:
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         ITSAppUsesNonExemptEncryption: false
+        # Not a game: says so, as iOS now asks every app that draws with
+        # Metal (the QR tree's SceneKit view), so Game Mode leaves it be.
+        LSSupportsGameMode: false
         StarHashChannel: $(STARHASH_CHANNEL)
         StarHashAppGroup: $(STARHASH_APP_GROUP)
         UIAppFonts: [SpaceGrotesk.ttf]
