@@ -74,7 +74,7 @@ Delete All Data brings back the four codes Buy came with.
 
 ## Activity
 
-- **D W M Y** picks Today, This Week (the default), This Month or This Year.
+- **W M Y** picks This Week (the default), This Month or This Year.
 - A summary card shows what you spent, what came in and the fees, over a bar chart you can press and slide along.
 - Payments are grouped by day, with a red arrow for money out and a green one for money in. Pending payments carry a yellow badge; failed ones are struck through and count towards nothing.
 - Airtime, bundles, electricity, water and TV show as **Bought**, with what was bought as their symbol, rather than as money sent. Their wallet's message says so ("You have bought 1,000 RWF of airtime"), or the name they were paid to does.

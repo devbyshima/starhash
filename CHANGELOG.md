@@ -25,6 +25,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 - Settings' rows each have an icon in StarHash's green glass style, and no line of description under them.
 - Onboarding, Profile, My Code and the empty screens drop their explanatory lines, leaving the titles.
 - Onboarding's number screen lines up with the screens around it, and Continue moves on with or without a number.
+- Activity's period control offers the week, the month and the year; the day is gone.
 - Pay's wallet switcher is now the logo above the keypad, where RWF was.
 - A new launch animation: a stroke sweeps round the screen, and as it lands the StarHash star snaps together out of a dot.
 - New drawings for the empty screens, hand-drawn in the accent's greens.
