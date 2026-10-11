@@ -10,9 +10,8 @@ import SwiftUI
 /// family: the symbol in its pulse rings in the middle, the words low, the
 /// choices (each with its carrier's logo) and Continue under them, and the
 /// glow at the bottom edge. As a carrier is picked its logo takes the
-/// symbol's place and the rings pulse round it: both the near black in
-/// light mode, as the accent is on the blue, and the carrier's own colours
-/// in dark. The choices keep their logos' colours in both.
+/// symbol's place and the rings pulse round it, in the carrier's own
+/// colours. The choices keep their logos' colours too.
 ///
 /// Also shown on its own, to an install that finished onboarding before
 /// this page existed.
@@ -21,14 +20,10 @@ struct OnboardingWalletPage: View {
 
     @AppStorage(PreferenceKey.wallet) private var wallet = ""
     @State private var choice: Recipient.Network?
-    @Environment(\.colorScheme) private var colorScheme
 
     private var tint: Color { OnboardingPalette.tint }
     /// The rings: the accent until a carrier is chosen, then its ring colour.
     private var ringTint: Color { choice?.ringColor ?? tint }
-    /// The chosen logo in the near black on the light page, matching its
-    /// rings; nil keeps the carrier's colours on the dark one.
-    private var logoInk: Color? { colorScheme == .light ? .white : nil }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -40,7 +35,7 @@ struct OnboardingWalletPage: View {
                 // The chosen carrier's logo in the rings; a SIM until then.
                 Group {
                     if let choice {
-                        WalletLogo(wallet: choice, height: 56, ink: logoInk)
+                        WalletLogo(wallet: choice, height: 56)
                     } else {
                         Image(systemName: "simcard.fill")
                             .font(.system(size: 72, weight: .medium))
@@ -60,9 +55,6 @@ struct OnboardingWalletPage: View {
                     .starhashFont(22, weight: .bold, relativeTo: .title2)
                     .foregroundStyle(Color.starhashPrimaryText)
                     .accessibilityAddTraits(.isHeader)
-                Text("Which carrier do you pay with? StarHash\ndials its codes for you.")
-                    .font(.starhash(.callout))
-                    .foregroundStyle(Color.starhashSecondaryText)
             }
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
@@ -89,8 +81,8 @@ struct OnboardingWalletPage: View {
         }
     }
 
-    /// A glass capsule the height of the button below it, as Beam's
-    /// secondary buttons are, ringed in the blue once chosen.
+    /// A capsule the height of the button below it, in the cards' solid
+    /// foreground, ringed in the accent once chosen.
     private func option(_ network: Recipient.Network) -> some View {
         let isChosen = choice == network
         return Button {
@@ -115,7 +107,7 @@ struct OnboardingWalletPage: View {
             .padding(.horizontal, 18)
             .frame(maxWidth: .infinity, minHeight: StarHashMetrics.primaryButtonHeight)
             .contentShape(Capsule())
-            .starhashGlass(interactive: true)
+            .starhashContainer(.starhashCard, in: Capsule())
             .overlay(Capsule().strokeBorder(Color.starhashAccentGraphic, lineWidth: 2).opacity(isChosen ? 1 : 0))
         }
         .buttonStyle(PressScaleButtonStyle())
@@ -133,13 +125,11 @@ struct OnboardingWalletPage: View {
 
 extension Recipient.Network {
     /// The rings round the chosen logo on onboarding's carrier step: the
-    /// near black in light mode, as the logo in them, and the carrier's own
-    /// colour in dark. Everywhere else the carrier's colour lives only in
-    /// its logo.
+    /// carrier's own colour. Everywhere else it lives only in its logo.
     var ringColor: Color {
         switch self {
-        case .mtn: Color(light: .white, dark: .starhashMTN)
-        case .airtel: Color(light: .white, dark: .starhashAirtel)
+        case .mtn: .starhashMTN
+        case .airtel: .starhashAirtel
         }
     }
 

@@ -25,8 +25,6 @@ extension PreferenceKey {
     /// them (`OwnerProfile`).
     static let profileName = "profileName"
     static let profileNumber = "profileNumber"
-    /// The face Profile shows, an `AvatarFace` raw value.
-    static let profileAvatar = "profileAvatar"
     /// Whether the on-device model may name the categories the rules
     /// cannot (iOS 26 and later, with Apple Intelligence).
     static let smartCategories = "smartCategories"
@@ -85,21 +83,23 @@ enum StarHashPreferences {
     static var scamWarnings: Bool { bool(PreferenceKey.scamWarnings, default: true) }
     static var smartCategories: Bool { bool(PreferenceKey.smartCategories, default: true) }
 
-    /// The owner's name and number as Settings keeps them.
+    /// The owner's name, number and photo as Settings keeps them.
+    @MainActor
     static var profile: OwnerProfile {
         let defaults = UserDefaults.standard
         return OwnerProfile(
             name: defaults.string(forKey: PreferenceKey.profileName),
             number: defaults.string(forKey: PreferenceKey.profileNumber),
-            avatar: defaults.string(forKey: PreferenceKey.profileAvatar)
+            photo: ProfilePhoto.shared.data
         )
     }
 
+    @MainActor
     static func saveProfile(_ profile: OwnerProfile) {
         let defaults = UserDefaults.standard
         defaults.set(profile.name ?? "", forKey: PreferenceKey.profileName)
         defaults.set(profile.number ?? "", forKey: PreferenceKey.profileNumber)
-        if let avatar = profile.avatar { defaults.set(avatar, forKey: PreferenceKey.profileAvatar) }
+        if let photo = profile.photo { ProfilePhoto.shared.restore(photo) }
     }
 
     /// Pay or Buy, the page StarHash opens on.
@@ -185,6 +185,7 @@ enum AppReset {
         AppEnvironment.shortcuts.reset()
         SmartCategories.reset()
         StarHashWidgetData.erase()
+        ProfilePhoto.shared.remove()
         if let domain = Bundle.main.bundleIdentifier {
             UserDefaults.standard.removePersistentDomain(forName: domain)
         }

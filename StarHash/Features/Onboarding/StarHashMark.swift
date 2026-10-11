@@ -1,8 +1,7 @@
 import SwiftUI
 
 /// The StarHash mark: the star over its small triangle, bare, with no tile
-/// behind it. Light: white on the blue page, since a blue star would vanish
-/// there, and the blue on white. Dark: the blue. Drawn from the icon's own
+/// behind it, in the accent. Drawn from the icon's own
 /// artwork (`AppIcon.icon/Assets/Document.svg`), so it matches the icon at
 /// any size.
 struct StarHashMark: View {

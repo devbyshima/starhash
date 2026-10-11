@@ -3,12 +3,13 @@ import StarHashKit
 import SwiftUI
 import WidgetKit
 
-/// `-widgetGallery` (DEBUG): the Buy widget at its three sizes, at an
-/// iPhone's 158, 338 by 158 and 338 by 354 points, to look at and
-/// screenshot without adding it to a Home Screen. The second medium one
-/// has more codes than fit, so its last tile is More.
+/// `-widgetGallery` (DEBUG): the Home Screen widgets at an iPhone's sizes,
+/// 158 points square and 338 by 158, to look at and screenshot without
+/// adding them to a Home Screen. Small Buy beside Scan to Pay, then medium
+/// Buy with three codes, spread across the width, and with more than fit,
+/// cut to the first four.
 struct WidgetGallery: View {
-    private let few = WidgetSnapshot(codes: Array(Self.codes.prefix(4)), wallet: .mtn, updatedAt: .now)
+    private let few = WidgetSnapshot(codes: Array(Self.codes.prefix(3)), wallet: .mtn, updatedAt: .now)
     private let many = WidgetSnapshot(codes: Self.codes, wallet: .mtn, updatedAt: .now)
 
     private static let codes = [
@@ -25,12 +26,11 @@ struct WidgetGallery: View {
         ScrollView {
             VStack(spacing: 22) {
                 HStack(spacing: 22) {
-                    card(width: 158, height: 158) { BuyWidgetView(snapshot: few, family: .systemSmall) }
                     card(width: 158, height: 158) { BuyWidgetView(snapshot: many, family: .systemSmall) }
+                    card(width: 158, height: 158) { ScanToPayWidgetView() }
                 }
                 card(width: 338, height: 158) { BuyWidgetView(snapshot: few, family: .systemMedium) }
                 card(width: 338, height: 158) { BuyWidgetView(snapshot: many, family: .systemMedium) }
-                card(width: 338, height: 354) { BuyWidgetView(snapshot: many, family: .systemLarge) }
             }
             .padding(.vertical, 24)
             .frame(maxWidth: .infinity)

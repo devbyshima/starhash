@@ -4,14 +4,12 @@ import SwiftUI
 /// The full-width primary capsule: "Pay", "Continue", "Get Started". After
 /// Beam's: a gradient fill, with a soft glow of the same colour under it on
 /// onboarding only (`.starhashPrimaryGlowing`); everywhere else it is flat.
-/// The blue with near-black text on every page but light mode's Pay,
-/// whose page is the blue already: there it turns over, near black with
-/// blue text, as the palette pairs them. The label is 18pt semibold, as
-/// measured in the reference.
+/// The accent green with near-black words on every page, Pay's included.
+/// The label is 18pt semibold, as measured in the reference.
 struct PrimaryButtonStyle: ButtonStyle {
     /// The design height; the paywall's button is taller than the others.
     var height: CGFloat = StarHashMetrics.primaryButtonHeight
-    /// On Pay's page, which is the blue in light mode.
+    /// On Pay's page, which takes Pay's own tokens (the same colours).
     var onPay = false
     /// The glow under it, kept for onboarding's buttons.
     var glows = false
@@ -67,7 +65,7 @@ private struct PrimaryButtonBody: View {
 extension ButtonStyle where Self == PrimaryButtonStyle {
     static var starhashPrimary: PrimaryButtonStyle { PrimaryButtonStyle() }
 
-    /// For Pay's page, the blue in light mode.
+    /// For Pay's page.
     static var starhashPrimaryOnPay: PrimaryButtonStyle { PrimaryButtonStyle(onPay: true) }
 
     /// With the glow under it: onboarding's buttons.
@@ -108,13 +106,12 @@ enum EmptyDoodle: String {
     case codes = "EmptyCodes"
 }
 
-/// Every empty state in StarHash, one look: a doodle, a bold title and a
-/// line under it, all 20pt and centred, after the reference's Home ("No
-/// Account", "No Expenses"), with an optional action under them.
+/// Every empty state in StarHash, one look: a doodle in the accent and a
+/// bold 20pt title under it, centred, with an optional action under them.
+/// No line explaining it: the doodle and the title say enough.
 struct EmptyStateView<Actions: View>: View {
     let doodle: EmptyDoodle
     let title: String
-    let message: String
     @ViewBuilder var actions: Actions
 
     var body: some View {
@@ -130,12 +127,6 @@ struct EmptyStateView<Actions: View>: View {
                 .foregroundStyle(Color.starhashPrimaryText)
                 .multilineTextAlignment(.center)
                 .accessibilityAddTraits(.isHeader)
-            Text(catalog: message)
-                .starhashFont(20)
-                .foregroundStyle(Color.starhashSecondaryText)
-                .multilineTextAlignment(.center)
-                .padding(.top, 3)
-                .fixedSize(horizontal: false, vertical: true)
             actions
                 .padding(.top, 30)
         }
@@ -145,7 +136,7 @@ struct EmptyStateView<Actions: View>: View {
 }
 
 extension EmptyStateView where Actions == EmptyView {
-    init(doodle: EmptyDoodle, title: String, message: String) {
-        self.init(doodle: doodle, title: title, message: message) { EmptyView() }
+    init(doodle: EmptyDoodle, title: String) {
+        self.init(doodle: doodle, title: title) { EmptyView() }
     }
 }

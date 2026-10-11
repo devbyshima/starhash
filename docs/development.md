@@ -68,7 +68,7 @@ Debug builds read these, in Xcode's scheme or after the screenshot script's name
 | `-inMemory` | A fresh store with sample payments (made-up numbers and amounts) |
 | `-emptyStore` | With `-inMemory`: no payments, for the empty states |
 | `-skipOnboarding`, `-resetOnboarding` | Start on the tabs, or on onboarding |
-| `-onboardingPage 0...6` | With `-resetOnboarding`: the onboarding screen to open on (2 is the number step) |
+| `-onboardingPage 0...7` | With `-resetOnboarding`: the onboarding screen to open on (2 is the number step, 7 auto-verify's setup) |
 | `-tab pay\|buy\|activity\|settings` | The page to start on |
 | `-wallet mtn\|airtel\|none` | The main wallet |
 | `-appAppearance system\|dark\|light` | The Appearance setting |
@@ -76,8 +76,7 @@ Debug builds read these, in Xcode's scheme or after the screenshot script's name
 | `-payPicker`, `-payQuery <text>` | Open the recipient screen, optionally with a search |
 | `-payScan`, `-scanCode <text>` | Open the QR scanner, and read this code as if the camera saw it (no camera needed) |
 | `-profile` | A sample name and number in Profile, for the QR code's screens |
-| `-pickAvatar` | With `-settingsPage profile`: the face picker, "Pick your vibe" |
-| `-openReport` | With `-tab activity`: this month's report |
+| `-qrCode`, `-qrTap <seconds>` | With `-profile`: the QR tree already turned into the code, or tapped after that long |
 | `-nearbyHere` | Turn Nearby on and place the phone where two sample payments were made |
 | `-activityPeriod today\|week\|month\|year\|all` | Activity's period |
 | `-activitySearch <text>` | Activity's search |
@@ -110,10 +109,10 @@ project.yml               XcodeGen spec: targets, settings, Info.plist keys
 Packages/StarHashKit/     models, store, USSD codes, SMS parser, totals, fees (Foundation only)
 StarHash/App/             app entry, tab bar, routing, lock, debug launch, sample data
 StarHash/Design/          palette, fonts, Liquid Glass helpers, sheets, shared components, shaders
-StarHash/Features/        Pay (with the QR scanner), Buy, Activity, Reports, Profile, Safety, Settings and Onboarding
+StarHash/Features/        Pay (with the QR scanner), Buy, Activity, Profile, Safety, Settings and Onboarding
 StarHash/Intents/         App Intents for Shortcuts and Siri
 StarHash/Resources/       asset catalog, app icon, Space Grotesk, Localizable.xcstrings (English and Kinyarwanda)
-StarHashWidgets/          the Buy widget (its view in Views/, shared with the app's -widgetGallery) and the Scan to Pay control
+StarHashWidgets/          the Buy and Scan to Pay widgets (their views in Views/, shared with the app's -widgetGallery) and the Scan to Pay control
 scripts/                  build, test, screenshot, doodles and shortcut scripts
 docs/                     this documentation
 ```

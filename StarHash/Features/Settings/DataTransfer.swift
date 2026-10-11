@@ -33,7 +33,7 @@ enum DataTransfer {
             appVersion: SettingsVersion.short,
             transactions: store.transactions,
             shortcuts: shortcuts.shortcuts,
-            profile: profile.name?.isEmpty == false || profile.number?.isEmpty == false || profile.avatar != nil ? profile : nil
+            profile: profile.name?.isEmpty == false || profile.number?.isEmpty == false || profile.photo != nil ? profile : nil
         )
         return BackupDocument(data: try backup.encoded())
     }

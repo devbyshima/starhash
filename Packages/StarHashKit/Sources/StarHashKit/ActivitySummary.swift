@@ -33,18 +33,6 @@ public enum ActivityPeriod: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    /// What an empty period says: "Nothing was paid or received this
-    /// week."
-    public var emptyMessage: String {
-        switch self {
-        case .today: String(localized: "Nothing was paid or received today.", bundle: .module)
-        case .week: String(localized: "Nothing was paid or received this week.", bundle: .module)
-        case .month: String(localized: "Nothing was paid or received this month.", bundle: .module)
-        case .year: String(localized: "Nothing was paid or received this year.", bundle: .module)
-        case .allTime: String(localized: "Nothing was paid or received yet.", bundle: .module)
-        }
-    }
-
     /// Ends "No transactions ..." when the period holds nothing.
     public var emptyPhrase: String {
         switch self {

@@ -114,7 +114,7 @@ struct ActivitySpendingChart: View {
                     y: .value("Sent", Double(bucket.total) / top),
                     width: .ratio(Self.barWidthRatio)
                 )
-                // The primary button's blue gradient, with no glow: inside
+                // The primary button's green gradient, with no glow: inside
                 // the card a glow spilled past each bar's edges. The
                 // pressed bar keeps full strength; the rest step back.
                 .foregroundStyle(Color.starhashInk.color(in: environment).gradient.opacity(isProminent(bucket) ? 1 : 0.4))
@@ -268,16 +268,15 @@ struct ActivitySpendingChart: View {
     }
 }
 
-/// The small glass tag a long press raises over a bar: the period in grey
-/// over the amount, on Liquid Glass tinted with a breath of ink.
+/// The small tag a long press raises over a bar: the period in grey over
+/// the amount, on a solid raised fill a step off the card, as the chart has
+/// no glass.
 private struct ActivityChartCallout: View {
     let title: String
     let amount: String
     let rollsDigits: Bool
 
     private static let shape = RoundedRectangle(cornerRadius: 11, style: .continuous)
-
-    @Environment(\.self) private var environment
 
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
@@ -293,7 +292,8 @@ private struct ActivityChartCallout: View {
         .fixedSize()
         .padding(.horizontal, 10)
         .padding(.vertical, 7)
-        .starhashGlass(in: Self.shape, tint: Color.starhashInk.color(in: environment).opacity(0.1))
+        .background(Color.starhashCardRaised, in: Self.shape)
+        .shadow(color: .black.opacity(0.08), radius: 8, y: 2)
     }
 }
 

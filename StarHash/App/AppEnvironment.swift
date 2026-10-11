@@ -122,21 +122,11 @@ final class AppRouter {
     }
     /// The transaction whose details page is open on Activity.
     var openTransactionID: UUID?
-    /// The month whose report is open on Activity (Reports), by its first
-    /// day.
-    var openReportMonth: Date?
     /// A scam warning's advice, over the app, from its notification.
     var scamNotice: ScamNotice?
     /// Pay's QR scanner, asked for from outside Pay (a widget, a link),
     /// until Pay opens it. A new value each time.
     private(set) var scanRequest: UUID?
-
-    /// Opens Reports on Activity at `month`'s report.
-    func showReport(month: Date) {
-        show(.activity)
-        openTransactionID = nil
-        openReportMonth = Calendar.current.dateInterval(of: .month, for: month)?.start ?? month
-    }
 
     /// Opens Pay with its QR scanner up.
     func scan() {
@@ -195,9 +185,8 @@ final class AppRouter {
     /// starhash://settings, starhash://transaction/<uuid>. starhash://help,
     /// from before Help moved into Settings, opens Settings. A StarHash QR
     /// code's link, starhash://pay?to=<number or code>, chooses who to pay;
-    /// starhash://scan opens the scanner, starhash://report the month's
-    /// report, and starhash://dial?code=<code> (or a tel: link a widget
-    /// hands over) dials a code. In DEBUG builds,
+    /// starhash://scan opens the scanner, and starhash://dial?code=<code>
+    /// (or a tel: link a widget hands over) dials a code. In DEBUG builds,
     /// starhash://whatsnew?page=<n> shows What's New.
     func handle(_ url: URL) {
         if url.scheme == "tel" {
@@ -233,8 +222,6 @@ final class AppRouter {
             }
         case "scan":
             scan()
-        case "report":
-            showReport(month: .now)
         case "dial":
             if let code = query.first(where: { $0.name == "code" })?.value.flatMap(USSDShortcut.code(from:)),
                let tel = USSD.telURL(for: code) {

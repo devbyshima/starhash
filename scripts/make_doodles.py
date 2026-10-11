@@ -5,20 +5,25 @@
 #
 #   python3 scripts/make_doodles.py
 #
-# - Three tones on the page and nothing else, no white and no black: a
-#   deep navy for lines and dark fills, a light periwinkle for the subject,
-#   both measured from the reference on its blue, which is StarHash's.
+# - Three tones on the page and nothing else: the green accent for the
+#   subject, and a deep green of the same hue for lines and dark fills,
+#   dark enough to hold on the white page and still green, not olive. It
+#   is the reference's light subject and deep line, moved onto StarHash's
+#   green. No white and no black but the page's own colour, which only
+#   ever shows through.
 # - Fills are flat, hand-cut blobs with soft edges and no outline
 #   (blob()). Lines are a brush pen (line()): round ends, a little uneven
 #   in width, thin for the drawing and the same width at any scale.
 # - Hands are outlines with the page showing through, filled with the
-#   page's own colour so they cover what they hold, in a navy sleeve; a
-#   loose cord with a loop in it trails off, and a few short strokes say
-#   "look here".
+#   page's own colour so they cover what they hold, in a deep green
+#   sleeve; a loose cord with a loop in it trails off, and a few short
+#   strokes say "look here".
 # - Dark mode has no reference, so it keeps the drawing in the near
-#   black's terms: the subject stays periwinkle and the details on it
-#   navy, the dark fills turn the blue, and lines straight on the page the
-#   lifted blue (brandBlueLift), so every line still reads.
+#   black's terms: the subject stays the accent and the details on it the
+#   deep green, the dark fills lift to a middle green that still stands
+#   off the near black, and lines straight on the page turn a lighter
+#   mint, so every line still reads and a hand's outline stays apart from
+#   the green it holds.
 #
 # Every point is placed here, so each canvas is trimmed to the drawing,
 # 6 points round: an empty state centres the image, and room left on one
@@ -37,8 +42,8 @@ ASSETS = os.path.join(ROOT, "StarHash", "Resources", "Assets.xcassets")
 # page: the ground, which fills hands. fill: the subject. dark: sleeves,
 # shadows, the dark half of a thing. line: lines straight on the page.
 # ink: lines drawn on the subject. chalk: lines drawn on a dark fill.
-LIGHT = dict(page="#3020FE", fill="#5982EF", dark="#140A95", line="#140A95", ink="#140A95", chalk="#5982EF")
-DARK = dict(page="#171717", fill="#5982EF", dark="#3020FE", line="#8A80FF", ink="#140A95", chalk="#5982EF")
+LIGHT = dict(page="#FFFFFF", fill="#00D957", dark="#00702D", line="#00702D", ink="#00702D", chalk="#00D957")
+DARK = dict(page="#171717", fill="#00D957", dark="#00873A", line="#5CF08F", ink="#00702D", chalk="#00D957")
 
 PEN = 4.6
 MARGIN = 6

@@ -180,12 +180,6 @@ private struct AppLockView: View {
                 .starhashFont(28, weight: .bold, relativeTo: .title)
                 .foregroundStyle(Color.starhashPrimaryText)
                 .accessibilityAddTraits(.isHeader)
-            Text("Unlock with \(unlock.name) to see your payments.")
-                .font(.starhash(.body))
-                .foregroundStyle(Color.starhashSecondaryText)
-                .multilineTextAlignment(.center)
-                .padding(.top, 10)
-                .padding(.horizontal, 32)
             Spacer()
             if lock.isLocked {
                 Button {

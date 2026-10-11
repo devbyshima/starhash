@@ -65,8 +65,8 @@ struct StarHashTabBar: View {
         )
         .animation(reduceMotion ? .smooth(duration: 0.2) : .spring(response: 0.3, dampingFraction: 0.78), value: router.isTabBarCompact)
         .onAppear { NavigationHaptics.shared.prepare() }
-        // Clear glass, pale over the blue page: near-black symbols in
-        // light mode, which also read over a white card scrolling under.
+        // Clear glass over the white page: near-black symbols in light
+        // mode, which also read over a card scrolling under.
         .starhashContainerSurface()
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Tab bar")
@@ -80,7 +80,9 @@ struct StarHashTabBar: View {
         let symbol = item.symbol(payPage: router.payPage)
         return Image(systemName: symbol)
             .font(.system(size: TabBarMetrics.symbolSize, weight: .semibold))
-            .foregroundStyle(Color.starhashPrimaryText)
+            // The page showing in the accent, the rest in the text colour.
+            .foregroundStyle(isSelected ? Color.starhashAccentText : Color.starhashPrimaryText)
+            .animation(.smooth(duration: 0.2), value: isSelected)
             .contentTransition(.symbolEffect(.replace))
             .frame(width: TabBarMetrics.itemWidth, height: TabBarMetrics.height)
             .contentShape(Rectangle())

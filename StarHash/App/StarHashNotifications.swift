@@ -187,11 +187,11 @@ final class StarHashNotifications {
         center.removeAllDeliveredNotifications()
     }
 
-    /// A tap opens what the notification is about: its transaction, a
-    /// summary's month on Reports, or a scam warning's advice. Verify opens
+    /// A tap opens what the notification is about: its transaction,
+    /// Activity for a summary, or a scam warning's advice. Verify opens
     /// the payment with its sheet, and Mark as Failed settles it as its
     /// details page would.
-    func answer(action: String, transactionID: UUID?, kind: NotificationPlan.Item.Kind? = nil, reportMonth: Date? = nil, body: String = "") async {
+    func answer(action: String, transactionID: UUID?, kind: NotificationPlan.Item.Kind? = nil, body: String = "") async {
         let store = AppEnvironment.store
         switch action {
         case Action.verify:
@@ -211,8 +211,6 @@ final class StarHashNotifications {
                 AppEnvironment.router.handle(url)
             } else if kind == .scamWarning {
                 AppEnvironment.router.scamNotice = ScamNotice(message: body)
-            } else if kind == .weeklySummary || kind == .monthlySummary {
-                AppEnvironment.router.showReport(month: reportMonth ?? .now)
             } else {
                 AppEnvironment.router.show(.activity)
             }
@@ -230,7 +228,6 @@ final class StarHashNotifications {
         content.threadIdentifier = item.transactionID == nil ? "summaries" : "payments"
         var userInfo: [String: Any] = ["kind": item.kind.rawValue]
         if let id = item.transactionID { userInfo["transaction"] = id.uuidString }
-        if let month = item.reportMonth { userInfo["reportMonth"] = month.timeIntervalSince1970 }
         content.userInfo = userInfo
         if item.kind == .scamWarning { content.threadIdentifier = "warnings" }
         switch item.kind {
@@ -257,10 +254,6 @@ final class StarHashNotifications {
 
     nonisolated static func kind(of userInfo: [AnyHashable: Any]) -> NotificationPlan.Item.Kind? {
         (userInfo["kind"] as? String).flatMap(NotificationPlan.Item.Kind.init(rawValue:))
-    }
-
-    nonisolated static func reportMonth(of userInfo: [AnyHashable: Any]) -> Date? {
-        (userInfo["reportMonth"] as? Double).map(Date.init(timeIntervalSince1970:))
     }
 }
 
@@ -291,10 +284,9 @@ private final class NotificationResponder: NSObject, UNUserNotificationCenterDel
         let userInfo = response.notification.request.content.userInfo
         let id = StarHashNotifications.transactionID(of: userInfo)
         let kind = StarHashNotifications.kind(of: userInfo)
-        let month = StarHashNotifications.reportMonth(of: userInfo)
         let body = response.notification.request.content.body
         Task { @MainActor in
-            await StarHashNotifications.shared.answer(action: action, transactionID: id, kind: kind, reportMonth: month, body: body)
+            await StarHashNotifications.shared.answer(action: action, transactionID: id, kind: kind, body: body)
             completionHandler()
         }
     }

@@ -16,50 +16,42 @@ import SwiftUI
 ///      leaves contacts out.
 ///   4. The same for notifications' prompt: reminders and summaries.
 ///   5. Auto-verify, with a message being confirmed on the mock; Set Up
-///      runs the setup over onboarding. Last, since setting it up leaves
-///      for Shortcuts.
+///      goes on to the setup itself, Maybe Later finishes. Last, since
+///      setting it up leaves for Shortcuts.
+///   6. The setup: `AutoVerificationGuide`'s steps (add the shortcut, make
+///      the automation, check it works) as onboarding's own last screens,
+///      offered every time, a replay included, so the shortcut and the
+///      automation can always be set up from here.
 ///
-/// A screen whose setting is already on (a replay) offers Continue alone.
 /// The screen reached is saved as it changes, so a flow left unfinished
-/// opens again where it was left; finishing clears it.
-/// The tint is StarHash's blue throughout; the wallets show as their logos.
+/// opens again where it was left; finishing clears it. The tint is the
+/// accent throughout; the wallets show as their logos.
 struct OnboardingView: View {
     let onFinish: () -> Void
 
-    @AppStorage(PreferenceKey.wallet) private var wallet = ""
     @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
-    @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
     @AppStorage(PreferenceKey.onboardingStage) private var savedStage = 0
     @AppStorage(PreferenceKey.hasSeenDeveloperNote) private var hasSeenDeveloperNote = false
     @State private var stage = OnboardingLaunch.initialStage ?? UserDefaults.standard.integer(forKey: PreferenceKey.onboardingStage)
-    @State private var setsUpAutoVerify = false
-    @State private var setupWentBack = false
 
     enum Stage: Int {
-        case reel, wallet, number, contacts, nearby, notifications, autoVerify
+        case reel, wallet, number, contacts, nearby, notifications, autoVerify, setup
     }
 
     /// Every screen there can be, for the debug launch's range.
-    static let stageCount = 7
+    static let stageCount = 8
 
     /// The screens, in order. Both wallets' messages can be read, so
-    /// everyone sees auto-verify.
-    private var stages: [Stage] { [.reel, .wallet, .number, .contacts, .nearby, .notifications, .autoVerify] }
-
-    /// The wallet picked on the wallet screen, MTN MoMo until then.
-    private var chosenWallet: Recipient.Network { Recipient.Network(rawValue: wallet) ?? .mtn }
+    /// everyone sees auto-verify and its setup.
+    private var stages: [Stage] { [.reel, .wallet, .number, .contacts, .nearby, .notifications, .autoVerify, .setup] }
 
     private var current: Stage { stages[min(stage, stages.count - 1)] }
 
     private static let phases: [OnboardingReel.Phase] = [
-        .init(symbol: "number", title: "No more USSD menus",
-              description: "Type an amount, pick who gets it,\nand StarHash dials the code for you."),
-        .init(symbol: "storefront.fill", title: "Pay anyone",
-              description: "Any MTN or Airtel number, or a merchant\ncode. StarHash knows which is which."),
-        .init(symbol: "clock.fill", title: "Every payment, logged",
-              description: "Activity keeps each payment by day,\nwith a chart and search."),
-        .init(symbol: "lock.shield.fill", title: "Private by design",
-              description: "No account and no server. Your PIN only\never goes into your wallet's own prompt."),
+        .init(symbol: "number", title: "No more USSD menus"),
+        .init(symbol: "storefront.fill", title: "Pay anyone"),
+        .init(symbol: "clock.fill", title: "Every payment, logged"),
+        .init(symbol: "lock.shield.fill", title: "Private by design"),
     ]
 
     private var tint: Color { OnboardingPalette.tint }
@@ -92,24 +84,24 @@ struct OnboardingView: View {
                 OnboardingPermission(config: autoVerify)
                     .id(Stage.autoVerify)
                     .transition(.opacity)
+            case .setup:
+                // The setup in full, in its own navigation bar: back steps
+                // back through it and then to the screen before, close
+                // skips it. Done or closed, onboarding ends, set up or not
+                // (Settings can switch it on later).
+                NavigationStack {
+                    AutoVerificationGuide(onClose: finish, onLeave: goBack, onDone: finish)
+                }
+                .transition(.opacity)
             }
         }
         .onChange(of: stage, initial: true) { _, stage in savedStage = stage }
-        // The setup in full, over onboarding. Done or closed, onboarding
-        // ends, set up or not (Settings can switch it on later); back from
-        // its first step returns to this page instead.
-        .fullScreenCover(isPresented: $setsUpAutoVerify, onDismiss: {
-            if setupWentBack { setupWentBack = false } else { finish() }
-        }) {
-            AutoVerifySetupCover { setupWentBack = true }
-        }
     }
 
     private var contacts: OnboardingPermission.Config {
         .init(
             initialDelay: 0.4,
             title: "Pay your contacts\nin a tap",
-            description: "Pick who to pay from your contacts.\nThey stay on your iPhone.",
             primaryTitle: "Continue",
             primaryAction: {
                 Task {
@@ -127,7 +119,6 @@ struct OnboardingView: View {
         .init(
             initialDelay: 0.4,
             title: "Suggest who you\npaid here",
-            description: "Paid a shop here before? StarHash lists it\nfirst next time. This stays on your iPhone.",
             alertButtons: 3,
             primaryTitle: "Continue",
             primaryAction: {
@@ -147,7 +138,6 @@ struct OnboardingView: View {
         .init(
             initialDelay: 0.4,
             title: "Stay on top of\nyour payments",
-            description: "A reminder when a payment is still pending,\nand your week and month summed up.",
             primaryTitle: "Continue",
             primaryAction: {
                 Task {
@@ -163,12 +153,9 @@ struct OnboardingView: View {
             mock: .message,
             initialDelay: 0.4,
             title: "Confirm payments\nautomatically",
-            description: String(localized: "Add one shortcut and each \(chosenWallet.messagesName) message\nconfirms its payment, with the fee."),
-            primaryTitle: autoVerifySetUp ? "Continue" : "Set Up",
-            primaryAction: {
-                if autoVerifySetUp { finish() } else { setsUpAutoVerify = true }
-            },
-            secondaryTitle: autoVerifySetUp ? nil : "Maybe Later",
+            primaryTitle: "Set Up",
+            primaryAction: advance,
+            secondaryTitle: "Maybe Later",
             secondaryAction: finish
         )
     }
@@ -188,6 +175,11 @@ struct OnboardingView: View {
         guard stage < stages.count - 1 else { return finish() }
         withAnimation(.smooth(duration: 0.45)) { stage += 1 }
     }
+
+    private func goBack() {
+        guard stage > 0 else { return }
+        withAnimation(.smooth(duration: 0.45)) { stage -= 1 }
+    }
 }
 
 // MARK: - Shared pieces
@@ -202,7 +194,7 @@ enum OnboardingMetrics {
 /// Colours used only by onboarding.
 enum OnboardingPalette {
     /// The flow's tint, the accent, whichever wallet is chosen.
-    static let tint = Color.starhashInk.onPage
+    static let tint = Color.brandAccent
 
     /// The iPhone mock on the permission screen: its frame and the filled
     /// shapes standing in for the screen's content.
@@ -289,9 +281,10 @@ extension View {
 
 // MARK: - Launch arguments
 
-/// `-onboardingPage 0...6` (DEBUG, with `-resetOnboarding`) starts on that
+/// `-onboardingPage 0...7` (DEBUG, with `-resetOnboarding`) starts on that
 /// screen: the reel, the wallet, the number, Contacts, Nearby,
-/// notifications, auto-verify. Without it, onboarding starts where it was left.
+/// notifications, auto-verify, its setup. Without it, onboarding starts
+/// where it was left.
 @MainActor
 enum OnboardingLaunch {
     static var initialStage: Int? {
@@ -301,27 +294,5 @@ enum OnboardingLaunch {
         #else
         return nil
         #endif
-    }
-}
-
-/// Auto-verify's setup as onboarding shows it: the same guide Settings
-/// pushes, in its own navigation bar, with back on the left (to the
-/// onboarding page, from the first step) and close on the right (skipping
-/// the setup).
-private struct AutoVerifySetupCover: View {
-    let onBack: () -> Void
-
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            AutoVerificationGuide(
-                onClose: { dismiss() },
-                onLeave: {
-                    onBack()
-                    dismiss()
-                }
-            )
-        }
     }
 }

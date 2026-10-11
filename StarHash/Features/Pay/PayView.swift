@@ -356,20 +356,10 @@ struct PayView: View {
     }
 }
 
-/// Balance's capsule: clear Liquid Glass in light mode, the blue page
-/// showing through with near-black words on it, as on the tab bar; in dark
-/// mode the Total card's white, with near-black words too.
+/// Balance's capsule: the Total card, as the recipient screen's Total.
 private struct BalanceSurface: ViewModifier {
-    @Environment(\.colorScheme) private var colorScheme
-
     func body(content: Content) -> some View {
-        if colorScheme == .dark {
-            content
-                .starhashTotalCard(in: Capsule(), interactive: true)
-                .environment(\.colorScheme, .light)
-        } else {
-            content.starhashGlass(in: Capsule(), interactive: true, tint: .clear)
-        }
+        content.starhashTotalCard(in: Capsule())
     }
 }
 

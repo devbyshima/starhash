@@ -1,19 +1,6 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "%lld/%lld": {
-      "shouldTranslate": false
-    },
-    "Balance": {
-      "localizations": {
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reba asigaye"
-          }
-        }
-      }
-    },
     "Buy": {
       "localizations": {
         "rw": {
@@ -24,12 +11,12 @@
         }
       }
     },
-    "Dial your Buy codes in a tap.": {
+    "Dial your codes in a tap.": {
       "localizations": {
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Koresha kode zawe za Gura ukanze rimwe gusa."
+            "value": "Koresha kode zawe ukanze rimwe gusa."
           }
         }
       }
@@ -44,12 +31,12 @@
         }
       }
     },
-    "More codes": {
+    "Open the scanner to pay a QR code.": {
       "localizations": {
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Izindi kode"
+            "value": "Fungura sikaneri ngo wishyure kode ya QR."
           }
         }
       }
@@ -64,32 +51,12 @@
         }
       }
     },
-    "Pages": {
-      "localizations": {
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Amapaji"
-          }
-        }
-      }
-    },
     "Scan to Pay": {
       "localizations": {
         "rw": {
           "stringUnit": {
             "state": "translated",
             "value": "Sikana wishyure"
-          }
-        }
-      }
-    },
-    "Show More Codes": {
-      "localizations": {
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reba izindi kode"
           }
         }
       }

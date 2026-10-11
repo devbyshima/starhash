@@ -80,17 +80,14 @@ public enum NotificationPlan {
         public let body: String
         /// The transaction it is about, which tapping it opens.
         public let transactionID: UUID?
-        /// For a summary, the month whose report tapping it opens.
-        public var reportMonth: Date?
 
-        public init(id: String, kind: Kind, date: Date?, title: String, body: String, transactionID: UUID?, reportMonth: Date? = nil) {
+        public init(id: String, kind: Kind, date: Date?, title: String, body: String, transactionID: UUID?) {
             self.id = id
             self.kind = kind
             self.date = date
             self.title = title
             self.body = body
             self.transactionID = transactionID
-            self.reportMonth = reportMonth
         }
     }
 
@@ -243,13 +240,10 @@ public enum NotificationPlan {
                 matchingPolicy: .nextTime
               ),
               let start = calendar.date(byAdding: .day, value: -7, to: date) else { return nil }
-        var item = summary(
+        return summary(
             id: "weekly-summary", kind: .weeklySummary, date: date, title: String(localized: "Your week", bundle: .module), period: String(localized: "this week", bundle: .module),
             of: transactions.filter { start <= $0.date && $0.date < date }, settings: settings
         )
-        // The month the week ends in, whose report it opens.
-        item?.reportMonth = calendar.dateInterval(of: .month, for: date.addingTimeInterval(-1))?.start
-        return item
     }
 
     /// The next monthly summary: the month just ended, on the 1st at the
@@ -264,12 +258,10 @@ public enum NotificationPlan {
               let lastDay = calendar.date(byAdding: .day, value: -1, to: date),
               let month = calendar.dateInterval(of: .month, for: lastDay) else { return nil }
         let name = calendar.standaloneMonthSymbols[calendar.component(.month, from: month.start) - 1]
-        var item = summary(
+        return summary(
             id: "monthly-summary", kind: .monthlySummary, date: date, title: String(localized: "Your \(name)", bundle: .module), period: String(localized: "in \(name)", bundle: .module),
             of: transactions.filter { month.start <= $0.date && $0.date < month.end }, settings: settings
         )
-        item?.reportMonth = month.start
-        return item
     }
 
     /// What was sent and received in a period. Nothing when nothing moved:

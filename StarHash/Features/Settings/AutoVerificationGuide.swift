@@ -2,7 +2,7 @@ import StarHashKit
 import SwiftUI
 import UIKit
 
-/// Auto-verify setup, a page pushed from Settings (and onboarding's last step), in three steps,
+/// Auto-verify setup, a page pushed from Settings (and onboarding's last screens), in three steps,
 /// each shown with a picture of what Shortcuts looks like, one thing to
 /// do, and a Continue (or Done) that appears only once it is done:
 ///
@@ -19,12 +19,15 @@ import UIKit
 ///    one comes nothing is failed for want of a message
 ///    (`StarHashPreferences.automationProven`).
 struct AutoVerificationGuide: View {
-    /// Over onboarding: the close button on the right, which skips the
+    /// In onboarding: the close button on the right, which skips the
     /// setup. Pushed from Settings there is none.
     var onClose: (() -> Void)?
     /// Back from the first step, when leaving is not just going back a
-    /// screen (over onboarding, where it returns to onboarding's page).
+    /// screen (in onboarding, where it returns to onboarding's page).
     var onLeave: (() -> Void)?
+    /// Done, when finishing is not just going back a screen (in
+    /// onboarding, where it ends onboarding).
+    var onDone: (() -> Void)?
 
     @Environment(AppRouter.self) private var router
     @Environment(\.dismiss) private var dismiss
@@ -373,7 +376,7 @@ struct AutoVerificationGuide: View {
 
     /// Auto-verify is already on by now (`checkVerification`).
     private func finish() {
-        dismiss()
+        if let onDone { onDone() } else { dismiss() }
     }
 
     private func goBack() {

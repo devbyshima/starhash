@@ -164,56 +164,6 @@
         }
       }
     },
-    "Nothing was paid or received this month.": {
-      "localizations": {
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nta mafaranga yishyuwe cyangwa yakiriwe uku kwezi."
-          }
-        }
-      }
-    },
-    "Nothing was paid or received this week.": {
-      "localizations": {
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nta mafaranga yishyuwe cyangwa yakiriwe muri iki cyumweru."
-          }
-        }
-      }
-    },
-    "Nothing was paid or received this year.": {
-      "localizations": {
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nta mafaranga yishyuwe cyangwa yakiriwe uyu mwaka."
-          }
-        }
-      }
-    },
-    "Nothing was paid or received today.": {
-      "localizations": {
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nta mafaranga yishyuwe cyangwa yakiriwe uyu munsi."
-          }
-        }
-      }
-    },
-    "Nothing was paid or received yet.": {
-      "localizations": {
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nta mafaranga arishyurwa cyangwa ngo yakirwe."
-          }
-        }
-      }
-    },
     "Payment confirmed": {
       "localizations": {
         "rw": {

@@ -20,14 +20,16 @@ A floating glass tab bar holds Activity on the left, Pay in the middle and Setti
 
 ## Onboarding
 
-Six screens, picked up where you left off:
+Picked up where you left off:
 
 1. A short reel of what StarHash does.
 2. Your wallet: MTN MoMo or Airtel Money.
-3. Your name and number, for your own QR code (Maybe Later skips it).
+3. Your name and number, for your own QR code (Continue moves on without them too).
 4. Contacts, so you can pick who to pay.
 5. Nearby, which asks for your location.
-6. Auto-verify, which you can set up now or later.
+6. Notifications, for reminders and summaries.
+7. Auto-verify: Set Up goes on to its setup, Maybe Later finishes.
+8. The setup itself: add the shortcut, make the automation, and check it works. It is offered on every run through onboarding, a replay included.
 
 Each permission screen has one button, Continue, which opens the system prompt. A short note from the developer opens over Pay when onboarding ends, and a single note two weeks later asks for a rating.
 
@@ -43,7 +45,7 @@ Each permission screen has one button, Continue, which opens the system prompt. 
 
 The scanner reads a merchant's MoMo QR code (its USSD code, a `tel:` link or the EMV payload Rwanda's merchant codes carry), a friend's StarHash code, or a bare number or merchant code. Whoever it names waits under the amount, with the amount filled in when the code carries one, and Pay dials them straight away, with no recipient screen. A code that is not a payment code says so, and scanning goes on. **Photos** reads a code from a picture, and the torch helps in the dark.
 
-**My Code** shows your own code for someone else to scan: a `starhash://pay?to=...` link, so the iPhone's own Camera opens StarHash on it too. It needs your number, given in onboarding or in Settings' **Profile**, where the code can also be shared. Profile puts your face and your name large at the top; tap the face to pick another from "Pick your vibe", and type the name in place.
+**My Code** shows your own code for someone else to scan: a `starhash://pay?to=...` link, so the iPhone's own Camera opens StarHash on it too. It needs your number, given in onboarding or in Settings' **Profile**. Both show the code as a little tree of blocks on a board, turning slowly; a tap swings round to look straight down on it, and the tree flattens into the QR code itself (another tap stands it back up). The code is the page's own two colours, black on white in light mode and white on black in dark, with the tree green. Share Code sits under it. Profile puts everything down the middle: your photo (tap it to choose one from your library), your name large under it, typed in place, and your number.
 
 ## Choosing a recipient
 
@@ -76,7 +78,6 @@ Delete All Data brings back the four codes Buy came with.
 - A summary card shows what you spent, what came in and the fees, over a bar chart you can press and slide along.
 - Payments are grouped by day, with a red arrow for money out and a green one for money in. Pending payments carry a yellow badge; failed ones are struck through and count towards nothing.
 - Airtime, bundles, electricity, water and TV show as **Bought**, with what was bought as their symbol, rather than as money sent. Their wallet's message says so ("You have bought 1,000 RWF of airtime"), or the name they were paid to does.
-- The chart button opens **Reports**.
 - Search covers every payment, not just the period: names, numbers, codes, amounts and references.
 - Hold a payment for Verify, Mark as Failed and Delete. On iOS 27, swipe left for a red trash, or all the way across to delete at once.
 
@@ -136,19 +137,20 @@ Off until you turn it on, and it needs precise location.
 
 Siri knows phrases such as "Pay with StarHash" and "Check my balance in StarHash".
 
-The `starhash://` scheme opens `pay`, `buy`, `activity`, `settings`, `transaction/<id>`, `scan` (the scanner) or `report` (this month's report). `starhash://pay?to=<number or code>&name=<name>&amount=<n>` is a StarHash QR code's link and chooses who to pay.
+The `starhash://` scheme opens `pay`, `buy`, `activity`, `settings`, `transaction/<id>` or `scan` (the scanner). `starhash://pay?to=<number or code>&name=<name>&amount=<n>` is a StarHash QR code's link and chooses who to pay.
 
 ## Widgets
 
-- **Buy**: your codes and nothing else, on GO Club's white card (the near black in dark mode), pinned codes first. A tap on a code dials it through the iPhone's call prompt. With more codes than fit, the last tile is More, which pages through them right on the widget; the small widget shows one code at a time with its own arrow, and the large one adds Balance and Scan to Pay.
-- **Scan to Pay**: a Control Center and Lock Screen control that opens the scanner.
+- **Buy**, small and medium: your codes, pinned first, each its symbol and its name with nothing behind them, on a white card (the near black in dark mode). The small widget is your first code; the medium one your first four. A tap dials the code through the iPhone's call prompt.
+- **Scan to Pay**: a small widget, its symbol and its name, and a Control Center and Lock Screen control, both opening the scanner.
 
 The widgets read your data through an App Group, which needs a paid developer team ([Development](development.md#widgets-and-the-app-group)); without one they show StarHash's own codes.
 
 ## Look and feel
 
-- Four colours: blue `#3020FE`, pale grey `#F4F4F4`, near black `#171717` and grey `#616161`. Light mode is blue throughout, with white text on it, white cards and white buttons with near-black words; dark mode is near black with blue buttons. Green `#05D079`, yellow `#F2BB07` and red `#F36209` appear only for money in, pending payments, and money out, failed payments and deletes.
+- A white page with `#F2F3F6` cards in light mode, `#171717` with `#3A3A3A` cards in dark, and the green `#00D957` as the accent and the brand: the buttons (with near-black words), switches, the chart, the selected tab, the empty-state drawings, the app icon and the launch. Money in and confirmed payments are green too; yellow `#F2BB07` marks pending payments and red `#F36209` money out, failed payments and deletes.
+- Settings' rows each carry an icon in StarHash's green glass style, and no line of explanation: titles, icons and values only, throughout the app.
 - English and Kinyarwanda, chosen per app in the Settings app.
 - [Space Grotesk](https://github.com/floriankarsten/space-grotesk) throughout, following Dynamic Type.
-- Liquid Glass on iOS 26 and later, with materials in its place on iOS 18.
+- Cards and lists are flat. Liquid Glass, on iOS 26 and later (materials on iOS 18), is for what floats over the page: the tab bar, the header buttons, sheets and Buy's call buttons.
 - Hand-drawn doodles for every empty state, and haptics on every press.
