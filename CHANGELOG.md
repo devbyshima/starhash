@@ -9,7 +9,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 ### Added
 
 - Scan to Pay: the scan button on Pay reads a merchant's MoMo QR code or a friend's StarHash code, and Pay dials them with no recipient screen, the amount filled in when the code carries one. Photos reads a code from a picture.
-- Your own QR code, for others to scan and pay you: your name and number, asked for in onboarding and kept in Settings' new Profile, with your photo. The code stands as a little tree of blocks, turning slowly, that stops and flattens into the QR code at a tap, on Profile and in the scanner's My Code. Share Code sends StarHash's own version of it, with the mark in the middle.
+- Your own QR code, for others to scan and pay you: your name and number, asked for in onboarding and kept in Settings' new Profile, with your photo. The code stands as a little tree of blocks, turning slowly, that turns on into place and flattens into the QR code at a tap, on Profile and in the scanner's My Code. Share Code sends StarHash's own version of it, with the mark in the middle.
 - Purchases of airtime, bundles, electricity, water and TV show as bought rather than sent, and payments sort into categories, by their names and, with Smart categories, by Apple Intelligence.
 - Scam warnings: a message that looks like MoMo's but comes from someone's own number, or asks for money back, is never logged, and a notification warns you before you send anything back.
 - Export and import: everything StarHash keeps as one file, in Settings' Your Data.
