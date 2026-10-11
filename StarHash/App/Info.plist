@@ -42,6 +42,8 @@
 	<array>
 		<string>tel</string>
 	</array>
+	<key>LSSupportsGameMode</key>
+	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>StarHash uses the camera to scan a QR code, to see who to pay. Nothing is recorded or kept.</string>
 	<key>NSContactsUsageDescription</key>
