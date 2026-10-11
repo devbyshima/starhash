@@ -12,8 +12,8 @@ struct NotificationSettingsView: View {
 
     @AppStorage(PreferenceKey.notifyPaymentReminders) private var paymentReminders = true
     @AppStorage(PreferenceKey.paymentReminderDelay) private var reminderDelay = NotificationPlan.defaultReminderDelay
-    @AppStorage(PreferenceKey.notifyConfirmedPayments) private var confirmedPayments = false
-    @AppStorage(PreferenceKey.notifyMoneyReceived) private var moneyReceived = false
+    @AppStorage(PreferenceKey.notifyConfirmedPayments) private var confirmedPayments = true
+    @AppStorage(PreferenceKey.notifyMoneyReceived) private var moneyReceived = true
     @AppStorage(PreferenceKey.notifyWeeklySummary) private var weeklySummary = true
     @AppStorage(PreferenceKey.weeklySummaryDay) private var weeklyDay = NotificationPlan.defaultWeeklyDay
     @AppStorage(PreferenceKey.notifyMonthlySummary) private var monthlySummary = true

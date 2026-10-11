@@ -617,9 +617,11 @@ struct RecipientPickerView: View {
         .padding(.horizontal, 22)
         .padding(.vertical, 14)
         .frame(minHeight: 72)
-        // The sheets' colours: solid white in light mode, their near-black
-        // glass in dark.
-        .starhashTotalCard(in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        // Liquid Glass, as it floats over the list scrolling under it,
+        // lifted by a soft shadow so it parts from the white page in light
+        // mode.
+        .starhashGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous), tint: .clear)
+        .shadow(color: .floatingShadow, radius: 18, y: 6)
         .padding(.horizontal, 16)
         .padding(.bottom, 8)
         .starhashReadableWidth()

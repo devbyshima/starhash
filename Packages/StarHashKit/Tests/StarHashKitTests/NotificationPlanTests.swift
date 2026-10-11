@@ -88,10 +88,10 @@ struct NotificationPlanTests {
         #expect(NotificationPlan.afterMessage(applied: confirmed, previous: confirmed, settings: .init(confirmedPayments: true)) == nil)
     }
 
-    @Test func moneyReceivedOnlyWhenChosen() throws {
+    @Test func moneyReceivedOnByDefaultAndOffWhenTurnedOff() throws {
         let received = Self.tx(20_000, .incoming, at: Self.now, source: .sms, balance: 32_000)
-        #expect(NotificationPlan.afterMessage(applied: received, previous: nil, settings: .init()) == nil)
-        let item = try #require(NotificationPlan.afterMessage(applied: received, previous: nil, settings: .init(moneyReceived: true)))
+        #expect(NotificationPlan.afterMessage(applied: received, previous: nil, settings: .init(moneyReceived: false)) == nil)
+        let item = try #require(NotificationPlan.afterMessage(applied: received, previous: nil, settings: .init()))
         #expect(item.body == "Aline sent you 20,000 RWF. Balance 32,000 RWF.")
         let hidden = try #require(NotificationPlan.afterMessage(applied: received, previous: nil, settings: .init(moneyReceived: true, showsAmounts: false)))
         #expect(hidden.body == "Aline sent you money.")
