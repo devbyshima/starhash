@@ -205,21 +205,12 @@ struct ProfileFields: View {
             }
         }
         .animation(.smooth(duration: 0.2), value: problem)
-        // The number pad has no return key: Done over it closes it.
-        .toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button("Done", action: dismissKeyboard)
-                    .fontWeight(.semibold)
-            }
-        }
         .onAppear {
             if draftNumber.isEmpty, let saved = Recipient.ownNumber(number) { draftNumber = saved.formattedDestination }
         }
     }
 
-    /// Whichever field has the keyboard lets it go, the name typed large
-    /// on Profile included.
+    /// Whichever field has the keyboard lets it go.
     private func dismissKeyboard() {
         focus = nil
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
