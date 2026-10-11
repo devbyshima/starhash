@@ -7,10 +7,10 @@ import UIKit
 /// 3D QR code by reactiive): the code's modules laid out as tiles on a
 /// board, with a tree standing on them whose crown is a block of columns,
 /// one per module. Until it is tapped the board turns slowly on its axis,
-/// counterclockwise. Tapping it swings the camera from above the corner to
-/// straight overhead as the board turns on to square, where every column's
-/// top is its module's colour, so the tree flattens into the code itself,
-/// upright and ready to scan; another tap stands it back up, turning again.
+/// counterclockwise. A tap stops it and swings the camera from above the
+/// corner to straight overhead as the board squares up, where every
+/// column's top is its module's colour, so the tree flattens into the code
+/// itself, ready to scan; another tap stands it back up, turning again.
 ///
 /// Two colours and the tree: the tree is the accent's greens, and the rest
 /// of the code is the near black on white in light mode and white on the
@@ -175,20 +175,27 @@ final class QRTreeScene {
         spinner.runAction(.repeatForever(turn), forKey: Self.spinKey)
     }
 
-    /// Stops the turning by carrying on, the same way, to the next whole
-    /// turn, so the code lands upright as the camera arrives overhead.
+    /// Stops the turning at once, then squares the board up as the camera
+    /// rises, as the reference does: the camera's own swing turns the
+    /// board a quarter turn's half on screen, and the board turns to the
+    /// nearest square angle with it, so what shows turns no more than 45
+    /// degrees either way before it lies flat. A code reads at any quarter
+    /// turn.
     private func settle(over duration: TimeInterval) {
         let angle = Double(spinner.presentation.eulerAngles.y)
         spinner.removeAction(forKey: Self.spinKey)
-        let remaining = angle <= 0 ? -angle : 2 * .pi - angle
-        guard duration > 0, remaining > 0.001 else {
-            spinner.eulerAngles.y = 0
+        spinner.eulerAngles.y = Float(angle)
+        let quarter = Double.pi / 2
+        let swing = Double(codePose.yaw - treePose.yaw)
+        let target = ((angle + swing) / quarter).rounded() * quarter
+        guard duration > 0 else {
+            spinner.eulerAngles.y = Float(target)
             return
         }
-        let finish = SCNAction.rotateBy(x: 0, y: CGFloat(remaining), z: 0, duration: duration)
-        finish.timingMode = .easeOut
+        let turn = SCNAction.rotateBy(x: 0, y: CGFloat(target - angle), z: 0, duration: duration)
+        turn.timingMode = .easeInEaseOut
         // Exactly square at the end, whatever the sums left over.
-        spinner.runAction(.sequence([finish, .rotateTo(x: 0, y: 0, z: 0, duration: 0)]), forKey: Self.spinKey)
+        spinner.runAction(.sequence([turn, .rotateTo(x: 0, y: CGFloat(target), z: 0, duration: 0)]), forKey: Self.spinKey)
     }
 
     // MARK: Building
@@ -428,17 +435,19 @@ private struct VoxelMesh {
 }
 
 /// A QR code's modules, read from Core Image's generator: a square of dark
-/// and light, without the quiet zone round it.
-private struct QRModules {
+/// and light, without the quiet zone round it. The tree and the shared
+/// image both draw from it.
+struct QRModules {
     let count: Int
     private let dark: [Bool]
 
-    init?(text: String) {
+    /// `correction` is the generator's level: Q, a quarter of the code to
+    /// spare, gives the tree's crown room to blur an edge here and there;
+    /// H, the shared image's, room for the mark over its middle.
+    init?(text: String, correction: String = "Q") {
         let filter = CIFilter.qrCodeGenerator()
         filter.message = Data(text.utf8)
-        // Q, a quarter of the code to spare: room for the crown's shading
-        // to blur an edge here and there.
-        filter.correctionLevel = "Q"
+        filter.correctionLevel = correction
         guard let output = filter.outputImage,
               let image = CIContext().createCGImage(output, from: output.extent) else { return nil }
         let width = image.width, height = image.height

@@ -16,6 +16,7 @@ struct FeatureFlagsView: View {
                 SettingsRow(
                     symbol: "shippingbox.fill",
                     title: "Channel",
+                    caption: "Sets where each flag starts",
                     value: ReleaseChannel.current.title
                 )
             }
@@ -25,6 +26,8 @@ struct FeatureFlagsView: View {
                     SettingsToggleRow(
                         symbol: "flag.fill",
                         title: flag.title,
+                        caption: flag.detail,
+                        status: overrides[flag.key] == nil ? nil : String(localized: "Changed on this iPhone"),
                         isOn: binding(for: flag)
                     )
                 }
@@ -36,7 +39,7 @@ struct FeatureFlagsView: View {
                         FeatureFlags.resetOverrides()
                         withAnimation(.smooth) { overrides = [:] }
                     } label: {
-                        SettingsRow(symbol: "arrow.counterclockwise", title: "Reset All")
+                        SettingsRow(symbol: "arrow.counterclockwise", title: "Reset All", caption: "Every flag back to where its rollout puts it")
                     }
                     .buttonStyle(HighlightRowButtonStyle())
                 }

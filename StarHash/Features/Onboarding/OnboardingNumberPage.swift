@@ -8,8 +8,9 @@ import SwiftUI
 /// without it.
 ///
 /// Laid out exactly as the wallet step, so nothing jumps between them: a
-/// symbol in its pulse rings, the title low, the fields and Continue under
-/// it, Continue 10 points over the bottom, and the glow at the bottom edge.
+/// symbol in its pulse rings, the words low, the fields and Continue under
+/// them, Continue 10 points over the bottom, and the glow at the bottom
+/// edge.
 struct OnboardingNumberPage: View {
     let onDone: () -> Void
 
@@ -41,6 +42,9 @@ struct OnboardingNumberPage: View {
                     .starhashFont(22, weight: .bold, relativeTo: .title2)
                     .foregroundStyle(Color.starhashPrimaryText)
                     .accessibilityAddTraits(.isHeader)
+                Text("It goes in your own QR code, so friends\nscan it to pay you. It stays on your iPhone.")
+                    .font(.starhash(.callout))
+                    .foregroundStyle(Color.starhashSecondaryText)
             }
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)

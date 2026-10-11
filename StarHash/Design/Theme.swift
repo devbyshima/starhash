@@ -36,7 +36,8 @@ extension Color {
     /// out, a failed payment and anything that deletes. Money in and a
     /// confirmed payment are the accent.
     static let brandYellow = Color(red: 242 / 255, green: 187 / 255, blue: 7 / 255)
-    static let brandRed = Color(red: 243 / 255, green: 98 / 255, blue: 9 / 255)
+    /// Blood red, #C1121F: delete buttons, failed payments, money out.
+    static let brandRed = Color(red: 193 / 255, green: 18 / 255, blue: 31 / 255)
 
     /// The accent deepened for words and thin marks on white and on the
     /// light cards: 5.1:1 on the page, 4.6:1 on #F2F3F6.
@@ -72,13 +73,13 @@ extension Color {
     static let starhashTertiaryText = SurfaceColor(light: .init(white: 0.52), dark: .init(white: 138 / 255))
     /// Section titles and small print.
     static let starhashCaptionText = Color.starhashSecondaryText
-    /// Money going out and destructive actions as words and arrows: on
-    /// white a deeper shade of the red (4.7:1), since the red is 3.2:1
-    /// there; on the dark cards a lighter one (4.9:1), since the red is
-    /// 3.5:1 on #3A3A3A.
+    /// Money going out and destructive actions as words and arrows: the
+    /// blood red itself on white and the light cards (6.2:1, 5.6:1), and a
+    /// lighter red of it on the dark cards (4.5:1), where the blood red is
+    /// too dark to read.
     static let starhashDestructive = Color(
-        light: .init(red: 201 / 255, green: 74 / 255, blue: 0),
-        dark: .init(red: 1, green: 138 / 255, blue: 76 / 255)
+        light: .brandRed,
+        dark: .init(red: 1, green: 123 / 255, blue: 123 / 255)
     )
     /// Buy's call buttons, the one glass left on Buy: Liquid Glass tinted
     /// the accent, with a near-black phone on it (9.4:1).
@@ -99,10 +100,9 @@ extension Color {
     /// 1.8:1.
     static let starhashUrgentText = Color(light: .init(red: 138 / 255, green: 101 / 255, blue: 0), dark: .brandYellow)
     /// A delete button's fill (Delete All Data, Delete Transaction): the
-    /// red, in either appearance, with near-black words on it (5.6:1;
-    /// white is 3.2:1).
+    /// blood red, in either appearance, with white words on it (6.2:1).
     static let starhashDestructiveButton = Color.brandRed
-    static let starhashOnDestructive = Color.brandNight
+    static let starhashOnDestructive = Color.white
     /// Red as text straight on the page, the same as on a card.
     static let starhashDestructiveOnPage = Color.starhashDestructive
     /// Money coming in and a confirmed payment: the accent. Its deeper
@@ -222,6 +222,9 @@ extension Color {
     /// Words on the widgets: the near black on white (17:1), the pale grey
     /// on the near black (16:1).
     static let widgetText = Color(light: .brandNight, dark: .brandPaper)
+    /// The medium Buy widget's tiles: the cards' pale grey on white, a
+    /// veil on the near black.
+    static let widgetChip = Color(light: .brandMist, dark: .brandPaper.opacity(0.08))
     /// The widgets' symbols: the accent.
     static let widgetAccent = Color.brandAccent
 

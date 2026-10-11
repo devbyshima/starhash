@@ -43,7 +43,7 @@ struct LegalDocumentView: View {
             }
             SettingsCard {
                 Link(destination: DeveloperNoteLinks.write) {
-                    SettingsRow(symbol: "bubble.left.and.bubble.right.fill", title: "Questions?") {
+                    SettingsRow(symbol: "bubble.left.and.bubble.right.fill", title: "Questions?", caption: "Ask on StarHash's GitHub page") {
                         SettingsChevron(symbol: "arrow.up.right")
                     }
                 }

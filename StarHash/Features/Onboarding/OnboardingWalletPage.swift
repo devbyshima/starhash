@@ -55,6 +55,9 @@ struct OnboardingWalletPage: View {
                     .starhashFont(22, weight: .bold, relativeTo: .title2)
                     .foregroundStyle(Color.starhashPrimaryText)
                     .accessibilityAddTraits(.isHeader)
+                Text("Which carrier do you pay with? StarHash\ndials its codes for you.")
+                    .font(.starhash(.callout))
+                    .foregroundStyle(Color.starhashSecondaryText)
             }
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)

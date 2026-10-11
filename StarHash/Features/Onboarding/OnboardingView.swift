@@ -29,6 +29,7 @@ import SwiftUI
 struct OnboardingView: View {
     let onFinish: () -> Void
 
+    @AppStorage(PreferenceKey.wallet) private var wallet = ""
     @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
     @AppStorage(PreferenceKey.onboardingStage) private var savedStage = 0
     @AppStorage(PreferenceKey.hasSeenDeveloperNote) private var hasSeenDeveloperNote = false
@@ -45,13 +46,20 @@ struct OnboardingView: View {
     /// everyone sees auto-verify and its setup.
     private var stages: [Stage] { [.reel, .wallet, .number, .contacts, .nearby, .notifications, .autoVerify, .setup] }
 
+    /// The wallet picked on the wallet screen, MTN MoMo until then.
+    private var chosenWallet: Recipient.Network { Recipient.Network(rawValue: wallet) ?? .mtn }
+
     private var current: Stage { stages[min(stage, stages.count - 1)] }
 
     private static let phases: [OnboardingReel.Phase] = [
-        .init(symbol: "number", title: "No more USSD menus"),
-        .init(symbol: "storefront.fill", title: "Pay anyone"),
-        .init(symbol: "clock.fill", title: "Every payment, logged"),
-        .init(symbol: "lock.shield.fill", title: "Private by design"),
+        .init(symbol: "number", title: "No more USSD menus",
+              description: "Type an amount, pick who gets it,\nand StarHash dials the code for you."),
+        .init(symbol: "storefront.fill", title: "Pay anyone",
+              description: "Any MTN or Airtel number, or a merchant\ncode. StarHash knows which is which."),
+        .init(symbol: "clock.fill", title: "Every payment, logged",
+              description: "Activity keeps each payment by day,\nwith a chart and search."),
+        .init(symbol: "lock.shield.fill", title: "Private by design",
+              description: "No account and no server. Your PIN only\never goes into your wallet's own prompt."),
     ]
 
     private var tint: Color { OnboardingPalette.tint }
@@ -102,6 +110,7 @@ struct OnboardingView: View {
         .init(
             initialDelay: 0.4,
             title: "Pay your contacts\nin a tap",
+            description: "Pick who to pay from your contacts.\nThey stay on your iPhone.",
             primaryTitle: "Continue",
             primaryAction: {
                 Task {
@@ -119,6 +128,7 @@ struct OnboardingView: View {
         .init(
             initialDelay: 0.4,
             title: "Suggest who you\npaid here",
+            description: "Paid a shop here before? StarHash lists it\nfirst next time. This stays on your iPhone.",
             alertButtons: 3,
             primaryTitle: "Continue",
             primaryAction: {
@@ -138,6 +148,7 @@ struct OnboardingView: View {
         .init(
             initialDelay: 0.4,
             title: "Stay on top of\nyour payments",
+            description: "A reminder when a payment is still pending,\nand your week and month summed up.",
             primaryTitle: "Continue",
             primaryAction: {
                 Task {
@@ -153,6 +164,7 @@ struct OnboardingView: View {
             mock: .message,
             initialDelay: 0.4,
             title: "Confirm payments\nautomatically",
+            description: String(localized: "Add one shortcut and each \(chosenWallet.messagesName) message\nconfirms its payment, with the fee."),
             primaryTitle: "Set Up",
             primaryAction: advance,
             secondaryTitle: "Maybe Later",

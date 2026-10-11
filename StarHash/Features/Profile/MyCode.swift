@@ -3,18 +3,81 @@ import StarHashKit
 import SwiftUI
 import UIKit
 
-/// The owner's code as a plain image to share: black on white, its
-/// modules scaled up without smoothing, as any scanner reads best.
+/// The owner's code as an image to share, StarHash's own: the modules as
+/// rounded near-black dots on white, the three corner squares rounded with
+/// their eyes in the deep green, and the StarHash mark in the accent on a
+/// white tile in the middle. Error correction H leaves a third of the code
+/// to spare, far more than the mark covers, so any scanner still reads it.
 enum QRCodeImage {
-    /// The code as an image, a few modules' quiet zone round it, or nil if
-    /// it would not encode.
-    static func image(for text: String, scale: CGFloat = 12) -> UIImage? {
-        let filter = CIFilter.qrCodeGenerator()
-        filter.message = Data(text.utf8)
-        filter.correctionLevel = "M"
-        guard let output = filter.outputImage?.transformed(by: CGAffineTransform(scaleX: scale, y: scale)),
-              let cgImage = CIContext().createCGImage(output, from: output.extent) else { return nil }
-        return UIImage(cgImage: cgImage)
+    /// The code as a square image `side` pixels wide, a quiet zone of four
+    /// modules round it, or nil if it would not encode.
+    static func image(for text: String, side: CGFloat = 1024) -> UIImage? {
+        guard let modules = QRModules(text: text, correction: "H") else { return nil }
+        let count = modules.count
+        let quiet = 4
+        let module = side / CGFloat(count + quiet * 2)
+        let origin = CGFloat(quiet) * module
+        let ink = UIColor(red: 23 / 255, green: 23 / 255, blue: 23 / 255, alpha: 1)
+        let eye = UIColor(red: 0, green: 127 / 255, blue: 55 / 255, alpha: 1)
+        let accent = UIColor(red: 0, green: 217 / 255, blue: 87 / 255, alpha: 1)
+
+        // The mark's tile: about a quarter of the code across, on whole
+        // modules, an odd number so it sits dead centre.
+        var tileModules = Int((Double(count) * 0.26).rounded())
+        if tileModules % 2 == 0 { tileModules += 1 }
+        let tileStart = (count - tileModules) / 2
+        let tileRange = tileStart..<(tileStart + tileModules)
+
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        format.opaque = true
+        return UIGraphicsImageRenderer(size: CGSize(width: side, height: side), format: format).image { context in
+            let cg = context.cgContext
+            UIColor.white.setFill()
+            cg.fill(CGRect(x: 0, y: 0, width: side, height: side))
+
+            // The modules, leaving out the corner squares (drawn whole
+            // below) and the mark's tile.
+            ink.setFill()
+            for row in 0..<count {
+                for column in 0..<count where modules.isDark(row: row, column: column) {
+                    if modules.isFinder(row: row, column: column) { continue }
+                    if tileRange.contains(row), tileRange.contains(column) { continue }
+                    let rect = CGRect(
+                        x: origin + CGFloat(column) * module,
+                        y: origin + CGFloat(row) * module,
+                        width: module,
+                        height: module
+                    ).insetBy(dx: module * 0.06, dy: module * 0.06)
+                    UIBezierPath(roundedRect: rect, cornerRadius: module * 0.32).fill()
+                }
+            }
+
+            // The three corner squares: a rounded ring and a rounded eye.
+            for (row, column) in [(0, 0), (0, count - 7), (count - 7, 0)] {
+                let outer = CGRect(x: origin + CGFloat(column) * module, y: origin + CGFloat(row) * module, width: module * 7, height: module * 7)
+                let ring = UIBezierPath(roundedRect: outer, cornerRadius: module * 2)
+                ring.append(UIBezierPath(roundedRect: outer.insetBy(dx: module, dy: module), cornerRadius: module * 1.3).reversing())
+                ink.setFill()
+                ring.fill()
+                eye.setFill()
+                UIBezierPath(roundedRect: outer.insetBy(dx: module * 2, dy: module * 2), cornerRadius: module).fill()
+            }
+
+            // The mark on its tile.
+            let tile = CGRect(
+                x: origin + CGFloat(tileStart) * module,
+                y: origin + CGFloat(tileStart) * module,
+                width: CGFloat(tileModules) * module,
+                height: CGFloat(tileModules) * module
+            ).insetBy(dx: module * 0.3, dy: module * 0.3)
+            UIColor.white.setFill()
+            UIBezierPath(roundedRect: tile, cornerRadius: tile.width * 0.24).fill()
+            let mark = StarHashMarkShape().path(in: tile.insetBy(dx: tile.width * 0.13, dy: tile.width * 0.13)).cgPath
+            cg.addPath(mark)
+            cg.setFillColor(accent.cgColor)
+            cg.fillPath()
+        }
     }
 }
 
@@ -121,10 +184,13 @@ struct ProfileFields: View {
             .focused($focus, equals: .number)
             .keyboardType(.phonePad)
             .textContentType(.telephoneNumber)
-            .onChange(of: draftNumber) { _, typed in
+            .onChange(of: draftNumber) { old, typed in
                 // Saved only once it is a number the code can carry.
                 if let recipient = Recipient.ownNumber(typed) {
                     number = recipient.destination
+                    // The whole number is in and it is right: the number
+                    // pad, which has no return key, goes by itself.
+                    if Recipient.ownNumber(old) == nil, problem == nil { dismissKeyboard() }
                 } else if typed.filter(\.isNumber).isEmpty {
                     number = ""
                 }
@@ -139,9 +205,24 @@ struct ProfileFields: View {
             }
         }
         .animation(.smooth(duration: 0.2), value: problem)
+        // The number pad has no return key: Done over it closes it.
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done", action: dismissKeyboard)
+                    .fontWeight(.semibold)
+            }
+        }
         .onAppear {
             if draftNumber.isEmpty, let saved = Recipient.ownNumber(number) { draftNumber = saved.formattedDestination }
         }
+    }
+
+    /// Whichever field has the keyboard lets it go, the name typed large
+    /// on Profile included.
+    private func dismissKeyboard() {
+        focus = nil
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 
     private func field(_ label: String, text: Binding<String>, prompt: String, symbol: String) -> some View {

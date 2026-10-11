@@ -93,6 +93,11 @@ struct ActivityView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { now = .now }
         }
+        // A payment logged while the page is up (a message through
+        // auto-verify, one made on Pay) can fall after the last refresh,
+        // past midnight or into a new week: the period moves on with it.
+        .onChange(of: store.transactions.count) { now = .now }
+        .onAppear { now = .now }
         .sensoryFeedback(.success, trigger: feedbackCount)
         .sensoryFeedback(.warning, trigger: failedCount)
         .sensoryFeedback(.impact(flexibility: .rigid), trigger: swipeDeleteCount)
