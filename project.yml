@@ -138,13 +138,16 @@ targets:
             CFBundleURLSchemes: [starhash]
 
   # Buy's codes on the Home Screen, and Scan to Pay in Control Center.
-  # Shares the app's colours (Theme.swift) and typeface.
+  # Shares the app's colours (Theme.swift), icons (Icons.swift and
+  # Icons.xcassets) and typeface.
   StarHashWidgets:
     type: app-extension
     platform: iOS
     sources:
       - path: StarHashWidgets
       - path: StarHash/Design/Theme.swift
+      - path: StarHash/Design/Icons.swift
+      - path: StarHash/Resources/Icons.xcassets
       - path: StarHash/Resources/Fonts/SpaceGrotesk.ttf
         buildPhase: resources
     dependencies:

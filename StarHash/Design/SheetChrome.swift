@@ -43,7 +43,7 @@ struct StarHashCircleGlyph: View {
     private var isClose: Bool { symbol == "xmark" }
 
     var body: some View {
-        Image(systemName: symbol)
+        Image(symbol: symbol)
             .font(.system(size: 17, weight: isClose ? .medium : .semibold))
             .starhashHeaderGlyphScale()
             .foregroundStyle(isClose ? Color.starhashCloseGlyph : Color.starhashPrimaryText)

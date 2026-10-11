@@ -163,14 +163,12 @@ struct PayView: View {
             Button {
                 dial(USSD.balance(for: wallet))
             } label: {
-                Label("Balance", systemImage: "wallet.bifold")
-                    // At accessibility sizes the word alone, shrunk a little
-                    // rather than broken across two lines.
-                    .labelStyle(BalanceLabelStyle())
+                Text("Balance")
+                    // At accessibility sizes shrunk a little rather than
+                    // broken across two lines.
                     .starhashFont(18, weight: .semibold, relativeTo: .body)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
-                    // The Total card is white in either appearance here.
                     .foregroundStyle(Color.starhashPrimaryText)
                     .padding(.horizontal, 12)
                     .frame(maxWidth: .infinity)
@@ -363,19 +361,6 @@ private struct BalanceSurface: ViewModifier {
     }
 }
 
-/// The wallet icon and "Balance", or only the word at accessibility text
-/// sizes, where the button is half the screen's width.
-private struct BalanceLabelStyle: LabelStyle {
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-
-    func makeBody(configuration: Configuration) -> some View {
-        HStack(spacing: 8) {
-            if !dynamicTypeSize.isAccessibilitySize { configuration.icon }
-            configuration.title
-        }
-    }
-}
-
 /// The scanner's button at the top right of Pay, in the round glass the
 /// other header buttons wear.
 private struct ScanButton: View {
@@ -412,7 +397,7 @@ private struct PayChosenRecipient: View {
                 .foregroundStyle(Color.payPrimaryText)
                 .lineLimit(1)
             Button(action: onClear) {
-                Image(systemName: "xmark.circle.fill")
+                Image(symbol: "xmark.circle.fill")
                     .font(.starhash(.body))
                     .foregroundStyle(Color.paySecondaryText)
                     .frame(minWidth: 32, minHeight: 32)

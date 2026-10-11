@@ -160,8 +160,8 @@ struct OnboardingPermission: View {
                 .padding(.leading, 24)
             Spacer(minLength: 0)
             Group {
-                Image(systemName: "wifi")
-                Image(systemName: "battery.50percent")
+                Image(symbol: "wifi")
+                Image(symbol: "battery.50percent")
             }
             .offset(y: -2)
         }
@@ -271,7 +271,7 @@ struct OnboardingPermission: View {
                     .frame(height: 13)
                     .padding(.trailing, 60)
             }
-            Image(systemName: "checkmark.circle.fill")
+            Image(symbol: "checkmark.circle.fill")
                 .font(.system(size: 30, weight: .semibold))
                 .foregroundStyle(Color.starhashIncoming)
                 .opacity(frame.tapOpacity)

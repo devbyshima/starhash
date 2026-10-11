@@ -2,10 +2,10 @@ import SwiftUI
 
 // Shared look for every page in the Settings tab, after GO Club's: rounded
 // 26pt cards 10pt from the screen's edges, flat in the cards' foreground
-// (#F2F3F6 in light mode, #3A3A3A in dark), everything in them 20pt in, a
+// (white on #F2F3F6 in light mode, #171717 on black in dark), everything in them 20pt in, a
 // section's grey title inside its card at the top, and a dashed line
-// across the card between every row. Rows are an icon in the green glass
-// style (`SettingsIcons`) and a title. A row's description stays hidden
+// across the card between every row. Rows are an icon in the accent
+// (`SettingsIconImage`) and a title. A row's description stays hidden
 // until its icon is tapped, and goes again at the next tap; a status line
 // (auto-verify waiting) always shows. Sheets presented from Settings keep
 // the sheet look instead.
@@ -14,7 +14,7 @@ extension Color {
     /// A settings card's fill: the cards' foreground.
     static var settingsCard: Color { .starhashCard }
     /// The tile behind row symbols and the profile monogram: a visible grey
-    /// on a white card, a faint veil on a charcoal one.
+    /// on a white card, a faint veil on a near-black one.
     static let settingsTile = Color(light: .brandNight.opacity(0.07), dark: .brandPaper.opacity(0.07))
     /// Behind every settings page: the app's page colour, so cards stand
     /// out the same way they do on Activity.
@@ -151,7 +151,7 @@ struct SettingsChoiceMenu<Value: Hashable>: View {
             HStack(spacing: 6) {
                 Text(catalog: label(selection))
                     .starhashFont(16, weight: .medium, relativeTo: .callout)
-                Image(systemName: "chevron.up.chevron.down")
+                Image(symbol: "chevron.up.chevron.down")
                     .font(.system(size: 13, weight: .semibold))
             }
             .foregroundStyle(Color.starhashPrimaryText)
@@ -172,15 +172,15 @@ struct SettingsChevron: View {
     var symbol = "chevron.right"
 
     var body: some View {
-        Image(systemName: symbol)
+        Image(symbol: symbol)
             .starhashFont(14, weight: .semibold, relativeTo: .footnote)
             .foregroundStyle(Color.starhashTertiaryText)
             .accessibilityHidden(true)
     }
 }
 
-/// A row's icon: the symbol's drawing in the green glass style
-/// (`SettingsIconImage`), all one colour. It grows with the text beside
+/// A row's icon: StarHash's icon for the symbol in the accent
+/// (`SettingsIconImage`). It grows with the text beside
 /// it, up to half as big again.
 struct SettingsSymbol: View {
     let symbol: String

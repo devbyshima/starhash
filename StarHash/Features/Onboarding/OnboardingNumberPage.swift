@@ -27,7 +27,7 @@ struct OnboardingNumberPage: View {
 
             ZStack {
                 OnboardingPulseRings(tint: tint)
-                Image(systemName: hasNumber ? "qrcode" : "person.crop.circle.fill")
+                Image(symbol: hasNumber ? "qrcode" : "person.crop.circle.fill")
                     .font(.system(size: 72, weight: .medium))
                     .foregroundStyle(tint.gradient)
                     .contentTransition(.symbolEffect(.replace))

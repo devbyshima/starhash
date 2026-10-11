@@ -72,7 +72,7 @@ struct OnboardingReel: View {
     @ViewBuilder
     private func glyph(_ symbol: String) -> some View {
         let size = OnboardingMetrics.iconSize
-        let image = Image(systemName: symbol)
+        let image = Image(symbol: symbol)
             .font(.system(size: size - 20))
             .foregroundStyle(tint.gradient)
             // One phase's symbol becomes the next instead of cutting to it.

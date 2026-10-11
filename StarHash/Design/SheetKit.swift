@@ -119,7 +119,7 @@ struct SheetGlassGlyph: View {
     let symbol: String
 
     var body: some View {
-        Image(systemName: symbol)
+        Image(symbol: symbol)
             .font(.title3)
             .foregroundStyle(Color.starhashPrimaryText)
             .frame(width: 32, height: 32)
@@ -215,7 +215,7 @@ struct SheetIconCircle: View {
     var tint: Color?
 
     var body: some View {
-        Image(systemName: symbol)
+        Image(symbol: symbol)
             .font(.sheetBody)
             .foregroundStyle(tint.map(AnyShapeStyle.init) ?? AnyShapeStyle(Color.starhashPrimaryText))
             .frame(width: 38, height: 38)
@@ -254,8 +254,8 @@ struct SheetButtonStyle: ButtonStyle {
 }
 
 /// Every delete button StarHash draws, one design: the blood red capsule
-/// with a bin and white words. Menus, swipes and confirmation alerts stay
-/// the system's own.
+/// with white words and no icon, as every button with words. Menus, swipes
+/// and confirmation alerts stay the system's own.
 struct DeleteButton: View {
     let title: String
     var fillsWidth = true
@@ -268,13 +268,8 @@ struct DeleteButton: View {
     }
 
     var body: some View {
-        // An icon and text rather than a Label, which a list would restyle.
         Button(role: .destructive, action: action) {
-            HStack(spacing: 8) {
-                Image(systemName: "trash")
-                    .accessibilityHidden(true)
-                Text(catalog: title)
-            }
+            Text(catalog: title)
         }
         .buttonStyle(SheetButtonStyle(fill: .destructive, fillsWidth: fillsWidth))
     }

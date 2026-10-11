@@ -21,13 +21,15 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Changed
 
-- A new look: a white page with #F2F3F6 cards in light mode, #171717 with #3A3A3A cards in dark, and the green #00D957 as the accent and the brand, on the buttons, switches, chart, tab bar, app icon and launch. Cards and lists are flat; Liquid Glass stays on the tab bar, the header buttons, sheets and Buy's call buttons. Status colours: green for money in, yellow for pending, blood red for money out and deletes.
-- Settings' rows each have an icon in StarHash's green glass style; a row's description shows when you tap its icon, and hides at the next tap.
+- A new look: a #F2F3F6 page with white cards in light mode, black with #171717 cards in dark, and the green #00D957 as the accent and the brand, on the buttons, switches, chart, tab bar, app icon and launch. Cards and lists are flat; Liquid Glass stays on the tab bar, the header buttons, sheets and Buy's call buttons. Status colours: green for money in, yellow for pending, blood red for money out and deletes.
+- Settings' rows each have a green icon; a row's description shows when you tap its icon, and hides at the next tap.
+- StarHash's own icons everywhere: one soft, rounded set drawn for the app, in place of the system's symbols, in the tab bar, buttons, menus, Settings, Buy's codes and the widgets.
 - Profile, My Code, the empty screens and a few sheets drop their explanatory lines, leaving the titles; onboarding keeps a line under each title.
 - Onboarding's number screen lines up with the screens around it, and Continue moves on with or without a number.
 - Activity's period control offers the week, the month and the year; the day is gone.
 - Auto-verify's automation step asks only to turn the StarHash SMS automation on, and the setup's pictures are smaller, so each step fits without scrolling.
 - Pay's wallet switcher is now the logo above the keypad, where RWF was.
+- Buttons with words show the words alone, without an icon: Balance, Delete, Share Code, Photos, My Code, Dial, Unlock and the transaction's category.
 - The recipient screen's Total floats over the list as Liquid Glass, clear of the rows in light mode.
 - Every notification is on to begin with, Confirmed payments and Money received included.
 - A new launch animation: a stroke sweeps round the screen, and as it lands the StarHash star snaps together out of a dot.

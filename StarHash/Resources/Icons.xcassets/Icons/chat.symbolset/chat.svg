@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- chat, drawn by scripts/make_icons.swift; edit it there, not here. -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="3300" height="2200">
+ <g id="Notes">
+  <rect height="2200" id="artboard" style="fill:white;opacity:1" width="3300" x="0" y="0"/>
+  <text id="template-version" style="stroke:none;fill:black;font-family:sans-serif;font-size:13;" transform="matrix(1 0 0 1 3036 1933)" text-anchor="end">Template v.2.0</text>
+ </g>
+ <g id="Guides">
+  <line id="Baseline-S" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="696" y2="696"/>
+  <line id="Capline-S" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="625.541" y2="625.541"/>
+  <line id="Baseline-M" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="1126" y2="1126"/>
+  <line id="Capline-M" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="1055.54" y2="1055.54"/>
+  <line id="Baseline-L" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="1556" y2="1556"/>
+  <line id="Capline-L" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="1485.54" y2="1485.54"/>
+  <line id="left-margin-Regular-S" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1400" x2="1400" y1="600" y2="720"/>
+  <line id="right-margin-Regular-S" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1490.35" x2="1490.35" y1="600" y2="720"/>
+  <line id="left-margin-Regular-M" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1400" x2="1400" y1="1030" y2="1150"/>
+  <line id="right-margin-Regular-M" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1515.38" x2="1515.38" y1="1030" y2="1150"/>
+  <line id="left-margin-Regular-L" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1400" x2="1400" y1="1460" y2="1580"/>
+  <line id="right-margin-Regular-L" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1548.85" x2="1548.85" y1="1460" y2="1580"/>
+ </g>
+ <g id="Symbols">
+  <g id="Regular-S" transform="matrix(1 0 0 1 1400 696)">
+   <path d="M60.53 -28.60C60.53 -16.36 50.56 -6.62 37.95 -6.62L34.34 -6.62L24.19 -0.75C18.75 2.87 12.14 -2.42 13.67 -8.54L14.76 -13.29C9.46 -17.22 6.32 -22.79 6.32 -29.21C6.32 -41.27 16.10 -50.59 28.31 -50.59L37.95 -50.59C50.56 -50.59 60.53 -40.85 60.53 -28.60ZM83.42 -52.70C83.42 -46.41 80.37 -40.45 75.54 -36.37L76.66 -31.51C78.17 -25.47 72.36 -21.40 67.23 -23.11L66.56 -23.40L64.96 -24.24C65.23 -25.65 65.35 -27.11 65.35 -28.60C65.35 -43.54 53.20 -55.41 37.95 -55.41L31.48 -55.41C33.56 -65.55 42.46 -73.48 53 -73.48L61.44 -73.48C73.52 -73.48 83.42 -64.28 83.42 -52.70Z"/>
+  </g>
+  <g id="Regular-M" transform="matrix(1 0 0 1 1400 1126)">
+   <path d="M77.31 -26.77C77.31 -11.13 64.58 1.31 48.46 1.31L43.86 1.31L30.89 8.80C23.95 13.43 15.50 6.67 17.46 -1.14L18.86 -7.21C12.08 -12.22 8.08 -19.34 8.08 -27.54C8.08 -42.95 20.57 -54.84 36.15 -54.84L48.46 -54.84C64.58 -54.84 77.31 -42.41 77.31 -26.77ZM106.54 -57.54C106.54 -49.51 102.65 -41.90 96.47 -36.69L97.90 -30.47C99.83 -22.76 92.42 -17.57 85.87 -19.76L85.01 -20.12L82.97 -21.20C83.31 -23 83.46 -24.86 83.46 -26.77C83.46 -45.84 67.94 -61 48.46 -61L40.20 -61C42.86 -73.95 54.22 -84.08 67.69 -84.08L78.46 -84.08C93.89 -84.08 106.54 -72.33 106.54 -57.54Z"/>
+  </g>
+  <g id="Regular-L" transform="matrix(1 0 0 1 1400 1556)">
+   <path d="M99.73 -24.31C99.73 -4.14 83.30 11.91 62.52 11.91L56.57 11.91L39.85 21.57C30.89 27.54 20 18.83 22.52 8.74L24.32 0.91C15.58 -5.55 10.42 -14.73 10.42 -25.31C10.42 -45.19 26.53 -60.53 46.64 -60.53L62.52 -60.53C83.30 -60.53 99.73 -44.49 99.73 -24.31ZM137.43 -64.01C137.43 -53.65 132.41 -43.83 124.45 -37.11L126.30 -29.10C128.78 -19.15 119.22 -12.45 110.77 -15.27L109.66 -15.74L107.03 -17.13C107.47 -19.45 107.67 -21.86 107.67 -24.31C107.67 -48.92 87.65 -68.47 62.52 -68.47L51.86 -68.47C55.29 -85.18 69.95 -98.24 87.32 -98.24L101.22 -98.24C121.12 -98.24 137.43 -83.09 137.43 -64.01Z"/>
+  </g>
+ </g>
+</svg>

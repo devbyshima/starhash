@@ -92,7 +92,7 @@ struct MyCodeShareButton: View {
                 message: Text("Pay me with StarHash: \(recipient.formattedDestination)"),
                 preview: SharePreview("My StarHash code", image: Image(uiImage: image))
             ) {
-                Label("Share Code", systemImage: "square.and.arrow.up")
+                Text("Share Code")
             }
         }
     }
@@ -219,7 +219,7 @@ struct ProfileFields: View {
     private func field(_ label: String, text: Binding<String>, prompt: String, symbol: String) -> some View {
         HStack(spacing: 12) {
             if !centred {
-                Image(systemName: symbol)
+                Image(symbol: symbol)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(Color.starhashSecondaryText)
                     .frame(width: 22)

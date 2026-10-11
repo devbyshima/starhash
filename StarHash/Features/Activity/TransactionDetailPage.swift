@@ -98,7 +98,7 @@ struct TransactionDetailPage: View {
     private func heroBadge(_ transaction: StarHashKit.Transaction) -> some View {
         let outgoing = transaction.direction == .outgoing
         let tint = outgoing ? AnyShapeStyle(Color.starhashDestructiveOnPage) : AnyShapeStyle(Color.starhashIncoming)
-        let arrow = Image(systemName: outgoing ? "arrow.up.right" : "arrow.down.left")
+        let arrow = Image(symbol: outgoing ? "arrow.up.right" : "arrow.down.left")
         if enableContacts, PayContacts.shared.photoContactID(for: transaction.counterparty) != nil {
             TransactionAvatar(counterparty: transaction.counterparty, size: 72, isCircle: true)
                 .overlay(alignment: .bottomTrailing) {
@@ -160,7 +160,7 @@ struct TransactionDetailPage: View {
             )) {
                 Text("None").tag(String?.none)
                 ForEach(TransactionCategory.choices) { option in
-                    Label(option.title, systemImage: option.symbol).tag(String?.some(option.rawValue))
+                    Label(option.title, symbol: option.symbol).tag(String?.some(option.rawValue))
                 }
             }
             .pickerStyle(.inline)
@@ -170,18 +170,15 @@ struct TransactionDetailPage: View {
             // shrinks back into it, so a larger invisible frame round a
             // smaller drawn pill made it collapse to a blob, leave a ghost
             // outline and drift as it settled.
-            HStack(spacing: 6) {
-                Image(systemName: category?.symbol ?? (customTitle == nil ? "plus" : "tag.fill"))
-                Text(category?.title ?? customTitle ?? "Add Category")
-            }
-            .font(.sheetSubheadline)
-            .foregroundStyle(category == nil && customTitle == nil ? Color.sheetSecondaryText : Color.starhashPrimaryText)
-            .lineLimit(1)
-            .padding(.horizontal, 16)
-            .frame(minHeight: 40)
-            .fixedSize()
-            .contentShape(Capsule())
-            .starhashGlass(interactive: true)
+            Text(category?.title ?? customTitle ?? "Add Category")
+                .font(.sheetSubheadline)
+                .foregroundStyle(category == nil && customTitle == nil ? Color.sheetSecondaryText : Color.starhashPrimaryText)
+                .lineLimit(1)
+                .padding(.horizontal, 16)
+                .frame(minHeight: 40)
+                .fixedSize()
+                .contentShape(Capsule())
+                .starhashGlass(interactive: true)
         }
         .menuOrder(.fixed)
         .buttonStyle(.hapticPlain)
