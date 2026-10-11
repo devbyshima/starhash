@@ -143,7 +143,7 @@ struct PayKeypad: View {
                 }
                 .accessibilityLabel("0")
                 key(.delete) {
-                    Image(systemName: "chevron.left")
+                    Image(symbol: "chevron.left")
                         .font(.system(size: 22, weight: .semibold))
                 }
                 .accessibilityLabel("Delete")

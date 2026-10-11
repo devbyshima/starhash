@@ -141,15 +141,15 @@ The `starhash://` scheme opens `pay`, `buy`, `activity`, `settings`, `transactio
 
 ## Widgets
 
-- **Buy**, small and medium, on a white card (the near black in dark mode), pinned codes first. The small widget is your first code, its symbol and name. The medium one is four tiles, each a code's symbol, name and code; with more codes than fit, the last tile is More, which pages through them right on the widget. A tap dials the code through the iPhone's call prompt.
+- **Buy**, small and medium, on the page's colour, pale grey or black, pinned codes first. The small widget is your first code, its symbol and name. The medium one is four tiles, each a code's symbol, name and code; with more codes than fit, the last tile is More, which pages through them right on the widget. A tap dials the code through the iPhone's call prompt.
 - **Scan to Pay**: a small widget, its symbol and its name, and a Control Center and Lock Screen control, both opening the scanner.
 
 The widgets read your data through an App Group, which needs a paid developer team ([Development](development.md#widgets-and-the-app-group)); without one they show StarHash's own codes.
 
 ## Look and feel
 
-- A white page with `#F2F3F6` cards in light mode, `#171717` with `#3A3A3A` cards in dark, and the green `#00D957` as the accent and the brand: the buttons (with near-black words), switches, the chart, the selected tab, the empty-state drawings, the app icon and the launch. Money in and confirmed payments are green too; yellow `#F2BB07` marks pending payments and red `#F36209` money out, failed payments and deletes.
-- Settings' rows each carry an icon in StarHash's green glass style; tap a row's icon to read what it does, and again to hide it.
+- A `#F2F3F6` page with white cards in light mode, black `#000000` with `#171717` cards in dark, and the green `#00D957` as the accent and the brand: the buttons (with near-black words), switches, the chart, the selected tab, the empty-state drawings, the app icon and the launch. Money in and confirmed payments are green too; yellow `#F2BB07` marks pending payments and red `#F36209` money out, failed payments and deletes.
+- StarHash's own icons throughout, one soft and rounded set drawn for the app. Settings' rows each carry one in green; tap a row's icon to read what it does, and again to hide it.
 - English and Kinyarwanda, chosen per app in the Settings app.
 - [Space Grotesk](https://github.com/floriankarsten/space-grotesk) throughout, following Dynamic Type.
 - Cards and lists are flat. Liquid Glass, on iOS 26 and later (materials on iOS 18), is for what floats over the page: the tab bar, the header buttons, sheets and Buy's call buttons.

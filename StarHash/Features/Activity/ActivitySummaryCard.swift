@@ -56,7 +56,7 @@ struct ActivitySummaryCard: View {
 
     private var receivedLine: some View {
         HStack(spacing: 4) {
-            Image(systemName: "arrow.down.left")
+            Image(symbol: "arrow.down.left")
                 .font(.starhash(.footnote, weight: .bold))
                 .accessibilityHidden(true)
             Text("Received \(Money.format(totals.received))")

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- parking, drawn by scripts/make_icons.swift; edit it there, not here. -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="3300" height="2200">
+ <g id="Notes">
+  <rect height="2200" id="artboard" style="fill:white;opacity:1" width="3300" x="0" y="0"/>
+  <text id="template-version" style="stroke:none;fill:black;font-family:sans-serif;font-size:13;" transform="matrix(1 0 0 1 3036 1933)" text-anchor="end">Template v.2.0</text>
+ </g>
+ <g id="Guides">
+  <line id="Baseline-S" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="696" y2="696"/>
+  <line id="Capline-S" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="625.541" y2="625.541"/>
+  <line id="Baseline-M" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="1126" y2="1126"/>
+  <line id="Capline-M" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="1055.54" y2="1055.54"/>
+  <line id="Baseline-L" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="1556" y2="1556"/>
+  <line id="Capline-L" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="1485.54" y2="1485.54"/>
+  <line id="left-margin-Regular-S" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1400" x2="1400" y1="600" y2="720"/>
+  <line id="right-margin-Regular-S" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1490.35" x2="1490.35" y1="600" y2="720"/>
+  <line id="left-margin-Regular-M" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1400" x2="1400" y1="1030" y2="1150"/>
+  <line id="right-margin-Regular-M" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1515.38" x2="1515.38" y1="1030" y2="1150"/>
+  <line id="left-margin-Regular-L" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1400" x2="1400" y1="1460" y2="1580"/>
+  <line id="right-margin-Regular-L" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1548.85" x2="1548.85" y1="1460" y2="1580"/>
+ </g>
+ <g id="Symbols">
+  <g id="Regular-S" transform="matrix(1 0 0 1 1400 696)">
+   <path d="M82.21 -53.30L82.21 -17.16C82.21 -6.68 73.72 1.81 63.24 1.81L27.10 1.81C16.63 1.81 8.13 -6.68 8.13 -17.16L8.13 -53.30C8.13 -63.78 16.63 -72.27 27.10 -72.27L63.24 -72.27C73.72 -72.27 82.21 -63.78 82.21 -53.30ZM35.54 -59.32C32.87 -59.32 30.72 -57.16 30.72 -54.50L30.72 -15.96C30.72 -13.29 32.87 -11.14 35.54 -11.14C38.20 -11.14 40.35 -13.29 40.35 -15.96L40.35 -26.80L47.58 -26.80C56.56 -26.80 63.84 -34.08 63.84 -43.06C63.84 -52.04 56.56 -59.32 47.58 -59.32ZM54.21 -43.06C54.21 -39.40 51.24 -36.43 47.58 -36.43L40.35 -36.43L40.35 -49.68L47.58 -49.68C51.24 -49.68 54.21 -46.72 54.21 -43.06Z"/>
+  </g>
+  <g id="Regular-M" transform="matrix(1 0 0 1 1400 1126)">
+   <path d="M105 -58.31L105 -12.15C105 1.23 94.15 12.08 80.77 12.08L34.62 12.08C21.23 12.08 10.38 1.23 10.38 -12.15L10.38 -58.31C10.38 -71.69 21.23 -82.54 34.62 -82.54L80.77 -82.54C94.15 -82.54 105 -71.69 105 -58.31ZM45.38 -66C41.99 -66 39.23 -63.24 39.23 -59.84L39.23 -10.61C39.23 -7.22 41.99 -4.46 45.38 -4.46C48.78 -4.46 51.54 -7.22 51.54 -10.61L51.54 -24.46L60.77 -24.46C72.24 -24.46 81.54 -33.76 81.54 -45.23C81.54 -56.70 72.24 -66 60.77 -66ZM69.23 -45.23C69.23 -40.56 65.44 -36.77 60.77 -36.77L51.54 -36.77L51.54 -53.69L60.77 -53.69C65.44 -53.69 69.23 -49.90 69.23 -45.23Z"/>
+  </g>
+  <g id="Regular-L" transform="matrix(1 0 0 1 1400 1556)">
+   <path d="M135.45 -65L135.45 -5.46C135.45 11.80 121.46 25.80 104.19 25.80L44.65 25.80C27.39 25.80 13.40 11.80 13.40 -5.46L13.40 -65C13.40 -82.26 27.39 -96.26 44.65 -96.26L104.19 -96.26C121.46 -96.26 135.45 -82.26 135.45 -65ZM58.55 -74.92C54.16 -74.92 50.61 -71.37 50.61 -66.98L50.61 -3.48C50.61 0.91 54.16 4.46 58.55 4.46C62.93 4.46 66.48 0.91 66.48 -3.48L66.48 -21.34L78.39 -21.34C93.19 -21.34 105.18 -33.33 105.18 -48.13C105.18 -62.93 93.19 -74.92 78.39 -74.92ZM89.31 -48.13C89.31 -42.10 84.42 -37.21 78.39 -37.21L66.48 -37.21L66.48 -59.04L78.39 -59.04C84.42 -59.04 89.31 -54.16 89.31 -48.13Z"/>
+  </g>
+ </g>
+</svg>

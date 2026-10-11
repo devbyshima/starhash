@@ -166,9 +166,9 @@ struct BuyView: View {
                                 onDial: { dial(shortcut.code) }
                             )
                             .contextMenu {
-                                Button(shortcuts.canPin ? "Pin" : "Pinned is full", systemImage: "pin") { afterMenu { pin(shortcut, true) } }
+                                Button(shortcuts.canPin ? "Pin" : "Pinned is full", symbol: "pin") { afterMenu { pin(shortcut, true) } }
                                     .disabled(!shortcuts.canPin)
-                                Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
+                                Button("Edit", symbol: "pencil") { editing = ShortcutDraft(shortcut) }
                                 Button(role: .destructive) { afterMenu { requestDelete(shortcut) } } label: { DestructiveMenuLabel("Delete") }
                             }
                             .accessibilityAction(named: "Pin") { pin(shortcut, true) }
@@ -253,13 +253,13 @@ struct BuyView: View {
             PinnedTile(shortcut: shortcut) { dial(shortcut.code) }
                 .contextMenu {
                     if shortcuts.pinned.count > 1 {
-                        Button("Rearrange", systemImage: "arrow.left.arrow.right") {
+                        Button("Rearrange", symbol: "arrow.left.arrow.right") {
                             afterMenu { withAnimation(.smooth(duration: 0.3)) { arranging = true } }
                         }
                     }
-                    Button("Unpin", systemImage: "pin.slash") { afterMenu { pin(shortcut, false) } }
-                    Button("Details", systemImage: "info.circle") { details = shortcut }
-                    Button("Edit", systemImage: "pencil") { editing = ShortcutDraft(shortcut) }
+                    Button("Unpin", symbol: "pin.slash") { afterMenu { pin(shortcut, false) } }
+                    Button("Details", symbol: "info.circle") { details = shortcut }
+                    Button("Edit", symbol: "pencil") { editing = ShortcutDraft(shortcut) }
                     Button(role: .destructive) { afterMenu { requestDelete(shortcut) } } label: { DestructiveMenuLabel("Delete") }
                 }
                 .accessibilityAction(named: "Unpin") { pin(shortcut, false) }
@@ -432,7 +432,7 @@ private struct ShortcutItem: View {
             } label: {
                 HStack(spacing: 14) {
                     // The symbol alone, in the accent, with no tile behind it.
-                    Image(systemName: shortcut.symbol ?? ShortcutSymbols.plain)
+                    Image(symbol: shortcut.symbol ?? ShortcutSymbols.plain)
                         .font(.system(size: 22, weight: .semibold))
                         .foregroundStyle(Color.starhashAccentGraphic)
                         .frame(width: 40, height: 40)
@@ -467,7 +467,7 @@ private struct ShortcutItem: View {
                 TapHaptic.play(.medium)
                 onDial()
             } label: {
-                Image(systemName: "phone.fill")
+                Image(symbol: "phone.fill")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(Color.callGlyph)
                     // The card's shape and height, so the two read as a pair.
@@ -550,7 +550,7 @@ private struct PinnedTileFace: View {
                     // the name from one line down, top-aligned, so one-
                     // and two-line names start level.
                     VStack(spacing: 0) {
-                        Image(systemName: shortcut.symbol ?? ShortcutSymbols.plain)
+                        Image(symbol: shortcut.symbol ?? ShortcutSymbols.plain)
                             .font(.system(size: iconSize, weight: .semibold))
                             .foregroundStyle(Color.starhashAccentGraphic)
                             .frame(width: iconSize * 1.4, height: iconSize * 1.4)
@@ -665,7 +665,7 @@ extension View {
         if #available(iOS 27.0, *) {
             swipeActions(edge: .leading, allowsFullSwipe: true) {
                 Button(action: onPin) {
-                    Image(systemName: "pin.fill")
+                    Image(symbol: "pin.fill")
                 }
                 .tint(Color.starhashInk)
                 .accessibilityLabel("Pin")
@@ -697,7 +697,7 @@ private struct ShortcutDetailSheet: View {
                 // The symbol and name on their own, above the card.
                 VStack(spacing: 10) {
                     // The symbol alone, with no tile behind it, as on Buy.
-                    Image(systemName: shortcut.symbol ?? ShortcutSymbols.plain)
+                    Image(symbol: shortcut.symbol ?? ShortcutSymbols.plain)
                         .font(.system(size: 40, weight: .semibold))
                         .foregroundStyle(Color.sheetBrandText)
                         .frame(height: 56)
@@ -727,7 +727,7 @@ private struct ShortcutDetailSheet: View {
 
                 VStack(spacing: 10) {
                     Button(action: onDial) {
-                        Label("Dial \(shortcut.code)", systemImage: "phone.fill")
+                        Text("Dial \(shortcut.code)")
                     }
                     .buttonStyle(.sheetPrimary)
                     DeleteButton("Delete Code", action: onDelete)
@@ -962,25 +962,20 @@ private struct ShortcutEditor: View {
         } label: {
             VStack(spacing: 0) {
                 Spacer(minLength: 8)
-                Image(systemName: symbol)
+                Image(symbol: symbol)
                     .font(.system(size: 42, weight: .semibold))
                     .foregroundStyle(Color.starhashPrimaryText)
                     .contentTransition(.symbolEffect(.replace))
                     .frame(height: 56)
                 Spacer(minLength: 8)
-                HStack(spacing: 4) {
-                    Image(systemName: choosesSymbol ? "chevron.up" : "pencil")
-                        .font(.system(size: 11, weight: .bold))
-                        .contentTransition(.symbolEffect(.replace))
-                    Text(choosesSymbol ? "Done" : "Change")
-                        .font(.sheet(13, .semibold, relativeTo: .footnote))
-                        .contentTransition(.opacity)
-                }
-                .foregroundStyle(Color.starhashOnInk)
-                .padding(.horizontal, 10)
-                .frame(height: 26)
-                .background(Color.starhashInk, in: Capsule())
-                .padding(.bottom, 12)
+                Text(choosesSymbol ? "Done" : "Change")
+                    .font(.sheet(13, .semibold, relativeTo: .footnote))
+                    .contentTransition(.opacity)
+                    .foregroundStyle(Color.starhashOnInk)
+                    .padding(.horizontal, 10)
+                    .frame(height: 26)
+                    .background(Color.starhashInk, in: Capsule())
+                    .padding(.bottom, 12)
             }
             .frame(width: 112)
             .frame(maxHeight: .infinity)
@@ -1046,7 +1041,7 @@ private struct ShortcutEditor: View {
                         withAnimation(.smooth(duration: 0.3)) { choosesSymbol = false }
                     }
                 } label: {
-                    Image(systemName: option)
+                    Image(symbol: option)
                         .font(.system(size: 19, weight: .semibold))
                         .foregroundStyle(Color.starhashPrimaryText)
                         .frame(width: 48, height: 48)

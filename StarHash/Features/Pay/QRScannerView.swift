@@ -156,12 +156,12 @@ struct QRScannerView: View {
     private var footer: some View {
         HStack(spacing: 12) {
             PhotosPicker(selection: $photoItem, matching: .images) {
-                Label("Photos", systemImage: "photo.on.rectangle")
+                Text("Photos")
                     .modifier(ScannerCapsule())
             }
             .buttonStyle(PressScaleButtonStyle())
             Button { showsMyCode = true } label: {
-                Label("My Code", systemImage: "qrcode")
+                Text("My Code")
                     .modifier(ScannerCapsule())
             }
             .buttonStyle(PressScaleButtonStyle())
@@ -172,7 +172,7 @@ struct QRScannerView: View {
 
     private func unavailable(title: String, message: String, showsSettings: Bool = false) -> some View {
         VStack(spacing: 10) {
-            Image(systemName: "camera.fill")
+            Image(symbol: "camera.fill")
                 .font(.system(size: 34, weight: .semibold))
                 .padding(.bottom, 6)
             Text(catalog: title)

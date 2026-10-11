@@ -164,7 +164,7 @@ private struct WhatsNewSummaryRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
-            Image(systemName: highlight.symbol)
+            Image(symbol: highlight.symbol)
                 .font(.system(size: symbolSize, weight: .regular))
                 .foregroundStyle(Color.sheetBrandText)
                 .frame(width: symbolColumn, height: titleLine)
@@ -194,7 +194,6 @@ private struct WhatsNewFeaturePage: View {
     /// The page is the one showing, so its video plays.
     let isShowing: Bool
 
-    @Environment(\.colorScheme) private var colorScheme
     /// Settings' Auto-Play Video Previews: off, a video waits for a tap.
     @State private var autoplays = UIAccessibility.isVideoAutoplayEnabled
     @State private var tappedToPlay = false
@@ -244,15 +243,14 @@ private struct WhatsNewFeaturePage: View {
             } else {
                 // No video yet: the feature's symbol, so the page still
                 // reads.
-                Image(systemName: feature.symbol)
+                Image(symbol: feature.symbol)
                     .font(.system(size: 64, weight: .regular))
                     .foregroundStyle(Color.brandNight)
             }
         }
         .clipShape(shape)
-        // On light mode's white sheet the white card needs a lift to show
-        // its edge; on the dark sheet it stands out alone.
-        .shadow(color: .black.opacity(colorScheme == .light ? 0.08 : 0), radius: 14, y: 3)
+        // White on the sheet's #F2F3F6 or its black, it stands out
+        // alone in either appearance.
         .accessibilityHidden(true)
     }
 }

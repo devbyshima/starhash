@@ -79,7 +79,9 @@ struct ScanToPayControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(kind: "ScanToPayControl") {
             ControlWidgetButton(action: OpenScannerIntent()) {
-                Label("Scan to Pay", systemImage: "qrcode.viewfinder")
+                // A control shows SF Symbols and custom symbols named in
+                // the asset catalog, so StarHash's scan icon by its name.
+                Label("Scan to Pay", image: StarIcon.scan.assetName)
             }
         }
         .displayName("Scan to Pay")

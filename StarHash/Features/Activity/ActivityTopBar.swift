@@ -48,7 +48,7 @@ struct ActivityTopBar: View {
     /// magnifier, the field and a clear button.
     private var searchField: some View {
         HStack(spacing: 10) {
-            Image(systemName: "magnifyingglass")
+            Image(symbol: "magnifyingglass")
                 .font(.title3)
                 .foregroundStyle(Color.sheetSecondaryText)
                 .accessibilityHidden(true)
@@ -62,7 +62,7 @@ struct ActivityTopBar: View {
                 Button {
                     searchText = ""
                 } label: {
-                    Image(systemName: "xmark.circle.fill")
+                    Image(symbol: "xmark.circle.fill")
                         .font(.title3)
                         .foregroundStyle(Color.sheetSecondaryText)
                         .frame(width: 28, height: 38)

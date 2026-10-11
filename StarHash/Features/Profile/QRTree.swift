@@ -15,7 +15,7 @@ import UIKit
 ///
 /// Two colours and the tree: the tree is the accent's greens, and the rest
 /// of the code is the near black on white in light mode and white on the
-/// near black in dark, as a code printed in the page's own ink.
+/// near black in dark, a board in the cards' colour on the page.
 ///
 /// The code is drawn on its own with nothing behind it: no card, no words.
 struct QRTreeView: View {

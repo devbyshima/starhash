@@ -185,7 +185,7 @@ private struct AppLockView: View {
                 Button {
                     Task { await lock.unlock() }
                 } label: {
-                    Label("Unlock with \(unlock.name)", systemImage: unlock.symbol)
+                    Text("Unlock with \(unlock.name)")
                 }
                 .buttonStyle(.starhashPrimary)
                 .padding(.horizontal, StarHashMetrics.screenPadding)

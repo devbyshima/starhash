@@ -37,7 +37,7 @@ struct OnboardingWalletPage: View {
                     if let choice {
                         WalletLogo(wallet: choice, height: 56)
                     } else {
-                        Image(systemName: "simcard.fill")
+                        Image(symbol: "simcard.fill")
                             .font(.system(size: 72, weight: .medium))
                             .foregroundStyle(tint.gradient)
                     }
@@ -101,7 +101,7 @@ struct OnboardingWalletPage: View {
                 Text(network.prefixList)
                     .font(.starhash(.footnote))
                     .foregroundStyle(Color.starhashSecondaryText)
-                Image(systemName: isChosen ? "checkmark.circle.fill" : "circle")
+                Image(symbol: isChosen ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 22, weight: .medium))
                     .foregroundStyle(isChosen ? Color.starhashAccentText : Color.starhashSecondaryText)
                     .contentTransition(.symbolEffect(.replace))
