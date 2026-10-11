@@ -44,13 +44,14 @@ public enum ActivityPeriod: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    /// The calendar span holding `now`, or nil for All Time. The week
-    /// follows `calendar`'s first weekday, so it starts on Sunday or Monday
-    /// as the user's region does.
+    /// The calendar span holding `now`, or nil for All Time. The week runs
+    /// Monday to Sunday, as weeks do in Rwanda, whatever region the iPhone
+    /// is set to: a Sunday-first region made a Sunday's week that one day
+    /// alone, and the six days before it vanished from This Week.
     public func interval(now: Date, calendar: Calendar) -> DateInterval? {
         switch self {
         case .today: calendar.dateInterval(of: .day, for: now)
-        case .week: calendar.dateInterval(of: .weekOfYear, for: now)
+        case .week: calendar.mondayFirst.dateInterval(of: .weekOfYear, for: now)
         case .month: calendar.dateInterval(of: .month, for: now)
         case .year: calendar.dateInterval(of: .year, for: now)
         case .allTime: nil
@@ -244,7 +245,7 @@ public enum ActivitySummary {
                 return (day, day, index % 7 == 0)
             }
         case .week:
-            guard let week = calendar.dateInterval(of: .weekOfYear, for: now) else { return [] }
+            guard let week = calendar.mondayFirst.dateInterval(of: .weekOfYear, for: now) else { return [] }
             let symbols = calendar.shortStandaloneWeekdaySymbols
             let narrow = calendar.veryShortStandaloneWeekdaySymbols
             return subdivide(week, by: .day, calendar: calendar) { _, start in
@@ -349,5 +350,14 @@ public enum ActivitySummary {
         formatter.timeZone = calendar.timeZone
         formatter.setLocalizedDateFormatFromTemplate(template)
         return formatter.string(from: date)
+    }
+}
+
+extension Calendar {
+    /// The same calendar with weeks starting on Monday.
+    var mondayFirst: Calendar {
+        var calendar = self
+        calendar.firstWeekday = 2
+        return calendar
     }
 }

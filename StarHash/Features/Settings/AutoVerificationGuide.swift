@@ -7,11 +7,11 @@ import UIKit
 /// do, and a Continue (or Done) that appears only once it is done:
 ///
 /// 1. Add Shortcut: opens Shortcuts on the shared StarHash SMS shortcut.
-/// 2. Make the automation: opens Shortcuts and walks through it ("When I
-///    get a message containing RWF", which every M-Money and AirtelMoney
-///    message is, run immediately). iOS offers no link to the Automation
-///    tab, and the automation written into the shared file for iOS 27
-///    never appeared on a real iPhone, so it is made by hand.
+/// 2. Turn on the automation: opens Shortcuts, where the StarHash SMS
+///    automation (when a message containing RWF arrives, which every
+///    M-Money and AirtelMoney message does, run immediately) is switched
+///    on in the Automation tab. iOS offers no link to that tab, so the
+///    step says where to go and nothing else.
 /// 3. Check it works: runs the shortcut through Shortcuts with a sample
 ///    message and comes straight back (x-callback-url). That proves the
 ///    shortcut, and turns auto-verify on; the automation is proven only by
@@ -186,7 +186,7 @@ struct AutoVerificationGuide: View {
     private var title: String {
         switch step {
         case 0: "Add StarHash SMS"
-        case 1: "Make the automation"
+        case 1: "Turn on the automation"
         default:
             switch verification {
             case .verified: "You're all set"
@@ -210,8 +210,7 @@ struct AutoVerificationGuide: View {
         } else if step == 1 {
             GuideStepList(steps: [
                 "Tap **Open Shortcuts** below and go to **Automation**.",
-                "Tap **+**, choose **Message**, and set **Message Contains** to **RWF**.",
-                "Choose **Run Immediately**, turn off **Notify When Run**, tap **Next** and pick **StarHash SMS**.",
+                "Turn on **StarHash SMS**.",
                 "Come back and tap **Continue**.",
             ])
         } else {
@@ -427,7 +426,7 @@ private struct GuidePhoneScreenshot: View {
     /// What to tap, as a share of the image (0...1 on both axes).
     let highlight: CGRect
 
-    @ScaledMetric(relativeTo: .body) private var height: CGFloat = 283
+    @ScaledMetric(relativeTo: .body) private var height: CGFloat = 240
 
     var body: some View {
         let screen = RoundedRectangle(cornerRadius: 26, style: .continuous)
@@ -441,7 +440,7 @@ private struct GuidePhoneScreenshot: View {
             .background(body.fill(Color(white: 0.09)))
             .overlay(body.strokeBorder(Color.white.opacity(0.14), lineWidth: 1))
             .shadow(color: .black.opacity(0.28), radius: 24, y: 12)
-            .frame(height: min(height, 420))
+            .frame(height: min(height, 360))
             .accessibilityElement()
             .accessibilityLabel(label)
             .accessibilityAddTraits(.isImage)
@@ -458,12 +457,12 @@ private struct GuideAutomationPhone: View {
     let highlight: CGRect
     var isVerified = false
 
-    @ScaledMetric(relativeTo: .body) private var height: CGFloat = 283
+    @ScaledMetric(relativeTo: .body) private var height: CGFloat = 240
 
     var body: some View {
         let screen = RoundedRectangle(cornerRadius: 26, style: .continuous)
         let body = RoundedRectangle(cornerRadius: 31, style: .continuous)
-        let phoneHeight = min(height, 420)
+        let phoneHeight = min(height, 360)
         // Step 1's screenshot's proportions (1206 by 2454).
         let screenSize = CGSize(width: (phoneHeight - 10) * 1206 / 2454, height: phoneHeight - 10)
         ZStack(alignment: .top) {

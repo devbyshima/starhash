@@ -7,10 +7,11 @@ import UIKit
 /// 3D QR code by reactiive): the code's modules laid out as tiles on a
 /// board, with a tree standing on them whose crown is a block of columns,
 /// one per module. Until it is tapped the board turns slowly on its axis,
-/// counterclockwise. Tapping it swings the camera from above the corner to
-/// straight overhead as the board turns on to square, where every column's
-/// top is its module's colour, so the tree flattens into the code itself,
-/// upright and ready to scan; another tap stands it back up, turning again.
+/// counterclockwise. A tap carries that turn on into place as the camera
+/// swings from above the corner to straight overhead, where every
+/// column's top is its module's colour, so the tree flattens into the code
+/// itself, square and ready to scan; another tap stands it back up,
+/// turning again.
 ///
 /// Two colours and the tree: the tree is the accent's greens, and the rest
 /// of the code is the near black on white in light mode and white on the
@@ -145,15 +146,15 @@ final class QRTreeScene {
         let first = isShowingCode == nil
         isShowingCode = code
         let pose = code ? codePose : treePose
-        let duration = animated && !first ? 0.9 : 0
+        let duration = animated && !first ? Self.swing : 0
         if code {
             settle(over: duration)
         } else if animated {
-            spin()
+            spin(easingIn: !first)
         }
         SCNTransaction.begin()
         SCNTransaction.animationDuration = duration
-        SCNTransaction.animationTimingFunction = CAMediaTimingFunction(controlPoints: 0.65, 0, 0.25, 1)
+        SCNTransaction.animationTimingFunction = Self.swingTiming
         yaw.eulerAngles.y = pose.yaw
         pitch.eulerAngles.x = pose.pitch
         camera.orthographicScale = pose.scale
@@ -164,31 +165,60 @@ final class QRTreeScene {
     // MARK: Turning
 
     private static let spinKey = "spin"
+    private static let settleKey = "settle"
     /// One full turn, in seconds: slow enough to read as the tree turning
     /// on its own, not as a loading spinner.
     private static let turn: TimeInterval = 14
+    /// The swing between the tree and the code, and its one curve: under
+    /// way at once and easing out, shared by the camera and the board, so
+    /// the camera's turn and the board's cancel exactly and the code turns
+    /// one way only, with no overshoot to come back from.
+    private static let swing: TimeInterval = 1
+    private static let swingTiming = CAMediaTimingFunction(controlPoints: 0.3, 0.1, 0.2, 1)
 
-    /// Turns the board counterclockwise, seen from above, round and round.
-    private func spin() {
+    /// Turns the board counterclockwise, seen from above, round and round;
+    /// coming back from the code, it eases up to speed first.
+    private func spin(easingIn: Bool) {
         spinner.removeAction(forKey: Self.spinKey)
-        let turn = SCNAction.rotateBy(x: 0, y: 2 * .pi, z: 0, duration: Self.turn)
-        spinner.runAction(.repeatForever(turn), forKey: Self.spinKey)
+        spinner.removeAnimation(forKey: Self.settleKey)
+        let round = SCNAction.repeatForever(.rotateBy(x: 0, y: 2 * .pi, z: 0, duration: Self.turn))
+        guard easingIn else {
+            spinner.runAction(round, forKey: Self.spinKey)
+            return
+        }
+        // An ease-in ends at about 1.7 times its average speed: this far
+        // over this long, it meets the turning speed as it hands over.
+        let ramp: TimeInterval = 1.2
+        let speed = 2 * Double.pi / Self.turn
+        let start = SCNAction.rotateBy(x: 0, y: CGFloat(speed * ramp / 1.7), z: 0, duration: ramp)
+        start.timingMode = .easeIn
+        spinner.runAction(.sequence([start, round]), forKey: Self.spinKey)
     }
 
-    /// Stops the turning by carrying on, the same way, to the next whole
-    /// turn, so the code lands upright as the camera arrives overhead.
+    /// Carries the turning on, the same way, to where the code lies square
+    /// and upright on screen, as the camera rises: the board never stops
+    /// dead and never turns back. Where the code shows now is the board's
+    /// angle against the camera's; it lands on the next quarter turn on
+    /// from there, at least a fifth of one on so it is still clearly
+    /// moving. A code reads at any quarter turn.
     private func settle(over duration: TimeInterval) {
         let angle = Double(spinner.presentation.eulerAngles.y)
         spinner.removeAction(forKey: Self.spinKey)
-        let remaining = angle <= 0 ? -angle : 2 * .pi - angle
-        guard duration > 0, remaining > 0.001 else {
-            spinner.eulerAngles.y = 0
-            return
-        }
-        let finish = SCNAction.rotateBy(x: 0, y: CGFloat(remaining), z: 0, duration: duration)
-        finish.timingMode = .easeOut
-        // Exactly square at the end, whatever the sums left over.
-        spinner.runAction(.sequence([finish, .rotateTo(x: 0, y: 0, z: 0, duration: 0)]), forKey: Self.spinKey)
+        spinner.removeAnimation(forKey: Self.settleKey)
+        let quarter = Double.pi / 2
+        let shown = angle - Double(treePose.yaw)
+        let landing = ((shown + quarter * 0.2) / quarter).rounded(.up) * quarter
+        let target = landing + Double(codePose.yaw)
+        spinner.eulerAngles.y = Float(target)
+        guard duration > 0 else { return }
+        // The angle itself, from here to there, so it turns the long way
+        // round when that is the way it was going.
+        let turn = CABasicAnimation(keyPath: "eulerAngles.y")
+        turn.fromValue = angle
+        turn.toValue = target
+        turn.duration = duration
+        turn.timingFunction = Self.swingTiming
+        spinner.addAnimation(turn, forKey: Self.settleKey)
     }
 
     // MARK: Building
@@ -428,17 +458,19 @@ private struct VoxelMesh {
 }
 
 /// A QR code's modules, read from Core Image's generator: a square of dark
-/// and light, without the quiet zone round it.
-private struct QRModules {
+/// and light, without the quiet zone round it. The tree and the shared
+/// image both draw from it.
+struct QRModules {
     let count: Int
     private let dark: [Bool]
 
-    init?(text: String) {
+    /// `correction` is the generator's level: Q, a quarter of the code to
+    /// spare, gives the tree's crown room to blur an edge here and there;
+    /// H, the shared image's, room for the mark over its middle.
+    init?(text: String, correction: String = "Q") {
         let filter = CIFilter.qrCodeGenerator()
         filter.message = Data(text.utf8)
-        // Q, a quarter of the code to spare: room for the crown's shading
-        // to blur an edge here and there.
-        filter.correctionLevel = "Q"
+        filter.correctionLevel = correction
         guard let output = filter.outputImage,
               let image = CIContext().createCGImage(output, from: output.extent) else { return nil }
         let width = image.width, height = image.height

@@ -15,8 +15,8 @@ struct StarHashWidgets: WidgetBundle {
     }
 }
 
-/// Buy's codes, nothing else on the card: dial one in a tap without
-/// opening StarHash.
+/// Buy's codes, nothing else on the card: dial one in a tap, and page
+/// through the rest with More on the medium one, without opening StarHash.
 struct BuyWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "BuyWidget", provider: StarHashTimeline()) { entry in
@@ -35,7 +35,7 @@ private struct BuyWidgetEntryView: View {
     @Environment(\.widgetFamily) private var family
 
     var body: some View {
-        BuyWidgetView(snapshot: entry.snapshot, family: family)
+        BuyWidgetView(snapshot: entry.snapshot, family: family, page: entry.page)
     }
 }
 
@@ -101,5 +101,5 @@ struct OpenScannerIntent: AppIntent {
 #Preview(as: .systemMedium) {
     BuyWidget()
 } timeline: {
-    StarHashEntry(date: .now, snapshot: .placeholder)
+    StarHashEntry(date: .now, snapshot: .placeholder, page: 0)
 }

@@ -13,6 +13,7 @@ struct OnboardingReel: View {
         let id = UUID()
         let symbol: String
         let title: String
+        let description: String
     }
 
     let phases: [Phase]
@@ -107,6 +108,12 @@ struct OnboardingReel: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .accessibilityAddTraits(.isHeader)
+            Text(catalog: phase.description)
+                .font(.starhash(.callout))
+                .foregroundStyle(Color.starhashSecondaryText)
+                .lineLimit(2)
+                .minimumScaleFactor(0.7)
+                .multilineTextAlignment(.center)
         }
         .frame(height: 130)
         .accessibilityElement(children: .combine)

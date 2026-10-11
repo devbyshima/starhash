@@ -11,27 +11,27 @@ struct AboutStarHashView: View {
     var body: some View {
         SettingsScroll {
             SettingsCard {
-                SettingsLinkRow(page: .whatsNew, symbol: "sparkles", title: "What's New")
+                SettingsLinkRow(page: .whatsNew, symbol: "sparkles", title: "What's New", caption: "What each version brought")
                 Button {
                     UserDefaults.standard.set(0, forKey: PreferenceKey.onboardingStage)
                     withAnimation(.smooth) { hasOnboarded = false }
                 } label: {
-                    SettingsRow(symbol: "play.circle.fill", title: "Replay Onboarding")
+                    SettingsRow(symbol: "play.circle.fill", title: "Replay Onboarding", caption: "See the welcome screens again")
                 }
                 .buttonStyle(HighlightRowButtonStyle())
                 Button { showsDeveloperNote = true } label: {
-                    SettingsRow(symbol: "envelope.open.fill", title: "Developer Note")
+                    SettingsRow(symbol: "envelope.open.fill", title: "Developer Note", caption: "A few words on why StarHash exists")
                 }
                 .buttonStyle(HighlightRowButtonStyle())
                 Link(destination: SettingsLinks.sourceCode) {
-                    SettingsRow(symbol: "chevron.left.forwardslash.chevron.right", title: "Source code") {
+                    SettingsRow(symbol: "chevron.left.forwardslash.chevron.right", title: "Source code", caption: "StarHash's code is public on GitHub") {
                         SettingsChevron(symbol: "arrow.up.right")
                     }
                 }
                 .buttonStyle(HighlightRowButtonStyle())
                 // Dev and TestFlight builds only, once there is a flag.
                 if FeatureFlags.showsPage {
-                    SettingsLinkRow(page: .featureFlags, symbol: "flag.fill", title: "Feature Flags")
+                    SettingsLinkRow(page: .featureFlags, symbol: "flag.fill", title: "Feature Flags", caption: "Try what is not finished yet")
                 }
             }
         }

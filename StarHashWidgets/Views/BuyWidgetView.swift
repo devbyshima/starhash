@@ -3,22 +3,38 @@ import StarHashKit
 import SwiftUI
 import WidgetKit
 
-/// Buy on the Home Screen: a code's symbol and its name, nothing round them,
-/// each dialling its code in a tap through iOS's call prompt, as the app's
-/// do. The snapshot already puts the pinned codes first, so the small
-/// widget is the first code, the whole widget dialling it (a small widget
-/// takes one link), and the medium one is the first four.
+/// Buy on the Home Screen. The small widget is the first code, its symbol
+/// and its name, the whole widget dialling it (a small widget takes one
+/// link); the snapshot already puts the pinned codes first. The medium one
+/// is four tiles, each a code's symbol, name and code, dialling it in a
+/// tap through iOS's call prompt, as the app's do; with more codes than
+/// fit, the last tile is More, which pages round without opening StarHash.
+/// The symbols stand alone in the accent, with nothing behind them.
 struct BuyWidgetView: View {
     let snapshot: WidgetSnapshot
     let family: WidgetFamily
+    var page = 0
 
     private var codes: [USSDShortcut] { snapshot.codes }
+
+    /// The medium widget's tiles.
+    private let slots = 4
+
+    /// Codes on a page: every slot, unless they do not all fit, when the
+    /// last slot is More.
+    private var perPage: Int { codes.count > slots ? slots - 1 : slots }
+
+    private var pages: Int { max(1, Int((Double(codes.count) / Double(perPage)).rounded(.up))) }
+
+    private var shown: [USSDShortcut] {
+        Array(codes.dropFirst((page % pages) * perPage).prefix(perPage))
+    }
 
     var body: some View {
         Group {
             switch family {
             case .systemSmall: small
-            default: medium
+            default: grid
             }
         }
         .foregroundStyle(Color.widgetText)
@@ -36,26 +52,78 @@ struct BuyWidgetView: View {
         }
     }
 
-    /// Up to four codes side by side, each in an equal share of the width,
-    /// so three or fewer spread out rather than leave a gap.
-    private var medium: some View {
-        HStack(spacing: 4) {
-            ForEach(codes.prefix(4)) { code in
-                Link(destination: USSD.telURL(for: code.code) ?? URL(string: "starhash://buy")!) {
-                    VStack(spacing: 10) {
-                        WidgetSymbol(name: code.symbol ?? "number", size: 30)
+    /// The codes two to a row, filling the widget, More in the last place
+    /// when they do not all fit.
+    private var grid: some View {
+        let items = shown.map(Slot.code) + (pages > 1 ? [Slot.more] : [])
+        return VStack(spacing: 8) {
+            ForEach(0..<2, id: \.self) { row in
+                HStack(spacing: 8) {
+                    ForEach(0..<2, id: \.self) { column in
+                        let index = row * 2 + column
+                        if index < items.count {
+                            tile(items[index])
+                        } else {
+                            Color.clear.frame(maxWidth: .infinity, maxHeight: .infinity)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(12)
+    }
+
+    // MARK: Tiles
+
+    private enum Slot {
+        case code(USSDShortcut)
+        case more
+    }
+
+    @ViewBuilder
+    private func tile(_ slot: Slot) -> some View {
+        switch slot {
+        case .code(let code):
+            Link(destination: USSD.telURL(for: code.code) ?? URL(string: "starhash://buy")!) {
+                HStack(spacing: 9) {
+                    WidgetSymbol(name: code.symbol ?? "number", size: 20)
+                        .frame(width: 32)
+                    VStack(alignment: .leading, spacing: 1) {
                         Text(code.name)
-                            .font(.widget(13, .bold))
+                            .font(.widget(14, .bold))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
+                        Text(code.code)
+                            .font(.widget(10.5))
                             .lineLimit(1)
                             .minimumScaleFactor(0.8)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    Spacer(minLength: 0)
                 }
-                .accessibilityLabel(code.name)
-                .accessibilityHint(String(localized: "Dials \(code.code)"))
+                .padding(.horizontal, 10)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.widgetChip, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
+            .accessibilityLabel(code.name)
+            .accessibilityHint(String(localized: "Dials \(code.code)"))
+        case .more:
+            // The next page, here in the widget: StarHash stays shut.
+            Button(intent: NextCodesPageIntent(pages: pages)) {
+                HStack(spacing: 9) {
+                    WidgetSymbol(name: "chevron.right", size: 16)
+                        .frame(width: 32)
+                    Text("\(page % pages + 1)/\(pages)")
+                        .font(.widget(14, .bold))
+                        .monospacedDigit()
+                    Spacer(minLength: 0)
+                }
+                .padding(.horizontal, 10)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.widgetChip, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(String(localized: "More codes"))
         }
-        .padding(.horizontal, 12)
     }
 }
 

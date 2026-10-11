@@ -41,13 +41,31 @@ struct ActivitySummaryTests {
 
     // MARK: Periods
 
-    @Test func weekFollowsTheCalendarsFirstWeekday() throws {
+    @Test func weekRunsMondayToSundayInAnyRegion() throws {
         let monday = try #require(ActivityPeriod.week.interval(now: Self.now, calendar: Self.calendar))
         #expect(monday.start == Self.date(2026, 9, 28, 0))
         var sundayFirst = Self.calendar
         sundayFirst.firstWeekday = 1
         let sunday = try #require(ActivityPeriod.week.interval(now: Self.now, calendar: sundayFirst))
-        #expect(sunday.start == Self.date(2026, 9, 27, 0))
+        #expect(sunday.start == Self.date(2026, 9, 28, 0))
+    }
+
+    /// On a Sunday, This Week is the Monday before to that Sunday, today
+    /// included, even where the region starts weeks on Sunday.
+    @Test func sundaysWeekHoldsTheWholeWeek() {
+        var sundayFirst = Self.calendar
+        sundayFirst.firstWeekday = 1
+        let sunday = Self.date(2026, 10, 11, 18)
+        let items = [
+            Self.tx(100, at: Self.date(2026, 10, 11, 9)),
+            Self.tx(200, at: Self.date(2026, 10, 5, 8)),
+            Self.tx(300, at: Self.date(2026, 10, 4, 20)),
+        ]
+        let week = ActivitySummary.transactions(items, in: .week, now: sunday, calendar: sundayFirst)
+        #expect(week.map(\.amount) == [100, 200])
+        let buckets = ActivitySummary.buckets(for: items, period: .week, now: sunday, calendar: sundayFirst, locale: Self.locale)
+        #expect(buckets.first?.label == "Mon")
+        #expect(buckets.map(\.total) == [200, 0, 0, 0, 0, 0, 100])
     }
 
     @Test func allTimeHasNoInterval() {

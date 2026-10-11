@@ -188,7 +188,7 @@ private struct SettingsRootList: View {
                     ProfilePhotoView(size: 46)
                     SettingsRowText(
                         title: profileName.isEmpty ? String(localized: "Profile") : profileName,
-                        caption: Recipient.ownNumber(profileNumber)?.formattedDestination
+                        status: Recipient.ownNumber(profileNumber)?.formattedDestination
                     )
                     Spacer(minLength: 8)
                     SettingsChevron()
@@ -206,28 +206,35 @@ private struct SettingsRootList: View {
         SettingsToggleRow(
             symbol: "tray.full.fill",
             title: "Save transactions",
+            caption: "Keep a history of what you pay and receive",
             isOn: $saveTransactions
         )
         SettingsToggleRow(
             symbol: "checkmark.message.fill",
             title: "Auto-verify transactions",
-            caption: autoVerifyStatus,
+            caption: String(localized: "Confirm payments from \(wallet.messagesName) messages"),
+            status: autoVerifyStatus,
             isOn: autoVerifyBinding
         )
         SettingsToggleRow(
             symbol: "questionmark.bubble.fill",
             title: "Ask before deleting",
+            caption: "Confirm every delete except a swipe",
             isOn: $confirmDeletes
         )
         SettingsToggleRow(
             symbol: "sparkles",
             title: "Smart categories",
+            caption: SmartCategories.isAvailable
+                ? "Sort payments into categories with Apple Intelligence"
+                : "Sort payments into categories by their names",
             isOn: $smartCategories
         )
         SettingsLinkRow(
             page: .notifications,
             symbol: "bell.fill",
-            title: "Notifications"
+            title: "Notifications",
+            caption: "Reminders, confirmations and summaries"
         )
     }
     }
@@ -237,16 +244,19 @@ private struct SettingsRootList: View {
         SettingsToggleRow(
             symbol: "person.crop.circle.fill",
             title: "Enable contacts",
+            caption: "Pick who to pay from your contacts",
             isOn: contactsBinding
         )
         SettingsToggleRow(
             symbol: "location.fill",
             title: "Nearby",
+            caption: "Suggest who you paid at the place you're in",
             isOn: locationBinding
         )
         SettingsToggleRow(
             symbol: "clock.arrow.circlepath",
             title: "Save recent recipients",
+            caption: "Show who you paid last at the top",
             isOn: $saveRecents
         )
     }
@@ -256,7 +266,8 @@ private struct SettingsRootList: View {
     SettingsCard("Pay & Buy") {
         SettingsRow(
             symbol: "house.fill",
-            title: "Default page"
+            title: "Default page",
+            caption: "Where StarHash opens"
         ) {
             SettingsChoiceMenu(
                 title: "Default page",
@@ -271,7 +282,8 @@ private struct SettingsRootList: View {
     SettingsCard("Display") {
         SettingsRow(
             symbol: "circle.lefthalf.filled",
-            title: "Appearance"
+            title: "Appearance",
+            caption: "Dark, light or as your iPhone is set"
         ) {
             SettingsChoiceMenu(
                 title: "Appearance",
@@ -282,7 +294,7 @@ private struct SettingsRootList: View {
         // iOS keeps each app's language in the Settings app, which
         // offers English and Kinyarwanda for StarHash.
         Button { SettingsAppLink.open() } label: {
-            SettingsRow(symbol: "globe", title: "Language") {
+            SettingsRow(symbol: "globe", title: "Language", caption: "English or Kinyarwanda, in the Settings app") {
                 HStack(spacing: 8) {
                     Text(AppLanguage.currentName)
                         .font(.starhash(.body))
@@ -302,6 +314,7 @@ private struct SettingsRootList: View {
         SettingsToggleRow(
             symbol: "exclamationmark.shield.fill",
             title: "Scam warnings",
+            caption: "Warn me about look-alike MoMo messages, and don't log them",
             isOn: $scamWarnings
         )
     }
@@ -310,13 +323,13 @@ private struct SettingsRootList: View {
     private var dataCard: some View {
     SettingsCard("Your Data") {
         Button(action: export) {
-            SettingsRow(symbol: "square.and.arrow.up.fill", title: "Export data") {
+            SettingsRow(symbol: "square.and.arrow.up.fill", title: "Export data", caption: "Save your transactions, codes and profile as a file") {
                 SettingsChevron()
             }
         }
         .buttonStyle(HighlightRowButtonStyle())
         Button { isImporting = true } label: {
-            SettingsRow(symbol: "square.and.arrow.down.fill", title: "Import data") {
+            SettingsRow(symbol: "square.and.arrow.down.fill", title: "Import data", caption: "Add what's in a StarHash file to this iPhone") {
                 SettingsChevron()
             }
         }
@@ -326,16 +339,16 @@ private struct SettingsRootList: View {
 
     private var moreCard: some View {
     SettingsCard("More") {
-        SettingsLinkRow(page: .terms, symbol: "doc.text.fill", title: "Terms of Service")
-        SettingsLinkRow(page: .privacy, symbol: "lock.fill", title: "Privacy Policy")
+        SettingsLinkRow(page: .terms, symbol: "doc.text.fill", title: "Terms of Service", caption: "The terms for using StarHash")
+        SettingsLinkRow(page: .privacy, symbol: "lock.fill", title: "Privacy Policy", caption: "Everything stays on this iPhone")
         Link(destination: SettingsLinks.requestFeature) {
-            SettingsRow(symbol: "lightbulb.fill", title: "Request a Feature") {
+            SettingsRow(symbol: "lightbulb.fill", title: "Request a Feature", caption: "Tell us what StarHash should do next") {
                 SettingsChevron(symbol: "arrow.up.right")
             }
         }
         .buttonStyle(HighlightRowButtonStyle())
         .accessibilityHint("Opens a feature request form on GitHub")
-        SettingsLinkRow(page: .about, symbol: "star.fill", title: "About StarHash")
+        SettingsLinkRow(page: .about, symbol: "star.fill", title: "About StarHash", caption: "What's new, the note and the source code")
     }
     }
 
@@ -389,7 +402,8 @@ private struct SettingsRootList: View {
         return SettingsToggleRow(
             symbol: unlock.symbol,
             title: unlock == .passcode ? "Passcode Lock" : unlock.name,
-            caption: available ? nil : String(localized: "Set a passcode on this iPhone first"),
+            caption: unlock == .passcode ? String(localized: "Ask for your passcode to open StarHash") : String(localized: "Ask for \(unlock.name) to open StarHash"),
+            status: available ? nil : String(localized: "Set a passcode on this iPhone first"),
             isOn: appLockBinding
         )
         .disabled(!available && !appLock)

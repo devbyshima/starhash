@@ -1,6 +1,9 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%lld/%lld": {
+      "shouldTranslate": false
+    },
     "Buy": {
       "localizations": {
         "rw": {
@@ -31,6 +34,16 @@
         }
       }
     },
+    "More codes": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izindi kode"
+          }
+        }
+      }
+    },
     "Open the scanner to pay a QR code.": {
       "localizations": {
         "rw": {
@@ -51,12 +64,32 @@
         }
       }
     },
+    "Pages": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amapaji"
+          }
+        }
+      }
+    },
     "Scan to Pay": {
       "localizations": {
         "rw": {
           "stringUnit": {
             "state": "translated",
             "value": "Sikana wishyure"
+          }
+        }
+      }
+    },
+    "Show More Codes": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reba izindi kode"
           }
         }
       }

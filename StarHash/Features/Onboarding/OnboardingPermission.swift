@@ -17,6 +17,7 @@ struct OnboardingPermission: View {
         /// Before the alert first appears, so the screen settles first.
         var initialDelay: Double = 0
         var title: String
+        var description: String
         /// How many buttons the drawn alert has.
         var alertButtons = 2
         var primaryTitle: String
@@ -32,6 +33,9 @@ struct OnboardingPermission: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showsAlert = false
+    /// The home indicator's room, which a second choice under the button
+    /// sits in, so the button itself stays where Continue is elsewhere.
+    @State private var bottomInset: CGFloat = 34
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -47,28 +51,37 @@ struct OnboardingPermission: View {
                     .minimumScaleFactor(0.7)
                     .accessibilityAddTraits(.isHeader)
 
+                Text(catalog: config.description)
+                    .font(.starhash(.footnote))
+                    .foregroundStyle(Color.starhashSecondaryText)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.7)
+                    .padding(.bottom, 10)
 
-                Button(LocalizedStringKey(config.primaryTitle), action: config.primaryAction)
-                    .buttonStyle(.starhashPrimaryGlowing)
-                    .padding(.horizontal, 15)
+                VStack(spacing: 0) {
+                    Button(LocalizedStringKey(config.primaryTitle), action: config.primaryAction)
+                        .buttonStyle(.starhashPrimaryGlowing)
+                        .padding(.horizontal, 15)
 
-                if let title = config.secondaryTitle, let action = config.secondaryAction {
-                    Button(action: action) {
-                        Text(catalog: title)
-                            .font(.starhash(.subheadline, weight: .semibold))
-                            .foregroundStyle(Color.starhashSecondaryText)
-                            .frame(minHeight: 44)
-                            .contentShape(Rectangle())
+                    if let title = config.secondaryTitle, let action = config.secondaryAction {
+                        Button(action: action) {
+                            Text(catalog: title)
+                                .font(.starhash(.subheadline, weight: .semibold))
+                                .foregroundStyle(Color.starhashSecondaryText)
+                                .frame(minHeight: 44)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.hapticPlain)
                     }
-                    .buttonStyle(.hapticPlain)
                 }
             }
-            // A lone button sits where Continue does on the other
-            // onboarding screens, 10 points over the bottom; with a second
-            // choice under it, the two are centred in the panel.
-            .frame(height: 270, alignment: hasSecondary ? .center : .bottom)
+            // The button sits where Continue does on the other onboarding
+            // screens, 10 points over the bottom, and a second choice goes
+            // under it, in the home indicator's room, rather than lifting it.
+            .frame(height: 270, alignment: .bottom)
             .padding([.horizontal, .top], 15)
-            .padding(.bottom, hasSecondary ? 15 : 10)
+            .padding(.bottom, hasSecondary ? max(10 - 44, -bottomInset) : 10)
             .frame(maxWidth: .infinity)
             // The phone fades into the page under the words.
             .background {
@@ -80,6 +93,7 @@ struct OnboardingPermission: View {
             }
         }
         .padding(.top, 20)
+        .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.bottom } action: { bottomInset = $0 }
         .task {
             guard !showsAlert else { return }
             try? await Task.sleep(for: .seconds(config.initialDelay))

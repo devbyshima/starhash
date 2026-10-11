@@ -210,10 +210,11 @@ struct ActivityStatusBadge: View {
 }
 
 extension ActivityPeriod {
-    /// The periods the control offers: a day, a week, a month and a year.
-    static let choices: [ActivityPeriod] = [.today, .week, .month, .year]
+    /// The periods the control offers: a week, a month and a year. A day
+    /// is too short to chart.
+    static let choices: [ActivityPeriod] = [.week, .month, .year]
 
-    /// The period control's label: a letter, as GO Club's D W M.
+    /// The period control's label: a letter, as GO Club's W M.
     var shortLabel: String {
         switch self {
         case .today: "D"

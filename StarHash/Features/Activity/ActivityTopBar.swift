@@ -2,7 +2,7 @@ import StarHashKit
 import SwiftUI
 
 /// Activity's floating bar: GO Club's period control at the leading end
-/// (Day, Week, Month, Year, as D W M Y), and the search button on the
+/// (Week, Month, Year, as W M Y), and the search button on the
 /// right. Searching, a close button comes in on the left and the field
 /// from the right as the control goes out to the left.
 struct ActivityTopBar: View {

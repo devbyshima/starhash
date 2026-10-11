@@ -32,7 +32,7 @@ StarHash is a free, source-available iPhone app for paying with MTN MoMo or Airt
 - **Scan to pay**: scan a merchant's MoMo QR code or a friend's StarHash code, type the amount (or have it filled in) and pay, with no recipient screen.
 - **Your own QR code**: add your number in onboarding or Settings' Profile, with your photo, and others scan your code to pay you. It stands as a little tree of blocks that turns into the QR code at a tap.
 - **Both wallets**: MTN MoMo or Airtel Money, switched from Pay, with the right code for numbers on either network.
-- **Activity**: every payment by day, a chart for today, this week, month or year, and search across everything. Airtime, bundles, electricity, water and TV show as bought, not sent, and payments sort into categories (by Apple Intelligence on iOS 26 and later).
+- **Activity**: every payment by day, a chart for this week, month or year, and search across everything. Airtime, bundles, electricity, water and TV show as bought, not sent, and payments sort into categories (by Apple Intelligence on iOS 26 and later).
 - **Auto-verify**: a Shortcuts automation passes your wallet's SMS to StarHash, which confirms each payment with its fee, reference and new balance.
 - **Buy**: the codes you dial often (pending approvals, cash out, bundles), one tap each, with up to eight pinned to the top.
 - **Nearby**: an opt-in suggestion of the shops you paid where you are standing, never of your contacts.
