@@ -28,6 +28,8 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 - Activity's period control offers the week, the month and the year; the day is gone.
 - Auto-verify's automation step asks only to turn the StarHash SMS automation on, and the setup's pictures are smaller, so each step fits without scrolling.
 - Pay's wallet switcher is now the logo above the keypad, where RWF was.
+- The recipient screen's Total floats over the list as Liquid Glass, clear of the rows in light mode.
+- Every notification is on to begin with, Confirmed payments and Money received included.
 - A new launch animation: a stroke sweeps round the screen, and as it lands the StarHash star snaps together out of a dot.
 - New drawings for the empty screens, hand-drawn in the accent's greens.
 - A number saved in your Contacts always shows under the name you saved it with.

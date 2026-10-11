@@ -33,8 +33,8 @@ public enum NotificationPlan {
         public init(
             paymentReminders: Bool = true,
             reminderDelay: Int = NotificationPlan.defaultReminderDelay,
-            confirmedPayments: Bool = false,
-            moneyReceived: Bool = false,
+            confirmedPayments: Bool = true,
+            moneyReceived: Bool = true,
             weeklySummary: Bool = true,
             weeklyDay: Int = NotificationPlan.defaultWeeklyDay,
             monthlySummary: Bool = true,

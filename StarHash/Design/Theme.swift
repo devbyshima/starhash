@@ -130,6 +130,10 @@ extension Color {
     static let payKeypadFlash = Color.brandAccent
     /// Glass on any page: clear.
     static let starhashGlassTint = Color.clear
+    /// The soft lift under glass that floats over a list (the recipient
+    /// screen's Total), so it parts from the white page in light mode;
+    /// dark mode's glass reads on its own.
+    static let floatingShadow = Color(light: .black.opacity(0.1), dark: .clear)
     /// Pills and recipient tiles on Pay, and the primary button there
     /// when disabled: the cards' foreground.
     static let payWash = Color(light: .brandMist, dark: .brandCharcoal)
