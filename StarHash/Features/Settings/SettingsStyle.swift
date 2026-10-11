@@ -209,11 +209,31 @@ private struct SettingsCaptionIcon: View {
                 .contentShape(Rectangle())
                 .highPriorityGesture(TapGesture().onEnded {
                     TapHaptic.play()
-                    withAnimation(.smooth(duration: 0.25)) { showsCaption.toggle() }
+                    withAnimation(SettingsCaptionMotion.open) { showsCaption.toggle() }
                 })
         } else {
             SettingsSymbol(symbol: symbol)
         }
+    }
+}
+
+/// How a description comes and goes. The row opens on a soft spring and
+/// the words settle into it from a blur a beat later, so they never sit on
+/// the row below while it is still making room; closing, they fade first
+/// and quickly, and the row closes behind them.
+@MainActor
+enum SettingsCaptionMotion {
+    static let open = Animation.spring(response: 0.42, dampingFraction: 0.9)
+
+    static var transition: AnyTransition {
+        .asymmetric(
+        insertion: AnyTransition(.blurReplace)
+            .combined(with: .offset(y: -4))
+            .animation(.smooth(duration: 0.34).delay(0.07)),
+        removal: AnyTransition.opacity
+            .combined(with: .offset(y: -2))
+            .animation(.smooth(duration: 0.14))
+        )
     }
 }
 
@@ -280,7 +300,7 @@ struct SettingsRowText: View {
             }
             if let caption, showsCaption {
                 line(caption)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+                    .transition(SettingsCaptionMotion.transition)
             }
         }
         .padding(.vertical, 14)
