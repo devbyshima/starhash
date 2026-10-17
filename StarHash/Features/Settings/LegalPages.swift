@@ -142,7 +142,7 @@ extension LegalDocument {
     static let privacyPolicy = LegalDocument(
         title: "Privacy Policy",
         symbol: "lock.fill",
-        effective: "2026-10-05",
+        effective: "2026-10-17",
         summary: "StarHash has no account, no server and no tracking. What it keeps stays on your iPhone.",
         sections: [
             .init(
@@ -171,7 +171,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "What StarHash shares",
-                text: "Nothing. It has no analytics, no advertising and no third-party code that collects data. Request a Feature and the source code open GitHub in your browser, under GitHub's own privacy policy, and every code you dial goes through your phone and your provider, under theirs."
+                text: "Nothing. It has no analytics, no advertising and no third-party code that collects data. Request a Feature and the source code open GitHub in your browser, and Support on Ko-fi opens Ko-fi, each under its own privacy policy. Every code you dial goes through your phone and your provider, under theirs."
             ),
             .init(
                 title: "Backups",

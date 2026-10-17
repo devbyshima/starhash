@@ -18,6 +18,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 - What's New: the first launch after an update shows what the version brought, with a video of each new feature. It shows once, and never on a fresh install.
 - Auto-verify reads MoMoAdvance's messages: when MTN's overdraft pays for a payment, its access fee joins that payment's fee, on a row of its own in the payment's details.
 - Verify replaces Mark as Confirmed: paste the wallet's message for a payment, and StarHash confirms it (or marks it failed) only if the message is that payment's, with its real fee, reference and balance. Confirm Without Message stays as the last resort.
+- Support on Ko-fi, in Settings' More, and Buy Shima a coffee in the developer's note, each opening Shima's Ko-fi page in the browser. StarHash stays free.
 
 ### Changed
 

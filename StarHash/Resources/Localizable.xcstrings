@@ -588,6 +588,16 @@
         }
       }
     },
+    "Buy Shima a coffee": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gurira Shima ikawa"
+          }
+        }
+      }
+    },
     "Camera is off": {
       "localizations": {
         "rw": {
@@ -2253,12 +2263,12 @@
         }
       }
     },
-    "Nothing. It has no analytics, no advertising and no third-party code that collects data. Request a Feature and the source code open GitHub in your browser, under GitHub's own privacy policy, and every code you dial goes through your phone and your provider, under theirs.": {
+    "Nothing. It has no analytics, no advertising and no third-party code that collects data. Request a Feature and the source code open GitHub in your browser, and Support on Ko-fi opens Ko-fi, each under its own privacy policy. Every code you dial goes through your phone and your provider, under theirs.": {
       "localizations": {
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nta na kimwe. Nta isesengura ry'imikoreshereze, nta matangazo, kandi nta kode y'ibindi bigo ikusanya amakuru ibamo. Gusaba ikintu gishya no kureba kode y'inkomoko bifungura GitHub muri mushakisha yawe, hakurikijwe politiki y'ibanga ya GitHub ubwayo, kandi buri kode ukanze inyura muri telefoni yawe no ku mutanga serivisi wawe, hakurikijwe politiki yabo."
+            "value": "Nta na kimwe. Nta isesengura ry'imikoreshereze, nta matangazo, kandi nta kode y'ibindi bigo ikusanya amakuru ibamo. Gusaba ikintu gishya no kureba kode y'inkomoko bifungura GitHub muri mushakisha yawe, naho gushyigikira kuri Ko-fi bigafungura Ko-fi, buri rubuga hakurikijwe politiki y'ibanga yarwo. Buri kode ukanze inyura muri telefoni yawe no ku mutanga serivisi wawe, hakurikijwe politiki yabo."
           }
         }
       }
@@ -2399,6 +2409,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fungura Shortcuts"
+          }
+        }
+      }
+    },
+    "Opens Shima's Ko-fi page": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ifungura urupapuro rwa Shima kuri Ko-fi"
           }
         }
       }
@@ -3712,6 +3732,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Incamake"
+          }
+        }
+      }
+    },
+    "Support on Ko-fi": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shyigikira kuri Ko-fi"
           }
         }
       }

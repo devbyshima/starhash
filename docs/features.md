@@ -118,10 +118,11 @@ Off until you turn it on, and it needs precise location.
 | Display | Appearance: System, Dark or Light; Language, English or Kinyarwanda, in the Settings app |
 | Security | Face ID (Touch ID, or Passcode Lock on an iPhone without either), Scam warnings |
 | Your Data | Export data, Import data |
-| More | Terms of Service, Privacy Policy, Request a Feature, About StarHash |
+| More | Terms of Service, Privacy Policy, Request a Feature, Support on Ko-fi, About StarHash |
 
 - The lock is off until you turn it on, and asks before it turns on or off. It asks as StarHash opens and after more than a minute away, so a payment's trip to the call screen does not trigger it, and it hides StarHash in the app switcher.
-- **About StarHash** holds What's New, Replay Onboarding, the developer's note and a link to the source code.
+- **Support on Ko-fi** opens [Shima's Ko-fi page](https://ko-fi.com/devbyshima) in the browser, for anyone who wants to give something back. StarHash stays free either way.
+- **About StarHash** holds What's New, Replay Onboarding, the developer's note (with Write to Shima and Buy Shima a coffee under it) and a link to the source code.
 - **Export data** saves everything StarHash keeps (payments, Buy's codes and your profile) as one JSON file, wherever you choose. **Import data** adds what is in such a file and not already here, changing nothing that is.
 - **Scam warnings** holds back a message that looks like your wallet's but came from someone's own number, or asks for money back, and warns you instead of logging it ([Auto-verify](auto-verify.md#scam-warnings)).
 - **Delete All Data** erases everything StarHash keeps (payments, Buy's codes, your wallet and settings) and starts again from onboarding, like deleting an account.
