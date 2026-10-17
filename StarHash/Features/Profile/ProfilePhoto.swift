@@ -78,7 +78,7 @@ struct ProfilePhotoView: View {
                     .resizable()
                     .scaledToFill()
             } else {
-                Image(systemName: "person.fill")
+                Image(symbol: "person.fill")
                     .font(.system(size: size * 0.42, weight: .medium))
                     .foregroundStyle(Color.profilePhotoGlyph)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -102,7 +102,7 @@ struct ProfilePhotoPicker: View {
         PhotosPicker(selection: $item, matching: .images) {
             ProfilePhotoView(size: size)
                 .overlay(alignment: .bottomTrailing) {
-                    Image(systemName: "camera.fill")
+                    Image(symbol: "camera.fill")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(Color.starhashOnInk)
                         .frame(width: 36, height: 36)

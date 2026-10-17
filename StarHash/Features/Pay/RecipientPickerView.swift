@@ -286,7 +286,7 @@ struct RecipientPickerView: View {
     /// a clear button.
     private var searchField: some View {
         HStack(spacing: 10) {
-            Image(systemName: "magnifyingglass")
+            Image(symbol: "magnifyingglass")
                 .font(.title3)
                 .foregroundStyle(Color.sheetSecondaryText)
                 .accessibilityHidden(true)
@@ -306,7 +306,7 @@ struct RecipientPickerView: View {
                 Button {
                     query = ""
                 } label: {
-                    Image(systemName: "xmark.circle.fill")
+                    Image(symbol: "xmark.circle.fill")
                         .font(.title3)
                         .foregroundStyle(Color.sheetSecondaryText)
                         .frame(width: 28, height: 38)
@@ -618,7 +618,7 @@ struct RecipientPickerView: View {
         .padding(.vertical, 14)
         .frame(minHeight: 72)
         // Liquid Glass, as it floats over the list scrolling under it,
-        // lifted by a soft shadow so it parts from the white page in light
+        // lifted by a soft shadow so it parts from the pale page in light
         // mode.
         .starhashGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous), tint: .clear)
         .shadow(color: .floatingShadow, radius: 18, y: 6)
@@ -921,7 +921,7 @@ struct RecipientTile: View {
                     .font(.starhashFixed(size * 0.36, weight: .semibold))
                     .foregroundStyle(onPay ? AnyShapeStyle(Color.payPrimaryText) : AnyShapeStyle(Color.starhashPrimaryText))
             case .symbol(let symbol):
-                Image(systemName: symbol)
+                Image(symbol: symbol)
                     .font(.system(size: size * 0.4))
                     .foregroundStyle(onPay ? AnyShapeStyle(Color.paySecondaryText) : AnyShapeStyle(Color.sheetSecondaryText))
             case .photo:
@@ -948,7 +948,7 @@ private struct ContactsAccessCard: View {
                         .foregroundStyle(Color.starhashSecondaryText)
                         .fixedSize(horizontal: false, vertical: true)
                 } icon: {
-                    Image(systemName: "person.crop.circle.badge.questionmark")
+                    Image(symbol: "person.crop.circle.badge.questionmark")
                         .foregroundStyle(Color.starhashPrimaryText)
                 }
                 Button("Open Settings") { USSDDialer.openSettings() }

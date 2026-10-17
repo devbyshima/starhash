@@ -78,7 +78,7 @@ struct RecipientNumberRow: View {
                 Text(ChooseNumberSheet.network(of: recipient))
                     .font(.sheetBody)
                     .foregroundStyle(Color.sheetSecondaryText)
-                Image(systemName: "chevron.right")
+                Image(symbol: "chevron.right")
                     .font(.sheet(12, .semibold, relativeTo: .footnote))
                     .foregroundStyle(Color.sheetSecondaryText)
             }

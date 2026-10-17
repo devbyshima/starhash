@@ -122,7 +122,7 @@ extension View {
     // MARK: Containers
 
     /// A container: a solid fill in `shape`, the owner's foreground
-    /// (#F2F3F6 in light mode, #3A3A3A in dark) unless a sheet asks for its
+    /// (white in light mode, #171717 in dark) unless a sheet asks for its
     /// own. No glass: Liquid Glass stays on what floats over the page (the
     /// tab bar, the header buttons, sheets, Buy's call buttons), and what
     /// sits in the page is flat. Every card, panel and field box goes

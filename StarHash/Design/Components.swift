@@ -72,7 +72,7 @@ extension ButtonStyle where Self == PrimaryButtonStyle {
     static var starhashPrimaryGlowing: PrimaryButtonStyle { PrimaryButtonStyle(glows: true) }
 }
 
-/// An SF Symbol on a raised tile (pale grey on a white card, a lifted
+/// An SF Symbol on a raised tile (the page's pale grey on a white card, a lifted
 /// charcoal in dark mode), as in expense rows and the
 /// onboarding sample rows.
 struct SymbolTile: View {
@@ -81,7 +81,7 @@ struct SymbolTile: View {
     var background: Color = .starhashCardRaised
 
     var body: some View {
-        Image(systemName: symbol)
+        Image(symbol: symbol)
             .font(.system(size: size * 0.45, weight: .semibold))
             .foregroundStyle(Color.starhashPrimaryText)
             .frame(width: size, height: size)

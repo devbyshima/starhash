@@ -88,7 +88,7 @@ extension View {
         if #available(iOS 27.0, *) {
             swipeActions(edge: .trailing, allowsFullSwipe: true) {
                 Button(role: .destructive, action: onDelete) {
-                    Image(systemName: "trash")
+                    Image(symbol: "trash")
                 }
                 .tint(Color.starhashDestructive)
                 .accessibilityLabel("Delete")

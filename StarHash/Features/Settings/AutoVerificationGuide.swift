@@ -480,11 +480,13 @@ private struct GuideAutomationPhone: View {
                     .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                     .overlay(alignment: .topTrailing) {
                         if isVerified {
-                            Image(systemName: "checkmark.circle.fill")
+                            // The tick is cut out of the circle, so the
+                            // colour drawn on it sits behind, inside the rim.
+                            Image(symbol: "checkmark.circle.fill")
                                 .font(.system(size: 22, weight: .semibold))
-                                .symbolRenderingMode(.palette)
-                                .foregroundStyle(Color.starhashOnIncoming, Color.starhashIncoming)
-                                .background(Circle().fill(Color(white: 0.07)).padding(1))
+                                .foregroundStyle(Color.starhashIncoming)
+                                .background(Circle().fill(Color.starhashOnIncoming).padding(5))
+                                .background(Circle().fill(Color(white: 0.07)).padding(2.5))
                                 .offset(x: 6, y: -8)
                                 .transition(.scale.combined(with: .opacity))
                         }
@@ -560,7 +562,7 @@ private struct GuideStepList: View {
                 HStack(alignment: .firstTextBaseline, spacing: 14) {
                     Group {
                         if let symbol {
-                            Image(systemName: symbol)
+                            Image(symbol: symbol)
                                 .font(.system(size: 12, weight: .heavy))
                         } else {
                             Text("\(index + 1)")

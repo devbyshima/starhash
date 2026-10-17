@@ -117,7 +117,7 @@ struct ContactDetailSheet: View {
                     .foregroundStyle(Color.sheetSecondaryText)
             }
             if let isChosen {
-                Image(systemName: isChosen ? "checkmark.circle.fill" : "circle")
+                Image(symbol: isChosen ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 20, weight: .medium))
                     .foregroundStyle(isChosen ? Color.starhashPrimaryText : Color.starhashTertiaryText)
                     .contentTransition(.symbolEffect(.replace))

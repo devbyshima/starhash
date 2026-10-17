@@ -53,14 +53,14 @@ struct ActivityTransactionRows: View {
                 Button {
                     onVerify(transaction)
                 } label: {
-                    Label("Verify", systemImage: "checkmark.message")
+                    Label("Verify", symbol: "checkmark.message")
                 }
             }
             if transaction.status == .pending {
                 Button {
                     onFail(transaction)
                 } label: {
-                    Label("Mark as Failed", systemImage: "xmark.circle")
+                    Label("Mark as Failed", symbol: "xmark.circle")
                 }
             }
             Button(role: .destructive) {
@@ -152,7 +152,7 @@ struct ActivityTransactionRow: View {
     /// then the amount.
     private var amount: some View {
         HStack(alignment: .firstTextBaseline, spacing: 4) {
-            Image(systemName: transaction.activityArrowSymbol)
+            Image(symbol: transaction.activityArrowSymbol)
                 .starhashFont(13, weight: .bold, relativeTo: .footnote)
                 .foregroundStyle(transaction.activityArrowColor)
             Text(Money.format(transaction.amount))

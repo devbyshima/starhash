@@ -157,7 +157,7 @@ struct WidgetSymbol: View {
     let size: CGFloat
 
     var body: some View {
-        Image(systemName: name)
+        Image(symbol: name)
             .font(.system(size: size, weight: .semibold))
             .foregroundStyle(Color.widgetAccent)
             .frame(height: size * 1.15)
