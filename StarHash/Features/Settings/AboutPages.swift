@@ -6,7 +6,7 @@ import SwiftUI
 /// builds the feature flags.
 struct AboutStarHashView: View {
     @AppStorage(PreferenceKey.hasOnboarded) private var hasOnboarded = true
-    @State private var showsDeveloperNote = false
+    @State private var showsDeveloperNote = SettingsLaunch.opensDeveloperNote
 
     var body: some View {
         SettingsScroll {

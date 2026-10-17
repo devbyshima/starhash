@@ -30,7 +30,7 @@ The payments file and the preferences are part of your iPhone's own iCloud or co
 StarHash has no networking code, no analytics, no advertising and no third-party packages. The only things that reach beyond the app are system ones you start:
 
 - dialling a code through the iPhone's call prompt;
-- opening GitHub in your browser (Request a Feature, the developer's note, the source code) or the shared shortcut in Shortcuts;
+- opening GitHub in your browser (Request a Feature, the developer's note, the source code), Ko-fi (Support on Ko-fi, and Buy Shima a coffee in the developer's note), or the shared shortcut in Shortcuts;
 - Apple's own rating prompt;
 - the map on a payment's page, which Apple Maps draws from its own servers around the saved spot;
 - **Export data**, which saves a file wherever you choose (Files, iCloud Drive, AirDrop), and sharing your QR code.

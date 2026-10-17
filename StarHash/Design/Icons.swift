@@ -16,7 +16,7 @@ import UIKit
 enum StarIcon: String, CaseIterable {
     case airplane, antenna, appearance, arrowDownLeft, arrowUpRight, bag, bank, battery, bell, bellBadge, bellSlash
     case bolt, box, bus, calendar, camera, car, card, cart, cash, chartBar, chartLine, chat, check, checkCircle
-    case chevronLeft, chevronRight, chevronUpDown, circle, clock, close, closeCircle, code, document, download, drop
+    case chevronLeft, chevronRight, chevronUpDown, circle, clock, close, closeCircle, code, cup, document, download, drop
     case envelope, eye, faceID, film, flag, food, fuel, game, gear, gift, globe, graduation, hash, health, heart
     case history, hourglass, house, info, lightbulb, location, lock, messageCheck, messageQuestion, more, parking
     case pencil, people, person, personAlert, personCircle, phone, pin, play, plus, qrCode, received, reset, scan
@@ -76,6 +76,7 @@ enum StarIcon: String, CaseIterable {
         "clock.fill": .clock,
         "creditcard.fill": .card,
         "cross.case.fill": .health,
+        "cup.and.saucer.fill": .cup,
         "doc.text.fill": .document,
         "drop.fill": .drop,
         "ellipsis.circle.fill": .more,

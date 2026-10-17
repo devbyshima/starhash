@@ -2,7 +2,7 @@ import StarHashKit
 import SwiftUI
 
 /// Settings: what StarHash saves, its notifications, its lock, and More (the terms of service,
-/// the privacy policy, a feature request, and About StarHash, which holds
+/// the privacy policy, a feature request, Ko-fi, and About StarHash, which holds
 /// What's New, onboarding, the note and the source code), then Delete All
 /// Data. (The wallet switcher lives on
 /// Pay.) Its own NavigationStack, with each page pushed onto it, over which
@@ -348,6 +348,13 @@ private struct SettingsRootList: View {
         }
         .buttonStyle(HighlightRowButtonStyle())
         .accessibilityHint("Opens a feature request form on GitHub")
+        Link(destination: SettingsLinks.koFi) {
+            SettingsRow(symbol: "cup.and.saucer.fill", title: "Support on Ko-fi", caption: "Buy Shima a coffee") {
+                SettingsChevron(symbol: "arrow.up.right")
+            }
+        }
+        .buttonStyle(HighlightRowButtonStyle())
+        .accessibilityHint("Opens Shima's Ko-fi page")
         SettingsLinkRow(page: .about, symbol: "star.fill", title: "About StarHash", caption: "What's new, the note and the source code")
     }
     }
@@ -511,7 +518,7 @@ struct SettingsFooter: View {
 
 // MARK: - Launch arguments
 
-/// `-settingsPage whatsNew|release|terms|privacy|about|notifications|flags|guide|guide2`
+/// `-settingsPage whatsNew|release|terms|privacy|about|note|notifications|flags|guide|guide2`
 /// (DEBUG only, with `-tab settings`) opens that page or the guide at launch.
 @MainActor
 enum SettingsLaunch {
@@ -527,7 +534,7 @@ enum SettingsLaunch {
         if page == "whatsNew" { return [.whatsNew] }
         if page == "terms" { return [.terms] }
         if page == "privacy" { return [.privacy] }
-        if page == "about" { return [.about] }
+        if page == "about" || page == "note" { return [.about] }
         if page == "notifications" { return [.notifications] }
         if page == "profile" { return [.profile] }
         if page == "flags" { return [.about, .featureFlags] }
@@ -535,6 +542,9 @@ enum SettingsLaunch {
         if page?.hasPrefix("guide") == true { return [.autoVerify] }
         return []
     }
+
+    /// `-settingsPage note` opens About StarHash with its Developer Note up.
+    static var opensDeveloperNote: Bool { page == "note" }
 
     /// `-settingsPage autoVerifyOff` asks to turn auto-verify off.
     static var confirmsAutoVerifyOff: Bool { page == "autoVerifyOff" }
@@ -569,4 +579,9 @@ enum SettingsLinks {
         ]
         return components.url!
     }
+
+    /// Shima's Ko-fi page, for anyone who wants to give something back.
+    /// StarHash stays free, so this is only ever a link: the page and any
+    /// payment are Ko-fi's, in the browser.
+    static let koFi = URL(string: "https://ko-fi.com/devbyshima")!
 }

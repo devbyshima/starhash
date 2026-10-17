@@ -3,7 +3,8 @@ import SwiftUI
 
 /// Shima's note, in two versions, laid out as a letter: a round photo,
 /// "A note from Shima", the note left aligned, the signature, and a button
-/// with "Write to Shima" under it.
+/// with "Write to Shima" under it (and, from Settings, "Buy Shima a coffee"
+/// beside it).
 ///
 /// - `welcome`, over Pay as onboarding ends (and Settings, About StarHash,
 ///   Developer Note): why StarHash exists, free, source-available and private,
@@ -42,6 +43,9 @@ struct DeveloperNoteContent: View {
     let primaryAction: () -> Void
     /// The note onboarding ends on stops at its button.
     var showsWriteLink = true
+    /// Settings' note also offers Ko-fi. Never the note onboarding ends on,
+    /// nor the two-week one, whose one ask is the rating.
+    var showsSupportLink = false
 
     @Environment(\.openURL) private var openURL
 
@@ -86,24 +90,41 @@ struct DeveloperNoteContent: View {
             VStack(spacing: 0) {
                 Button(LocalizedStringKey(primaryTitle), action: primaryAction)
                     .buttonStyle(.sheetPrimary)
-                if showsWriteLink {
-                    Button {
-                        openURL(DeveloperNoteLinks.write)
-                    } label: {
-                        Text("Write to Shima")
-                            .starhashFont(14, relativeTo: .subheadline)
-                            .foregroundStyle(Color.starhashSecondaryText)
-                            .frame(maxWidth: .infinity, minHeight: 64)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.hapticPlain)
-                    .accessibilityHint("Opens a new message to Shima on GitHub")
+                // Side by side, so the note keeps the one row of links the
+                // reference has; stacked when a large text size won't fit.
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 0) { links }
+                    VStack(spacing: 0) { links }
                 }
             }
             .padding(.top, 30)
         }
         .padding(.horizontal, 30)
         .padding(.vertical, 20)
+    }
+
+    @ViewBuilder private var links: some View {
+        if showsWriteLink {
+            link("Write to Shima", to: DeveloperNoteLinks.write, hint: "Opens a new message to Shima on GitHub")
+        }
+        if showsSupportLink {
+            link("Buy Shima a coffee", to: SettingsLinks.koFi, hint: "Opens Shima's Ko-fi page")
+        }
+    }
+
+    private func link(_ title: LocalizedStringKey, to url: URL, hint: LocalizedStringKey) -> some View {
+        Button {
+            openURL(url)
+        } label: {
+            Text(title)
+                .starhashFont(14, relativeTo: .subheadline)
+                .foregroundStyle(Color.starhashSecondaryText)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, minHeight: 64)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.hapticPlain)
+        .accessibilityHint(hint)
     }
 }
 
@@ -138,7 +159,8 @@ enum DeveloperNoteLinks {
 
 /// The welcome note. As onboarding ends it opens over Pay, ends on Start
 /// Using StarHash, and closes to Pay; from Settings, About StarHash,
-/// Developer Note, it ends on Done with Write to Shima under it.
+/// Developer Note, it ends on Done with Write to Shima and Buy Shima a
+/// coffee under it.
 struct DeveloperNoteSheet: View {
     var afterOnboarding = false
 
@@ -150,7 +172,8 @@ struct DeveloperNoteSheet: View {
                 kind: .welcome,
                 primaryTitle: afterOnboarding ? "Start Using StarHash" : "Done",
                 primaryAction: { dismiss() },
-                showsWriteLink: !afterOnboarding
+                showsWriteLink: !afterOnboarding,
+                showsSupportLink: !afterOnboarding
             )
         }
     }

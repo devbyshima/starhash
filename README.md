@@ -11,6 +11,7 @@
 [![Swift 6](https://img.shields.io/badge/Swift-6-F05138?style=flat-square&logo=swift&logoColor=white)](https://www.swift.org)
 [![SwiftUI](https://img.shields.io/badge/UI-SwiftUI-171717?style=flat-square)](https://developer.apple.com/xcode/swiftui/)
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20Noncommercial-616161?style=flat-square)](LICENSE)
+[![Support on Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20StarHash-00D957?style=flat-square&logo=ko-fi&logoColor=white)](https://ko-fi.com/devbyshima)
 
 [Features](#features) • [Getting started](#getting-started) • [How it works](#how-it-works) • [Privacy](#privacy) • [Docs](#documentation)
 
@@ -108,6 +109,10 @@ The full picture is in [Privacy](docs/privacy.md), and the app carries its own P
 | [Changelog](CHANGELOG.md) | What each version changed |
 
 Have an idea? [Request a feature](https://github.com/devbyshima/starhash/issues/new?template=feature_request.yml).
+
+## Support
+
+StarHash is free, with no ads and nothing to buy. If it saves you time and you'd like to give something back, you can [buy me a coffee on Ko-fi](https://ko-fi.com/devbyshima). The app has the same link in Settings, under More.
 
 ## License
 
