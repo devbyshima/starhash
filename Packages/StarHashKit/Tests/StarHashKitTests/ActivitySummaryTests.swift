@@ -151,6 +151,16 @@ struct ActivitySummaryTests {
         #expect(ActivitySummary.axisTicks(for: highest) == expected)
     }
 
+    @Test func ownTransfersAreNeitherSpentNorReceived() {
+        var topUp = Self.tx(2000, at: Self.now)
+        topUp.category = TransactionCategory.ownAccounts.rawValue
+        var offload = Self.tx(500, .incoming, at: Self.now)
+        offload.category = TransactionCategory.ownAccounts.rawValue
+        let totals = ActivitySummary.totals(of: [topUp, offload, Self.tx(700, at: Self.now)])
+        #expect(totals.spent == 700)
+        #expect(totals.received == 0)
+    }
+
     // MARK: List
 
     @Test func groupsByDayNewestFirst() {

@@ -138,6 +138,7 @@ extension TransactionCategory {
         case .education: String(localized: "Education")
         case .family: String(localized: "Family")
         case .savings: String(localized: "Savings")
+        case .ownAccounts: String(localized: "Your own accounts")
         case .other: String(localized: "Other")
         }
     }
@@ -158,6 +159,7 @@ extension TransactionCategory {
         case .education: "graduationcap.fill"
         case .family: "person.2.fill"
         case .savings: "banknote.fill"
+        case .ownAccounts: "arrow.left.arrow.right"
         case .other: "ellipsis.circle.fill"
         }
     }

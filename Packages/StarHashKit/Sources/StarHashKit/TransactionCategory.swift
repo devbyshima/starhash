@@ -4,7 +4,9 @@ import Foundation
 /// a label the app no longer lists still shows under its own name. The
 /// first five are things bought from a carrier or a utility (airtime, a
 /// bundle, electricity, water, a TV subscription), which Activity shows as
-/// bought rather than sent.
+/// bought rather than sent. `ownAccounts` is money moved between the
+/// owner's own accounts (their other SIM, MoMo's virtual card), which is
+/// neither spent nor received.
 public enum TransactionCategory: String, CaseIterable, Codable, Identifiable, Sendable {
     case airtime
     case bundles
@@ -20,6 +22,7 @@ public enum TransactionCategory: String, CaseIterable, Codable, Identifiable, Se
     case education
     case family
     case savings
+    case ownAccounts
     case other
 
     public var id: Self { self }
@@ -32,6 +35,10 @@ public enum TransactionCategory: String, CaseIterable, Codable, Identifiable, Se
         default: false
         }
     }
+
+    /// Money moved between the owner's own accounts: left out of what was
+    /// spent and what was received.
+    public var isOwnTransfer: Bool { self == .ownAccounts }
 
     /// The categories a person can choose for a payment, purchases first.
     public static let choices: [TransactionCategory] = allCases
@@ -48,6 +55,12 @@ extension Transaction {
     /// electricity, water, TV) rather than money sent to someone.
     public var isPurchase: Bool {
         direction == .outgoing && (knownCategory?.isPurchase ?? false)
+    }
+
+    /// Money moved between the owner's own accounts, either way: not spent,
+    /// not received.
+    public var isOwnTransfer: Bool {
+        knownCategory?.isOwnTransfer ?? false
     }
 }
 
@@ -93,7 +106,9 @@ public enum TransactionCategorizer {
     /// short word only matches whole ("reg" in "REG", not "regional").
     private static let nameRules: [(TransactionCategory, [String])] = [
         (.airtime, ["airtime", " credit ", "recharge", "ama inite"]),
-        (.bundles, ["bundle", "internet", " data ", "gwamon", "yolo", "4g", "fibre", "fiber", "liquid", "canalbox"]),
+        // MTN itself: what MoMo pays MTN Rwandacell (a bundle bought through
+        // *345# or MTN's menus) and its voice and data packs.
+        (.bundles, ["bundle", "internet", " data ", "gwamon", "yolo", "4g", "fibre", "fiber", "liquid", "canalbox", "rwandacell", "voice pack", " packs "]),
         (.electricity, ["eucl", " reg ", "cash power", "cashpower", "electricity", "electrogaz", "umuriro"]),
         (.water, ["wasac", " water ", "amazi"]),
         (.tv, ["canal+", "canal +", "canal plus", "startimes", "star times", "dstv", "gotv", "azam", " tv "]),

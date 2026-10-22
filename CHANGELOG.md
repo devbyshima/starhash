@@ -8,6 +8,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Added
 
+- Money paid to MTN itself shows as bought: bundles and packs (by MTN Rwandacell, Voice Pack MTN, Data Bundle MTN) and airtime, from MoMo's own messages. Topping up MoMo's virtual card, or taking money back off it, shows as a move between your own accounts and counts as neither spent nor received; a new category, Your own accounts, does the same for any payment you mark.
 - MTN Virtual Card (*182*2*6#) is one of Buy's built-in codes, added once to lists saved before it.
 - Scan to Pay: the scan button on Pay reads a merchant's MoMo QR code or a friend's StarHash code, and Pay dials them with no recipient screen, the amount filled in when the code carries one. Photos reads a code from a picture.
 - Your own QR code, for others to scan and pay you: your name and number, asked for in onboarding and kept in Settings' new Profile, with your photo. The code stands as a little tree of blocks, turning slowly, that turns on into place and flattens into the QR code at a tap, on Profile and in the scanner's My Code. Share Code sends StarHash's own version of it, with the mark in the middle.

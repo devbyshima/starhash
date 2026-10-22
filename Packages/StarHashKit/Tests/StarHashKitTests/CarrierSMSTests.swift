@@ -10,6 +10,63 @@ import Testing
         return calendar.date(from: DateComponents(year: y, month: mo, day: d, hour: h, minute: mi, second: s))!
     }
 
+    // MARK: Bought from MTN, and MoMo's virtual card
+    // From the owner's own messages, with the numbers, ids and balances made
+    // up.
+
+    @Test func bundleBoughtFromMTNItself() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "*164*S*Y'ello, A transaction of 5000 RWF by MTN RWANDACELL  LIMITED on your MOMO account was successfully completed at 2024-12-27 16:11:43. Message from debit receiver: . Your new balance:3537 RWF. Fee was 0 RWF. Financial Transaction Id: 10000000001. External Transaction Id: 10000000002.*EN#"
+        ))
+        #expect(sms.direction == .outgoing)
+        #expect(sms.amount == 5000)
+        #expect(sms.counterparty.name == "MTN")
+        #expect(sms.category == TransactionCategory.bundles.rawValue)
+    }
+
+    @Test func voiceAndDataPacksFromMTN() throws {
+        for payee in ["Voice Pack MTN", "Data Bundle MTN"] {
+            let sms = try #require(CarrierSMS.parse(
+                "*164*S*Y'ello, A transaction of 3000 RWF by \(payee) on your MOMO account was successfully completed at 2024-12-17 13:03:40. Message from debit receiver: . Your new balance:5572 RWF. Fee was 0 RWF. Financial Transaction Id: 10000000003. External Transaction Id: 10000000004.*EN#"
+            ))
+            #expect(sms.category == TransactionCategory.bundles.rawValue, "\(payee)")
+        }
+    }
+
+    @Test func airtimeThroughMoMo() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "*162*TxId:10000000005*S*Your payment of 1000 RWF to Airtime with token  has been completed at 2024-05-07 09:00:18. Fee was 0 RWF. Your new balance: 24710 RWF . Message: - -. *EN#"
+        ))
+        #expect(sms.amount == 1000)
+        #expect(sms.category == TransactionCategory.airtime.rawValue)
+    }
+
+    @Test func virtualCardTopUpIsAMoveBetweenOwnAccounts() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "*164*S*Y'ello, A transaction of 2000 RWF by MOBILE MONEY RWANDA Limited on your MOMO account was successfully completed at 2024-11-30 03:21:15. Message from debit receiver: Card top up. Your new balance:5392 RWF. Fee was 0 RWF. Financial Transaction Id: 10000000006. External Transaction Id: 00000000-0000-4000-8000-000000000001.*EN#"
+        ))
+        #expect(sms.direction == .outgoing)
+        #expect(sms.counterparty.name == "MTN Virtual Card")
+        #expect(sms.category == TransactionCategory.ownAccounts.rawValue)
+    }
+
+    @Test func virtualCardOffloadComesBackFromOwnAccounts() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "You have received 8000 RWF from MOBILE MONEY RWANDA Limited (*********515) on your mobile money account at 2026-07-28 22:19:44. Message from sender: Card offload. Your new balance:13125 RWF. Financial Transaction Id: 10000000007."
+        ))
+        #expect(sms.direction == .incoming)
+        #expect(sms.counterparty.name == "MTN Virtual Card")
+        #expect(sms.category == TransactionCategory.ownAccounts.rawValue)
+    }
+
+    @Test func virtualCardCashbackIsIncome() throws {
+        let sms = try #require(CarrierSMS.parse(
+            "You have received 319 RWF from MOBILE MONEY RWANDA Limited  (*********777) on your mobile money account at 2025-07-16 11:26:33. Message from sender: Cashback Virtual card . Your new balance:319 RWF. Financial Transaction Id: 10000000008."
+        ))
+        #expect(sms.direction == .incoming)
+        #expect(sms.category == nil)
+    }
+
     // MARK: Transfers sent
 
     @Test func transferSent() throws {
@@ -419,7 +476,7 @@ import Testing
         #expect(sms.direction == .incoming)
         #expect(sms.amount == 1_000)
         #expect(sms.counterparty.kind == .merchant)
-        #expect(sms.counterparty.name == "Mtn Rwandacell Limited")
+        #expect(sms.counterparty.name == "MTN")
         #expect(sms.balanceAfter == 18_501)
     }
 

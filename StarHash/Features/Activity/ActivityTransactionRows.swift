@@ -136,6 +136,8 @@ struct ActivityTransactionRow: View {
         var parts: [String] = []
         if transaction.isPurchase {
             parts.append(String(localized: "Bought"))
+        } else if transaction.isOwnTransfer {
+            parts.append(String(localized: "Between your accounts"))
         } else if transaction.counterparty.name?.isEmpty == false, !transaction.counterparty.destination.isEmpty {
             parts.append(transaction.counterparty.formattedDestination)
         }

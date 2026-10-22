@@ -25,6 +25,9 @@ struct TransactionTile: View {
                 } else {
                     RecipientTile(tile: .symbol(category.symbol), size: size)
                 }
+            } else if transaction.isOwnTransfer, let category = transaction.knownCategory {
+                // Moved between the owner's own accounts: the move itself.
+                RecipientTile(tile: .symbol(category.symbol), size: size)
             } else {
                 let counterparty = transaction.counterparty
                 let photo = enableContacts ? PayContacts.shared.photoContactID(for: counterparty) : nil
