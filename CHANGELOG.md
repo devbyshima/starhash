@@ -28,6 +28,8 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Changed
 
+- A photo you pick for your profile opens on a Move and Scale screen first: pinch to resize, drag to frame it in the circle, then Choose.
+- With two SIMs, Profile shows both numbers in one box.
 - Pending payments are yellow again, beside red for failed and green for confirmed.
 - The tab bar is a little shorter, so its highlight sits the same distance from every edge.
 - Onboarding's screens change visibly: the screen before drifts up into a blur as it fades, and the new title and line rise in word by word.

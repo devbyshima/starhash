@@ -24,8 +24,13 @@ final class ProfilePhoto {
     /// Keeps a picked photo: cropped to its middle square and made small,
     /// since it never shows bigger than Profile's circle.
     func set(_ data: Data) {
-        guard let picked = UIImage(data: data), let square = Self.square(picked, side: 600),
-              let jpeg = square.jpegData(compressionQuality: 0.85) else { return }
+        guard let picked = UIImage(data: data), let square = Self.square(picked, side: 600) else { return }
+        set(square)
+    }
+
+    /// Keeps a photo already cropped to its square (`PhotoCropView`).
+    func set(_ square: UIImage) {
+        guard let jpeg = square.jpegData(compressionQuality: 0.85) else { return }
         save(jpeg)
         StarHashCloud.syncPhoto()
     }
@@ -96,10 +101,19 @@ struct ProfilePhotoView: View {
 
 /// Profile's photo: tap to choose one from the library, with a small
 /// accent badge saying so, and Remove Photo in its menu once there is one.
+/// A photo picked opens on the crop screen first, to move and scale it in
+/// the circle.
 struct ProfilePhotoPicker: View {
     var size: CGFloat = 120
 
     @State private var item: PhotosPickerItem?
+    @State private var cropping: PickedPhoto?
+
+    /// A photo waiting on the crop screen.
+    struct PickedPhoto: Identifiable {
+        let id = UUID()
+        let image: UIImage
+    }
 
     var body: some View {
         PhotosPicker(selection: $item, matching: .images) {
@@ -129,11 +143,28 @@ struct ProfilePhotoPicker: View {
         .onChange(of: item) { _, item in
             guard let item else { return }
             Task {
-                if let data = try? await item.loadTransferable(type: Data.self) {
-                    withAnimation(.smooth) { ProfilePhoto.shared.set(data) }
+                if let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) {
+                    cropping = PickedPhoto(image: image)
                 }
                 self.item = nil
             }
         }
+        .fullScreenCover(item: $cropping) { picked in
+            PhotoCropView(image: picked.image) {
+                cropping = nil
+            } onChoose: { square in
+                cropping = nil
+                withAnimation(.smooth) { ProfilePhoto.shared.set(square) }
+            }
+        }
+        #if DEBUG
+        // -cropPhoto: the crop screen on a sample photo, for screenshots.
+        .task {
+            if DebugLaunch.arguments.contains("-cropPhoto"), cropping == nil, let sample = UIImage(named: "DeveloperPhoto") {
+                try? await Task.sleep(for: .milliseconds(500))
+                cropping = PickedPhoto(image: sample)
+            }
+        }
+        #endif
     }
 }

@@ -1229,6 +1229,22 @@
         }
       }
     },
+    "Choose": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hitamo"
+          }
+        }
+      }
+    },
     "Choose a file you exported from StarHash's Settings.": {
       "localizations": {
         "rw": {
@@ -3265,6 +3281,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reculer"
+          }
+        }
+      }
+    },
+    "Move and Scale": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déplacer et redimensionner"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imura kandi uhindure ingano"
           }
         }
       }

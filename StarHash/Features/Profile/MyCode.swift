@@ -183,57 +183,28 @@ struct ProfileFields: View {
             .textInputAutocapitalization(.words)
             .submitLabel(.next)
             .onSubmit { focus = .number }
+            .modifier(ProfileFieldBackground(onSheet: onSheet))
             }
 
-            field(
-                "Your number",
-                text: $draftNumber,
-                prompt: "07X XXX XXXX",
-                symbol: "phone.fill"
-            )
-            .focused($focus, equals: .number)
-            .keyboardType(.phonePad)
-            .textContentType(.telephoneNumber)
-            .onChange(of: draftNumber) { old, typed in
-                // Saved only once it is a number the code can carry.
-                if let recipient = Recipient.ownNumber(typed) {
-                    number = recipient.destination
-                    // The whole number is in and it is right: the number
-                    // pad, which has no return key, goes by itself.
-                    if Recipient.ownNumber(old) == nil, problem == nil { dismissKeyboard() }
-                } else if typed.filter(\.isNumber).isEmpty {
-                    number = ""
+            // With two SIMs, both numbers in one box, a line between them.
+            if let otherNumber {
+                VStack(spacing: 0) {
+                    numberField
+                    SheetDivider()
+                        .padding(.horizontal, 18)
+                    otherField(otherNumber)
                 }
+                .modifier(ProfileFieldBackground(onSheet: onSheet, grouped: true))
+            } else {
+                numberField
+                    .modifier(ProfileFieldBackground(onSheet: onSheet))
             }
 
             if let problem {
                 problemText(problem)
             }
-
-            if let otherNumber {
-                field(
-                    "Other SIM",
-                    text: $draftOther,
-                    prompt: "Other SIM",
-                    symbol: "simcard.fill"
-                )
-                .focused($focus, equals: .other)
-                .keyboardType(.phonePad)
-                .textContentType(.telephoneNumber)
-                .onChange(of: draftOther) { old, typed in
-                    // Kept as Settings' Other SIM row keeps it, so the two
-                    // show the same number.
-                    if let recipient = Recipient.ownNumber(typed) {
-                        otherNumber.wrappedValue = recipient.formattedDestination
-                        if Recipient.ownNumber(old) == nil { dismissKeyboard() }
-                    } else if typed.filter(\.isNumber).isEmpty {
-                        otherNumber.wrappedValue = ""
-                    }
-                }
-
-                if let otherProblem {
-                    problemText(otherProblem)
-                }
+            if let otherProblem {
+                problemText(otherProblem)
             }
         }
         .animation(.smooth(duration: 0.2), value: problem)
@@ -242,6 +213,51 @@ struct ProfileFields: View {
             if draftNumber.isEmpty, let saved = Recipient.ownNumber(number) { draftNumber = saved.formattedDestination }
             if draftOther.isEmpty, let saved = otherNumber.flatMap({ Recipient.ownNumber($0.wrappedValue) }) {
                 draftOther = saved.formattedDestination
+            }
+        }
+    }
+
+    private var numberField: some View {
+        field(
+            "Your number",
+            text: $draftNumber,
+            prompt: "07X XXX XXXX",
+            symbol: "phone.fill"
+        )
+        .focused($focus, equals: .number)
+        .keyboardType(.phonePad)
+        .textContentType(.telephoneNumber)
+        .onChange(of: draftNumber) { old, typed in
+            // Saved only once it is a number the code can carry.
+            if let recipient = Recipient.ownNumber(typed) {
+                number = recipient.destination
+                // The whole number is in and it is right: the number
+                // pad, which has no return key, goes by itself.
+                if Recipient.ownNumber(old) == nil, problem == nil { dismissKeyboard() }
+            } else if typed.filter(\.isNumber).isEmpty {
+                number = ""
+            }
+        }
+    }
+
+    private func otherField(_ otherNumber: Binding<String>) -> some View {
+        field(
+            "Other SIM",
+            text: $draftOther,
+            prompt: "Other SIM",
+            symbol: "simcard.fill"
+        )
+        .focused($focus, equals: .other)
+        .keyboardType(.phonePad)
+        .textContentType(.telephoneNumber)
+        .onChange(of: draftOther) { old, typed in
+            // Kept as Settings' Other SIM row keeps it, so the two show
+            // the same number.
+            if let recipient = Recipient.ownNumber(typed) {
+                otherNumber.wrappedValue = recipient.formattedDestination
+                if Recipient.ownNumber(old) == nil { dismissKeyboard() }
+            } else if typed.filter(\.isNumber).isEmpty {
+                otherNumber.wrappedValue = ""
             }
         }
     }
@@ -277,18 +293,21 @@ struct ProfileFields: View {
         }
         .padding(.horizontal, 18)
         .frame(minHeight: StarHashMetrics.primaryButtonHeight)
-        .modifier(ProfileFieldBackground(onSheet: onSheet))
     }
 }
 
 /// A field's box: a sheet's card in a sheet, the cards' solid foreground
-/// on the page.
+/// on the page; a capsule round one field, a card's rounded corners round
+/// two.
 private struct ProfileFieldBackground: ViewModifier {
     let onSheet: Bool
+    var grouped = false
 
     func body(content: Content) -> some View {
         if onSheet {
-            content.sheetCard(radius: 29)
+            content.sheetCard(radius: grouped ? 22 : 29)
+        } else if grouped {
+            content.starhashContainer(.starhashCard, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
         } else {
             content.starhashContainer(.starhashCard, in: Capsule())
         }
