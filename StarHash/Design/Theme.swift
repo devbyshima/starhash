@@ -240,15 +240,6 @@ extension Color {
     /// The solid line between a card's rows.
     static let sheetDivider = Color(light: .brandForest.opacity(0.14), dark: .brandPaper.opacity(0.13))
 
-    /// The image beside a transaction: white in either appearance, with a
-    /// hairline round it on the green page.
-    static let tileSurface = Color.white
-    static let tileBorder = Color(light: .brandForest.opacity(0.12), dark: .clear)
-    /// A tile with no photo or logo: the initial (or the mark) in a deep
-    /// green on a pale wash of the green (4.9:1), in either appearance.
-    static let tilePlaceholder = Color(red: 227 / 255, green: 245 / 255, blue: 231 / 255)
-    static let tilePlaceholderGlyph = Color.brandAccentDeep
-
     /// A profile without a photo: the cards' foreground behind a person in
     /// the quieter text.
     static let profilePhotoFill = Color.starhashCard
