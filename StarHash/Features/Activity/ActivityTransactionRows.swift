@@ -88,7 +88,9 @@ struct ActivityTransactionRow: View {
 
     var body: some View {
         let isLarge = dynamicTypeSize.isAccessibilitySize
-        HStack(alignment: .top, spacing: ActivityLayout.tileGap) {
+        // The amount halfway down the row, beside both lines; at the
+        // largest sizes it goes under them and the row keeps to the top.
+        HStack(alignment: isLarge ? .top : .center, spacing: ActivityLayout.tileGap) {
             TransactionTile(transaction: transaction, size: ActivityLayout.tileSize)
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
