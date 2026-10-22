@@ -4535,22 +4535,6 @@
         }
       }
     },
-    "People who scan your code see your photo. It is kept on StarHash's server under a random id, never with your number.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les personnes qui scannent votre code voient votre photo. Elle est gardée sur le serveur de StarHash sous un identifiant aléatoire, jamais avec votre numéro."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abasikana kode yawe babona ifoto yawe. Ibikwa kuri seriveri ya StarHash ku kimenyetso cy'impfabusa, ntibikwa hamwe na nimero yawe."
-          }
-        }
-      }
-    },
     "Period": {
       "localizations": {
         "rw": {
@@ -4563,22 +4547,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Période"
-          }
-        }
-      }
-    },
-    "Photo with my code": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Photo avec mon code"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ifoto kuri kode yanjye"
           }
         }
       }
@@ -5968,18 +5936,18 @@
         }
       }
     },
-    "StarHash has no account and no tracking. Your payments stay on your iPhone. Only your photo, if you share it with your QR code, and an anonymous count of who uses StarHash reach its server.": {
+    "StarHash has no account and no tracking. Your payments stay on your iPhone. Only your profile photo, if you add one, and an anonymous count of who uses StarHash reach its server.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "StarHash n'a ni compte ni pistage. Vos paiements restent sur votre iPhone. Seule votre photo, si vous la partagez avec votre code QR, et un décompte anonyme des utilisateurs de StarHash arrivent sur son serveur."
+            "value": "StarHash n'a ni compte ni pistage. Vos paiements restent sur votre iPhone. Seule votre photo de profil, si vous en ajoutez une, et un décompte anonyme des utilisateurs de StarHash arrivent sur son serveur."
           }
         },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "StarHash nta konti igira, nta n'ubwo igukurikirana. Ubwishyu bwawe buguma kuri iPhone yawe. Ifoto yawe gusa, niba uyisangiza kuri kode yawe ya QR, n'umubare utavuga amazina w'abakoresha StarHash ni byo bigera kuri seriveri yayo."
+            "value": "StarHash nta konti igira, nta n'ubwo igukurikirana. Ubwishyu bwawe buguma kuri iPhone yawe. Ifoto y'umwirondoro wawe gusa, niba wayishyizeho, n'umubare utavuga amazina w'abakoresha StarHash ni byo bigera kuri seriveri yayo."
           }
         }
       }
@@ -7186,18 +7154,18 @@
         }
       }
     },
-    "Two things reach it. Your profile photo, if you have one and leave Photo with my code on: it is kept under a random id that your QR code carries, so people who scan your code see it, and never with your name or number; only your iPhone holds the key that can change or delete it, and turning the switch off or removing your photo deletes it. And once a day, a random id made when StarHash was installed, with its version, so the number of people using StarHash can be counted. Nothing else is sent: no number, no name, no payment, no location.": {
+    "Two things reach it. Your profile photo, if you add one: it is kept under a random id that your QR code carries, so people who scan your code see it, and never with your name or number; only your iPhone holds the key that can change or delete it, and removing your photo deletes it. And once a day, a random id made when StarHash was installed, with its version, so the number of people using StarHash can be counted. Nothing else is sent: no number, no name, no payment, no location.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Deux choses y arrivent. Votre photo de profil, si vous en avez une et laissez Photo avec mon code activé : elle est gardée sous un identifiant aléatoire que porte votre code QR, pour que les personnes qui scannent votre code la voient, et jamais avec votre nom ou votre numéro ; seul votre iPhone détient la clé qui peut la modifier ou la supprimer, et désactiver l'option ou retirer votre photo la supprime. Et une fois par jour, un identifiant aléatoire créé à l'installation de StarHash, avec sa version, pour compter le nombre de personnes qui utilisent StarHash. Rien d'autre n'est envoyé : ni numéro, ni nom, ni paiement, ni position."
+            "value": "Deux choses y arrivent. Votre photo de profil, si vous en ajoutez une : elle est gardée sous un identifiant aléatoire que porte votre code QR, pour que les personnes qui scannent votre code la voient, et jamais avec votre nom ou votre numéro ; seul votre iPhone détient la clé qui peut la modifier ou la supprimer, et retirer votre photo la supprime. Et une fois par jour, un identifiant aléatoire créé à l'installation de StarHash, avec sa version, pour compter le nombre de personnes qui utilisent StarHash. Rien d'autre n'est envoyé : ni numéro, ni nom, ni paiement, ni position."
           }
         },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ibintu bibiri ni byo biyigeraho. Ifoto y'umwirondoro wawe, niba uyifite kandi ugasiga Ifoto kuri kode yanjye ifunguye: ibikwa ku kimenyetso cy'impfabusa kode yawe ya QR itwara, kugira ngo abasikana kode yawe bayibone, kandi ntibikwa hamwe n'izina cyangwa nimero yawe; iPhone yawe yonyine ni yo ifite urufunguzo rwo kuyihindura cyangwa kuyisiba, kandi kuzimya iyo nyobora cyangwa gukuraho ifoto yawe birayisiba. N'inshuro imwe ku munsi, ikimenyetso cy'impfabusa cyakozwe igihe StarHash yashyirwagaho, hamwe n'ubwoko bwayo, kugira ngo umubare w'abakoresha StarHash ubarwe. Nta kindi cyoherezwa: nta nimero, nta zina, nta bwishyu, nta hantu uri."
+            "value": "Ibintu bibiri ni byo biyigeraho. Ifoto y'umwirondoro wawe, niba wayishyizeho: ibikwa ku kimenyetso cy'impfabusa kode yawe ya QR itwara, kugira ngo abasikana kode yawe bayibone, kandi ntibikwa hamwe n'izina cyangwa nimero yawe; iPhone yawe yonyine ni yo ifite urufunguzo rwo kuyihindura cyangwa kuyisiba, kandi gukuraho ifoto yawe birayisiba. N'inshuro imwe ku munsi, ikimenyetso cy'impfabusa cyakozwe igihe StarHash yashyirwagaho, hamwe n'ubwoko bwayo, kugira ngo umubare w'abakoresha StarHash ubarwe. Nta kindi cyoherezwa: nta nimero, nta zina, nta bwishyu, nta hantu uri."
           }
         }
       }

@@ -4,8 +4,8 @@ import StarHashKit
 import UIKit
 
 /// StarHash's server (`server/` in the repo): the one thing kept off the
-/// iPhone. The owner's photo, when they share it with their code, lives
-/// there under a random id their code carries, so whoever scans the code
+/// iPhone. The owner's photo, whenever they have one, lives there under a
+/// random id their code carries, so whoever scans the code
 /// sees it; a secret key in the Keychain is needed to replace or delete it.
 /// And once a day a random id, made on the first launch, says this copy of
 /// StarHash is in use, with its version, so the people using it can be
@@ -16,17 +16,10 @@ enum StarHashCloud {
 
     // MARK: The owner's photo
 
-    /// The id the owner's code carries for their photo, when they share it
-    /// and have one.
+    /// The id the owner's code carries for their photo, when they have one.
     static var sharedPhotoID: UUID? {
-        guard sharesPhoto, ProfilePhoto.shared.image != nil else { return nil }
+        guard ProfilePhoto.shared.image != nil else { return nil }
         return photoID
-    }
-
-    /// Whether the owner shares their photo with their code (Settings), on
-    /// until turned off.
-    static var sharesPhoto: Bool {
-        UserDefaults.standard.object(forKey: PreferenceKey.sharePhoto) as? Bool ?? true
     }
 
     /// The photo's id, made once.
@@ -40,10 +33,10 @@ enum StarHashCloud {
     private static let photoIDKey = "cloudPhotoID"
 
     /// Uploads the owner's photo, or deletes it from the server when they
-    /// have none or no longer share it. Run whenever either changes.
+    /// have none. Run whenever it changes.
     static func syncPhoto() {
         let id = photoID
-        let data = sharesPhoto ? ProfilePhoto.shared.data : nil
+        let data = ProfilePhoto.shared.data
         Task.detached {
             guard let key = await photoKey() else { return }
             var request = URLRequest(url: baseURL.appending(path: "v1/photos/\(id.uuidString.lowercased())"))

@@ -28,10 +28,6 @@ extension PreferenceKey {
     /// How many SIMs pay from this iPhone (1 or 2), and the other one's
     /// number: money between the two is moved, not spent (`OwnAccounts`).
     static let simCount = "simCount"
-    /// Whether the owner's photo goes with their QR code, kept on
-    /// StarHash's server for whoever scans it (`StarHashCloud`). On unless
-    /// turned off.
-    static let sharePhoto = "sharePhoto"
     /// The language StarHash speaks (`AppLanguage`), the iPhone's until one
     /// is chosen.
     static let appLanguage = "appLanguage"

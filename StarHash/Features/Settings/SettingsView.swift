@@ -77,7 +77,6 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.profileName) private var profileName = ""
     @AppStorage(PreferenceKey.profileNumber) private var profileNumber = ""
     @AppStorage(PreferenceKey.simCount) private var simCount = 1
-    @AppStorage(PreferenceKey.sharePhoto) private var sharePhoto = true
     @AppStorage(PreferenceKey.appLanguage) private var appLanguage = AppLanguage.system.rawValue
     @AppStorage(PreferenceKey.secondNumber) private var secondNumber = ""
     @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
@@ -185,8 +184,7 @@ private struct SettingsRootList: View {
         }
     }
 
-    /// The owner's photo, name and number, opening Profile, and whether
-    /// their photo goes with their code.
+    /// The owner's photo, name and number, opening Profile.
     private var profileCard: some View {
         SettingsCard {
             NavigationLink(value: SettingsPage.profile) {
@@ -204,14 +202,7 @@ private struct SettingsRootList: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(HighlightRowButtonStyle(pressHaptic: false))
-            SettingsToggleRow(
-                symbol: "qrcode",
-                title: "Photo with my code",
-                caption: "People who scan your code see your photo. It is kept on StarHash's server under a random id, never with your number.",
-                isOn: $sharePhoto
-            )
         }
-        .onChange(of: sharePhoto) { StarHashCloud.syncPhoto() }
     }
 
     /// One SIM or two, and the other's number: money between them is

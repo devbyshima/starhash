@@ -5,7 +5,8 @@ import SwiftUI
 /// it to choose one), their name large under it and typed in place, their
 /// number, and once it is in, their code as the voxel tree that turns into
 /// the QR code others scan to pay them, with Share under it. Kept on the
-/// iPhone, in Settings' preferences and the photo's own file.
+/// iPhone, in Settings' preferences and the photo's own file; only the
+/// photo, which goes with the code, reaches StarHash's server.
 struct ProfileView: View {
     @AppStorage(PreferenceKey.profileName) private var name = ""
     @AppStorage(PreferenceKey.profileNumber) private var number = ""

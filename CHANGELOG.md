@@ -8,7 +8,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Added
 
-- Your photo with your QR code: people who scan it see your photo beside your number (a photo saved in their Contacts comes first). It is kept on StarHash's new small server under a random id, never with your number, and Photo with my code in Settings turns it off. StarHash also counts how many people use it, by a random id once a day; the privacy policy says so.
+- Your photo with your QR code: people who scan it see your photo beside your number (a photo saved in their Contacts comes first). It is kept on StarHash's new small server under a random id, never with your number, and removing your photo deletes it there. StarHash also counts how many people use it, by a random id once a day; the privacy policy says so.
 - Two SIMs: say so in Settings and give the other number, and money between your own SIMs is filed under Your own accounts, counted as neither spent nor received.
 - A Nearby suggestion passed over five times in a row stops being suggested; picking it keeps it, and paying it any other way brings it back.
 - Money paid to MTN itself shows as bought: bundles and packs (by MTN Rwandacell, Voice Pack MTN, Data Bundle MTN) and airtime, from MoMo's own messages. Topping up MoMo's virtual card, or taking money back off it, shows as a move between your own accounts and counts as neither spent nor received; a new category, Your own accounts, does the same for any payment you mark.

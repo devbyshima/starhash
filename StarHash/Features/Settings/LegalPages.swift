@@ -143,7 +143,7 @@ extension LegalDocument {
         title: "Privacy Policy",
         symbol: "lock.fill",
         effective: "2026-10-22",
-        summary: "StarHash has no account and no tracking. Your payments stay on your iPhone. Only your photo, if you share it with your QR code, and an anonymous count of who uses StarHash reach its server.",
+        summary: "StarHash has no account and no tracking. Your payments stay on your iPhone. Only your profile photo, if you add one, and an anonymous count of who uses StarHash reach its server.",
         sections: [
             .init(
                 title: "What StarHash keeps",
@@ -151,7 +151,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "StarHash's server",
-                text: "Two things reach it. Your profile photo, if you have one and leave Photo with my code on: it is kept under a random id that your QR code carries, so people who scan your code see it, and never with your name or number; only your iPhone holds the key that can change or delete it, and turning the switch off or removing your photo deletes it. And once a day, a random id made when StarHash was installed, with its version, so the number of people using StarHash can be counted. Nothing else is sent: no number, no name, no payment, no location."
+                text: "Two things reach it. Your profile photo, if you add one: it is kept under a random id that your QR code carries, so people who scan your code see it, and never with your name or number; only your iPhone holds the key that can change or delete it, and removing your photo deletes it. And once a day, a random id made when StarHash was installed, with its version, so the number of people using StarHash can be counted. Nothing else is sent: no number, no name, no payment, no location."
             ),
             .init(
                 title: "Contacts",
