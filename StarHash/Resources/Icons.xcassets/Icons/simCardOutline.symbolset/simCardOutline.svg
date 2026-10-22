@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- simCardOutline, drawn by scripts/make_icons.swift; edit it there, not here. -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="3300" height="2200">
+ <g id="Notes">
+  <rect height="2200" id="artboard" style="fill:white;opacity:1" width="3300" x="0" y="0"/>
+  <text id="template-version" style="stroke:none;fill:black;font-family:sans-serif;font-size:13;" transform="matrix(1 0 0 1 3036 1933)" text-anchor="end">Template v.2.0</text>
+ </g>
+ <g id="Guides">
+  <line id="Baseline-S" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="696" y2="696"/>
+  <line id="Capline-S" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="625.541" y2="625.541"/>
+  <line id="Baseline-M" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="1126" y2="1126"/>
+  <line id="Capline-M" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="1055.54" y2="1055.54"/>
+  <line id="Baseline-L" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="1556" y2="1556"/>
+  <line id="Capline-L" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="1485.54" y2="1485.54"/>
+  <line id="left-margin-Regular-S" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1400" x2="1400" y1="600" y2="720"/>
+  <line id="right-margin-Regular-S" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1490.35" x2="1490.35" y1="600" y2="720"/>
+  <line id="left-margin-Regular-M" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1400" x2="1400" y1="1030" y2="1150"/>
+  <line id="right-margin-Regular-M" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1515.38" x2="1515.38" y1="1030" y2="1150"/>
+  <line id="left-margin-Regular-L" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1400" x2="1400" y1="1460" y2="1580"/>
+  <line id="right-margin-Regular-L" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1548.85" x2="1548.85" y1="1460" y2="1580"/>
+ </g>
+ <g id="Symbols">
+  <g id="Regular-S" transform="matrix(1 0 0 1 1400 696)">
+   <path d="M58.22 -72.97L76.29 -54.90C77.19 -54 77.70 -52.77 77.70 -51.49L77.70 -8.73C77.70 -1.85 71.93 3.92 65.05 3.92L27.10 3.92C20.23 3.92 14.46 -1.85 14.46 -8.73L14.46 -61.73C14.46 -68.61 20.23 -74.38 27.10 -74.38L54.81 -74.38C56.09 -74.38 57.31 -73.87 58.22 -72.97ZM27.10 -64.74C25.55 -64.74 24.09 -63.29 24.09 -61.73L24.09 -8.73C24.09 -7.17 25.55 -5.72 27.10 -5.72L65.05 -5.72C66.60 -5.72 68.06 -7.17 68.06 -8.73L68.06 -49.50L52.81 -64.74ZM60.83 -34.02L60.83 -19.57C60.83 -15.58 57.60 -12.34 53.61 -12.34L36.74 -12.34C32.75 -12.34 29.51 -15.58 29.51 -19.57L29.51 -34.02C29.51 -38.02 32.75 -41.25 36.74 -41.25L53.61 -41.25C57.60 -41.25 60.83 -38.02 60.83 -34.02ZM36.74 -34.02L36.74 -19.57L53.61 -19.57L53.61 -34.02Z"/>
+  </g>
+  <g id="Regular-M" transform="matrix(1 0 0 1 1400 1126)">
+   <path d="M74.35 -83.43L97.43 -60.35C98.58 -59.20 99.23 -57.63 99.23 -56L99.23 -1.38C99.23 7.40 91.86 14.77 83.08 14.77L34.62 14.77C25.83 14.77 18.46 7.40 18.46 -1.38L18.46 -69.08C18.46 -77.86 25.83 -85.23 34.62 -85.23L70 -85.23C71.63 -85.23 73.20 -84.58 74.35 -83.43ZM34.62 -72.92C32.63 -72.92 30.77 -71.06 30.77 -69.08L30.77 -1.38C30.77 0.60 32.63 2.46 34.62 2.46L83.08 2.46C85.06 2.46 86.92 0.60 86.92 -1.38L86.92 -53.45L67.45 -72.92ZM77.69 -33.69L77.69 -15.23C77.69 -10.13 73.56 -6 68.46 -6L46.92 -6C41.83 -6 37.69 -10.13 37.69 -15.23L37.69 -33.69C37.69 -38.79 41.83 -42.92 46.92 -42.92L68.46 -42.92C73.56 -42.92 77.69 -38.79 77.69 -33.69ZM46.92 -33.69L46.92 -15.23L68.46 -15.23L68.46 -33.69Z"/>
+  </g>
+  <g id="Regular-L" transform="matrix(1 0 0 1 1400 1556)">
+   <path d="M95.91 -97.40L125.68 -67.64C127.17 -66.15 128.01 -64.13 128.01 -62.02L128.01 8.43C128.01 19.76 118.50 29.27 107.17 29.27L44.65 29.27C33.32 29.27 23.82 19.76 23.82 8.43L23.82 -78.89C23.82 -90.22 33.32 -99.73 44.65 -99.73L90.30 -99.73C92.41 -99.73 94.42 -98.89 95.91 -97.40ZM44.65 -83.85C42.09 -83.85 39.69 -81.45 39.69 -78.89L39.69 8.43C39.69 10.99 42.09 13.39 44.65 13.39L107.17 13.39C109.73 13.39 112.13 10.99 112.13 8.43L112.13 -58.73L87.01 -83.85ZM100.22 -33.24L100.22 -9.43C100.22 -2.85 94.89 2.48 88.32 2.48L60.53 2.48C53.95 2.48 48.62 -2.85 48.62 -9.43L48.62 -33.24C48.62 -39.82 53.95 -45.15 60.53 -45.15L88.32 -45.15C94.89 -45.15 100.22 -39.82 100.22 -33.24ZM60.53 -33.24L60.53 -9.43L88.32 -9.43L88.32 -33.24Z"/>
+  </g>
+ </g>
+</svg>

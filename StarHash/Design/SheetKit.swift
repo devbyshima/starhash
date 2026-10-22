@@ -11,10 +11,10 @@ import SwiftUI
 // MARK: Type
 
 extension Font {
-    /// Beam's type scale, in Space Grotesk, for sheets: `size` at the
-    /// default text size, scaling like `style`.
+    /// Beam's type scale, in Melange, for sheets: `size` at the default
+    /// text size, scaling like `style`.
     static func sheet(_ size: CGFloat, _ weight: Font.Weight = .medium, relativeTo style: Font.TextStyle = .body) -> Font {
-        .custom(starhashFamily, size: size, relativeTo: style).weight(weight)
+        .custom(StarHashTypeface.melange(weight), size: size, relativeTo: style)
     }
 
     static var sheetLargeTitle: Font { sheet(32, .bold, relativeTo: .largeTitle) }

@@ -166,10 +166,10 @@ struct WidgetSymbol: View {
 }
 
 extension Font {
-    /// Space Grotesk at a widget's size, scaling with Dynamic Type as the
-    /// text around it does.
+    /// Melange at a widget's size, scaling with Dynamic Type as the text
+    /// around it does.
     static func widget(_ size: CGFloat, _ weight: Font.Weight = .medium) -> Font {
-        .custom(Font.starhashFamily, size: size, relativeTo: .starhashNearest(to: size)).weight(weight)
+        .custom(StarHashTypeface.melange(weight), size: size, relativeTo: .starhashNearest(to: size))
     }
 }
 #endif

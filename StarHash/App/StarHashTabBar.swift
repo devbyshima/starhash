@@ -78,9 +78,10 @@ struct StarHashTabBar: View {
 
     private func icon(_ item: TabBarItem, isSelected: Bool) -> some View {
         let symbol = item.symbol(payPage: router.payPage)
-        return Image(symbol: symbol)
+        // The page showing filled in the accent, the rest in outline in the
+        // text colour.
+        return Image(symbol: symbol, outline: !isSelected)
             .font(.system(size: TabBarMetrics.symbolSize, weight: .semibold))
-            // The page showing in the accent, the rest in the text colour.
             .foregroundStyle(isSelected ? Color.starhashAccentText : Color.starhashPrimaryText)
             .animation(.smooth(duration: 0.2), value: isSelected)
             .contentTransition(.symbolEffect(.replace))

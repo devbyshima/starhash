@@ -29,7 +29,8 @@
 	<string>$(STARHASH_APP_GROUP)</string>
 	<key>UIAppFonts</key>
 	<array>
-		<string>SpaceGrotesk.ttf</string>
+		<string>MelangeGrotesk-Light.ttf</string>
+		<string>QuadrantNotepad-Regular.otf</string>
 	</array>
 </dict>
 </plist>

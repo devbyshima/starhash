@@ -43,7 +43,7 @@ struct StarHashApp: App {
             UserDefaults.standard.set(false, forKey: PreferenceKey.hasOnboarded)
         }
         #endif
-        Self.useSpaceGroteskInNavigationBars()
+        Self.useBrandTypeInNavigationBars()
         // Before launch finishes, so a tap that opened StarHash is heard.
         StarHashNotifications.shared.start()
         // Nearby's own file from before it was built from the payments:
@@ -53,12 +53,14 @@ struct StarHashApp: App {
 
     /// Navigation bar titles (Settings and its pages, a transaction) are
     /// UIKit's, outside SwiftUI's font environment: the page title's 21pt
-    /// bold, scaled for the text size at launch up to 28.
-    private static func useSpaceGroteskInNavigationBars() {
+    /// bold in Melange, scaled for the text size at launch up to 28, and a
+    /// large title in Quadrant.
+    private static func useBrandTypeInNavigationBars() {
         let bar = UINavigationBar.appearance()
-        let title = UIFont.starhash(StarHashMetrics.pageTitleSize, weight: 700)
+        let title = UIFont.starhash(StarHashMetrics.pageTitleSize, weight: .bold)
         bar.titleTextAttributes = [.font: UIFontMetrics(forTextStyle: .headline).scaledFont(for: title, maximumPointSize: 28)]
-        bar.largeTitleTextAttributes = [.font: UIFont.starhash(34, weight: 700)]
+        let large = UIFont(name: StarHashTypeface.quadrant, size: 34) ?? .systemFont(ofSize: 34, weight: .bold)
+        bar.largeTitleTextAttributes = [.font: large]
     }
 
     var body: some Scene {
@@ -66,7 +68,7 @@ struct StarHashApp: App {
             SplashGate {
                 RootView()
                     // Text with no font of its own (list rows, fields) is in
-                    // Space Grotesk too.
+                    // Melange too.
                     .font(.starhash(.body))
                     .environment(store)
                     .environment(router)
@@ -114,14 +116,8 @@ struct StarHashApp: App {
 }
 
 private extension UIFont {
-    /// Space Grotesk at a point on its weight axis (300 to 700). Asked for
-    /// by name alone, UIKit gives the variable font's default, Light.
-    static func starhash(_ size: CGFloat, weight: CGFloat) -> UIFont {
-        let wght = 0x7767_6874 // the 'wght' axis tag
-        let descriptor = UIFontDescriptor(fontAttributes: [
-            .name: Font.starhashFamily,
-            UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String): [wght: weight],
-        ])
-        return UIFont(descriptor: descriptor, size: size)
+    /// Melange's face nearest `weight`.
+    static func starhash(_ size: CGFloat, weight: Font.Weight) -> UIFont {
+        UIFont(name: StarHashTypeface.melange(weight), size: size) ?? .systemFont(ofSize: size)
     }
 }

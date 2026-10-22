@@ -44,7 +44,7 @@ struct OnboardingPermission: View {
 
             VStack(spacing: 15) {
                 Text(catalog: config.title)
-                    .starhashFont(28, weight: .bold, relativeTo: .title)
+                    .font(.starhashDisplay(28, relativeTo: .title))
                     .foregroundStyle(Color.starhashPrimaryText)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)

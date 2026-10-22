@@ -76,7 +76,7 @@ enum AppTab: String, Hashable, CaseIterable, Identifiable {
     /// The tab bar's symbol, and the Pay and Buy switcher's.
     var symbol: String {
         switch self {
-        case .pay: "number"
+        case .pay: "number.square.fill"
         case .buy: "bag.fill"
         case .activity: "clock.fill"
         case .settings: "gearshape.fill"

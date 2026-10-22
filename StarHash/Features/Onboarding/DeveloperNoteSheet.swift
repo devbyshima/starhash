@@ -66,7 +66,7 @@ struct DeveloperNoteContent: View {
             DeveloperAvatar()
                 .padding(.bottom, 16)
             Text("A note from Shima")
-                .starhashFont(29, weight: .bold, relativeTo: .title)
+                .font(.starhashDisplay(29, relativeTo: .title))
                 .foregroundStyle(Color.starhashPrimaryText)
                 .accessibilityAddTraits(.isHeader)
                 .padding(.bottom, 18)
@@ -80,7 +80,7 @@ struct DeveloperNoteContent: View {
                 }
             }
             // A signature, so a script face: iOS's own Snell Roundhand, the
-            // one text not set in Space Grotesk.
+            // one text not set in Melange or Quadrant.
             Text("Shima")
                 .font(.custom("SnellRoundhand", size: 50, relativeTo: .largeTitle))
                 .foregroundStyle(Color.starhashPrimaryText)

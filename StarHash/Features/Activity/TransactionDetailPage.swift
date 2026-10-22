@@ -97,7 +97,7 @@ struct TransactionDetailPage: View {
     @ViewBuilder
     private func heroBadge(_ transaction: StarHashKit.Transaction) -> some View {
         let outgoing = transaction.direction == .outgoing
-        let tint = outgoing ? AnyShapeStyle(Color.starhashDestructiveOnPage) : AnyShapeStyle(Color.starhashIncoming)
+        let tint = outgoing ? AnyShapeStyle(Color.starhashOutgoing) : AnyShapeStyle(Color.starhashIncoming)
         let arrow = Image(symbol: outgoing ? "arrow.up.right" : "arrow.down.left")
         if enableContacts, PayContacts.shared.photoContactID(for: transaction.counterparty) != nil {
             TransactionAvatar(counterparty: transaction.counterparty, size: 72, isCircle: true)

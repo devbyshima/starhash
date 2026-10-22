@@ -15,7 +15,7 @@ extension Color {
     static var settingsCard: Color { .starhashCard }
     /// The tile behind row symbols and the profile monogram: a visible grey
     /// on a white card, a faint veil on a near-black one.
-    static let settingsTile = Color(light: .brandNight.opacity(0.07), dark: .brandPaper.opacity(0.07))
+    static let settingsTile = Color(light: .brandForest.opacity(0.07), dark: .brandPaper.opacity(0.07))
     /// Behind every settings page: the app's page colour, so cards stand
     /// out the same way they do on Activity.
     static var settingsCanvas: Color { .starhashBackground }
