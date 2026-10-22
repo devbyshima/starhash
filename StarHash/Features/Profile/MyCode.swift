@@ -139,12 +139,22 @@ struct ProfileFields: View {
     /// The number in the middle of its field, with no symbol, as Profile
     /// sets everything down the middle.
     var centred = false
+    /// The other SIM's number, on Profile when the owner has two.
+    var otherNumber: Binding<String>?
 
     @FocusState private var focus: Field?
     @State private var draftNumber = ""
+    @State private var draftOther = ""
     @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
 
-    private enum Field { case name, number }
+    private enum Field { case name, number, other }
+
+    /// What is wrong with the other SIM's number: it need only be a
+    /// Rwandan mobile number, on either network.
+    private var otherProblem: String? {
+        guard draftOther.filter(\.isNumber).count >= 10, Recipient.ownNumber(draftOther) == nil else { return nil }
+        return String(starhash: "Enter a Rwandan mobile number: 078, 079, 072 or 073.")
+    }
 
     /// What is wrong with the number typed, once it is long enough to tell.
     private var problem: String? {
@@ -197,17 +207,51 @@ struct ProfileFields: View {
             }
 
             if let problem {
-                Text(problem)
-                    .font(.starhash(.footnote))
-                    .foregroundStyle(Color.starhashDestructive)
-                    .padding(.horizontal, 6)
-                    .transition(.opacity)
+                problemText(problem)
+            }
+
+            if let otherNumber {
+                field(
+                    "Other SIM",
+                    text: $draftOther,
+                    prompt: "Other SIM",
+                    symbol: "simcard.fill"
+                )
+                .focused($focus, equals: .other)
+                .keyboardType(.phonePad)
+                .textContentType(.telephoneNumber)
+                .onChange(of: draftOther) { old, typed in
+                    // Kept as Settings' Other SIM row keeps it, so the two
+                    // show the same number.
+                    if let recipient = Recipient.ownNumber(typed) {
+                        otherNumber.wrappedValue = recipient.formattedDestination
+                        if Recipient.ownNumber(old) == nil { dismissKeyboard() }
+                    } else if typed.filter(\.isNumber).isEmpty {
+                        otherNumber.wrappedValue = ""
+                    }
+                }
+
+                if let otherProblem {
+                    problemText(otherProblem)
+                }
             }
         }
         .animation(.smooth(duration: 0.2), value: problem)
+        .animation(.smooth(duration: 0.2), value: otherProblem)
         .onAppear {
             if draftNumber.isEmpty, let saved = Recipient.ownNumber(number) { draftNumber = saved.formattedDestination }
+            if draftOther.isEmpty, let saved = otherNumber.flatMap({ Recipient.ownNumber($0.wrappedValue) }) {
+                draftOther = saved.formattedDestination
+            }
         }
+    }
+
+    private func problemText(_ problem: String) -> some View {
+        Text(problem)
+            .font(.starhash(.footnote))
+            .foregroundStyle(Color.starhashDestructive)
+            .padding(.horizontal, 6)
+            .transition(.opacity)
     }
 
     /// Whichever field has the keyboard lets it go.

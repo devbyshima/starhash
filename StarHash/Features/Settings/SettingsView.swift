@@ -79,6 +79,7 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.simCount) private var simCount = 1
     @AppStorage(PreferenceKey.appLanguage) private var appLanguage = AppLanguage.system.rawValue
     @AppStorage(PreferenceKey.secondNumber) private var secondNumber = ""
+    @FocusState private var editsSecondNumber: Bool
     @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
     @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
     @AppStorage(PreferenceKey.saveRecents) private var saveRecents = true
@@ -184,7 +185,15 @@ private struct SettingsRootList: View {
         }
     }
 
-    /// The owner's photo, name and number, opening Profile.
+    /// The owner's number under their name, and their other SIM's after
+    /// it when they have two.
+    private var profileNumbers: String? {
+        let numbers = [profileNumber] + (simCount == 2 ? [secondNumber] : [])
+        let shown = numbers.compactMap { Recipient.ownNumber($0)?.formattedDestination }
+        return shown.isEmpty ? nil : shown.joined(separator: " \u{00B7} ")
+    }
+
+    /// The owner's photo, name and numbers, opening Profile.
     private var profileCard: some View {
         SettingsCard {
             NavigationLink(value: SettingsPage.profile) {
@@ -192,7 +201,7 @@ private struct SettingsRootList: View {
                     ProfilePhotoView(size: 46)
                     SettingsRowText(
                         title: profileName.isEmpty ? String(starhash: "Profile") : profileName,
-                        status: Recipient.ownNumber(profileNumber)?.formattedDestination
+                        status: profileNumbers
                     )
                     Spacer(minLength: 8)
                     SettingsChevron()
@@ -218,9 +227,12 @@ private struct SettingsRootList: View {
                     $0 == 2 ? String(starhash: "Two") : String(starhash: "One")
                 }
             }
-            if simCount == 2 {
+            // Asked for here until it is in; from then on it is part of the
+            // profile (the card above shows it, Profile changes it).
+            if simCount == 2, Recipient.ownNumber(secondNumber) == nil {
                 SettingsRow(symbol: "simcard.fill", title: "Other SIM") {
                     TextField("07X XXX XXXX", text: $secondNumber)
+                        .focused($editsSecondNumber)
                         .keyboardType(.phonePad)
                         .textContentType(.telephoneNumber)
                         .multilineTextAlignment(.trailing)
@@ -229,8 +241,18 @@ private struct SettingsRootList: View {
                 }
             }
         }
+        .animation(.smooth(duration: 0.3), value: Recipient.ownNumber(secondNumber) == nil)
         .onChange(of: simCount) { store.markOwnTransfers() }
-        .onChange(of: secondNumber) { store.markOwnTransfers() }
+        .onChange(of: secondNumber) {
+            store.markOwnTransfers()
+            // The phone pad has no return key: a whole number is the end of
+            // it, so the keyboard goes once one is in, and it is spaced as
+            // Profile shows it.
+            if let recipient = Recipient.ownNumber(secondNumber) {
+                editsSecondNumber = false
+                if secondNumber != recipient.formattedDestination { secondNumber = recipient.formattedDestination }
+            }
+        }
     }
 
     private var transactionsCard: some View {

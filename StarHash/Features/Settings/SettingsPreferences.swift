@@ -90,13 +90,16 @@ enum StarHashPreferences {
     static var scamWarnings: Bool { bool(PreferenceKey.scamWarnings, default: true) }
     static var smartCategories: Bool { bool(PreferenceKey.smartCategories, default: true) }
 
-    /// The owner's name, number and photo as Settings keeps them.
+    /// The owner's name, numbers and photo as Settings keeps them; the
+    /// other SIM's only while they say they have two.
     @MainActor
     static var profile: OwnerProfile {
         let defaults = UserDefaults.standard
+        let other = defaults.integer(forKey: PreferenceKey.simCount) == 2 ? defaults.string(forKey: PreferenceKey.secondNumber) : nil
         return OwnerProfile(
             name: defaults.string(forKey: PreferenceKey.profileName),
             number: defaults.string(forKey: PreferenceKey.profileNumber),
+            otherNumber: other.flatMap { $0.isEmpty ? nil : $0 },
             photo: ProfilePhoto.shared.data
         )
     }
@@ -106,6 +109,11 @@ enum StarHashPreferences {
         let defaults = UserDefaults.standard
         defaults.set(profile.name ?? "", forKey: PreferenceKey.profileName)
         defaults.set(profile.number ?? "", forKey: PreferenceKey.profileNumber)
+        // A backup with a second number brings the second SIM back with it.
+        if let other = profile.otherNumber, !other.isEmpty {
+            defaults.set(other, forKey: PreferenceKey.secondNumber)
+            defaults.set(2, forKey: PreferenceKey.simCount)
+        }
         if let photo = profile.photo { ProfilePhoto.shared.restore(photo) }
     }
 

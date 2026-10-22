@@ -53,6 +53,8 @@ struct SettingsScroll<Content: View>: View {
         .background(Color.settingsCanvas.ignoresSafeArea())
         .starhashReadableScrollContent(base: SettingsLayout.screenMargin)
         .contentMargins(.top, top, for: .scrollContent)
+        // A number pad has no return key; scrolling puts it away too.
+        .scrollDismissesKeyboard(.interactively)
         .starhashSoftEdge()
     }
 }

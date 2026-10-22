@@ -78,12 +78,16 @@ public struct OwnerProfile: Codable, Hashable, Sendable {
     public var name: String?
     /// A Rwandan mobile number in local form (0788123456).
     public var number: String?
+    /// The owner's other SIM's number, when they have two: money between
+    /// the two is their own (`OwnAccounts`). Missing from older backups.
+    public var otherNumber: String?
     /// The owner's photo, a small JPEG.
     public var photo: Data?
 
-    public init(name: String? = nil, number: String? = nil, photo: Data? = nil) {
+    public init(name: String? = nil, number: String? = nil, otherNumber: String? = nil, photo: Data? = nil) {
         self.name = name
         self.number = number
+        self.otherNumber = otherNumber
         self.photo = photo
     }
 

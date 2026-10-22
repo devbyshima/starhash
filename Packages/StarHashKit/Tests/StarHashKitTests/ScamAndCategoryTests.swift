@@ -121,6 +121,16 @@ import Testing
         #expect(read.profile?.number == "0788123456")
     }
 
+    /// The other SIM goes with the profile, and a backup from before it
+    /// had one still reads.
+    @Test func otherSIMInTheProfile() throws {
+        let backup = StarHashBackup(transactions: [], profile: OwnerProfile(name: "Shima", number: "0788123456", otherNumber: "0722123456"))
+        #expect(try StarHashBackup.decode(try backup.encoded()).profile?.otherNumber == "0722123456")
+        let older = try JSONDecoder().decode(OwnerProfile.self, from: Data(#"{"name":"Shima","number":"0788123456"}"#.utf8))
+        #expect(older.otherNumber == nil)
+        #expect(older.number == "0788123456")
+    }
+
     @Test func rejectsOtherFiles() {
         #expect(throws: StarHashBackup.ReadError.notABackup) { try StarHashBackup.decode(Data("{\"a\":1}".utf8)) }
         #expect(throws: StarHashBackup.ReadError.notABackup) { try StarHashBackup.decode(Data("not json".utf8)) }

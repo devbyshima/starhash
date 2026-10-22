@@ -54,10 +54,10 @@ extension Color {
     static let brandPaperQuiet = Color(red: 163 / 255, green: 163 / 255, blue: 163 / 255)
     static let brandPaperMuted = Color(red: 128 / 255, green: 128 / 255, blue: 128 / 255)
 
-    /// A payment still waiting for its SMS: a pale wash of the green in
-    /// light mode (#D4F2DA), a mid green in dark (#2A5A36), quieter than the
-    /// solid green of a confirmed one.
-    static let brandSprout = Color(light: .init(red: 212 / 255, green: 242 / 255, blue: 218 / 255), dark: .init(red: 42 / 255, green: 90 / 255, blue: 54 / 255))
+    /// A payment still waiting for its SMS: yellow, #F2BB07, so the three
+    /// states read apart at a glance, as they did before the redesign:
+    /// yellow pending, red failed, green confirmed.
+    static let brandYellow = Color(red: 242 / 255, green: 187 / 255, blue: 7 / 255)
 
     /// Blood red, #C1121F: delete buttons and failed payments (5.9:1 on
     /// white).
@@ -114,13 +114,14 @@ extension Color {
     /// text colour, as the system's own selection reads.
     static let segmentedLens = Color(light: .black.opacity(0.07), dark: .white.opacity(0.14))
     static let segmentedLensEdge = Color(light: .black.opacity(0.08), dark: .white.opacity(0.18))
-    /// A payment still waiting for its SMS: the sprout green behind a
-    /// pending badge, with the text colour on it.
-    static let starhashUrgent = Color.brandSprout
-    static let starhashOnUrgent = Color(light: .brandInk, dark: .brandPaper)
-    /// Pending as words (on a transaction's page): the quieter text, since a
-    /// payment still waiting says nothing yet.
-    static let starhashUrgentText = Color(light: .brandGrey, dark: .brandPaperQuiet)
+    /// A payment still waiting for its SMS: the yellow behind a pending
+    /// badge, with near-black words on it (10:1), in either appearance.
+    static let starhashUrgent = Color.brandYellow
+    static let starhashOnUrgent = Color.brandInk
+    /// Pending as words (on a transaction's page): the yellow itself in dark
+    /// mode (10:1 on #171717), a deep amber on light mode's white (#8A6500,
+    /// 5.3:1), where the yellow is 1.8:1.
+    static let starhashUrgentText = Color(light: .init(red: 138 / 255, green: 101 / 255, blue: 0), dark: .brandYellow)
     /// Money going out, as an arrow or an amount: the text colour. Red is
     /// kept for what failed or deletes.
     static let starhashOutgoing = SurfaceColor(light: .brandInk, dark: .brandPaper)

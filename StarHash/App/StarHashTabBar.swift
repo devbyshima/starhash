@@ -164,14 +164,16 @@ extension EnvironmentValues {
     @Entry var floatingBarBottom: CGFloat = 8
 }
 
-/// The reference's measurements, in points: a 75pt capsule whose foot is
-/// 28pt above the screen's, a 93.3 by 59 lens 6pt in from the side and 8
-/// from top and foot, and 66pt for each symbol it is not under.
+/// The reference's measurements, in points: a capsule whose foot is 28pt
+/// above the screen's, a 93.3 by 59 lens, and 66pt for each symbol it is
+/// not under. The reference's capsule is 75 tall, the lens 8 from its top
+/// and foot; the owner brought it down to 71 so the lens sits 6 from every
+/// edge, as from its sides.
 enum TabBarMetrics {
-    static let height: CGFloat = 75
+    static let height: CGFloat = 71
     static let lensWidth: CGFloat = 93.33
     static let lensSideInset: CGFloat = 6
-    static let lensInset: CGFloat = 8
+    static let lensInset: CGFloat = 6
     static let itemWidth: CGFloat = 66
     static let endInset: CGFloat = 8
     static let symbolSize: CGFloat = 24

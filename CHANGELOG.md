@@ -9,7 +9,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 ### Added
 
 - Your photo with your QR code: people who scan it see your photo beside your number (a photo saved in their Contacts comes first). It is kept on StarHash's new small server under a random id, never with your number, and removing your photo deletes it there. StarHash also counts how many people use it, by a random id once a day; the privacy policy says so.
-- Two SIMs: say so in Settings and give the other number, and money between your own SIMs is filed under Your own accounts, counted as neither spent nor received.
+- Two SIMs: say so in Settings and give the other number, and money between your own SIMs is filed under Your own accounts, counted as neither spent nor received. The other number is part of your profile: Profile shows and changes it, the backup carries it, and Settings asks for it only until it is in, putting the keyboard away once it is.
 - A Nearby suggestion passed over five times in a row stops being suggested; picking it keeps it, and paying it any other way brings it back.
 - Money paid to MTN itself shows as bought: bundles and packs (by MTN Rwandacell, Voice Pack MTN, Data Bundle MTN) and airtime, from MoMo's own messages. Topping up MoMo's virtual card, or taking money back off it, shows as a move between your own accounts and counts as neither spent nor received; a new category, Your own accounts, does the same for any payment you mark.
 - MTN Virtual Card (*182*2*6#) is one of Buy's built-in codes, added once to lists saved before it.
@@ -28,6 +28,8 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Changed
 
+- Pending payments are yellow again, beside red for failed and green for confirmed.
+- The tab bar is a little shorter, so its highlight sits the same distance from every edge.
 - Onboarding's screens change visibly: the screen before drifts up into a blur as it fades, and the new title and line rise in word by word.
 - Onboarding asks for your photo after your name and number, for the people who scan your code. On "Confirm payments automatically", Set Up and Maybe Later sit side by side where Set Up was.
 - Activity's transactions and the recipient list have a line under each row, from where its words start to where they end. Report's title and its week, month and year control sit up beside the back button, and the recipient screen's Total sits where the tab bar does.
