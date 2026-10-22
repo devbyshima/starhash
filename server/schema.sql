@@ -6,3 +6,13 @@ CREATE TABLE IF NOT EXISTS installs (
   last_seen TEXT NOT NULL,
   version TEXT
 );
+
+-- One row per shared photo: the random id an owner's QR code carries, the
+-- hash of the key their iPhone holds (needed to replace or delete it), and
+-- the JPEG itself, 200 KB at most. No number, no name.
+CREATE TABLE IF NOT EXISTS photos (
+  id TEXT PRIMARY KEY,
+  key_hash TEXT NOT NULL,
+  data BLOB NOT NULL,
+  updated_at TEXT NOT NULL
+);

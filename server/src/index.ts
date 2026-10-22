@@ -11,7 +11,6 @@
 // counted. Nothing else: no number, no name, no transactions.
 
 export interface Env {
-  PHOTOS: R2Bucket;
   DB: D1Database;
 }
 
@@ -46,9 +45,9 @@ export default {
 } satisfies ExportedHandler<Env>;
 
 async function getPhoto(id: string, env: Env): Promise<Response> {
-  const object = await env.PHOTOS.get(id);
-  if (!object) return text(404, "Not found");
-  return new Response(object.body, {
+  const row = await env.DB.prepare("SELECT data FROM photos WHERE id = ?1").bind(id).first<{ data: number[] }>();
+  if (!row) return text(404, "Not found");
+  return new Response(new Uint8Array(row.data), {
     headers: {
       "Content-Type": "image/jpeg",
       // A replaced photo shows within the hour.
@@ -65,23 +64,27 @@ async function putPhoto(id: string, request: Request, env: Env): Promise<Respons
   if (body.byteLength === 0 || body.byteLength > MAX_PHOTO_BYTES) return text(413, "Too large");
   if (!isJPEG(body)) return text(415, "Only a JPEG");
   const keyHash = await sha256(key);
-  // The first upload claims the id for its key; later ones must match it.
-  const existing = await env.PHOTOS.head(id);
-  if (existing && existing.customMetadata?.keyHash !== keyHash) return text(403, "Not yours");
-  await env.PHOTOS.put(id, body, {
-    httpMetadata: { contentType: "image/jpeg" },
-    customMetadata: { keyHash },
-  });
+  // The first upload claims the id for its key; later ones replace it
+  // only when their key matches, in the one statement, so two uploads at
+  // once can't both claim it.
+  const result = await env.DB.prepare(
+    `INSERT INTO photos (id, key_hash, data, updated_at) VALUES (?1, ?2, ?3, ?4)
+     ON CONFLICT(id) DO UPDATE SET data = ?3, updated_at = ?4 WHERE photos.key_hash = ?2`,
+  )
+    .bind(id, keyHash, body, new Date().toISOString())
+    .run();
+  if (result.meta.changes === 0) return text(403, "Not yours");
   return text(200, "Saved");
 }
 
 async function deletePhoto(id: string, request: Request, env: Env): Promise<Response> {
   const key = bearer(request);
   if (!key) return text(401, "A key is needed");
-  const existing = await env.PHOTOS.head(id);
-  if (!existing) return text(200, "Gone");
-  if (existing.customMetadata?.keyHash !== (await sha256(key))) return text(403, "Not yours");
-  await env.PHOTOS.delete(id);
+  const keyHash = await sha256(key);
+  const row = await env.DB.prepare("SELECT key_hash FROM photos WHERE id = ?1").bind(id).first<{ key_hash: string }>();
+  if (!row) return text(200, "Gone");
+  if (row.key_hash !== keyHash) return text(403, "Not yours");
+  await env.DB.prepare("DELETE FROM photos WHERE id = ?1 AND key_hash = ?2").bind(id, keyHash).run();
   return text(200, "Deleted");
 }
 
