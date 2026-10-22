@@ -14,7 +14,7 @@ StarHash is an iPhone app (portrait only, iOS 18 and later), written in Swift 6 
 
 The Xcode project is generated from `project.yml` and is not committed.
 
-1. Set your own `DEVELOPMENT_TEAM` and the StarHash target's `PRODUCT_BUNDLE_IDENTIFIER` in `project.yml` (and the widgets' `com.fulltimestudio.starhash.widgets` to match). Automatic signing with a free personal team is enough while `STARHASH_APP_GROUPS` is `NO`, as it is by default.
+1. Set your own `DEVELOPMENT_TEAM` and the StarHash target's `PRODUCT_BUNDLE_IDENTIFIER` in `project.yml` (and the widgets' `com.devbyshima.starhash.widgets` to match). Automatic signing with a free personal team is enough while `STARHASH_APP_GROUPS` is `NO`, as it is by default.
 
 ### Widgets and the App Group
 
