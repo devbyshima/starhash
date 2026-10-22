@@ -9,7 +9,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 ### Added
 
 - Your photo with your QR code: people who scan it see your photo beside your number (a photo saved in their Contacts comes first). It is kept on StarHash's new small server under a random id, never with your number, and removing your photo deletes it there. StarHash also counts how many people use it, by a random id once a day; the privacy policy says so.
-- Two SIMs: say so in Settings and give the other number, and money between your own SIMs is filed under Your own accounts, counted as neither spent nor received. The other number is part of your profile: Profile shows and changes it, the backup carries it, and Settings asks for it only until it is in, putting the keyboard away once it is.
+- Two SIMs: say so in Settings and give the other number, and money between your own SIMs is filed under Your own accounts, counted as neither spent nor received. The other number is part of your profile: Profile shows and changes it, the backup carries it, and Settings asks for it only until it is in, putting the keyboard away once it is. Going back to one SIM asks which one you keep; the wallet follows the SIM kept.
 - A Nearby suggestion passed over five times in a row stops being suggested; picking it keeps it, and paying it any other way brings it back.
 - Money paid to MTN itself shows as bought: bundles and packs (by MTN Rwandacell, Voice Pack MTN, Data Bundle MTN) and airtime, from MoMo's own messages. Topping up MoMo's virtual card, or taking money back off it, shows as a move between your own accounts and counts as neither spent nor received; a new category, Your own accounts, does the same for any payment you mark.
 - MTN Virtual Card (*182*2*6#) is one of Buy's built-in codes, added once to lists saved before it.
@@ -28,6 +28,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Changed
 
+- Profile's numbers sit in an outlined box, as Settings' cards and a transaction's details do.
 - Balance on Pay, Cancel on Move and Scale and Maybe Later in onboarding are clear Liquid Glass, with no colour; only sheets are tinted.
 - Report's header no longer slides a little to the left once the page has opened.
 - Activity groups each month's transactions by day (Today, Yesterday, Mon, Oct 20), each row giving its time.

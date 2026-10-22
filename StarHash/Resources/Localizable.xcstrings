@@ -6641,6 +6641,22 @@
         }
       }
     },
+    "The other number leaves your profile.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'autre numéro quitte votre profil."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indi nimero ivanwa ku mwirondoro wawe."
+          }
+        }
+      }
+    },
     "The shortcut works. A message through the automation proves the rest.": {
       "localizations": {
         "rw": {
@@ -7897,6 +7913,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Où s'ouvre StarHash"
+          }
+        }
+      }
+    },
+    "Which SIM do you keep?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quelle SIM gardez-vous ?"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ni iyihe SIM ugumana?"
           }
         }
       }

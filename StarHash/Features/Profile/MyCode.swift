@@ -163,7 +163,9 @@ struct ProfileFields: View {
         guard let recipient = Recipient.ownNumber(draftNumber) else {
             return String(starhash: "Enter a Rwandan mobile number: 078, 079, 072 or 073.")
         }
-        if let network = recipient.network, network != wallet {
+        // With two SIMs, the wallet's may be the other one.
+        let otherOnWallet = otherNumber.flatMap { Recipient.ownNumber($0.wrappedValue)?.network } == wallet
+        if let network = recipient.network, network != wallet, !otherOnWallet {
             return String(starhash: "That is an \(network.name) number; you pay with \(wallet.walletName).")
         }
         return nil
@@ -183,7 +185,7 @@ struct ProfileFields: View {
             .textInputAutocapitalization(.words)
             .submitLabel(.next)
             .onSubmit { focus = .number }
-            .modifier(ProfileFieldBackground(onSheet: onSheet))
+            .modifier(ProfileFieldBackground(onSheet: onSheet, outlined: centred))
             }
 
             // With two SIMs, both numbers side by side in one capsule, a
@@ -196,10 +198,10 @@ struct ProfileFields: View {
                         .frame(width: 1, height: 28)
                     otherField(otherNumber)
                 }
-                .modifier(ProfileFieldBackground(onSheet: onSheet))
+                .modifier(ProfileFieldBackground(onSheet: onSheet, outlined: centred))
             } else {
                 numberField
-                    .modifier(ProfileFieldBackground(onSheet: onSheet))
+                    .modifier(ProfileFieldBackground(onSheet: onSheet, outlined: centred))
             }
 
             if let problem {
@@ -300,14 +302,18 @@ struct ProfileFields: View {
     }
 }
 
-/// A field's box: a sheet's card in a sheet, the cards' solid foreground
-/// on the page.
+/// A field's box: a sheet's card in a sheet; on Profile, outlined as
+/// Settings' cards and a transaction's details are (a line round it, the
+/// page's colour inside); elsewhere on a page, the cards' solid fill.
 private struct ProfileFieldBackground: ViewModifier {
     let onSheet: Bool
+    var outlined = false
 
     func body(content: Content) -> some View {
         if onSheet {
             content.sheetCard(radius: 29)
+        } else if outlined {
+            content.starhashOutlinedTile(in: Capsule())
         } else {
             content.starhashContainer(.starhashCard, in: Capsule())
         }

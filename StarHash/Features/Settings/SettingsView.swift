@@ -80,6 +80,8 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.appLanguage) private var appLanguage = AppLanguage.system.rawValue
     @AppStorage(PreferenceKey.secondNumber) private var secondNumber = ""
     @FocusState private var editsSecondNumber: Bool
+    /// Going back to one SIM with two numbers in: which one stays.
+    @State private var choosesSIMToKeep = false
     @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
     @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
     @AppStorage(PreferenceKey.saveRecents) private var saveRecents = true
@@ -223,7 +225,7 @@ private struct SettingsRootList: View {
                 title: "SIMs",
                 caption: "With two, money between them is not counted as spent"
             ) {
-                SettingsChoiceMenu(title: "SIMs", selection: $simCount, choices: [1, 2]) {
+                SettingsChoiceMenu(title: "SIMs", selection: simCountBinding, choices: [1, 2]) {
                     $0 == 2 ? String(starhash: "Two") : String(starhash: "One")
                 }
             }
@@ -242,6 +244,14 @@ private struct SettingsRootList: View {
             }
         }
         .animation(.smooth(duration: 0.3), value: Recipient.ownNumber(secondNumber) == nil)
+        .confirmationDialog("Which SIM do you keep?", isPresented: $choosesSIMToKeep, titleVisibility: .visible) {
+            ForEach([profileNumber, secondNumber].compactMap(Recipient.ownNumber), id: \.destination) { sim in
+                Button(sim.formattedDestination) { keepOnly(sim) }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("The other number leaves your profile.")
+        }
         .onChange(of: simCount) { store.markOwnTransfers() }
         .onChange(of: secondNumber) {
             store.markOwnTransfers()
@@ -253,6 +263,34 @@ private struct SettingsRootList: View {
                 if secondNumber != recipient.formattedDestination { secondNumber = recipient.formattedDestination }
             }
         }
+    }
+
+    /// Two SIMs to one: when both numbers are in, the owner says which SIM
+    /// stays rather than StarHash dropping the second.
+    private var simCountBinding: Binding<Int> {
+        Binding(
+            get: { simCount },
+            set: { count in
+                if count == 1, simCount == 2,
+                   Recipient.ownNumber(profileNumber) != nil, Recipient.ownNumber(secondNumber) != nil {
+                    choosesSIMToKeep = true
+                } else {
+                    simCount = count
+                }
+            }
+        )
+    }
+
+    /// The SIM kept becomes the profile's number, the other is cleared, and
+    /// the wallet follows the kept SIM's network, since it is the one that
+    /// pays now.
+    private func keepOnly(_ sim: Recipient) {
+        withAnimation(.smooth(duration: 0.3)) {
+            profileNumber = sim.destination
+            secondNumber = ""
+            simCount = 1
+        }
+        if let network = sim.network, network != wallet { wallet = network }
     }
 
     private var transactionsCard: some View {
