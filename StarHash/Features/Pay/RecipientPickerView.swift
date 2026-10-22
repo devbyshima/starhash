@@ -731,7 +731,7 @@ private enum PickerType {
     /// The amount's size in the currency's weight, so the label reads with
     /// "RWF" and the number leads.
     static var totalLabel: Font { .sheet(34, totalCurrencyWeight, relativeTo: .title) }
-    static var totalAmount: Font { .sheet(34, .bold, relativeTo: .title) }
+    static var totalAmount: Font { .starhashNumber(34, weight: .bold, relativeTo: .title) }
     static var totalCurrency: Font { .sheet(20, totalCurrencyWeight, relativeTo: .title3) }
     private static let totalCurrencyWeight: Font.Weight = .semibold
 }

@@ -94,7 +94,7 @@ struct BuyWidgetView: View {
                             .lineLimit(1)
                             .minimumScaleFactor(0.75)
                         Text(code.code)
-                            .font(.widget(10.5))
+                            .font(.starhashNumber(10.5))
                             .lineLimit(1)
                             .minimumScaleFactor(0.8)
                     }
@@ -113,7 +113,7 @@ struct BuyWidgetView: View {
                     WidgetSymbol(name: "chevron.right", size: 16)
                         .frame(width: 32)
                     Text("\(page % pages + 1)/\(pages)")
-                        .font(.widget(14, .bold))
+                        .font(.starhashNumber(14, weight: .bold))
                         .monospacedDigit()
                     Spacer(minLength: 0)
                 }

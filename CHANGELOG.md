@@ -22,7 +22,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Changed
 
-- A new look in StarHash's two greens: the green #64D27B as the accent and the brand, and the deep green #091D11 as light mode's text and dark mode's page, with every other colour a variation of them; red stays only for deletes and failures. Text is set in Melange and a few big titles in Quadrant. The tab bar shows the open page's icon filled and the others in outline, and Pay's tab is a hash in a rounded square. The QR code icon is redrawn.
+- A new look in StarHash's two greens: the green #64D27B as the accent and the brand, and the deep green #091D11 as light mode's text and dark mode's page, with every other colour a variation of them; red stays only for deletes and failures. Text is set in Melange, numbers in Google Sans Flex and a few big titles in Quadrant. The tab bar shows the open page's icon filled and the others in outline, and Pay's tab is a hash in a rounded square. The QR code icon is redrawn.
 - A new look: a #F2F3F6 page with white cards in light mode, black with #171717 cards in dark, and the green #00D957 as the accent and the brand, on the buttons, switches, chart, tab bar, app icon and launch. Cards and lists are flat; Liquid Glass stays on the tab bar, the header buttons, sheets and Buy's call buttons. Status colours: green for money in, yellow for pending, blood red for money out and deletes.
 - Settings' rows each have a green icon; a row's description shows when you tap its icon, and hides at the next tap.
 - StarHash's own icons everywhere: one soft, rounded set drawn for the app, in place of the system's symbols, in the tab bar, buttons, menus, Settings, Buy's codes and the widgets.

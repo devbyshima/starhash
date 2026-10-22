@@ -71,7 +71,7 @@ struct RecipientNumberRow: View {
             HStack(spacing: 14) {
                 leading
                 Text(recipient.formattedDestination)
-                    .font(.sheet(16, .medium))
+                    .font(.starhashNumber(16, relativeTo: .body))
                     .foregroundStyle(Color.starhashPrimaryText)
                     .monospacedDigit()
                 Spacer(minLength: 8)

@@ -156,7 +156,7 @@ struct ActivityTransactionRow: View {
                 .starhashFont(13, weight: .bold, relativeTo: .footnote)
                 .foregroundStyle(transaction.activityArrowColor)
             Text(Money.format(transaction.amount))
-                .starhashFont(17, weight: .semibold, relativeTo: .headline)
+                .font(.starhashNumber(17, weight: .semibold, relativeTo: .headline))
                 .foregroundStyle(transaction.activityAmountColor)
                 .strikethrough(transaction.status == .failed)
         }

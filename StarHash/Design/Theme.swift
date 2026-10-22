@@ -385,6 +385,13 @@ extension Font {
         .custom(StarHashTypeface.quadrant, size: size, relativeTo: style)
     }
 
+    /// Google Sans Flex, for numbers (amounts, the keypad, codes, phone
+    /// numbers): `size` at the default text size, scaling like the style
+    /// nearest it, at any weight on its axis.
+    static func starhashNumber(_ size: CGFloat, weight: Font.Weight = .medium, relativeTo style: Font.TextStyle? = nil) -> Font {
+        .custom(StarHashTypeface.numbers, size: size, relativeTo: style ?? .starhashNearest(to: size)).weight(weight)
+    }
+
     /// Big titles on a page (Auto-verify's steps): Title 1 bold, 28pt at
     /// the default text size. Pair it with `StarHashTracking.display(28)`.
     static let starhashTitle = Font.starhash(.title, weight: .bold)
@@ -397,6 +404,8 @@ extension Font {
 /// bundled.
 enum StarHashTypeface {
     static let quadrant = "QuadrantNotepad-Regular"
+    /// The numbers' family, a variable font: every weight from one file.
+    static let numbers = "Google Sans Flex"
 
     private static let melangeFaces: [(weight: CGFloat, name: String)] = [
         (300, "KMRMelangeGrotesk-Light"),

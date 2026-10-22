@@ -443,7 +443,7 @@ private struct ShortcutItem: View {
                             .foregroundStyle(Color.starhashPrimaryText)
                             .lineLimit(2)
                         Text(shortcut.code)
-                            .starhashFont(14, weight: .semibold, relativeTo: .subheadline, tracking: 0)
+                            .font(.starhashNumber(14, weight: .semibold, relativeTo: .subheadline))
                             .foregroundStyle(Color.starhashTertiaryText)
                             .lineLimit(1)
                     }

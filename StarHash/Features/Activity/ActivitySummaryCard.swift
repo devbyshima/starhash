@@ -22,7 +22,7 @@ struct ActivitySummaryCard: View {
                     .foregroundStyle(Color.starhashSecondaryText)
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(Money.format(totals.spent))
-                        .starhashFont(48, weight: .bold, relativeTo: .largeTitle, tracking: 0)
+                        .font(.starhashNumber(48, weight: .bold, relativeTo: .largeTitle))
                         .foregroundStyle(Color.starhashPrimaryText)
                         // The digits roll to a new total (another period, a
                         // new payment), or fade with Reduce Motion.
@@ -144,7 +144,7 @@ struct ActivitySpendingChart: View {
                 AxisValueLabel {
                     if let position = value.as(Double.self) {
                         Text(Money.compact(Int((position * top).rounded())))
-                            .font(.starhash(.caption2))
+                            .font(.starhashNumber(11, relativeTo: .caption2))
                             .foregroundStyle(Color.starhashSecondaryText)
                     }
                 }

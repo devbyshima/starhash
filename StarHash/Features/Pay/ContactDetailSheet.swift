@@ -107,7 +107,7 @@ struct ContactDetailSheet: View {
         HStack(spacing: 14) {
             leading(recipient)
             Text(recipient.formattedDestination)
-                .font(.sheet(16, .medium))
+                .font(.starhashNumber(16, relativeTo: .body))
                 .foregroundStyle(Color.starhashPrimaryText)
                 .monospacedDigit()
             Spacer(minLength: 8)
@@ -177,7 +177,7 @@ struct ContactDetailSheet: View {
     private func stat(value: String, label: String) -> some View {
         VStack(alignment: .leading, spacing: 1) {
             Text(value)
-                .font(.sheet(30, .bold, relativeTo: .title))
+                .font(.starhashNumber(30, weight: .bold, relativeTo: .title))
                 .foregroundStyle(Color.starhashPrimaryText)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)

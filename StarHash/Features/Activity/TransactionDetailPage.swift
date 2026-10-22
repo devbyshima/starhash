@@ -137,7 +137,7 @@ struct TransactionDetailPage: View {
                 + Text(" " + Money.currency)
                 .font(.sheet(22, .semibold, relativeTo: .title2))
                 .foregroundStyle(Color.sheetSecondaryText))
-                .font(.sheet(44, .bold, relativeTo: .largeTitle))
+                .font(.starhashNumber(44, weight: .bold, relativeTo: .largeTitle))
                 .monospacedDigit()
                 .lineLimit(1)
                 .minimumScaleFactor(0.4)
@@ -300,7 +300,7 @@ struct TransactionDetailPage: View {
     private func stat(value: String, label: String) -> some View {
         VStack(alignment: .leading, spacing: 1) {
             Text(value)
-                .font(.sheet(30, .bold, relativeTo: .title))
+                .font(.starhashNumber(30, weight: .bold, relativeTo: .title))
                 .foregroundStyle(Color.starhashPrimaryText)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
