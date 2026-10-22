@@ -4,6 +4,8 @@ import SwiftUI
 @main
 struct StarHashApp: App {
     @Environment(\.scenePhase) private var scenePhase
+    /// For the icon's quick actions (`QuickActions`).
+    @UIApplicationDelegateAdaptor(StarHashAppDelegate.self) private var appDelegate
 
     private let store = AppEnvironment.store
     private let router = AppEnvironment.router
@@ -106,6 +108,10 @@ struct StarHashApp: App {
             // were in the background, and notifications may have been
             // turned on or off in the Settings app.
             if phase == .active {
+                // A quick action chosen on the icon, and the menu as it now
+                // stands (the wallet's balance code).
+                QuickActions.performPending()
+                QuickActions.update()
                 // Counted as in use, once a day, by a random id alone.
                 StarHashCloud.pingIfDue()
                 store.reloadFromDisk()
@@ -116,8 +122,10 @@ struct StarHashApp: App {
                 Task { await SmartCategories.run(on: store) }
             }
             if phase == .background {
-                // The Buy widget shows the codes as they are now.
+                // The Buy widget shows the codes as they are now, and the
+                // icon's menu dials the wallet chosen now.
                 StarHashWidgetData.publish(shortcuts: shortcuts)
+                QuickActions.update()
             }
             AppLock.shared.sceneChanged(to: phase)
         }

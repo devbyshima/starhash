@@ -18,6 +18,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 - Purchases of airtime, bundles, electricity, water and TV show as bought rather than sent, and payments sort into categories, by their names and, with Smart categories, by Apple Intelligence.
 - Scam warnings: a message that looks like MoMo's but comes from someone's own number, or asks for money back, is never logged, and a notification warns you before you send anything back.
 - Export and import: everything StarHash keeps as one file, in Settings' Your Data.
+- A long press on StarHash's icon offers Scan to Pay, Balance (for your wallet), Buy and Activity, in the language chosen in StarHash.
 - Widgets, four of them after the owner's reference: Buy, tiles that dial your codes, two (small) or four (medium), which you choose in Edit Widget (any left unchosen show Buy's next codes), and Quick Pay, a Pay pill with Scan and Balance under it (small) or Scan, Balance, Buy and Activity (medium). Scan to Pay stays in Control Center.
 - English, French and Kinyarwanda, chosen in StarHash's own Settings (Language) and changed at once, dates and month names included. The widgets and iOS's own prompts keep the iPhone's language.
 - What's New: the first launch after an update shows what the version brought, with a video of each new feature. It shows once, and never on a fresh install.

@@ -333,6 +333,8 @@ private struct SettingsRootList: View {
                         // The lookups first, so the redraw is in it.
                         chosen.apply()
                         appLanguage = chosen.rawValue
+                        // The icon's menu, in the new language.
+                        QuickActions.update()
                         // The summaries queued with iOS were written in
                         // the language before.
                         Task { await StarHashNotifications.shared.sync() }
