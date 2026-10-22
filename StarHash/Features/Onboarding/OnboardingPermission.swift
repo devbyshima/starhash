@@ -41,7 +41,8 @@ struct OnboardingPermission: View {
                 .accessibilityHidden(true)
 
             VStack(spacing: 15) {
-                Text(catalog: config.title)
+                // Rising word by word as the screen before leaves.
+                RevealText(config.title, delay: RevealTiming.enterDelay)
                     .starhashFont(28, weight: .bold, relativeTo: .title)
                     .foregroundStyle(Color.starhashPrimaryText)
                     .multilineTextAlignment(.center)
@@ -49,7 +50,7 @@ struct OnboardingPermission: View {
                     .minimumScaleFactor(0.7)
                     .accessibilityAddTraits(.isHeader)
 
-                Text(catalog: config.description)
+                RevealText(config.description, startIndex: RevealText.wordCount(config.title), delay: RevealTiming.enterDelay)
                     .font(.starhash(.footnote))
                     .foregroundStyle(Color.starhashSecondaryText)
                     .multilineTextAlignment(.center)

@@ -23,6 +23,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Changed
 
+- Onboarding's screens change visibly: the screen before drifts up into a blur as it fades, and the new title and line rise in word by word. The tab bar's highlight sits the same distance from every edge.
 - Onboarding asks for your photo after your name and number, for the people who scan your code. On "Confirm payments automatically", Set Up and Maybe Later sit side by side where Set Up was.
 - The tab bar's icons swap at once, filled where the highlight is as it moves, with no animation of their own.
 - Activity's transactions and the recipient list have a line under each row, from where its words start to where they end. Report's title and its week, month and year control sit up beside the back button, and the recipient screen's Total sits where the tab bar does.

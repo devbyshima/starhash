@@ -38,11 +38,16 @@ struct OnboardingNumberPage: View {
             Spacer(minLength: 0)
 
             VStack(spacing: 12) {
-                Text("Your number")
+                // Rising word by word as the screen before leaves.
+                RevealText(String(localized: "Your number"), delay: RevealTiming.enterDelay)
                     .starhashFont(22, weight: .bold, relativeTo: .title2)
                     .foregroundStyle(Color.starhashPrimaryText)
                     .accessibilityAddTraits(.isHeader)
-                Text("It goes in your own QR code, so friends\nscan it to pay you. It stays on your iPhone.")
+                RevealText(
+                    String(localized: "It goes in your own QR code, so friends\nscan it to pay you. It stays on your iPhone."),
+                    startIndex: RevealText.wordCount(String(localized: "Your number")),
+                    delay: RevealTiming.enterDelay
+                )
                     .font(.starhash(.callout))
                     .foregroundStyle(Color.starhashSecondaryText)
             }

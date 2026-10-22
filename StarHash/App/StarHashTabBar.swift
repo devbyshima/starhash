@@ -190,13 +190,14 @@ extension EnvironmentValues {
 }
 
 /// The reference's measurements, in points: a 75pt capsule whose foot is
-/// 28pt above the screen's, a 93.3 by 59 lens 6pt in from the side and 8
-/// from top and foot, and 66pt for each symbol it is not under.
+/// 28pt above the screen's, a 93.3 by 63 lens 6pt in from every edge (the
+/// owner evened its top and foot to its sides), and 66pt for each symbol it
+/// is not under.
 enum TabBarMetrics {
     static let height: CGFloat = 75
     static let lensWidth: CGFloat = 93.33
     static let lensSideInset: CGFloat = 6
-    static let lensInset: CGFloat = 8
+    static let lensInset: CGFloat = 6
     static let itemWidth: CGFloat = 66
     static let endInset: CGFloat = 8
     static let symbolSize: CGFloat = 24

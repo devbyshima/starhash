@@ -72,31 +72,31 @@ struct OnboardingView: View {
             switch current {
             case .reel:
                 OnboardingReel(phases: Self.phases, tint: tint, onContinue: advance)
-                    .transition(.opacity)
+                    .transition(.blurOutUp)
             case .wallet:
                 OnboardingWalletPage(onDone: advance)
-                    .transition(.opacity)
+                    .transition(.blurOutUp)
             case .number:
                 OnboardingNumberPage(onDone: advance)
-                    .transition(.opacity)
+                    .transition(.blurOutUp)
             case .photo:
                 OnboardingPhotoPage(onDone: advance)
-                    .transition(.opacity)
+                    .transition(.blurOutUp)
             case .contacts:
                 OnboardingPermission(config: contacts)
-                    .transition(.opacity)
+                    .transition(.blurOutUp)
             case .nearby:
                 OnboardingPermission(config: nearby)
                     .id(Stage.nearby)
-                    .transition(.opacity)
+                    .transition(.blurOutUp)
             case .notifications:
                 OnboardingPermission(config: notifications)
                     .id(Stage.notifications)
-                    .transition(.opacity)
+                    .transition(.blurOutUp)
             case .autoVerify:
                 OnboardingPermission(config: autoVerify)
                     .id(Stage.autoVerify)
-                    .transition(.opacity)
+                    .transition(.blurOutUp)
             case .setup:
                 // The setup in full, in its own navigation bar: back steps
                 // back through it and then to the screen before, close
@@ -105,7 +105,7 @@ struct OnboardingView: View {
                 NavigationStack {
                     AutoVerificationGuide(onClose: finish, onLeave: goBack, onDone: finish)
                 }
-                .transition(.opacity)
+                .transition(.blurOutUp)
             }
         }
         .onChange(of: stage, initial: true) { _, stage in savedStage = stage }

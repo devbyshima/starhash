@@ -25,11 +25,16 @@ struct OnboardingPhotoPage: View {
             Spacer(minLength: 0)
 
             VStack(spacing: 12) {
-                Text("Your photo")
+                // Rising word by word as the screen before leaves.
+                RevealText(String(localized: "Your photo"), delay: RevealTiming.enterDelay)
                     .starhashFont(22, weight: .bold, relativeTo: .title2)
                     .foregroundStyle(Color.starhashPrimaryText)
                     .accessibilityAddTraits(.isHeader)
-                Text("Friends who scan your code see it\nbeside your number, so they know it's you.")
+                RevealText(
+                    String(localized: "Friends who scan your code see it\nbeside your number, so they know it's you."),
+                    startIndex: RevealText.wordCount(String(localized: "Your photo")),
+                    delay: RevealTiming.enterDelay
+                )
                     .font(.starhash(.callout))
                     .foregroundStyle(Color.starhashSecondaryText)
             }
