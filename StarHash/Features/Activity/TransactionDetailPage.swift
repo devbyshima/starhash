@@ -5,9 +5,9 @@ import UIKit
 
 /// What tapping a transaction shows, a page pushed on Activity's stack,
 /// after the owner's reference: the round back button, then who, when and
-/// how much down the middle with the category under it, the details in
-/// outlined cards grouped by what they say (how it went and how it was
-/// paid; who to; the amount, its fee and the balance after), where it was
+/// how much down the middle, the details in outlined cards grouped by what
+/// they say (how it went, its category and how it was paid; who to; the
+/// amount, its fee and the balance after), where it was
 /// paid on a small map, what this year has sent the same recipient, and
 /// the actions (Pay Again, Verify, Mark as Failed, Delete Transaction) as
 /// one filled list.
@@ -124,17 +124,16 @@ struct TransactionDetailPage: View {
                 .font(.starhashNumber(40, weight: .bold, relativeTo: .largeTitle))
                 .lineLimit(1)
                 .minimumScaleFactor(0.4)
-                .padding(.bottom, 16)
-            categoryPill(transaction)
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 8)
         .accessibilityElement(children: .contain)
     }
 
-    /// The category as a capsule that opens a menu of every category, and
-    /// None to clear it.
-    private func categoryPill(_ transaction: StarHashKit.Transaction) -> some View {
+    /// The category, a row under Status that opens a menu of every
+    /// category, and None to clear it; its value ends in the up-and-down
+    /// chevron, as Settings' choices do.
+    private func categoryRow(_ transaction: StarHashKit.Transaction) -> some View {
         let category = transaction.activityCategory
         let customTitle = category == nil ? transaction.category?.capitalized : nil
         return Menu {
@@ -149,20 +148,24 @@ struct TransactionDetailPage: View {
             }
             .pickerStyle(.inline)
         } label: {
-            // One glass capsule and nothing round it, as Activity's period
-            // menu is: the menu opens out of the label's own shape and
-            // shrinks back into it, so a larger invisible frame round a
-            // smaller drawn pill made it collapse to a blob, leave a ghost
-            // outline and drift as it settled.
-            Text(category?.title ?? customTitle ?? "Add Category")
-                .font(.sheetSubheadline)
-                .foregroundStyle(category == nil && customTitle == nil ? Color.sheetSecondaryText : Color.starhashPrimaryText)
-                .lineLimit(1)
-                .padding(.horizontal, 16)
-                .frame(minHeight: 40)
-                .fixedSize()
-                .contentShape(Capsule())
-                .starhashGlass(interactive: true)
+            // Laid out as a DetailRow, but not one: its combined
+            // accessibility element kept the menu from opening on a tap.
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Text("Category")
+                    .starhashFont(17, relativeTo: .body)
+                    .foregroundStyle(Color.starhashPrimaryText)
+                    .lineLimit(1)
+                Spacer(minLength: 8)
+                Text(catalog: category?.title ?? customTitle ?? "None")
+                    .starhashFont(17, relativeTo: .body)
+                    .foregroundStyle(Color.starhashSecondaryText)
+                    .lineLimit(1)
+                Image(symbol: "chevron.up.chevron.down")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.starhashTertiaryText)
+            }
+            .padding(.vertical, 11)
+            .contentShape(Rectangle())
         }
         .menuOrder(.fixed)
         .buttonStyle(.hapticPlain)
@@ -184,6 +187,7 @@ struct TransactionDetailPage: View {
                 if transaction.status == .failed, let reason = failureText(transaction) {
                     DetailRow("Reason", reason)
                 }
+                categoryRow(transaction)
                 if let wallet = transaction.wallet {
                     DetailRow("Payment", wallet.walletName)
                 }
