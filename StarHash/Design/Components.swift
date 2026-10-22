@@ -161,6 +161,17 @@ struct OutlinedCardShape: ViewModifier {
 }
 
 extension View {
+    /// A card or tile of its own drawn as a line, as the outlined cards are,
+    /// over the page's own colour rather than nothing, so it stays solid
+    /// when lifted over others (a pinned code being moved).
+    func starhashOutlinedTile(in shape: some InsettableShape) -> some View {
+        background(Color.starhashBackground, in: shape)
+            .overlay(shape.strokeBorder(Color.starhashOutline, lineWidth: 1))
+            .starhashContainerSurface()
+    }
+}
+
+extension View {
     /// This content in an outlined card: `OutlinedCardShape`.
     func starhashOutlinedCard(padding: EdgeInsets = EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16)) -> some View {
         modifier(OutlinedCardShape(padding: padding))

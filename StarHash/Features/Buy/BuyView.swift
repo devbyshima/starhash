@@ -52,7 +52,6 @@ struct BuyView: View {
     /// Bumped as a dragged tile passes another, for a tick each time.
     @State private var reorderTicks = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @FeatureFlagged(.buyRows) private var showsRows
 
     var body: some View {
         // The header is a Soft Edge bar: the codes scroll under it.
@@ -159,11 +158,10 @@ struct BuyView: View {
                 }
                 if !shortcuts.unpinned.isEmpty {
                     sectionTitle("Your codes")
-                    VStack(spacing: showsRows ? 0 : 10) {
+                    VStack(spacing: 10) {
                         ForEach(shortcuts.unpinned) { shortcut in
                             ShortcutItem(
                                 shortcut: shortcut,
-                                asRow: showsRows,
                                 onOpen: { details = shortcut },
                                 onDial: { dial(shortcut.code) }
                             )
@@ -199,24 +197,13 @@ struct BuyView: View {
         .starhashTabBarFollowsScroll()
     }
 
-    /// "Your codes": as Activity's month headings with the rows, a grey
-    /// label over the cards.
-    @ViewBuilder
     private func sectionTitle(_ title: String) -> some View {
-        if showsRows {
-            Text(catalog: title)
-                .starhashFont(22, weight: .bold, relativeTo: .title2)
-                .foregroundStyle(Color.starhashPrimaryText)
-                .accessibilityAddTraits(.isHeader)
-                .padding(.bottom, ActivityLayout.monthBottom)
-        } else {
-            Text(catalog: title)
-                .starhashFont(17, weight: .semibold, relativeTo: .headline)
-                .foregroundStyle(Color.starhashSecondaryText)
-                .accessibilityAddTraits(.isHeader)
-                .padding(.leading, 16)
-                .padding(.bottom, 10)
-        }
+        Text(catalog: title)
+            .starhashFont(17, weight: .semibold, relativeTo: .headline)
+            .foregroundStyle(Color.starhashSecondaryText)
+            .accessibilityAddTraits(.isHeader)
+            .padding(.leading, 16)
+            .padding(.bottom, 10)
     }
 
     /// The pinned codes, four to a row in two rows at most, every row
@@ -428,8 +415,6 @@ struct BuyView: View {
 /// one clear thing.
 private struct ShortcutItem: View {
     let shortcut: USSDShortcut
-    /// As Activity's rows (`FeatureFlag.buyRows`) rather than a card.
-    var asRow = false
     let onOpen: () -> Void
     let onDial: () -> Void
 
@@ -440,73 +425,6 @@ private struct ShortcutItem: View {
     private let shape = RoundedRectangle(cornerRadius: 22, style: .continuous)
 
     var body: some View {
-        if asRow {
-            row
-        } else {
-            card
-        }
-    }
-
-    /// As one of Activity's rows: the symbol on a white tile, the name with
-    /// the code under it, and a round call button on the right.
-    private var row: some View {
-        HStack(spacing: ActivityLayout.tileGap) {
-            Button {
-                TapHaptic.play()
-                onOpen()
-            } label: {
-                HStack(spacing: ActivityLayout.tileGap) {
-                    let tile = RoundedRectangle(cornerRadius: ActivityLayout.tileSize * 0.24, style: .continuous)
-                    Image(symbol: shortcut.symbol ?? ShortcutSymbols.plain)
-                        .font(.system(size: ActivityLayout.tileSize * 0.42, weight: .semibold))
-                        .foregroundStyle(Color.tilePlaceholderGlyph)
-                        .frame(width: ActivityLayout.tileSize, height: ActivityLayout.tileSize)
-                        .background(Color.tileSurface, in: tile)
-                        .overlay(tile.strokeBorder(Color.tileBorder, lineWidth: 1))
-                        .accessibilityHidden(true)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(shortcut.name)
-                            .starhashFont(17, relativeTo: .body)
-                            .foregroundStyle(Color.starhashPrimaryText)
-                            .lineLimit(2)
-                        Text(shortcut.code)
-                            .font(.starhashNumber(14, relativeTo: .subheadline))
-                            .foregroundStyle(Color.starhashSecondaryText)
-                            .lineLimit(1)
-                    }
-                    Spacer(minLength: 0)
-                }
-                .padding(.vertical, ActivityLayout.rowPadding)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(SharedPressButtonStyle(isPressed: $isPressed))
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(shortcut.name)
-            .accessibilityValue(shortcut.code)
-            .accessibilityHint("Shows its details")
-            .accessibilityAddTraits(.isButton)
-
-            Button {
-                TapHaptic.play(.medium)
-                onDial()
-            } label: {
-                Image(symbol: "phone.fill")
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundStyle(Color.callGlyph)
-                    .frame(width: 44, height: 44)
-                    .contentShape(Circle())
-                    .starhashGlass(in: Circle(), tint: .callGlassTint)
-            }
-            .buttonStyle(SharedPressButtonStyle(isPressed: $isPressed))
-            .accessibilityLabel("Dial \(shortcut.name)")
-            .accessibilityHint("Dials \(shortcut.code)")
-        }
-        .opacity(isPressed ? 0.6 : 1)
-        .animation(.snappy(duration: 0.18), value: isPressed)
-        .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: ActivityLayout.rowRadius, style: .continuous))
-    }
-
-    private var card: some View {
         HStack(spacing: 10) {
             Button {
                 TapHaptic.play()
@@ -534,8 +452,8 @@ private struct ShortcutItem: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity, minHeight: 68, alignment: .leading)
-                // The Total card, as the recipient screen's Total.
-                .starhashTotalCard(in: shape)
+                // Outlined, as a transaction's details and Settings' cards.
+                .starhashOutlinedTile(in: shape)
                 .contentShape(shape)
             }
             .buttonStyle(SharedPressButtonStyle(isPressed: $isPressed))
@@ -651,7 +569,7 @@ private struct PinnedTileFace: View {
                     .frame(width: width, height: height)
                 }
             }
-            .starhashTotalCard(in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .starhashOutlinedTile(in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
