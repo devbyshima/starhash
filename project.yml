@@ -147,6 +147,7 @@ targets:
       - path: StarHashWidgets
       - path: StarHash/Design/Theme.swift
       - path: StarHash/Design/Icons.swift
+      - path: StarHash/Features/Onboarding/StarHashMark.swift
       - path: StarHash/Resources/Icons.xcassets
       - path: StarHash/Resources/Fonts/SpaceGrotesk.ttf
         buildPhase: resources

@@ -2,35 +2,24 @@
 import AppIntents
 import Foundation
 
-/// Which page of codes the Buy widget shows, kept in the extension's own
-/// defaults, since only the widget changes it.
-enum WidgetChoices {
-    private static let pageKey = "buyPage"
-
-    static var buyPage: Int {
-        get { UserDefaults.standard.integer(forKey: pageKey) }
-        set { UserDefaults.standard.set(newValue, forKey: pageKey) }
-    }
-}
-
-/// Buy's More: the next page of codes, run in the widget without opening
-/// StarHash.
-struct NextCodesPageIntent: AppIntent {
-    static let title: LocalizedStringResource = "Show More Codes"
+/// A widget's tile, pill or circle: opens StarHash at one of its links
+/// (Pay, the scanner, Buy, Activity, or dialling the balance code). A
+/// button with an intent, since a small widget takes no links of its own.
+struct OpenStarHashIntent: AppIntent {
+    static let title: LocalizedStringResource = "Open StarHash"
     static let isDiscoverable = false
+    static let openAppWhenRun = true
 
-    /// How many pages there are, so the last wraps round to the first.
-    @Parameter(title: "Pages") var pages: Int
+    @Parameter(title: "Link") var link: String
 
     init() {}
 
-    init(pages: Int) {
-        self.pages = pages
+    init(link: String) {
+        self.link = link
     }
 
-    func perform() async throws -> some IntentResult {
-        WidgetChoices.buyPage = (WidgetChoices.buyPage + 1) % max(pages, 1)
-        return .result()
+    func perform() async throws -> some IntentResult & OpensIntent {
+        .result(opensIntent: OpenURLIntent(URL(string: link) ?? URL(string: "starhash://pay")!))
     }
 }
 #endif

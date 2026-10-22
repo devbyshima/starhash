@@ -2,75 +2,64 @@ import AppIntents
 import SwiftUI
 import WidgetKit
 
-/// StarHash's widgets: Buy's codes and Scan to Pay on the Home Screen, and
-/// Scan to Pay again in Control Center and on the Lock Screen. The Home
-/// Screen views are in `Views/`, shared with the app's widget gallery
-/// (DEBUG).
+/// StarHash's widgets, after the owner's reference: two kinds, each small
+/// and medium, so four in all, on the Home Screen; and Scan to Pay in
+/// Control Center and on the Lock Screen. The Home Screen views are in
+/// `Views/`, shared with the app's widget gallery (DEBUG).
 @main
 struct StarHashWidgets: WidgetBundle {
     var body: some Widget {
-        BuyWidget()
-        ScanToPayWidget()
+        ShortcutTilesWidget()
+        QuickPayWidget()
         ScanToPayControl()
     }
 }
 
-/// Buy's codes, nothing else on the card: dial one in a tap, and page
-/// through the rest with More on the medium one, without opening StarHash.
-struct BuyWidget: Widget {
+/// Tiles: Pay and Scan on the small one, Pay, Scan, Balance and Activity on
+/// the medium one.
+struct ShortcutTilesWidget: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: "BuyWidget", provider: StarHashTimeline()) { entry in
-            BuyWidgetEntryView(entry: entry)
+        StaticConfiguration(kind: "ShortcutTilesWidget", provider: StarHashTimeline()) { entry in
+            ShortcutTilesEntryView(entry: entry)
                 .containerBackground(Color.widgetCard, for: .widget)
         }
-        .configurationDisplayName("Buy")
-        .description("Dial your codes in a tap.")
+        .configurationDisplayName("StarHash")
+        .description("Pay, scan, check your balance and see your activity in a tap.")
         .supportedFamilies([.systemSmall, .systemMedium])
         .contentMarginsDisabled()
     }
 }
 
-private struct BuyWidgetEntryView: View {
+private struct ShortcutTilesEntryView: View {
     let entry: StarHashEntry
     @Environment(\.widgetFamily) private var family
 
     var body: some View {
-        BuyWidgetView(snapshot: entry.snapshot, family: family, page: entry.page)
+        ShortcutTilesWidgetView(family: family, wallet: entry.snapshot.wallet)
     }
 }
 
-/// Scan to Pay as a small widget, on the same card as Buy's: one tap opens
-/// StarHash's scanner.
-struct ScanToPayWidget: Widget {
+/// Pay in a pill, with Scan and Balance (and on the medium one Buy and
+/// Activity) as circles under it.
+struct QuickPayWidget: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: "ScanToPayWidget", provider: ScanToPayTimeline()) { _ in
-            ScanToPayWidgetView()
+        StaticConfiguration(kind: "QuickPayWidget", provider: StarHashTimeline()) { entry in
+            QuickPayEntryView(entry: entry)
                 .containerBackground(Color.widgetCard, for: .widget)
         }
-        .configurationDisplayName("Scan to Pay")
-        .description("Open the scanner to pay a QR code.")
-        .supportedFamilies([.systemSmall])
+        .configurationDisplayName("Quick Pay")
+        .description("Start a payment, or scan, from your Home Screen.")
+        .supportedFamilies([.systemSmall, .systemMedium])
         .contentMarginsDisabled()
     }
 }
 
-/// Scan to Pay shows nothing that changes, so its timeline is one entry
-/// that stands for good.
-private struct ScanToPayTimeline: TimelineProvider {
-    struct Entry: TimelineEntry {
-        let date: Date
-    }
+private struct QuickPayEntryView: View {
+    let entry: StarHashEntry
+    @Environment(\.widgetFamily) private var family
 
-    func placeholder(in context: Context) -> Entry {
-        Entry(date: .now)
-    }
-
-    func getSnapshot(in context: Context, completion: @escaping (Entry) -> Void) {
-        completion(Entry(date: .now))
-    }
-
-    func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> Void) {
-        completion(Timeline(entries: [Entry(date: .now)], policy: .never))
+    var body: some View {
+        QuickPayWidgetView(family: family, wallet: entry.snapshot.wallet)
     }
 }
 
@@ -101,7 +90,7 @@ struct OpenScannerIntent: AppIntent {
 }
 
 #Preview(as: .systemMedium) {
-    BuyWidget()
+    ShortcutTilesWidget()
 } timeline: {
-    StarHashEntry(date: .now, snapshot: .placeholder, page: 0)
+    StarHashEntry(date: .now, snapshot: .placeholder)
 }

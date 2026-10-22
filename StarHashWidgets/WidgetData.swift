@@ -17,26 +17,26 @@ enum WidgetData {
     }
 }
 
-/// One moment of the Buy widget: the codes and the page it is on.
+/// One moment of a widget: the app's snapshot, for the wallet Balance
+/// dials.
 struct StarHashEntry: TimelineEntry {
     let date: Date
     let snapshot: WidgetSnapshot
-    let page: Int
 }
 
-/// The codes change only in the app, which reloads the widget whenever it
-/// writes a new snapshot, so the timeline is the one entry, now.
+/// The wallet changes only in the app, which reloads the widgets whenever
+/// it writes a new snapshot, so the timeline is the one entry, now.
 struct StarHashTimeline: TimelineProvider {
     func placeholder(in context: Context) -> StarHashEntry {
-        StarHashEntry(date: .now, snapshot: .placeholder, page: 0)
+        StarHashEntry(date: .now, snapshot: .placeholder)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (StarHashEntry) -> Void) {
-        completion(StarHashEntry(date: .now, snapshot: context.isPreview ? .placeholder : WidgetData.snapshot, page: WidgetChoices.buyPage))
+        completion(StarHashEntry(date: .now, snapshot: context.isPreview ? .placeholder : WidgetData.snapshot))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<StarHashEntry>) -> Void) {
-        let entry = StarHashEntry(date: .now, snapshot: WidgetData.snapshot, page: WidgetChoices.buyPage)
+        let entry = StarHashEntry(date: .now, snapshot: WidgetData.snapshot)
         completion(Timeline(entries: [entry], policy: .never))
     }
 }

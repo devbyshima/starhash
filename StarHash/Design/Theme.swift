@@ -259,8 +259,11 @@ extension Color {
     static let widgetCard = Color(light: .brandWhite, dark: .brandInk)
     /// Words on the widgets: the text colours.
     static let widgetText = Color(light: .brandInk, dark: .brandPaper)
-    /// The medium Buy widget's tiles: the fills' colour.
-    static let widgetChip = Color(light: .brandMist, dark: .brandCoal)
+    /// The quieter words on a widget (the pill's "Pay").
+    static let widgetSecondaryText = Color(light: .brandGrey, dark: .brandPaperQuiet)
+    /// The widgets' tiles, pills and circles: a step past the fills, as the
+    /// reference's grey tiles stand on its card.
+    static let widgetChip = Color(light: .brandCloud, dark: .brandSlate)
     /// The widgets' symbols: the green.
     static let widgetAccent = Color.brandFill
 
