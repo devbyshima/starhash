@@ -8,8 +8,20 @@ enum AppEnvironment {
         #if DEBUG
         if DebugLaunch.inMemory { return DebugLaunch.seededStore() }
         #endif
-        return StarHashStore(fileURL: StarHashStore.defaultFileURL)
+        let store = StarHashStore(fileURL: StarHashStore.defaultFileURL)
+        store.ownAccounts = ownAccounts
+        return store
     }()
+
+    /// The owner's two numbers, with two SIMs set in Settings.
+    static func ownAccounts() -> OwnAccounts? {
+        let defaults = UserDefaults.standard
+        guard defaults.integer(forKey: PreferenceKey.simCount) == 2 else { return nil }
+        return OwnAccounts(
+            numbers: [defaults.string(forKey: PreferenceKey.profileNumber) ?? "", defaults.string(forKey: PreferenceKey.secondNumber) ?? ""],
+            name: defaults.string(forKey: PreferenceKey.profileName)
+        )
+    }
 
     /// Buy's codes. Debug launches with -inMemory start from the defaults
     /// in a throwaway list.

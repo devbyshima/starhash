@@ -16,6 +16,16 @@ public final class StarHashStore {
 
     @ObservationIgnored private let fileURL: URL?
 
+    /// The owner's own numbers, read afresh each time a payment or message
+    /// comes in (the app reads them from its settings): money between them
+    /// is filed as `ownAccounts`.
+    @ObservationIgnored public var ownAccounts: @MainActor () -> OwnAccounts? = { nil }
+
+    /// `ownAccounts` when `counterparty` is one of the owner's own numbers.
+    private func ownCategory(for counterparty: Recipient) -> String? {
+        ownAccounts()?.owns(counterparty) == true ? TransactionCategory.ownAccounts.rawValue : nil
+    }
+
     /// False while the file exists but could not be read: a Shortcuts
     /// automation can wake the app while the phone is still locked after a
     /// restart, when the file is sealed. Writing then would replace a
@@ -162,12 +172,29 @@ public final class StarHashStore {
             sortAndSave()
             return retry
         }
-        let transaction = Transaction(
+        var transaction = Transaction(
             direction: .outgoing, counterparty: recipient, amount: amount,
             date: date, status: .pending, source: .app, location: location, wallet: wallet
         )
+        transaction.category = ownCategory(for: recipient)
         add(transaction)
         return transaction
+    }
+
+    /// Files every transaction with one of the owner's own numbers as
+    /// `ownAccounts`, as the numbers are first given or change. Returns how
+    /// many it filed.
+    @discardableResult
+    public func markOwnTransfers() -> Int {
+        var count = 0
+        for index in transactions.indices where transactions[index].category != TransactionCategory.ownAccounts.rawValue {
+            if let own = ownCategory(for: transactions[index].counterparty) {
+                transactions[index].category = own
+                count += 1
+            }
+        }
+        if count > 0 { sortAndSave() }
+        return count
     }
 
     /// Applies a carrier SMS: confirms the matching pending payment (same
@@ -185,7 +212,7 @@ public final class StarHashStore {
         let transaction = Transaction(
             direction: sms.direction, counterparty: sms.counterparty, amount: sms.amount,
             fee: sms.fee, date: date, status: .confirmed, source: .sms,
-            reference: sms.reference, balanceAfter: sms.balanceAfter, category: sms.category,
+            reference: sms.reference, balanceAfter: sms.balanceAfter, category: ownCategory(for: sms.counterparty) ?? sms.category,
             wallet: sms.wallet, messageDate: sms.date
         )
         add(transaction)
@@ -207,7 +234,7 @@ public final class StarHashStore {
         match.messageDate = sms.date
         match.wallet = sms.wallet
         // A category chosen by hand stays; one the message gives fills a gap.
-        if match.category == nil { match.category = sms.category }
+        if match.category == nil { match.category = ownCategory(for: match.counterparty) ?? sms.category }
         // A merchant takes the name its code is registered under, from
         // a message that names the code: it can differ from the shop's
         // sign, and it is what the code shows as from now on (Activity,

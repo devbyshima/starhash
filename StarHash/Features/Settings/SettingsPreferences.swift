@@ -25,6 +25,10 @@ extension PreferenceKey {
     /// them (`OwnerProfile`).
     static let profileName = "profileName"
     static let profileNumber = "profileNumber"
+    /// How many SIMs pay from this iPhone (1 or 2), and the other one's
+    /// number: money between the two is moved, not spent (`OwnAccounts`).
+    static let simCount = "simCount"
+    static let secondNumber = "secondNumber"
     /// Whether the on-device model may name the categories the rules
     /// cannot (iOS 26 and later, with Apple Intelligence).
     static let smartCategories = "smartCategories"

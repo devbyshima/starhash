@@ -76,6 +76,8 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.smartCategories) private var smartCategories = true
     @AppStorage(PreferenceKey.profileName) private var profileName = ""
     @AppStorage(PreferenceKey.profileNumber) private var profileNumber = ""
+    @AppStorage(PreferenceKey.simCount) private var simCount = 1
+    @AppStorage(PreferenceKey.secondNumber) private var secondNumber = ""
     @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
     @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
     @AppStorage(PreferenceKey.saveRecents) private var saveRecents = true
@@ -119,6 +121,7 @@ private struct SettingsRootList: View {
     private var settingsList: some View {
         SettingsScroll {
             profileCard
+            simsCard
             transactionsCard
             recipientsCard
             payBuyCard
@@ -199,6 +202,34 @@ private struct SettingsRootList: View {
             }
             .buttonStyle(HighlightRowButtonStyle(pressHaptic: false))
         }
+    }
+
+    /// One SIM or two, and the other's number: money between them is
+    /// filed as moved between the owner's own accounts.
+    private var simsCard: some View {
+        SettingsCard("Your SIMs") {
+            SettingsRow(
+                symbol: "simcard.fill",
+                title: "SIMs",
+                caption: "With two, money between them is not counted as spent"
+            ) {
+                SettingsChoiceMenu(title: "SIMs", selection: $simCount, choices: [1, 2]) {
+                    $0 == 2 ? String(localized: "Two") : String(localized: "One")
+                }
+            }
+            if simCount == 2 {
+                SettingsRow(symbol: "simcard.fill", title: "Other SIM") {
+                    TextField("07X XXX XXXX", text: $secondNumber)
+                        .keyboardType(.phonePad)
+                        .textContentType(.telephoneNumber)
+                        .multilineTextAlignment(.trailing)
+                        .font(.starhashNumber(16, relativeTo: .body))
+                        .frame(maxWidth: 150)
+                }
+            }
+        }
+        .onChange(of: simCount) { store.markOwnTransfers() }
+        .onChange(of: secondNumber) { store.markOwnTransfers() }
     }
 
     private var transactionsCard: some View {
