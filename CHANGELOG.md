@@ -22,6 +22,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Changed
 
+- Activity's transactions and the recipient list have a line under each row, from where its words start to where they end. Report's title and its week, month and year control sit up beside the back button, and the recipient screen's Total sits where the tab bar does.
 - Buy's codes and pinned tiles are outlined cards, as a transaction's details and Settings are.
 - Pay: the wallet's logo sits on its own above the keypad, Balance is a Liquid Glass button in light and dark, and a number saved with no name shows the StarHash mark where a "#" was.
 - The developer's note is in StarHash's colours the other way round from the page under it (deep green over light mode's green, green over dark mode's deep green), so it stands apart.

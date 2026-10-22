@@ -30,6 +30,7 @@ struct RecipientPickerView: View {
 
     @Environment(StarHashStore.self) private var store
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.floatingBarBottom) private var floatingBarBottom
     @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
     @AppStorage(PreferenceKey.saveRecents) private var saveRecents = true
     @AppStorage(PreferenceKey.nearbyLocation) private var nearbyEnabled = false
@@ -622,7 +623,9 @@ struct RecipientPickerView: View {
         .starhashGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous), tint: .clear)
         .shadow(color: .floatingShadow, radius: 18, y: 6)
         .padding(.horizontal, 16)
-        .padding(.bottom, 8)
+        // Level with the tab bar it takes the place of: its foot as far
+        // from the screen's.
+        .padding(.bottom, floatingBarBottom)
         .starhashReadableWidth()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Total \(Money.formatWithCurrency(amount))")
@@ -754,6 +757,12 @@ private struct PickerSkeletonRow: View {
         .padding(.horizontal, 22)
         .padding(.vertical, 8)
         .opacity(dims ? 0.45 : 1)
+        // The real rows' line, so the list keeps its rhythm as it loads.
+        .overlay(alignment: .bottom) {
+            SheetDivider()
+                .padding(.leading, 22 + 44 + 12)
+                .padding(.trailing, 22)
+        }
         .onAppear {
             guard !reduceMotion else { return }
             withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) { dims = true }
@@ -838,6 +847,14 @@ struct RecipientRow: View {
             // Flat on the page, in line with the section labels.
             .padding(.horizontal, 22)
             .padding(.vertical, 8)
+            // A line under the row from where its words start to where the
+            // row's content ends: past the tile and its gap, in from the
+            // edge as far as the row is.
+            .overlay(alignment: .bottom) {
+                SheetDivider()
+                    .padding(.leading, 22 + 44 + 12)
+                    .padding(.trailing, 22)
+            }
             .contentShape(Rectangle())
             // On the label, inside the button: a gesture on the button
             // itself would rank below its tap and never be heard.

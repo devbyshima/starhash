@@ -73,8 +73,9 @@ struct ActivityView: View {
                     TransactionDetailPage(transactionID: id, onPayAgain: payAgain)
                         .starhashBackButton()
                 case .report:
+                    // Its title and period control sit up beside the back
+                    // button, so it brings its own.
                     ReportPage()
-                        .starhashBackButton()
                 case .profile:
                     ProfileView()
                         .starhashBackButton()

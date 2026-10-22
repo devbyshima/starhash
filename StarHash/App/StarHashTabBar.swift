@@ -158,6 +158,13 @@ struct TabBarLayout: Equatable {
     }
 }
 
+extension EnvironmentValues {
+    /// How far above the safe area's foot the tab bar's foot sits (below
+    /// it, on a phone with a home indicator), for a bar that takes the tab
+    /// bar's place while it steps aside.
+    @Entry var floatingBarBottom: CGFloat = 8
+}
+
 /// The reference's measurements, in points: a 75pt capsule whose foot is
 /// 28pt above the screen's, a 93.3 by 59 lens 6pt in from the side and 8
 /// from top and foot, and 66pt for each symbol it is not under.

@@ -117,6 +117,12 @@ struct ActivityTransactionRow: View {
             }
         }
         .padding(.vertical, ActivityLayout.rowPadding)
+        // A line under the row from where its words start to where the
+        // amount ends.
+        .overlay(alignment: .bottom) {
+            SheetDivider()
+                .padding(.leading, ActivityLayout.tileSize + ActivityLayout.tileGap)
+        }
         .contentShape(Rectangle())
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(transaction.activityAccessibilityLabel)
