@@ -76,9 +76,6 @@ struct ActivityView: View {
                     // Its title and period control sit up beside the back
                     // button, so it brings its own.
                     ReportPage()
-                case .profile:
-                    ProfileView()
-                        .starhashBackButton()
                 }
             }
         }
@@ -181,7 +178,6 @@ struct ActivityView: View {
             searchText: $searchText,
             searchFocused: $searchFocused,
             onReport: { page = .report },
-            onProfile: { page = .profile },
             onSearch: beginSearch,
             onCloseSearch: endSearch
         )
@@ -313,7 +309,6 @@ struct ActivityView: View {
 enum ActivityRoute: Hashable {
     case transaction(UUID)
     case report
-    case profile
 
     var transactionID: UUID? {
         if case .transaction(let id) = self { id } else { nil }

@@ -2,15 +2,13 @@ import StarHashKit
 import SwiftUI
 
 /// Activity's header, after the owner's reference: the page's title large
-/// on the left, and on the right the report, search and the owner's photo,
-/// each round. Searching, a close button comes in on the left and the field
+/// on the left, and on the right the report and search, each round. Searching, a close button comes in on the left and the field
 /// from the right as the title goes out to the left.
 struct ActivityTopBar: View {
     let isSearching: Bool
     @Binding var searchText: String
     var searchFocused: FocusState<Bool>.Binding
     let onReport: () -> Void
-    let onProfile: () -> Void
     let onSearch: () -> Void
     let onCloseSearch: () -> Void
 
@@ -39,8 +37,6 @@ struct ActivityTopBar: View {
                         SwapGlassButton(symbol: "chart.bar.fill", label: "Report", action: onReport)
                             .transition(.opacity)
                         SwapGlassButton(symbol: "magnifyingglass", label: "Search", action: onSearch)
-                            .transition(.opacity)
-                        OwnerAvatarButton(action: onProfile)
                             .transition(.opacity)
                     }
                 }
@@ -87,43 +83,5 @@ struct ActivityTopBar: View {
         .frame(maxWidth: .infinity, minHeight: 44)
         // Clear, as the buttons it melts into.
         .starhashGlass(interactive: true, tint: .clear)
-    }
-}
-
-/// The owner's photo in a round button, as the reference's avatar: their
-/// photo when there is one, else their initial on the green, else a
-/// person. Opens Profile.
-struct OwnerAvatarButton: View {
-    let action: () -> Void
-
-    @AppStorage(PreferenceKey.profileName) private var name = ""
-
-    var body: some View {
-        Button(action: action) {
-            Group {
-                if let image = ProfilePhoto.shared.image {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFill()
-                } else if let initial = name.first(where: \.isLetter) {
-                    Text(String(initial).uppercased())
-                        .font(.starhashFixed(19, weight: .semibold))
-                        .foregroundStyle(Color.starhashOnInk)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.starhashInk)
-                } else {
-                    Image(symbol: "person.fill")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(Color.starhashOnInk)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.starhashInk)
-                }
-            }
-            .frame(width: 44, height: 44)
-            .clipShape(Circle())
-            .contentShape(Circle())
-        }
-        .buttonStyle(.hapticPlain)
-        .accessibilityLabel("Profile")
     }
 }
