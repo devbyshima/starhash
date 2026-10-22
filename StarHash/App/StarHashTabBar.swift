@@ -41,14 +41,9 @@ struct StarHashTabBar: View {
                 .frame(width: TabBarMetrics.lensWidth, height: TabBarMetrics.height - TabBarMetrics.lensInset * 2)
                 .offset(x: lensCenter - TabBarMetrics.lensWidth / 2, y: TabBarMetrics.lensInset)
 
-            // The symbol the lens is over is the one filled, frame by frame
-            // as the lens moves (a tap's spring, a finger's drag), with no
-            // animation of its own: it fills as the lens reaches it.
-            LensFill(lensCenter: lensCenter, centers: layout.centers) { filled in
-                ForEach(Array(items.enumerated()), id: \.element) { index, item in
-                    icon(item, isFilled: index == filled, isSelected: index == selectedIndex)
-                        .position(x: layout.centers[index], y: TabBarMetrics.height / 2)
-                }
+            ForEach(Array(items.enumerated()), id: \.element) { index, item in
+                icon(item, isSelected: index == selectedIndex)
+                    .position(x: layout.centers[index], y: TabBarMetrics.height / 2)
             }
         }
         .frame(width: layout.width, height: TabBarMetrics.height, alignment: .topLeading)
@@ -70,7 +65,7 @@ struct StarHashTabBar: View {
         )
         .animation(reduceMotion ? .smooth(duration: 0.2) : .spring(response: 0.3, dampingFraction: 0.78), value: router.isTabBarCompact)
         .onAppear { NavigationHaptics.shared.prepare() }
-        // Clear glass over the pale page: near-black symbols in light
+        // Clear glass over the white page: near-black symbols in light
         // mode, which also read over a card scrolling under.
         .starhashContainerSurface()
         .accessibilityElement(children: .contain)
@@ -81,14 +76,14 @@ struct StarHashTabBar: View {
         LensMotion.spring(reduceMotion: reduceMotion)
     }
 
-    private func icon(_ item: TabBarItem, isFilled: Bool, isSelected: Bool) -> some View {
+    private func icon(_ item: TabBarItem, isSelected: Bool) -> some View {
         let symbol = item.symbol(payPage: router.payPage)
-        // Under the lens filled in the accent, the rest in outline in the
-        // text colour, swapped at once.
-        return Image(symbol: symbol, outline: !isFilled)
+        return Image(symbol: symbol)
             .font(.system(size: TabBarMetrics.symbolSize, weight: .semibold))
-            .foregroundStyle(isFilled ? Color.starhashAccentText : Color.starhashPrimaryText)
-            .transaction { $0.animation = nil }
+            // The page showing in the accent, the rest in the text colour.
+            .foregroundStyle(isSelected ? Color.starhashAccentText : Color.starhashPrimaryText)
+            .animation(.smooth(duration: 0.2), value: isSelected)
+            .contentTransition(.symbolEffect(.replace))
             .frame(width: TabBarMetrics.itemWidth, height: TabBarMetrics.height)
             .contentShape(Rectangle())
             .accessibilityElement()
@@ -124,26 +119,6 @@ struct StarHashTabBar: View {
         case .pay: router.show(router.payPage)
         case .settings: router.show(.settings)
         }
-    }
-}
-
-/// The bar's symbols, told which one the lens is over as it moves: the
-/// lens's centre is this view's animatable value, so its body is worked out
-/// afresh on every frame of the lens's spring or drag, not only where the
-/// lens is headed.
-private struct LensFill<Content: View>: View, Animatable {
-    var lensCenter: CGFloat
-    let centers: [CGFloat]
-    @ViewBuilder let content: (Int) -> Content
-
-    var animatableData: CGFloat {
-        get { lensCenter }
-        set { lensCenter = newValue }
-    }
-
-    var body: some View {
-        let filled = centers.indices.min { abs(centers[$0] - lensCenter) < abs(centers[$1] - lensCenter) } ?? 0
-        content(filled)
     }
 }
 
@@ -190,14 +165,13 @@ extension EnvironmentValues {
 }
 
 /// The reference's measurements, in points: a 75pt capsule whose foot is
-/// 28pt above the screen's, a 93.3 by 63 lens 6pt in from every edge (the
-/// owner evened its top and foot to its sides), and 66pt for each symbol it
-/// is not under.
+/// 28pt above the screen's, a 93.3 by 59 lens 6pt in from the side and 8
+/// from top and foot, and 66pt for each symbol it is not under.
 enum TabBarMetrics {
     static let height: CGFloat = 75
     static let lensWidth: CGFloat = 93.33
     static let lensSideInset: CGFloat = 6
-    static let lensInset: CGFloat = 6
+    static let lensInset: CGFloat = 8
     static let itemWidth: CGFloat = 66
     static let endInset: CGFloat = 8
     static let symbolSize: CGFloat = 24
