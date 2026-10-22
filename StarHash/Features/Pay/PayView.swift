@@ -367,12 +367,12 @@ struct PayView: View {
     }
 }
 
-/// Balance's capsule: Liquid Glass, tinted with the cards' colour so it
-/// reads clearly on the pale page and the deep green alike, and lit by a
-/// press. Before iOS 26, the cards' fill.
+/// Balance's capsule: clear Liquid Glass with no tint, as the header
+/// buttons wear it (only sheets are tinted glass), lit by a press. Before
+/// iOS 26, the fallback material.
 private struct BalanceSurface: ViewModifier {
     func body(content: Content) -> some View {
-        content.starhashGlass(in: Capsule(), interactive: true, tint: .balanceGlassTint)
+        content.starhashGlass(in: Capsule(), interactive: true, tint: .clear)
     }
 }
 

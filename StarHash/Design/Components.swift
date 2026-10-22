@@ -73,8 +73,8 @@ extension ButtonStyle where Self == PrimaryButtonStyle {
 }
 
 /// The quieter choice beside a primary button, at its height ("Maybe
-/// Later" beside "Set Up"): Liquid Glass tinted with the cards' colour, as
-/// Balance is, with the text colour on it.
+/// Later" beside "Set Up", Cancel beside Choose): clear Liquid Glass with
+/// no tint, as Balance is, with the text colour on it.
 struct SecondaryButtonStyle: ButtonStyle {
     var height: CGFloat = StarHashMetrics.primaryButtonHeight
 
@@ -90,7 +90,7 @@ struct SecondaryButtonStyle: ButtonStyle {
             .frame(maxWidth: .infinity)
             .frame(minHeight: height)
             .contentShape(Capsule())
-            .starhashGlass(in: Capsule(), interactive: true, tint: .balanceGlassTint)
+            .starhashGlass(in: Capsule(), interactive: true, tint: .clear)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.snappy(duration: 0.16), value: configuration.isPressed)
             .starhashPressHaptic(configuration.isPressed)

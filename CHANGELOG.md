@@ -28,6 +28,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Changed
 
+- Balance on Pay, Cancel on Move and Scale and Maybe Later in onboarding are clear Liquid Glass, with no colour; only sheets are tinted.
 - Report's header no longer slides a little to the left once the page has opened.
 - Activity groups each month's transactions by day (Today, Yesterday, Mon, Oct 20), each row giving its time.
 - Tapping your photo on Profile opens a sheet: Take Photo, Upload Photo or View Photo. Move and Scale has Cancel beside Choose.

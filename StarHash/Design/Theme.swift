@@ -158,9 +158,6 @@ extension Color {
     /// screen's Total), so it parts from the white page in light mode; dark
     /// mode's glass reads on its own.
     static let floatingShadow = Color(light: .black.opacity(0.1), dark: .clear)
-    /// Balance's glass: a veil of the fills' colour over clear Liquid
-    /// Glass, so the capsule stands out on Pay's page in either appearance.
-    static let balanceGlassTint = Color(light: .brandMist.opacity(0.85), dark: .brandCoal.opacity(0.8))
     /// Pills and recipient tiles on Pay, and the primary button there
     /// when disabled: the fills' colour.
     static let payWash = Color(light: .brandMist, dark: .brandCoal)
