@@ -37,35 +37,50 @@ enum WidgetAction: CaseIterable {
         case .scan: "starhash://scan"
         case .buy: "starhash://buy"
         case .activity: "starhash://activity"
-        case .balance:
-            "starhash://dial?code=" + (USSD.balance(for: wallet).addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? "")
+        case .balance: Self.dialLink(USSD.balance(for: wallet))
         }
+    }
+
+    /// The StarHash link that dials `code`.
+    static func dialLink(_ code: String) -> String {
+        "starhash://dial?code=" + (code.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? "")
     }
 }
 
 /// The reference's grid of tiles, each an icon top left and its name at the
-/// foot: two stacked on the small widget (Pay and Scan), two by two on the
-/// medium one (Pay, Scan, Balance and Activity).
-struct ShortcutTilesWidgetView: View {
+/// foot, for Buy's codes: two stacked on the small widget, two by two on the
+/// medium one, each dialling its code. With fewer codes than tiles, the
+/// next tile adds one in Buy.
+struct BuyTilesWidgetView: View {
     let family: WidgetFamily
-    let wallet: Recipient.Network
+    let codes: [USSDShortcut]
+
+    private var slots: Int { family == .systemSmall ? 2 : 4 }
+
+    /// The codes that fit, then Add a code when there is room, then nothing.
+    private var tiles: [Tile] {
+        let shown = codes.prefix(slots).map(Tile.code)
+        let add = shown.count < slots ? [Tile.add] : []
+        return Array((shown + add + Array(repeating: Tile.empty, count: slots)).prefix(slots))
+    }
 
     var body: some View {
+        let tiles = tiles
         Group {
             if family == .systemSmall {
                 VStack(spacing: WidgetMetrics.gap) {
-                    tile(.pay)
-                    tile(.scan)
+                    tile(tiles[0])
+                    tile(tiles[1])
                 }
             } else {
                 Grid(horizontalSpacing: WidgetMetrics.gap, verticalSpacing: WidgetMetrics.gap) {
                     GridRow {
-                        tile(.pay)
-                        tile(.scan)
+                        tile(tiles[0])
+                        tile(tiles[1])
                     }
                     GridRow {
-                        tile(.balance)
-                        tile(.activity)
+                        tile(tiles[2])
+                        tile(tiles[3])
                     }
                 }
             }
@@ -74,29 +89,52 @@ struct ShortcutTilesWidgetView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    private func tile(_ action: WidgetAction) -> some View {
-        Button(intent: OpenStarHashIntent(link: action.link(wallet: wallet))) {
-            VStack(alignment: .leading, spacing: 0) {
-                // In a box of one height, so every name sits at the same
-                // size and place whatever its icon's shape.
-                Image(symbol: action.symbol, outline: true)
-                    .font(.system(size: 19, weight: .semibold))
-                    .frame(height: 20, alignment: .leading)
-                    .accessibilityHidden(true)
-                Spacer(minLength: 0)
-                Text(action.title)
-                    .font(.widget(15))
-                    .lineLimit(1)
-                    .fixedSize(horizontal: false, vertical: true)
+    private enum Tile {
+        case code(USSDShortcut), add, empty
+    }
+
+    @ViewBuilder
+    private func tile(_ tile: Tile) -> some View {
+        switch tile {
+        case .code(let code):
+            Button(intent: OpenStarHashIntent(link: WidgetAction.dialLink(code.code))) {
+                label(symbol: code.symbol ?? "number", title: Text(verbatim: code.name))
             }
-            .foregroundStyle(Color.widgetText)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 9)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            .background(Color.widgetChip, in: RoundedRectangle(cornerRadius: WidgetMetrics.tileRadius, style: .continuous))
+            .buttonStyle(.plain)
+            .accessibilityLabel(Text(verbatim: code.name))
+            .accessibilityHint(Text("Dials \(code.code)"))
+        case .add:
+            Button(intent: OpenStarHashIntent(link: "starhash://buy")) {
+                label(symbol: "plus", title: Text("Add a code"))
+            }
+            .buttonStyle(.plain)
+        case .empty:
+            Color.clear
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(Text(action.title))
+    }
+
+    private func label(symbol: String, title: Text) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // In a box of one height, so every name sits at the same size
+            // and place whatever its icon's shape.
+            Image(symbol: symbol, outline: true)
+                .font(.system(size: 19, weight: .semibold))
+                .frame(height: 20, alignment: .leading)
+                .accessibilityHidden(true)
+            Spacer(minLength: 0)
+            // A code's name is the owner's own and may be long: it
+            // shrinks a little before it is cut.
+            title
+                .font(.widget(15))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .foregroundStyle(Color.widgetText)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .background(Color.widgetChip, in: RoundedRectangle(cornerRadius: WidgetMetrics.tileRadius, style: .continuous))
     }
 }
 

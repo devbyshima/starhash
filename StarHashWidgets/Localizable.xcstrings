@@ -1,6 +1,9 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@": {
+      "shouldTranslate": false
+    },
     "%lld/%lld": {
       "shouldTranslate": false
     },
@@ -16,6 +19,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ibikorwa"
+          }
+        }
+      }
+    },
+    "Add a code": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter un code"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongeraho kode"
           }
         }
       }
@@ -48,6 +67,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Acheter"
+          }
+        }
+      }
+    },
+    "Buy Code": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code d'achat"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode yo kugura"
+          }
+        }
+      }
+    },
+    "Buy Codes": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codes d'achat"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode zo kugura"
+          }
+        }
+      }
+    },
+    "Choose the codes the widget dials.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez les codes que le widget compose."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hitamo kode iyi widget ikanda."
+          }
+        }
+      }
+    },
+    "Codes": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codes"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode"
           }
         }
       }
@@ -100,22 +183,6 @@
         }
       }
     },
-    "More codes": {
-      "localizations": {
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Izindi kode"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Plus de codes"
-          }
-        }
-      }
-    },
     "Open StarHash": {
       "localizations": {
         "fr": {
@@ -132,22 +199,6 @@
         }
       }
     },
-    "Open the scanner to pay a QR code.": {
-      "localizations": {
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fungura sikaneri ngo wishyure kode ya QR."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ouvrez le scanner pour payer un code QR."
-          }
-        }
-      }
-    },
     "Opens StarHash's scanner to pay a QR code.": {
       "localizations": {
         "rw": {
@@ -160,22 +211,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ouvre le scanner de StarHash pour payer un code QR."
-          }
-        }
-      }
-    },
-    "Pages": {
-      "localizations": {
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Amapaji"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pages"
           }
         }
       }
@@ -208,22 +243,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ishyura umuntu"
-          }
-        }
-      }
-    },
-    "Pay, scan, check your balance and see your activity in a tap.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Payez, scannez, consultez votre solde et votre activité d'une touche."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ishyura, sikana, reba amafaranga asigaye n'ibikorwa byawe ukanze rimwe gusa."
           }
         }
       }
@@ -272,22 +291,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Scanner pour payer"
-          }
-        }
-      }
-    },
-    "Show More Codes": {
-      "localizations": {
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reba izindi kode"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Afficher plus de codes"
           }
         }
       }

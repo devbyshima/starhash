@@ -1,41 +1,19 @@
 import AppIntents
+import StarHashKit
 import SwiftUI
 import WidgetKit
 
 /// StarHash's widgets, after the owner's reference: two kinds, each small
-/// and medium, so four in all, on the Home Screen; and Scan to Pay in
-/// Control Center and on the Lock Screen. The Home Screen views are in
+/// and medium, so four in all, on the Home Screen (Buy's codes as tiles,
+/// and Quick Pay); and Scan to Pay in Control Center and on the Lock
+/// Screen. The Home Screen views are in
 /// `Views/`, shared with the app's widget gallery (DEBUG).
 @main
 struct StarHashWidgets: WidgetBundle {
     var body: some Widget {
-        ShortcutTilesWidget()
+        BuyCodesWidget()
         QuickPayWidget()
         ScanToPayControl()
-    }
-}
-
-/// Tiles: Pay and Scan on the small one, Pay, Scan, Balance and Activity on
-/// the medium one.
-struct ShortcutTilesWidget: Widget {
-    var body: some WidgetConfiguration {
-        StaticConfiguration(kind: "ShortcutTilesWidget", provider: StarHashTimeline()) { entry in
-            ShortcutTilesEntryView(entry: entry)
-                .containerBackground(Color.widgetCard, for: .widget)
-        }
-        .configurationDisplayName("StarHash")
-        .description("Pay, scan, check your balance and see your activity in a tap.")
-        .supportedFamilies([.systemSmall, .systemMedium])
-        .contentMarginsDisabled()
-    }
-}
-
-private struct ShortcutTilesEntryView: View {
-    let entry: StarHashEntry
-    @Environment(\.widgetFamily) private var family
-
-    var body: some View {
-        ShortcutTilesWidgetView(family: family, wallet: entry.snapshot.wallet)
     }
 }
 
@@ -90,7 +68,7 @@ struct OpenScannerIntent: AppIntent {
 }
 
 #Preview(as: .systemMedium) {
-    ShortcutTilesWidget()
+    BuyCodesWidget()
 } timeline: {
-    StarHashEntry(date: .now, snapshot: .placeholder)
+    BuyCodesEntry(date: .now, codes: WidgetSnapshot.placeholder.codes)
 }

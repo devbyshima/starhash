@@ -6,15 +6,15 @@ import WidgetKit
 /// `-widgetGallery` (DEBUG): the Home Screen widgets at an iPhone's sizes,
 /// 158 points square and 338 by 158, to look at and screenshot without
 /// adding them to a Home Screen, laid out as the owner's reference: the
-/// medium tiles, the small tiles beside the small Quick Pay, then the
-/// medium Quick Pay.
+/// medium Buy tiles, the small ones beside the small Quick Pay, then the
+/// medium Quick Pay. The tiles show StarHash's own codes.
 struct WidgetGallery: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 22) {
-                card(width: 338, height: 158) { ShortcutTilesWidgetView(family: .systemMedium, wallet: .mtn) }
+                card(width: 338, height: 158) { BuyTilesWidgetView(family: .systemMedium, codes: WidgetSnapshot.placeholder.codes) }
                 HStack(spacing: 22) {
-                    card(width: 158, height: 158) { ShortcutTilesWidgetView(family: .systemSmall, wallet: .mtn) }
+                    card(width: 158, height: 158) { BuyTilesWidgetView(family: .systemSmall, codes: WidgetSnapshot.placeholder.codes) }
                     card(width: 158, height: 158) { QuickPayWidgetView(family: .systemSmall, wallet: .mtn) }
                 }
                 card(width: 338, height: 158) { QuickPayWidgetView(family: .systemMedium, wallet: .mtn) }
