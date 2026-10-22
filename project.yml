@@ -1,6 +1,6 @@
 name: StarHash
 options:
-  bundleIdPrefix: com.fulltimestudio
+  bundleIdPrefix: com.devbyshima
   deploymentTarget:
     iOS: "18.0"
   createIntermediateGroups: true
@@ -28,7 +28,7 @@ settings:
     # one before archiving each upload. Settings shows it after the version.
     CURRENT_PROJECT_VERSION: "1"
     CODE_SIGN_STYLE: Automatic
-    DEVELOPMENT_TEAM: 7WHQR6L96K
+    DEVELOPMENT_TEAM: W46T258AXM
     SWIFT_APPROACHABLE_CONCURRENCY: YES
     SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY: YES
     LOCALIZATION_PREFERS_STRING_CATALOGS: YES
@@ -38,7 +38,7 @@ settings:
     # build fails with one. NO leaves the group out (the widgets then show
     # Buy's default codes and no spending); YES signs both targets with it.
     STARHASH_APP_GROUPS: NO
-    STARHASH_APP_GROUP: group.com.fulltimestudio.starhash
+    STARHASH_APP_GROUP: group.com.devbyshima.starhash
     STARHASH_APP_ENTITLEMENTS_YES: StarHash/App/StarHash.entitlements
     STARHASH_APP_ENTITLEMENTS_NO: ""
     STARHASH_WIDGET_ENTITLEMENTS_YES: StarHashWidgets/StarHashWidgets.entitlements
@@ -99,7 +99,7 @@ targets:
       - target: StarHashWidgets
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.fulltimestudio.starhash
+        PRODUCT_BUNDLE_IDENTIFIER: com.devbyshima.starhash
         CODE_SIGN_ENTITLEMENTS: $(STARHASH_APP_ENTITLEMENTS_$(STARHASH_APP_GROUPS))
         TARGETED_DEVICE_FAMILY: "1"
         ENABLE_PREVIEWS: YES
@@ -134,7 +134,7 @@ targets:
         NSFaceIDUsageDescription: StarHash asks for Face ID to open, when you turn it on in Settings, so only you see your payments.
         LSApplicationQueriesSchemes: [tel]
         CFBundleURLTypes:
-          - CFBundleURLName: com.fulltimestudio.starhash
+          - CFBundleURLName: com.devbyshima.starhash
             CFBundleURLSchemes: [starhash]
 
   # Buy's codes on the Home Screen, and Scan to Pay in Control Center.
@@ -154,7 +154,7 @@ targets:
       - package: StarHashKit
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.fulltimestudio.starhash.widgets
+        PRODUCT_BUNDLE_IDENTIFIER: com.devbyshima.starhash.widgets
         # The views in Views/ compile here always, and into the app only
         # for Debug's widget gallery.
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: $(inherited) WIDGET_EXTENSION

@@ -20,7 +20,7 @@ import tempfile
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "StarHash", "Resources", "StarHash SMS.shortcut")
 
-BUNDLE_ID = "com.fulltimestudio.starhash"
+BUNDLE_ID = "com.devbyshima.starhash"
 TEAM_ID = "7WHQR6L96K"
 INTENT = "ProcessCarrierSMSIntent"
 
