@@ -9,7 +9,10 @@ import SwiftUI
 /// no pill of its own; the amount reads out with it.)
 struct WalletPill: View {
     @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
+    @AppStorage(PreferenceKey.seenVoiceLineHint) private var seenVoiceLineHint = false
     @OwnWallets private var ownWallets
+    /// The wallet just switched to, while the voice line hint is up.
+    @State private var hintFor: OwnerWallets.Wallet?
 
     var body: some View {
         Menu {
@@ -18,7 +21,7 @@ struct WalletPill: View {
             ForEach(ownWallets.wallets) { option in
                 Toggle(isOn: Binding(
                     get: { wallet == option.network },
-                    set: { if $0 { wallet = option.network } }
+                    set: { if $0 { choose(option) } }
                 )) {
                     // Straight in the row, so the menu reads the logo as its
                     // icon and the number as the line under the name.
@@ -46,6 +49,28 @@ struct WalletPill: View {
         .sensoryFeedback(.selection, trigger: wallet)
         .accessibilityLabel("Wallet: \(wallet.walletName)")
         .accessibilityHint("Switches the wallet you pay from")
+        .sheet(item: $hintFor) { option in
+            VoiceLineHintSheet(wallet: option)
+        }
+        #if DEBUG
+        // -voiceLineHint: the hint for the wallet not chosen, for screenshots.
+        .task {
+            guard DebugLaunch.arguments.contains("-voiceLineHint") else { return }
+            try? await Task.sleep(for: .milliseconds(500))
+            hintFor = ownWallets.wallets.first { $0.network != wallet } ?? ownWallets.wallets.first
+        }
+        #endif
+    }
+
+    /// The wallet switched to, and the first time an owner with SIMs on both
+    /// carriers switches, the hint to make that SIM the iPhone's voice line.
+    private func choose(_ option: OwnerWallets.Wallet) {
+        guard option.network != wallet else { return }
+        wallet = option.network
+        if ownWallets.hasBothCarriers, !seenVoiceLineHint {
+            seenVoiceLineHint = true
+            hintFor = option
+        }
     }
 }
 

@@ -1293,6 +1293,22 @@
         }
       }
     },
+    "Choose the SIM with %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez la SIM %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hitamo SIM ya %@"
+          }
+        }
+      }
+    },
     "Chooses a photo from your library": {
       "localizations": {
         "rw": {
@@ -1960,6 +1976,22 @@
         }
       }
     },
+    "Dial from your %@ SIM": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilisez votre SIM %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koresha SIM ya %@"
+          }
+        }
+      }
+    },
     "Dialled": {
       "localizations": {
         "rw": {
@@ -2533,6 +2565,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Inshuti zisikana kode yawe ziyibona\niruhande rwa nimero yawe, zikamenya ko ari wowe."
+          }
+        }
+      }
+    },
+    "Got It": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compris"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byumvikanye"
           }
         }
       }
@@ -4033,6 +4081,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ouvrir Réglages"
+          }
+        }
+      }
+    },
+    "Open Settings, then Cellular or Mobile Service": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrez Réglages, puis Réseau cellulaire"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fungura Settings, hanyuma Cellular cyangwa Mobile Service"
           }
         }
       }
@@ -6477,6 +6541,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Touchez **Vérifier le raccourci** ci-dessous."
+          }
+        }
+      }
+    },
+    "Tap Default Voice Line": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touchez Ligne vocale par défaut"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kanda Default Voice Line"
           }
         }
       }

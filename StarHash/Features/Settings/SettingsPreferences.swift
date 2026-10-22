@@ -32,6 +32,10 @@ extension PreferenceKey {
     /// is chosen.
     static let appLanguage = "appLanguage"
     static let secondNumber = "secondNumber"
+    /// Whether the hint to set the iPhone's default voice line, shown the
+    /// first time an owner with SIMs on both carriers switches wallet, has
+    /// been seen.
+    static let seenVoiceLineHint = "seenVoiceLineHint"
     /// Whether the on-device model may name the categories the rules
     /// cannot (iOS 26 and later, with Apple Intelligence).
     static let smartCategories = "smartCategories"
