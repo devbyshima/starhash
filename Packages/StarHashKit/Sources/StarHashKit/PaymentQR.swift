@@ -9,11 +9,17 @@ public struct PaymentRequest: Hashable, Sendable {
     /// The id of the owner's photo on StarHash's server, when their code
     /// shares it: shown beside their number once scanned.
     public var photoID: UUID?
+    /// Whether it was StarHash's own code, which says who it is and may
+    /// carry their photo. Any other (a MoMo USSD string, a merchant's
+    /// sticker, a bare number) says only where the money goes, so it is
+    /// shown as its number alone.
+    public var isStarHashCode: Bool
 
-    public init(recipient: Recipient, amount: Int? = nil, photoID: UUID? = nil) {
+    public init(recipient: Recipient, amount: Int? = nil, photoID: UUID? = nil, isStarHashCode: Bool = false) {
         self.recipient = recipient
         self.amount = amount
         self.photoID = photoID
+        self.isStarHashCode = isStarHashCode
     }
 }
 
@@ -79,8 +85,9 @@ public enum PaymentQR {
         if let name = value(["name", "merchantname"]), !name.isEmpty { recipient.name = name }
         let amount = value(["amount", "amt"]).flatMap { Int($0.filter(\.isASCIIDigit)) }
         // Only StarHash's own codes carry a photo.
-        let photoID = scheme == "starhash" ? value(["p"]).flatMap(UUID.init(uuidString:)) : nil
-        return PaymentRequest(recipient: recipient, amount: amount, photoID: photoID)
+        let isStarHash = scheme == "starhash"
+        let photoID = isStarHash ? value(["p"]).flatMap(UUID.init(uuidString:)) : nil
+        return PaymentRequest(recipient: recipient, amount: amount, photoID: photoID, isStarHashCode: isStarHash)
     }
 
     // MARK: USSD

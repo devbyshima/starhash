@@ -21,6 +21,9 @@ struct PayView: View {
     @State private var chosenRecipient: Recipient?
     /// The photo a scanned code shares for `chosenRecipient`.
     @State private var chosenPhotoID: UUID?
+    /// Whether `chosenRecipient` came from a code other than StarHash's,
+    /// which says nothing of who it is: shown as its number alone.
+    @State private var chosenIsBare = false
     /// A code the system would not dial (the simulator, an iPad), shown in
     /// an alert so it can be dialled by hand.
     @State private var undialledCode: String?
@@ -118,7 +121,7 @@ struct PayView: View {
             Spacer(minLength: 12)
             PayAmountDisplay(amount: input.value, shakes: zeroShakes)
             if let chosenRecipient {
-                PayChosenRecipient(recipient: chosenRecipient, photoID: chosenPhotoID) {
+                PayChosenRecipient(recipient: chosenRecipient, photoID: chosenPhotoID, isBare: chosenIsBare) {
                     withAnimation(.smooth(duration: 0.25)) { self.chosenRecipient = nil }
                 }
                 .padding(.top, 12)
@@ -258,7 +261,9 @@ struct PayView: View {
     private func takePayRequest() {
         guard let request = router.takePayRequest() else { return }
         path = []
-        take(PaymentRequest(recipient: request.recipient, amount: request.amount, photoID: request.photoID))
+        // Pay Again, or StarHash's own link opened from the Camera: both
+        // know who they are paying.
+        take(PaymentRequest(recipient: request.recipient, amount: request.amount, photoID: request.photoID, isStarHashCode: true))
     }
 
     /// Who a scanned code (or Pay Again) says to pay: chosen under the
@@ -271,10 +276,12 @@ struct PayView: View {
         withAnimation(.smooth(duration: 0.25)) {
             chosenRecipient = request.recipient
             chosenPhotoID = request.photoID
+            chosenIsBare = !request.isStarHashCode
             if let amount = request.amount { input = AmountInput(value: amount) }
         }
         if request.amount == nil {
-            AccessibilityNotification.Announcement("Paying \(request.recipient.shownName). Type an amount.").post()
+            let who = request.isStarHashCode ? request.recipient.shownName : request.recipient.formattedDestination
+            AccessibilityNotification.Announcement("Paying \(who). Type an amount.").post()
         }
     }
 
@@ -386,11 +393,14 @@ private enum PayRoute: Hashable {
 }
 
 /// The recipient Pay Again chose, under an empty amount: who the next
-/// payment goes to, with a way to drop them and pick someone else.
+/// payment goes to, with a way to drop them and pick someone else. One
+/// from a code other than StarHash's is its number or code alone, with no
+/// tile: the code says nothing more.
 private struct PayChosenRecipient: View {
     let recipient: Recipient
     /// Their photo on StarHash's server, when their code shared one.
     var photoID: UUID?
+    var isBare = false
     let onClear: () -> Void
 
     @State private var sharedPhoto: UIImage?
@@ -403,7 +413,9 @@ private struct PayChosenRecipient: View {
             // A photo saved in Contacts comes first; then the one their
             // code shared; then the tile.
             let contactPhoto = enableContacts ? contacts.photoContactID(for: recipient) : nil
-            if contactPhoto == nil, let sharedPhoto {
+            if isBare {
+                EmptyView()
+            } else if contactPhoto == nil, let sharedPhoto {
                 Image(uiImage: sharedPhoto)
                     .resizable()
                     .scaledToFill()
@@ -413,7 +425,7 @@ private struct PayChosenRecipient: View {
             } else {
                 RecipientTile(tile: .for(recipient, photoContactID: contactPhoto), size: 28)
             }
-            Text("To \(recipient.shownName)")
+            Text("To \(isBare ? recipient.formattedDestination : recipient.shownName)")
                 .font(.starhash(.subheadline, weight: .semibold))
                 .foregroundStyle(Color.payPrimaryText)
                 .lineLimit(1)
@@ -425,9 +437,9 @@ private struct PayChosenRecipient: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.hapticPlain)
-            .accessibilityLabel("Remove \(recipient.shownName)")
+            .accessibilityLabel("Remove \(isBare ? recipient.formattedDestination : recipient.shownName)")
         }
-        .padding(.leading, 6)
+        .padding(.leading, isBare ? 14 : 6)
         .padding(.trailing, 4)
         .padding(.vertical, 4)
         .starhashGlass()

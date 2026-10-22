@@ -66,6 +66,7 @@ import Testing
         #expect(request.recipient.destination == "020205")
         #expect(request.recipient.name == "Pili-Pili Invest")
         #expect(request.amount == 1_500)
+        #expect(!request.isStarHashCode)
     }
 
     @Test func emvWithMobileNumberInAdditionalData() throws {
@@ -121,5 +122,24 @@ import Testing
         // Without one, none; and a link from elsewhere never brings one.
         #expect(PaymentQR.parse(PaymentQR.link(for: recipient).absoluteString)?.photoID == nil)
         #expect(PaymentQR.parse("https://example.com/pay?to=0788123456&p=\(id.uuidString)")?.photoID == nil)
+    }
+
+    @Test func onlyStarHashCodesSayWhoTheyAre() throws {
+        let recipient = Recipient(name: "Ariane", destination: "0788123456", kind: .phone)
+        #expect(try #require(PaymentQR.parse(PaymentQR.link(for: recipient).absoluteString)).isStarHashCode)
+        // Every other payment code is read, as its number or code alone.
+        let others = [
+            "*182*8*1*020205#",
+            "tel:*182*8*1*184522*2500%23",
+            "*182*1*1*0788123456#",
+            "https://example.com/pay?to=0788123456&name=Someone",
+            "0788 123 456",
+            "MoMo Pay: 020205",
+        ]
+        for code in others {
+            let request = try #require(PaymentQR.parse(code), "\(code)")
+            #expect(!request.isStarHashCode, "\(code)")
+            #expect(request.photoID == nil, "\(code)")
+        }
     }
 }
