@@ -6641,22 +6641,6 @@
         }
       }
     },
-    "The other number leaves your profile.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "L'autre numéro quitte votre profil."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Indi nimero ivanwa ku mwirondoro wawe."
-          }
-        }
-      }
-    },
     "The shortcut works. A message through the automation proves the rest.": {
       "localizations": {
         "rw": {

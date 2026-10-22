@@ -244,13 +244,11 @@ private struct SettingsRootList: View {
             }
         }
         .animation(.smooth(duration: 0.3), value: Recipient.ownNumber(secondNumber) == nil)
-        .confirmationDialog("Which SIM do you keep?", isPresented: $choosesSIMToKeep, titleVisibility: .visible) {
-            ForEach([profileNumber, secondNumber].compactMap(Recipient.ownNumber), id: \.destination) { sim in
-                Button(sim.formattedDestination) { keepOnly(sim) }
+        .sheet(isPresented: $choosesSIMToKeep) {
+            KeepSIMSheet(sims: [profileNumber, secondNumber].compactMap(Recipient.ownNumber)) { sim in
+                choosesSIMToKeep = false
+                keepOnly(sim)
             }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("The other number leaves your profile.")
         }
         .onChange(of: simCount) { store.markOwnTransfers() }
         .onChange(of: secondNumber) {
