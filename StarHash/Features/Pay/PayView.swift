@@ -19,6 +19,8 @@ struct PayView: View {
     /// Who to pay, from Pay Again on a transaction. Pay then dials them
     /// straight away instead of opening the picker.
     @State private var chosenRecipient: Recipient?
+    /// The photo a scanned code shares for `chosenRecipient`.
+    @State private var chosenPhotoID: UUID?
     /// A code the system would not dial (the simulator, an iPad), shown in
     /// an alert so it can be dialled by hand.
     @State private var undialledCode: String?
@@ -116,7 +118,7 @@ struct PayView: View {
             Spacer(minLength: 12)
             PayAmountDisplay(amount: input.value, shakes: zeroShakes)
             if let chosenRecipient {
-                PayChosenRecipient(recipient: chosenRecipient) {
+                PayChosenRecipient(recipient: chosenRecipient, photoID: chosenPhotoID) {
                     withAnimation(.smooth(duration: 0.25)) { self.chosenRecipient = nil }
                 }
                 .padding(.top, 12)
@@ -256,7 +258,7 @@ struct PayView: View {
     private func takePayRequest() {
         guard let request = router.takePayRequest() else { return }
         path = []
-        take(PaymentRequest(recipient: request.recipient, amount: request.amount))
+        take(PaymentRequest(recipient: request.recipient, amount: request.amount, photoID: request.photoID))
     }
 
     /// Who a scanned code (or Pay Again) says to pay: chosen under the
@@ -268,6 +270,7 @@ struct PayView: View {
         startLocating()
         withAnimation(.smooth(duration: 0.25)) {
             chosenRecipient = request.recipient
+            chosenPhotoID = request.photoID
             if let amount = request.amount { input = AmountInput(value: amount) }
         }
         if request.amount == nil {
@@ -386,17 +389,30 @@ private enum PayRoute: Hashable {
 /// payment goes to, with a way to drop them and pick someone else.
 private struct PayChosenRecipient: View {
     let recipient: Recipient
+    /// Their photo on StarHash's server, when their code shared one.
+    var photoID: UUID?
     let onClear: () -> Void
+
+    @State private var sharedPhoto: UIImage?
 
     @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
     private var contacts: PayContacts { .shared }
 
     var body: some View {
         HStack(spacing: 10) {
-            RecipientTile(
-                tile: .for(recipient, photoContactID: enableContacts ? contacts.photoContactID(for: recipient) : nil),
-                size: 28
-            )
+            // A photo saved in Contacts comes first; then the one their
+            // code shared; then the tile.
+            let contactPhoto = enableContacts ? contacts.photoContactID(for: recipient) : nil
+            if contactPhoto == nil, let sharedPhoto {
+                Image(uiImage: sharedPhoto)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 28, height: 28)
+                    .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                    .accessibilityHidden(true)
+            } else {
+                RecipientTile(tile: .for(recipient, photoContactID: contactPhoto), size: 28)
+            }
             Text("To \(recipient.shownName)")
                 .font(.starhash(.subheadline, weight: .semibold))
                 .foregroundStyle(Color.payPrimaryText)
@@ -419,6 +435,11 @@ private struct PayChosenRecipient: View {
         // The photo, when the number or code is saved in Contacts.
         .task(id: enableContacts) {
             if enableContacts { await contacts.loadIfAllowed() }
+        }
+        // The photo their code shared, when it shared one.
+        .task(id: photoID) {
+            sharedPhoto = nil
+            if let photoID { sharedPhoto = await StarHashCloud.photo(photoID) }
         }
     }
 }

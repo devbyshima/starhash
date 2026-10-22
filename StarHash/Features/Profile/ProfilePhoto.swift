@@ -27,17 +27,20 @@ final class ProfilePhoto {
         guard let picked = UIImage(data: data), let square = Self.square(picked, side: 600),
               let jpeg = square.jpegData(compressionQuality: 0.85) else { return }
         save(jpeg)
+        StarHashCloud.syncPhoto()
     }
 
     /// Keeps a photo from a backup as it is.
     func restore(_ data: Data) {
         guard UIImage(data: data) != nil else { return }
         save(data)
+        StarHashCloud.syncPhoto()
     }
 
     func remove() {
         try? FileManager.default.removeItem(at: url)
         image = nil
+        StarHashCloud.syncPhoto()
     }
 
     private func save(_ jpeg: Data) {

@@ -36,7 +36,7 @@ struct ProfileView: View {
 
                 if let recipient {
                     VStack(spacing: 18) {
-                        QRTreeView(text: PaymentQR.link(for: recipient).absoluteString)
+                        QRTreeView(text: PaymentQR.link(for: recipient, photoID: StarHashCloud.sharedPhotoID).absoluteString)
                             .frame(maxWidth: 340)
                         MyCodeShareButton(recipient: recipient)
                             .buttonStyle(.starhashPrimary)

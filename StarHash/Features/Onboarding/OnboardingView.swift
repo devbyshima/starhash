@@ -61,7 +61,7 @@ struct OnboardingView: View {
         .init(symbol: "clock.fill", title: "Every payment, logged",
               description: "Activity keeps each payment by day,\nwith a chart and search."),
         .init(symbol: "lock.shield.fill", title: "Private by design",
-              description: "No account and no server. Your PIN only\never goes into your wallet's own prompt."),
+              description: "No account and no tracking. Your PIN only\never goes into your wallet's own prompt."),
     ]
 
     private var tint: Color { OnboardingPalette.tint }

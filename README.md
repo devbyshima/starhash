@@ -41,7 +41,7 @@ StarHash is a free, source-available iPhone app for paying with MTN MoMo or Airt
 - **Widgets**: Buy's codes on the Home Screen, each its symbol and name, dialled without opening the app; Scan to Pay as a small widget and in Control Center.
 - **Export and import**: everything StarHash keeps, as one file you can move to another iPhone.
 - **English and Kinyarwanda**, chosen in the Settings app.
-- **Private by design**: no account, no server, no tracking, and an optional Face ID lock.
+- **Private by design**: no account, no tracking, your payments stay on the phone, and an optional Face ID lock. Only a photo you share with your QR code, and an anonymous daily count of who uses StarHash, reach its small server (`server/`).
 - **Shortcuts and Siri**: Pay with StarHash, Check Wallet Balance and Process Carrier SMS.
 
 ## Getting started

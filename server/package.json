@@ -1,0 +1,17 @@
+{
+  "name": "starhash-server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "schema": "wrangler d1 execute starhash --remote --file schema.sql",
+    "count": "wrangler d1 execute starhash --remote --command \"SELECT COUNT(*) AS installs, SUM(last_seen >= date('now', '-30 days')) AS active_30_days FROM installs\""
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261019.1",
+    "typescript": "^5.6.0",
+    "wrangler": "^4.0.0"
+  }
+}

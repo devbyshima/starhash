@@ -109,4 +109,17 @@ import Testing
         #expect(OwnerProfile(name: "", number: "0788123456").recipient?.name == nil)
         #expect(OwnerProfile(name: "Shima").recipient == nil)
     }
+
+    @Test func aCodeCarriesTheOwnersPhotoID() throws {
+        let id = UUID(uuidString: "6F9619FF-8B86-4011-B42D-00C04FC964FF")!
+        let recipient = Recipient(name: "Ariane", destination: "0788123456", kind: .phone)
+        let link = PaymentQR.link(for: recipient, photoID: id)
+        #expect(link.absoluteString.contains("p=6f9619ff-8b86-4011-b42d-00c04fc964ff"))
+        let request = try #require(PaymentQR.parse(link.absoluteString))
+        #expect(request.photoID == id)
+        #expect(request.recipient.destination == "0788123456")
+        // Without one, none; and a link from elsewhere never brings one.
+        #expect(PaymentQR.parse(PaymentQR.link(for: recipient).absoluteString)?.photoID == nil)
+        #expect(PaymentQR.parse("https://example.com/pay?to=0788123456&p=\(id.uuidString)")?.photoID == nil)
+    }
 }

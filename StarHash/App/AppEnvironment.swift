@@ -171,8 +171,8 @@ final class AppRouter {
     /// Switches to Pay with `recipient` chosen under the amount, and the
     /// amount when one is asked for (a scanned code's); Pay then dials them
     /// once there is an amount.
-    func pay(_ recipient: Recipient, amount: Int? = nil) {
-        payRequest = PayRequest(recipient: recipient, amount: amount)
+    func pay(_ recipient: Recipient, amount: Int? = nil, photoID: UUID? = nil) {
+        payRequest = PayRequest(recipient: recipient, amount: amount, photoID: photoID)
         show(.pay)
     }
 
@@ -213,7 +213,7 @@ final class AppRouter {
         }
         if url.host() == "pay", query.contains(where: { $0.name == "to" }) {
             if let request = PaymentQR.parse(url.absoluteString) {
-                pay(request.recipient, amount: request.amount)
+                pay(request.recipient, amount: request.amount, photoID: request.photoID)
             } else {
                 show(.pay)
             }
@@ -257,6 +257,8 @@ struct PayRequest: Identifiable, Equatable {
     let recipient: Recipient
     /// The amount a scanned code asked for, typed in for them.
     var amount: Int?
+    /// The owner's photo on StarHash's server, when their code shares it.
+    var photoID: UUID?
 }
 
 /// A scam warning's advice, shown over the app from its notification.

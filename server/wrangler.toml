@@ -1,0 +1,17 @@
+# StarHash's server: the owners' photos for their QR codes, and an
+# anonymous count of the people using StarHash. On the devbyshima account.
+name = "starhash"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+account_id = "4a77243b4e1b483028ac8d9ea4a3e58a"
+workers_dev = true
+
+[[r2_buckets]]
+binding = "PHOTOS"
+bucket_name = "starhash-photos"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "starhash"
+# Filled in by `wrangler d1 create starhash` before the first deploy.
+database_id = "00000000-0000-0000-0000-000000000000"

@@ -97,6 +97,8 @@ struct StarHashApp: App {
             // were in the background, and notifications may have been
             // turned on or off in the Settings app.
             if phase == .active {
+                // Counted as in use, once a day, by a random id alone.
+                StarHashCloud.pingIfDue()
                 store.reloadFromDisk()
                 PaymentExpiry.run()
                 Task { await StarHashNotifications.shared.sync() }

@@ -20,13 +20,13 @@ enum DeveloperNoteKind {
         case .welcome: [
             "Hi, I'm Shima, and I made StarHash.",
             "I built it because I was tired of how hard USSD makes paying. Typing codes and digging through menus for the things you do every day felt wrong, so StarHash does them in a few taps.",
-            "It's free, its source code is public, and it's private: no account, no server, no tracking. Everything stays on your iPhone.",
+            "It's free, its source code is public, and it's private: no account, no tracking. Your payments stay on your iPhone.",
             "I hope it makes paying a little easier. Enjoy it.",
         ]
         case .review: [
             "You've been using StarHash for two weeks now. Thank you.",
             "I made it on my own, because USSD made paying harder than it should be.",
-            "StarHash is free, with public source code, no ads, no account and nothing sent off your iPhone. There is nothing to buy.",
+            "StarHash is free, with public source code, no ads, no account, and your payments never leave your iPhone. There is nothing to buy.",
             "So if you love it, a rating on the App Store is all I ask. It helps someone else find an easier way to pay.",
             "If something is off, write to me first. I answer you myself.",
         ]

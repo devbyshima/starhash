@@ -6,10 +6,14 @@ public struct PaymentRequest: Hashable, Sendable {
     public var recipient: Recipient
     /// Whole RWF, when the code names an amount.
     public var amount: Int?
+    /// The id of the owner's photo on StarHash's server, when their code
+    /// shares it: shown beside their number once scanned.
+    public var photoID: UUID?
 
-    public init(recipient: Recipient, amount: Int? = nil) {
+    public init(recipient: Recipient, amount: Int? = nil, photoID: UUID? = nil) {
         self.recipient = recipient
         self.amount = amount
+        self.photoID = photoID
     }
 }
 
@@ -21,8 +25,10 @@ public struct PaymentRequest: Hashable, Sendable {
 /// Rwanda's merchant QR codes carry, or a bare number or merchant code.
 public enum PaymentQR {
     /// The link a StarHash QR code holds for `recipient`, with its name
-    /// when it has one and an amount when one is asked for.
-    public static func link(for recipient: Recipient, amount: Int? = nil) -> URL {
+    /// when it has one, an amount when one is asked for, and the id of the
+    /// owner's photo when they share it (`p`, a random id that says nothing
+    /// of who they are).
+    public static func link(for recipient: Recipient, amount: Int? = nil, photoID: UUID? = nil) -> URL {
         var components = URLComponents()
         components.scheme = "starhash"
         components.host = "pay"
@@ -32,6 +38,9 @@ public enum PaymentQR {
         }
         if let amount, amount > 0 {
             items.append(URLQueryItem(name: "amount", value: String(amount)))
+        }
+        if let photoID {
+            items.append(URLQueryItem(name: "p", value: photoID.uuidString.lowercased()))
         }
         components.queryItems = items
         return components.url!
@@ -69,7 +78,9 @@ public enum PaymentQR {
         if scheme != "starhash", recipient.kind == .phone, !recipient.isRwandanMobile { return nil }
         if let name = value(["name", "merchantname"]), !name.isEmpty { recipient.name = name }
         let amount = value(["amount", "amt"]).flatMap { Int($0.filter(\.isASCIIDigit)) }
-        return PaymentRequest(recipient: recipient, amount: amount)
+        // Only StarHash's own codes carry a photo.
+        let photoID = scheme == "starhash" ? value(["p"]).flatMap(UUID.init(uuidString:)) : nil
+        return PaymentRequest(recipient: recipient, amount: amount, photoID: photoID)
     }
 
     // MARK: USSD
