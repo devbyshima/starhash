@@ -72,6 +72,35 @@ extension ButtonStyle where Self == PrimaryButtonStyle {
     static var starhashPrimaryGlowing: PrimaryButtonStyle { PrimaryButtonStyle(glows: true) }
 }
 
+/// The quieter choice beside a primary button, at its height ("Maybe
+/// Later" beside "Set Up"): Liquid Glass tinted with the cards' colour, as
+/// Balance is, with the text colour on it.
+struct SecondaryButtonStyle: ButtonStyle {
+    var height: CGFloat = StarHashMetrics.primaryButtonHeight
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .starhashFont(18, weight: .semibold, relativeTo: .body)
+            .foregroundStyle(Color.starhashPrimaryText)
+            .multilineTextAlignment(.center)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity)
+            .frame(minHeight: height)
+            .contentShape(Capsule())
+            .starhashGlass(in: Capsule(), interactive: true, tint: .balanceGlassTint)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.snappy(duration: 0.16), value: configuration.isPressed)
+            .starhashPressHaptic(configuration.isPressed)
+    }
+}
+
+extension ButtonStyle where Self == SecondaryButtonStyle {
+    static var starhashSecondary: SecondaryButtonStyle { SecondaryButtonStyle() }
+}
+
 /// An SF Symbol on a raised tile (the page's pale grey on a white card, a lifted
 /// charcoal in dark mode), as in expense rows and the
 /// onboarding sample rows.

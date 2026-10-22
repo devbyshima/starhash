@@ -221,9 +221,9 @@ extension Color {
     /// The tab bar's lens under the page showing: a veil of the deep green
     /// over the clear glass on the green, of white on the dark glass. Its
     /// rim is light along the top and dark down the sides, as glass's is.
-    static let tabBarLens = Color(light: .brandForest.opacity(0.1), dark: .brandPaper.opacity(0.16))
-    static let tabBarLensEdgeLight = Color(light: .white.opacity(0.55), dark: .white.opacity(0.22))
-    static let tabBarLensEdgeDark = Color(light: .brandForest.opacity(0.14), dark: .black.opacity(0.3))
+    static let tabBarLens = Color(light: .brandForest.opacity(0.07), dark: .brandPaper.opacity(0.16))
+    static let tabBarLensEdgeLight = Color(light: .white.opacity(0.8), dark: .white.opacity(0.22))
+    static let tabBarLensEdgeDark = Color(light: .brandForest.opacity(0.1), dark: .black.opacity(0.3))
     /// The note sheets' background: the page's own colour, so the note
     /// reads as a page.
     static let noteSheetBackground = Color(light: .brandAccent, dark: .brandForest)

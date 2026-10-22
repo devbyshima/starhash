@@ -41,9 +41,14 @@ struct StarHashTabBar: View {
                 .frame(width: TabBarMetrics.lensWidth, height: TabBarMetrics.height - TabBarMetrics.lensInset * 2)
                 .offset(x: lensCenter - TabBarMetrics.lensWidth / 2, y: TabBarMetrics.lensInset)
 
-            ForEach(Array(items.enumerated()), id: \.element) { index, item in
-                icon(item, isSelected: index == selectedIndex)
-                    .position(x: layout.centers[index], y: TabBarMetrics.height / 2)
+            // The symbol the lens is over is the one filled, frame by frame
+            // as the lens moves (a tap's spring, a finger's drag), with no
+            // animation of its own: it fills as the lens reaches it.
+            LensFill(lensCenter: lensCenter, centers: layout.centers) { filled in
+                ForEach(Array(items.enumerated()), id: \.element) { index, item in
+                    icon(item, isFilled: index == filled, isSelected: index == selectedIndex)
+                        .position(x: layout.centers[index], y: TabBarMetrics.height / 2)
+                }
             }
         }
         .frame(width: layout.width, height: TabBarMetrics.height, alignment: .topLeading)
@@ -76,15 +81,14 @@ struct StarHashTabBar: View {
         LensMotion.spring(reduceMotion: reduceMotion)
     }
 
-    private func icon(_ item: TabBarItem, isSelected: Bool) -> some View {
+    private func icon(_ item: TabBarItem, isFilled: Bool, isSelected: Bool) -> some View {
         let symbol = item.symbol(payPage: router.payPage)
-        // The page showing filled in the accent, the rest in outline in the
-        // text colour.
-        return Image(symbol: symbol, outline: !isSelected)
+        // Under the lens filled in the accent, the rest in outline in the
+        // text colour, swapped at once.
+        return Image(symbol: symbol, outline: !isFilled)
             .font(.system(size: TabBarMetrics.symbolSize, weight: .semibold))
-            .foregroundStyle(isSelected ? Color.starhashAccentText : Color.starhashPrimaryText)
-            .animation(.smooth(duration: 0.2), value: isSelected)
-            .contentTransition(.symbolEffect(.replace))
+            .foregroundStyle(isFilled ? Color.starhashAccentText : Color.starhashPrimaryText)
+            .transaction { $0.animation = nil }
             .frame(width: TabBarMetrics.itemWidth, height: TabBarMetrics.height)
             .contentShape(Rectangle())
             .accessibilityElement()
@@ -120,6 +124,26 @@ struct StarHashTabBar: View {
         case .pay: router.show(router.payPage)
         case .settings: router.show(.settings)
         }
+    }
+}
+
+/// The bar's symbols, told which one the lens is over as it moves: the
+/// lens's centre is this view's animatable value, so its body is worked out
+/// afresh on every frame of the lens's spring or drag, not only where the
+/// lens is headed.
+private struct LensFill<Content: View>: View, Animatable {
+    var lensCenter: CGFloat
+    let centers: [CGFloat]
+    @ViewBuilder let content: (Int) -> Content
+
+    var animatableData: CGFloat {
+        get { lensCenter }
+        set { lensCenter = newValue }
+    }
+
+    var body: some View {
+        let filled = centers.indices.min { abs(centers[$0] - lensCenter) < abs(centers[$1] - lensCenter) } ?? 0
+        content(filled)
     }
 }
 

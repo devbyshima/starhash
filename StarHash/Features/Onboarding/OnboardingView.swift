@@ -10,6 +10,8 @@ import SwiftUI
 ///   1. `OnboardingWalletPage`, which wallet pays (MTN MoMo or Airtel Money).
 ///   1½. `OnboardingNumberPage`, the owner's name and number, for their own
 ///      QR code (Maybe Later skips it).
+///   1¾. `OnboardingPhotoPage`, the owner's photo, shown to whoever scans
+///      their code. Continue moves on with or without one.
 ///   2. `OnboardingPermission`, an iPhone mock playing the Contacts prompt,
 ///      asked for at the moment the screen explains why.
 ///   3. The same for Nearby's location prompt. After Contacts, since Nearby
@@ -36,15 +38,15 @@ struct OnboardingView: View {
     @State private var stage = OnboardingLaunch.initialStage ?? UserDefaults.standard.integer(forKey: PreferenceKey.onboardingStage)
 
     enum Stage: Int {
-        case reel, wallet, number, contacts, nearby, notifications, autoVerify, setup
+        case reel, wallet, number, photo, contacts, nearby, notifications, autoVerify, setup
     }
 
     /// Every screen there can be, for the debug launch's range.
-    static let stageCount = 8
+    static let stageCount = 9
 
     /// The screens, in order. Both wallets' messages can be read, so
     /// everyone sees auto-verify and its setup.
-    private var stages: [Stage] { [.reel, .wallet, .number, .contacts, .nearby, .notifications, .autoVerify, .setup] }
+    private var stages: [Stage] { [.reel, .wallet, .number, .photo, .contacts, .nearby, .notifications, .autoVerify, .setup] }
 
     /// The wallet picked on the wallet screen, MTN MoMo until then.
     private var chosenWallet: Recipient.Network { Recipient.Network(rawValue: wallet) ?? .mtn }
@@ -76,6 +78,9 @@ struct OnboardingView: View {
                     .transition(.opacity)
             case .number:
                 OnboardingNumberPage(onDone: advance)
+                    .transition(.opacity)
+            case .photo:
+                OnboardingPhotoPage(onDone: advance)
                     .transition(.opacity)
             case .contacts:
                 OnboardingPermission(config: contacts)
@@ -205,8 +210,9 @@ enum OnboardingMetrics {
 
 /// Colours used only by onboarding.
 enum OnboardingPalette {
-    /// The flow's tint, the accent, whichever wallet is chosen.
-    static let tint = Color.brandAccent
+    /// The flow's tint, the accent's fill (the deep green on light mode's
+    /// green page, the green on dark mode's), whichever wallet is chosen.
+    static let tint = Color.brandFill
 
     /// The iPhone mock on the permission screen: its frame and the filled
     /// shapes standing in for the screen's content.
@@ -293,8 +299,8 @@ extension View {
 
 // MARK: - Launch arguments
 
-/// `-onboardingPage 0...7` (DEBUG, with `-resetOnboarding`) starts on that
-/// screen: the reel, the wallet, the number, Contacts, Nearby,
+/// `-onboardingPage 0...8` (DEBUG, with `-resetOnboarding`) starts on that
+/// screen: the reel, the wallet, the number, the photo, Contacts, Nearby,
 /// notifications, auto-verify, its setup. Without it, onboarding starts
 /// where it was left.
 @MainActor

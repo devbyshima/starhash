@@ -22,9 +22,10 @@ struct OnboardingPermission: View {
         var alertButtons = 2
         var primaryTitle: String
         var primaryAction: () -> Void
-        /// A quieter second choice under the button (auto-verify's Maybe
-        /// Later). Never on a screen before a system prompt: Apple allows
-        /// those one button, Continue, and no way past the prompt.
+        /// A quieter second choice beside the button, the two sharing its
+        /// place and height (auto-verify's Maybe Later). Never on a screen
+        /// before a system prompt: Apple allows those one button, Continue,
+        /// and no way past the prompt.
         var secondaryTitle: String?
         var secondaryAction: (() -> Void)?
     }
@@ -33,9 +34,6 @@ struct OnboardingPermission: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showsAlert = false
-    /// The home indicator's room, which a second choice under the button
-    /// sits in, so the button itself stays where Continue is elsewhere.
-    @State private var bottomInset: CGFloat = 34
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -59,29 +57,24 @@ struct OnboardingPermission: View {
                     .minimumScaleFactor(0.7)
                     .padding(.bottom, 10)
 
-                VStack(spacing: 0) {
+                // A second choice splits the button's place in two, the
+                // button on the left and the choice on the right, at the
+                // same height, so nothing moves from the screens before.
+                HStack(spacing: 12) {
                     Button(LocalizedStringKey(config.primaryTitle), action: config.primaryAction)
                         .buttonStyle(.starhashPrimaryGlowing)
-                        .padding(.horizontal, 15)
-
                     if let title = config.secondaryTitle, let action = config.secondaryAction {
-                        Button(action: action) {
-                            Text(catalog: title)
-                                .font(.starhash(.subheadline, weight: .semibold))
-                                .foregroundStyle(Color.starhashSecondaryText)
-                                .frame(minHeight: 44)
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.hapticPlain)
+                        Button(LocalizedStringKey(title), action: action)
+                            .buttonStyle(.starhashSecondary)
                     }
                 }
+                .padding(.horizontal, 15)
             }
-            // The button sits where Continue does on the other onboarding
-            // screens, 10 points over the bottom, and a second choice goes
-            // under it, in the home indicator's room, rather than lifting it.
+            // The buttons sit where Continue does on the other onboarding
+            // screens, 10 points over the bottom.
             .frame(height: 270, alignment: .bottom)
             .padding([.horizontal, .top], 15)
-            .padding(.bottom, hasSecondary ? max(10 - 44, -bottomInset) : 10)
+            .padding(.bottom, 10)
             .frame(maxWidth: .infinity)
             // The phone fades into the page under the words.
             .background {
@@ -93,15 +86,12 @@ struct OnboardingPermission: View {
             }
         }
         .padding(.top, 20)
-        .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.bottom } action: { bottomInset = $0 }
         .task {
             guard !showsAlert else { return }
             try? await Task.sleep(for: .seconds(config.initialDelay))
             showsAlert = true
         }
     }
-
-    private var hasSecondary: Bool { config.secondaryTitle != nil && config.secondaryAction != nil }
 
     // MARK: The iPhone
 
