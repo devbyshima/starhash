@@ -371,25 +371,25 @@ private struct Palette {
 
     static let light = Palette(
         ground: [UIColor(rgb: 0xFFFFFF)],
-        groundSide: UIColor(rgb: 0xE1EDE4),
-        groundShade: UIColor(rgb: 0xC9D9CD),
-        ink: [UIColor(rgb: 0x091D11), UIColor(rgb: 0x0F2618)],
-        inkSide: UIColor(rgb: 0x1B3523),
-        inkShade: UIColor(rgb: 0x050F09),
-        finder: UIColor(rgb: 0x091D11),
+        groundSide: UIColor(rgb: 0xE2E2E2),
+        groundShade: UIColor(rgb: 0xCACACA),
+        ink: [UIColor(rgb: 0x171717), UIColor(rgb: 0x202020)],
+        inkSide: UIColor(rgb: 0x2E2E2E),
+        inkShade: UIColor(rgb: 0x0B0B0B),
+        finder: UIColor(rgb: 0x171717),
         leaves: [UIColor(rgb: 0x4FB866), UIColor(rgb: 0x45A85B), UIColor(rgb: 0x3C9A51)],
         blossom: [UIColor(rgb: 0xE8F7EB), UIColor(rgb: 0xDCF2E0)],
         shadow: 0.16
     )
 
     static let dark = Palette(
-        ground: [UIColor(rgb: 0x102B19)],
-        groundSide: UIColor(rgb: 0x183C23),
-        groundShade: UIColor(rgb: 0x133220),
-        ink: [UIColor(rgb: 0xF3FBF4), UIColor(rgb: 0xE6F3E9)],
-        inkSide: UIColor(rgb: 0xB7CBBC),
-        inkShade: UIColor(rgb: 0x8DA594),
-        finder: UIColor(rgb: 0xF3FBF4),
+        ground: [UIColor(rgb: 0x262626)],
+        groundSide: UIColor(rgb: 0x333333),
+        groundShade: UIColor(rgb: 0x2B2B2B),
+        ink: [UIColor(rgb: 0xFAFBFA), UIColor(rgb: 0xEDEDED)],
+        inkSide: UIColor(rgb: 0xBDBDBD),
+        inkShade: UIColor(rgb: 0x8E8E8E),
+        finder: UIColor(rgb: 0xFAFBFA),
         leaves: [UIColor(rgb: 0x64D27B), UIColor(rgb: 0x5CC873)],
         blossom: [UIColor(rgb: 0x0C2414), UIColor(rgb: 0x143520)],
         shadow: 0.5

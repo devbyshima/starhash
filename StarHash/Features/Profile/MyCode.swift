@@ -17,7 +17,7 @@ enum QRCodeImage {
         let quiet = 4
         let module = side / CGFloat(count + quiet * 2)
         let origin = CGFloat(quiet) * module
-        let ink = UIColor(red: 9 / 255, green: 29 / 255, blue: 17 / 255, alpha: 1)
+        let ink = UIColor(red: 23 / 255, green: 23 / 255, blue: 23 / 255, alpha: 1)
         let eye = UIColor(red: 53 / 255, green: 116 / 255, blue: 68 / 255, alpha: 1)
         let accent = UIColor(red: 100 / 255, green: 210 / 255, blue: 123 / 255, alpha: 1)
 

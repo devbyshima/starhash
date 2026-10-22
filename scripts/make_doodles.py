@@ -42,8 +42,8 @@ ASSETS = os.path.join(ROOT, "StarHash", "Resources", "Assets.xcassets")
 # page: the ground, which fills hands. fill: the subject. dark: sleeves,
 # shadows, the dark half of a thing. line: lines straight on the page.
 # ink: lines drawn on the subject. chalk: lines drawn on a dark fill.
-LIGHT = dict(page="#64D27B", fill="#F3FBF4", dark="#091D11", line="#091D11", ink="#245331", chalk="#F3FBF4")
-DARK = dict(page="#102B19", fill="#64D27B", dark="#408A51", line="#9AE2A9", ink="#326E41", chalk="#64D27B")
+LIGHT = dict(page="#FFFFFF", fill="#64D27B", dark="#326E41", line="#326E41", ink="#326E41", chalk="#64D27B")
+DARK = dict(page="#171717", fill="#64D27B", dark="#408A51", line="#9AE2A9", ink="#326E41", chalk="#64D27B")
 
 PEN = 4.6
 MARGIN = 6
