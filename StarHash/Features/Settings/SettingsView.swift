@@ -46,6 +46,7 @@ enum SettingsPage: Hashable {
     case about
     case featureFlags
     case profile
+    case licences
 
     @MainActor @ViewBuilder
     var destination: some View {
@@ -59,6 +60,7 @@ enum SettingsPage: Hashable {
         case .whatsNew: WhatsNewView()
         case .release(let version): ReleaseDetailView(version: version)
         case .featureFlags: FeatureFlagsView()
+        case .licences: LicencesView()
         }
     }
 }
@@ -615,7 +617,7 @@ struct SettingsFooter: View {
 
 // MARK: - Launch arguments
 
-/// `-settingsPage whatsNew|release|terms|privacy|about|note|notifications|flags|guide|guide2`
+/// `-settingsPage whatsNew|release|terms|privacy|about|note|licences|notifications|flags|guide|guide2`
 /// (DEBUG only, with `-tab settings`) opens that page or the guide at launch.
 @MainActor
 enum SettingsLaunch {
@@ -635,6 +637,7 @@ enum SettingsLaunch {
         if page == "notifications" { return [.notifications] }
         if page == "profile" { return [.profile] }
         if page == "flags" { return [.about, .featureFlags] }
+        if page == "licences" { return [.about, .licences] }
         if page == "release" { return [.whatsNew, .release(ReleaseHistory.releases[0].version)] }
         if page?.hasPrefix("guide") == true { return [.autoVerify] }
         return []

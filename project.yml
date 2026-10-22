@@ -151,6 +151,9 @@ targets:
       - path: StarHash/Resources/Icons.xcassets
       - path: StarHash/Resources/Fonts/SpaceGrotesk.ttf
         buildPhase: resources
+      # The font's licence travels with it, as the OFL asks.
+      - path: StarHash/Resources/Fonts/OFL.txt
+        buildPhase: resources
     dependencies:
       - package: StarHashKit
     settings:

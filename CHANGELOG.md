@@ -8,6 +8,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Added
 
+- Licences, in About StarHash: Space Grotesk's copyright and the SIL Open Font License's full text, StarHash's own PolyForm Noncommercial licence, and a note on the carriers' trademarks.
 - Your photo with your QR code: people who scan it see your photo beside your number (a photo saved in their Contacts comes first). It is kept on StarHash's new small server under a random id, never with your number, and removing your photo deletes it there. StarHash also counts how many people use it, by a random id once a day; the privacy policy says so.
 - Two SIMs: say so in Settings and give the other number, and money between your own SIMs is filed under Your own accounts, counted as neither spent nor received. The other number is part of your profile: Profile shows and changes it, the backup carries it, and Settings asks for it only until it is in, putting the keyboard away once it is. Going back to one SIM asks which one you keep; the wallet follows the SIM kept. Two SIMs on different carriers give both wallets: Pay's wallet menu lists MTN MoMo and Airtel Money, each with the SIM it is on, and auto-verify and notifications speak of both carriers' messages. The first time you switch wallet with SIMs on both carriers, a sheet shows how to make that SIM the iPhone's default voice line, which is the one iOS dials codes from.
 - A Nearby suggestion passed over five times in a row stops being suggested; picking it keeps it, and paying it any other way brings it back.

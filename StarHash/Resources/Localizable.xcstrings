@@ -2505,6 +2505,38 @@
         }
       }
     },
+    "Font": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Police"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imyandikire"
+          }
+        }
+      }
+    },
+    "Font's source": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source de la police"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inkomoko y'imyandikire"
+          }
+        }
+      }
+    },
     "Free": {
       "localizations": {
         "rw": {
@@ -2985,6 +3017,38 @@
         }
       }
     },
+    "Licence text": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Texte de la licence"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inyandiko y'uruhushya"
+          }
+        }
+      }
+    },
+    "Licences": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Licences"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impushya"
+          }
+        }
+      }
+    },
     "Light": {
       "localizations": {
         "rw": {
@@ -3072,6 +3136,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "M"
+          }
+        }
+      }
+    },
+    "MTN, MoMo, Airtel and Airtel Money, and their logos, are their owners' trademarks, shown only to name the wallets StarHash works with.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MTN, MoMo, Airtel et Airtel Money, ainsi que leurs logos, sont des marques de leurs propriétaires, montrées seulement pour nommer les portefeuilles avec lesquels StarHash fonctionne."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MTN, MoMo, Airtel na Airtel Money, n'ibirango byabyo, ni ibya ba nyirabyo, bigaragazwa gusa mu kuvuga konti StarHash ikorana nazo."
           }
         }
       }
@@ -4743,6 +4823,22 @@
         }
       }
     },
+    "PolyForm Noncommercial": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PolyForm Noncommercial"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PolyForm Noncommercial"
+          }
+        }
+      }
+    },
     "Privacy & Sound": {
       "localizations": {
         "rw": {
@@ -5187,6 +5283,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Lancez-le une fois là-bas, et autorisez tout ce qu'il demande."
+          }
+        }
+      }
+    },
+    "SIL Open Font License": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SIL Open Font License"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SIL Open Font License"
           }
         }
       }
@@ -6689,6 +6801,22 @@
         }
       }
     },
+    "The font and code StarHash is built with, and their terms": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La police et le code de StarHash, et leurs conditions"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imyandikire na kode StarHash yubakishijwe, n'amategeko yabyo"
+          }
+        }
+      }
+    },
     "The money goes to the number you pick.": {
       "localizations": {
         "rw": {
@@ -6994,6 +7122,22 @@
       }
     },
     "Touch ID": {},
+    "Trademarks": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marques"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibirango"
+          }
+        }
+      }
+    },
     "Transaction": {
       "localizations": {
         "rw": {
