@@ -19,7 +19,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 - Scam warnings: a message that looks like MoMo's but comes from someone's own number, or asks for money back, is never logged, and a notification warns you before you send anything back.
 - Export and import: everything StarHash keeps as one file, in Settings' Your Data.
 - Widgets, four of them after the owner's reference: tiles for Pay and Scan (small) or Pay, Scan, Balance and Activity (medium), and Quick Pay, a Pay pill with Scan and Balance under it (small) or Scan, Balance, Buy and Activity (medium). Scan to Pay stays in Control Center.
-- Kinyarwanda, chosen in the Settings app.
+- English, French and Kinyarwanda, chosen in StarHash's own Settings (Language) and changed at once, dates and month names included. The widgets and iOS's own prompts keep the iPhone's language.
 - What's New: the first launch after an update shows what the version brought, with a video of each new feature. It shows once, and never on a fresh install.
 - Auto-verify reads MoMoAdvance's messages: when MTN's overdraft pays for a payment, its access fee joins that payment's fee, on a row of its own in the payment's details.
 - Verify replaces Mark as Confirmed: paste the wallet's message for a payment, and StarHash confirms it (or marks it failed) only if the message is that payment's, with its real fee, reference and balance. Confirm Without Message stays as the last resort.

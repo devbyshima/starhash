@@ -11,25 +11,25 @@ public enum ActivityPeriod: String, CaseIterable, Identifiable, Sendable {
 
     public var id: Self { self }
 
-    /// The period picker's title: String(localized: "This Week", bundle: .module).
+    /// The period picker's title: String(kit: "This Week").
     public var title: String {
         switch self {
-        case .today: String(localized: "Today", bundle: .module)
-        case .week: String(localized: "This Week", bundle: .module)
-        case .month: String(localized: "This Month", bundle: .module)
-        case .year: String(localized: "This Year", bundle: .module)
-        case .allTime: String(localized: "All Time", bundle: .module)
+        case .today: String(kit: "Today")
+        case .week: String(kit: "This Week")
+        case .month: String(kit: "This Month")
+        case .year: String(kit: "This Year")
+        case .allTime: String(kit: "All Time")
         }
     }
 
-    /// Over the summary card's total: String(localized: "Spent this week", bundle: .module).
+    /// Over the summary card's total: String(kit: "Spent this week").
     public var spentCaption: String {
         switch self {
-        case .today: String(localized: "Spent today", bundle: .module)
-        case .week: String(localized: "Spent this week", bundle: .module)
-        case .month: String(localized: "Spent this month", bundle: .module)
-        case .year: String(localized: "Spent this year", bundle: .module)
-        case .allTime: String(localized: "Spent in total", bundle: .module)
+        case .today: String(kit: "Spent today")
+        case .week: String(kit: "Spent this week")
+        case .month: String(kit: "Spent this month")
+        case .year: String(kit: "Spent this year")
+        case .allTime: String(kit: "Spent in total")
         }
     }
 
@@ -209,7 +209,7 @@ public enum ActivitySummary {
         let start = bucket.interval.start
         switch period {
         case .today:
-            return String(localized: "\(string(start, "j", calendar, locale)) to \(string(bucket.interval.end, "j", calendar, locale))", bundle: .module)
+            return String(kit: "\(string(start, "j", calendar, locale)) to \(string(bucket.interval.end, "j", calendar, locale))")
         case .week: return string(start, "EEEEdMMMM", calendar, locale)
         case .month: return string(start, "dMMMM", calendar, locale)
         case .year: return string(start, "MMMMyyyy", calendar, locale)
@@ -306,12 +306,12 @@ public enum ActivitySummary {
         }
     }
 
-    /// A day group's heading: String(localized: "Today", bundle: .module), String(localized: "Yesterday", bundle: .module), "Fri 2 Oct" (in the
+    /// A day group's heading: String(kit: "Today"), String(kit: "Yesterday"), "Fri 2 Oct" (in the
     /// user's own date order), with the year once it is not this year's.
     public static func dayTitle(for day: Date, now: Date, calendar: Calendar, locale: Locale = .current) -> String {
-        if calendar.isDate(day, inSameDayAs: now) { return String(localized: "Today", bundle: .module) }
+        if calendar.isDate(day, inSameDayAs: now) { return String(kit: "Today") }
         if let yesterday = calendar.date(byAdding: .day, value: -1, to: now), calendar.isDate(day, inSameDayAs: yesterday) {
-            return String(localized: "Yesterday", bundle: .module)
+            return String(kit: "Yesterday")
         }
         let sameYear = calendar.component(.year, from: day) == calendar.component(.year, from: now)
         return string(day, sameYear ? "EEEdMMM" : "EEEdMMMyyyy", calendar, locale)
@@ -330,10 +330,12 @@ public enum ActivitySummary {
     }
 
     /// A month group's heading: "August", with the year once it is not this
-    /// year's ("August 2025").
+    /// year's ("August 2025"). Its first letter is a capital in every
+    /// language, as a heading's is, though French writes "octobre".
     public static func monthTitle(for month: Date, now: Date, calendar: Calendar, locale: Locale = .current) -> String {
         let sameYear = calendar.component(.year, from: month) == calendar.component(.year, from: now)
-        return string(month, sameYear ? "MMMM" : "MMMMyyyy", calendar, locale)
+        let title = string(month, sameYear ? "MMMM" : "MMMMyyyy", calendar, locale)
+        return title.prefix(1).uppercased(with: locale) + title.dropFirst()
     }
 
     /// A row's date in a month's list: "Aug 31", with the year once it is

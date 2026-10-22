@@ -197,6 +197,8 @@ struct ActivitySummaryTests {
     @Test func monthTitlesAndRowDates() {
         #expect(ActivitySummary.monthTitle(for: Self.date(2026, 8, 1, 0), now: Self.now, calendar: Self.calendar, locale: Self.locale) == "August")
         #expect(ActivitySummary.monthTitle(for: Self.date(2025, 8, 1, 0), now: Self.now, calendar: Self.calendar, locale: Self.locale) == "August 2025")
+        // French writes its months in lower case; a heading still starts with a capital.
+        #expect(ActivitySummary.monthTitle(for: Self.date(2026, 10, 1, 0), now: Self.now, calendar: Self.calendar, locale: Locale(identifier: "fr_RW")) == "Octobre")
         let row = ActivitySummary.rowDate(for: Self.date(2026, 8, 31), now: Self.now, calendar: Self.calendar, locale: Self.locale)
         #expect(row == "31 Aug")
         #expect(ActivitySummary.rowDate(for: Self.date(2025, 8, 31), now: Self.now, calendar: Self.calendar, locale: Self.locale).contains("2025"))

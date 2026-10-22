@@ -8,6 +8,12 @@
             "state": "translated",
             "value": " Amafaranga asigaye ni %@."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " Solde %@."
+          }
         }
       }
     },
@@ -21,6 +27,12 @@
             "state": "translated",
             "value": "%@, kandi %@ %@."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ et %@ %@."
+          }
         }
       }
     },
@@ -30,6 +42,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@: biracyategerejwe. Hitamo niba byemejwe cyangwa byanze."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ est encore en attente. Marquez-le comme confirmé ou échoué."
           }
         }
       }
@@ -41,6 +59,12 @@
             "state": "translated",
             "value": "ubutumwa bwa %@"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Message %@"
+          }
         }
       }
     },
@@ -50,6 +74,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@ yakoherereje %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ vous a envoyé %@."
           }
         }
       }
@@ -61,6 +91,12 @@
             "state": "translated",
             "value": "%@ yakoherereje amafaranga."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ vous a envoyé de l'argent."
+          }
         }
       }
     },
@@ -70,6 +106,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ kuri %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ à %@"
           }
         }
       }
@@ -81,6 +123,12 @@
             "state": "translated",
             "value": "Ubwishyu bwa %1$@ kuri %2$@ bwagenze neza."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ à %@ est passé."
+          }
         }
       }
     },
@@ -90,6 +138,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ubwishyu %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld paiements"
           }
         }
       }
@@ -101,6 +155,12 @@
             "state": "translated",
             "value": "ubwishyu 1"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 paiement"
+          }
         }
       }
     },
@@ -110,6 +170,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ubutumwa buvuye kuri %@ %@, ariko ubwa %@ buva kuri %@. Ntugire amafaranga usubiza. Banza urebe amafaranga asigaye."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un message de %@ %@, mais ceux de %@ viennent de %@. Ne renvoyez pas d'argent. Vérifiez d'abord votre solde."
           }
         }
       }
@@ -121,6 +187,12 @@
             "state": "translated",
             "value": "Ubutumwa %1$@ burasaba ko usubiza amafaranga. %2$@ ntijya ibisaba. Banza urebe amafaranga asigaye mbere yo kohereza ikintu cyose."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un message disant que %@ demande de l'argent en retour. %@ ne le fait jamais. Vérifiez votre solde avant d'envoyer quoi que ce soit."
+          }
         }
       }
     },
@@ -130,6 +202,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Igihe cyose"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depuis le début"
           }
         }
       }
@@ -141,6 +219,12 @@
             "state": "translated",
             "value": "Ubwishyu bwawe bwagenze neza?"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre paiement est-il passé ?"
+          }
         }
       }
     },
@@ -150,6 +234,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Amafaranga yakiriwe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Argent reçu"
           }
         }
       }
@@ -161,6 +251,12 @@
             "state": "translated",
             "value": "Mu isaha imwe, %1$@ ntibwemeje %2$@, bityo StarHash ibyita ko byanze."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun %@ n'a confirmé %@ dans l'heure, alors StarHash l'a marqué comme échoué."
+          }
         }
       }
     },
@@ -170,6 +266,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ubwishyu bwemejwe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paiement confirmé"
           }
         }
       }
@@ -181,6 +283,12 @@
             "state": "translated",
             "value": "Byakoreshejwe byose hamwe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dépensé au total"
+          }
         }
       }
     },
@@ -190,6 +298,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Byakoreshejwe uku kwezi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dépensé ce mois-ci"
           }
         }
       }
@@ -201,6 +315,12 @@
             "state": "translated",
             "value": "Byakoreshejwe iki cyumweru"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dépensé cette semaine"
+          }
         }
       }
     },
@@ -210,6 +330,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Byakoreshejwe uyu mwaka"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dépensé cette année"
           }
         }
       }
@@ -221,6 +347,12 @@
             "state": "translated",
             "value": "Byakoreshejwe uyu munsi"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dépensé aujourd'hui"
+          }
         }
       }
     },
@@ -230,6 +362,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uku kwezi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce mois-ci"
           }
         }
       }
@@ -241,6 +379,12 @@
             "state": "translated",
             "value": "Iki cyumweru"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette semaine"
+          }
         }
       }
     },
@@ -250,6 +394,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uyu mwaka"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette année"
           }
         }
       }
@@ -261,6 +411,12 @@
             "state": "translated",
             "value": "Ibi bishobora kuba ubutekamutwe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceci est peut-être une arnaque"
+          }
         }
       }
     },
@@ -270,6 +426,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uyu munsi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aujourd'hui"
           }
         }
       }
@@ -281,6 +443,12 @@
             "state": "translated",
             "value": "Ejo hashize"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hier"
+          }
         }
       }
     },
@@ -290,6 +458,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous %@ %@."
           }
         }
       }
@@ -301,6 +475,12 @@
             "state": "translated",
             "value": "Wakoze %@ %@. Fungura StarHash urebe aho amafaranga yawe yagiye."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez fait %@ %@. Ouvrez StarHash pour voir où est allé votre argent."
+          }
         }
       }
     },
@@ -310,6 +490,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wakiriye amafaranga %@. Fungura StarHash uyarebe."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez reçu de l'argent %@. Ouvrez StarHash pour le voir."
           }
         }
       }
@@ -321,6 +507,12 @@
             "state": "translated",
             "value": "Wohereje %@ (%@)"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez envoyé %@ en %@"
+          }
         }
       }
     },
@@ -330,6 +522,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ukwezi kwawe kwa %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre %@"
           }
         }
       }
@@ -341,6 +539,12 @@
             "state": "translated",
             "value": "Ubwishyu bwawe ntibwakunze"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre paiement n'est pas passé"
+          }
         }
       }
     },
@@ -350,6 +554,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ubwishyu bwawe kuri %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre paiement à %@"
           }
         }
       }
@@ -361,6 +571,12 @@
             "state": "translated",
             "value": "Ubwishyu bwawe kuri %@ bwagenze neza."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre paiement à %@ est passé."
+          }
         }
       }
     },
@@ -370,6 +586,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Icyumweru cyawe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre semaine"
           }
         }
       }
@@ -381,6 +603,12 @@
             "state": "translated",
             "value": "uwohereje utazwi"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "un expéditeur inconnu"
+          }
         }
       }
     },
@@ -390,6 +618,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "amafaranga asigaye %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "solde %@"
           }
         }
       }
@@ -401,6 +635,12 @@
             "state": "translated",
             "value": "ikiguzi %@"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "frais %@"
+          }
         }
       }
     },
@@ -410,6 +650,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "muri %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "en %@"
           }
         }
       }
@@ -421,6 +667,12 @@
             "state": "translated",
             "value": "busa n'ubwa %@"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ressemble à celui de %@"
+          }
         }
       }
     },
@@ -430,6 +682,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ubutumwa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "message"
           }
         }
       }
@@ -441,6 +699,12 @@
             "state": "translated",
             "value": "wakiriye %@"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "reçu %@"
+          }
         }
       }
     },
@@ -450,6 +714,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "buvuga ko wakiriye %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "dit que vous avez reçu %@"
           }
         }
       }
@@ -461,6 +731,12 @@
             "state": "translated",
             "value": "iki cyumweru"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cette semaine"
+          }
         }
       }
     },
@@ -470,6 +746,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ubwishyu bwawe kuri %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "votre paiement à %@"
           }
         }
       }

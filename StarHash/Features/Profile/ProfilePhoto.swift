@@ -124,8 +124,8 @@ struct ProfilePhotoPicker: View {
                 }
             }
         }
-        .accessibilityLabel(String(localized: "Your photo"))
-        .accessibilityHint(String(localized: "Chooses a photo from your library"))
+        .accessibilityLabel(String(starhash: "Your photo"))
+        .accessibilityHint(String(starhash: "Chooses a photo from your library"))
         .onChange(of: item) { _, item in
             guard let item else { return }
             Task {

@@ -136,28 +136,28 @@ public enum NotificationPlan {
               transaction.source == .app, transaction.direction == .outgoing else { return nil }
         let name = transaction.counterparty.displayName
         if settings.failsUnconfirmed {
-            let messages = transaction.wallet.map { String(localized: "\($0.messagesName) message", bundle: .module) } ?? String(localized: "message", bundle: .module)
+            let messages = transaction.wallet.map { String(kit: "\($0.messagesName) message") } ?? String(kit: "message")
             let what = settings.showsAmounts
-                ? String(localized: "\(Money.formatWithCurrency(transaction.amount)) to \(name)", bundle: .module)
-                : String(localized: "your payment to \(name)", bundle: .module)
+                ? String(kit: "\(Money.formatWithCurrency(transaction.amount)) to \(name)")
+                : String(kit: "your payment to \(name)")
             return Item(
                 id: "payment-reminder.\(transaction.id.uuidString)",
                 kind: .paymentExpired,
                 date: transaction.date.addingTimeInterval(AutoVerify.confirmationWindow),
-                title: String(localized: "Your payment didn't go through", bundle: .module),
-                body: String(localized: "No \(messages) confirmed \(what) within an hour, so StarHash marked it failed.", bundle: .module),
+                title: String(kit: "Your payment didn't go through"),
+                body: String(kit: "No \(messages) confirmed \(what) within an hour, so StarHash marked it failed."),
                 transactionID: transaction.id
             )
         }
         let what = settings.showsAmounts
-            ? String(localized: "\(Money.formatWithCurrency(transaction.amount)) to \(name)", bundle: .module)
-            : String(localized: "Your payment to \(name)", bundle: .module)
+            ? String(kit: "\(Money.formatWithCurrency(transaction.amount)) to \(name)")
+            : String(kit: "Your payment to \(name)")
         return Item(
             id: "payment-reminder.\(transaction.id.uuidString)",
             kind: .paymentReminder,
             date: transaction.date.addingTimeInterval(TimeInterval(settings.reminderDelay * 60)),
-            title: String(localized: "Did your payment go through?", bundle: .module),
-            body: String(localized: "\(what) is still pending. Mark it as confirmed or failed.", bundle: .module),
+            title: String(kit: "Did your payment go through?"),
+            body: String(kit: "\(what) is still pending. Mark it as confirmed or failed."),
             transactionID: transaction.id
         )
     }
@@ -174,12 +174,12 @@ public enum NotificationPlan {
             guard settings.confirmedPayments, previous.status == .pending,
                   transaction.status == .confirmed, transaction.direction == .outgoing else { return nil }
             var body = settings.showsAmounts
-                ? String(localized: "\(Money.formatWithCurrency(transaction.amount)) to \(name) went through.", bundle: .module)
-                : String(localized: "Your payment to \(name) went through.", bundle: .module)
+                ? String(kit: "\(Money.formatWithCurrency(transaction.amount)) to \(name) went through.")
+                : String(kit: "Your payment to \(name) went through.")
             if settings.showsAmounts {
                 let details = [
-                    transaction.fee.map { String(localized: "fee \(Money.formatWithCurrency($0))", bundle: .module) },
-                    transaction.balanceAfter.map { String(localized: "balance \(Money.formatWithCurrency($0))", bundle: .module) },
+                    transaction.fee.map { String(kit: "fee \(Money.formatWithCurrency($0))") },
+                    transaction.balanceAfter.map { String(kit: "balance \(Money.formatWithCurrency($0))") },
                 ].compactMap(\.self)
                 if !details.isEmpty {
                     let line = details.joined(separator: ", ")
@@ -188,19 +188,19 @@ public enum NotificationPlan {
             }
             return Item(
                 id: "payment-confirmed.\(transaction.id.uuidString)", kind: .paymentConfirmed, date: nil,
-                title: String(localized: "Payment confirmed", bundle: .module), body: body, transactionID: transaction.id
+                title: String(kit: "Payment confirmed"), body: body, transactionID: transaction.id
             )
         }
         guard settings.moneyReceived, transaction.direction == .incoming else { return nil }
         var body = settings.showsAmounts
-            ? String(localized: "\(name) sent you \(Money.formatWithCurrency(transaction.amount)).", bundle: .module)
-            : String(localized: "\(name) sent you money.", bundle: .module)
+            ? String(kit: "\(name) sent you \(Money.formatWithCurrency(transaction.amount)).")
+            : String(kit: "\(name) sent you money.")
         if settings.showsAmounts, let balance = transaction.balanceAfter {
-            body += String(localized: " Balance \(Money.formatWithCurrency(balance)).", bundle: .module)
+            body += String(kit: " Balance \(Money.formatWithCurrency(balance)).")
         }
         return Item(
             id: "money-received.\(transaction.id.uuidString)", kind: .moneyReceived, date: nil,
-            title: String(localized: "Money received", bundle: .module), body: body, transactionID: transaction.id
+            title: String(kit: "Money received"), body: body, transactionID: transaction.id
         )
     }
 
@@ -212,19 +212,19 @@ public enum NotificationPlan {
     public static func scamWarning(_ warning: ScamWarning, settings: Settings, at date: Date = .now) -> Item {
         let wallet = warning.wallet.walletName
         let claim: String = if let claimed = warning.claimed, claimed.direction == .incoming, settings.showsAmounts {
-            String(localized: "says you received \(Money.formatWithCurrency(claimed.amount))", bundle: .module)
+            String(kit: "says you received \(Money.formatWithCurrency(claimed.amount))")
         } else {
-            String(localized: "looks like \(wallet)'s", bundle: .module)
+            String(kit: "looks like \(wallet)'s")
         }
         let body: String = switch warning.reason {
         case .unofficialSender:
-            String(localized: "A message from \(warning.sender ?? String(localized: "an unknown sender", bundle: .module)) \(claim), but \(wallet)'s come from \(warning.wallet.messagesName). Don't send any money back. Check your balance first.", bundle: .module)
+            String(kit: "A message from \(warning.sender ?? String(kit: "an unknown sender")) \(claim), but \(wallet)'s come from \(warning.wallet.messagesName). Don't send any money back. Check your balance first.")
         case .suspiciousWording:
-            String(localized: "A message that \(claim) asks for money back. \(wallet) never does. Check your balance before you send anything.", bundle: .module)
+            String(kit: "A message that \(claim) asks for money back. \(wallet) never does. Check your balance before you send anything.")
         }
         return Item(
             id: "scam-warning.\(Int(date.timeIntervalSince1970))", kind: .scamWarning, date: nil,
-            title: String(localized: "This may be a scam", bundle: .module), body: body, transactionID: nil
+            title: String(kit: "This may be a scam"), body: body, transactionID: nil
         )
     }
 
@@ -241,7 +241,7 @@ public enum NotificationPlan {
               ),
               let start = calendar.date(byAdding: .day, value: -7, to: date) else { return nil }
         return summary(
-            id: "weekly-summary", kind: .weeklySummary, date: date, title: String(localized: "Your week", bundle: .module), period: String(localized: "this week", bundle: .module),
+            id: "weekly-summary", kind: .weeklySummary, date: date, title: String(kit: "Your week"), period: String(kit: "this week"),
             of: transactions.filter { start <= $0.date && $0.date < date }, settings: settings
         )
     }
@@ -259,7 +259,7 @@ public enum NotificationPlan {
               let month = calendar.dateInterval(of: .month, for: lastDay) else { return nil }
         let name = calendar.standaloneMonthSymbols[calendar.component(.month, from: month.start) - 1]
         return summary(
-            id: "monthly-summary", kind: .monthlySummary, date: date, title: String(localized: "Your \(name)", bundle: .module), period: String(localized: "in \(name)", bundle: .module),
+            id: "monthly-summary", kind: .monthlySummary, date: date, title: String(kit: "Your \(name)"), period: String(kit: "in \(name)"),
             of: transactions.filter { month.start <= $0.date && $0.date < month.end }, settings: settings
         )
     }
@@ -279,20 +279,20 @@ public enum NotificationPlan {
         guard !counted.isEmpty else { return nil }
         let totals = ActivitySummary.totals(of: counted)
         let payments = counted.filter { $0.direction == .outgoing }.count
-        let paymentsPhrase = payments == 1 ? String(localized: "1 payment", bundle: .module) : String(localized: "\(payments) payments", bundle: .module)
+        let paymentsPhrase = payments == 1 ? String(kit: "1 payment") : String(kit: "\(payments) payments")
         let body: String
         if settings.showsAmounts {
-            let sent = String(localized: "You sent \(Money.formatWithCurrency(totals.spent)) in \(paymentsPhrase)", bundle: .module)
-            let received = String(localized: "received \(Money.formatWithCurrency(totals.received))", bundle: .module)
+            let sent = String(kit: "You sent \(Money.formatWithCurrency(totals.spent)) in \(paymentsPhrase)")
+            let received = String(kit: "received \(Money.formatWithCurrency(totals.received))")
             body = switch (payments > 0, totals.received > 0) {
-            case (true, true): String(localized: "\(sent) and \(received) \(period).", bundle: .module)
-            case (true, false): String(localized: "\(sent) \(period).", bundle: .module)
-            default: String(localized: "You \(received) \(period).", bundle: .module)
+            case (true, true): String(kit: "\(sent) and \(received) \(period).")
+            case (true, false): String(kit: "\(sent) \(period).")
+            default: String(kit: "You \(received) \(period).")
             }
         } else {
             body = payments > 0
-                ? String(localized: "You made \(paymentsPhrase) \(period). Open StarHash to see where your money went.", bundle: .module)
-                : String(localized: "You received money \(period). Open StarHash to see it.", bundle: .module)
+                ? String(kit: "You made \(paymentsPhrase) \(period). Open StarHash to see where your money went.")
+                : String(kit: "You received money \(period). Open StarHash to see it.")
         }
         return Item(id: id, kind: kind, date: date, title: title, body: body, transactionID: nil)
     }

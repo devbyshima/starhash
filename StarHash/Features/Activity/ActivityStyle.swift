@@ -124,22 +124,22 @@ extension TransactionCategory {
     /// The category's name, as Activity shows it.
     var title: String {
         switch self {
-        case .airtime: String(localized: "Airtime")
-        case .bundles: String(localized: "Bundles")
-        case .electricity: String(localized: "Electricity")
-        case .water: String(localized: "Water")
-        case .tv: String(localized: "TV")
-        case .restaurant: String(localized: "Restaurants")
-        case .groceries: String(localized: "Groceries")
-        case .transport: String(localized: "Transport")
-        case .bills: String(localized: "Bills")
-        case .shopping: String(localized: "Shopping")
-        case .health: String(localized: "Health")
-        case .education: String(localized: "Education")
-        case .family: String(localized: "Family")
-        case .savings: String(localized: "Savings")
-        case .ownAccounts: String(localized: "Your own accounts")
-        case .other: String(localized: "Other")
+        case .airtime: String(starhash: "Airtime")
+        case .bundles: String(starhash: "Bundles")
+        case .electricity: String(starhash: "Electricity")
+        case .water: String(starhash: "Water")
+        case .tv: String(starhash: "TV")
+        case .restaurant: String(starhash: "Restaurants")
+        case .groceries: String(starhash: "Groceries")
+        case .transport: String(starhash: "Transport")
+        case .bills: String(starhash: "Bills")
+        case .shopping: String(starhash: "Shopping")
+        case .health: String(starhash: "Health")
+        case .education: String(starhash: "Education")
+        case .family: String(starhash: "Family")
+        case .savings: String(starhash: "Savings")
+        case .ownAccounts: String(starhash: "Your own accounts")
+        case .other: String(starhash: "Other")
         }
     }
 
@@ -190,11 +190,11 @@ extension StarHashKit.Transaction {
     var activityAccessibilityLabel: String {
         var parts = [
             counterparty.shownName,
-            (isPurchase ? String(localized: "Bought ") : direction == .outgoing ? String(localized: "Sent ") : String(localized: "Received ")) + Money.formatWithCurrency(amount),
-            date.formatted(date: .abbreviated, time: .shortened),
+            (isPurchase ? String(starhash: "Bought ") : direction == .outgoing ? String(starhash: "Sent ") : String(starhash: "Received ")) + Money.formatWithCurrency(amount),
+            date.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened, locale: .starhash)),
         ]
-        if status == .pending { parts.append("Pending") }
-        if status == .failed { parts.append("Failed") }
+        if status == .pending { parts.append(String(starhash: "Pending")) }
+        if status == .failed { parts.append(String(starhash: "Failed")) }
         return parts.joined(separator: ", ")
     }
 }
@@ -229,11 +229,11 @@ extension ActivityPeriod {
     /// The period control's label: a letter, as GO Club's W M.
     var shortLabel: String {
         switch self {
-        case .today: "D"
-        case .week: "W"
-        case .month: "M"
-        case .year: "Y"
-        case .allTime: "A"
+        case .today: String(starhash: LocalizedStringResource("D", comment: "The period control's letter for a day"))
+        case .week: String(starhash: LocalizedStringResource("W", comment: "The period control's letter for a week"))
+        case .month: String(starhash: LocalizedStringResource("M", comment: "The period control's letter for a month"))
+        case .year: String(starhash: LocalizedStringResource("Y", comment: "The period control's letter for a year"))
+        case .allTime: String(starhash: LocalizedStringResource("A", comment: "The period control's letter for all time"))
         }
     }
 }

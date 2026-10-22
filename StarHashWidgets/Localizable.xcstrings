@@ -4,12 +4,50 @@
     "%lld/%lld": {
       "shouldTranslate": false
     },
+    "Activity": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activité"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibikorwa"
+          }
+        }
+      }
+    },
+    "Balance": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solde"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reba asigaye"
+          }
+        }
+      }
+    },
     "Buy": {
       "localizations": {
         "rw": {
           "stringUnit": {
             "state": "translated",
             "value": "Gura"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acheter"
           }
         }
       }
@@ -21,6 +59,12 @@
             "state": "translated",
             "value": "Koresha kode zawe ukanze rimwe gusa."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Composez vos codes d'une touche."
+          }
         }
       }
     },
@@ -30,6 +74,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ikanda %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose %@"
+          }
+        }
+      }
+    },
+    "Link": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lien"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ihuza"
           }
         }
       }
@@ -41,6 +107,28 @@
             "state": "translated",
             "value": "Izindi kode"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus de codes"
+          }
+        }
+      }
+    },
+    "Open StarHash": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir StarHash"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fungura StarHash"
+          }
         }
       }
     },
@@ -50,6 +138,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fungura sikaneri ngo wishyure kode ya QR."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrez le scanner pour payer un code QR."
           }
         }
       }
@@ -61,6 +155,12 @@
             "state": "translated",
             "value": "Ifungura sikaneri ya StarHash ngo wishyure kode ya QR."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre le scanner de StarHash pour payer un code QR."
+          }
         }
       }
     },
@@ -70,6 +170,92 @@
           "stringUnit": {
             "state": "translated",
             "value": "Amapaji"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pages"
+          }
+        }
+      }
+    },
+    "Pay": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payer"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ishyura"
+          }
+        }
+      }
+    },
+    "Pay someone": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payer quelqu'un"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ishyura umuntu"
+          }
+        }
+      }
+    },
+    "Pay, scan, check your balance and see your activity in a tap.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payez, scannez, consultez votre solde et votre activité d'une touche."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ishyura, sikana, reba amafaranga asigaye n'ibikorwa byawe ukanze rimwe gusa."
+          }
+        }
+      }
+    },
+    "Quick Pay": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paiement rapide"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kwishyura vuba"
+          }
+        }
+      }
+    },
+    "Scan": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scanner"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sikana"
           }
         }
       }
@@ -81,6 +267,12 @@
             "state": "translated",
             "value": "Sikana wishyure"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scanner pour payer"
+          }
         }
       }
     },
@@ -90,6 +282,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reba izindi kode"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher plus de codes"
+          }
+        }
+      }
+    },
+    "StarHash": {},
+    "Start a payment, or scan, from your Home Screen.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lancez un paiement, ou scannez, depuis l'écran d'accueil."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tangira kwishyura, cyangwa usikane, uhereye ku Rugo rwa telefoni."
           }
         }
       }

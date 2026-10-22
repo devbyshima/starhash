@@ -52,15 +52,15 @@ enum DataTransfer {
         let scoped = url.startAccessingSecurityScopedResource()
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
         guard let data = try? Data(contentsOf: url) else {
-            return Outcome(title: String(localized: "Couldn't Open the File"), message: String(localized: "StarHash couldn't read it. Try saving it to your iPhone first."))
+            return Outcome(title: String(starhash: "Couldn't Open the File"), message: String(starhash: "StarHash couldn't read it. Try saving it to your iPhone first."))
         }
         let backup: StarHashBackup
         do {
             backup = try StarHashBackup.decode(data)
         } catch .tooNew {
-            return Outcome(title: String(localized: "Update StarHash First"), message: String(localized: "This file is from a newer StarHash. Update from the App Store, then import it again."))
+            return Outcome(title: String(starhash: "Update StarHash First"), message: String(starhash: "This file is from a newer StarHash. Update from the App Store, then import it again."))
         } catch {
-            return Outcome(title: String(localized: "Not a StarHash File"), message: String(localized: "Choose a file you exported from StarHash's Settings."))
+            return Outcome(title: String(starhash: "Not a StarHash File"), message: String(starhash: "Choose a file you exported from StarHash's Settings."))
         }
 
         let transactions = store.merge(backup.transactions)
@@ -71,12 +71,12 @@ enum DataTransfer {
         }
 
         guard transactions + codes > 0 else {
-            return Outcome(title: String(localized: "Already Up to Date"), message: String(localized: "Everything in this file is already in StarHash."))
+            return Outcome(title: String(starhash: "Already Up to Date"), message: String(starhash: "Everything in this file is already in StarHash."))
         }
         var parts: [String] = []
-        if transactions > 0 { parts.append(transactions == 1 ? String(localized: "1 transaction") : String(localized: "\(transactions) transactions")) }
-        if codes > 0 { parts.append(codes == 1 ? String(localized: "1 code") : String(localized: "\(codes) codes")) }
-        let added = parts.joined(separator: String(localized: " and "))
-        return Outcome(title: String(localized: "Imported"), message: String(localized: "Added \(added). Nothing already here was changed."))
+        if transactions > 0 { parts.append(transactions == 1 ? String(starhash: "1 transaction") : String(starhash: "\(transactions) transactions")) }
+        if codes > 0 { parts.append(codes == 1 ? String(starhash: "1 code") : String(starhash: "\(codes) codes")) }
+        let added = parts.joined(separator: String(starhash: " and "))
+        return Outcome(title: String(starhash: "Imported"), message: String(starhash: "Added \(added). Nothing already here was changed."))
     }
 }

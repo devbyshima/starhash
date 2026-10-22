@@ -135,8 +135,11 @@ final class StarHashNotifications {
             return
         }
         let transactions = AppEnvironment.store.transactions
+        // Month names in the language StarHash speaks, not the iPhone's.
+        var calendar = Calendar.current
+        calendar.locale = .starhash
         let plan = NotificationPlan.scheduled(
-            for: transactions, settings: StarHashPreferences.notifications, now: .now, calendar: .current
+            for: transactions, settings: StarHashPreferences.notifications, now: .now, calendar: calendar
         )
         let planned = Set(plan.map(\.id))
         center.removePendingNotificationRequests(withIdentifiers: waiting.filter { !planned.contains($0) })

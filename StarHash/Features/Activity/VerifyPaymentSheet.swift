@@ -76,7 +76,7 @@ struct VerifyPaymentSheet: View {
             ("Amount", Money.formatWithCurrency(transaction.amount)),
             ("To", transaction.counterparty.displayName),
             (transaction.counterparty.kind == .phone ? "Number" : "Merchant code", transaction.counterparty.formattedDestination),
-            ("Dialled", transaction.date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated).hour().minute())),
+            ("Dialled", transaction.date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated).hour().minute().locale(.starhash))),
         ]
         return VStack(spacing: 0) {
             ForEach(Array(rows.enumerated()), id: \.offset) { index, row in
@@ -117,7 +117,7 @@ struct VerifyPaymentSheet: View {
             dismiss()
         case .overdraft(let paid):
             let fee = Money.formatWithCurrency(paid.accessFee ?? 0)
-            show(Note(text: String(localized: "MoMoAdvance's fee of \(fee) is added. Now paste the payment's own message."), isProblem: false))
+            show(Note(text: String(starhash: "MoMoAdvance's fee of \(fee) is added. Now paste the payment's own message."), isProblem: false))
         case .anotherPayment, .confirmedAnother, .notAMessage:
             // Another payment's message, one already used, or not a
             // wallet's at all: all the same to the owner, the wrong one.

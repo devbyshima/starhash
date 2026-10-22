@@ -39,13 +39,13 @@ struct OnboardingNumberPage: View {
 
             VStack(spacing: 12) {
                 // Rising word by word as the screen before leaves.
-                RevealText(String(localized: "Your number"), delay: RevealTiming.enterDelay)
+                RevealText(String(starhash: "Your number"), delay: RevealTiming.enterDelay)
                     .starhashFont(22, weight: .bold, relativeTo: .title2)
                     .foregroundStyle(Color.starhashPrimaryText)
                     .accessibilityAddTraits(.isHeader)
                 RevealText(
-                    String(localized: "It goes in your own QR code, so friends\nscan it to pay you. It stays on your iPhone."),
-                    startIndex: RevealText.wordCount(String(localized: "Your number")),
+                    String(starhash: "It goes in your own QR code, so friends\nscan it to pay you. It stays on your iPhone."),
+                    startIndex: RevealText.wordCount(String(starhash: "Your number")),
                     delay: RevealTiming.enterDelay
                 )
                     .font(.starhash(.callout))

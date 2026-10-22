@@ -42,7 +42,7 @@ struct NotificationSettingsView: View {
                     symbol: "bell.badge.fill",
                     title: "Payment reminders",
                     caption: failsUnconfirmed
-                        ? String(localized: "When no \(wallet.messagesName) message confirms a payment within an hour")
+                        ? String(starhash: "When no \(wallet.messagesName) message confirms a payment within an hour")
                         : "When a payment you made is still pending",
                     isOn: $paymentReminders
                 )
@@ -61,7 +61,7 @@ struct NotificationSettingsView: View {
                     symbol: "checkmark.seal.fill",
                     title: "Confirmed payments",
                     caption: autoVerifyOn
-                        ? String(localized: "When a \(wallet.messagesName) message confirms a payment")
+                        ? String(starhash: "When a \(wallet.messagesName) message confirms a payment")
                         : "Needs auto-verify, under Transactions",
                     isOn: $confirmedPayments
                 )
@@ -69,7 +69,7 @@ struct NotificationSettingsView: View {
                     symbol: "arrow.down.circle.fill",
                     title: "Money received",
                     caption: autoVerifyOn
-                        ? String(localized: "When a \(wallet.messagesName) message brings money in")
+                        ? String(starhash: "When a \(wallet.messagesName) message brings money in")
                         : "Needs auto-verify, under Transactions",
                     isOn: $moneyReceived
                 )
@@ -210,9 +210,9 @@ struct NotificationSettingsView: View {
 
     /// "10 minutes", "1 hour".
     private static func delayTitle(_ minutes: Int) -> String {
-        guard minutes >= 60 else { return String(localized: "\(minutes) minutes") }
+        guard minutes >= 60 else { return String(starhash: "\(minutes) minutes") }
         let hours = minutes / 60
-        return hours == 1 ? String(localized: "1 hour") : String(localized: "\(hours) hours")
+        return hours == 1 ? String(starhash: "1 hour") : String(starhash: "\(hours) hours")
     }
 
     /// The week's days from the one the calendar starts on, as `Calendar`
@@ -223,12 +223,14 @@ struct NotificationSettingsView: View {
     }
 
     private static func weekdayTitle(_ day: Int) -> String {
-        Calendar.current.weekdaySymbols[day - 1]
+        var calendar = Calendar.current
+        calendar.locale = .starhash
+        return calendar.weekdaySymbols[day - 1]
     }
 
     /// "18:00" or "6 PM", as the iPhone writes the time.
     private static func hourTitle(_ hour: Int) -> String {
         let date = Calendar.current.date(bySettingHour: hour, minute: 0, second: 0, of: .now) ?? .now
-        return date.formatted(date: .omitted, time: .shortened)
+        return date.formatted(Date.FormatStyle(date: .omitted, time: .shortened, locale: .starhash))
     }
 }

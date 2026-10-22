@@ -5,9 +5,9 @@ options:
     iOS: "18.0"
   createIntermediateGroups: true
   developmentLanguage: en
-  # English and Kinyarwanda (Localizable.xcstrings in the app and in
-  # StarHashKit), chosen per app in the Settings app.
-  knownRegions: [en, rw, Base]
+  # English, French and Kinyarwanda (Localizable.xcstrings in the app, the
+  # widgets and StarHashKit), chosen in StarHash's own Settings.
+  knownRegions: [en, fr, rw, Base]
 
 # One configuration per release channel (RELEASING.md). Beta is Release
 # with its own channel, archived from a release branch for TestFlight.
@@ -116,7 +116,7 @@ targets:
         CFBundleDisplayName: StarHash
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
-        CFBundleLocalizations: [en, rw]
+        CFBundleLocalizations: [en, fr, rw]
         UILaunchScreen:
           UIColorName: LaunchBackground
         UISupportedInterfaceOrientations:

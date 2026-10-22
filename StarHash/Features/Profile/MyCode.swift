@@ -151,10 +151,10 @@ struct ProfileFields: View {
         let digits = draftNumber.filter(\.isNumber)
         guard digits.count >= 10 else { return nil }
         guard let recipient = Recipient.ownNumber(draftNumber) else {
-            return String(localized: "Enter a Rwandan mobile number: 078, 079, 072 or 073.")
+            return String(starhash: "Enter a Rwandan mobile number: 078, 079, 072 or 073.")
         }
         if let network = recipient.network, network != wallet {
-            return String(localized: "That is an \(network.name) number; you pay with \(wallet.walletName).")
+            return String(starhash: "That is an \(network.name) number; you pay with \(wallet.walletName).")
         }
         return nil
     }

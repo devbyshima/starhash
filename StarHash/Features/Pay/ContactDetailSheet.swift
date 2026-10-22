@@ -146,7 +146,7 @@ struct ContactDetailSheet: View {
     }
 
     private var payButton: some View {
-        Button(payee == nil ? String(localized: "Choose a number") : String(localized: "Pay \(Money.formatWithCurrency(amount))")) {
+        Button(payee == nil ? String(starhash: "Choose a number") : String(starhash: "Pay \(Money.formatWithCurrency(amount))")) {
             if let payee { onPay(payee) }
         }
         .buttonStyle(.sheetPrimary)
@@ -165,7 +165,7 @@ struct ContactDetailSheet: View {
         return VStack(spacing: 8) {
             SheetSectionLabel("This year")
             HStack(alignment: .top, spacing: 16) {
-                stat(value: Money.format(totals.amount), label: String(localized: "\(Money.currency) sent"))
+                stat(value: Money.format(totals.amount), label: String(starhash: "\(Money.currency) sent"))
                 stat(value: String(totals.count), label: totals.count == 1 ? "Payment" : "Payments")
             }
             .padding(16)

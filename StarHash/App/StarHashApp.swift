@@ -10,6 +10,8 @@ struct StarHashApp: App {
     private let shortcuts = AppEnvironment.shortcuts
 
     init() {
+        // The language chosen in StarHash, before anything is drawn.
+        AppLanguage.stored.apply()
         #if DEBUG
         if DebugLaunch.arguments.contains("-skipOnboarding") {
             UserDefaults.standard.set(true, forKey: PreferenceKey.hasOnboarded)
@@ -61,6 +63,9 @@ struct StarHashApp: App {
         bar.largeTitleTextAttributes = [.font: UIFont.starhash(34, weight: 700)]
     }
 
+    /// The language chosen in Settings; the app is drawn afresh in it.
+    @AppStorage(PreferenceKey.appLanguage) private var language = AppLanguage.system.rawValue
+
     var body: some Scene {
         WindowGroup {
             SplashGate {
@@ -68,6 +73,10 @@ struct StarHashApp: App {
                     // Text with no font of its own (list rows, fields) is in
                     // Space Grotesk too.
                     .font(.starhash(.body))
+                    // In the language chosen, with its dates and numbers, and
+                    // drawn afresh when it changes.
+                    .environment(\.locale, (AppLanguage(rawValue: language) ?? .system).locale)
+                    .id(language)
                     .environment(store)
                     .environment(router)
                     .environment(shortcuts)

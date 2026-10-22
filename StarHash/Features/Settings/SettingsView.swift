@@ -78,6 +78,7 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.profileNumber) private var profileNumber = ""
     @AppStorage(PreferenceKey.simCount) private var simCount = 1
     @AppStorage(PreferenceKey.sharePhoto) private var sharePhoto = true
+    @AppStorage(PreferenceKey.appLanguage) private var appLanguage = AppLanguage.system.rawValue
     @AppStorage(PreferenceKey.secondNumber) private var secondNumber = ""
     @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
     @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
@@ -192,7 +193,7 @@ private struct SettingsRootList: View {
                 HStack(spacing: 12) {
                     ProfilePhotoView(size: 46)
                     SettingsRowText(
-                        title: profileName.isEmpty ? String(localized: "Profile") : profileName,
+                        title: profileName.isEmpty ? String(starhash: "Profile") : profileName,
                         status: Recipient.ownNumber(profileNumber)?.formattedDestination
                     )
                     Spacer(minLength: 8)
@@ -223,7 +224,7 @@ private struct SettingsRootList: View {
                 caption: "With two, money between them is not counted as spent"
             ) {
                 SettingsChoiceMenu(title: "SIMs", selection: $simCount, choices: [1, 2]) {
-                    $0 == 2 ? String(localized: "Two") : String(localized: "One")
+                    $0 == 2 ? String(starhash: "Two") : String(starhash: "One")
                 }
             }
             if simCount == 2 {
@@ -252,7 +253,7 @@ private struct SettingsRootList: View {
         SettingsToggleRow(
             symbol: "checkmark.message.fill",
             title: "Auto-verify transactions",
-            caption: String(localized: "Confirm payments from \(wallet.messagesName) messages"),
+            caption: String(starhash: "Confirm payments from \(wallet.messagesName) messages"),
             status: autoVerifyStatus,
             isOn: autoVerifyBinding
         )
@@ -331,20 +332,24 @@ private struct SettingsRootList: View {
                 choices: AppAppearance.allCases
             ) { $0.title }
         }
-        // iOS keeps each app's language in the Settings app, which
-        // offers English and Kinyarwanda for StarHash.
-        Button { SettingsAppLink.open() } label: {
-            SettingsRow(symbol: "globe", title: "Language", caption: "English or Kinyarwanda, in the Settings app") {
-                HStack(spacing: 8) {
-                    Text(AppLanguage.currentName)
-                        .font(.starhash(.body))
-                        .foregroundStyle(Color.starhashSecondaryText)
-                    SettingsChevron(symbol: "arrow.up.right")
-                }
-            }
+        // Chosen here and changed at once, without the Settings app.
+        SettingsRow(symbol: "globe", title: "Language", caption: "English, French or Kinyarwanda, or your iPhone's") {
+            SettingsChoiceMenu(
+                title: "Language",
+                selection: Binding(
+                    get: { AppLanguage(rawValue: appLanguage) ?? .system },
+                    set: { chosen in
+                        // The lookups first, so the redraw is in it.
+                        chosen.apply()
+                        appLanguage = chosen.rawValue
+                        // The summaries queued with iOS were written in
+                        // the language before.
+                        Task { await StarHashNotifications.shared.sync() }
+                    }
+                ),
+                choices: AppLanguage.allCases
+            ) { $0.title }
         }
-        .buttonStyle(HighlightRowButtonStyle())
-        .accessibilityHint("Opens StarHash in the Settings app")
     }
     }
 
@@ -422,10 +427,10 @@ private struct SettingsRootList: View {
     private var autoVerifyStatus: String? {
         if autoVerifyBinding.wrappedValue,
            !StarHashPreferences.automationProven(lastMessageAt: lastMessageAt, since: autoVerifySince) {
-            return String(localized: "Waiting for a \(wallet.messagesName) message to come through")
+            return String(starhash: "Waiting for a \(wallet.messagesName) message to come through")
         }
         return autoVerifyLooksBroken
-            ? String(localized: "No \(wallet.messagesName) messages for a week. Check the automation")
+            ? String(starhash: "No \(wallet.messagesName) messages for a week. Check the automation")
             : nil
     }
 
@@ -449,8 +454,8 @@ private struct SettingsRootList: View {
         return SettingsToggleRow(
             symbol: unlock.symbol,
             title: unlock == .passcode ? "Passcode Lock" : unlock.name,
-            caption: unlock == .passcode ? String(localized: "Ask for your passcode to open StarHash") : String(localized: "Ask for \(unlock.name) to open StarHash"),
-            status: available ? nil : String(localized: "Set a passcode on this iPhone first"),
+            caption: unlock == .passcode ? String(starhash: "Ask for your passcode to open StarHash") : String(starhash: "Ask for \(unlock.name) to open StarHash"),
+            status: available ? nil : String(starhash: "Set a passcode on this iPhone first"),
             isOn: appLockBinding
         )
         .disabled(!available && !appLock)
@@ -464,7 +469,7 @@ private struct SettingsRootList: View {
         } set: { isOn in
             let name = DeviceUnlock.current.name
             Task {
-                let reason = isOn ? String(localized: "Turn on \(name) for StarHash.") : String(localized: "Turn off \(name) for StarHash.")
+                let reason = isOn ? String(starhash: "Turn on \(name) for StarHash.") : String(starhash: "Turn off \(name) for StarHash.")
                 guard await AppLock.authenticate(reason: reason) else { return }
                 withAnimation(.smooth) { appLock = isOn }
             }
@@ -523,7 +528,7 @@ enum SettingsVersion {
     /// "StarHash version 1.1.0, build 2, Beta", for VoiceOver.
     static var spoken: String {
         let channel = ReleaseChannel.current
-        let spoken = String(localized: "StarHash version \(short), build \(build)")
+        let spoken = String(starhash: "StarHash version \(short), build \(build)")
         return channel == .production ? spoken : "\(spoken), \(channel.title)"
     }
 

@@ -32,6 +32,9 @@ extension PreferenceKey {
     /// StarHash's server for whoever scans it (`StarHashCloud`). On unless
     /// turned off.
     static let sharePhoto = "sharePhoto"
+    /// The language StarHash speaks (`AppLanguage`), the iPhone's until one
+    /// is chosen.
+    static let appLanguage = "appLanguage"
     static let secondNumber = "secondNumber"
     /// Whether the on-device model may name the categories the rules
     /// cannot (iOS 26 and later, with Apple Intelligence).

@@ -119,7 +119,7 @@ struct ActivitySpendingChart: View {
                 // pressed bar keeps full strength; the rest step back.
                 .foregroundStyle(Color.starhashInk.color(in: environment).gradient.opacity(isProminent(bucket) ? 1 : 0.4))
                 .clipShape(UnevenRoundedRectangle(topLeadingRadius: barRadius, topTrailingRadius: barRadius, style: .continuous))
-                .accessibilityLabel(ActivitySummary.spokenName(of: bucket, period: period, calendar: calendar))
+                .accessibilityLabel(ActivitySummary.spokenName(of: bucket, period: period, calendar: calendar, locale: .starhash))
                 .accessibilityValue(Money.formatWithCurrency(bucket.total))
             }
         }
@@ -195,7 +195,7 @@ struct ActivitySpendingChart: View {
             let leading = min(max(barCenter - calloutSize.width / 2, 0), max(chartWidth - calloutSize.width, 0))
             let bottom = max(barTop - 6, calloutSize.height)
             ActivityChartCallout(
-                title: ActivitySummary.calloutTitle(of: selected, period: period, calendar: calendar),
+                title: ActivitySummary.calloutTitle(of: selected, period: period, calendar: calendar, locale: .starhash),
                 amount: Money.formatWithCurrency(selected.total),
                 rollsDigits: !reduceMotion
             )

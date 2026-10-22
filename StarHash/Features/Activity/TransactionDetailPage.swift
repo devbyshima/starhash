@@ -110,7 +110,7 @@ struct TransactionDetailPage: View {
                 .foregroundStyle(Color.starhashPrimaryText)
                 .multilineTextAlignment(.center)
                 .padding(.bottom, 6)
-            Text(transaction.date.formatted(.dateTime.month(.abbreviated).day().hour().minute()))
+            Text(transaction.date.formatted(.dateTime.month(.abbreviated).day().hour().minute().locale(.starhash)))
                 .starhashFont(17, relativeTo: .body)
                 .foregroundStyle(Color.starhashSecondaryText)
                 .padding(.bottom, 14)
@@ -288,7 +288,7 @@ struct TransactionDetailPage: View {
         return VStack(spacing: 8) {
             SheetSectionLabel("This year", onPage: true)
             HStack(alignment: .top, spacing: 16) {
-                stat(value: Money.format(ytd.amount), label: String(localized: "\(Money.currency) sent"))
+                stat(value: Money.format(ytd.amount), label: String(starhash: "\(Money.currency) sent"))
                 stat(value: String(ytd.count), label: ytd.count == 1 ? "Payment" : "Payments")
             }
             .starhashOutlinedCard(padding: EdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16))

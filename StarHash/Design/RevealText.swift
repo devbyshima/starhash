@@ -18,7 +18,7 @@ struct RevealText: View {
 
     /// Looked up in the string catalog by its English, as `Text(catalog:)`.
     init(_ key: String, startIndex: Int = 0, delay: Double = 0) {
-        let text = String(localized: String.LocalizationValue(key))
+        let text = String(starhash: LocalizedStringResource(String.LocalizationValue(key)))
         self.words = Token.split(text)
         self.startIndex = startIndex
         self.delay = delay
@@ -26,7 +26,7 @@ struct RevealText: View {
 
     /// How many words it has, for the line that follows it.
     static func wordCount(_ key: String) -> Int {
-        Token.split(String(localized: String.LocalizationValue(key))).filter(\.isWord).count
+        Token.split(String(starhash: LocalizedStringResource(String.LocalizationValue(key)))).filter(\.isWord).count
     }
 
     var body: some View {

@@ -49,8 +49,8 @@ struct QRTreeView: View {
             scene = QRTreeScene(text: text, dark: colorScheme == .dark)
         }
         .accessibilityElement()
-        .accessibilityLabel(String(localized: "Your StarHash QR code"))
-        .accessibilityHint(showsCode ? String(localized: "Shows it as a tree") : String(localized: "Shows it as a QR code"))
+        .accessibilityLabel(String(starhash: "Your StarHash QR code"))
+        .accessibilityHint(showsCode ? String(starhash: "Shows it as a tree") : String(starhash: "Shows it as a QR code"))
         .accessibilityAddTraits(.isButton)
         .accessibilityAction(.default, toggle)
         #if DEBUG

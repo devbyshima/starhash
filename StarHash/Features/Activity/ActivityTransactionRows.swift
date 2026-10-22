@@ -135,14 +135,14 @@ struct ActivityTransactionRow: View {
     private var detailLine: String {
         var parts: [String] = []
         if transaction.isPurchase {
-            parts.append(String(localized: "Bought"))
+            parts.append(String(starhash: "Bought"))
         } else if transaction.isOwnTransfer {
-            parts.append(String(localized: "Between your accounts"))
+            parts.append(String(starhash: "Between your accounts"))
         } else if transaction.counterparty.name?.isEmpty == false, !transaction.counterparty.destination.isEmpty {
             parts.append(transaction.counterparty.formattedDestination)
         }
-        parts.append(ActivitySummary.rowDate(for: transaction.date, now: .now, calendar: .autoupdatingCurrent)
-            + ", " + transaction.date.formatted(date: .omitted, time: .shortened))
+        parts.append(ActivitySummary.rowDate(for: transaction.date, now: .now, calendar: .autoupdatingCurrent, locale: .starhash)
+            + ", " + transaction.date.formatted(Date.FormatStyle(date: .omitted, time: .shortened, locale: .starhash)))
         return parts.joined(separator: " \u{00B7} ")
     }
 

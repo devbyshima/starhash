@@ -167,7 +167,7 @@ struct ActivityView: View {
 
     /// "August", "July", "December 2025": bold, as the reference's.
     private func monthHeader(_ section: ActivitySummary.DaySection, isFirst: Bool) -> some View {
-        Text(ActivitySummary.monthTitle(for: section.day, now: now, calendar: calendar))
+        Text(ActivitySummary.monthTitle(for: section.day, now: now, calendar: calendar, locale: .starhash))
             .starhashFont(22, weight: .bold, relativeTo: .title2)
             .foregroundStyle(Color.starhashPrimaryText)
             .accessibilityAddTraits(.isHeader)

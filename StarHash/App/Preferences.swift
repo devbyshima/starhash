@@ -1,3 +1,4 @@
+import StarHashKit
 import Foundation
 
 /// UserDefaults keys, used with @AppStorage. One place, so every screen
@@ -26,13 +27,51 @@ enum PreferenceKey {
     static let wallet = "wallet"
 }
 
-/// The language StarHash shows itself in: English or Kinyarwanda, chosen in
-/// the Settings app (iOS keeps each app's language there).
-enum AppLanguage {
-    /// The language's own name for itself: "English", "Kinyarwanda".
-    static var currentName: String {
-        let code = Bundle.main.preferredLocalizations.first ?? "en"
-        let name = Locale(identifier: code).localizedString(forLanguageCode: code) ?? code
-        return name.prefix(1).uppercased() + name.dropFirst()
+/// The language StarHash speaks, chosen in Settings rather than the
+/// Settings app, and changed at once: the iPhone's own, English, French or
+/// Kinyarwanda. Every string written out is looked up in it
+/// (`String(starhash:)`), and SwiftUI's views take its locale, so the app
+/// redraws in it without a restart. The widgets and iOS's own prompts keep
+/// the iPhone's language.
+enum AppLanguage: String, CaseIterable {
+    case system
+    case english = "en"
+    case french = "fr"
+    case kinyarwanda = "rw"
+
+    /// Each language in its own words, the way language pickers name them.
+    var title: String {
+        switch self {
+        case .system: String(starhash: "iPhone's language")
+        case .english: "English"
+        case .french: "Français"
+        case .kinyarwanda: "Ikinyarwanda"
+        }
     }
+
+    /// The language chosen, or the iPhone's when none is.
+    static var stored: AppLanguage {
+        UserDefaults.standard.string(forKey: PreferenceKey.appLanguage).flatMap(AppLanguage.init(rawValue:)) ?? .system
+    }
+
+    /// For SwiftUI's environment: the language with the region's formats.
+    var locale: Locale {
+        guard self != .system else { return .autoupdatingCurrent }
+        var components = Locale.Components(locale: .autoupdatingCurrent)
+        components.languageComponents = Locale.Language.Components(identifier: rawValue)
+        return Locale(components: components)
+    }
+
+    /// Points every string StarHash writes out at this language, the
+    /// app's and the kit's (`String(starhash:)`). Run at launch and
+    /// whenever the choice changes.
+    func apply() {
+        StarHashLanguage.locale = locale
+    }
+}
+
+extension Locale {
+    /// The chosen language with the region's formats, for dates and times
+    /// written out as words outside a view's environment.
+    static var starhash: Locale { StarHashLanguage.locale }
 }

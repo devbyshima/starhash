@@ -35,7 +35,7 @@ struct ReportPage: View {
                     ActivitySummaryCard(
                         period: period,
                         totals: ActivitySummary.totals(of: inPeriod),
-                        buckets: ActivitySummary.buckets(for: inPeriod, period: period, now: now, calendar: calendar),
+                        buckets: ActivitySummary.buckets(for: inPeriod, period: period, now: now, calendar: calendar, locale: .starhash),
                         calendar: calendar
                     )
                     .transition(.opacity)

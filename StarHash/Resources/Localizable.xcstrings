@@ -8,6 +8,12 @@
             "state": "translated",
             "value": " na "
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " et "
+          }
         }
       }
     },
@@ -17,6 +23,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nimero ya %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numéro %@"
           }
         }
       }
@@ -28,6 +40,12 @@
             "state": "translated",
             "value": "%@ byoherejwe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ envoyés"
+          }
         }
       }
     },
@@ -37,6 +55,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ubutumwa nyakuri bwa %@ buturuka kuri %@, ntibujya buturuka kuri nimero ya telefoni."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les messages de %@ viennent de %@, jamais d'un numéro de téléphone."
           }
         }
       }
@@ -54,6 +78,12 @@
             "state": "translated",
             "value": "kode %lld"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld codes"
+          }
         }
       }
     },
@@ -63,6 +93,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Amasaha %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld heures"
           }
         }
       }
@@ -74,6 +110,12 @@
             "state": "translated",
             "value": "iminota %lld"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld minutes"
+          }
         }
       }
     },
@@ -83,6 +125,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ubwishyu %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld paiements"
           }
         }
       }
@@ -94,6 +142,12 @@
             "state": "translated",
             "value": "Nimero %lld za telefoni"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld numéros de téléphone"
+          }
         }
       }
     },
@@ -103,6 +157,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ibikorwa %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld transactions"
           }
         }
       }
@@ -122,6 +182,12 @@
             "state": "translated",
             "value": "kode 1"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 code"
+          }
         }
       }
     },
@@ -131,6 +197,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "isaha 1"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 heure"
           }
         }
       }
@@ -142,6 +214,12 @@
             "state": "translated",
             "value": "ubwishyu 1"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 paiement"
+          }
         }
       }
     },
@@ -152,11 +230,28 @@
             "state": "translated",
             "value": "igikorwa 1"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 transaction"
+          }
         }
       }
     },
     "9:41": {
       "shouldTranslate": false
+    },
+    "A": {
+      "comment": "The period control's letter for all time",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "T"
+          }
+        }
+      }
     },
     "A few words on why StarHash exists": {
       "localizations": {
@@ -164,6 +259,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Impamvu StarHash yakozwe, mu magambo make"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quelques mots sur la raison d'être de StarHash"
           }
         }
       }
@@ -175,6 +276,12 @@
             "state": "translated",
             "value": "Kode ya MoMo y'umucuruzi, cyangwa kode ya StarHash y'inshuti."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le code MoMo d'un commerçant, ou le code StarHash d'un ami."
+          }
         }
       }
     },
@@ -184,6 +291,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ubutumwa buvuye kuri Shima"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un mot de Shima"
           }
         }
       }
@@ -195,6 +308,12 @@
             "state": "translated",
             "value": "Kwibutswa iyo ubwishyu bugitegerejwe cyangwa butagenze neza, n'incamake y'icyumweru n'ukwezi kwawe. Hitamo ibyo wakira, n'uko bigaragaza amafaranga cyangwa bitayagaragaza, mu Igenamiterere."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un rappel quand un paiement est encore en attente ou n'est pas passé, et le résumé de votre semaine et de votre mois. Choisissez lesquels vous recevez, et s'ils montrent les montants, dans Réglages."
+          }
         }
       }
     },
@@ -204,6 +323,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kwibutswa iyo ubwishyu bugitegerejwe,\nn'incamake y'icyumweru n'ukwezi kwawe."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un rappel quand un paiement est en attente,\net le résumé de votre semaine et de votre mois."
           }
         }
       }
@@ -215,6 +340,12 @@
             "state": "translated",
             "value": "Ibyerekeye StarHash"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À propos de StarHash"
+          }
         }
       }
     },
@@ -224,6 +355,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ibikorwa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activité"
           }
         }
       }
@@ -235,6 +372,12 @@
             "state": "translated",
             "value": "Ibikorwa bibika buri bwishyu ku munsi wabwo,\nhamwe n'igishushanyo n'ishakisha."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activité garde chaque paiement par jour,\navec un graphique et une recherche."
+          }
         }
       }
     },
@@ -244,6 +387,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ongeraho"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter"
           }
         }
       }
@@ -255,6 +404,12 @@
             "state": "translated",
             "value": "Ongeramo nanone"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter à nouveau"
+          }
         }
       }
     },
@@ -264,6 +419,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ongeraho icyiciro"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter une catégorie"
           }
         }
       }
@@ -275,6 +436,12 @@
             "state": "translated",
             "value": "Add Shortcut"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter le raccourci"
+          }
         }
       }
     },
@@ -284,6 +451,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ongeramo StarHash SMS"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter StarHash SMS"
           }
         }
       }
@@ -295,6 +468,12 @@
             "state": "translated",
             "value": "Ongeraho kode"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter un code"
+          }
         }
       }
     },
@@ -304,6 +483,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ongeramo shortcut imwe, maze buri butumwa bwa %@\nbwemeze ubwishyu bwabwo, hamwe n'ikiguzi."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajoutez un raccourci et chaque message %@\nconfirme son paiement, avec les frais."
           }
         }
       }
@@ -315,6 +500,12 @@
             "state": "translated",
             "value": "Ongeraho shortcut imwe, maze ubutumwa bwa MTN MoMo cyangwa Airtel Money bwemeze buri bwishyu, hamwe n'ikiguzi cyabwo n'amafaranga asigaye nyuma yabwo."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajoutez un raccourci et vos messages MTN MoMo ou Airtel Money confirment chaque paiement, avec ses frais et votre nouveau solde."
+          }
         }
       }
     },
@@ -324,6 +515,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ongera ibiri muri dosiye ya StarHash kuri iyi iPhone"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter le contenu d'un fichier StarHash à cet iPhone"
           }
         }
       }
@@ -335,6 +532,12 @@
             "state": "translated",
             "value": "Hongewemo %@. Nta kintu cyari gisanzwe hano cyahinduwe."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ajoutés. Rien de ce qui était déjà là n'a changé."
+          }
         }
       }
     },
@@ -344,6 +547,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ama-inite"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crédit"
           }
         }
       }
@@ -355,6 +564,12 @@
             "state": "translated",
             "value": "Emerera StarHash gukoresha kamera muri porogaramu ya Settings kugira ngo usikane kode, cyangwa uhitemo ifoto yayo."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autorisez l'appareil photo pour StarHash dans l'app Réglages pour scanner un code, ou choisissez-en une photo."
+          }
         }
       }
     },
@@ -364,6 +579,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Muri porogaramu ya Settings, emerera StarHash kumenya neza aho uri, kugira ngo ibashe gutandukanya iduka rimwe n'irindi."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autorisez votre position exacte pour StarHash dans l'app Réglages, pour qu'il distingue une caisse de la suivante."
           }
         }
       }
@@ -375,6 +596,12 @@
             "state": "translated",
             "value": "Emera imenyesha"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autoriser les notifications"
+          }
         }
       }
     },
@@ -384,6 +611,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Byose bisanzwe bihari"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déjà à jour"
           }
         }
       }
@@ -395,6 +628,12 @@
             "state": "translated",
             "value": "Amafaranga"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Montant"
+          }
         }
       }
     },
@@ -404,6 +643,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nimero iyo ari yo yose ya MTN cyangwa Airtel, cyangwa kode\ny'umucuruzi. StarHash imenya itandukaniro."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tout numéro MTN ou Airtel, ou un code\ncommerçant. StarHash sait les reconnaître."
           }
         }
       }
@@ -415,6 +660,12 @@
             "state": "translated",
             "value": "Impinduka yose kuri iyi politiki izagaragazwa hano, hamwe n'umunsi yatangiriyeho gukurikizwa."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tout changement de cette politique sera indiqué ici, avec le jour de son entrée en vigueur."
+          }
         }
       }
     },
@@ -424,6 +675,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Imigaragarire"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apparence"
           }
         }
       }
@@ -435,6 +692,12 @@
             "state": "translated",
             "value": "Uzi neza ko ushaka gusiba amakuru yose?"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voulez-vous vraiment supprimer toutes les données ?"
+          }
         }
       }
     },
@@ -444,6 +707,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Baza mbere yo gusiba"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demander avant de supprimer"
           }
         }
       }
@@ -455,6 +724,12 @@
             "state": "translated",
             "value": "Saba %@ mbere yo gufungura StarHash"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demander %@ pour ouvrir StarHash"
+          }
         }
       }
     },
@@ -464,6 +739,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gusaba kode y'ibanga mbere yo gufungura StarHash"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demander votre code pour ouvrir StarHash"
           }
         }
       }
@@ -475,6 +756,12 @@
             "state": "translated",
             "value": "Baza ku ipaji ya StarHash kuri GitHub"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demandez sur la page GitHub de StarHash"
+          }
         }
       }
     },
@@ -484,6 +771,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kugenzura byikora"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérification auto"
           }
         }
       }
@@ -495,6 +788,12 @@
             "state": "translated",
             "value": "Kugenzura ibikorwa byikora"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérifier les transactions automatiquement"
+          }
         }
       }
     },
@@ -504,6 +803,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Subira inyuma"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retour"
           }
         }
       }
@@ -515,6 +820,12 @@
             "state": "translated",
             "value": "Kubika kopi"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sauvegardes"
+          }
         }
       }
     },
@@ -524,6 +835,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reba asigaye"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solde"
           }
         }
       }
@@ -535,6 +852,28 @@
             "state": "translated",
             "value": "Amafaranga asigaye nyuma"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solde après"
+          }
+        }
+      }
+    },
+    "Between your accounts": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entre vos comptes"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hagati ya konti zawe"
+          }
         }
       }
     },
@@ -544,6 +883,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fagitire"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Factures"
           }
         }
       }
@@ -555,6 +900,12 @@
             "state": "translated",
             "value": "Waguze"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acheté"
+          }
         }
       }
     },
@@ -564,6 +915,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Byaguzwe "
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acheté "
           }
         }
       }
@@ -575,6 +932,12 @@
             "state": "translated",
             "value": "Interineti"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forfaits"
+          }
         }
       }
     },
@@ -584,6 +947,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gura"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acheter"
           }
         }
       }
@@ -595,6 +964,12 @@
             "state": "translated",
             "value": "Gurira Shima ikawa"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offrir un café à Shima"
+          }
         }
       }
     },
@@ -604,6 +979,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kamera irafunze"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'appareil photo est désactivé"
           }
         }
       }
@@ -615,6 +996,12 @@
             "state": "translated",
             "value": "Iki gikoresho ntigishobora guhamagara"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de composer sur cet appareil"
+          }
         }
       }
     },
@@ -625,16 +1012,43 @@
             "state": "translated",
             "value": "Reka"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annuler"
+          }
         }
       }
     },
-    "Cash Power": {},
+    "Cash Power": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cash Power"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cash Power"
+          }
+        }
+      }
+    },
     "Category": {
       "localizations": {
         "rw": {
           "stringUnit": {
             "state": "translated",
             "value": "Icyiciro"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Catégorie"
           }
         }
       }
@@ -646,6 +1060,12 @@
             "state": "translated",
             "value": "Hindura"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifier"
+          }
         }
       }
     },
@@ -655,6 +1075,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Byahinduwe kuri iyi iPhone"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifié sur cet iPhone"
           }
         }
       }
@@ -666,6 +1092,12 @@
             "state": "translated",
             "value": "Impinduka kuri aya mabwiriza"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifications de ces conditions"
+          }
         }
       }
     },
@@ -675,6 +1107,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Impinduka kuri iyi politiki"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifications de cette politique"
           }
         }
       }
@@ -686,6 +1124,12 @@
             "state": "translated",
             "value": "Umuyoboro"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Canal"
+          }
         }
       }
     },
@@ -695,6 +1139,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reba amafaranga asigaye"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voir le solde"
           }
         }
       }
@@ -706,6 +1156,12 @@
             "state": "translated",
             "value": "Reba amafaranga asigaye kuri konti"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voir le solde du portefeuille"
+          }
         }
       }
     },
@@ -715,6 +1171,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reba ko ikora"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérifier que ça marche"
           }
         }
       }
@@ -726,6 +1188,12 @@
             "state": "translated",
             "value": "Banza urebe amafaranga asigaye kuri konti yawe mbere yo gusubiza amafaranga ayo ari yo yose."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérifiez votre solde auprès de votre portefeuille avant de renvoyer quoi que ce soit."
+          }
         }
       }
     },
@@ -735,6 +1203,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Biragenzurwa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérification"
           }
         }
       }
@@ -746,6 +1220,12 @@
             "state": "translated",
             "value": "Abana"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enfants"
+          }
         }
       }
     },
@@ -755,6 +1235,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hitamo dosiye wohereje uhereye ku Igenamiterere rya StarHash."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez un fichier exporté depuis les Réglages de StarHash."
           }
         }
       }
@@ -766,6 +1252,12 @@
             "state": "translated",
             "value": "Hitamo nimero"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir un numéro"
+          }
         }
       }
     },
@@ -775,6 +1267,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ahubwo hitamo ifoto ya kode."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez plutôt une photo du code."
           }
         }
       }
@@ -786,6 +1284,12 @@
             "state": "translated",
             "value": "Ihitamo ifoto mu mafoto yawe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisit une photo dans votre photothèque"
+          }
         }
       }
     },
@@ -795,6 +1299,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ihitamo iyi nimero muri Ishyura"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisit ce numéro pour Payer"
           }
         }
       }
@@ -806,6 +1316,12 @@
             "state": "translated",
             "value": "Kuraho"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Effacer"
+          }
         }
       }
     },
@@ -815,6 +1331,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Siba ibyo washakishaga"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Effacer la recherche"
           }
         }
       }
@@ -826,6 +1348,12 @@
             "state": "translated",
             "value": "Funga"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fermer"
+          }
         }
       }
     },
@@ -835,6 +1363,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Funga ishakisha"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fermer la recherche"
           }
         }
       }
@@ -846,6 +1380,12 @@
             "state": "translated",
             "value": "Ifunga ibimenyetso"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ferme les symboles"
+          }
         }
       }
     },
@@ -855,6 +1395,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kode"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code"
           }
         }
       }
@@ -866,6 +1412,12 @@
             "state": "translated",
             "value": "Kode, urugero *182*7*1#"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code, par ex. *182*7*1#"
+          }
         }
       }
     },
@@ -875,6 +1427,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kode, ibiguzi n'inyandiko"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codes, frais et historique"
           }
         }
       }
@@ -886,6 +1444,12 @@
             "state": "translated",
             "value": "Garuka ukande **Komeza**."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revenez et touchez **Continuer**."
+          }
         }
       }
     },
@@ -895,6 +1459,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Garuka hano ukande **Ongera ugerageze**."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revenez et touchez **Réessayer**."
           }
         }
       }
@@ -906,6 +1476,12 @@
             "state": "translated",
             "value": "Emeza nta butumwa"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmer sans message"
+          }
         }
       }
     },
@@ -915,6 +1491,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Emeza buri gusiba, keretse usibishije kunyerereza urutoki"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmer chaque suppression, sauf par balayage"
           }
         }
       }
@@ -926,6 +1508,12 @@
             "state": "translated",
             "value": "Emeza ubwishyu\nmu buryo bwikora"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmer les paiements\nautomatiquement"
+          }
         }
       }
     },
@@ -935,6 +1523,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Emeza ubwishyu ukoresheje ubutumwa bwa %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmer les paiements avec les messages %@"
           }
         }
       }
@@ -946,6 +1540,12 @@
             "state": "translated",
             "value": "Byemejwe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmé"
+          }
         }
       }
     },
@@ -955,6 +1555,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ubwishyu bwemejwe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paiements confirmés"
           }
         }
       }
@@ -966,6 +1572,12 @@
             "state": "translated",
             "value": "Abo muvugana"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contacts"
+          }
         }
       }
     },
@@ -975,6 +1587,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Abo muvugana barafunze"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les contacts sont désactivés"
           }
         }
       }
@@ -986,6 +1604,12 @@
             "state": "translated",
             "value": "Unyuzwe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contenu"
+          }
         }
       }
     },
@@ -995,6 +1619,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Komeza"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuer"
           }
         }
       }
@@ -1006,6 +1636,12 @@
             "state": "translated",
             "value": "Koporora kode"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copier le code"
+          }
         }
       }
     },
@@ -1015,6 +1651,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ntibyashobotse gufungura dosiye"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d'ouvrir le fichier"
+          }
+        }
+      }
+    },
+    "D": {
+      "comment": "The period control's letter for a day",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "J"
           }
         }
       }
@@ -1026,6 +1679,12 @@
             "state": "translated",
             "value": "Umwijima"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sombre"
+          }
         }
       }
     },
@@ -1035,6 +1694,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Umwijima, urumuri, cyangwa nk'uko iPhone yawe iteye"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sombre, clair ou comme votre iPhone"
           }
         }
       }
@@ -1046,6 +1711,12 @@
             "state": "translated",
             "value": "Itariki"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Date"
+          }
         }
       }
     },
@@ -1055,6 +1726,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Umunsi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jour"
           }
         }
       }
@@ -1066,6 +1743,12 @@
             "state": "translated",
             "value": "Paji ibanza"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Page par défaut"
+          }
         }
       }
     },
@@ -1075,6 +1758,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Siba"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer"
           }
         }
       }
@@ -1086,6 +1775,12 @@
             "state": "translated",
             "value": "Siba amakuru yose"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer toutes les données"
+          }
         }
       }
     },
@@ -1095,6 +1790,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Siba kode"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer le code"
           }
         }
       }
@@ -1106,6 +1807,12 @@
             "state": "translated",
             "value": "Siba kode?"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer le code ?"
+          }
         }
       }
     },
@@ -1115,6 +1822,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Siba igikorwa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer la transaction"
           }
         }
       }
@@ -1126,6 +1839,12 @@
             "state": "translated",
             "value": "Urashaka gusiba igikorwa?"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer la transaction ?"
+          }
         }
       }
     },
@@ -1135,6 +1854,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Siba, ntuzongere kubaza"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer, ne plus demander"
           }
         }
       }
@@ -1146,6 +1871,12 @@
             "state": "translated",
             "value": "Ibisobanuro"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Détails"
+          }
         }
       }
     },
@@ -1155,6 +1886,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ubutumwa bw'uwayikoze"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mot du développeur"
           }
         }
       }
@@ -1166,6 +1903,12 @@
             "state": "translated",
             "value": "Kanda %@"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Composer %@"
+          }
         }
       }
     },
@@ -1175,6 +1918,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kanda %@ kuri telefoni yawe kugira ngo urangize."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Composez %@ sur votre téléphone pour terminer."
           }
         }
       }
@@ -1186,6 +1935,12 @@
             "state": "translated",
             "value": "Kanda %@ kuri telefoni yawe."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Composez %@ sur votre téléphone."
+          }
         }
       }
     },
@@ -1195,6 +1950,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Igihe byakanzwe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Composé"
           }
         }
       }
@@ -1206,6 +1967,12 @@
             "state": "translated",
             "value": "Ikanda %@"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose %@"
+          }
         }
       }
     },
@@ -1215,6 +1982,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ikanda kode yo kureba amafaranga asigaye kuri MTN MoMo cyangwa Airtel Money."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose le code de solde MTN MoMo ou Airtel Money."
           }
         }
       }
@@ -1226,6 +1999,12 @@
             "state": "translated",
             "value": "Ibigaragara"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Affichage"
+          }
         }
       }
     },
@@ -1235,6 +2014,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Byarangiye"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
           }
         }
       }
@@ -1246,6 +2031,12 @@
             "state": "translated",
             "value": "Kurura uyimure"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faites glisser pour le déplacer"
+          }
         }
       }
     },
@@ -1255,6 +2046,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hindura"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifier"
           }
         }
       }
@@ -1266,6 +2063,12 @@
             "state": "translated",
             "value": "Hindura kode"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifier le code"
+          }
         }
       }
     },
@@ -1275,6 +2078,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uburezi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Éducation"
           }
         }
       }
@@ -1286,6 +2095,12 @@
             "state": "translated",
             "value": "Bikurikizwa guhera ku wa %@"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En vigueur le %@"
+          }
         }
       }
     },
@@ -1295,6 +2110,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Umuriro"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Électricité"
           }
         }
       }
@@ -1306,15 +2127,27 @@
             "state": "translated",
             "value": "Emerera abo muvugana"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activer les contacts"
+          }
         }
       }
     },
-    "English or Kinyarwanda, in the Settings app": {
+    "English, French or Kinyarwanda, or your iPhone's": {
       "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anglais, français ou kinyarwanda, ou celle de votre iPhone"
+          }
+        },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Icyongereza cyangwa Ikinyarwanda, muri porogaramu ya Settings"
+            "value": "Icyongereza, Igifaransa cyangwa Ikinyarwanda, cyangwa urwa iPhone yawe"
           }
         }
       }
@@ -1326,6 +2159,12 @@
             "state": "translated",
             "value": "Andika nimero ya telefoni yo mu Rwanda: 078, 079, 072 cyangwa 073."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saisissez un numéro mobile rwandais : 078, 079, 072 ou 073."
+          }
         }
       }
     },
@@ -1335,6 +2174,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Buri butumwa bwa %@ bwemeza ubwishyu bwabwo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chaque message %@ confirme son paiement."
           }
         }
       }
@@ -1346,6 +2191,12 @@
             "state": "translated",
             "value": "Buri flag isubira uko rollout yayo ibiteganya"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chaque option revient à son déploiement"
+          }
         }
       }
     },
@@ -1355,6 +2206,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ubwishyu bwose ku munsi, icyumweru, ukwezi cyangwa umwaka, hamwe n'igishushanyo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chaque paiement par jour, semaine, mois ou année, avec un graphique."
           }
         }
       }
@@ -1366,6 +2223,12 @@
             "state": "translated",
             "value": "Ubwishyu bwose muri Ibikorwa"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chaque paiement dans Activité"
+          }
         }
       }
     },
@@ -1375,6 +2238,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Buri bwishyu, bwanditswe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chaque paiement, enregistré"
           }
         }
       }
@@ -1386,6 +2255,12 @@
             "state": "translated",
             "value": "Ibiri muri iyi dosiye byose bisanzwe biri muri StarHash."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tout ce que contient ce fichier est déjà dans StarHash."
+          }
         }
       }
     },
@@ -1396,6 +2271,12 @@
             "state": "translated",
             "value": "Byose biguma kuri iyi iPhone"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tout reste sur cet iPhone"
+          }
         }
       }
     },
@@ -1405,6 +2286,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ohereza amakuru"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exporter les données"
           }
         }
       }
@@ -1417,6 +2304,12 @@
             "state": "translated",
             "value": "Ifunga rya Face ID"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verrouillage Face ID"
+          }
         }
       }
     },
@@ -1426,6 +2319,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Byanze"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Échoué"
           }
         }
       }
@@ -1437,16 +2336,43 @@
             "state": "translated",
             "value": "Umuryango"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Famille"
+          }
         }
       }
     },
-    "Feature Flags": {},
+    "Feature Flags": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Options en test"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibigeragezwa"
+          }
+        }
+      }
+    },
     "Fee": {
       "localizations": {
         "rw": {
           "stringUnit": {
             "state": "translated",
             "value": "Ikiguzi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frais"
           }
         }
       }
@@ -1458,6 +2384,12 @@
             "state": "translated",
             "value": "Ibiguzi"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frais"
+          }
         }
       }
     },
@@ -1467,6 +2399,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ibiguzi %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frais %@"
           }
         }
       }
@@ -1478,6 +2416,12 @@
             "state": "translated",
             "value": "Ibiguzi n'amafaranga asigaye ntibizuzuzwa"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les frais et le solde ne se rempliront pas"
+          }
         }
       }
     },
@@ -1488,16 +2432,43 @@
             "state": "translated",
             "value": "Ibiguzi n'amafaranga asigaye byiyuzuza ubwabyo."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les frais et votre solde se remplissent d'eux-mêmes."
+          }
         }
       }
     },
-    "Flags": {},
+    "Flags": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Options"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibigeragezwa"
+          }
+        }
+      }
+    },
     "Free": {
       "localizations": {
         "rw": {
           "stringUnit": {
             "state": "translated",
             "value": "Ubuntu"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gratuit"
           }
         }
       }
@@ -1509,6 +2480,12 @@
             "state": "translated",
             "value": "Ni ubuntu, kandi kode yayo irafunguye"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gratuit et open source"
+          }
         }
       }
     },
@@ -1518,6 +2495,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ni ubuntu, kode y'inkomoko iraboneka"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gratuit, code source disponible"
+          }
+        }
+      }
+    },
+    "Friends who scan your code see it\nbeside your number, so they know it's you.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vos amis qui scannent votre code la voient\nà côté de votre numéro, et savent que c'est vous."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inshuti zisikana kode yawe ziyibona\niruhande rwa nimero yawe, zikamenya ko ari wowe."
           }
         }
       }
@@ -1529,6 +2528,12 @@
             "state": "translated",
             "value": "Ibiribwa"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Courses"
+          }
         }
       }
     },
@@ -1538,6 +2543,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ubuzima"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Santé"
           }
         }
       }
@@ -1549,6 +2560,12 @@
             "state": "translated",
             "value": "Muraho, nitwa Shima, kandi ni njye wakoze StarHash."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bonjour, je suis Shima, et j'ai créé StarHash."
+          }
         }
       }
     },
@@ -1558,6 +2575,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Igihe ubwishyu bubanza gutegereza"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Combien de temps un paiement attend d'abord"
           }
         }
       }
@@ -1569,6 +2592,12 @@
             "state": "translated",
             "value": "Nayikoze kuko nari narambiwe ukuntu USSD igora kwishyura. Kwandika kode no gushakisha muri menu ku bintu ukora buri munsi byansaga nk'ibidakwiye, ni yo mpamvu StarHash ibikora mu gukanda gake."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je l'ai créé parce que j'en avais assez de voir l'USSD compliquer chaque paiement. Taper des codes et fouiller des menus pour ce qu'on fait tous les jours n'avait pas de sens, alors StarHash le fait en quelques touches."
+          }
         }
       }
     },
@@ -1578,6 +2607,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nizeye ko izakorohereza kwishyura ho gato. Uyikoreshe neza."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "J'espère qu'il rendra vos paiements un peu plus simples. Bonne utilisation."
           }
         }
       }
@@ -1589,6 +2624,12 @@
             "state": "translated",
             "value": "Nayikoze ku giti cyanjye, kuko USSD yatumaga kwishyura bigorana kurusha uko byari bikwiye."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je l'ai créé seul, parce que l'USSD rendait les paiements plus difficiles qu'ils ne devraient l'être."
+          }
         }
       }
     },
@@ -1598,6 +2639,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Niba hari ikitagenda neza, banza unyandikire. Ngusubiza ubwanjye."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Si quelque chose ne va pas, écrivez-moi d'abord. Je vous réponds moi-même."
           }
         }
       }
@@ -1609,6 +2656,12 @@
             "state": "translated",
             "value": "Nushyiraho ifunga, iOS igenzura Face ID, Touch ID cyangwa kode y'ibanga yawe. StarHash ntijya ibona isura yawe cyangwa igikumwe cyawe; ibwirwa gusa niba igenzura ryagenze neza."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Si vous activez le verrouillage, iOS vérifie votre Face ID, Touch ID ou code. StarHash ne voit jamais votre visage ni votre empreinte ; il sait seulement si la vérification a réussi."
+          }
         }
       }
     },
@@ -1618,6 +2671,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Injiza amakuru"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importer des données"
           }
         }
       }
@@ -1629,6 +2688,12 @@
             "state": "translated",
             "value": "Byinjijwe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importé"
+          }
         }
       }
     },
@@ -1638,6 +2703,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mu Igenamiterere, igihe icyo ari cyo cyose ushobora kubuza StarHash kubika ibikorwa, gukoresha abo muvugana no kwibuka abo wishyuye vuba, ndetse ukazimya Hafi aha, Kugenzura byikora na buri menyesha yayo. Ushobora gusiba igikorwa icyo ari cyo cyose, cyangwa ugasiba byose ukoresheje Siba amakuru yose. Gusiba porogaramu na byo bikuraho byose."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dans Réglages, vous pouvez à tout moment empêcher StarHash d'enregistrer les transactions, d'utiliser les contacts, de retenir les destinataires récents, À proximité, la vérification auto et chacune de ses notifications. Vous pouvez supprimer n'importe quelle transaction, ou tout effacer avec Supprimer toutes les données. Supprimer l'app efface aussi tout."
           }
         }
       }
@@ -1649,6 +2720,12 @@
             "state": "translated",
             "value": "Muri Shortcuts, reba ko **StarHash SMS** yongeweho kuri iryo zina."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dans Raccourcis, vérifiez que **StarHash SMS** a été ajouté sous ce nom."
+          }
         }
       }
     },
@@ -1658,6 +2735,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Muri Shortcuts, kanda **Add Shortcut**."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dans Raccourcis, touchez **Ajouter le raccourci**."
           }
         }
       }
@@ -1669,6 +2752,12 @@
             "state": "translated",
             "value": "Bihita bigaruka hano. Nta kibikwa."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il revient directement ici. Rien n'est enregistré."
+          }
         }
       }
     },
@@ -1678,6 +2767,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ijya muri kode yawe ya QR, kugira ngo inshuti zawe\nziyisikane zikwishyure. Iguma kuri iPhone yawe."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il figure dans votre propre code QR, pour que vos amis\nle scannent pour vous payer. Il reste sur votre iPhone."
           }
         }
       }
@@ -1689,6 +2784,12 @@
             "state": "translated",
             "value": "Ikurwa muri Gura."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il est retiré d'Acheter."
+          }
         }
       }
     },
@@ -1699,15 +2800,27 @@
             "state": "translated",
             "value": "Gisibwa muri StarHash gusa."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elle est retirée de StarHash seulement."
+          }
         }
       }
     },
-    "It's free, its source code is public, and it's private: no account, no server, no tracking. Everything stays on your iPhone.": {
+    "It's free, its source code is public, and it's private: no account, no tracking. Your payments stay on your iPhone.": {
       "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il est gratuit, son code source est public, et il respecte votre vie privée : pas de compte, pas de pistage. Vos paiements restent sur votre iPhone."
+          }
+        },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ni ubuntu, kode yayo iri ahagaragara, kandi irinda ibanga ryawe: nta kwiyandikisha, nta seriveri, nta gukurikiranwa. Byose biguma kuri iPhone yawe."
+            "value": "Ni ubuntu, kode yayo iri ku mugaragaro, kandi ni ibanga: nta konti, nta gukurikiranwa. Ubwishyu bwawe buguma kuri iPhone yawe."
           }
         }
       }
@@ -1719,6 +2832,12 @@
             "state": "translated",
             "value": "Bigumeho"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laisser activé"
+          }
         }
       }
     },
@@ -1728,6 +2847,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bika amateka y'ibyo wishyura n'ibyo wakira"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Garder l'historique de ce que vous payez et recevez"
           }
         }
       }
@@ -1739,6 +2864,12 @@
             "state": "translated",
             "value": "Bika kode ukunze gukanda, nko kubikuza n'interineti, maze uzikoreshe ukanze rimwe gusa."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gardez les codes que vous composez souvent, comme le retrait et les forfaits, et composez-les d'une touche."
+          }
         }
       }
     },
@@ -1748,6 +2879,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bika kode ukanda kenshi, nk'ibyemezo bitegerejwe, kubikuza n'interineti, maze uzikande mu gukanda rimwe. Shyira hejuru izigera ku munani."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gardez les codes que vous composez souvent, comme les approbations en attente, le retrait et les forfaits, et composez-les d'une touche. Épinglez-en jusqu'à huit en haut."
           }
         }
       }
@@ -1759,6 +2896,12 @@
             "state": "translated",
             "value": "Ururimi"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Langue"
+          }
         }
       }
     },
@@ -1768,6 +2911,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Iheruka"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernières"
           }
         }
       }
@@ -1779,6 +2928,28 @@
             "state": "translated",
             "value": "Urumuri"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clair"
+          }
+        }
+      }
+    },
+    "Link": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lien"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ihuza"
+          }
         }
       }
     },
@@ -1788,6 +2959,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Turimo kuzana abo muvugana"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chargement des contacts"
           }
         }
       }
@@ -1799,6 +2976,12 @@
             "state": "translated",
             "value": "Ahantu"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Position"
+          }
         }
       }
     },
@@ -1808,6 +2991,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kumenya aho uri birafunze"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La position est désactivée"
+          }
+        }
+      }
+    },
+    "M": {
+      "comment": "The period control's letter for a month",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "M"
           }
         }
       }
@@ -1820,6 +3020,12 @@
             "state": "translated",
             "value": "Ikarita yerekana aho ubu bwishyu bwakorewe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carte de l'endroit du paiement"
+          }
         }
       }
     },
@@ -1829,6 +3035,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Byanze"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marquer comme échoué"
           }
         }
       }
@@ -1840,6 +3052,12 @@
             "state": "translated",
             "value": "Wenda nyuma"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus tard"
+          }
         }
       }
     },
@@ -1849,6 +3067,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kode y'umucuruzi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code commerçant"
           }
         }
       }
@@ -1860,6 +3084,28 @@
             "state": "translated",
             "value": "Kode y'umucuruzi %@"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code commerçant %@"
+          }
+        }
+      }
+    },
+    "Merchant codes": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codes commerçants"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode z'abacuruzi"
+          }
         }
       }
     },
@@ -1869,6 +3115,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ubutumwa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Message"
           }
         }
       }
@@ -1880,6 +3132,12 @@
             "state": "translated",
             "value": "Ubutumwa"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Messages"
+          }
         }
       }
     },
@@ -1889,6 +3147,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ikiguzi cya MoMoAdvance"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frais MoMoAdvance"
           }
         }
       }
@@ -1900,6 +3164,12 @@
             "state": "translated",
             "value": "Ikiguzi cya MoMoAdvance cya %@ cyongeweho. Noneho shyiramo ubutumwa bw'ubwo bwishyu ubwabwo."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les frais MoMoAdvance de %@ sont ajoutés. Collez maintenant le message du paiement."
+          }
         }
       }
     },
@@ -1909,6 +3179,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Amafaranga yakiriwe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Argent reçu"
           }
         }
       }
@@ -1920,6 +3196,12 @@
             "state": "translated",
             "value": "Amafaranga wakiriye ntazandikwa"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'argent reçu ne sera pas enregistré"
+          }
         }
       }
     },
@@ -1929,6 +3211,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Incamake y'ukwezi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Résumé du mois"
           }
         }
       }
@@ -1940,6 +3228,12 @@
             "state": "translated",
             "value": "Ibindi"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus"
+          }
         }
       }
     },
@@ -1949,6 +3243,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Shyira imbere"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avancer"
           }
         }
       }
@@ -1960,6 +3260,12 @@
             "state": "translated",
             "value": "Yimurire inyuma"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reculer"
+          }
         }
       }
     },
@@ -1969,6 +3275,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kode yanjye"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mon code"
           }
         }
       }
@@ -1980,6 +3292,12 @@
             "state": "translated",
             "value": "Kode yanjye ya StarHash"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mon code StarHash"
+          }
         }
       }
     },
@@ -1989,6 +3307,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Izina"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom"
           }
         }
       }
@@ -2000,6 +3324,12 @@
             "state": "translated",
             "value": "Izina (si ngombwa)"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom (facultatif)"
+          }
         }
       }
     },
@@ -2009,6 +3339,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hafi aha"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À proximité"
           }
         }
       }
@@ -2020,6 +3356,12 @@
             "state": "translated",
             "value": "Bisaba Kugenzura byikora, mu gice cy'Ibikorwa"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nécessite la vérification auto, sous Transactions"
+          }
         }
       }
     },
@@ -2029,6 +3371,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ntukigere uha undi PIN yawe. Konti yawe ntijya iyigusaba mu butumwa cyangwa kuri telefoni."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ne partagez jamais votre PIN. Votre portefeuille ne le demande jamais par message ni par appel."
           }
         }
       }
@@ -2040,6 +3388,12 @@
             "state": "translated",
             "value": "Kode nshya"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nouveau code"
+          }
         }
       }
     },
@@ -2049,6 +3403,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ibikurikira"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suivant"
           }
         }
       }
@@ -2060,6 +3420,12 @@
             "state": "translated",
             "value": "Nta butumwa bwa %@ bwaje mu cyumweru. Reba automation"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun message %@ depuis une semaine. Vérifiez l'automatisation"
+          }
         }
       }
     },
@@ -2069,6 +3435,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nta kode urabona"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore de code"
           }
         }
       }
@@ -2080,6 +3452,12 @@
             "state": "translated",
             "value": "Nta kode"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun code"
+          }
         }
       }
     },
@@ -2089,6 +3467,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nta bihuye"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune correspondance"
           }
         }
       }
@@ -2100,6 +3484,12 @@
             "state": "translated",
             "value": "Nta cyabonetse"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun résultat"
+          }
         }
       }
     },
@@ -2110,15 +3500,27 @@
             "state": "translated",
             "value": "Nta bikorwa"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune transaction"
+          }
         }
       }
     },
-    "No account and no server. Your PIN only\never goes into your wallet's own prompt.": {
+    "No account and no tracking. Your PIN only\never goes into your wallet's own prompt.": {
       "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas de compte, pas de pistage. Votre PIN ne va\nque dans la fenêtre de votre portefeuille."
+          }
+        },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nta kwiyandikisha, nta seriveri. PIN yawe uyandika gusa\naho konti yawe ubwayo iyigusaba."
+            "value": "Nta konti, nta gukurikiranwa. PIN yawe yinjizwa\ngusa aho konti yawe ubwayo iyigusaba."
           }
         }
       }
@@ -2130,6 +3532,12 @@
             "state": "translated",
             "value": "Nta konti, nta seriveri, kandi nta gukurikiranwa. Byose biguma kuri iPhone yawe."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas de compte, pas de serveur, pas de pistage. Tout reste sur votre iPhone."
+          }
         }
       }
     },
@@ -2139,6 +3547,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nta kamera ihari"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas d'appareil photo ici"
           }
         }
       }
@@ -2150,6 +3564,12 @@
             "state": "translated",
             "value": "Nta butumwa bwaje mu isaha imwe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun message dans l'heure"
+          }
         }
       }
     },
@@ -2159,6 +3579,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nta menu za USSD ukundi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fini les menus USSD"
           }
         }
       }
@@ -2170,6 +3596,12 @@
             "state": "translated",
             "value": "Nta garanti"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune garantie"
+          }
         }
       }
     },
@@ -2179,6 +3611,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nta na kimwe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun"
           }
         }
       }
@@ -2190,6 +3628,12 @@
             "state": "translated",
             "value": "Ubu oya"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas maintenant"
+          }
         }
       }
     },
@@ -2199,6 +3643,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Si dosiye ya StarHash"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas un fichier StarHash"
           }
         }
       }
@@ -2210,6 +3660,12 @@
             "state": "translated",
             "value": "Si kode yo kwishyura"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas un code de paiement"
+          }
         }
       }
     },
@@ -2219,6 +3675,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nta sano ifitanye na bo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans affiliation"
           }
         }
       }
@@ -2230,6 +3692,12 @@
             "state": "translated",
             "value": "Icyitonderwa"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Note"
+          }
         }
       }
     },
@@ -2239,6 +3707,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ibisobanuro (si ngombwa)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Note (facultative)"
           }
         }
       }
@@ -2250,6 +3724,28 @@
             "state": "translated",
             "value": "Nta menyesha na rimwe riri hano hasi rizaza utarabyemera"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien de ce qui suit n'arrive tant que vous ne le faites pas"
+          }
+        }
+      }
+    },
+    "Nothing beyond StarHash's own server above. It has no advertising and no third-party code that collects data. Request a Feature and the source code open GitHub in your browser, and Support on Ko-fi opens Ko-fi, each under its own privacy policy. Every code you dial goes through your phone and your provider, under theirs.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien d'autre que le serveur de StarHash ci-dessus. Pas de publicité, ni de code tiers qui collecte des données. Demander une fonctionnalité et le code source ouvrent GitHub dans votre navigateur, et Soutenir sur Ko-fi ouvre Ko-fi, chacun selon sa propre politique de confidentialité. Chaque code que vous composez passe par votre téléphone et votre opérateur, selon la leur."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta kindi uretse seriveri ya StarHash ivugwa haruguru. Nta matangazo ifite, nta n'ikode y'abandi ikusanya amakuru. Saba ikintu gishya na kode yayo bifungura GitHub muri mushakisha yawe, naho Shyigikira kuri Ko-fi igafungura Ko-fi, buri kimwe hakurikijwe politiki y'ibanga yacyo. Kode yose ukanze inyura kuri telefoni yawe n'ikigo cyawe cy'itumanaho, hakurikijwe politiki zabo."
+          }
         }
       }
     },
@@ -2260,15 +3756,11 @@
             "state": "translated",
             "value": "Nta kintu wakoporoye. Banza ukoporore ubutumwa muri Messages."
           }
-        }
-      }
-    },
-    "Nothing. It has no analytics, no advertising and no third-party code that collects data. Request a Feature and the source code open GitHub in your browser, and Support on Ko-fi opens Ko-fi, each under its own privacy policy. Every code you dial goes through your phone and your provider, under theirs.": {
-      "localizations": {
-        "rw": {
+        },
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nta na kimwe. Nta isesengura ry'imikoreshereze, nta matangazo, kandi nta kode y'ibindi bigo ikusanya amakuru ibamo. Gusaba ikintu gishya no kureba kode y'inkomoko bifungura GitHub muri mushakisha yawe, naho gushyigikira kuri Ko-fi bigafungura Ko-fi, buri rubuga hakurikijwe politiki y'ibanga yarwo. Buri kode ukanze inyura muri telefoni yawe no ku mutanga serivisi wawe, hakurikijwe politiki yabo."
+            "value": "Rien n'est copié. Copiez d'abord le message dans Messages."
           }
         }
       }
@@ -2280,6 +3772,12 @@
             "state": "translated",
             "value": "Imenyesha"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications"
+          }
         }
       }
     },
@@ -2290,11 +3788,39 @@
             "state": "translated",
             "value": "Imenyesha zirafunze"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les notifications sont désactivées"
+          }
         }
       }
     },
     "Number": {
       "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimero"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numéro"
+          }
+        }
+      }
+    },
+    "Numbers": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numéros"
+          }
+        },
         "rw": {
           "stringUnit": {
             "state": "translated",
@@ -2310,6 +3836,12 @@
             "state": "translated",
             "value": "Nimero na kode z'abacuruzi"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numéros et codes commerçants"
+          }
         }
       }
     },
@@ -2319,6 +3851,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nimero zitangira na 072 cyangwa 073"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numéros commençant par 072 ou 073"
           }
         }
       }
@@ -2330,6 +3868,12 @@
             "state": "translated",
             "value": "Nimero zitangira na 078 cyangwa 079"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numéros commençant par 078 ou 079"
+          }
         }
       }
     },
@@ -2339,6 +3883,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sawa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
           }
         }
       }
@@ -2350,6 +3900,28 @@
             "state": "translated",
             "value": "Iyo bizimye, amafaranga n'ayasigaye ntibigaragara kuri ecran ifunze"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désactivé, les montants et soldes n'apparaissent pas sur l'écran verrouillé"
+          }
+        }
+      }
+    },
+    "One": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imwe"
+          }
         }
       }
     },
@@ -2359,6 +3931,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gusa iyo ubyemeye, kandi StarHash ibikubaza rimwe gusa igihe uyitunganya. Ikora ibyibutsa n'incamake byayo kuri iPhone yawe, ikoresheje ibikorwa isanzwe ibika; nta kintu na kimwe iyoherezwa kivuye kuri seriveri. Ku rupapuro rwayo rwa Imenyesha, hitamo ibyo ikumenyesha, kandi uhitemo niba yerekana amafaranga kuri Lock Screen yawe."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seulement si vous les autorisez, ce que StarHash demande une fois lors de la configuration. Il crée ses rappels et résumés sur votre iPhone à partir des transactions qu'il garde déjà ; rien ne lui est envoyé par un serveur. Choisissez sur sa page Notifications ce qu'elles vous signalent, et si elles montrent les montants sur l'écran verrouillé."
           }
         }
       }
@@ -2370,6 +3948,12 @@
             "state": "translated",
             "value": "Ari uko gusa ufunguye Hafi aha, kandi igihe wishyura gusa. Iyo wishyuye kode y'umucuruzi, cyangwa nimero itari mu bo muvugana, StarHash yandika aho ubwishyu bwakorewe, kugira ngo ihagaragaze ku ikarita kandi ikakwibutsa uwo wishyuye nugaruka aho. Kwishyura umwe mu bo muvugana ntibijya byandika aho wari uri. Aho ubwishyu bwakorewe hibikwa hamwe n'ubwo bwishyu, kuri iPhone yawe no mu bubiko bwawe bw'inyongera (backups), nk'uko ibikorwa byawe bibikwa. Iyo uzimije Hafi aha, ayo makuru arasibwa."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seulement si vous activez À proximité, et seulement pendant que vous payez. Quand vous payez un code commerçant, ou un numéro qui n'est pas dans vos contacts, StarHash note où le paiement a été fait, pour le montrer sur une carte et vous le suggérer quand vous y revenez. Payer un de vos contacts n'enregistre jamais où vous étiez. L'endroit d'un paiement est gardé avec ce paiement, sur votre iPhone et dans vos sauvegardes comme vos transactions. Désactiver À proximité l'efface."
+          }
         }
       }
     },
@@ -2379,6 +3963,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Abo muvugana bamwe gusa ni bo basangijwe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seuls certains contacts sont partagés"
           }
         }
       }
@@ -2390,6 +3980,12 @@
             "state": "translated",
             "value": "Ongera ufungure"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rouvrir"
+          }
         }
       }
     },
@@ -2399,6 +3995,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fungura Settings"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir Réglages"
           }
         }
       }
@@ -2410,6 +4012,28 @@
             "state": "translated",
             "value": "Fungura Shortcuts"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir Raccourcis"
+          }
+        }
+      }
+    },
+    "Open StarHash": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir StarHash"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fungura StarHash"
+          }
         }
       }
     },
@@ -2419,6 +4043,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ifungura urupapuro rwa Shima kuri Ko-fi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre la page Ko-fi de Shima"
           }
         }
       }
@@ -2430,6 +4060,12 @@
             "state": "translated",
             "value": "Ifungura StarHash muri porogaramu ya Settings"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre StarHash dans l'app Réglages"
+          }
         }
       }
     },
@@ -2439,6 +4075,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ifungura utubuto tw'imibare twa StarHash kugira ngo wishyure umuntu."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre le clavier de StarHash pour payer quelqu'un."
           }
         }
       }
@@ -2450,6 +4092,12 @@
             "state": "translated",
             "value": "Ifungura ifishi yo gusaba ikintu gishya kuri GitHub"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre un formulaire de demande sur GitHub"
+          }
         }
       }
     },
@@ -2459,6 +4107,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ifungura ikibazo gishya kuri GitHub"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre un nouveau ticket sur GitHub"
           }
         }
       }
@@ -2470,6 +4124,12 @@
             "state": "translated",
             "value": "Ifungura ubutumwa bushya bwandikiwe Shima kuri GitHub"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre un nouveau message à Shima sur GitHub"
+          }
         }
       }
     },
@@ -2479,6 +4139,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ifungura ibimenyetso byo guhitamo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre les symboles à choisir"
           }
         }
       }
@@ -2491,6 +4157,28 @@
             "state": "translated",
             "value": "Ibindi"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autre"
+          }
+        }
+      }
+    },
+    "Other SIM": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autre SIM"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indi SIM"
+          }
         }
       }
     },
@@ -2502,6 +4190,12 @@
             "state": "translated",
             "value": "Urupapuro %lld kuri %lld"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Page %lld sur %lld"
+          }
         }
       }
     },
@@ -2511,6 +4205,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wigeze kwishyura iduka hano? StarHash irarishyira\nimbere ubutaha. Ibi biguma kuri iPhone yawe."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déjà payé une boutique ici ? StarHash la place\nen tête la prochaine fois. Cela reste sur votre iPhone."
           }
         }
       }
@@ -2522,6 +4222,12 @@
             "state": "translated",
             "value": "Kode y'ibanga"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code"
+          }
         }
       }
     },
@@ -2531,6 +4237,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ifunga rya kode y'ibanga"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verrouillage par code"
           }
         }
       }
@@ -2542,6 +4254,12 @@
             "state": "translated",
             "value": "Komeka ubutumwa"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coller le message"
+          }
         }
       }
     },
@@ -2551,6 +4269,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ishyura"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payer"
           }
         }
       }
@@ -2562,6 +4286,12 @@
             "state": "translated",
             "value": "Ishyura %@"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payer %@"
+          }
         }
       }
     },
@@ -2571,6 +4301,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ishyura & Gura"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payer et Acheter"
           }
         }
       }
@@ -2582,6 +4318,12 @@
             "state": "translated",
             "value": "Ongera wishyure"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payer à nouveau"
+          }
         }
       }
     },
@@ -2591,6 +4333,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ishyura uwo ari we wese"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payez n'importe qui"
           }
         }
       }
@@ -2602,6 +4350,12 @@
             "state": "translated",
             "value": "Ishyura ukanze inshuro nke"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payez en quelques touches"
+          }
         }
       }
     },
@@ -2611,6 +4365,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nyishyura ukoresheje StarHash"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payez-moi avec StarHash"
           }
         }
       }
@@ -2622,6 +4382,28 @@
             "state": "translated",
             "value": "Nyishyura ukoresheje StarHash: %@"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payez-moi avec StarHash : %@"
+          }
+        }
+      }
+    },
+    "Pay someone": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payer quelqu'un"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ishyura umuntu"
+          }
         }
       }
     },
@@ -2631,6 +4413,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ishyura ukoresheje StarHash"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payer avec StarHash"
           }
         }
       }
@@ -2642,6 +4430,12 @@
             "state": "translated",
             "value": "Ishyura abo muvugana\nukanze rimwe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payez vos contacts\nd'une touche"
+          }
         }
       }
     },
@@ -2651,6 +4445,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ubwishyu"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paiement"
           }
         }
       }
@@ -2662,6 +4462,12 @@
             "state": "translated",
             "value": "Kwibutswa ubwishyu"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rappels de paiement"
+          }
         }
       }
     },
@@ -2671,6 +4477,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ubwishyu"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paiements"
           }
         }
       }
@@ -2682,6 +4494,12 @@
             "state": "translated",
             "value": "Ubwishyu ntibuzemezwa"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les paiements ne seront pas confirmés"
+          }
         }
       }
     },
@@ -2691,6 +4509,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bitegerejwe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En attente"
           }
         }
       }
@@ -2702,6 +4526,28 @@
             "state": "translated",
             "value": "Abantu"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personnes"
+          }
+        }
+      }
+    },
+    "People who scan your code see your photo. It is kept on StarHash's server under a random id, never with your number.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les personnes qui scannent votre code voient votre photo. Elle est gardée sur le serveur de StarHash sous un identifiant aléatoire, jamais avec votre numéro."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abasikana kode yawe babona ifoto yawe. Ibikwa kuri seriveri ya StarHash ku kimenyetso cy'impfabusa, ntibikwa hamwe na nimero yawe."
+          }
         }
       }
     },
@@ -2711,6 +4557,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Igihe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Période"
+          }
+        }
+      }
+    },
+    "Photo with my code": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photo avec mon code"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ifoto kuri kode yanjye"
           }
         }
       }
@@ -2722,6 +4590,12 @@
             "state": "translated",
             "value": "Amafoto"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photos"
+          }
         }
       }
     },
@@ -2731,6 +4605,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hitamo uwo wishyura mu bo muvugana"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez qui payer parmi vos contacts"
           }
         }
       }
@@ -2742,6 +4622,12 @@
             "state": "translated",
             "value": "Hitamo uwo wishyura mu bo muvugana.\nBaguma kuri iPhone yawe."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez qui payer parmi vos contacts.\nIls restent sur votre iPhone."
+          }
         }
       }
     },
@@ -2751,6 +4637,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Shyira hejuru"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Épingler"
           }
         }
       }
@@ -2762,6 +4654,12 @@
             "state": "translated",
             "value": "Ahashyizwe hejuru huzuye"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Épinglés au complet"
+          }
         }
       }
     },
@@ -2771,6 +4669,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vuza ijwi kuri buri menyesha"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jouer un son à chaque notification"
           }
         }
       }
@@ -2782,6 +4686,12 @@
             "state": "translated",
             "value": "Ibanga n'amajwi"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confidentialité et son"
+          }
         }
       }
     },
@@ -2791,6 +4701,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Politiki y'ibanga"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Politique de confidentialité"
           }
         }
       }
@@ -2802,6 +4718,12 @@
             "state": "translated",
             "value": "Yubatswe irinda ibanga ryawe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privé par conception"
+          }
         }
       }
     },
@@ -2811,6 +4733,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Soma ${message} ya ${sender}"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traiter ${message} de ${sender}"
           }
         }
       }
@@ -2822,6 +4750,12 @@
             "state": "translated",
             "value": "Soma SMS ya konti"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traiter le SMS de l'opérateur"
+          }
         }
       }
     },
@@ -2831,6 +4765,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Umwirondoro"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profil"
           }
         }
       }
@@ -2842,6 +4782,12 @@
             "state": "translated",
             "value": "Ufite ibibazo?"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Des questions ?"
+          }
         }
       }
     },
@@ -2851,6 +4797,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tanga amanota kuri App Store"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noter sur l'App Store"
           }
         }
       }
@@ -2862,6 +4814,12 @@
             "state": "translated",
             "value": "Isoma ubutumwa bwa MTN MoMo cyangwa Airtel Money maze ikandika igikorwa muri StarHash. Ubundi butumwa ntibwitabwaho."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lit un message MTN MoMo ou Airtel Money et enregistre la transaction dans StarHash. Les autres messages sont ignorés."
+          }
         }
       }
     },
@@ -2871,6 +4829,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tondeka bundi bushya"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réorganiser"
           }
         }
       }
@@ -2882,6 +4846,12 @@
             "state": "translated",
             "value": "Impamvu"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raison"
+          }
         }
       }
     },
@@ -2891,6 +4861,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Byakiriwe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reçu"
           }
         }
       }
@@ -2902,6 +4878,12 @@
             "state": "translated",
             "value": "Byakiriwe "
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reçu "
+          }
         }
       }
     },
@@ -2911,6 +4893,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Byakiriwe %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reçu %@"
           }
         }
       }
@@ -2922,6 +4910,12 @@
             "state": "translated",
             "value": "Abaheruka"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Récents"
+          }
         }
       }
     },
@@ -2931,6 +4925,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Abo wishyura"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Destinataires"
           }
         }
       }
@@ -2942,6 +4942,12 @@
             "state": "translated",
             "value": "Ibyavuguruwe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notes de version"
+          }
         }
       }
     },
@@ -2951,6 +4957,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Unyibutse nyuma ya"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Me rappeler après"
           }
         }
       }
@@ -2962,6 +4974,12 @@
             "state": "translated",
             "value": "Ibyibutsa, ibyemezo n'incamake"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rappels, confirmations et résumés"
+          }
         }
       }
     },
@@ -2971,6 +4989,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kuraho %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retirer %@"
           }
         }
       }
@@ -2982,6 +5006,12 @@
             "state": "translated",
             "value": "Kuraho ifoto"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retirer la photo"
+          }
         }
       }
     },
@@ -2991,6 +5021,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ongera urebe intangiriro"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revoir l'accueil"
+          }
+        }
+      }
+    },
+    "Report": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rapport"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raporo"
           }
         }
       }
@@ -3002,6 +5054,12 @@
             "state": "translated",
             "value": "Raporo"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rapports"
+          }
         }
       }
     },
@@ -3011,6 +5069,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Saba ikintu gishya"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demander une fonctionnalité"
           }
         }
       }
@@ -3022,6 +5086,12 @@
             "state": "translated",
             "value": "Subiza byose uko byari"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tout réinitialiser"
+          }
         }
       }
     },
@@ -3032,6 +5102,12 @@
             "state": "translated",
             "value": "Resitora"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurants"
+          }
         }
       }
     },
@@ -3041,6 +5117,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yikoreshe rimwe aho, kandi wemere ibyo isaba byose."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lancez-le une fois là-bas, et autorisez tout ce qu'il demande."
+          }
+        }
+      }
+    },
+    "SIMs": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SIM"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SIM"
           }
         }
       }
@@ -3053,6 +5151,12 @@
             "state": "translated",
             "value": "Bika"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistrer"
+          }
         }
       }
     },
@@ -3062,6 +5166,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bika abo wishyuye vuba"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Garder les destinataires récents"
           }
         }
       }
@@ -3073,6 +5183,12 @@
             "state": "translated",
             "value": "Bika ibikorwa"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistrer les transactions"
+          }
         }
       }
     },
@@ -3082,6 +5198,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bika ibikorwa byawe, kode n'umwirondoro wawe nka dosiye"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistrer vos transactions, codes et profil dans un fichier"
           }
         }
       }
@@ -3093,6 +5215,12 @@
             "state": "translated",
             "value": "Byabitswe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistré"
+          }
         }
       }
     },
@@ -3102,6 +5230,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kuzigama"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Épargne"
           }
         }
       }
@@ -3113,6 +5247,28 @@
             "state": "translated",
             "value": "Imiburo y'ubutekamutwe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alertes d'arnaque"
+          }
+        }
+      }
+    },
+    "Scan": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scanner"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sikana"
+          }
         }
       }
     },
@@ -3122,6 +5278,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sikana kode ya QR"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scanner un code QR"
           }
         }
       }
@@ -3133,6 +5295,12 @@
             "state": "translated",
             "value": "Sikana wishyure"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scanner pour payer"
+          }
         }
       }
     },
@@ -3142,6 +5310,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sikana wishyure"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scanner pour payer"
           }
         }
       }
@@ -3153,6 +5327,12 @@
             "state": "translated",
             "value": "Shakisha"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher"
+          }
         }
       }
     },
@@ -3162,6 +5342,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Shakisha ibikorwa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher des transactions"
           }
         }
       }
@@ -3173,6 +5359,12 @@
             "state": "translated",
             "value": "Shakisha izina, nimero cyangwa kode y'umucuruzi"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom, numéro ou code commerçant"
+          }
         }
       }
     },
@@ -3182,6 +5374,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Shakisha ibikorwa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher des transactions"
           }
         }
       }
@@ -3193,6 +5391,12 @@
             "state": "translated",
             "value": "Umutekano"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sécurité"
+          }
         }
       }
     },
@@ -3202,6 +5406,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ongera urebe amapaji y'ikaze"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revoir les écrans d'accueil"
           }
         }
       }
@@ -3213,6 +5423,12 @@
             "state": "translated",
             "value": "Reba ibyo wakoresheje ku munsi, icyumweru, ukwezi cyangwa umwaka, hamwe n'igishushanyo n'amakuru ya buri bwishyu."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voyez ce que vous avez dépensé par jour, semaine, mois ou année, avec un graphique et le détail de chaque paiement."
+          }
         }
       }
     },
@@ -3222,6 +5438,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reba ibyo wakoresheje ku munsi, icyumweru, ukwezi cyangwa umwaka, hamwe n'igishushanyo, ishakisha n'ibisobanuro bya buri bwishyu."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voyez ce que vous avez dépensé par jour, semaine, mois ou année, avec un graphique, une recherche et le détail de chaque paiement."
           }
         }
       }
@@ -3233,6 +5455,12 @@
             "state": "translated",
             "value": "Hitamo uwo wishyura"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir un destinataire"
+          }
         }
       }
     },
@@ -3242,6 +5470,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ohereza amafaranga"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoyer de l'argent"
           }
         }
       }
@@ -3253,6 +5487,12 @@
             "state": "translated",
             "value": "Uwohereje"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expéditeur"
+          }
         }
       }
     },
@@ -3262,6 +5502,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Byoherejwe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoyé"
           }
         }
       }
@@ -3273,6 +5519,12 @@
             "state": "translated",
             "value": "Byoherejwe "
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoyé "
+          }
         }
       }
     },
@@ -3282,6 +5534,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Shyiraho"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurer"
           }
         }
       }
@@ -3293,6 +5551,12 @@
             "state": "translated",
             "value": "Banza ushyire kode y'ibanga kuri iyi iPhone"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Définissez d'abord un code sur cet iPhone"
+          }
         }
       }
     },
@@ -3302,6 +5566,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Igena aho buri flag itangirira"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Définit le départ de chaque option"
           }
         }
       }
@@ -3313,6 +5583,12 @@
             "state": "translated",
             "value": "Igenamiterere"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réglages"
+          }
         }
       }
     },
@@ -3322,6 +5598,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sangiza kode"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partager le code"
           }
         }
       }
@@ -3337,16 +5619,43 @@
             "state": "translated",
             "value": "Guhaha"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shopping"
+          }
         }
       }
     },
-    "Shortcut": {},
+    "Shortcut": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raccourci"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortcut"
+          }
+        }
+      }
+    },
     "Shortcut didn't run": {
       "localizations": {
         "rw": {
           "stringUnit": {
             "state": "translated",
             "value": "Shortcut ntiyakoze"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le raccourci ne s'est pas lancé"
           }
         }
       }
@@ -3358,6 +5667,12 @@
             "state": "translated",
             "value": "Shortcuts irafunguka igakoresha **StarHash SMS** ku butumwa bw'igerageza."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raccourcis s'ouvre et lance **StarHash SMS** sur un message de test."
+          }
         }
       }
     },
@@ -3367,6 +5682,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Shortcuts yerekana StarHash SMS, ifite akabuto Add Shortcut hasi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raccourcis montrant StarHash SMS, avec le bouton Ajouter le raccourci en bas"
           }
         }
       }
@@ -3378,6 +5699,12 @@
             "state": "translated",
             "value": "Igice cya Automation muri Shortcuts: iyo nakiriye ubutumwa burimo RWF, koresha StarHash SMS, birakora"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onglet Automatisation de Raccourcis : quand je reçois un message contenant RWF, lancer StarHash SMS, activé"
+          }
         }
       }
     },
@@ -3387,6 +5714,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Erekana amafaranga"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher les montants"
           }
         }
       }
@@ -3398,6 +5731,12 @@
             "state": "translated",
             "value": "Erekana amakuru y'uwo muvugana"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher la fiche du contact"
+          }
         }
       }
     },
@@ -3407,6 +5746,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Erekana hejuru abo wishyuye vuba"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher en haut qui vous avez payé en dernier"
           }
         }
       }
@@ -3418,6 +5763,12 @@
             "state": "translated",
             "value": "Iyerekana nka kode ya QR"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'affiche en code QR"
+          }
         }
       }
     },
@@ -3427,6 +5778,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Iyerekana nk'igiti"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'affiche en arbre"
           }
         }
       }
@@ -3438,6 +5795,12 @@
             "state": "translated",
             "value": "Yerekana amakuru yayo"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Affiche ses détails"
+          }
         }
       }
     },
@@ -3447,6 +5810,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uwawe, Shima"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signé, Shima"
           }
         }
       }
@@ -3458,6 +5827,12 @@
             "state": "translated",
             "value": "Ibyiciro byikora"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Catégories intelligentes"
+          }
         }
       }
     },
@@ -3467,6 +5842,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Niba rero uyikunze, icyo nsaba gusa ni amanota kuri App Store. Bifasha undi muntu kubona uburyo bworoshye bwo kwishyura."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alors si vous l'aimez, une note sur l'App Store est tout ce que je demande. Elle aide quelqu'un d'autre à trouver une façon plus simple de payer."
           }
         }
       }
@@ -3478,6 +5859,12 @@
             "state": "translated",
             "value": "Umuntu uvuga ko yakoherereje amafaranga yibeshye, akagusaba kuyamusubiza, ni wo mutego ukunze gukoreshwa."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quelqu'un qui dit vous avoir envoyé de l'argent par erreur et le redemande, c'est l'arnaque habituelle."
+          }
         }
       }
     },
@@ -3487,6 +5874,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Shyira ubwishyu mu byiciro hakurikijwe amazina"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Classer les paiements par catégorie selon leur nom"
           }
         }
       }
@@ -3498,6 +5891,12 @@
             "state": "translated",
             "value": "Shyira ubwishyu mu byiciro ukoresheje Apple Intelligence"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Classer les paiements par catégorie avec Apple Intelligence"
+          }
         }
       }
     },
@@ -3508,6 +5907,12 @@
             "state": "translated",
             "value": "Ijwi"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Son"
+          }
         }
       }
     },
@@ -3517,6 +5922,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kode y'inkomoko"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code source"
           }
         }
       }
@@ -3532,6 +5943,12 @@
             "state": "translated",
             "value": "StarHash ntishobora gusoma SMS zawe. Niba utunganyije Kugenzura byikora, automation yawe bwite ya Shortcuts yoherereza StarHash ubutumwa burimo RWF, nayo ikabusomera kuri iPhone yawe kugira ngo yemeze ubwishyu. Ubutumwa butari ubw'ibikorwa bya MTN MoMo cyangwa Airtel Money burirengagizwa kandi ntibubikwa."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash ne peut pas lire vos SMS. Si vous configurez la vérification auto, votre propre automatisation Raccourcis transmet à StarHash les messages contenant RWF, qu'il lit sur votre iPhone pour confirmer les paiements. Les messages qui ne sont pas des transactions MTN MoMo ou Airtel Money sont ignorés et non conservés."
+          }
         }
       }
     },
@@ -3542,15 +5959,27 @@
             "state": "translated",
             "value": "StarHash ntiyabashije kuyisoma. Gerageza kubanza kuyibika kuri iPhone yawe."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash n'a pas pu le lire. Essayez d'abord de l'enregistrer sur votre iPhone."
+          }
         }
       }
     },
-    "StarHash has no account, no server and no tracking. What it keeps stays on your iPhone.": {
+    "StarHash has no account and no tracking. Your payments stay on your iPhone. Only your photo, if you share it with your QR code, and an anonymous count of who uses StarHash reach its server.": {
       "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash n'a ni compte ni pistage. Vos paiements restent sur votre iPhone. Seule votre photo, si vous la partagez avec votre code QR, et un décompte anonyme des utilisateurs de StarHash arrivent sur son serveur."
+          }
+        },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "StarHash ntigira konti, ntigira seriveri kandi ntigukurikirana. Ibyo ibika biguma kuri iPhone yawe."
+            "value": "StarHash nta konti igira, nta n'ubwo igukurikirana. Ubwishyu bwawe buguma kuri iPhone yawe. Ifoto yawe gusa, niba uyisangiza kuri kode yawe ya QR, n'umubare utavuga amazina w'abakoresha StarHash ni byo bigera kuri seriveri yayo."
           }
         }
       }
@@ -3562,6 +5991,12 @@
             "state": "translated",
             "value": "StarHash irafunze"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash est verrouillé"
+          }
         }
       }
     },
@@ -3571,6 +6006,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "StarHash ni porogaramu y'ubuntu igufasha kwishyura ukoresheje MTN MoMo na Airtel Money mu Rwanda: yuzuza kode ya USSD konti yawe ikoresha, igafungura aho uhamagarira kuri iPhone yawe. Ukoresheje StarHash, uba wemeye aya mabwiriza. Niba utayemera, turakwinginze ntuyikoreshe."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash est une app gratuite qui vous aide à payer avec MTN MoMo et Airtel Money au Rwanda : elle remplit le code USSD de votre portefeuille et ouvre le clavier de votre iPhone. En utilisant StarHash, vous acceptez ces conditions. Si vous ne les acceptez pas, ne l'utilisez pas."
           }
         }
       }
@@ -3582,6 +6023,12 @@
             "state": "translated",
             "value": "StarHash ni porogaramu yigenga. Ntiyakozwe, ntiyemejwe kandi ntishyigikiwe na MTN Group, MTN Rwanda, Airtel Africa cyangwa Airtel Rwanda. MTN, MoMo, Airtel na Airtel Money ni ibirango by'ubucuruzi bya ba nyirabyo, bikoreshwa gusa mu kuvuga serivisi StarHash ikorana na zo."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash est une app indépendante. Elle n'est ni créée, ni approuvée, ni soutenue par MTN Group, MTN Rwanda, Airtel Africa ou Airtel Rwanda. MTN, MoMo, Airtel et Airtel Money sont des marques de leurs propriétaires, citées seulement pour nommer les services avec lesquels StarHash fonctionne."
+          }
         }
       }
     },
@@ -3591,6 +6038,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "StarHash ni ubuntu, kandi kode yayo ifunguriye buri wese kuyisoma no kuyinoza."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash est gratuit, et son code est ouvert à tous pour le lire et l'améliorer."
           }
         }
       }
@@ -3602,15 +6055,27 @@
             "state": "translated",
             "value": "StarHash ni ubuntu, nta konti, nta kwiyandikisha kwishyurwa, nta n'amatangazo. Kode y'inkomoko yayo yashyizwe ahagaragara hakurikijwe uruhushya rwa PolyForm Noncommercial License 1.0.0, rukwemerera gukoresha no guhindura iyo kode ku mpamvu iyo ari yo yose itari iy'ubucuruzi."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash est gratuit, sans compte, abonnement ni publicité. Son code source est publié sous la licence PolyForm Noncommercial 1.0.0, qui vous permet d'utiliser et de modifier le code à toute fin non commerciale."
+          }
         }
       }
     },
-    "StarHash is free, with public source code, no ads, no account and nothing sent off your iPhone. There is nothing to buy.": {
+    "StarHash is free, with public source code, no ads, no account, and your payments never leave your iPhone. There is nothing to buy.": {
       "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash est gratuit, avec un code source public, sans publicité ni compte, et vos paiements ne quittent jamais votre iPhone. Il n'y a rien à acheter."
+          }
+        },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "StarHash ni ubuntu: kode y'inkomoko yayo iri ahagaragara, nta matangazo, nta konti, kandi nta kintu na kimwe kiva kuri iPhone yawe. Nta kintu cyo kugura kirimo."
+            "value": "StarHash ni ubuntu, kode yayo iri ku mugaragaro, nta matangazo, nta konti, kandi ubwishyu bwawe ntibuva kuri iPhone yawe. Nta kintu cyo kugura."
           }
         }
       }
@@ -3622,6 +6087,12 @@
             "state": "translated",
             "value": "StarHash igenewe abantu bafite imyaka ihagije yo kugira konti ya mobile money, kandi ntigenewe abana."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash s'adresse aux personnes en âge d'avoir un compte mobile money, et pas aux enfants."
+          }
         }
       }
     },
@@ -3631,6 +6102,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "StarHash itangwa uko iri, nta ngwate y'ubwoko ubwo ari bwo bwose. Mu rugero amategeko yemera, uwayikoze ntaryozwa igihombo icyo ari cyo cyose giturutse ku kuyikoresha, harimo ubwishyu bwoherejwe ku muntu utari we cyangwa bw'amafaranga atari yo, ubwishyu bwanze cyangwa bwatinze, inyandiko ibura cyangwa itari yo, cyangwa imenyesha ritinze, ritaje cyangwa ritari ryo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash est fourni tel quel, sans aucune garantie. Dans la mesure permise par la loi, son développeur n'est responsable d'aucune perte liée à son utilisation, y compris un paiement envoyé à la mauvaise personne ou du mauvais montant, un paiement échoué ou retardé, un enregistrement manquant ou erroné, ou une notification en retard, manquante ou erronée."
           }
         }
       }
@@ -3642,6 +6119,12 @@
             "state": "translated",
             "value": "StarHash ntijya ibika, yohereza cyangwa yakira amafaranga. Buri bwishyu bukorwa n'ikigo cyawe cya mobile money, nyuma y'uko ugenzura amakuru yabwo ku idirishya ry'icyo kigo ubwacyo, ukinjiza PIN yawe aho. Genzura umubare w'amafaranga n'uwo agenewe mbere yo kwemeza. Ubwishyu wemeje ni hagati yawe n'ikigo cyawe, hakurikijwe amabwiriza n'ibiguzi byacyo."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash ne détient, n'envoie ni ne reçoit jamais d'argent. Chaque paiement est fait par votre opérateur mobile money, après que vous en avez vérifié les détails dans sa propre fenêtre et y avez saisi votre PIN. Vérifiez le montant et le destinataire avant de confirmer. Un paiement que vous confirmez est entre vous et votre opérateur, selon ses propres conditions et frais."
+          }
         }
       }
     },
@@ -3652,6 +6135,12 @@
             "state": "translated",
             "value": "StarHash verisiyo %@, build %@"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash version %@, build %@"
+          }
         }
       }
     },
@@ -3661,6 +6150,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kode ya StarHash iri ahagaragara kuri GitHub"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le code de StarHash est public sur GitHub"
+          }
+        }
+      }
+    },
+    "StarHash's server": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le serveur de StarHash"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seriveri ya StarHash"
           }
         }
       }
@@ -3673,6 +6184,12 @@
             "state": "translated",
             "value": "Tangira gukoresha StarHash"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Commencer avec StarHash"
+          }
         }
       }
     },
@@ -3682,6 +6199,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uko bihagaze"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Statut"
           }
         }
       }
@@ -3693,6 +6216,12 @@
             "state": "translated",
             "value": "Kurikirana neza\nubwishyu bwawe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gardez le fil\nde vos paiements"
+          }
         }
       }
     },
@@ -3702,6 +6231,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Intambwe ya %1$lld kuri %2$lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Étape %lld sur %lld"
           }
         }
       }
@@ -3713,6 +6248,12 @@
             "state": "translated",
             "value": "Ibutswa uwo\nwishyuye hano"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proposer qui vous\navez payé ici"
+          }
         }
       }
     },
@@ -3722,6 +6263,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Erekana uwo wishyuye aho uri ubu"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proposer qui vous avez payé à l'endroit où vous êtes"
           }
         }
       }
@@ -3733,6 +6280,12 @@
             "state": "translated",
             "value": "Incamake"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Résumés"
+          }
         }
       }
     },
@@ -3742,6 +6295,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Shyigikira kuri Ko-fi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soutenir sur Ko-fi"
           }
         }
       }
@@ -3753,6 +6312,12 @@
             "state": "translated",
             "value": "Jya kuri %@"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passer à %@"
+          }
         }
       }
     },
@@ -3762,6 +6327,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ihindura konti wishyuriraho"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change le portefeuille avec lequel vous payez"
           }
         }
       }
@@ -3773,6 +6344,12 @@
             "state": "translated",
             "value": "Ikimenyetso"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Symbole"
+          }
         }
       }
     },
@@ -3783,12 +6360,24 @@
             "state": "translated",
             "value": "Nka telefoni"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Système"
+          }
         }
       }
     },
     "TV": {
       "localizations": {
         "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TV"
+          }
+        },
+        "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "TV"
@@ -3803,6 +6392,12 @@
             "state": "translated",
             "value": "Umurongo w'ibice"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Barre d'onglets"
+          }
         }
       }
     },
@@ -3812,6 +6407,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kanda **Add Shortcut** hepfo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touchez **Ajouter le raccourci** ci-dessous."
           }
         }
       }
@@ -3823,6 +6424,12 @@
             "state": "translated",
             "value": "Kanda **Fungura Shortcuts** hepfo maze ujye kuri **Automation**."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touchez **Ouvrir Raccourcis** ci-dessous et allez dans **Automatisation**."
+          }
         }
       }
     },
@@ -3832,6 +6439,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kanda **Genzura shortcut** hasi aha."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touchez **Vérifier le raccourci** ci-dessous."
           }
         }
       }
@@ -3843,6 +6456,12 @@
             "state": "translated",
             "value": "Tubwire icyo StarHash ikwiye gukora ubutaha"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dites-nous ce que StarHash devrait faire ensuite"
+          }
         }
       }
     },
@@ -3852,6 +6471,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Amabwiriza y'ikoreshwa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conditions d'utilisation"
           }
         }
       }
@@ -3863,6 +6488,12 @@
             "state": "translated",
             "value": "Iyo ni nimero ya %@; wishyura ukoresheje %@."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "C'est un numéro %@ ; vous payez avec %@."
+          }
         }
       }
     },
@@ -3872,6 +6503,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ubwo si bwo butumwa bukwiye."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce n'est pas le bon message."
           }
         }
       }
@@ -3883,6 +6520,12 @@
             "state": "translated",
             "value": "Kode za USSD, ibiguzi n'imipaka StarHash ikoresha bikomoka ku makuru ibigo bitanga serivisi byatangaje, kandi ibyo bigo bishobora kubihindura nta nteguza. Ibikorwa ni inyandiko ikubikiwe, ikomoka ku byo ukanda n'ubutumwa uha StarHash; inyandiko z'ikigo cyawe ni zo zifite agaciro. Iyo Kugenzura byikora bikora, ubwishyu butemejwe n'ubutumwa ubwo ari bwo bwose mu isaha imwe bushyirwa mu byanze; niba bwarakunze, bushyire mu byemejwe. Ibyibutsa n'incamake bya StarHash bikorwa hashingiwe kuri iyo nyandiko, kandi iOS ni yo ihitamo igihe bigaragara: kwibutswa gutinze cyangwa kutaje na rimwe ntikuvuga niba ubwishyu bwaragenze neza cyangwa butagenze neza."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les codes USSD, frais et limites qu'utilise StarHash viennent des informations publiées par les opérateurs, qui peuvent les modifier sans préavis. Activité est un historique tenu pour vous, à partir de ce que vous composez et des messages que vous transmettez à StarHash ; ce sont les relevés de votre opérateur qui font foi. Avec la vérification auto activée, un paiement qu'aucun message ne confirme dans l'heure est marqué comme échoué ; s'il est bien passé, marquez-le comme confirmé. Les rappels et résumés de StarHash sont établis à partir de cet historique, et iOS décide quand ils s'affichent : un rappel en retard ou absent ne dit rien de la réussite d'un paiement."
+          }
         }
       }
     },
@@ -3892,6 +6535,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kode ukunze gukanda, buri imwe ukanda rimwe gusa, ugashyira hejuru zigera ku munani."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les codes que vous composez souvent, une touche chacun, jusqu'à huit épinglés."
           }
         }
       }
@@ -3903,6 +6552,12 @@
             "state": "translated",
             "value": "Umunsi incamake iza"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le jour de l'envoi"
+          }
         }
       }
     },
@@ -3912,6 +6567,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Verisiyo ya mbere ya StarHash: ishyura ukoresheje MTN MoMo cyangwa Airtel Money utanditse kode za USSD, kandi ubike ubwishyu bwose ahantu hamwe."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La première version de StarHash : payez avec MTN MoMo ou Airtel Money sans taper de codes USSD, et gardez chaque paiement au même endroit."
           }
         }
       }
@@ -3923,6 +6584,12 @@
             "state": "translated",
             "value": "Amafaranga ajya kuri nimero uhisemo."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'argent va au numéro que vous choisissez."
+          }
         }
       }
     },
@@ -3932,6 +6599,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ukwezi gushize, ku itariki ya 1"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le mois écoulé, le 1er"
           }
         }
       }
@@ -3943,6 +6616,12 @@
             "state": "translated",
             "value": "Shortcut irakora. Ubutumwa bunyuze muri automation ni bwo buzemeza ibisigaye."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le raccourci fonctionne. Un message passant par l'automatisation prouvera le reste."
+          }
         }
       }
     },
@@ -3952,6 +6631,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Amabwiriza yo gukoresha StarHash"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les conditions d'utilisation de StarHash"
           }
         }
       }
@@ -3963,6 +6648,12 @@
             "state": "translated",
             "value": "Amabwiriza yo gukoresha StarHash, mu magambo yoroshye."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les conditions d'utilisation de StarHash, en termes simples."
+          }
         }
       }
     },
@@ -3972,6 +6663,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Inyandiko ya SMS ya MoMo. Muri automation, ohereza Shortcut Input."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le texte du SMS MoMo. Dans une automatisation, passez l'entrée du raccourci."
           }
         }
       }
@@ -3983,6 +6680,12 @@
             "state": "translated",
             "value": "Konti yavuze ko byanze"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le portefeuille a indiqué l'échec"
+          }
         }
       }
     },
@@ -3992,6 +6695,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aya mabwiriza ashobora guhinduka uko StarHash ihinduka. Amabwiriza agezweho ahora ari hano, hamwe n'itariki yatangiye gukurikizwa, kandi gukoresha StarHash nyuma y'impinduka bisobanura ko uyemera."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ces conditions peuvent évoluer avec StarHash. Les conditions en vigueur sont toujours ici, avec leur date d'effet, et utiliser StarHash après un changement signifie que vous les acceptez."
           }
         }
       }
@@ -4003,6 +6712,12 @@
             "state": "translated",
             "value": "Iyi kode ntirimo nimero cyangwa kode y'umucuruzi."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce code ne contient ni numéro ni code commerçant."
+          }
         }
       }
     },
@@ -4012,6 +6727,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Iyi dosiye yavuye muri StarHash nshya kuruta iyi. Vugurura StarHash kuri App Store, hanyuma wongere uyinjize."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce fichier vient d'une version plus récente de StarHash. Mettez à jour depuis l'App Store, puis importez-le à nouveau."
           }
         }
       }
@@ -4023,6 +6744,12 @@
             "state": "translated",
             "value": "Iyi si kode yemewe. Koresha imibare, * na # gusa, utangire na * cyangwa # kandi urangize na #."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce code n'est pas valide. Utilisez seulement des chiffres, * et #, en commençant par * ou # et en finissant par #."
+          }
         }
       }
     },
@@ -4032,6 +6759,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ibi bishobora kuba ubutekamutwe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceci est peut-être une arnaque"
           }
         }
       }
@@ -4043,6 +6776,12 @@
             "state": "translated",
             "value": "Uyu mwaka"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette année"
+          }
         }
       }
     },
@@ -4052,6 +6791,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Isaha"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heure"
           }
         }
       }
@@ -4063,6 +6808,12 @@
             "state": "translated",
             "value": "Kuri"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À"
+          }
         }
       }
     },
@@ -4072,6 +6823,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kuri %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À %@"
+          }
+        }
+      }
+    },
+    "Total": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igiteranyo"
           }
         }
       }
@@ -4083,6 +6856,12 @@
             "state": "translated",
             "value": "Igiteranyo %@"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total %@"
+          }
         }
       }
     },
@@ -4092,6 +6871,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Igiteranyo:"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total :"
           }
         }
       }
@@ -4104,6 +6889,12 @@
             "state": "translated",
             "value": "Igikorwa"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transaction"
+          }
         }
       }
     },
@@ -4113,6 +6904,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ibikorwa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transactions"
           }
         }
       }
@@ -4124,6 +6921,12 @@
             "state": "translated",
             "value": "Ingendo"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transport"
+          }
         }
       }
     },
@@ -4133,6 +6936,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ongera ugerageze"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réessayer"
           }
         }
       }
@@ -4144,6 +6953,12 @@
             "state": "translated",
             "value": "Gerageza ibitararangira"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Essayer ce qui n'est pas encore terminé"
+          }
         }
       }
     },
@@ -4153,6 +6968,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zimya"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désactiver"
           }
         }
       }
@@ -4164,6 +6985,12 @@
             "state": "translated",
             "value": "Zimya Kugenzura byikora?"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désactiver la vérification auto ?"
+          }
         }
       }
     },
@@ -4173,6 +7000,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fungura"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activer"
           }
         }
       }
@@ -4184,6 +7017,12 @@
             "state": "translated",
             "value": "Wabizimya igihe icyo ari cyo cyose muri **Igenamiterere**."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désactivez-le à tout moment dans **Réglages**."
+          }
         }
       }
     },
@@ -4193,6 +7032,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bifungure maze StarHash yibuke aho wishyuriye nimero cyangwa kode, maze iyikwereke nugaruka aho."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activez-le et StarHash retient où vous avez payé un numéro ou un code, et vous le propose quand vous y revenez."
           }
         }
       }
@@ -4204,6 +7049,12 @@
             "state": "translated",
             "value": "Bifungure muri Igenamiterere, maze isura yawe, igikumwe cyawe cyangwa kode y'ibanga byonyine ni byo bifungura StarHash."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activez-le dans Réglages et seuls votre visage, votre empreinte ou votre code ouvrent StarHash."
+          }
         }
       }
     },
@@ -4213,6 +7064,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zimya %@ kuri StarHash."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désactivez %@ pour StarHash."
           }
         }
       }
@@ -4224,6 +7081,12 @@
             "state": "translated",
             "value": "Zimya itoroshi"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Éteindre la lampe"
+          }
         }
       }
     },
@@ -4233,6 +7096,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fungura %@ kuri StarHash."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activez %@ pour StarHash."
           }
         }
       }
@@ -4244,6 +7113,12 @@
             "state": "translated",
             "value": "Fungura **StarHash SMS**."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activez **StarHash SMS**."
+          }
         }
       }
     },
@@ -4253,6 +7128,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fungura automation"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activer l'automatisation"
           }
         }
       }
@@ -4264,6 +7145,12 @@
             "state": "translated",
             "value": "Cana itoroshi"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allumer la lampe"
+          }
         }
       }
     },
@@ -4273,6 +7160,44 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fungura imenyesha za StarHash muri porogaramu ya Settings"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activez-les pour StarHash dans l'app Réglages"
+          }
+        }
+      }
+    },
+    "Two": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deux"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ebyiri"
+          }
+        }
+      }
+    },
+    "Two things reach it. Your profile photo, if you have one and leave Photo with my code on: it is kept under a random id that your QR code carries, so people who scan your code see it, and never with your name or number; only your iPhone holds the key that can change or delete it, and turning the switch off or removing your photo deletes it. And once a day, a random id made when StarHash was installed, with its version, so the number of people using StarHash can be counted. Nothing else is sent: no number, no name, no payment, no location.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deux choses y arrivent. Votre photo de profil, si vous en avez une et laissez Photo avec mon code activé : elle est gardée sous un identifiant aléatoire que porte votre code QR, pour que les personnes qui scannent votre code la voient, et jamais avec votre nom ou votre numéro ; seul votre iPhone détient la clé qui peut la modifier ou la supprimer, et désactiver l'option ou retirer votre photo la supprime. Et une fois par jour, un identifiant aléatoire créé à l'installation de StarHash, avec sa version, pour compter le nombre de personnes qui utilisent StarHash. Rien d'autre n'est envoyé : ni numéro, ni nom, ni paiement, ni position."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibintu bibiri ni byo biyigeraho. Ifoto y'umwirondoro wawe, niba uyifite kandi ugasiga Ifoto kuri kode yanjye ifunguye: ibikwa ku kimenyetso cy'impfabusa kode yawe ya QR itwara, kugira ngo abasikana kode yawe bayibone, kandi ntibikwa hamwe n'izina cyangwa nimero yawe; iPhone yawe yonyine ni yo ifite urufunguzo rwo kuyihindura cyangwa kuyisiba, kandi kuzimya iyo nyobora cyangwa gukuraho ifoto yawe birayisiba. N'inshuro imwe ku munsi, ikimenyetso cy'impfabusa cyakozwe igihe StarHash yashyirwagaho, hamwe n'ubwoko bwayo, kugira ngo umubare w'abakoresha StarHash ubarwe. Nta kindi cyoherezwa: nta nimero, nta zina, nta bwishyu, nta hantu uri."
           }
         }
       }
@@ -4284,6 +7209,12 @@
             "state": "translated",
             "value": "Andika kode y'umucuruzi cyangwa nimero, cyangwa uhitemo uwo muvugana. Nimero na kode wabitse bigaragara mu mazina yabyo, hamwe n'ifoto yabyo."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tapez un code commerçant ou un numéro, ou choisissez un contact. Les numéros et codes enregistrés apparaissent par leur nom, avec leur photo."
+          }
         }
       }
     },
@@ -4293,6 +7224,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Banza wandike umubare w'amafaranga"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tapez d'abord un montant"
           }
         }
       }
@@ -4304,6 +7241,12 @@
             "state": "translated",
             "value": "Andika amafaranga, hitamo uwo muvugana cyangwa kode y'umucuruzi, maze StarHash igukandire kode ya konti yawe."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tapez un montant, choisissez un contact ou un code commerçant, et StarHash compose pour vous le code de votre portefeuille."
+          }
         }
       }
     },
@@ -4313,6 +7256,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Andika amafaranga, hitamo uyahabwa,\nmaze StarHash igukandire kode."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tapez un montant, choisissez qui le reçoit,\net StarHash compose le code pour vous."
           }
         }
       }
@@ -4324,6 +7273,12 @@
             "state": "translated",
             "value": "Andika umubare w'amafaranga, hitamo uwo agenewe, maze StarHash ikande kode."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tapez un montant, choisissez qui le reçoit, et StarHash compose le code."
+          }
         }
       }
     },
@@ -4333,6 +7288,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Andika amafaranga, hitamo uwo uyoherereza, maze StarHash igukandire kode ya konti yawe. PIN yawe uyandika gusa aho konti yawe ubwayo iyigusaba."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tapez un montant, choisissez qui le reçoit, et StarHash compose pour vous le code de votre portefeuille. Votre PIN ne se tape que dans la fenêtre de votre portefeuille."
           }
         }
       }
@@ -4344,6 +7305,12 @@
             "state": "translated",
             "value": "Andika icyo ushaka, turakibona"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tapez n'importe quoi, on le trouvera"
+          }
         }
       }
     },
@@ -4353,6 +7320,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fungura StarHash urebe ubwishyu bwawe."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déverrouillez StarHash pour voir vos paiements."
           }
         }
       }
@@ -4364,6 +7337,12 @@
             "state": "translated",
             "value": "Fungura ukoresheje %@"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déverrouiller avec %@"
+          }
         }
       }
     },
@@ -4373,6 +7352,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kura hejuru"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désépingler"
           }
         }
       }
@@ -4384,6 +7369,12 @@
             "state": "translated",
             "value": "Mu gihe ubutumwa butaraza, StarHash ntizajya ishyira ubwishyu mu byanze ku bwayo."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tant qu'aucun n'arrive, StarHash ne marquera pas de lui-même les paiements comme échoués."
+          }
         }
       }
     },
@@ -4393,6 +7384,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Banza uvugurure StarHash"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettez d'abord StarHash à jour"
           }
         }
       }
@@ -4404,6 +7401,12 @@
             "state": "translated",
             "value": "Gukoresha StarHash"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utiliser StarHash"
+          }
         }
       }
     },
@@ -4413,6 +7416,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Genzura"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérifier"
           }
         }
       }
@@ -4424,6 +7433,12 @@
             "state": "translated",
             "value": "Genzura shortcut"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérifier le raccourci"
+          }
         }
       }
     },
@@ -4433,6 +7448,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Verisiyo %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version %@"
+          }
+        }
+      }
+    },
+    "W": {
+      "comment": "The period control's letter for a week",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "S"
           }
         }
       }
@@ -4444,6 +7476,12 @@
             "state": "translated",
             "value": "Tegereza ubutumwa bwawe bukurikira bwa %@, cyangwa usabe umuntu akwandikire **RWF**."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attendez votre prochain message %@, ou demandez à quelqu'un de vous écrire **RWF**."
+          }
         }
       }
     },
@@ -4453,6 +7491,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bitegereje SMS"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En attente du SMS"
           }
         }
       }
@@ -4464,6 +7508,12 @@
             "state": "translated",
             "value": "Dutegereje ubutumwa bwa %@"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En attente d'un message %@"
+          }
         }
       }
     },
@@ -4473,6 +7523,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hategerejwe ubutumwa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En attente d'un message"
           }
         }
       }
@@ -4484,6 +7540,12 @@
             "state": "translated",
             "value": "Konti"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Portefeuille"
+          }
         }
       }
     },
@@ -4493,6 +7555,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Konti: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Portefeuille : %@"
           }
         }
       }
@@ -4504,6 +7572,12 @@
             "state": "translated",
             "value": "Mburira ku butumwa bwigana ubwa MoMo, kandi ntubwandike"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "M'avertir des faux messages MoMo, et ne pas les enregistrer"
+          }
         }
       }
     },
@@ -4513,6 +7587,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Amazi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eau"
           }
         }
       }
@@ -4524,6 +7604,12 @@
             "state": "translated",
             "value": "Incamake y'icyumweru"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Résumé de la semaine"
+          }
         }
       }
     },
@@ -4533,6 +7619,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ibyo StarHash ibika"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce que StarHash garde"
           }
         }
       }
@@ -4544,16 +7636,43 @@
             "state": "translated",
             "value": "Ibyo StarHash isangiza"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce que StarHash partage"
+          }
         }
       }
     },
-    "What a payment to a business was for": {},
+    "What a payment to a business was for": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À quoi servait un paiement à une entreprise"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icyo ubwishyu bwahawe ubucuruzi bwari bugenewe"
+          }
+        }
+      }
+    },
     "What each version brought": {
       "localizations": {
         "rw": {
           "stringUnit": {
             "state": "translated",
             "value": "Ibyo buri verisiyo yazanye"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce qu'a apporté chaque version"
           }
         }
       }
@@ -4565,6 +7684,12 @@
             "state": "translated",
             "value": "Ibyo wohereje n'ibyo wakiriye mu cyumweru"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce que vous avez envoyé et reçu dans la semaine"
+          }
         }
       }
     },
@@ -4574,6 +7699,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ibishya"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nouveautés"
           }
         }
       }
@@ -4585,6 +7716,12 @@
             "state": "translated",
             "value": "Ibishya muri StarHash"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nouveautés de StarHash"
+          }
         }
       }
     },
@@ -4594,6 +7731,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ibishya, ijambo ry'uwayikoze na kode y'inkomoko"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nouveautés, le mot et le code source"
           }
         }
       }
@@ -4605,6 +7748,12 @@
             "state": "translated",
             "value": "Iyo ubutumwa bwa %@ buvuga ko wakiriye amafaranga"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quand un message %@ annonce de l'argent reçu"
+          }
         }
       }
     },
@@ -4614,6 +7763,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Iyo ubutumwa bwa %@ bwemeje ubwishyu"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quand un message %@ confirme un paiement"
           }
         }
       }
@@ -4625,6 +7780,12 @@
             "state": "translated",
             "value": "Iyo ubwishyu wakoze bugitegerejwe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quand un paiement que vous avez fait est encore en attente"
+          }
         }
       }
     },
@@ -4634,6 +7795,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Iyo nta butumwa bwa %@ bwemeje ubwishyu mu isaha imwe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quand aucun message %@ ne confirme un paiement dans l'heure"
           }
         }
       }
@@ -4645,6 +7812,12 @@
             "state": "translated",
             "value": "Igihe incamake ziza"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quand arrivent les résumés"
+          }
         }
       }
     },
@@ -4654,6 +7827,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aho StarHash ifungukira"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Où s'ouvre StarHash"
           }
         }
       }
@@ -4665,6 +7844,12 @@
             "state": "translated",
             "value": "Wishyura ukoresheje uwuhe murongo? StarHash\nigukandira kode zawo."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avec quel opérateur payez-vous ? StarHash\ncompose ses codes pour vous."
+          }
         }
       }
     },
@@ -4674,6 +7859,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uwohereje ubutumwa. Muri automation, shyiramo Sender ya Shortcut Input."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qui a envoyé le message. Dans une automatisation, passez l'expéditeur de l'entrée du raccourci."
+          }
+        }
+      }
+    },
+    "With two, money between them is not counted as spent": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avec deux, l'argent entre elles ne compte pas comme dépensé"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ufite ebyiri, amafaranga ava ku imwe ajya ku yindi ntabarwa nk'ayakoreshejwe"
           }
         }
       }
@@ -4685,6 +7892,12 @@
             "state": "translated",
             "value": "Iyo ubyemeye, StarHash isoma abo muvugana kugira ngo ikwereke abo ushobora kwishyura, no gushyira amazina n'amafoto ku bwishyu bwawe. Basomerwa kuri iPhone yawe gusa kandi ntibigera bakopororwa ngo bayivemo."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avec votre permission, StarHash lit vos contacts pour montrer qui vous pouvez payer et mettre des noms et des photos sur vos paiements. Ils sont lus sur votre iPhone seulement et jamais copiés ailleurs."
+          }
         }
       }
     },
@@ -4694,6 +7907,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Andikira Shima"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Écrire à Shima"
+          }
+        }
+      }
+    },
+    "Y": {
+      "comment": "The period control's letter for a year",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A"
           }
         }
       }
@@ -4705,6 +7935,12 @@
             "state": "translated",
             "value": "Wowe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous"
+          }
         }
       }
     },
@@ -4714,6 +7950,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ni wowe ushinzwe iPhone yawe, kode y'ibanga yayo n'abemerewe kuyikoresha. Uburyo bwa Face ID bwo gufunga StarHash butuma Ibikorwa biguma ari ibanga, ariko konti yawe irindwa na PIN yawe. Ntukigere uha PIN yawe undi muntu uwo ari we wese, harimo n'uvuga ko aturuka kuri StarHash cyangwa ku kigo gitanga serivisi yawe."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous êtes responsable de votre iPhone, de son code et de qui peut l'utiliser. Le verrouillage Face ID de StarHash garde Activité privée, mais c'est votre PIN qui protège votre portefeuille. Ne partagez jamais votre PIN avec personne, y compris quelqu'un qui dit venir de StarHash ou de votre opérateur."
           }
         }
       }
@@ -4725,6 +7967,12 @@
             "state": "translated",
             "value": "Ushobora gushyira hejuru kode zigera kuri %lld. Kura imwe hejuru kugira ngo ubone umwanya."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous pouvez épingler jusqu'à %lld codes. Désépinglez-en un pour faire de la place."
+          }
         }
       }
     },
@@ -4734,6 +7982,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Byose biteguye"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tout est prêt"
           }
         }
       }
@@ -4745,6 +7999,12 @@
             "state": "translated",
             "value": "Umaze ibyumweru bibiri ukoresha StarHash. Urakoze."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous utilisez StarHash depuis deux semaines. Merci."
+          }
         }
       }
     },
@@ -4754,6 +8014,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Amakuru yawe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vos données"
+          }
+        }
+      }
+    },
+    "Your SIMs": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vos SIM"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SIM zawe"
           }
         }
       }
@@ -4765,6 +8047,12 @@
             "state": "translated",
             "value": "Kode yawe ya QR ya StarHash"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre code QR StarHash"
+          }
         }
       }
     },
@@ -4774,6 +8062,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sosiyete yawe y'itumanaho"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre opérateur"
           }
         }
       }
@@ -4785,6 +8079,12 @@
             "state": "translated",
             "value": "Amahitamo yawe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vos choix"
+          }
         }
       }
     },
@@ -4794,6 +8094,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kode zawe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vos codes"
           }
         }
       }
@@ -4805,6 +8111,12 @@
             "state": "translated",
             "value": "iPhone yawe na PIN yawe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre iPhone et votre PIN"
+          }
         }
       }
     },
@@ -4814,6 +8126,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Izina ryawe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre nom"
           }
         }
       }
@@ -4825,6 +8143,28 @@
             "state": "translated",
             "value": "Nimero yawe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre numéro"
+          }
+        }
+      }
+    },
+    "Your own accounts": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vos propres comptes"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konti zawe bwite"
+          }
         }
       }
     },
@@ -4834,6 +8174,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ifoto yawe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre photo"
           }
         }
       }
@@ -4845,6 +8191,12 @@
             "state": "translated",
             "value": "Ibikorwa byawe (uwo, angahe, ryari, niba byemejwe, n'ikiguzi, kode y'igikorwa n'amafaranga asigaye iyo ubutumwa bubitanze), ibyiciro wongeyeho, abo wishyuye vuba, kode za Gura n'igenamiterere ryawe. Ibyo byose bibikwa mu bubiko bwa StarHash ubwayo kuri iPhone yawe, kandi nta na kimwe cyoherezwa ahandi."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vos transactions (qui, combien, quand, si elles sont confirmées, et les frais, la référence et le solde quand un message les donne), les catégories que vous ajoutez, vos destinataires récents, les codes d'Acheter et vos réglages. Tout est enregistré dans le stockage de StarHash sur votre iPhone, et rien n'est envoyé nulle part."
+          }
         }
       }
     },
@@ -4854,6 +8206,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ibikorwa byawe (hamwe n'aho buri kimwe cyishyuriwe, iyo Hafi aha ifunguye) n'igenamiterere ryawe biri muri kopi zibikwa na iPhone yawe ubwayo, kuri iCloud cyangwa kuri mudasobwa yawe, ugenzura ubwawe."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vos transactions (avec l'endroit de chaque paiement, quand À proximité est activé) et vos réglages font partie des sauvegardes de votre iPhone, sur iCloud ou votre ordinateur, que vous contrôlez."
           }
         }
       }
@@ -4865,6 +8223,12 @@
             "state": "translated",
             "value": "Ubutumwa bwa konti yawe bukwemereza buri bwishyu."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les messages de votre portefeuille confirment chaque paiement pour vous."
+          }
         }
       }
     },
@@ -4874,6 +8238,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ubutumwa bwa konti yawe bwemeza buri bwishyu, hamwe n'ikiguzi cyabwo n'amafaranga asigaye. Urakoze gukoresha StarHash."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les messages de votre portefeuille confirment chaque paiement, avec ses frais et son solde. Merci d'utiliser StarHash."
           }
         }
       }
@@ -4885,10 +8255,32 @@
             "state": "translated",
             "value": "Konti yawe, ubwishyu bwawe"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre portefeuille, vos paiements"
+          }
         }
       }
     },
     "feature_request.yml": {},
+    "iPhone's language": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Langue de l'iPhone"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ururimi rwa iPhone"
+          }
+        }
+      }
+    },
     "init(coder:) is not used": {},
     "payment-expired": {},
     "payment-reminder": {},

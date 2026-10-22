@@ -63,7 +63,7 @@ struct ProfileView: View {
         .starhashReadableScrollContent()
         .background(Color.starhashBackground.ignoresSafeArea())
         // The page is its own title: the bar keeps only the back button.
-        .navigationTitle(String(localized: "Profile"))
+        .navigationTitle(String(starhash: "Profile"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) { Color.clear.frame(width: 1, height: 1) }
@@ -72,7 +72,7 @@ struct ProfileView: View {
 
     private var nameField: some View {
         TextField(
-            String(localized: "Your name"),
+            String(starhash: "Your name"),
             text: $name,
             prompt: Text("Your name").foregroundStyle(Color.starhashTertiaryText),
             axis: .vertical
@@ -92,6 +92,6 @@ struct ProfileView: View {
                 editsName = false
             }
         }
-        .accessibilityLabel(String(localized: "Your name"))
+        .accessibilityLabel(String(starhash: "Your name"))
     }
 }

@@ -169,7 +169,7 @@ struct OnboardingView: View {
             mock: .message,
             initialDelay: 0.4,
             title: "Confirm payments\nautomatically",
-            description: String(localized: "Add one shortcut and each \(chosenWallet.messagesName) message\nconfirms its payment, with the fee."),
+            description: String(starhash: "Add one shortcut and each \(chosenWallet.messagesName) message\nconfirms its payment, with the fee."),
             primaryTitle: "Set Up",
             primaryAction: advance,
             secondaryTitle: "Maybe Later",

@@ -27,7 +27,7 @@ struct FeatureFlagsView: View {
                         symbol: "flag.fill",
                         title: flag.title,
                         caption: flag.detail,
-                        status: overrides[flag.key] == nil ? nil : String(localized: "Changed on this iPhone"),
+                        status: overrides[flag.key] == nil ? nil : String(starhash: "Changed on this iPhone"),
                         isOn: binding(for: flag)
                     )
                 }

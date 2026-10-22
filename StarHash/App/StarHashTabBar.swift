@@ -301,7 +301,7 @@ struct PayBuySwitcher: View {
 
     var body: some View {
         let target: AppTab = page == .buy ? .pay : .buy
-        SwapGlassButton(symbol: target.symbol, label: String(localized: "Switch to \(target.title)"), pressHaptic: false) {
+        SwapGlassButton(symbol: target.symbol, label: String(starhash: "Switch to \(target.title)"), pressHaptic: false) {
             NavigationHaptics.shared.switchPage()
             router.show(target)
         }

@@ -637,9 +637,9 @@ struct RecipientPickerView: View {
 
     /// "0788 123 456", "Merchant code 020205", or "3 phone numbers".
     private func contactSubtitle(_ contact: PayContact) -> String {
-        guard contact.recipients.count == 1 else { return String(localized: "\(contact.recipients.count) phone numbers") }
+        guard contact.recipients.count == 1 else { return String(starhash: "\(contact.recipients.count) phone numbers") }
         let only = contact.recipients[0]
-        return only.kind == .merchant ? String(localized: "Merchant code \(only.destination)") : only.formattedDestination
+        return only.kind == .merchant ? String(starhash: "Merchant code \(only.destination)") : only.formattedDestination
     }
 
     /// A storefront for merchants, initials for named people, a phone for
@@ -653,7 +653,7 @@ struct RecipientPickerView: View {
     /// fee the payment gets.
     private func kindLabel(_ recipient: Recipient) -> String {
         guard let network = recipient.network else { return "Merchant code" }
-        return String(localized: "\(network.name) number")
+        return String(starhash: "\(network.name) number")
     }
 
     private func pick(_ contact: PayContact) {
