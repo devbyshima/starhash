@@ -28,10 +28,11 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Changed
 
+- Report's header no longer slides a little to the left once the page has opened.
 - Activity groups each month's transactions by day (Today, Yesterday, Mon, Oct 20), each row giving its time.
 - Tapping your photo on Profile opens a sheet: Take Photo, Upload Photo or View Photo. Move and Scale has Cancel beside Choose.
 - A photo you pick for your profile opens on a Move and Scale screen first: pinch to resize, drag to frame it in the circle, then Choose.
-- With two SIMs, Profile shows both numbers in one box.
+- With two SIMs, Profile shows both numbers side by side in one box.
 - Pending payments are yellow again, beside red for failed and green for confirmed.
 - The tab bar is a little shorter, so its highlight sits the same distance from every edge.
 - Onboarding's screens change visibly: the screen before drifts up into a blur as it fades, and the new title and line rise in word by word.

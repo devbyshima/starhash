@@ -186,15 +186,17 @@ struct ProfileFields: View {
             .modifier(ProfileFieldBackground(onSheet: onSheet))
             }
 
-            // With two SIMs, both numbers in one box, a line between them.
+            // With two SIMs, both numbers side by side in one capsule, a
+            // line between them.
             if let otherNumber {
-                VStack(spacing: 0) {
+                HStack(spacing: 0) {
                     numberField
-                    SheetDivider()
-                        .padding(.horizontal, 18)
+                    Rectangle()
+                        .fill(Color.sheetDivider)
+                        .frame(width: 1, height: 28)
                     otherField(otherNumber)
                 }
-                .modifier(ProfileFieldBackground(onSheet: onSheet, grouped: true))
+                .modifier(ProfileFieldBackground(onSheet: onSheet))
             } else {
                 numberField
                     .modifier(ProfileFieldBackground(onSheet: onSheet))
@@ -291,23 +293,21 @@ struct ProfileFields: View {
                 .multilineTextAlignment(centred ? .center : .leading)
                 .accessibilityLabel(label)
         }
-        .padding(.horizontal, 18)
+        // Two numbers side by side share the width, so each keeps a
+        // little less to either side.
+        .padding(.horizontal, otherNumber == nil ? 18 : 10)
         .frame(minHeight: StarHashMetrics.primaryButtonHeight)
     }
 }
 
 /// A field's box: a sheet's card in a sheet, the cards' solid foreground
-/// on the page; a capsule round one field, a card's rounded corners round
-/// two.
+/// on the page.
 private struct ProfileFieldBackground: ViewModifier {
     let onSheet: Bool
-    var grouped = false
 
     func body(content: Content) -> some View {
         if onSheet {
-            content.sheetCard(radius: grouped ? 22 : 29)
-        } else if grouped {
-            content.starhashContainer(.starhashCard, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+            content.sheetCard(radius: 29)
         } else {
             content.starhashContainer(.starhashCard, in: Capsule())
         }

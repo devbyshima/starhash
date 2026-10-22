@@ -5,9 +5,13 @@ import SwiftUI
 /// chart for the week, the month or the year, as the top of Activity once
 /// held them. Its title sits up beside the back button and the period
 /// control at the bar's other end, and a period with nothing in it shows
-/// the empty calendar.
+/// the empty calendar. The header is the page's own, as Activity's is,
+/// not the navigation bar's: iOS lays a bar's items out again once a
+/// push has finished, and on the iPhone the whole header then slid a
+/// little to the left.
 struct ReportPage: View {
     @Environment(StarHashStore.self) private var store
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -50,7 +54,12 @@ struct ReportPage: View {
         .starhashSoftEdge()
         .starhashReadableScrollContent()
         .background(Color.starhashBackground.ignoresSafeArea())
-        .starhashBackButton(title: "Report") { periodControl }
+        .starhashSoftEdgeHeader { header }
+        .navigationTitle(String(starhash: "Report"))
+        .navigationBarBackButtonHidden()
+        .toolbar(.hidden, for: .navigationBar)
+        // The swipe in from the left edge still goes back.
+        .background(SwipeBackEnabler())
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
             now = .now
         }
@@ -61,6 +70,29 @@ struct ReportPage: View {
         #if DEBUG
         .onAppear(perform: applyDebugLaunch)
         #endif
+    }
+
+    /// The back button and the title on the left, the period control on
+    /// the right, where Activity's header puts its buttons.
+    private var header: some View {
+        HStack(spacing: 12) {
+            Button { dismiss() } label: {
+                StarHashCircleGlyph(symbol: "chevron.left")
+            }
+            .buttonStyle(.hapticPlain)
+            .accessibilityLabel("Back")
+            Text("Report")
+                .starhashFont(24, weight: .bold, relativeTo: .title2)
+                .foregroundStyle(Color.starhashPrimaryText)
+                .lineLimit(1)
+                .accessibilityAddTraits(.isHeader)
+            Spacer(minLength: 8)
+            periodControl
+        }
+        .frame(minHeight: ActivityLayout.topBarHeight)
+        .padding(.horizontal, StarHashMetrics.screenPadding)
+        .starhashReadableWidth()
+        .starhashClearsWindowControls()
     }
 
     private var periodControl: some View {

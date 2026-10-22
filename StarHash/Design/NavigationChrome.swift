@@ -13,13 +13,6 @@ extension View {
         modifier(StarHashBackButton())
     }
 
-    /// The back button with the page's title beside it, large and bold, and
-    /// `trailing` at the bar's other end: a page whose title sits up with
-    /// its controls instead of over its content (Report).
-    func starhashBackButton(title: String, @ViewBuilder trailing: () -> some View) -> some View {
-        modifier(TitledBackBar(title: title, trailing: trailing()))
-    }
-
     /// A back button on the left that runs `back`, and a close button on
     /// the right when `close` is given, for a page that steps back through
     /// itself before leaving (auto-verify's setup). The swipe from the
@@ -49,42 +42,6 @@ private struct StarHashBackButton: ViewModifier {
                 }
                 .buttonStyle(.hapticPlain)
                 .accessibilityLabel("Back")
-            }
-            .background(SwipeBackEnabler())
-    }
-}
-
-private struct TitledBackBar<Trailing: View>: ViewModifier {
-    let title: String
-    let trailing: Trailing
-    @Environment(\.dismiss) private var dismiss
-
-    func body(content: Content) -> some View {
-        content
-            .navigationTitle(title)
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationBarBackButtonHidden()
-            // One item, so the title always follows the button.
-            .barButton {
-                HStack(spacing: 12) {
-                    Button { dismiss() } label: {
-                        StarHashCircleGlyph(symbol: "chevron.left")
-                    }
-                    .buttonStyle(.hapticPlain)
-                    .accessibilityLabel("Back")
-                    Text(catalog: title)
-                        .starhashFont(24, weight: .bold, relativeTo: .title2)
-                        .foregroundStyle(Color.starhashPrimaryText)
-                        .lineLimit(1)
-                        .fixedSize()
-                        .accessibilityAddTraits(.isHeader)
-                }
-            }
-            .trailingBarButton { trailing }
-            // The bar's own title stays for VoiceOver and the back menu,
-            // drawn as nothing: the one beside the button says it.
-            .toolbar {
-                ToolbarItem(placement: .principal) { Color.clear.frame(width: 1, height: 1) }
             }
             .background(SwipeBackEnabler())
     }
