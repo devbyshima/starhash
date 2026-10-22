@@ -140,14 +140,19 @@ struct ActivityView: View {
             LazyVStack(alignment: .leading, spacing: 0) {
                 ForEach(sections) { section in
                     monthHeader(section, isFirst: section.id == sections.first?.id)
-                    ActivityTransactionRows(
-                        transactions: section.transactions,
-                        onOpen: open,
-                        onVerify: verify,
-                        onFail: markFailed,
-                        onDelete: requestDelete,
-                        onSwipeDelete: swipeDelete
-                    )
+                    // Each day of the month under its own heading.
+                    ForEach(ActivitySummary.groupedByDay(section.transactions, calendar: calendar)) { day in
+                        dayHeader(day)
+                        ActivityTransactionRows(
+                            transactions: day.transactions,
+                            onOpen: open,
+                            onVerify: verify,
+                            onFail: markFailed,
+                            onDelete: requestDelete,
+                            onSwipeDelete: swipeDelete,
+                            showsDate: false
+                        )
+                    }
                 }
             }
             .padding(.horizontal, StarHashMetrics.screenPadding)
@@ -170,6 +175,17 @@ struct ActivityView: View {
             .accessibilityAddTraits(.isHeader)
             .padding(.top, isFirst ? ActivityLayout.contentTop : ActivityLayout.monthTop)
             .padding(.bottom, ActivityLayout.monthBottom)
+    }
+
+    /// "Today", "Yesterday", "Mon, Oct 20": a day's heading under its month,
+    /// in the quieter text, smaller than the month's.
+    private func dayHeader(_ day: ActivitySummary.DaySection) -> some View {
+        Text(ActivitySummary.dayTitle(for: day.day, now: now, calendar: calendar, locale: .starhash))
+            .starhashFont(15, weight: .semibold, relativeTo: .subheadline)
+            .foregroundStyle(Color.starhashSecondaryText)
+            .accessibilityAddTraits(.isHeader)
+            .padding(.top, ActivityLayout.dayTop)
+            .padding(.bottom, ActivityLayout.dayBottom)
     }
 
     private var topBar: some View {

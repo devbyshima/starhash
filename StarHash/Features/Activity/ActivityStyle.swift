@@ -20,7 +20,10 @@ enum ActivityLayout {
     static let rowRadius: CGFloat = 16
     /// A month's heading: its room above, and below before the first row.
     static let monthTop: CGFloat = 30
-    static let monthBottom: CGFloat = 8
+    static let monthBottom: CGFloat = 0
+    /// A day's heading under its month: room above, a little below.
+    static let dayTop: CGFloat = 12
+    static let dayBottom: CGFloat = 4
 }
 
 /// The question before one transaction is deleted: the title and the

@@ -6401,6 +6401,38 @@
         }
       }
     },
+    "Take Photo": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prendre une photo"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fata ifoto"
+          }
+        }
+      }
+    },
+    "Take, upload or view your photo": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prendre, importer ou voir votre photo"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fata, shyiraho cyangwa urebe ifoto yawe"
+          }
+        }
+      }
+    },
     "Tap **Add Shortcut** below.": {
       "localizations": {
         "rw": {
@@ -7394,6 +7426,22 @@
         }
       }
     },
+    "Upload Photo": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importer une photo"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shyiraho ifoto"
+          }
+        }
+      }
+    },
     "Using StarHash": {
       "localizations": {
         "rw": {
@@ -7454,6 +7502,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Version %@"
+          }
+        }
+      }
+    },
+    "View Photo": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voir la photo"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reba ifoto"
           }
         }
       }

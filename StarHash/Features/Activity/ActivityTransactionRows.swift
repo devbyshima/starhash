@@ -17,6 +17,8 @@ struct ActivityTransactionRows: View {
     let onDelete: (StarHashKit.Transaction) -> Void
     /// The swipe's delete, which does not ask.
     let onSwipeDelete: (StarHashKit.Transaction) -> Void
+    /// The date on each row; under a day's heading, the time is enough.
+    var showsDate = true
 
     private let shape = RoundedRectangle(cornerRadius: ActivityLayout.rowRadius, style: .continuous)
 
@@ -36,7 +38,7 @@ struct ActivityTransactionRows: View {
             TapHaptic.play()
             onOpen(transaction)
         } label: {
-            ActivityTransactionRow(transaction: transaction)
+            ActivityTransactionRow(transaction: transaction, showsDate: showsDate)
                 .contentShape(shape)
         }
         .buttonStyle(ActivityRowButtonStyle())
@@ -80,6 +82,7 @@ struct ActivityTransactionRows: View {
 /// keeps the width it needs.
 struct ActivityTransactionRow: View {
     let transaction: StarHashKit.Transaction
+    var showsDate = true
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -131,7 +134,7 @@ struct ActivityTransactionRow: View {
 
     /// "0788 123 998 \u{00B7} 22 Oct, 13:12". A named merchant shows its code;
     /// an unnamed recipient already shows its number as the name, so only
-    /// the date and time.
+    /// the date and time; under a day's heading, the time alone.
     private var detailLine: String {
         var parts: [String] = []
         if transaction.isPurchase {
@@ -141,8 +144,12 @@ struct ActivityTransactionRow: View {
         } else if transaction.counterparty.name?.isEmpty == false, !transaction.counterparty.destination.isEmpty {
             parts.append(transaction.counterparty.formattedDestination)
         }
-        parts.append(ActivitySummary.rowDate(for: transaction.date, now: .now, calendar: .autoupdatingCurrent, locale: .starhash)
-            + ", " + transaction.date.formatted(Date.FormatStyle(date: .omitted, time: .shortened, locale: .starhash)))
+        let time = transaction.date.formatted(Date.FormatStyle(date: .omitted, time: .shortened, locale: .starhash))
+        if showsDate {
+            parts.append(ActivitySummary.rowDate(for: transaction.date, now: .now, calendar: .autoupdatingCurrent, locale: .starhash) + ", " + time)
+        } else {
+            parts.append(time)
+        }
         return parts.joined(separator: " \u{00B7} ")
     }
 

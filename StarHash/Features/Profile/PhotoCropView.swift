@@ -70,10 +70,15 @@ struct PhotoCropView: View {
             }
             .overlay(alignment: .top) { header }
             .overlay(alignment: .bottom) {
-                Button("Choose") { onChoose(crop(circle: side)) }
-                    .buttonStyle(.starhashPrimary)
-                    .padding(.horizontal, StarHashMetrics.screenPadding)
-                    .padding(.bottom, 12)
+                // Side by side, as onboarding's Set Up and Maybe Later.
+                HStack(spacing: 12) {
+                    Button("Cancel", action: onCancel)
+                        .buttonStyle(.starhashSecondary)
+                    Button("Choose") { onChoose(crop(circle: side)) }
+                        .buttonStyle(.starhashPrimary)
+                }
+                .padding(.horizontal, StarHashMetrics.screenPadding)
+                .padding(.bottom, 12)
             }
         }
         .preferredColorScheme(.dark)
@@ -81,21 +86,11 @@ struct PhotoCropView: View {
     }
 
     private var header: some View {
-        ZStack {
-            Text("Move and Scale")
-                .starhashFont(17, weight: .semibold, relativeTo: .headline)
-                .foregroundStyle(.white)
-                .accessibilityAddTraits(.isHeader)
-            HStack {
-                Button("Cancel", action: onCancel)
-                    .starhashFont(17, relativeTo: .body)
-                    .foregroundStyle(.white)
-                    .buttonStyle(.hapticPlain)
-                Spacer()
-            }
-        }
-        .padding(.horizontal, StarHashMetrics.screenPadding)
-        .padding(.top, 12)
+        Text("Move and Scale")
+            .starhashFont(17, weight: .semibold, relativeTo: .headline)
+            .foregroundStyle(.white)
+            .accessibilityAddTraits(.isHeader)
+            .padding(.top, 12)
     }
 
     /// The photo's size on screen: just covering the circle, times the zoom.
