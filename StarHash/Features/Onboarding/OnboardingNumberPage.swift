@@ -39,7 +39,7 @@ struct OnboardingNumberPage: View {
 
             VStack(spacing: 12) {
                 Text("Your number")
-                    .font(.starhashDisplay(22, relativeTo: .title2))
+                    .starhashFont(22, weight: .bold, relativeTo: .title2)
                     .foregroundStyle(Color.starhashPrimaryText)
                     .accessibilityAddTraits(.isHeader)
                 Text("It goes in your own QR code, so friends\nscan it to pay you. It stays on your iPhone.")

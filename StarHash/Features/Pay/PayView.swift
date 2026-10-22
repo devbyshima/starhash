@@ -354,10 +354,12 @@ struct PayView: View {
     }
 }
 
-/// Balance's capsule: the Total card, as the recipient screen's Total.
+/// Balance's capsule: Liquid Glass, tinted with the cards' colour so it
+/// reads clearly on the pale page and the deep green alike, and lit by a
+/// press. Before iOS 26, the cards' fill.
 private struct BalanceSurface: ViewModifier {
     func body(content: Content) -> some View {
-        content.starhashTotalCard(in: Capsule())
+        content.starhashGlass(in: Capsule(), interactive: true, tint: .balanceGlassTint)
     }
 }
 

@@ -53,14 +53,12 @@ struct StarHashApp: App {
 
     /// Navigation bar titles (Settings and its pages, a transaction) are
     /// UIKit's, outside SwiftUI's font environment: the page title's 21pt
-    /// bold in Space Grotesk, scaled for the text size at launch up to 28, and a
-    /// large title in Quadrant.
+    /// bold in Space Grotesk, scaled for the text size at launch up to 28.
     private static func useBrandTypeInNavigationBars() {
         let bar = UINavigationBar.appearance()
         let title = UIFont.starhash(StarHashMetrics.pageTitleSize, weight: 700)
         bar.titleTextAttributes = [.font: UIFontMetrics(forTextStyle: .headline).scaledFont(for: title, maximumPointSize: 28)]
-        let large = UIFont(name: StarHashTypeface.quadrant, size: 34) ?? .systemFont(ofSize: 34, weight: .bold)
-        bar.largeTitleTextAttributes = [.font: large]
+        bar.largeTitleTextAttributes = [.font: UIFont.starhash(34, weight: 700)]
     }
 
     var body: some Scene {

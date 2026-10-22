@@ -59,7 +59,6 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>SpaceGrotesk.ttf</string>
-		<string>QuadrantNotepad-Regular.otf</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict>

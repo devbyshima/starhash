@@ -127,7 +127,7 @@ targets:
         LSSupportsGameMode: false
         StarHashChannel: $(STARHASH_CHANNEL)
         StarHashAppGroup: $(STARHASH_APP_GROUP)
-        UIAppFonts: [SpaceGrotesk.ttf, QuadrantNotepad-Regular.otf]
+        UIAppFonts: [SpaceGrotesk.ttf]
         NSContactsUsageDescription: StarHash shows your contacts so you can pick who to pay. They stay on your iPhone.
         NSLocationWhenInUseUsageDescription: StarHash notes where you pay, to suggest who you paid when you are back there and to show each payment on a map. It stays on your iPhone.
         NSCameraUsageDescription: StarHash uses the camera to scan a QR code, to see who to pay. Nothing is recorded or kept.
@@ -150,8 +150,6 @@ targets:
       - path: StarHash/Resources/Icons.xcassets
       - path: StarHash/Resources/Fonts/SpaceGrotesk.ttf
         buildPhase: resources
-      - path: StarHash/Resources/Fonts/QuadrantNotepad-Regular.otf
-        buildPhase: resources
     dependencies:
       - package: StarHashKit
     settings:
@@ -171,5 +169,5 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
-        UIAppFonts: [SpaceGrotesk.ttf, QuadrantNotepad-Regular.otf]
+        UIAppFonts: [SpaceGrotesk.ttf]
         StarHashAppGroup: $(STARHASH_APP_GROUP)

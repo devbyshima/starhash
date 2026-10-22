@@ -52,7 +52,7 @@ struct OnboardingWalletPage: View {
 
             VStack(spacing: 12) {
                 Text("Your carrier")
-                    .font(.starhashDisplay(22, relativeTo: .title2))
+                    .starhashFont(22, weight: .bold, relativeTo: .title2)
                     .foregroundStyle(Color.starhashPrimaryText)
                     .accessibilityAddTraits(.isHeader)
                 Text("Which carrier do you pay with? StarHash\ndials its codes for you.")

@@ -66,8 +66,8 @@ struct DeveloperNoteContent: View {
             DeveloperAvatar()
                 .padding(.bottom, 16)
             Text("A note from Shima")
-                .font(.starhashDisplay(29, relativeTo: .title))
-                .foregroundStyle(Color.starhashPrimaryText)
+                .starhashFont(29, weight: .bold, relativeTo: .title)
+                .foregroundStyle(Color.noteBrandText)
                 .accessibilityAddTraits(.isHeader)
                 .padding(.bottom, 18)
             VStack(alignment: .leading, spacing: 10) {
@@ -75,21 +75,21 @@ struct DeveloperNoteContent: View {
                     Text(paragraph)
                         .starhashFont(16.5, relativeTo: .body)
                         .lineSpacing(3)
-                        .foregroundStyle(Color.starhashPrimaryText)
+                        .foregroundStyle(Color.noteBrandText)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
             // A signature, so a script face: iOS's own Snell Roundhand, the
-            // one text not set in Space Grotesk or Quadrant.
+            // one text not set in Space Grotesk.
             Text("Shima")
                 .font(.custom("SnellRoundhand", size: 50, relativeTo: .largeTitle))
-                .foregroundStyle(Color.starhashPrimaryText)
+                .foregroundStyle(Color.noteBrandText)
                 .padding(.top, 14)
                 .accessibilityLabel("Signed, Shima")
 
             VStack(spacing: 0) {
                 Button(LocalizedStringKey(primaryTitle), action: primaryAction)
-                    .buttonStyle(.sheetPrimary)
+                    .buttonStyle(NoteButtonStyle())
                 // Side by side, so the note keeps the one row of links the
                 // reference has; stacked when a large text size won't fit.
                 ViewThatFits(in: .horizontal) {
@@ -118,7 +118,7 @@ struct DeveloperNoteContent: View {
         } label: {
             Text(title)
                 .starhashFont(14, relativeTo: .subheadline)
-                .foregroundStyle(Color.starhashSecondaryText)
+                .foregroundStyle(Color.noteBrandSecondary)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity, minHeight: 64)
                 .contentShape(Rectangle())
@@ -137,7 +137,7 @@ private struct DeveloperAvatar: View {
             .scaledToFill()
             .frame(width: 60, height: 60)
             .clipShape(Circle())
-            .overlay { Circle().strokeBorder(Color.starhashPrimaryText.opacity(0.1), lineWidth: 1) }
+            .overlay { Circle().strokeBorder(Color.noteBrandText.opacity(0.15), lineWidth: 1) }
             .accessibilityHidden(true)
     }
 }
@@ -227,10 +227,30 @@ private struct NoteSheetFrame<Content: View>: View {
             content
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(Color.noteSheetBackground.ignoresSafeArea())
+        // The brand's green, the same in either appearance, so the note
+        // stands apart from the page it opens over; its glass and words
+        // are light mode's on it.
+        .background(Color.noteBrandBackground.ignoresSafeArea())
+        .environment(\.colorScheme, .light)
         .starhashContainerSurface()
         .sheetGlass(detents: [.large])
+        .presentationBackground(Color.noteBrandBackground)
         .presentationDragIndicator(.hidden)
+    }
+}
+
+/// The note's button: the deep green with the green on it, the other way
+/// round from the page, at a sheet button's size.
+private struct NoteButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.sheet(17, .semibold, relativeTo: .headline))
+            .foregroundStyle(Color.noteBrandButtonLabel)
+            .frame(maxWidth: .infinity, minHeight: 54)
+            .background(Color.noteBrandButton, in: Capsule())
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.snappy(duration: 0.18), value: configuration.isPressed)
+            .starhashPressHaptic(configuration.isPressed, weight: .medium)
     }
 }
 

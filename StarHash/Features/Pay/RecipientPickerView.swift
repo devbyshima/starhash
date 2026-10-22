@@ -915,6 +915,13 @@ struct RecipientTile: View {
     private var plainTile: some View {
         Group {
             switch tile {
+            case .monogram(let initials) where initials == "#":
+                // A name with no letters (a number saved as the name)
+                // has no initial: the StarHash mark stands in, at the
+                // initials' size and in their colour, where a "#" sat.
+                StarHashMarkShape()
+                    .fill(onPay ? AnyShapeStyle(Color.payPrimaryText) : AnyShapeStyle(Color.starhashPrimaryText))
+                    .frame(width: size * 0.46, height: size * 0.46)
             case .monogram(let initials):
                 Text(initials)
                     .font(.starhashFixed(size * 0.36, weight: .semibold))

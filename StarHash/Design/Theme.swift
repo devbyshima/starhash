@@ -151,6 +151,10 @@ extension Color {
     /// screen's Total), so it parts from the pale page in light mode;
     /// dark mode's glass reads on its own.
     static let floatingShadow = Color(light: .brandForest.opacity(0.12), dark: .clear)
+    /// Balance's glass: a veil of the cards' colour over clear Liquid
+    /// Glass, so the capsule stands out on Pay's page in either
+    /// appearance.
+    static let balanceGlassTint = Color(light: .brandWhite.opacity(0.75), dark: .brandFern.opacity(0.7))
     /// Pills and recipient tiles on Pay, and the primary button there
     /// when disabled: the cards' foreground.
     static let payWash = Color(light: .brandWhite, dark: .brandMoss)
@@ -218,6 +222,15 @@ extension Color {
     /// The note sheets' background: the page's own colour, #F2F3F6 in light
     /// mode and black in dark, so the note reads as a page.
     static let noteSheetBackground = Color(light: .brandMist, dark: .brandForest)
+    /// The developer's note in the brand's own colours, so it stands apart
+    /// from the page it opens over in either appearance: the deep green on
+    /// the green (9.2:1), its quieter words a little lighter (5.9:1), and
+    /// its button the other way round.
+    static let noteBrandBackground = Color.brandAccent
+    static let noteBrandText = Color.brandForest
+    static let noteBrandSecondary = Color.brandForest.opacity(0.78)
+    static let noteBrandButton = Color.brandForest
+    static let noteBrandButtonLabel = Color.brandAccent
     /// The solid line between a card's rows.
     static let sheetDivider = Color(light: .brandForest.opacity(0.11), dark: .brandPaper.opacity(0.13))
 
@@ -365,9 +378,8 @@ enum StarHashMetrics {
 }
 
 extension Font {
-    // Text and numbers are set in Space Grotesk, the app's typeface (a
-    // variable font, weights 300 to 700), and a few big titles in Quadrant
-    // (Quadrant Notepad). Use `starhash(_:weight:)` where a text style fits,
+    // Text, titles and numbers are set in Space Grotesk, the app's typeface
+    // (a variable font, weights 300 to 700). Use `starhash(_:weight:)` where a text style fits,
     // `starhashFont(_:weight:)` for an exact size and `starhashNumber` for
     // a number, never Font.system, so the size still follows Dynamic Type.
     // SF Symbols keep .system sizes.
@@ -392,13 +404,6 @@ extension Font {
         .custom(starhashFamily, fixedSize: size).weight(weight)
     }
 
-    /// Quadrant, for the few titles that carry the brand (a page's own
-    /// title, onboarding's): `size` at the default text size, scaling like
-    /// `style`. It has one weight and keeps its own spacing.
-    static func starhashDisplay(_ size: CGFloat, relativeTo style: Font.TextStyle = .largeTitle) -> Font {
-        .custom(StarHashTypeface.quadrant, size: size, relativeTo: style)
-    }
-
     /// Space Grotesk for numbers (amounts, the keypad, codes, phone
     /// numbers), with figures all of one width so a total does not shift as
     /// it changes: `size` at the default text size, scaling like the style
@@ -412,12 +417,6 @@ extension Font {
     /// Big titles on a page (Auto-verify's steps): Title 1 bold, 28pt at
     /// the default text size. Pair it with `StarHashTracking.display(28)`.
     static let starhashTitle = Font.starhash(.title, weight: .bold)
-}
-
-/// The brand's display face, by the PostScript name its file registers
-/// from `UIAppFonts`.
-enum StarHashTypeface {
-    static let quadrant = "QuadrantNotepad-Regular"
 }
 
 /// How much large headings tighten, after GO Club's: not at all up to

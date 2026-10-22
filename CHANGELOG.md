@@ -22,10 +22,12 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Changed
 
+- Pay: the wallet's logo sits on its own above the keypad, Balance is a Liquid Glass button in light and dark, and a number saved with no name shows the StarHash mark where a "#" was.
+- The developer's note is in StarHash's green, so it stands apart from the page under it.
 - Activity lists every transaction by month under a large title, each with its picture on a rounded tile (a contact's photo, the carrier's logo for airtime and bundles, or an initial), and its number, date, time and status. The spending summary and chart move to a Report page, from the chart button beside search; your photo opens Profile.
 - A transaction's page puts its picture, name, date and amount down the middle, its details in outlined cards grouped by what they say, and Pay Again, Verify, Mark as Failed and Delete in one list.
 - Settings' cards are outlined, with each section's title above its card, shorter rows and even margins on both sides. Every separator in the app is a solid line.
-- A new look in StarHash's two greens: the green #64D27B as the accent and the brand, and the deep green #091D11 as light mode's text and dark mode's page, with every other colour a variation of them; red stays only for deletes and failures. A few big titles are set in Quadrant; everything else stays in Space Grotesk. The tab bar shows the open page's icon filled and the others in outline, and Pay's tab is a hash in a rounded square. The QR code icon is redrawn.
+- A new look in StarHash's two greens: the green #64D27B as the accent and the brand, and the deep green #091D11 as light mode's text and dark mode's page, with every other colour a variation of them; red stays only for deletes and failures. The tab bar shows the open page's icon filled and the others in outline, and Pay's tab is a hash in a rounded square. The QR code icon is redrawn.
 - A new look: a #F2F3F6 page with white cards in light mode, black with #171717 cards in dark, and the green #00D957 as the accent and the brand, on the buttons, switches, chart, tab bar, app icon and launch. Cards and lists are flat; Liquid Glass stays on the tab bar, the header buttons, sheets and Buy's call buttons. Status colours: green for money in, yellow for pending, blood red for money out and deletes.
 - Settings' rows each have a green icon; a row's description shows when you tap its icon, and hides at the next tap.
 - StarHash's own icons everywhere: one soft, rounded set drawn for the app, in place of the system's symbols, in the tab bar, buttons, menus, Settings, Buy's codes and the widgets.

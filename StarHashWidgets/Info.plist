@@ -30,7 +30,6 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>SpaceGrotesk.ttf</string>
-		<string>QuadrantNotepad-Regular.otf</string>
 	</array>
 </dict>
 </plist>

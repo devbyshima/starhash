@@ -1,9 +1,9 @@
 import StarHashKit
 import SwiftUI
 
-/// The wallet as a pill just above Pay's keypad, where the amount's
-/// currency once sat: the carrier's logo alone, and a menu to switch to the
-/// other wallet. Payments and Balance dial the new
+/// The wallet just above Pay's keypad, where the amount's currency once
+/// sat: the carrier's logo alone, straight on the page with nothing behind
+/// it, and a menu to switch to the other wallet. Payments and Balance dial the new
 /// wallet's codes from the next tap. (Rwanda's one currency needs no pill
 /// of its own; the amount reads out with it.)
 struct WalletPill: View {
@@ -17,15 +17,14 @@ struct WalletPill: View {
                 }
             }
         } label: {
-            // The logo alone, in the pill the flag once sat in: the menu
-            // names the wallets.
+            // The logo alone, on the page: the menu names the wallets. The
+            // tap area keeps the pill's size it once had.
             Image(wallet.logoAsset)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 40, height: 22)
                 .padding(.horizontal, 16)
                 .frame(minWidth: 72, minHeight: 36)
-                .background(Color.payWash, in: Capsule())
                 .contentShape(Capsule())
                 .animation(.smooth(duration: 0.25), value: wallet)
         }

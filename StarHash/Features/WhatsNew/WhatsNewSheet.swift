@@ -128,7 +128,7 @@ private struct WhatsNewSummaryPage: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     Text("What's New in StarHash")
-                        .font(.starhashDisplay(31, relativeTo: .title))
+                        .starhashFont(31, weight: .bold, relativeTo: .title)
                         .foregroundStyle(Color.sheetBrandText)
                         .lineLimit(1)
                         .minimumScaleFactor(0.75)

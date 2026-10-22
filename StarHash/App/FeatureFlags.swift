@@ -13,7 +13,16 @@ extension FeatureFlag {
     ///         detail: "Pay part of a total to each of several people",
     ///         rollout: .dev
     ///     )
-    static let all: [FeatureFlag] = []
+    static let all: [FeatureFlag] = [.buyRows]
+
+    /// Buy's codes as Activity's rows, straight on the page with a tile and
+    /// a round call button, instead of cards: kept behind a switch until the
+    /// owner approves it.
+    static let buyRows = FeatureFlag(
+        key: "buyRows", title: "Buy as rows",
+        detail: "Buy's codes as Activity's rows, without cards",
+        rollout: .dev
+    )
 }
 
 extension ReleaseChannel {

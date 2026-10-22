@@ -18,7 +18,7 @@ struct ActivityTopBar: View {
         ZStack(alignment: .leading) {
             if !isSearching {
                 Text("Activity")
-                    .font(.starhashDisplay(34, relativeTo: .largeTitle))
+                    .starhashFont(34, weight: .bold, relativeTo: .largeTitle)
                     .foregroundStyle(Color.starhashPrimaryText)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
