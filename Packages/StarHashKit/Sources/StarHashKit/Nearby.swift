@@ -77,3 +77,48 @@ public enum Nearby {
         return 2 * radius * asin(min(1, sqrt(a)))
     }
 }
+
+/// Nearby suggestions passed over: each time the picker showed one and
+/// another was paid instead, that suggestion missed once more. After
+/// `limit` misses in a row it is no longer suggested; picking it puts it
+/// back to none, and so does paying it any other way (typed, from
+/// Contacts, a scanned code), which brings it back.
+public struct NearbyMisses: Codable, Equatable, Sendable {
+    /// Misses in a row, by the recipient's kind and number or code.
+    public private(set) var counts: [String: Int] = [:]
+
+    /// Five passed over in a row and it stops being suggested.
+    public static let limit = 5
+
+    public init() {}
+
+    /// Whether `recipient` has been passed over too often to suggest.
+    public func isRetired(_ recipient: Recipient) -> Bool {
+        (counts[Self.key(recipient)] ?? 0) >= Self.limit
+    }
+
+    /// The suggestions still worth showing, in their order.
+    public func filter(_ suggestions: [Recipient]) -> [Recipient] {
+        suggestions.filter { !isRetired($0) }
+    }
+
+    /// The picker showed `shown` and `chosen` was paid: every suggestion
+    /// passed over misses once more, and the one picked (if it was one)
+    /// starts again.
+    public mutating func record(shown: [Recipient], chosen: Recipient) {
+        let picked = Self.key(chosen)
+        for recipient in shown where Self.key(recipient) != picked {
+            counts[Self.key(recipient), default: 0] += 1
+        }
+        counts[picked] = nil
+    }
+
+    /// `recipient` was paid, however it was chosen: it starts again.
+    public mutating func paid(_ recipient: Recipient) {
+        counts[Self.key(recipient)] = nil
+    }
+
+    private static func key(_ recipient: Recipient) -> String {
+        "\(recipient.kind.rawValue):\(recipient.destination)"
+    }
+}

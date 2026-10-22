@@ -286,6 +286,9 @@ struct PayView: View {
         let generation = locationsGeneration
         locationTask = nil
 
+        // Paid, however it was chosen: a Nearby suggestion passed over
+        // before is suggested again.
+        NearbyMissesStore.paid(recipient)
         var recordedID: UUID?
         if saveTransactions {
             recordedID = store.recordPayment(to: recipient, amount: amount, wallet: wallet, retryWindow: 5 * 60).id

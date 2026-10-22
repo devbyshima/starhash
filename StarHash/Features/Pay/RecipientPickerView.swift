@@ -451,13 +451,15 @@ struct RecipientPickerView: View {
     }
 
     /// Numbers and codes paid where the phone is now, nearest first, from
-    /// where the saved payments were made. Only before anything is typed: a
-    /// search is looking for someone in particular.
+    /// where the saved payments were made, less any passed over five times
+    /// in a row (`NearbyMisses`). Only before anything is typed: a search is
+    /// looking for someone in particular.
     private var nearby: [Recipient] {
         guard nearbyEnabled, search.isEmpty, let fix = shownNearbyFix else { return [] }
-        return Nearby.suggestions(
-            from: store.transactions, latitude: fix.latitude, longitude: fix.longitude, accuracy: fix.accuracy
+        let found = Nearby.suggestions(
+            from: store.transactions, latitude: fix.latitude, longitude: fix.longitude, accuracy: fix.accuracy, limit: 8
         ).map(\.recipient)
+        return Array(NearbyMissesStore.filter(found).prefix(3))
     }
 
     private var matchingContactsUnfiltered: [PayContact] {
@@ -695,6 +697,9 @@ struct RecipientPickerView: View {
     private func choose(_ recipient: Recipient) {
         guard !hasPaid, recipient.isPayable else { return }
         hasPaid = true
+        // The Nearby suggestions showing were passed over, unless this is
+        // one of them.
+        NearbyMissesStore.record(shown: nearby, chosen: recipient)
         searchFocused = false
         onPay(recipient)
     }
