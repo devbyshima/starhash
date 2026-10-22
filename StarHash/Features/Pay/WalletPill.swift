@@ -3,17 +3,30 @@ import SwiftUI
 
 /// The wallet just above Pay's keypad, where the amount's currency once
 /// sat: the carrier's logo alone, straight on the page with nothing behind
-/// it, and a menu to switch to the other wallet. Payments and Balance dial the new
-/// wallet's codes from the next tap. (Rwanda's one currency needs no pill
-/// of its own; the amount reads out with it.)
+/// it, and a menu of the owner's wallets, each with the SIM it lives on
+/// (two SIMs on different carriers give both). Payments and Balance dial
+/// the new wallet's codes from the next tap. (Rwanda's one currency needs
+/// no pill of its own; the amount reads out with it.)
 struct WalletPill: View {
     @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
+    @OwnWallets private var ownWallets
 
     var body: some View {
         Menu {
-            Picker("Wallet", selection: $wallet) {
-                ForEach(Recipient.Network.allCases, id: \.self) { network in
-                    Label(network.walletName, image: network.logoAsset)
+            // Toggles rather than a picker: a picker's rows drop the second
+            // line, and the SIM's number is what tells two wallets apart.
+            ForEach(ownWallets.wallets) { option in
+                Toggle(isOn: Binding(
+                    get: { wallet == option.network },
+                    set: { if $0 { wallet = option.network } }
+                )) {
+                    // Straight in the row, so the menu reads the logo as its
+                    // icon and the number as the line under the name.
+                    Image(option.network.logoAsset)
+                    Text(verbatim: option.network.walletName)
+                    if let sim = option.sim {
+                        Text(verbatim: sim.formattedDestination)
+                    }
                 }
             }
         } label: {

@@ -68,6 +68,22 @@
         }
       }
     },
+    "%@ or %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ou %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ cyangwa %@"
+          }
+        }
+      }
+    },
     "%@ sent you %@.": {
       "localizations": {
         "rw": {

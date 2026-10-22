@@ -21,7 +21,7 @@ struct NotificationSettingsView: View {
     @AppStorage(PreferenceKey.notificationAmounts) private var showsAmounts = true
     @AppStorage(PreferenceKey.notificationSound) private var sound = true
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
-    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
+    @OwnWallets private var ownWallets
     @AppStorage(PreferenceKey.lastVerifiedAt) private var lastVerifiedAt: Double = 0
     @AppStorage(PreferenceKey.lastMessageAt) private var lastMessageAt: Double = 0
     @AppStorage(PreferenceKey.autoVerifySince) private var autoVerifySince: Double = 0
@@ -42,7 +42,7 @@ struct NotificationSettingsView: View {
                     symbol: "bell.badge.fill",
                     title: "Payment reminders",
                     caption: failsUnconfirmed
-                        ? String(starhash: "When no \(wallet.messagesName) message confirms a payment within an hour")
+                        ? String(starhash: "When no \(ownWallets.messagesName) message confirms a payment within an hour")
                         : "When a payment you made is still pending",
                     isOn: $paymentReminders
                 )
@@ -61,7 +61,7 @@ struct NotificationSettingsView: View {
                     symbol: "checkmark.seal.fill",
                     title: "Confirmed payments",
                     caption: autoVerifyOn
-                        ? String(starhash: "When a \(wallet.messagesName) message confirms a payment")
+                        ? String(starhash: "When a \(ownWallets.messagesName) message confirms a payment")
                         : "Needs auto-verify, under Transactions",
                     isOn: $confirmedPayments
                 )
@@ -69,7 +69,7 @@ struct NotificationSettingsView: View {
                     symbol: "arrow.down.circle.fill",
                     title: "Money received",
                     caption: autoVerifyOn
-                        ? String(starhash: "When a \(wallet.messagesName) message brings money in")
+                        ? String(starhash: "When a \(ownWallets.messagesName) message brings money in")
                         : "Needs auto-verify, under Transactions",
                     isOn: $moneyReceived
                 )

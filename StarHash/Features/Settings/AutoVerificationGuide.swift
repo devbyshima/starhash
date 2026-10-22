@@ -39,7 +39,7 @@ struct AutoVerificationGuide: View {
     @AppStorage(PreferenceKey.lastMessageAt) private var lastMessageAt: Double = 0
     @AppStorage(PreferenceKey.autoVerifySince) private var autoVerifySince: Double = 0
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
-    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
+    @OwnWallets private var ownWallets
 
     @State private var step = SettingsLaunch.guideOutcome == nil ? SettingsLaunch.guideStep : Self.checkStep
     /// Whether the step's action (Add Shortcut, Open Shortcuts) has been
@@ -218,14 +218,14 @@ struct AutoVerificationGuide: View {
                 switch verification {
                 case .verified:
                     GuideStepList(steps: [
-                        "Every \(wallet.messagesName) message confirms its payment.",
+                        "Every \(ownWallets.messagesName) message confirms its payment.",
                         "Fees and your balance fill in by themselves.",
                         "Turn it off any time in **Settings**.",
                     ], symbol: "checkmark")
                 case .awaitingMessage:
                     GuideStepList(steps: [
                         "The shortcut works. A message through the automation proves the rest.",
-                        "Wait for your next \(wallet.messagesName) message, or ask someone to text you **RWF**.",
+                        "Wait for your next \(ownWallets.messagesName) message, or ask someone to text you **RWF**.",
                         "Until one comes, StarHash won't mark payments failed on its own.",
                     ])
                 case .failed:

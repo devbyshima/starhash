@@ -93,6 +93,7 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.autoVerifySince) private var autoVerifySince: Double = 0
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
     @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
+    @OwnWallets private var ownWallets
     @AppStorage(PreferenceKey.appLock) private var appLock = false
 
     @State private var confirmsDeleteAll = false
@@ -302,7 +303,7 @@ private struct SettingsRootList: View {
         SettingsToggleRow(
             symbol: "checkmark.message.fill",
             title: "Auto-verify transactions",
-            caption: String(starhash: "Confirm payments from \(wallet.messagesName) messages"),
+            caption: String(starhash: "Confirm payments from \(ownWallets.messagesName) messages"),
             status: autoVerifyStatus,
             isOn: autoVerifyBinding
         )
@@ -478,10 +479,10 @@ private struct SettingsRootList: View {
     private var autoVerifyStatus: String? {
         if autoVerifyBinding.wrappedValue,
            !StarHashPreferences.automationProven(lastMessageAt: lastMessageAt, since: autoVerifySince) {
-            return String(starhash: "Waiting for a \(wallet.messagesName) message to come through")
+            return String(starhash: "Waiting for a \(ownWallets.messagesName) message to come through")
         }
         return autoVerifyLooksBroken
-            ? String(starhash: "No \(wallet.messagesName) messages for a week. Check the automation")
+            ? String(starhash: "No \(ownWallets.messagesName) messages for a week. Check the automation")
             : nil
     }
 
