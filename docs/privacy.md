@@ -1,6 +1,6 @@
 # Privacy
 
-StarHash has no account and no tracking, and your payments stay on your iPhone. Its one server (`server/`, a Cloudflare Worker) keeps only the photo you share with your QR code and an anonymous count of who uses StarHash. The app's own Privacy Policy, under **Settings › More**, is the one that applies; this page explains how the code backs it up.
+StarHash has no account and no tracking, and your payments stay on your iPhone. Its one server (`server/`, a Cloudflare Worker) keeps only your profile photo, which goes with your QR code, and an anonymous count of who uses StarHash. The app's own Privacy Policy, under **Settings › More**, is the one that applies; this page explains how the code backs it up.
 
 ## Permissions
 
@@ -17,7 +17,7 @@ Each permission screen in onboarding has a single **Continue** button that opens
 
 - **Payments**: one JSON file in the app's Application Support folder, holding who, how much, when, the status, and the fee, reference and balance when a message gives them. With Nearby on, a payment to a merchant code or to a number not in your Contacts also keeps where it was made. A file that cannot be read is set aside rather than overwritten, so it can be recovered.
 - **Settings and Buy's codes**: the app's preferences. Recent recipients are not stored separately: they are read from the payments file.
-- **Your profile**: the name and number you give for your QR code, in the app's preferences. They leave the phone only in a code you show or share. Your photo is kept on the phone too, and on StarHash's server while **Photo with my code** is on (below).
+- **Your profile**: the name and number you give for your QR code, in the app's preferences. They leave the phone only in a code you show or share. Your photo is kept on the phone too, and on StarHash's server whenever you have one (below).
 - **Messages**: only the ones your own Shortcuts automation passes in, and who sent them. Anything that is not a MoMo or Airtel Money transaction is ignored and not kept, and so is a message held back as a possible scam.
 - **Widgets**: with an App Group, Buy's codes and your wallet, which the Buy widget reads, in the group's preferences on the phone.
 
@@ -29,7 +29,7 @@ The payments file and the preferences are part of your iPhone's own iCloud or co
 
 StarHash talks to one server of its own, `starhash.devbyshima.workers.dev` (`StarHashCloud`, and `server/` for the Worker), and only for two things:
 
-- **Your photo, with your QR code**: while you have a photo and **Photo with my code** is on, it is uploaded under a random id (`cloudPhotoID`) that your code then carries, so whoever scans the code sees it beside your number. It is never stored with your name or number. A random key made on the phone and kept in its Keychain is needed to replace or delete it; the server keeps only the key's hash. Removing your photo or turning the switch off deletes it from the server.
+- **Your photo, with your QR code**: whenever you have a photo, it is uploaded under a random id (`cloudPhotoID`) that your code then carries, so whoever scans the code sees it beside your number. It is never stored with your name or number. A random key made on the phone and kept in its Keychain is needed to replace or delete it; the server keeps only the key's hash, beside the photo in its D1 database. Removing your photo deletes it from the server.
 - **Counting who uses StarHash**: once a day, a random id made on the first launch (`cloudInstallID`) and the app's version. The server keeps the id, the first and last day it was seen, and the version.
 
 Nothing else is sent: no number, no name, no payment, no location, no contacts. There are no analytics or advertising packages. Beyond that, the only things that reach beyond the app are system ones you start:
