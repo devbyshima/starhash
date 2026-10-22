@@ -67,6 +67,9 @@ extension Color {
     /// Controls sitting on a card (icon tiles, date pill, text fields):
     /// #F2F3F6 on white, #3A3A3A on the near black.
     static let starhashCardRaised = Color(light: .brandMist, dark: .brandFern)
+    /// The line round an outlined card (a transaction's details, Settings'
+    /// groups): the cards' hairline, a touch firmer.
+    static let starhashOutline = Color(light: .brandForest.opacity(0.11), dark: .brandPaper.opacity(0.13))
     /// Hairlines between rows.
     static let starhashSeparator = Color(light: .brandForest.opacity(0.1), dark: .brandPaper.opacity(0.14))
     /// Hairlines between the rows of a settings list.
@@ -215,8 +218,18 @@ extension Color {
     /// The note sheets' background: the page's own colour, #F2F3F6 in light
     /// mode and black in dark, so the note reads as a page.
     static let noteSheetBackground = Color(light: .brandMist, dark: .brandForest)
-    /// The dotted line between a sheet card's rows.
-    static let sheetDivider = Color(light: .brandForest.opacity(0.22), dark: .brandPaper.opacity(0.22))
+    /// The solid line between a card's rows.
+    static let sheetDivider = Color(light: .brandForest.opacity(0.11), dark: .brandPaper.opacity(0.13))
+
+    /// The image beside a transaction: white in either appearance, with a
+    /// hairline round it on the pale page, where white alone would melt in.
+    static let tileSurface = Color.white
+    static let tileBorder = Color(light: .brandForest.opacity(0.09), dark: .clear)
+    /// A tile with no photo or logo: the initial (or the mark) in the deep
+    /// green words' shade on a pale wash of the green (4.9:1), in either
+    /// appearance.
+    static let tilePlaceholder = Color(red: 227 / 255, green: 245 / 255, blue: 231 / 255)
+    static let tilePlaceholderGlyph = Color.brandAccentDeep
 
     /// A profile without a photo: the cards' foreground behind a person in
     /// the quieter grey.
@@ -342,6 +355,8 @@ extension View {
 enum StarHashMetrics {
     static let screenPadding: CGFloat = 16
     static let cardRadius: CGFloat = 26
+    /// Outlined cards and the action list under them, as the reference's.
+    static let outlinedCardRadius: CGFloat = 24
     static let rowRadius: CGFloat = 24
     static let primaryButtonHeight: CGFloat = 58
     /// Every page's title, in the system bar or drawn by the page: 21pt
@@ -350,32 +365,31 @@ enum StarHashMetrics {
 }
 
 extension Font {
-    // Text is set in Melange (KMR Melange Grotesk), and a few big titles in
-    // Quadrant (Quadrant Notepad): the owner's two typefaces. Use
-    // `starhash(_:weight:)` where a text style fits and
-    // `starhashFont(_:weight:)` for an exact size, never Font.system, so the
-    // size still follows Dynamic Type. SF Symbols keep .system sizes.
+    // Text and numbers are set in Space Grotesk, the app's typeface (a
+    // variable font, weights 300 to 700), and a few big titles in Quadrant
+    // (Quadrant Notepad). Use `starhash(_:weight:)` where a text style fits,
+    // `starhashFont(_:weight:)` for an exact size and `starhashNumber` for
+    // a number, never Font.system, so the size still follows Dynamic Type.
+    // SF Symbols keep .system sizes.
     //
     // The weights follow GO Club's, measured from its screens: text is
     // medium (500) unless it says otherwise, buttons semibold, headings and
-    // numbers bold, and large headings tighten (`StarHashTracking`). Each
-    // weight is a face of its own (`StarHashTypeface`), so a weight with no
-    // face bundled yet takes the nearest one that is.
+    // numbers bold, and large headings tighten (`StarHashTracking`).
 
-    /// Melange at a text style's size, scaling with it: medium, and
+    /// The typeface's family name, as registered from `UIAppFonts`.
+    static let starhashFamily = "Space Grotesk"
+
+    /// Space Grotesk at a text style's size, scaling with it: medium, and
     /// headline semibold, unless told otherwise.
     static func starhash(_ style: Font.TextStyle, weight: Font.Weight? = nil) -> Font {
-        .custom(
-            StarHashTypeface.melange(weight ?? (style == .headline ? .semibold : .medium)),
-            size: style.starhashDefaultSize,
-            relativeTo: style
-        )
+        .custom(starhashFamily, size: style.starhashDefaultSize, relativeTo: style)
+            .weight(weight ?? (style == .headline ? .semibold : .medium))
     }
 
-    /// Melange at a size that never scales, for the onboarding pictures,
-    /// which are drawn at one size like an image.
+    /// Space Grotesk at a size that never scales, for the onboarding
+    /// pictures, which are drawn at one size like an image.
     static func starhashFixed(_ size: CGFloat, weight: Font.Weight = .medium) -> Font {
-        .custom(StarHashTypeface.melange(weight), fixedSize: size)
+        .custom(starhashFamily, fixedSize: size).weight(weight)
     }
 
     /// Quadrant, for the few titles that carry the brand (a page's own
@@ -385,11 +399,14 @@ extension Font {
         .custom(StarHashTypeface.quadrant, size: size, relativeTo: style)
     }
 
-    /// Google Sans Flex, for numbers (amounts, the keypad, codes, phone
-    /// numbers): `size` at the default text size, scaling like the style
-    /// nearest it, at any weight on its axis.
+    /// Space Grotesk for numbers (amounts, the keypad, codes, phone
+    /// numbers), with figures all of one width so a total does not shift as
+    /// it changes: `size` at the default text size, scaling like the style
+    /// nearest it.
     static func starhashNumber(_ size: CGFloat, weight: Font.Weight = .medium, relativeTo style: Font.TextStyle? = nil) -> Font {
-        .custom(StarHashTypeface.numbers, size: size, relativeTo: style ?? .starhashNearest(to: size)).weight(weight)
+        .custom(starhashFamily, size: size, relativeTo: style ?? .starhashNearest(to: size))
+            .weight(weight)
+            .monospacedDigit()
     }
 
     /// Big titles on a page (Auto-verify's steps): Title 1 bold, 28pt at
@@ -397,38 +414,10 @@ extension Font {
     static let starhashTitle = Font.starhash(.title, weight: .bold)
 }
 
-/// The owner's typefaces, by the PostScript names their files register
-/// from `UIAppFonts`. Melange comes as one file per weight: list each face
-/// here as its file is added to `StarHash/Resources/Fonts` (and to
-/// `UIAppFonts`), and every weight asked for takes the nearest face
-/// bundled.
+/// The brand's display face, by the PostScript name its file registers
+/// from `UIAppFonts`.
 enum StarHashTypeface {
     static let quadrant = "QuadrantNotepad-Regular"
-    /// The numbers' family, a variable font: every weight from one file.
-    static let numbers = "Google Sans Flex"
-
-    private static let melangeFaces: [(weight: CGFloat, name: String)] = [
-        (300, "KMRMelangeGrotesk-Light"),
-        (400, "KMRMelangeGrotesk-Regular"),
-        (500, "KMRMelangeGrotesk-Medium"),
-        (600, "KMRMelangeGrotesk-Semibold"),
-        (700, "KMRMelangeGrotesk-Bold"),
-    ]
-
-    /// The faces in this build, looked up once.
-    private static let bundled = melangeFaces.filter { UIFont(name: $0.name, size: 12) != nil }
-
-    /// Melange's face nearest `weight` among those bundled.
-    static func melange(_ weight: Font.Weight) -> String {
-        let wanted = weightValues[weight] ?? 500
-        let faces = bundled.isEmpty ? melangeFaces : bundled
-        return faces.min { abs($0.weight - wanted) < abs($1.weight - wanted) }!.name
-    }
-
-    private static let weightValues: [Font.Weight: CGFloat] = [
-        .ultraLight: 100, .thin: 200, .light: 300, .regular: 400, .medium: 500,
-        .semibold: 600, .bold: 700, .heavy: 800, .black: 900,
-    ]
 }
 
 /// How much large headings tighten, after GO Club's: not at all up to
@@ -482,7 +471,7 @@ private struct ScaledSystemFont: ViewModifier {
             content.font(.system(size: size, weight: weight, design: design))
         } else {
             content
-                .font(.custom(StarHashTypeface.melange(weight), fixedSize: size))
+                .font(.custom(Font.starhashFamily, fixedSize: size).weight(weight))
                 .tracking(tracking ?? (StarHashTracking.tightens(weight) ? StarHashTracking.display(size) : 0))
         }
     }

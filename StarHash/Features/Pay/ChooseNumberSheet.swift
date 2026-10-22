@@ -73,7 +73,6 @@ struct RecipientNumberRow: View {
                 Text(recipient.formattedDestination)
                     .font(.starhashNumber(16, relativeTo: .body))
                     .foregroundStyle(Color.starhashPrimaryText)
-                    .monospacedDigit()
                 Spacer(minLength: 8)
                 Text(ChooseNumberSheet.network(of: recipient))
                     .font(.sheetBody)

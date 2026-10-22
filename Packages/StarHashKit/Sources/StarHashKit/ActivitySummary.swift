@@ -316,6 +316,32 @@ public enum ActivitySummary {
         return string(day, sameYear ? "EEEdMMM" : "EEEdMMMyyyy", calendar, locale)
     }
 
+    /// Groups transactions by calendar month, newest month first and newest
+    /// first within each month, as Activity lists them. A month's `day` is
+    /// its first day.
+    public static func groupedByMonth(_ transactions: [Transaction], calendar: Calendar) -> [DaySection] {
+        let groups = Dictionary(grouping: transactions) { transaction in
+            calendar.dateInterval(of: .month, for: transaction.date)?.start ?? calendar.startOfDay(for: transaction.date)
+        }
+        return groups.keys.sorted(by: >).map { month in
+            DaySection(day: month, transactions: groups[month, default: []].sorted { $0.date > $1.date })
+        }
+    }
+
+    /// A month group's heading: "August", with the year once it is not this
+    /// year's ("August 2025").
+    public static func monthTitle(for month: Date, now: Date, calendar: Calendar, locale: Locale = .current) -> String {
+        let sameYear = calendar.component(.year, from: month) == calendar.component(.year, from: now)
+        return string(month, sameYear ? "MMMM" : "MMMMyyyy", calendar, locale)
+    }
+
+    /// A row's date in a month's list: "Aug 31", with the year once it is
+    /// not this year's.
+    public static func rowDate(for date: Date, now: Date, calendar: Calendar, locale: Locale = .current) -> String {
+        let sameYear = calendar.component(.year, from: date) == calendar.component(.year, from: now)
+        return string(date, sameYear ? "MMMd" : "MMMdyyyy", calendar, locale)
+    }
+
     // MARK: Search
 
     /// The transactions matching `query` by name, number or merchant code,

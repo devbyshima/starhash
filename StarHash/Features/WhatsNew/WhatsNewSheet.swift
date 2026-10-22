@@ -156,7 +156,7 @@ private struct WhatsNewSummaryPage: View {
 private struct WhatsNewSummaryRow: View {
     let highlight: Release.Highlight
 
-    /// The title's line (Melange 18), which the symbol centres on,
+    /// The title's line (Space Grotesk 18), which the symbol centres on,
     /// a little low, as Cift's sit.
     @ScaledMetric(relativeTo: .headline) private var titleLine: CGFloat = 23
     @ScaledMetric(relativeTo: .headline) private var symbolSize: CGFloat = 23.5

@@ -3,14 +3,14 @@ import StarHashKit
 import SwiftUI
 import UIKit
 
-/// What tapping a transaction shows, a page pushed on Activity's stack: the
-/// system bar with its back button (no menu: every action is on the page,
-/// and a long press on the code copies it), then who and how much
-/// with the category, the carrier's details in a card of dotted rows, where
-/// it was paid on a small map, what this year has sent the same recipient,
-/// and the actions (Pay Again, Verify, Mark as Failed, Delete
-/// Transaction). The
-/// pieces are Beam's sheet language, on the page's cards.
+/// What tapping a transaction shows, a page pushed on Activity's stack,
+/// after the owner's reference: the round back button, then who, when and
+/// how much down the middle with the category under it, the details in
+/// outlined cards grouped by what they say (how it went and how it was
+/// paid; who to; the amount, its fee and the balance after), where it was
+/// paid on a small map, what this year has sent the same recipient, and
+/// the actions (Pay Again, Verify, Mark as Failed, Delete Transaction) as
+/// one filled list.
 struct TransactionDetailPage: View {
     let transactionID: UUID
     /// Pay Again: the caller pops this page and takes the recipient to Pay.
@@ -34,10 +34,11 @@ struct TransactionDetailPage: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
+            VStack(spacing: 16) {
                 if let transaction {
                     hero(transaction)
-                    detailsCard(transaction)
+                        .padding(.bottom, 16)
+                    detailCards(transaction)
                     if let location = transaction.location {
                         locationSection(location, title: transaction.counterparty.shownName)
                     }
@@ -59,7 +60,12 @@ struct TransactionDetailPage: View {
         .starhashReadableScrollContent()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color.starhashBackground.ignoresSafeArea())
-        .starhashNavigationTitle("Transaction")
+        .navigationTitle("Transaction")
+        .navigationBarTitleDisplayMode(.inline)
+        // The reference's page has no title in its bar: the hero says it.
+        .toolbar {
+            ToolbarItem(placement: .principal) { Color.clear.frame(width: 1, height: 1) }
+        }
         // Deleted here or elsewhere: nothing left to show.
         .onChange(of: transaction == nil) { _, isGone in
             if isGone { router.openTransactionID = nil }
@@ -92,55 +98,33 @@ struct TransactionDetailPage: View {
 
     // MARK: Hero
 
-    /// The contact's photo with the direction arrow on its corner when they
-    /// are saved with one; otherwise the arrow alone in a tinted circle.
-    @ViewBuilder
-    private func heroBadge(_ transaction: StarHashKit.Transaction) -> some View {
-        let outgoing = transaction.direction == .outgoing
-        let tint = outgoing ? AnyShapeStyle(Color.starhashOutgoing) : AnyShapeStyle(Color.starhashIncoming)
-        let arrow = Image(symbol: outgoing ? "arrow.up.right" : "arrow.down.left")
-        if enableContacts, PayContacts.shared.photoContactID(for: transaction.counterparty) != nil {
-            TransactionAvatar(counterparty: transaction.counterparty, size: 72, isCircle: true)
-                .overlay(alignment: .bottomTrailing) {
-                    arrow
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(tint)
-                        .frame(width: 24, height: 24)
-                        .background(Color.starhashBackground, in: Circle())
-                        .overlay(Circle().fill(tint.opacity(0.14)))
-                        .offset(x: 4, y: 4)
-                        .accessibilityHidden(true)
-                }
-        } else {
-            arrow
-                .font(.system(size: 24, weight: .bold))
-                .foregroundStyle(tint)
-                .frame(width: 72, height: 72)
-                .background(tint.opacity(0.14), in: Circle())
-                .accessibilityHidden(true)
-        }
-    }
-
+    /// The tile, the name in bold, the date and time in grey, then the
+    /// amount large, struck through when it failed, with RWF after it at
+    /// half its size on its baseline.
     private func hero(_ transaction: StarHashKit.Transaction) -> some View {
-        VStack(spacing: 10) {
-            heroBadge(transaction)
+        VStack(spacing: 0) {
+            TransactionTile(transaction: transaction, size: 64)
+                .padding(.bottom, 18)
             Text(transaction.counterparty.shownName)
-                .font(.sheet(21, .bold, relativeTo: .title2))
+                .starhashFont(28, weight: .bold, relativeTo: .title)
                 .foregroundStyle(Color.starhashPrimaryText)
                 .multilineTextAlignment(.center)
-            // One Text, so the amount and "RWF" shrink together. The unit
-            // is half the number's size on its baseline, as GO Club sets
-            // "ml" after an amount, and as Activity's total does.
-            (Text(Money.format(transaction.amount))
+                .padding(.bottom, 6)
+            Text(transaction.date.formatted(.dateTime.month(.abbreviated).day().hour().minute()))
+                .starhashFont(17, relativeTo: .body)
+                .foregroundStyle(Color.starhashSecondaryText)
+                .padding(.bottom, 14)
+            // One Text, so the amount and "RWF" shrink together.
+            (Text((transaction.direction == .incoming ? "+" : "") + Money.format(transaction.amount))
                 .foregroundStyle(transaction.activityAmountColor)
                 .strikethrough(transaction.status == .failed)
                 + Text(" " + Money.currency)
-                .font(.sheet(22, .semibold, relativeTo: .title2))
-                .foregroundStyle(Color.sheetSecondaryText))
-                .font(.starhashNumber(44, weight: .bold, relativeTo: .largeTitle))
-                .monospacedDigit()
+                .font(.starhashNumber(20, relativeTo: .title3))
+                .foregroundStyle(Color.starhashSecondaryText))
+                .font(.starhashNumber(40, weight: .bold, relativeTo: .largeTitle))
                 .lineLimit(1)
                 .minimumScaleFactor(0.4)
+                .padding(.bottom, 16)
             categoryPill(transaction)
         }
         .frame(maxWidth: .infinity)
@@ -189,44 +173,59 @@ struct TransactionDetailPage: View {
 
     // MARK: Details
 
-    private func detailsCard(_ transaction: StarHashKit.Transaction) -> some View {
-        var rows: [(String, String)] = []
-        // The fee only once the carrier's SMS has confirmed it; until then
-        // the row is left out rather than guessed.
-        // MoMoAdvance's access fee gets a row of its own, so the wallet's
-        // fee reads as its message gave it.
-        if transaction.status == .confirmed, let fee = transaction.walletFee {
-            rows.append(("Fee", fee == 0 ? "Free" : Money.formatWithCurrency(fee)))
-            if let accessFee = transaction.accessFee {
-                rows.append(("MoMoAdvance fee", Money.formatWithCurrency(accessFee)))
+    /// The reference's three cards, with StarHash's details in them: how it
+    /// went and the wallet it went through; who it went to and the
+    /// carrier's code for it; and the money, the amount with its fee and
+    /// the balance it left. A row with nothing to say is left out.
+    private func detailCards(_ transaction: StarHashKit.Transaction) -> some View {
+        VStack(spacing: 16) {
+            VStack(spacing: 0) {
+                DetailRow(label: "Status") { statusValue(transaction.status) }
+                if transaction.status == .failed, let reason = failureText(transaction) {
+                    DetailRow("Reason", reason)
+                }
+                if let wallet = transaction.wallet {
+                    DetailRow("Payment", wallet.walletName)
+                }
             }
-        }
-        rows += [
-            ("Date", transaction.date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated).year())),
-            ("Time", transaction.date.formatted(date: .omitted, time: .shortened)),
-            ("Code", transaction.reference ?? (transaction.status == .pending ? "Waiting for SMS" : "None")),
-            (transaction.counterparty.kind == .phone ? "Number" : "Merchant code", transaction.counterparty.formattedDestination),
-        ]
-        if let balance = transaction.balanceAfter {
-            rows.append(("Balance after", Money.formatWithCurrency(balance)))
-        }
-        return VStack(spacing: 0) {
-            ForEach(Array(rows.enumerated()), id: \.offset) { index, row in
-                if index > 0 { SheetDivider() }
-                SheetInfoRow(row.0, row.1)
+            .starhashOutlinedCard()
+
+            VStack(spacing: 0) {
+                DetailRow(
+                    transaction.counterparty.kind == .phone ? "Number" : "Merchant code",
+                    transaction.counterparty.formattedDestination,
+                    numeric: true
+                )
+                DetailRow(
+                    "Code",
+                    transaction.reference ?? (transaction.status == .pending ? "Waiting for SMS" : "None"),
+                    numeric: transaction.reference != nil
+                )
             }
-            SheetDivider()
-            SheetInfoRow(label: "Status") { statusValue(transaction.status) }
-            if transaction.status == .failed, let reason = failureText(transaction) {
-                SheetDivider()
-                SheetInfoRow("Reason", reason)
+            .starhashOutlinedCard()
+
+            VStack(spacing: 0) {
+                DetailRow("Amount", Money.formatWithCurrency(transaction.amount), numeric: true)
+                // The fee only once the carrier's SMS has confirmed it;
+                // until then the row is left out rather than guessed.
+                // MoMoAdvance's access fee gets a row of its own, so the
+                // wallet's fee reads as its message gave it.
+                if transaction.status == .confirmed, let fee = transaction.walletFee {
+                    DetailRow("Fee", fee == 0 ? "Free" : Money.formatWithCurrency(fee), numeric: fee != 0)
+                    if let accessFee = transaction.accessFee {
+                        DetailRow("MoMoAdvance fee", Money.formatWithCurrency(accessFee), numeric: true)
+                    }
+                    DetailRow("Total", Money.formatWithCurrency(transaction.amount + (transaction.fee ?? 0)), numeric: true)
+                }
+                if let balance = transaction.balanceAfter {
+                    DetailRow("Balance after", Money.formatWithCurrency(balance), numeric: true)
+                }
             }
+            .starhashOutlinedCard()
         }
-        .padding(.horizontal, 16)
-        .sheetCard(fill: .starhashCard)
     }
 
-    /// A dot and the word, in the status's colour, as Beam shows a state.
+    /// A dot and the word, in the status's colour.
     private func statusValue(_ status: StarHashKit.Transaction.Status) -> some View {
         let color: AnyShapeStyle = switch status {
         case .confirmed: AnyShapeStyle(Color.starhashIncoming)
@@ -236,7 +235,7 @@ struct TransactionDetailPage: View {
         return HStack(spacing: 6) {
             Circle().fill(color).frame(width: 7, height: 7)
             Text(statusTitle(status))
-                .font(.sheet(16, .medium))
+                .starhashFont(17, relativeTo: .body)
                 .foregroundStyle(color)
         }
     }
@@ -292,8 +291,7 @@ struct TransactionDetailPage: View {
                 stat(value: Money.format(ytd.amount), label: String(localized: "\(Money.currency) sent"))
                 stat(value: String(ytd.count), label: ytd.count == 1 ? "Payment" : "Payments")
             }
-            .padding(16)
-            .sheetCard(fill: .starhashCard)
+            .starhashOutlinedCard(padding: EdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16))
         }
     }
 
@@ -315,27 +313,27 @@ struct TransactionDetailPage: View {
 
     // MARK: Actions
 
+    /// Every action in one filled list, after the reference's: Pay Again
+    /// (Send Money for money received), Verify while it is not confirmed,
+    /// Mark as Failed while pending, and Delete Transaction in red.
     private func actions(_ transaction: StarHashKit.Transaction) -> some View {
-        VStack(spacing: 12) {
+        ActionList {
             // A sender read from an SMS may be masked or have no number at
             // all; there is nothing safe to dial then.
             if transaction.counterparty.isPayable {
-                Button(LocalizedStringKey(payTitle(transaction))) { payAgain(transaction) }
-                    .buttonStyle(.sheetPrimary)
+                ActionRow(payTitle(transaction), symbol: "arrow.uturn.backward.circle") { payAgain(transaction) }
             }
             // Settled by the wallet's own message. A failed payment can
             // still be verified, in case it went through after all.
             if transaction.status != .confirmed {
-                Button("Verify") { isVerifying = true }
-                    .buttonStyle(.sheetConfirm)
+                ActionRow("Verify", symbol: "checkmark.message") { isVerifying = true }
             }
-            // The quiet one: most pending payments go through.
             if transaction.status == .pending {
-                SheetTextButton("Mark as Failed", onPage: true) { markFailed(transaction) }
+                ActionRow("Mark as Failed", symbol: "xmark.circle") { markFailed(transaction) }
             }
-            DeleteButton("Delete Transaction") { requestDelete(transaction) }
+            ActionRow("Delete Transaction", symbol: "trash", isDestructive: true) { requestDelete(transaction) }
         }
-        .padding(.top, 14)
+        .padding(.top, 8)
     }
 
     private func payTitle(_ transaction: StarHashKit.Transaction) -> String {

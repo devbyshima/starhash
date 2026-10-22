@@ -11,6 +11,16 @@ enum ActivityLayout {
     /// Buy's codes.
     static let cardRadius: CGFloat = 22
     static let cardSpacing: CGFloat = 10
+    /// A transaction's row, after the owner's reference: a 44pt tile 16pt
+    /// from the words, 8pt above and below, so rows sit 60pt apart.
+    static let tileSize: CGFloat = 44
+    static let tileGap: CGFloat = 16
+    static let rowPadding: CGFloat = 8
+    /// The press and the context menu's preview round a row by this much.
+    static let rowRadius: CGFloat = 16
+    /// A month's heading: its room above, and below before the first row.
+    static let monthTop: CGFloat = 30
+    static let monthBottom: CGFloat = 8
 }
 
 /// The question before one transaction is deleted: the title and the

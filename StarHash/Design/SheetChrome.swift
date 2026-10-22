@@ -65,7 +65,7 @@ struct StarHashCard<Content: View>: View {
 }
 
 /// The line between rows of a card, starting where the row text starts:
-/// the dotted `SheetDivider`, the app's one separator. With `overlapsRows`
+/// the solid `SheetDivider`, the app's one separator. With `overlapsRows`
 /// it is drawn across the boundary between the rows instead of adding its
 /// own height between them.
 struct StarHashRowSeparator: View {

@@ -109,7 +109,6 @@ struct ContactDetailSheet: View {
             Text(recipient.formattedDestination)
                 .font(.starhashNumber(16, relativeTo: .body))
                 .foregroundStyle(Color.starhashPrimaryText)
-                .monospacedDigit()
             Spacer(minLength: 8)
             if let detail = detail(for: recipient) {
                 Text(detail)

@@ -114,7 +114,6 @@ struct BuyWidgetView: View {
                         .frame(width: 32)
                     Text("\(page % pages + 1)/\(pages)")
                         .font(.starhashNumber(14, weight: .bold))
-                        .monospacedDigit()
                     Spacer(minLength: 0)
                 }
                 .padding(.horizontal, 10)
@@ -166,10 +165,10 @@ struct WidgetSymbol: View {
 }
 
 extension Font {
-    /// Melange at a widget's size, scaling with Dynamic Type as the text
+    /// Space Grotesk at a widget's size, scaling with Dynamic Type as the text
     /// around it does.
     static func widget(_ size: CGFloat, _ weight: Font.Weight = .medium) -> Font {
-        .custom(StarHashTypeface.melange(weight), size: size, relativeTo: .starhashNearest(to: size))
+        .custom(Font.starhashFamily, size: size, relativeTo: .starhashNearest(to: size)).weight(weight)
     }
 }
 #endif

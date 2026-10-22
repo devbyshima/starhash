@@ -1,18 +1,14 @@
 import StarHashKit
 import SwiftUI
 
-/// Transactions as cards of their own, as Buy's codes are: one day of
-/// Activity's list, or the search results. A card opens its details; its
-/// context menu verifies it, marks it failed or deletes it (asking first),
-/// and a swipe deletes
-/// it outright, the whole card sliding aside and the trash beside it, as a
-/// code does on Buy; deleted, it shrinks and fades as the cards under it
-/// close up.
+/// Transactions as rows straight on the page, after the owner's reference:
+/// one month of Activity's list, or the search results. A row opens its
+/// details; its context menu verifies it, marks it failed or deletes it
+/// (asking first), and a swipe deletes it outright, the row sliding aside
+/// and the trash beside it; deleted, it shrinks and fades as the rows under
+/// it close up.
 struct ActivityTransactionRows: View {
     let transactions: [StarHashKit.Transaction]
-    /// Search results come from many days, so their rows show the date as
-    /// well as the time.
-    var showsDate = false
     let onOpen: (StarHashKit.Transaction) -> Void
     /// Verify, on a payment not yet confirmed.
     let onVerify: (StarHashKit.Transaction) -> Void
@@ -22,29 +18,28 @@ struct ActivityTransactionRows: View {
     /// The swipe's delete, which does not ask.
     let onSwipeDelete: (StarHashKit.Transaction) -> Void
 
-    private let shape = RoundedRectangle(cornerRadius: ActivityLayout.cardRadius, style: .continuous)
+    private let shape = RoundedRectangle(cornerRadius: ActivityLayout.rowRadius, style: .continuous)
 
     var body: some View {
         // Lazy, so a long list of results is built only as it scrolls in.
-        LazyVStack(spacing: ActivityLayout.cardSpacing) {
+        LazyVStack(spacing: 0) {
             ForEach(transactions) { transaction in
-                card(transaction)
+                row(transaction)
             }
         }
     }
 
-    private func card(_ transaction: StarHashKit.Transaction) -> some View {
+    private func row(_ transaction: StarHashKit.Transaction) -> some View {
         Button {
             // Here, not on touch-down: a long press opens the menu, which
             // has its own.
             TapHaptic.play()
             onOpen(transaction)
         } label: {
-            ActivityTransactionRow(transaction: transaction, showsDate: showsDate)
+            ActivityTransactionRow(transaction: transaction)
                 .contentShape(shape)
-                .starhashContainer(.starhashCard, in: shape)
         }
-        .buttonStyle(ActivityCardButtonStyle())
+        .buttonStyle(ActivityRowButtonStyle())
         .contentShape(.contextMenuPreview, shape)
         .contextMenu {
             // A failed payment can still be verified, in case it went
@@ -70,7 +65,6 @@ struct ActivityTransactionRows: View {
             }
         }
         .activitySwipeToDelete { onSwipeDelete(transaction) }
-        // Buy's codes' own.
         .transition(.asymmetric(
             insertion: .scale(scale: 0.9, anchor: .top).combined(with: .opacity),
             removal: .scale(scale: 0.85).combined(with: .opacity)
@@ -78,63 +72,60 @@ struct ActivityTransactionRows: View {
     }
 }
 
-/// One transaction: their contact photo or a person or shop tile, name,
-/// number or code with the
-/// time, and the signed amount. At accessibility text sizes the amount
-/// moves under the details so the name keeps the width it needs.
+/// One transaction, after the owner's reference, with everything the
+/// cards before it said: the tile, the name with its Pending or Failed
+/// badge, under it what was bought or the number or code with the date and
+/// time, and the amount on the right after its direction's arrow. At
+/// accessibility text sizes the amount moves under the details so the name
+/// keeps the width it needs.
 struct ActivityTransactionRow: View {
     let transaction: StarHashKit.Transaction
-    var showsDate = false
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         let isLarge = dynamicTypeSize.isAccessibilitySize
-        HStack(spacing: 16) {
-            if transaction.isPurchase, let category = transaction.knownCategory {
-                // Bought, not sent: what was bought stands for who.
-                SymbolTile(symbol: category.symbol, size: 42)
-                    .accessibilityHidden(true)
-            } else {
-                TransactionAvatar(counterparty: transaction.counterparty, size: 42)
-            }
-            VStack(alignment: .leading, spacing: 1) {
+        HStack(alignment: .top, spacing: ActivityLayout.tileGap) {
+            TransactionTile(transaction: transaction, size: ActivityLayout.tileSize)
+            VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
                     Text(transaction.counterparty.shownName)
-                        .starhashFont(17, weight: .semibold, relativeTo: .headline)
+                        .starhashFont(17, relativeTo: .body)
                         .foregroundStyle(Color.starhashPrimaryText)
                         .lineLimit(isLarge ? 3 : 1)
                     ActivityStatusBadge(status: transaction.status)
                 }
                 Text(detailLine)
-                    .starhashFont(15, relativeTo: .subheadline)
+                    .starhashFont(14, relativeTo: .subheadline)
                     .foregroundStyle(Color.starhashSecondaryText)
                     .lineLimit(isLarge ? 2 : 1)
                     // Shrinks a little before the time is cut off beside a
                     // wide amount.
-                    .minimumScaleFactor(0.85)
+                    .minimumScaleFactor(0.8)
                 if isLarge {
                     amount
                         .padding(.top, 4)
                 }
             }
+            .padding(.top, 1)
             if isLarge {
                 Spacer(minLength: 0)
             } else {
-                Spacer(minLength: 8)
+                Spacer(minLength: 12)
                 amount
                     .layoutPriority(1)
             }
         }
-        .padding(16)
+        .padding(.vertical, ActivityLayout.rowPadding)
         .contentShape(Rectangle())
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(transaction.activityAccessibilityLabel)
         .accessibilityAddTraits(.isButton)
     }
 
-    /// "0788 123 998 · 13:12". A named merchant shows its code; an unnamed
-    /// recipient already shows its number as the name, so only the time.
+    /// "0788 123 998 \u{00B7} 22 Oct, 13:12". A named merchant shows its code;
+    /// an unnamed recipient already shows its number as the name, so only
+    /// the date and time.
     private var detailLine: String {
         var parts: [String] = []
         if transaction.isPurchase {
@@ -142,35 +133,34 @@ struct ActivityTransactionRow: View {
         } else if transaction.counterparty.name?.isEmpty == false, !transaction.counterparty.destination.isEmpty {
             parts.append(transaction.counterparty.formattedDestination)
         }
-        parts.append(showsDate
-            ? transaction.date.formatted(.dateTime.day().month(.abbreviated).hour().minute())
-            : transaction.date.formatted(date: .omitted, time: .shortened))
+        parts.append(ActivitySummary.rowDate(for: transaction.date, now: .now, calendar: .autoupdatingCurrent)
+            + ", " + transaction.date.formatted(date: .omitted, time: .shortened))
         return parts.joined(separator: " \u{00B7} ")
     }
 
-    /// The direction arrow (red out, green in, as on the details page),
-    /// then the amount.
+    /// The direction arrow (the text colour out, green in, as on the
+    /// details page), then the amount, struck through when it failed.
     private var amount: some View {
         HStack(alignment: .firstTextBaseline, spacing: 4) {
             Image(symbol: transaction.activityArrowSymbol)
                 .starhashFont(13, weight: .bold, relativeTo: .footnote)
                 .foregroundStyle(transaction.activityArrowColor)
             Text(Money.format(transaction.amount))
-                .font(.starhashNumber(17, weight: .semibold, relativeTo: .headline))
+                .font(.starhashNumber(17, relativeTo: .body))
                 .foregroundStyle(transaction.activityAmountColor)
                 .strikethrough(transaction.status == .failed)
         }
         .lineLimit(1)
+        .padding(.top, 1)
     }
 }
 
-/// A card gives a little as it is pressed, as Buy's codes do. Silent: the
-/// tap plays its haptic as it lands, since a long press opens the menu.
-struct ActivityCardButtonStyle: ButtonStyle {
+/// A row dims a little as it is pressed. Silent: the tap plays its haptic
+/// as it lands, since a long press opens the menu.
+struct ActivityRowButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? 0.96 : 1)
-            .opacity(configuration.isPressed ? 0.88 : 1)
+            .opacity(configuration.isPressed ? 0.6 : 1)
             .animation(.snappy(duration: 0.18), value: configuration.isPressed)
     }
 }

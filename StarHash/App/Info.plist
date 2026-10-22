@@ -58,9 +58,8 @@
 	<string>$(STARHASH_CHANNEL)</string>
 	<key>UIAppFonts</key>
 	<array>
-		<string>MelangeGrotesk-Light.ttf</string>
+		<string>SpaceGrotesk.ttf</string>
 		<string>QuadrantNotepad-Regular.otf</string>
-		<string>GoogleSansFlex.ttf</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict>

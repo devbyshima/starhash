@@ -173,6 +173,25 @@ struct ActivitySummaryTests {
         #expect(title(Self.date(2025, 9, 25, 0)).contains("2025"))
     }
 
+    @Test func groupsByMonthNewestFirst() {
+        let sections = ActivitySummary.groupedByMonth([
+            Self.tx(1, at: Self.date(2026, 8, 31, 9)),
+            Self.tx(2, at: Self.date(2026, 10, 1, 8)),
+            Self.tx(3, at: Self.date(2026, 10, 2, 13)),
+            Self.tx(4, at: Self.date(2025, 10, 2, 13)),
+        ], calendar: Self.calendar)
+        #expect(sections.map(\.day) == [Self.date(2026, 10, 1, 0), Self.date(2026, 8, 1, 0), Self.date(2025, 10, 1, 0)])
+        #expect(sections.first?.transactions.map(\.amount) == [3, 2])
+    }
+
+    @Test func monthTitlesAndRowDates() {
+        #expect(ActivitySummary.monthTitle(for: Self.date(2026, 8, 1, 0), now: Self.now, calendar: Self.calendar, locale: Self.locale) == "August")
+        #expect(ActivitySummary.monthTitle(for: Self.date(2025, 8, 1, 0), now: Self.now, calendar: Self.calendar, locale: Self.locale) == "August 2025")
+        let row = ActivitySummary.rowDate(for: Self.date(2026, 8, 31), now: Self.now, calendar: Self.calendar, locale: Self.locale)
+        #expect(row == "31 Aug")
+        #expect(ActivitySummary.rowDate(for: Self.date(2025, 8, 31), now: Self.now, calendar: Self.calendar, locale: Self.locale).contains("2025"))
+    }
+
     // MARK: Search
 
     @Test func searchMatchesNameNumberAmountAndReference() {

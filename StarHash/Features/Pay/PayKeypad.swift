@@ -21,8 +21,6 @@ struct PayAmountDisplay: View {
         let reduceMotion = reduceMotion
         Text(Money.format(amount))
             .font(.starhashNumber(96, weight: .bold, relativeTo: .largeTitle))
-            // Proportional figures: Melange's tabular ones space the comma
-            // as wide as a digit, which reads as a gap at this size.
             .contentTransition(.numericText(value: Double(amount)))
             .foregroundStyle(amount == 0 ? Color.payPlaceholderText : Color.payPrimaryText)
             .lineLimit(1)

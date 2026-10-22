@@ -4,17 +4,17 @@ import SwiftUI
 // Every bottom sheet in StarHash is built in Beam's sheet language, from
 // these pieces only: a centred large bold title with at most a glass
 // button on its right (no close button; a sheet is swiped away), solid
-// cards whose rows are split by dotted lines, small uppercase section
+// cards whose rows are split by solid hairlines, small uppercase section
 // labels, 50pt buttons, and Beam's type scale, all on clear Liquid Glass
 // with the grabber showing. The accent is StarHash's green, as Beam's.
 
 // MARK: Type
 
 extension Font {
-    /// Beam's type scale, in Melange, for sheets: `size` at the default
+    /// Beam's type scale, in Space Grotesk, for sheets: `size` at the default
     /// text size, scaling like `style`.
     static func sheet(_ size: CGFloat, _ weight: Font.Weight = .medium, relativeTo style: Font.TextStyle = .body) -> Font {
-        .custom(StarHashTypeface.melange(weight), size: size, relativeTo: style)
+        .custom(starhashFamily, size: size, relativeTo: style).weight(weight)
     }
 
     static var sheetLargeTitle: Font { sheet(32, .bold, relativeTo: .largeTitle) }
@@ -131,20 +131,13 @@ struct SheetGlassGlyph: View {
 
 // MARK: Rows
 
-/// A dotted line between a card's rows.
+/// A solid hairline between a card's rows.
 struct SheetDivider: View {
     var body: some View {
-        GeometryReader { geometry in
-            Path { path in
-                path.move(to: CGPoint(x: 0, y: 0.5))
-                path.addLine(to: CGPoint(x: geometry.size.width, y: 0.5))
-            }
-            // GO Club's dashes: 3pt on, 3pt off.
-            .stroke(style: StrokeStyle(lineWidth: 1, lineCap: .butt, dash: [3, 3]))
-            .foregroundStyle(Color.sheetDivider)
-        }
-        .frame(height: 1)
-        .accessibilityHidden(true)
+        Rectangle()
+            .fill(Color.sheetDivider)
+            .frame(height: 1)
+            .accessibilityHidden(true)
     }
 }
 

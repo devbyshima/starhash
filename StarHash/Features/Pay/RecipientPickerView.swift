@@ -606,7 +606,6 @@ struct RecipientPickerView: View {
                 Text(Money.format(amount))
                     .font(PickerType.totalAmount)
                     .foregroundStyle(Color.starhashPrimaryText)
-                    .monospacedDigit()
                 Text(Money.currency)
                     .font(PickerType.totalCurrency)
                     .foregroundStyle(Color.sheetSecondaryText)

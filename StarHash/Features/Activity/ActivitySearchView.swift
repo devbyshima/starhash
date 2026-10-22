@@ -47,7 +47,6 @@ struct ActivitySearchView: View {
                 LazyVStack(spacing: 0) {
                     ActivityTransactionRows(
                         transactions: results,
-                        showsDate: true,
                         onOpen: onOpen,
                         onVerify: onVerify,
                         onFail: onFail,

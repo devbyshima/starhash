@@ -1,29 +1,34 @@
 import StarHashKit
 import SwiftUI
 
-/// Activity's floating bar: GO Club's period control at the leading end
-/// (Week, Month, Year, as W M Y), and the search button on the
-/// right. Searching, a close button comes in on the left and the field
-/// from the right as the control goes out to the left.
+/// Activity's header, after the owner's reference: the page's title large
+/// on the left, and on the right the report, search and the owner's photo,
+/// each round. Searching, a close button comes in on the left and the field
+/// from the right as the title goes out to the left.
 struct ActivityTopBar: View {
-    let period: ActivityPeriod
-    let onPeriod: @MainActor (ActivityPeriod) -> Void
     let isSearching: Bool
     @Binding var searchText: String
     var searchFocused: FocusState<Bool>.Binding
+    let onReport: () -> Void
+    let onProfile: () -> Void
     let onSearch: () -> Void
     let onCloseSearch: () -> Void
 
     var body: some View {
         ZStack(alignment: .leading) {
             if !isSearching {
-                periodControl
+                Text("Activity")
+                    .font(.starhashDisplay(34, relativeTo: .largeTitle))
+                    .foregroundStyle(Color.starhashPrimaryText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .accessibilityAddTraits(.isHeader)
                     .transition(.offset(x: -36).combined(with: .opacity))
             }
             // One glass container, so the buttons and the search capsule
             // melt into one another as the search opens and closes.
-            StarHashGlassContainer(spacing: 10) {
-                HStack(spacing: 10) {
+            StarHashGlassContainer(spacing: 12) {
+                HStack(spacing: 12) {
                     if isSearching {
                         SwapGlassButton(symbol: "xmark", label: "Close search", action: onCloseSearch)
                             .transition(.opacity)
@@ -31,7 +36,11 @@ struct ActivityTopBar: View {
                             .transition(.offset(x: 80).combined(with: .opacity))
                     } else {
                         Spacer(minLength: 0)
+                        SwapGlassButton(symbol: "chart.bar.fill", label: "Report", action: onReport)
+                            .transition(.opacity)
                         SwapGlassButton(symbol: "magnifyingglass", label: "Search", action: onSearch)
+                            .transition(.opacity)
+                        OwnerAvatarButton(action: onProfile)
                             .transition(.opacity)
                     }
                 }
@@ -79,14 +88,42 @@ struct ActivityTopBar: View {
         // Clear, as the buttons it melts into.
         .starhashGlass(interactive: true, tint: .clear)
     }
+}
 
-    private var periodControl: some View {
-        GlassSegmentedControl(
-            options: ActivityPeriod.choices,
-            selection: period,
-            onSelect: onPeriod,
-            label: \.shortLabel,
-            accessibilityLabel: \.title
-        )
+/// The owner's photo in a round button, as the reference's avatar: their
+/// photo when there is one, else their initial on the green, else a
+/// person. Opens Profile.
+struct OwnerAvatarButton: View {
+    let action: () -> Void
+
+    @AppStorage(PreferenceKey.profileName) private var name = ""
+
+    var body: some View {
+        Button(action: action) {
+            Group {
+                if let image = ProfilePhoto.shared.image {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                } else if let initial = name.first(where: \.isLetter) {
+                    Text(String(initial).uppercased())
+                        .font(.starhashFixed(19, weight: .semibold))
+                        .foregroundStyle(Color.starhashOnInk)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.starhashInk)
+                } else {
+                    Image(symbol: "person.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(Color.starhashOnInk)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.starhashInk)
+                }
+            }
+            .frame(width: 44, height: 44)
+            .clipShape(Circle())
+            .contentShape(Circle())
+        }
+        .buttonStyle(.hapticPlain)
+        .accessibilityLabel("Profile")
     }
 }

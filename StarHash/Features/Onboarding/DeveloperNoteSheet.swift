@@ -80,7 +80,7 @@ struct DeveloperNoteContent: View {
                 }
             }
             // A signature, so a script face: iOS's own Snell Roundhand, the
-            // one text not set in Melange or Quadrant.
+            // one text not set in Space Grotesk or Quadrant.
             Text("Shima")
                 .font(.custom("SnellRoundhand", size: 50, relativeTo: .largeTitle))
                 .foregroundStyle(Color.starhashPrimaryText)
