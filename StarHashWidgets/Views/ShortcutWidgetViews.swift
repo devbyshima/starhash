@@ -23,7 +23,7 @@ enum WidgetAction: CaseIterable {
     var symbol: String {
         switch self {
         case .pay: "number.square.fill"
-        case .scan: "qrcode.viewfinder"
+        case .scan: "qrcode"
         case .balance: "banknote.fill"
         case .buy: "bag.fill"
         case .activity: "clock.fill"

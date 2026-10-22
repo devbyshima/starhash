@@ -160,7 +160,6 @@ let icons: [(name: String, parts: [Part])] = [
     ("unpin", [puff(pinShape), line("M9 11.2v3.4"), cut(line("M3.6 3.6l10.8 10.8", 3.4)), line("M3.6 3.6l10.8 10.8")]),
     ("share", [line(box), line("M9 3.4v7M6.6 5.6L9 3.4l2.4 2.2")]),
     ("download", [line(box), line("M9 3.2v7M6.6 7.8L9 10.2l2.4-2.4")]),
-    ("scan", [line(corners), puff(rect: 7.2, 7.2, 3.6, 3.6, 0.6)]),
     // After the owner's reference: three finder squares, each a solid
     // centre in a rounded frame, and five dots as a die shows them.
     ("qrCode", [

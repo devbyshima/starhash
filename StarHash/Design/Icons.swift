@@ -21,7 +21,7 @@ enum StarIcon: String, CaseIterable {
     case chevronLeft, chevronRight, chevronUpDown, circle, clock, close, closeCircle, code, cup, document, download, drop
     case envelope, eye, faceID, film, flag, food, fuel, game, gear, gift, globe, graduation, hash, health, heart
     case hashSquare, history, hourglass, house, info, lightbulb, location, lock, messageCheck, messageQuestion, more, parking
-    case pencil, people, person, personAlert, personCircle, phone, pin, play, plus, qrCode, received, reset, scan
+    case pencil, people, person, personAlert, personCircle, phone, pin, play, plus, qrCode, received, reset
     case seal, search, sendBack, shieldAlert, shieldLock, share, simCard, sound, sparkles, star, store, sunset, swap
     case ticket, torch, torchOn, touchID, trash, tray, tv, unpin, wifi
 
@@ -130,7 +130,8 @@ enum StarIcon: String, CaseIterable {
         "play.circle.fill": .play,
         "plus": .plus,
         "qrcode": .qrCode,
-        "qrcode.viewfinder": .scan,
+        // Scanning shows the QR code itself, after the owner's reference.
+        "qrcode.viewfinder": .qrCode,
         "questionmark.bubble.fill": .messageQuestion,
         "shippingbox.fill": .box,
         "simcard.fill": .simCard,

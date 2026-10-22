@@ -382,7 +382,7 @@ private struct ScanButton: View {
     let action: () -> Void
 
     var body: some View {
-        SwapGlassButton(symbol: "qrcode.viewfinder", label: "Scan a QR code", action: action)
+        SwapGlassButton(symbol: "qrcode", label: "Scan a QR code", action: action)
     }
 }
 
