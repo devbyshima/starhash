@@ -18,8 +18,8 @@ enum QRCodeImage {
         let module = side / CGFloat(count + quiet * 2)
         let origin = CGFloat(quiet) * module
         let ink = UIColor(red: 23 / 255, green: 23 / 255, blue: 23 / 255, alpha: 1)
-        let eye = UIColor(red: 0, green: 127 / 255, blue: 55 / 255, alpha: 1)
-        let accent = UIColor(red: 0, green: 217 / 255, blue: 87 / 255, alpha: 1)
+        let eye = UIColor(red: 53 / 255, green: 116 / 255, blue: 68 / 255, alpha: 1)
+        let accent = UIColor(red: 100 / 255, green: 210 / 255, blue: 123 / 255, alpha: 1)
 
         // The mark's tile: about a quarter of the code across, on whole
         // modules, an odd number so it sits dead centre.
@@ -86,7 +86,7 @@ struct MyCodeShareButton: View {
     let recipient: Recipient
 
     var body: some View {
-        if let image = QRCodeImage.image(for: PaymentQR.link(for: recipient).absoluteString) {
+        if let image = QRCodeImage.image(for: PaymentQR.link(for: recipient, photoID: StarHashCloud.sharedPhotoID).absoluteString) {
             ShareLink(
                 item: Image(uiImage: image),
                 message: Text("Pay me with StarHash: \(recipient.formattedDestination)"),
@@ -112,7 +112,7 @@ struct MyCodeSheet: View {
         VStack(spacing: 18) {
             SheetHeader("My Code")
             if let recipient {
-                QRTreeView(text: PaymentQR.link(for: recipient).absoluteString)
+                QRTreeView(text: PaymentQR.link(for: recipient, photoID: StarHashCloud.sharedPhotoID).absoluteString)
                     .frame(maxWidth: 320)
                 MyCodeShareButton(recipient: recipient)
                     .buttonStyle(.sheetPrimary)
@@ -139,22 +139,34 @@ struct ProfileFields: View {
     /// The number in the middle of its field, with no symbol, as Profile
     /// sets everything down the middle.
     var centred = false
+    /// The other SIM's number, on Profile when the owner has two.
+    var otherNumber: Binding<String>?
 
     @FocusState private var focus: Field?
     @State private var draftNumber = ""
+    @State private var draftOther = ""
     @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
 
-    private enum Field { case name, number }
+    private enum Field { case name, number, other }
+
+    /// What is wrong with the other SIM's number: it need only be a
+    /// Rwandan mobile number, on either network.
+    private var otherProblem: String? {
+        guard draftOther.filter(\.isNumber).count >= 10, Recipient.ownNumber(draftOther) == nil else { return nil }
+        return String(starhash: "Enter a Rwandan mobile number: 078, 079, 072 or 073.")
+    }
 
     /// What is wrong with the number typed, once it is long enough to tell.
     private var problem: String? {
         let digits = draftNumber.filter(\.isNumber)
         guard digits.count >= 10 else { return nil }
         guard let recipient = Recipient.ownNumber(draftNumber) else {
-            return String(localized: "Enter a Rwandan mobile number: 078, 079, 072 or 073.")
+            return String(starhash: "Enter a Rwandan mobile number: 078, 079, 072 or 073.")
         }
-        if let network = recipient.network, network != wallet {
-            return String(localized: "That is an \(network.name) number; you pay with \(wallet.walletName).")
+        // With two SIMs, the wallet's may be the other one.
+        let otherOnWallet = otherNumber.flatMap { Recipient.ownNumber($0.wrappedValue)?.network } == wallet
+        if let network = recipient.network, network != wallet, !otherOnWallet {
+            return String(starhash: "That is an \(network.name) number; you pay with \(wallet.walletName).")
         }
         return nil
     }
@@ -173,41 +185,93 @@ struct ProfileFields: View {
             .textInputAutocapitalization(.words)
             .submitLabel(.next)
             .onSubmit { focus = .number }
+            .modifier(ProfileFieldBackground(onSheet: onSheet, outlined: centred))
             }
 
-            field(
-                "Your number",
-                text: $draftNumber,
-                prompt: "07X XXX XXXX",
-                symbol: "phone.fill"
-            )
-            .focused($focus, equals: .number)
-            .keyboardType(.phonePad)
-            .textContentType(.telephoneNumber)
-            .onChange(of: draftNumber) { old, typed in
-                // Saved only once it is a number the code can carry.
-                if let recipient = Recipient.ownNumber(typed) {
-                    number = recipient.destination
-                    // The whole number is in and it is right: the number
-                    // pad, which has no return key, goes by itself.
-                    if Recipient.ownNumber(old) == nil, problem == nil { dismissKeyboard() }
-                } else if typed.filter(\.isNumber).isEmpty {
-                    number = ""
+            // With two SIMs, both numbers side by side in one capsule, a
+            // line between them.
+            if let otherNumber {
+                HStack(spacing: 0) {
+                    numberField
+                    Rectangle()
+                        .fill(Color.sheetDivider)
+                        .frame(width: 1, height: 28)
+                    otherField(otherNumber)
                 }
+                .modifier(ProfileFieldBackground(onSheet: onSheet, outlined: centred))
+            } else {
+                numberField
+                    .modifier(ProfileFieldBackground(onSheet: onSheet, outlined: centred))
             }
 
             if let problem {
-                Text(problem)
-                    .font(.starhash(.footnote))
-                    .foregroundStyle(Color.starhashDestructive)
-                    .padding(.horizontal, 6)
-                    .transition(.opacity)
+                problemText(problem)
+            }
+            if let otherProblem {
+                problemText(otherProblem)
             }
         }
         .animation(.smooth(duration: 0.2), value: problem)
+        .animation(.smooth(duration: 0.2), value: otherProblem)
         .onAppear {
             if draftNumber.isEmpty, let saved = Recipient.ownNumber(number) { draftNumber = saved.formattedDestination }
+            if draftOther.isEmpty, let saved = otherNumber.flatMap({ Recipient.ownNumber($0.wrappedValue) }) {
+                draftOther = saved.formattedDestination
+            }
         }
+    }
+
+    private var numberField: some View {
+        field(
+            "Your number",
+            text: $draftNumber,
+            prompt: "07X XXX XXXX",
+            symbol: "phone.fill"
+        )
+        .focused($focus, equals: .number)
+        .keyboardType(.phonePad)
+        .textContentType(.telephoneNumber)
+        .onChange(of: draftNumber) { old, typed in
+            // Saved only once it is a number the code can carry.
+            if let recipient = Recipient.ownNumber(typed) {
+                number = recipient.destination
+                // The whole number is in and it is right: the number
+                // pad, which has no return key, goes by itself.
+                if Recipient.ownNumber(old) == nil, problem == nil { dismissKeyboard() }
+            } else if typed.filter(\.isNumber).isEmpty {
+                number = ""
+            }
+        }
+    }
+
+    private func otherField(_ otherNumber: Binding<String>) -> some View {
+        field(
+            "Other SIM",
+            text: $draftOther,
+            prompt: "Other SIM",
+            symbol: "simcard.fill"
+        )
+        .focused($focus, equals: .other)
+        .keyboardType(.phonePad)
+        .textContentType(.telephoneNumber)
+        .onChange(of: draftOther) { old, typed in
+            // Kept as Settings' Other SIM row keeps it, so the two show
+            // the same number.
+            if let recipient = Recipient.ownNumber(typed) {
+                otherNumber.wrappedValue = recipient.formattedDestination
+                if Recipient.ownNumber(old) == nil { dismissKeyboard() }
+            } else if typed.filter(\.isNumber).isEmpty {
+                otherNumber.wrappedValue = ""
+            }
+        }
+    }
+
+    private func problemText(_ problem: String) -> some View {
+        Text(problem)
+            .font(.starhash(.footnote))
+            .foregroundStyle(Color.starhashDestructive)
+            .padding(.horizontal, 6)
+            .transition(.opacity)
     }
 
     /// Whichever field has the keyboard lets it go.
@@ -231,20 +295,25 @@ struct ProfileFields: View {
                 .multilineTextAlignment(centred ? .center : .leading)
                 .accessibilityLabel(label)
         }
-        .padding(.horizontal, 18)
+        // Two numbers side by side share the width, so each keeps a
+        // little less to either side.
+        .padding(.horizontal, otherNumber == nil ? 18 : 10)
         .frame(minHeight: StarHashMetrics.primaryButtonHeight)
-        .modifier(ProfileFieldBackground(onSheet: onSheet))
     }
 }
 
-/// A field's box: a sheet's card in a sheet, the cards' solid foreground
-/// on the page.
+/// A field's box: a sheet's card in a sheet; on Profile, outlined as
+/// Settings' cards and a transaction's details are (a line round it, the
+/// page's colour inside); elsewhere on a page, the cards' solid fill.
 private struct ProfileFieldBackground: ViewModifier {
     let onSheet: Bool
+    var outlined = false
 
     func body(content: Content) -> some View {
         if onSheet {
             content.sheetCard(radius: 29)
+        } else if outlined {
+            content.starhashOutlinedTile(in: Capsule())
         } else {
             content.starhashContainer(.starhashCard, in: Capsule())
         }

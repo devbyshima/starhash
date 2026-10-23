@@ -5,9 +5,9 @@ options:
     iOS: "18.0"
   createIntermediateGroups: true
   developmentLanguage: en
-  # English and Kinyarwanda (Localizable.xcstrings in the app and in
-  # StarHashKit), chosen per app in the Settings app.
-  knownRegions: [en, rw, Base]
+  # English, French and Kinyarwanda (Localizable.xcstrings in the app, the
+  # widgets and StarHashKit), chosen in StarHash's own Settings.
+  knownRegions: [en, fr, rw, Base]
 
 # One configuration per release channel (RELEASING.md). Beta is Release
 # with its own channel, archived from a release branch for TestFlight.
@@ -116,7 +116,7 @@ targets:
         CFBundleDisplayName: StarHash
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
-        CFBundleLocalizations: [en, rw]
+        CFBundleLocalizations: [en, fr, rw]
         UILaunchScreen:
           UIColorName: LaunchBackground
         UISupportedInterfaceOrientations:
@@ -130,7 +130,7 @@ targets:
         UIAppFonts: [SpaceGrotesk.ttf]
         NSContactsUsageDescription: StarHash shows your contacts so you can pick who to pay. They stay on your iPhone.
         NSLocationWhenInUseUsageDescription: StarHash notes where you pay, to suggest who you paid when you are back there and to show each payment on a map. It stays on your iPhone.
-        NSCameraUsageDescription: StarHash uses the camera to scan a QR code, to see who to pay. Nothing is recorded or kept.
+        NSCameraUsageDescription: StarHash uses the camera to scan a QR code, to see who to pay, and to take your profile photo when you ask. Nothing else is recorded or kept.
         NSFaceIDUsageDescription: StarHash asks for Face ID to open, when you turn it on in Settings, so only you see your payments.
         LSApplicationQueriesSchemes: [tel]
         CFBundleURLTypes:
@@ -147,8 +147,12 @@ targets:
       - path: StarHashWidgets
       - path: StarHash/Design/Theme.swift
       - path: StarHash/Design/Icons.swift
+      - path: StarHash/Features/Onboarding/StarHashMark.swift
       - path: StarHash/Resources/Icons.xcassets
       - path: StarHash/Resources/Fonts/SpaceGrotesk.ttf
+        buildPhase: resources
+      # The font's licence travels with it, as the OFL asks.
+      - path: StarHash/Resources/Fonts/OFL.txt
         buildPhase: resources
     dependencies:
       - package: StarHashKit

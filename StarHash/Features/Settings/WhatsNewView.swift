@@ -140,7 +140,7 @@ enum KigaliDay {
         parser.timeZone = kigali
         parser.dateFormat = "yyyy-MM-dd"
         guard let day = parser.date(from: date) else { return date }
-        var style = Date.FormatStyle.dateTime.day().month(.wide).year()
+        var style = Date.FormatStyle.dateTime.day().month(.wide).year().locale(.starhash)
         style.timeZone = kigali
         return day.formatted(style)
     }

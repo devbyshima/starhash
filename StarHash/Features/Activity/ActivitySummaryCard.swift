@@ -22,7 +22,7 @@ struct ActivitySummaryCard: View {
                     .foregroundStyle(Color.starhashSecondaryText)
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(Money.format(totals.spent))
-                        .starhashFont(48, weight: .bold, relativeTo: .largeTitle, tracking: 0)
+                        .font(.starhashNumber(48, weight: .bold, relativeTo: .largeTitle))
                         .foregroundStyle(Color.starhashPrimaryText)
                         // The digits roll to a new total (another period, a
                         // new payment), or fade with Reduce Motion.
@@ -119,7 +119,7 @@ struct ActivitySpendingChart: View {
                 // pressed bar keeps full strength; the rest step back.
                 .foregroundStyle(Color.starhashInk.color(in: environment).gradient.opacity(isProminent(bucket) ? 1 : 0.4))
                 .clipShape(UnevenRoundedRectangle(topLeadingRadius: barRadius, topTrailingRadius: barRadius, style: .continuous))
-                .accessibilityLabel(ActivitySummary.spokenName(of: bucket, period: period, calendar: calendar))
+                .accessibilityLabel(ActivitySummary.spokenName(of: bucket, period: period, calendar: calendar, locale: .starhash))
                 .accessibilityValue(Money.formatWithCurrency(bucket.total))
             }
         }
@@ -144,7 +144,7 @@ struct ActivitySpendingChart: View {
                 AxisValueLabel {
                     if let position = value.as(Double.self) {
                         Text(Money.compact(Int((position * top).rounded())))
-                            .font(.starhash(.caption2))
+                            .font(.starhashNumber(11, relativeTo: .caption2))
                             .foregroundStyle(Color.starhashSecondaryText)
                     }
                 }
@@ -195,7 +195,7 @@ struct ActivitySpendingChart: View {
             let leading = min(max(barCenter - calloutSize.width / 2, 0), max(chartWidth - calloutSize.width, 0))
             let bottom = max(barTop - 6, calloutSize.height)
             ActivityChartCallout(
-                title: ActivitySummary.calloutTitle(of: selected, period: period, calendar: calendar),
+                title: ActivitySummary.calloutTitle(of: selected, period: period, calendar: calendar, locale: .starhash),
                 amount: Money.formatWithCurrency(selected.total),
                 rollsDigits: !reduceMotion
             )

@@ -25,6 +25,17 @@ extension PreferenceKey {
     /// them (`OwnerProfile`).
     static let profileName = "profileName"
     static let profileNumber = "profileNumber"
+    /// How many SIMs pay from this iPhone (1 or 2), and the other one's
+    /// number: money between the two is moved, not spent (`OwnAccounts`).
+    static let simCount = "simCount"
+    /// The language StarHash speaks (`AppLanguage`), the iPhone's until one
+    /// is chosen.
+    static let appLanguage = "appLanguage"
+    static let secondNumber = "secondNumber"
+    /// Whether the hint to set the iPhone's default voice line, shown the
+    /// first time an owner with SIMs on both carriers switches wallet, has
+    /// been seen.
+    static let seenVoiceLineHint = "seenVoiceLineHint"
     /// Whether the on-device model may name the categories the rules
     /// cannot (iOS 26 and later, with Apple Intelligence).
     static let smartCategories = "smartCategories"
@@ -83,13 +94,16 @@ enum StarHashPreferences {
     static var scamWarnings: Bool { bool(PreferenceKey.scamWarnings, default: true) }
     static var smartCategories: Bool { bool(PreferenceKey.smartCategories, default: true) }
 
-    /// The owner's name, number and photo as Settings keeps them.
+    /// The owner's name, numbers and photo as Settings keeps them; the
+    /// other SIM's only while they say they have two.
     @MainActor
     static var profile: OwnerProfile {
         let defaults = UserDefaults.standard
+        let other = defaults.integer(forKey: PreferenceKey.simCount) == 2 ? defaults.string(forKey: PreferenceKey.secondNumber) : nil
         return OwnerProfile(
             name: defaults.string(forKey: PreferenceKey.profileName),
             number: defaults.string(forKey: PreferenceKey.profileNumber),
+            otherNumber: other.flatMap { $0.isEmpty ? nil : $0 },
             photo: ProfilePhoto.shared.data
         )
     }
@@ -99,6 +113,11 @@ enum StarHashPreferences {
         let defaults = UserDefaults.standard
         defaults.set(profile.name ?? "", forKey: PreferenceKey.profileName)
         defaults.set(profile.number ?? "", forKey: PreferenceKey.profileNumber)
+        // A backup with a second number brings the second SIM back with it.
+        if let other = profile.otherNumber, !other.isEmpty {
+            defaults.set(other, forKey: PreferenceKey.secondNumber)
+            defaults.set(2, forKey: PreferenceKey.simCount)
+        }
         if let photo = profile.photo { ProfilePhoto.shared.restore(photo) }
     }
 

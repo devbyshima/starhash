@@ -19,6 +19,11 @@ struct PayView: View {
     /// Who to pay, from Pay Again on a transaction. Pay then dials them
     /// straight away instead of opening the picker.
     @State private var chosenRecipient: Recipient?
+    /// The photo a scanned code shares for `chosenRecipient`.
+    @State private var chosenPhotoID: UUID?
+    /// Whether `chosenRecipient` came from a code other than StarHash's,
+    /// which says nothing of who it is: shown as its number alone.
+    @State private var chosenIsBare = false
     /// A code the system would not dial (the simulator, an iPad), shown in
     /// an alert so it can be dialled by hand.
     @State private var undialledCode: String?
@@ -116,7 +121,7 @@ struct PayView: View {
             Spacer(minLength: 12)
             PayAmountDisplay(amount: input.value, shakes: zeroShakes)
             if let chosenRecipient {
-                PayChosenRecipient(recipient: chosenRecipient) {
+                PayChosenRecipient(recipient: chosenRecipient, photoID: chosenPhotoID, isBare: chosenIsBare) {
                     withAnimation(.smooth(duration: 0.25)) { self.chosenRecipient = nil }
                 }
                 .padding(.top, 12)
@@ -256,7 +261,9 @@ struct PayView: View {
     private func takePayRequest() {
         guard let request = router.takePayRequest() else { return }
         path = []
-        take(PaymentRequest(recipient: request.recipient, amount: request.amount))
+        // Pay Again, or StarHash's own link opened from the Camera: both
+        // know who they are paying.
+        take(PaymentRequest(recipient: request.recipient, amount: request.amount, photoID: request.photoID, isStarHashCode: true))
     }
 
     /// Who a scanned code (or Pay Again) says to pay: chosen under the
@@ -268,10 +275,13 @@ struct PayView: View {
         startLocating()
         withAnimation(.smooth(duration: 0.25)) {
             chosenRecipient = request.recipient
+            chosenPhotoID = request.photoID
+            chosenIsBare = !request.isStarHashCode
             if let amount = request.amount { input = AmountInput(value: amount) }
         }
         if request.amount == nil {
-            AccessibilityNotification.Announcement("Paying \(request.recipient.shownName). Type an amount.").post()
+            let who = request.isStarHashCode ? request.recipient.shownName : request.recipient.formattedDestination
+            AccessibilityNotification.Announcement("Paying \(who). Type an amount.").post()
         }
     }
 
@@ -286,6 +296,9 @@ struct PayView: View {
         let generation = locationsGeneration
         locationTask = nil
 
+        // Paid, however it was chosen: a Nearby suggestion passed over
+        // before is suggested again.
+        NearbyMissesStore.paid(recipient)
         var recordedID: UUID?
         if saveTransactions {
             recordedID = store.recordPayment(to: recipient, amount: amount, wallet: wallet, retryWindow: 5 * 60).id
@@ -354,10 +367,12 @@ struct PayView: View {
     }
 }
 
-/// Balance's capsule: the Total card, as the recipient screen's Total.
+/// Balance's capsule: clear Liquid Glass with no tint, as the header
+/// buttons wear it (only sheets are tinted glass), lit by a press. Before
+/// iOS 26, the fallback material.
 private struct BalanceSurface: ViewModifier {
     func body(content: Content) -> some View {
-        content.starhashTotalCard(in: Capsule())
+        content.starhashGlass(in: Capsule(), interactive: true, tint: .clear)
     }
 }
 
@@ -367,7 +382,7 @@ private struct ScanButton: View {
     let action: () -> Void
 
     var body: some View {
-        SwapGlassButton(symbol: "qrcode.viewfinder", label: "Scan a QR code", action: action)
+        SwapGlassButton(symbol: "qrcode", label: "Scan a QR code", action: action)
     }
 }
 
@@ -378,21 +393,39 @@ private enum PayRoute: Hashable {
 }
 
 /// The recipient Pay Again chose, under an empty amount: who the next
-/// payment goes to, with a way to drop them and pick someone else.
+/// payment goes to, with a way to drop them and pick someone else. One
+/// from a code other than StarHash's is its number or code alone, with no
+/// tile: the code says nothing more.
 private struct PayChosenRecipient: View {
     let recipient: Recipient
+    /// Their photo on StarHash's server, when their code shared one.
+    var photoID: UUID?
+    var isBare = false
     let onClear: () -> Void
+
+    @State private var sharedPhoto: UIImage?
 
     @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
     private var contacts: PayContacts { .shared }
 
     var body: some View {
         HStack(spacing: 10) {
-            RecipientTile(
-                tile: .for(recipient, photoContactID: enableContacts ? contacts.photoContactID(for: recipient) : nil),
-                size: 28
-            )
-            Text("To \(recipient.shownName)")
+            // A photo saved in Contacts comes first; then the one their
+            // code shared; then the tile.
+            let contactPhoto = enableContacts ? contacts.photoContactID(for: recipient) : nil
+            if isBare {
+                EmptyView()
+            } else if contactPhoto == nil, let sharedPhoto {
+                Image(uiImage: sharedPhoto)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 28, height: 28)
+                    .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                    .accessibilityHidden(true)
+            } else {
+                RecipientTile(tile: .for(recipient, photoContactID: contactPhoto), size: 28)
+            }
+            Text("To \(isBare ? recipient.formattedDestination : recipient.shownName)")
                 .font(.starhash(.subheadline, weight: .semibold))
                 .foregroundStyle(Color.payPrimaryText)
                 .lineLimit(1)
@@ -404,9 +437,9 @@ private struct PayChosenRecipient: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.hapticPlain)
-            .accessibilityLabel("Remove \(recipient.shownName)")
+            .accessibilityLabel("Remove \(isBare ? recipient.formattedDestination : recipient.shownName)")
         }
-        .padding(.leading, 6)
+        .padding(.leading, isBare ? 14 : 6)
         .padding(.trailing, 4)
         .padding(.vertical, 4)
         .starhashGlass()
@@ -414,6 +447,11 @@ private struct PayChosenRecipient: View {
         // The photo, when the number or code is saved in Contacts.
         .task(id: enableContacts) {
             if enableContacts { await contacts.loadIfAllowed() }
+        }
+        // The photo their code shared, when it shared one.
+        .task(id: photoID) {
+            sharedPhoto = nil
+            if let photoID { sharedPhoto = await StarHashCloud.photo(photoID) }
         }
     }
 }

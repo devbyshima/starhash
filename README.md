@@ -16,7 +16,7 @@
 [Features](#features) • [Getting started](#getting-started) • [How it works](#how-it-works) • [Privacy](#privacy) • [Docs](#documentation)
 
 <img src="docs/images/pay.png" alt="Pay: an amount of 5,000 on the keypad, with Balance and Pay below" width="200" />
-<img src="docs/images/activity.png" alt="Activity in dark mode: this week's spending, a bar chart and today's payments" width="200" />
+<img src="docs/images/activity.png" alt="Transactions in dark mode: this week's spending, a bar chart and today's payments" width="200" />
 <img src="docs/images/transaction.png" alt="A confirmed merchant payment with its fee, reference and a map of where it was paid" width="200" />
 <img src="docs/images/buy.png" alt="Buy in dark mode: saved USSD codes, each with its call button" width="200" />
 
@@ -33,7 +33,7 @@ StarHash is a free, source-available iPhone app for paying with MTN MoMo or Airt
 - **Scan to pay**: scan a merchant's MoMo QR code or a friend's StarHash code, type the amount (or have it filled in) and pay, with no recipient screen.
 - **Your own QR code**: add your number in onboarding or Settings' Profile, with your photo, and others scan your code to pay you. It stands as a little tree of blocks that turns into the QR code at a tap.
 - **Both wallets**: MTN MoMo or Airtel Money, switched from Pay, with the right code for numbers on either network.
-- **Activity**: every payment by day, a chart for this week, month or year, and search across everything. Airtime, bundles, electricity, water and TV show as bought, not sent, and payments sort into categories (by Apple Intelligence on iOS 26 and later).
+- **Transactions**: every payment by day, a chart for this week, month or year, and search across everything. Airtime, bundles, electricity, water and TV show as bought, not sent, and payments sort into categories (by Apple Intelligence on iOS 26 and later).
 - **Auto-verify**: a Shortcuts automation passes your wallet's SMS to StarHash, which confirms each payment with its fee, reference and new balance.
 - **Buy**: the codes you dial often (pending approvals, cash out, bundles), one tap each, with up to eight pinned to the top.
 - **Nearby**: an opt-in suggestion of the shops you paid where you are standing, never of your contacts.
@@ -41,7 +41,7 @@ StarHash is a free, source-available iPhone app for paying with MTN MoMo or Airt
 - **Widgets**: Buy's codes on the Home Screen, each its symbol and name, dialled without opening the app; Scan to Pay as a small widget and in Control Center.
 - **Export and import**: everything StarHash keeps, as one file you can move to another iPhone.
 - **English and Kinyarwanda**, chosen in the Settings app.
-- **Private by design**: no account, no server, no tracking, and an optional Face ID lock.
+- **Private by design**: no account, no tracking, your payments stay on the phone, and an optional Face ID lock. Only a photo you share with your QR code, and an anonymous daily count of who uses StarHash, reach its small server (`server/`).
 - **Shortcuts and Siri**: Pay with StarHash, Check Wallet Balance and Process Carrier SMS.
 
 ## Getting started
@@ -99,7 +99,7 @@ The full picture is in [Privacy](docs/privacy.md), and the app carries its own P
 
 | Page | What's inside |
 | --- | --- |
-| [Features](docs/features.md) | A tour of Pay, Buy, Activity, Nearby, Settings, Shortcuts and the look |
+| [Features](docs/features.md) | A tour of Pay, Buy, Transactions, Nearby, Settings, Shortcuts and the look |
 | [Codes and fees](docs/codes-and-fees.md) | Every USSD code, how numbers are read, and the fee tables |
 | [Auto-verify](docs/auto-verify.md) | The Shortcuts automation, how messages are matched, and using it with your own build |
 | [Privacy](docs/privacy.md) | Permissions, what is stored where, and what never leaves the phone |

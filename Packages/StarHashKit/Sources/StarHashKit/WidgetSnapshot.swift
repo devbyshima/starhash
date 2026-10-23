@@ -1,13 +1,14 @@
 import Foundation
 
-/// What StarHash's Buy widget shows, written by the app whenever it goes to
-/// the background and read by the widget extension: Buy's codes to dial and
-/// the wallet, for its balance code. Kept in the App Group the two share,
+/// What StarHash's widgets show, written by the app whenever Buy's codes or
+/// the wallet change and read by the widget extension: Buy's codes, for the
+/// Buy widget to dial and its owner to choose from, and the wallet, for
+/// Quick Pay's balance code. Kept in the App Group the two share,
 /// when the build has one; without it the widget falls back to
 /// `placeholder`.
 public struct WidgetSnapshot: Codable, Equatable, Sendable {
-    /// The codes the widget offers: the pinned ones, then the rest, in Buy's
-    /// order, at most eight.
+    /// Every one of Buy's codes: the pinned ones, then the rest, in Buy's
+    /// order. The Buy widget shows the first ones until its owner chooses.
     public var codes: [USSDShortcut]
     public var wallet: Recipient.Network
     public var updatedAt: Date
@@ -28,7 +29,7 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
     /// The snapshot of `shortcuts` as they stand at `now`.
     public static func make(shortcuts: [USSDShortcut], wallet: Recipient.Network, now: Date = .now) -> WidgetSnapshot {
         let ordered = shortcuts.filter(\.isPinned) + shortcuts.filter { !$0.isPinned }
-        return WidgetSnapshot(codes: Array(ordered.prefix(8)), wallet: wallet, updatedAt: now)
+        return WidgetSnapshot(codes: ordered, wallet: wallet, updatedAt: now)
     }
 
     public func encoded() -> Data? {

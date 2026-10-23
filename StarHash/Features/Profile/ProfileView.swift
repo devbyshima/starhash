@@ -3,12 +3,15 @@ import SwiftUI
 
 /// Settings' Profile, everything down the middle: the owner's photo (tap
 /// it to choose one), their name large under it and typed in place, their
-/// number, and once it is in, their code as the voxel tree that turns into
+/// number (and their other SIM's, when they have two), and once it is in, their code as the voxel tree that turns into
 /// the QR code others scan to pay them, with Share under it. Kept on the
-/// iPhone, in Settings' preferences and the photo's own file.
+/// iPhone, in Settings' preferences and the photo's own file; only the
+/// photo, which goes with the code, reaches StarHash's server.
 struct ProfileView: View {
     @AppStorage(PreferenceKey.profileName) private var name = ""
     @AppStorage(PreferenceKey.profileNumber) private var number = ""
+    @AppStorage(PreferenceKey.simCount) private var simCount = 1
+    @AppStorage(PreferenceKey.secondNumber) private var otherNumber = ""
     @FocusState private var editsName: Bool
     /// The scroll view's visible height, so the empty state can sit in the
     /// middle of the room under the fields.
@@ -28,7 +31,13 @@ struct ProfileView: View {
                     nameField
                         .padding(.top, 18)
 
-                    ProfileFields(name: $name, number: $number, showsName: false, centred: true)
+                    ProfileFields(
+                        name: $name,
+                        number: $number,
+                        showsName: false,
+                        centred: true,
+                        otherNumber: simCount == 2 ? $otherNumber : nil
+                    )
                         .frame(maxWidth: 360)
                         .padding(.top, 20)
                 }
@@ -36,7 +45,7 @@ struct ProfileView: View {
 
                 if let recipient {
                     VStack(spacing: 18) {
-                        QRTreeView(text: PaymentQR.link(for: recipient).absoluteString)
+                        QRTreeView(text: PaymentQR.link(for: recipient, photoID: StarHashCloud.sharedPhotoID).absoluteString)
                             .frame(maxWidth: 340)
                         MyCodeShareButton(recipient: recipient)
                             .buttonStyle(.starhashPrimary)
@@ -63,7 +72,7 @@ struct ProfileView: View {
         .starhashReadableScrollContent()
         .background(Color.starhashBackground.ignoresSafeArea())
         // The page is its own title: the bar keeps only the back button.
-        .navigationTitle(String(localized: "Profile"))
+        .navigationTitle(String(starhash: "Profile"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) { Color.clear.frame(width: 1, height: 1) }
@@ -72,7 +81,7 @@ struct ProfileView: View {
 
     private var nameField: some View {
         TextField(
-            String(localized: "Your name"),
+            String(starhash: "Your name"),
             text: $name,
             prompt: Text("Your name").foregroundStyle(Color.starhashTertiaryText),
             axis: .vertical
@@ -92,6 +101,6 @@ struct ProfileView: View {
                 editsName = false
             }
         }
-        .accessibilityLabel(String(localized: "Your name"))
+        .accessibilityLabel(String(starhash: "Your name"))
     }
 }

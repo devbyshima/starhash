@@ -24,20 +24,28 @@ final class ProfilePhoto {
     /// Keeps a picked photo: cropped to its middle square and made small,
     /// since it never shows bigger than Profile's circle.
     func set(_ data: Data) {
-        guard let picked = UIImage(data: data), let square = Self.square(picked, side: 600),
-              let jpeg = square.jpegData(compressionQuality: 0.85) else { return }
+        guard let picked = UIImage(data: data), let square = Self.square(picked, side: 600) else { return }
+        set(square)
+    }
+
+    /// Keeps a photo already cropped to its square (`PhotoCropView`).
+    func set(_ square: UIImage) {
+        guard let jpeg = square.jpegData(compressionQuality: 0.85) else { return }
         save(jpeg)
+        StarHashCloud.syncPhoto()
     }
 
     /// Keeps a photo from a backup as it is.
     func restore(_ data: Data) {
         guard UIImage(data: data) != nil else { return }
         save(data)
+        StarHashCloud.syncPhoto()
     }
 
     func remove() {
         try? FileManager.default.removeItem(at: url)
         image = nil
+        StarHashCloud.syncPhoto()
     }
 
     private func save(_ jpeg: Data) {
@@ -91,15 +99,38 @@ struct ProfilePhotoView: View {
     }
 }
 
-/// Profile's photo: tap to choose one from the library, with a small
-/// accent badge saying so, and Remove Photo in its menu once there is one.
+/// Profile's photo, with a small accent badge saying it can change: a tap
+/// opens the photo's sheet (Take Photo, Upload Photo, View Photo), and
+/// Remove Photo is in its menu once there is one. A photo taken or picked
+/// opens on the crop screen first, to move and scale it in the circle.
 struct ProfilePhotoPicker: View {
     var size: CGFloat = 120
 
+    @State private var showsOptions = false
+    /// What the sheet asked for, opened once the sheet has gone.
+    @State private var chosen: ProfilePhotoAction?
+    @State private var showsLibrary = false
     @State private var item: PhotosPickerItem?
+    @State private var cover: Cover?
+
+    /// What covers the screen: the camera, the crop screen on a photo, or
+    /// the photo itself to look at. One at a time, so one presentation.
+    enum Cover: Identifiable {
+        case camera
+        case crop(UIImage)
+        case view(UIImage)
+
+        var id: String {
+            switch self {
+            case .camera: "camera"
+            case .crop(let image): "crop-\(ObjectIdentifier(image))"
+            case .view: "view"
+            }
+        }
+    }
 
     var body: some View {
-        PhotosPicker(selection: $item, matching: .images) {
+        Button { showsOptions = true } label: {
             ProfilePhotoView(size: size)
                 .overlay(alignment: .bottomTrailing) {
                     Image(symbol: "camera.fill")
@@ -121,16 +152,68 @@ struct ProfilePhotoPicker: View {
                 }
             }
         }
-        .accessibilityLabel(String(localized: "Your photo"))
-        .accessibilityHint(String(localized: "Chooses a photo from your library"))
+        .accessibilityLabel(String(starhash: "Your photo"))
+        .accessibilityHint(String(starhash: "Take, upload or view your photo"))
+        .sheet(isPresented: $showsOptions, onDismiss: openChosen) {
+            ProfilePhotoOptionsSheet(hasPhoto: ProfilePhoto.shared.image != nil) { action in
+                chosen = action
+                showsOptions = false
+            }
+        }
+        .photosPicker(isPresented: $showsLibrary, selection: $item, matching: .images)
         .onChange(of: item) { _, item in
             guard let item else { return }
             Task {
-                if let data = try? await item.loadTransferable(type: Data.self) {
-                    withAnimation(.smooth) { ProfilePhoto.shared.set(data) }
+                if let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) {
+                    cover = .crop(image)
                 }
                 self.item = nil
             }
+        }
+        .fullScreenCover(item: $cover) { cover in
+            switch cover {
+            case .camera:
+                CameraPhotoPicker { image in
+                    self.cover = image.map(Cover.crop)
+                }
+                .ignoresSafeArea()
+            case .crop(let image):
+                PhotoCropView(image: image) {
+                    self.cover = nil
+                } onChoose: { square in
+                    self.cover = nil
+                    withAnimation(.smooth) { ProfilePhoto.shared.set(square) }
+                }
+            case .view(let image):
+                ProfilePhotoViewer(image: image) { self.cover = nil }
+            }
+        }
+        #if DEBUG
+        // -cropPhoto: the crop screen on a sample photo; -photoOptions: the
+        // photo's sheet. For screenshots.
+        .task {
+            if DebugLaunch.arguments.contains("-cropPhoto"), cover == nil, let sample = UIImage(named: "DeveloperPhoto") {
+                try? await Task.sleep(for: .milliseconds(500))
+                cover = .crop(sample)
+            }
+            if DebugLaunch.arguments.contains("-photoOptions") {
+                try? await Task.sleep(for: .milliseconds(500))
+                showsOptions = true
+            }
+        }
+        #endif
+    }
+
+    /// The sheet's choice, after it has gone: a second presentation can't
+    /// start while the first is still leaving.
+    private func openChosen() {
+        guard let action = chosen else { return }
+        chosen = nil
+        switch action {
+        case .camera: cover = .camera
+        case .library: showsLibrary = true
+        case .view:
+            if let image = ProfilePhoto.shared.image { cover = .view(image) }
         }
     }
 }

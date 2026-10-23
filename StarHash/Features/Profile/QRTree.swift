@@ -49,8 +49,8 @@ struct QRTreeView: View {
             scene = QRTreeScene(text: text, dark: colorScheme == .dark)
         }
         .accessibilityElement()
-        .accessibilityLabel(String(localized: "Your StarHash QR code"))
-        .accessibilityHint(showsCode ? String(localized: "Shows it as a tree") : String(localized: "Shows it as a QR code"))
+        .accessibilityLabel(String(starhash: "Your StarHash QR code"))
+        .accessibilityHint(showsCode ? String(starhash: "Shows it as a tree") : String(starhash: "Shows it as a QR code"))
         .accessibilityAddTraits(.isButton)
         .accessibilityAction(.default, toggle)
         #if DEBUG
@@ -363,8 +363,8 @@ private struct Palette {
     var finder: UIColor
     var leaves: [UIColor]
     var blossom: [UIColor]
-    var leafSide = UIColor(rgb: 0x00D957)
-    var leafShade = UIColor(rgb: 0x00A945)
+    var leafSide = UIColor(rgb: 0x64D27B)
+    var leafShade = UIColor(rgb: 0x4FB066)
     var bark = UIColor(rgb: 0x6B4429)
     var barkShade = UIColor(rgb: 0x4E301C)
     var shadow: CGFloat
@@ -377,21 +377,21 @@ private struct Palette {
         inkSide: UIColor(rgb: 0x2E2E2E),
         inkShade: UIColor(rgb: 0x0B0B0B),
         finder: UIColor(rgb: 0x171717),
-        leaves: [UIColor(rgb: 0x00C451), UIColor(rgb: 0x00B84B), UIColor(rgb: 0x00A845)],
-        blossom: [UIColor(rgb: 0xE9FAEF), UIColor(rgb: 0xDDF6E6)],
+        leaves: [UIColor(rgb: 0x4FB866), UIColor(rgb: 0x45A85B), UIColor(rgb: 0x3C9A51)],
+        blossom: [UIColor(rgb: 0xE8F7EB), UIColor(rgb: 0xDCF2E0)],
         shadow: 0.16
     )
 
     static let dark = Palette(
-        ground: [UIColor(rgb: 0x171717)],
-        groundSide: UIColor(rgb: 0x2E2E2E),
-        groundShade: UIColor(rgb: 0x242424),
-        ink: [UIColor(rgb: 0xF4F4F4), UIColor(rgb: 0xE8E8E8)],
+        ground: [UIColor(rgb: 0x262626)],
+        groundSide: UIColor(rgb: 0x333333),
+        groundShade: UIColor(rgb: 0x2B2B2B),
+        ink: [UIColor(rgb: 0xFAFBFA), UIColor(rgb: 0xEDEDED)],
         inkSide: UIColor(rgb: 0xBDBDBD),
         inkShade: UIColor(rgb: 0x8E8E8E),
-        finder: UIColor(rgb: 0xF4F4F4),
-        leaves: [UIColor(rgb: 0x00D957), UIColor(rgb: 0x00C451)],
-        blossom: [UIColor(rgb: 0x0B2E1A), UIColor(rgb: 0x0E3A21)],
+        finder: UIColor(rgb: 0xFAFBFA),
+        leaves: [UIColor(rgb: 0x64D27B), UIColor(rgb: 0x5CC873)],
+        blossom: [UIColor(rgb: 0x0C2414), UIColor(rgb: 0x143520)],
         shadow: 0.5
     )
 }

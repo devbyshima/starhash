@@ -29,6 +29,7 @@ struct AboutStarHashView: View {
                     }
                 }
                 .buttonStyle(HighlightRowButtonStyle())
+                SettingsLinkRow(page: .licences, symbol: "doc.text.fill", title: "Licences", caption: "The font and code StarHash is built with, and their terms")
                 // Dev and TestFlight builds only, once there is a flag.
                 if FeatureFlags.showsPage {
                     SettingsLinkRow(page: .featureFlags, symbol: "flag.fill", title: "Feature Flags", caption: "Try what is not finished yet")

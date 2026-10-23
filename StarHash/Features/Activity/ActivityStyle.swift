@@ -11,6 +11,25 @@ enum ActivityLayout {
     /// Buy's codes.
     static let cardRadius: CGFloat = 22
     static let cardSpacing: CGFloat = 10
+    /// A transaction's row, after the owner's reference: a 44pt tile 16pt
+    /// from the words, 8pt above and below, so rows sit 60pt apart.
+    static let tileSize: CGFloat = 44
+    static let tileGap: CGFloat = 16
+    static let rowPadding: CGFloat = 8
+    /// A long press on a pending row lifts it with its tile this far from
+    /// the card's edges, as Contacts lifts a contact.
+    static let rowPreviewInset: CGFloat = 9
+    /// A long press on a confirmed row lifts its page's top, after the
+    /// owner's reference: the room its bar takes on the page above the
+    /// tile, and the card's height, which cuts the details off.
+    static let previewTop: CGFloat = 66
+    static let previewHeight: CGFloat = 527
+    /// A month's heading: its room above, and below before the first row.
+    static let monthTop: CGFloat = 30
+    static let monthBottom: CGFloat = 0
+    /// A day's heading under its month: room above, a little below.
+    static let dayTop: CGFloat = 12
+    static let dayBottom: CGFloat = 4
 }
 
 /// The question before one transaction is deleted: the title and the
@@ -114,21 +133,22 @@ extension TransactionCategory {
     /// The category's name, as Activity shows it.
     var title: String {
         switch self {
-        case .airtime: String(localized: "Airtime")
-        case .bundles: String(localized: "Bundles")
-        case .electricity: String(localized: "Electricity")
-        case .water: String(localized: "Water")
-        case .tv: String(localized: "TV")
-        case .restaurant: String(localized: "Restaurants")
-        case .groceries: String(localized: "Groceries")
-        case .transport: String(localized: "Transport")
-        case .bills: String(localized: "Bills")
-        case .shopping: String(localized: "Shopping")
-        case .health: String(localized: "Health")
-        case .education: String(localized: "Education")
-        case .family: String(localized: "Family")
-        case .savings: String(localized: "Savings")
-        case .other: String(localized: "Other")
+        case .airtime: String(starhash: "Airtime")
+        case .bundles: String(starhash: "Bundles")
+        case .electricity: String(starhash: "Electricity")
+        case .water: String(starhash: "Water")
+        case .tv: String(starhash: "TV")
+        case .restaurant: String(starhash: "Restaurants")
+        case .groceries: String(starhash: "Groceries")
+        case .transport: String(starhash: "Transport")
+        case .bills: String(starhash: "Bills")
+        case .shopping: String(starhash: "Shopping")
+        case .health: String(starhash: "Health")
+        case .education: String(starhash: "Education")
+        case .family: String(starhash: "Family")
+        case .savings: String(starhash: "Savings")
+        case .ownAccounts: String(starhash: "Your own accounts")
+        case .other: String(starhash: "Other")
         }
     }
 
@@ -148,6 +168,7 @@ extension TransactionCategory {
         case .education: "graduationcap.fill"
         case .family: "person.2.fill"
         case .savings: "banknote.fill"
+        case .ownAccounts: "arrow.left.arrow.right"
         case .other: "ellipsis.circle.fill"
         }
     }
@@ -160,9 +181,9 @@ extension StarHashKit.Transaction {
         direction == .outgoing ? "arrow.up.right" : "arrow.down.left"
     }
 
-    /// Red out, green in: the only two hues besides ink.
+    /// The text colour out, green in: red is kept for what failed.
     var activityArrowColor: AnyShapeStyle {
-        direction == .outgoing ? AnyShapeStyle(Color.starhashDestructive) : AnyShapeStyle(Color.starhashIncoming)
+        direction == .outgoing ? AnyShapeStyle(Color.starhashOutgoing) : AnyShapeStyle(Color.starhashIncoming)
     }
 
     /// The amount's colour: primary text when money left, green when it
@@ -173,16 +194,22 @@ extension StarHashKit.Transaction {
 
     var activityCategory: TransactionCategory? { knownCategory }
 
+    /// The category's name as a transaction's details give it: one of
+    /// StarHash's, else one an older version kept, else None.
+    var activityCategoryTitle: String {
+        activityCategory?.title ?? category?.capitalized ?? "None"
+    }
+
     /// What VoiceOver reads for a row.
     @MainActor
     var activityAccessibilityLabel: String {
         var parts = [
             counterparty.shownName,
-            (isPurchase ? String(localized: "Bought ") : direction == .outgoing ? String(localized: "Sent ") : String(localized: "Received ")) + Money.formatWithCurrency(amount),
-            date.formatted(date: .abbreviated, time: .shortened),
+            (isPurchase ? String(starhash: "Bought ") : direction == .outgoing ? String(starhash: "Sent ") : String(starhash: "Received ")) + Money.formatWithCurrency(amount),
+            date.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened, locale: .starhash)),
         ]
-        if status == .pending { parts.append("Pending") }
-        if status == .failed { parts.append("Failed") }
+        if status == .pending { parts.append(String(starhash: "Pending")) }
+        if status == .failed { parts.append(String(starhash: "Failed")) }
         return parts.joined(separator: ", ")
     }
 }
@@ -217,11 +244,11 @@ extension ActivityPeriod {
     /// The period control's label: a letter, as GO Club's W M.
     var shortLabel: String {
         switch self {
-        case .today: "D"
-        case .week: "W"
-        case .month: "M"
-        case .year: "Y"
-        case .allTime: "A"
+        case .today: String(starhash: LocalizedStringResource("D", comment: "The period control's letter for a day"))
+        case .week: String(starhash: LocalizedStringResource("W", comment: "The period control's letter for a week"))
+        case .month: String(starhash: LocalizedStringResource("M", comment: "The period control's letter for a month"))
+        case .year: String(starhash: LocalizedStringResource("Y", comment: "The period control's letter for a year"))
+        case .allTime: String(starhash: LocalizedStringResource("A", comment: "The period control's letter for all time"))
         }
     }
 }

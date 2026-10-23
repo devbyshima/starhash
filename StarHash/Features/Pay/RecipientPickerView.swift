@@ -30,6 +30,7 @@ struct RecipientPickerView: View {
 
     @Environment(StarHashStore.self) private var store
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.floatingBarBottom) private var floatingBarBottom
     @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
     @AppStorage(PreferenceKey.saveRecents) private var saveRecents = true
     @AppStorage(PreferenceKey.nearbyLocation) private var nearbyEnabled = false
@@ -450,13 +451,15 @@ struct RecipientPickerView: View {
     }
 
     /// Numbers and codes paid where the phone is now, nearest first, from
-    /// where the saved payments were made. Only before anything is typed: a
-    /// search is looking for someone in particular.
+    /// where the saved payments were made, less any passed over five times
+    /// in a row (`NearbyMisses`). Only before anything is typed: a search is
+    /// looking for someone in particular.
     private var nearby: [Recipient] {
         guard nearbyEnabled, search.isEmpty, let fix = shownNearbyFix else { return [] }
-        return Nearby.suggestions(
-            from: store.transactions, latitude: fix.latitude, longitude: fix.longitude, accuracy: fix.accuracy
+        let found = Nearby.suggestions(
+            from: store.transactions, latitude: fix.latitude, longitude: fix.longitude, accuracy: fix.accuracy, limit: 8
         ).map(\.recipient)
+        return Array(NearbyMissesStore.filter(found).prefix(3))
     }
 
     private var matchingContactsUnfiltered: [PayContact] {
@@ -606,7 +609,6 @@ struct RecipientPickerView: View {
                 Text(Money.format(amount))
                     .font(PickerType.totalAmount)
                     .foregroundStyle(Color.starhashPrimaryText)
-                    .monospacedDigit()
                 Text(Money.currency)
                     .font(PickerType.totalCurrency)
                     .foregroundStyle(Color.sheetSecondaryText)
@@ -623,7 +625,9 @@ struct RecipientPickerView: View {
         .starhashGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous), tint: .clear)
         .shadow(color: .floatingShadow, radius: 18, y: 6)
         .padding(.horizontal, 16)
-        .padding(.bottom, 8)
+        // Level with the tab bar it takes the place of: its foot as far
+        // from the screen's.
+        .padding(.bottom, floatingBarBottom)
         .starhashReadableWidth()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Total \(Money.formatWithCurrency(amount))")
@@ -633,9 +637,9 @@ struct RecipientPickerView: View {
 
     /// "0788 123 456", "Merchant code 020205", or "3 phone numbers".
     private func contactSubtitle(_ contact: PayContact) -> String {
-        guard contact.recipients.count == 1 else { return String(localized: "\(contact.recipients.count) phone numbers") }
+        guard contact.recipients.count == 1 else { return String(starhash: "\(contact.recipients.count) phone numbers") }
         let only = contact.recipients[0]
-        return only.kind == .merchant ? String(localized: "Merchant code \(only.destination)") : only.formattedDestination
+        return only.kind == .merchant ? String(starhash: "Merchant code \(only.destination)") : only.formattedDestination
     }
 
     /// A storefront for merchants, initials for named people, a phone for
@@ -649,7 +653,7 @@ struct RecipientPickerView: View {
     /// fee the payment gets.
     private func kindLabel(_ recipient: Recipient) -> String {
         guard let network = recipient.network else { return "Merchant code" }
-        return String(localized: "\(network.name) number")
+        return String(starhash: "\(network.name) number")
     }
 
     private func pick(_ contact: PayContact) {
@@ -693,6 +697,9 @@ struct RecipientPickerView: View {
     private func choose(_ recipient: Recipient) {
         guard !hasPaid, recipient.isPayable else { return }
         hasPaid = true
+        // The Nearby suggestions showing were passed over, unless this is
+        // one of them.
+        NearbyMissesStore.record(shown: nearby, chosen: recipient)
         searchFocused = false
         onPay(recipient)
     }
@@ -731,7 +738,7 @@ private enum PickerType {
     /// The amount's size in the currency's weight, so the label reads with
     /// "RWF" and the number leads.
     static var totalLabel: Font { .sheet(34, totalCurrencyWeight, relativeTo: .title) }
-    static var totalAmount: Font { .sheet(34, .bold, relativeTo: .title) }
+    static var totalAmount: Font { .starhashNumber(34, weight: .bold, relativeTo: .title) }
     static var totalCurrency: Font { .sheet(20, totalCurrencyWeight, relativeTo: .title3) }
     private static let totalCurrencyWeight: Font.Weight = .semibold
 }
@@ -755,6 +762,12 @@ private struct PickerSkeletonRow: View {
         .padding(.horizontal, 22)
         .padding(.vertical, 8)
         .opacity(dims ? 0.45 : 1)
+        // The real rows' line, so the list keeps its rhythm as it loads.
+        .overlay(alignment: .bottom) {
+            SheetDivider()
+                .padding(.leading, 22 + 44 + 12)
+                .padding(.trailing, 22)
+        }
         .onAppear {
             guard !reduceMotion else { return }
             withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) { dims = true }
@@ -839,6 +852,14 @@ struct RecipientRow: View {
             // Flat on the page, in line with the section labels.
             .padding(.horizontal, 22)
             .padding(.vertical, 8)
+            // A line under the row from where its words start to where the
+            // row's content ends: past the tile and its gap, in from the
+            // edge as far as the row is.
+            .overlay(alignment: .bottom) {
+                SheetDivider()
+                    .padding(.leading, 22 + 44 + 12)
+                    .padding(.trailing, 22)
+            }
             .contentShape(Rectangle())
             // On the label, inside the button: a gesture on the button
             // itself would rank below its tap and never be heard.
@@ -916,6 +937,13 @@ struct RecipientTile: View {
     private var plainTile: some View {
         Group {
             switch tile {
+            case .monogram(let initials) where initials == "#":
+                // A name with no letters (a number saved as the name)
+                // has no initial: the StarHash mark stands in, at the
+                // initials' size and in their colour, where a "#" sat.
+                StarHashMarkShape()
+                    .fill(onPay ? AnyShapeStyle(Color.payPrimaryText) : AnyShapeStyle(Color.starhashPrimaryText))
+                    .frame(width: size * 0.46, height: size * 0.46)
             case .monogram(let initials):
                 Text(initials)
                     .font(.starhashFixed(size * 0.36, weight: .semibold))

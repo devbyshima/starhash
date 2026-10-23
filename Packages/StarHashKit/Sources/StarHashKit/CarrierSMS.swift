@@ -103,17 +103,27 @@ public enum CarrierSMS {
         // ... airtime"), anything else sent by the name it was paid to.
         // Only a purchase reads the whole message: MoMo's transfers end
         // with an advert for airtime and bundles. Money received has none.
-        let category: TransactionCategory? = if shape.isPurchase {
+        var counterparty = shape.counterparty
+        var category: TransactionCategory? = if shape.isPurchase {
             TransactionCategorizer.category(name: shape.counterparty.name, message: message)
         } else if shape.direction == .outgoing {
             TransactionCategorizer.category(name: shape.counterparty.name, kind: shape.counterparty.kind)
         } else {
             nil
         }
+        // MoMo's virtual card is the owner's own money: topping it up and
+        // taking money back off it move it between their own accounts.
+        if wallet == .mtn, isVirtualCardMove(message) {
+            counterparty = Recipient(name: virtualCardName, destination: "", kind: .merchant)
+            category = .ownAccounts
+        } else if wallet == .mtn, counterparty.name?.lowercased().contains("rwandacell") == true {
+            // What MoMo paid MTN itself, by its company name: a bundle.
+            counterparty = Recipient(name: "MTN", destination: counterparty.destination, kind: .merchant)
+        }
         return ParsedSMS(
             wallet: wallet,
             direction: shape.direction,
-            counterparty: shape.counterparty,
+            counterparty: counterparty,
             amount: shape.amount,
             fee: fee(in: message),
             date: date(in: message),
@@ -121,6 +131,19 @@ public enum CarrierSMS {
             balanceAfter: balance(in: message),
             category: category?.rawValue
         )
+    }
+
+    /// What the virtual card is called in Activity.
+    static let virtualCardName = "MTN Virtual Card"
+
+    /// A top-up of MoMo's virtual card ("A transaction of 2000 RWF by
+    /// MOBILE MONEY RWANDA Limited ... Message from debit receiver: Card top
+    /// up") or money taken back off it ("You have received 8000 RWF from
+    /// MOBILE MONEY RWANDA Limited ... Message from sender: Card offload").
+    /// Its cashback is income, not a move, and is left alone.
+    private static func isVirtualCardMove(_ message: String) -> Bool {
+        matches(#"(?i)mobile money rwanda"#, message)
+            && matches(#"(?i)message from (?:debit receiver|sender):\s*card (?:top ?up|offload)"#, message)
     }
 
     /// A payment that did not go through, as the wallet tells it: "Your

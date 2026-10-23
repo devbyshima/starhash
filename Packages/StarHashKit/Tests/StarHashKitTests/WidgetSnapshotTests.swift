@@ -16,9 +16,10 @@ struct WidgetSnapshotTests {
         #expect(snapshot.codes.map(\.name) == ["Bundles", "Power", "Airtime", "Water"])
     }
 
-    @Test func atMostEightCodes() {
+    /// Every code, so the Buy widget can offer any of them.
+    @Test func everyCode() {
         let codes = (1...12).map { Self.code("Code \($0)") }
-        #expect(WidgetSnapshot.make(shortcuts: codes, wallet: .airtel).codes.count == 8)
+        #expect(WidgetSnapshot.make(shortcuts: codes, wallet: .airtel).codes.count == 12)
     }
 
     @Test func survivesTheAppGroup() throws {

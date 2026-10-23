@@ -118,7 +118,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "Codes, fees and records",
-                text: "The USSD codes, fees and limits StarHash uses come from the providers' published information, and the providers may change them without notice. Activity is a record kept for you, from what you dial and the messages you pass to StarHash; your provider's records are the ones that count. With auto-verify on, a payment that no message confirms within an hour is marked failed; if it did go through, mark it as confirmed. StarHash's reminders and summaries are worked out from that record, and iOS decides when they show: a reminder that is late or never comes says nothing about whether a payment went through."
+                text: "The USSD codes, fees and limits StarHash uses come from the providers' published information, and the providers may change them without notice. The Transactions page is a record kept for you, from what you dial and the messages you pass to StarHash; your provider's records are the ones that count. With auto-verify on, a payment that no message confirms within an hour is marked failed; if it did go through, mark it as confirmed. StarHash's reminders and summaries are worked out from that record, and iOS decides when they show: a reminder that is late or never comes says nothing about whether a payment went through."
             ),
             .init(
                 title: "Free, with source available",
@@ -130,7 +130,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "Your iPhone and your PIN",
-                text: "You are responsible for your iPhone, its passcode and who can use it. StarHash's Face ID lock keeps Activity private, but your wallet is protected by your PIN. Never share your PIN with anyone, including someone who says they are from StarHash or your provider."
+                text: "You are responsible for your iPhone, its passcode and who can use it. StarHash's Face ID lock keeps your transactions private, but your wallet is protected by your PIN. Never share your PIN with anyone, including someone who says they are from StarHash or your provider."
             ),
             .init(
                 title: "Changes to these terms",
@@ -142,12 +142,16 @@ extension LegalDocument {
     static let privacyPolicy = LegalDocument(
         title: "Privacy Policy",
         symbol: "lock.fill",
-        effective: "2026-10-17",
-        summary: "StarHash has no account, no server and no tracking. What it keeps stays on your iPhone.",
+        effective: "2026-10-22",
+        summary: "StarHash has no account and no tracking. Your payments stay on your iPhone. Only your profile photo, if you add one, and an anonymous count of who uses StarHash reach its server.",
         sections: [
             .init(
                 title: "What StarHash keeps",
                 text: "Your transactions (who, how much, when, whether they are confirmed, and the fee, reference and balance when a message gives them), the categories you add, your recent recipients, Buy's codes and your settings. All of it is saved in StarHash's own storage on your iPhone, and none of it is sent anywhere."
+            ),
+            .init(
+                title: "StarHash's server",
+                text: "Two things reach it. Your profile photo, if you add one: it is kept under a random id that your QR code carries, so people who scan your code see it, and never with your name or number; only your iPhone holds the key that can change or delete it, and removing your photo deletes it. And once a day, a random id made when StarHash was installed, with its version, so the number of people using StarHash can be counted. Nothing else is sent: no number, no name, no payment, no location."
             ),
             .init(
                 title: "Contacts",
@@ -171,7 +175,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "What StarHash shares",
-                text: "Nothing. It has no analytics, no advertising and no third-party code that collects data. Request a Feature and the source code open GitHub in your browser, and Support on Ko-fi opens Ko-fi, each under its own privacy policy. Every code you dial goes through your phone and your provider, under theirs."
+                text: "Nothing beyond StarHash's own server above. It has no advertising and no third-party code that collects data. Request a Feature and the source code open GitHub in your browser, and Support on Ko-fi opens Ko-fi, each under its own privacy policy. Every code you dial goes through your phone and your provider, under theirs."
             ),
             .init(
                 title: "Backups",

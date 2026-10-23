@@ -13,16 +13,16 @@ struct ScamNoticeSheet: View {
 
     private var tips: [(symbol: String, text: String)] {
         [
-            ("person.crop.circle.badge.exclamationmark", String(localized: "\(wallet.walletName)'s own messages come from \(wallet.messagesName), never from a phone number.")),
-            ("arrow.uturn.backward.circle", String(localized: "Someone who says they sent you money by mistake and asks for it back is the usual trick.")),
-            ("banknote", String(localized: "Check your balance with your wallet before you send anything back.")),
-            ("lock.shield", String(localized: "Never share your PIN. Your wallet never asks for it in a message or a call.")),
+            ("person.crop.circle.badge.exclamationmark", String(starhash: "\(wallet.walletName)'s own messages come from \(wallet.messagesName), never from a phone number.")),
+            ("arrow.uturn.backward.circle", String(starhash: "Someone who says they sent you money by mistake and asks for it back is the usual trick.")),
+            ("banknote", String(starhash: "Check your balance with your wallet before you send anything back.")),
+            ("lock.shield", String(starhash: "Never share your PIN. Your wallet never asks for it in a message or a call.")),
         ]
     }
 
     var body: some View {
         VStack(spacing: 18) {
-            SheetHeader(String(localized: "This may be a scam"))
+            SheetHeader(String(starhash: "This may be a scam"))
             if !notice.message.isEmpty {
                 Text(notice.message)
                     .font(.sheetBody)
@@ -43,12 +43,12 @@ struct ScamNoticeSheet: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            Button(String(localized: "Check Balance")) {
+            Button(String(starhash: "Check Balance")) {
                 Task { _ = await USSDDialer.dial(USSD.balance(for: wallet)) }
                 dismiss()
             }
             .buttonStyle(.sheetPrimary)
-            SheetTextButton(String(localized: "Close")) { dismiss() }
+            SheetTextButton(String(starhash: "Close")) { dismiss() }
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 12)

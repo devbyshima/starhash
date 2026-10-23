@@ -443,7 +443,7 @@ private struct ShortcutItem: View {
                             .foregroundStyle(Color.starhashPrimaryText)
                             .lineLimit(2)
                         Text(shortcut.code)
-                            .starhashFont(14, weight: .semibold, relativeTo: .subheadline, tracking: 0)
+                            .font(.starhashNumber(14, weight: .semibold, relativeTo: .subheadline))
                             .foregroundStyle(Color.starhashTertiaryText)
                             .lineLimit(1)
                     }
@@ -452,8 +452,8 @@ private struct ShortcutItem: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity, minHeight: 68, alignment: .leading)
-                // The Total card, as the recipient screen's Total.
-                .starhashTotalCard(in: shape)
+                // Outlined, as a transaction's details and Settings' cards.
+                .starhashOutlinedTile(in: shape)
                 .contentShape(shape)
             }
             .buttonStyle(SharedPressButtonStyle(isPressed: $isPressed))
@@ -569,7 +569,7 @@ private struct PinnedTileFace: View {
                     .frame(width: width, height: height)
                 }
             }
-            .starhashTotalCard(in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .starhashOutlinedTile(in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 

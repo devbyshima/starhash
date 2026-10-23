@@ -4,12 +4,16 @@ import SwiftUI
 @main
 struct StarHashApp: App {
     @Environment(\.scenePhase) private var scenePhase
+    /// For the icon's quick actions (`QuickActions`).
+    @UIApplicationDelegateAdaptor(StarHashAppDelegate.self) private var appDelegate
 
     private let store = AppEnvironment.store
     private let router = AppEnvironment.router
     private let shortcuts = AppEnvironment.shortcuts
 
     init() {
+        // The language chosen in StarHash, before anything is drawn.
+        AppLanguage.stored.apply()
         #if DEBUG
         if DebugLaunch.arguments.contains("-skipOnboarding") {
             UserDefaults.standard.set(true, forKey: PreferenceKey.hasOnboarded)
@@ -43,7 +47,7 @@ struct StarHashApp: App {
             UserDefaults.standard.set(false, forKey: PreferenceKey.hasOnboarded)
         }
         #endif
-        Self.useSpaceGroteskInNavigationBars()
+        Self.useBrandTypeInNavigationBars()
         // Before launch finishes, so a tap that opened StarHash is heard.
         StarHashNotifications.shared.start()
         // Nearby's own file from before it was built from the payments:
@@ -53,13 +57,16 @@ struct StarHashApp: App {
 
     /// Navigation bar titles (Settings and its pages, a transaction) are
     /// UIKit's, outside SwiftUI's font environment: the page title's 21pt
-    /// bold, scaled for the text size at launch up to 28.
-    private static func useSpaceGroteskInNavigationBars() {
+    /// bold in Space Grotesk, scaled for the text size at launch up to 28.
+    private static func useBrandTypeInNavigationBars() {
         let bar = UINavigationBar.appearance()
         let title = UIFont.starhash(StarHashMetrics.pageTitleSize, weight: 700)
         bar.titleTextAttributes = [.font: UIFontMetrics(forTextStyle: .headline).scaledFont(for: title, maximumPointSize: 28)]
         bar.largeTitleTextAttributes = [.font: UIFont.starhash(34, weight: 700)]
     }
+
+    /// The language chosen in Settings; the app is drawn afresh in it.
+    @AppStorage(PreferenceKey.appLanguage) private var language = AppLanguage.system.rawValue
 
     var body: some Scene {
         WindowGroup {
@@ -68,6 +75,10 @@ struct StarHashApp: App {
                     // Text with no font of its own (list rows, fields) is in
                     // Space Grotesk too.
                     .font(.starhash(.body))
+                    // In the language chosen, with its dates and numbers, and
+                    // drawn afresh when it changes.
+                    .environment(\.locale, (AppLanguage(rawValue: language) ?? .system).locale)
+                    .id(language)
                     .environment(store)
                     .environment(router)
                     .environment(shortcuts)
@@ -97,6 +108,12 @@ struct StarHashApp: App {
             // were in the background, and notifications may have been
             // turned on or off in the Settings app.
             if phase == .active {
+                // A quick action chosen on the icon, and the menu as it now
+                // stands (the wallet's balance code).
+                QuickActions.performPending()
+                QuickActions.update()
+                // Counted as in use, once a day, by a random id alone.
+                StarHashCloud.pingIfDue()
                 store.reloadFromDisk()
                 PaymentExpiry.run()
                 Task { await StarHashNotifications.shared.sync() }
@@ -105,8 +122,10 @@ struct StarHashApp: App {
                 Task { await SmartCategories.run(on: store) }
             }
             if phase == .background {
-                // The Buy widget shows the codes as they are now.
+                // The Buy widget shows the codes as they are now, and the
+                // icon's menu dials the wallet chosen now.
                 StarHashWidgetData.publish(shortcuts: shortcuts)
+                QuickActions.update()
             }
             AppLock.shared.sceneChanged(to: phase)
         }

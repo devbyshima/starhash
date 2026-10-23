@@ -37,7 +37,7 @@ enum Style {
     case fill
 }
 
-enum Geometry {
+enum Geometry: Equatable {
     case path(String)
     case circle(CGFloat, CGFloat, CGFloat)
     case rect(CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)
@@ -117,6 +117,11 @@ let graduationCap = "M8.4 3.9c.4-.2.8-.2 1.2 0l5.2 2.5c.5.2.5.9 0 1.1L9.6 9.9c-.
 let personHead = (cx: CGFloat(9), cy: CGFloat(5.6), r: CGFloat(2.35))
 let personBody = "M4.5 13.6c0-2.2 2-3.6 4.5-3.6s4.5 1.4 4.5 3.6c0 .5-.4.9-.9.9H5.4c-.5 0-.9-.4-.9-.9z"
 let box = "M6.6 7.6H5.4a1.2 1.2 0 00-1.2 1.2v4.4a1.2 1.2 0 001.2 1.2h7.2a1.2 1.2 0 001.2-1.2V8.8a1.2 1.2 0 00-1.2-1.2h-1.2"
+let hashMark = "M7.4 3.8L6 14.2M12 3.8l-1.4 10.4M4.2 7.1h10M3.8 10.9h10"
+let hashInSquare = "M7.8 6.1l-.8 5.8M11 6.1l-.8 5.8M6.1 7.8h5.9M5.9 10.2h5.9"
+let qrDots = [(10.7, 10.7), (13.4, 10.7), (12.05, 12.05), (10.7, 13.4), (13.4, 13.4)].map { (x: CGFloat, y: CGFloat) in
+    Part(geometry: .rect(x - 0.15, y - 0.15, 1.6, 1.6, 0.45), style: .fill)
+}
 
 let icons: [(name: String, parts: [Part])] = [
     // The three the style was given by.
@@ -143,7 +148,9 @@ let icons: [(name: String, parts: [Part])] = [
     ("reset", [line(circleArrow), puff(circleArrowHead)]),
     ("history", [line(circleArrow), puff(circleArrowHead), line("M9 7.5v2.2l1.6 1.1")]),
     ("sendBack", [line("M7 4.4L4.4 7 7 9.6M4.6 7h5.4a3.4 3.4 0 010 6.8H8.4")]),
-    ("hash", [line("M7.4 3.8L6 14.2M12 3.8l-1.4 10.4M4.2 7.1h10M3.8 10.9h10")]),
+    ("hash", [line(hashMark)]),
+    // Pay's tab: the hash in a rounded square, so it has a filled form.
+    ("hashSquare", [puff(rect: 3.2, 3.2, 11.6, 11.6, 3), cut(line(hashInSquare, 1.4))]),
     ("code", [line("M6 6.2L3.4 9 6 11.8M12 6.2L14.6 9 12 11.8M10.1 4.8l-2.2 8.4")]),
 
     // Things to do.
@@ -153,12 +160,12 @@ let icons: [(name: String, parts: [Part])] = [
     ("unpin", [puff(pinShape), line("M9 11.2v3.4"), cut(line("M3.6 3.6l10.8 10.8", 3.4)), line("M3.6 3.6l10.8 10.8")]),
     ("share", [line(box), line("M9 3.4v7M6.6 5.6L9 3.4l2.4 2.2")]),
     ("download", [line(box), line("M9 3.2v7M6.6 7.8L9 10.2l2.4-2.4")]),
-    ("scan", [line(corners), puff(rect: 7.2, 7.2, 3.6, 3.6, 0.6)]),
+    // After the owner's reference: three finder squares, each a solid
+    // centre in a rounded frame, and five dots as a die shows them.
     ("qrCode", [
-        puff(rect: 3.4, 3.4, 3.6, 3.6, 0.7), puff(rect: 11, 3.4, 3.6, 3.6, 0.7), puff(rect: 3.4, 11, 3.6, 3.6, 0.7),
-        cut(Part(geometry: .rect(4.55, 4.55, 1.3, 1.3, 0.2), style: .fill)), cut(Part(geometry: .rect(12.15, 4.55, 1.3, 1.3, 0.2), style: .fill)), cut(Part(geometry: .rect(4.55, 12.15, 1.3, 1.3, 0.2), style: .fill)),
-        puff(rect: 11.7, 11.7, 1.6, 1.6, 0.4),
-    ]),
+        puff(rect: 3.2, 3.2, 4.2, 4.2, 1.1), puff(rect: 10.6, 3.2, 4.2, 4.2, 1.1), puff(rect: 3.2, 10.6, 4.2, 4.2, 1.1),
+        cut(line(rect: 3.95, 3.95, 2.7, 2.7, 0.7, 0.85)), cut(line(rect: 11.35, 3.95, 2.7, 2.7, 0.7, 0.85)), cut(line(rect: 3.95, 11.35, 2.7, 2.7, 0.7, 0.85)),
+    ] + qrDots),
     ("camera", [puff("M6.8 4.4h4.4l.9 1.5h1.2a1.4 1.4 0 011.4 1.4v4.9a1.4 1.4 0 01-1.4 1.4H4.7a1.4 1.4 0 01-1.4-1.4V7.3a1.4 1.4 0 011.4-1.4h1.2z"), cut(line(circle: 9, 9.6, 2.2, 1.4))]),
     ("torch", [puff(torch), cut(dot(9, 10.6, 0.7))]),
     ("torchOn", [puff(torch), cut(dot(9, 10.6, 0.7)), line("M9 2.9v1.3M5 4.1l.9.9M13 4.1l-.9.9")]),
@@ -433,6 +440,72 @@ func outline(_ parts: [Part]) -> CGPath {
     return shape
 }
 
+// MARK: Outline forms
+
+/// Icons whose outline form is drawn by hand, where the rule below would
+/// not read as the icon.
+let outlineOverrides: [String: [Part]] = [
+    // The door as an arch in the shopfront, which a cut would leave hanging.
+    "store": [
+        line("M4.6 3.2h8.8l1.2 3c0 1-.8 1.6-1.8 1.6-.9 0-1.6-.6-1.8-1.3-.2.7-.9 1.3-1.8 1.3h-.4c-.9 0-1.6-.6-1.8-1.3-.2.7-.9 1.3-1.8 1.3-1 0-1.8-.6-1.8-1.6z"),
+        line(rect: 4.6, 9.8, 8.8, 4.8, 1), line("M7.8 14.6v-1.7a1.2 1.2 0 012.4 0v1.7", 1.4),
+    ],
+    "qrCode": [
+        line(rect: 3.2, 3.2, 4.2, 4.2, 1.1, 1.5), line(rect: 10.6, 3.2, 4.2, 4.2, 1.1, 1.5), line(rect: 3.2, 10.6, 4.2, 4.2, 1.1, 1.5),
+        Part(geometry: .rect(4.45, 4.45, 1.7, 1.7, 0.4), style: .fill), Part(geometry: .rect(11.85, 4.45, 1.7, 1.7, 0.4), style: .fill), Part(geometry: .rect(4.45, 11.85, 1.7, 1.7, 0.4), style: .fill),
+    ] + qrDots,
+]
+
+/// Icons whose fill is what they say (half a circle for the appearance),
+/// kept as they are in both forms.
+let filledInBothForms: Set<String> = ["appearance"]
+
+/// An icon's outline form, for a tab that is not chosen: every closed
+/// shape drawn as a 1.6 line instead of filled, and each detail cut out of
+/// it drawn in it instead (a dot's ring when it is large). Small shapes (a
+/// dot, a badge, an arrow's head) stay filled, as rings they would vanish,
+/// and so do the gaps that part one shape from the next: cuts the shape
+/// they make room for follows.
+func outlineForm(_ name: String, _ parts: [Part]) -> [Part] {
+    if let drawn = outlineOverrides[name] { return drawn }
+    if filledInBothForms.contains(name) { return parts }
+    return parts.enumerated().map { index, part in
+        if part.cuts {
+            let later = parts[(index + 1)...].filter { !$0.cuts }
+            if later.contains(where: { makesRoom(part, for: $0) }) { return part }
+            var drawn = part
+            drawn.cuts = false
+            switch part.style {
+            case .puff: drawn.style = .line(1.3)
+            case .fill:
+                if case .circle(_, _, let r) = part.geometry, r >= 1.5 { drawn.style = .line(1.4) }
+            case .line: break
+            }
+            return drawn
+        }
+        guard case .puff = part.style, !isSmall(part.geometry) else { return part }
+        var drawn = part
+        drawn.style = .line(1.6)
+        return drawn
+    }
+}
+
+/// Whether a cut is the gap round a shape drawn after it: the same shape,
+/// or a circle on the same centre.
+func makesRoom(_ gap: Part, for part: Part) -> Bool {
+    if gap.geometry == part.geometry { return true }
+    if case .circle(let x1, let y1, _) = gap.geometry, case .circle(let x2, let y2, _) = part.geometry {
+        return x1 == x2 && y1 == y2
+    }
+    return false
+}
+
+/// Too small to draw as a ring.
+func isSmall(_ geometry: Geometry) -> Bool {
+    let box = geometryPath(geometry).boundingBoxOfPath
+    return min(box.width, box.height) < 3.2
+}
+
 // MARK: Symbols
 
 /// Template units per grid unit: the drawing area, 2.5 to 15.5, is 100
@@ -576,13 +649,27 @@ for icon in icons {
     drawn.append((icon.name, path))
 }
 
+// Each icon's outline form beside it, as `<name>Outline`.
+var outlines: [(String, CGPath)] = []
+for icon in icons {
+    let name = icon.name + "Outline"
+    let path = outline(outlineForm(icon.name, icon.parts))
+    let set = folder.appendingPathComponent("\(name).symbolset")
+    try! manager.createDirectory(at: set, withIntermediateDirectories: true)
+    try! symbolSVG(name, path).write(to: set.appendingPathComponent("\(name).svg"), atomically: true, encoding: .utf8)
+    let contents = "{ \(info), \"symbols\" : [ { \"filename\" : \"\(name).svg\", \"idiom\" : \"universal\" } ] }\n"
+    try! contents.write(to: set.appendingPathComponent("Contents.json"), atomically: true, encoding: .utf8)
+    outlines.append((name, path))
+}
+
 let arguments = CommandLine.arguments
 if let flag = arguments.firstIndex(of: "--preview"), flag + 1 < arguments.count {
     // --only a,b,c previews just those.
-    var shown = drawn
+    // Each filled form, then its outline form.
+    var shown = zip(drawn, outlines).flatMap { [$0, $1] }
     if let only = arguments.firstIndex(of: "--only"), only + 1 < arguments.count {
         let names = Set(arguments[only + 1].split(separator: ",").map(String.init))
-        shown = drawn.filter { names.contains($0.0) }
+        shown = shown.filter { names.contains($0.0.hasSuffix("Outline") ? String($0.0.dropLast("Outline".count)) : $0.0) }
     }
     writePreview(shown, to: URL(fileURLWithPath: arguments[flag + 1]))
 }

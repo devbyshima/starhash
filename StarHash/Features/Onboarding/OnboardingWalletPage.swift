@@ -51,11 +51,16 @@ struct OnboardingWalletPage: View {
             Spacer(minLength: 0)
 
             VStack(spacing: 12) {
-                Text("Your carrier")
+                // Rising word by word as the screen before leaves.
+                RevealText(String(starhash: "Your carrier"), delay: RevealTiming.enterDelay)
                     .starhashFont(22, weight: .bold, relativeTo: .title2)
                     .foregroundStyle(Color.starhashPrimaryText)
                     .accessibilityAddTraits(.isHeader)
-                Text("Which carrier do you pay with? StarHash\ndials its codes for you.")
+                RevealText(
+                    String(starhash: "Which carrier do you pay with? StarHash\ndials its codes for you."),
+                    startIndex: RevealText.wordCount(String(starhash: "Your carrier")),
+                    delay: RevealTiming.enterDelay
+                )
                     .font(.starhash(.callout))
                     .foregroundStyle(Color.starhashSecondaryText)
             }

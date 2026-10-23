@@ -10,6 +10,8 @@ import SwiftUI
 ///   1. `OnboardingWalletPage`, which wallet pays (MTN MoMo or Airtel Money).
 ///   1½. `OnboardingNumberPage`, the owner's name and number, for their own
 ///      QR code (Maybe Later skips it).
+///   1¾. `OnboardingPhotoPage`, the owner's photo, shown to whoever scans
+///      their code. Continue moves on with or without one.
 ///   2. `OnboardingPermission`, an iPhone mock playing the Contacts prompt,
 ///      asked for at the moment the screen explains why.
 ///   3. The same for Nearby's location prompt. After Contacts, since Nearby
@@ -36,15 +38,15 @@ struct OnboardingView: View {
     @State private var stage = OnboardingLaunch.initialStage ?? UserDefaults.standard.integer(forKey: PreferenceKey.onboardingStage)
 
     enum Stage: Int {
-        case reel, wallet, number, contacts, nearby, notifications, autoVerify, setup
+        case reel, wallet, number, photo, contacts, nearby, notifications, autoVerify, setup
     }
 
     /// Every screen there can be, for the debug launch's range.
-    static let stageCount = 8
+    static let stageCount = 9
 
     /// The screens, in order. Both wallets' messages can be read, so
     /// everyone sees auto-verify and its setup.
-    private var stages: [Stage] { [.reel, .wallet, .number, .contacts, .nearby, .notifications, .autoVerify, .setup] }
+    private var stages: [Stage] { [.reel, .wallet, .number, .photo, .contacts, .nearby, .notifications, .autoVerify, .setup] }
 
     /// The wallet picked on the wallet screen, MTN MoMo until then.
     private var chosenWallet: Recipient.Network { Recipient.Network(rawValue: wallet) ?? .mtn }
@@ -57,9 +59,9 @@ struct OnboardingView: View {
         .init(symbol: "storefront.fill", title: "Pay anyone",
               description: "Any MTN or Airtel number, or a merchant\ncode. StarHash knows which is which."),
         .init(symbol: "clock.fill", title: "Every payment, logged",
-              description: "Activity keeps each payment by day,\nwith a chart and search."),
+              description: "Transactions keeps each payment by day,\nwith a chart and search."),
         .init(symbol: "lock.shield.fill", title: "Private by design",
-              description: "No account and no server. Your PIN only\never goes into your wallet's own prompt."),
+              description: "No account and no tracking. Your PIN only\never goes into your wallet's own prompt."),
     ]
 
     private var tint: Color { OnboardingPalette.tint }
@@ -70,28 +72,31 @@ struct OnboardingView: View {
             switch current {
             case .reel:
                 OnboardingReel(phases: Self.phases, tint: tint, onContinue: advance)
-                    .transition(.opacity)
+                    .transition(.blurOutUp)
             case .wallet:
                 OnboardingWalletPage(onDone: advance)
-                    .transition(.opacity)
+                    .transition(.blurOutUp)
             case .number:
                 OnboardingNumberPage(onDone: advance)
-                    .transition(.opacity)
+                    .transition(.blurOutUp)
+            case .photo:
+                OnboardingPhotoPage(onDone: advance)
+                    .transition(.blurOutUp)
             case .contacts:
                 OnboardingPermission(config: contacts)
-                    .transition(.opacity)
+                    .transition(.blurOutUp)
             case .nearby:
                 OnboardingPermission(config: nearby)
                     .id(Stage.nearby)
-                    .transition(.opacity)
+                    .transition(.blurOutUp)
             case .notifications:
                 OnboardingPermission(config: notifications)
                     .id(Stage.notifications)
-                    .transition(.opacity)
+                    .transition(.blurOutUp)
             case .autoVerify:
                 OnboardingPermission(config: autoVerify)
                     .id(Stage.autoVerify)
-                    .transition(.opacity)
+                    .transition(.blurOutUp)
             case .setup:
                 // The setup in full, in its own navigation bar: back steps
                 // back through it and then to the screen before, close
@@ -100,7 +105,7 @@ struct OnboardingView: View {
                 NavigationStack {
                     AutoVerificationGuide(onClose: finish, onLeave: goBack, onDone: finish)
                 }
-                .transition(.opacity)
+                .transition(.blurOutUp)
             }
         }
         .onChange(of: stage, initial: true) { _, stage in savedStage = stage }
@@ -164,7 +169,7 @@ struct OnboardingView: View {
             mock: .message,
             initialDelay: 0.4,
             title: "Confirm payments\nautomatically",
-            description: String(localized: "Add one shortcut and each \(chosenWallet.messagesName) message\nconfirms its payment, with the fee."),
+            description: String(starhash: "Add one shortcut and each \(chosenWallet.messagesName) message\nconfirms its payment, with the fee."),
             primaryTitle: "Set Up",
             primaryAction: advance,
             secondaryTitle: "Maybe Later",
@@ -205,8 +210,9 @@ enum OnboardingMetrics {
 
 /// Colours used only by onboarding.
 enum OnboardingPalette {
-    /// The flow's tint, the accent, whichever wallet is chosen.
-    static let tint = Color.brandAccent
+    /// The flow's tint, the accent's fill (the deep green on light mode's
+    /// green page, the green on dark mode's), whichever wallet is chosen.
+    static let tint = Color.brandFill
 
     /// The iPhone mock on the permission screen: its frame and the filled
     /// shapes standing in for the screen's content.
@@ -293,8 +299,8 @@ extension View {
 
 // MARK: - Launch arguments
 
-/// `-onboardingPage 0...7` (DEBUG, with `-resetOnboarding`) starts on that
-/// screen: the reel, the wallet, the number, Contacts, Nearby,
+/// `-onboardingPage 0...8` (DEBUG, with `-resetOnboarding`) starts on that
+/// screen: the reel, the wallet, the number, the photo, Contacts, Nearby,
 /// notifications, auto-verify, its setup. Without it, onboarding starts
 /// where it was left.
 @MainActor

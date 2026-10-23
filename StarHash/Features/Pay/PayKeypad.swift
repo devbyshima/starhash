@@ -20,8 +20,7 @@ struct PayAmountDisplay: View {
         // A copy the keyframes' closure can take with it.
         let reduceMotion = reduceMotion
         Text(Money.format(amount))
-            .starhashFont(96, weight: .bold, design: .rounded, relativeTo: .largeTitle, tracking: 0)
-            .monospacedDigit()
+            .font(.starhashNumber(96, weight: .bold, relativeTo: .largeTitle))
             .contentTransition(.numericText(value: Double(amount)))
             .foregroundStyle(amount == 0 ? Color.payPlaceholderText : Color.payPrimaryText)
             .lineLimit(1)
@@ -112,7 +111,7 @@ struct PayKeypad: View {
                     ForEach(row, id: \.self) { digit in
                         key(.digit(digit)) {
                             Text(String(digit))
-                                .starhashFont(26, weight: .semibold, relativeTo: .title2)
+                                .font(.starhashNumber(26, weight: .semibold, relativeTo: .title2))
                         }
                         .accessibilityLabel(String(digit))
                     }
@@ -128,7 +127,7 @@ struct PayKeypad: View {
                             .starhashFont(17, weight: .medium, relativeTo: .body)
                     } else {
                         Text(".")
-                            .starhashFont(30, weight: .semibold, relativeTo: .title2)
+                            .font(.starhashNumber(30, weight: .semibold, relativeTo: .title2))
                             .foregroundStyle(Color.paySecondaryText)
                             // Up from the baseline to sit level with the digits.
                             .offset(y: -6)
@@ -139,7 +138,7 @@ struct PayKeypad: View {
                 .accessibilityHidden(!canClear)
                 key(.digit(0)) {
                     Text("0")
-                        .starhashFont(26, weight: .semibold, relativeTo: .title2)
+                        .font(.starhashNumber(26, weight: .semibold, relativeTo: .title2))
                 }
                 .accessibilityLabel("0")
                 key(.delete) {

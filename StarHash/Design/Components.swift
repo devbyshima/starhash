@@ -72,6 +72,35 @@ extension ButtonStyle where Self == PrimaryButtonStyle {
     static var starhashPrimaryGlowing: PrimaryButtonStyle { PrimaryButtonStyle(glows: true) }
 }
 
+/// The quieter choice beside a primary button, at its height ("Maybe
+/// Later" beside "Set Up", Cancel beside Choose): clear Liquid Glass with
+/// no tint, as Balance is, with the text colour on it.
+struct SecondaryButtonStyle: ButtonStyle {
+    var height: CGFloat = StarHashMetrics.primaryButtonHeight
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .starhashFont(18, weight: .semibold, relativeTo: .body)
+            .foregroundStyle(Color.starhashPrimaryText)
+            .multilineTextAlignment(.center)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity)
+            .frame(minHeight: height)
+            .contentShape(Capsule())
+            .starhashGlass(in: Capsule(), interactive: true, tint: .clear)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.snappy(duration: 0.16), value: configuration.isPressed)
+            .starhashPressHaptic(configuration.isPressed)
+    }
+}
+
+extension ButtonStyle where Self == SecondaryButtonStyle {
+    static var starhashSecondary: SecondaryButtonStyle { SecondaryButtonStyle() }
+}
+
 /// An SF Symbol on a raised tile (the page's pale grey on a white card, a lifted
 /// charcoal in dark mode), as in expense rows and the
 /// onboarding sample rows.
@@ -138,5 +167,145 @@ struct EmptyStateView<Actions: View>: View {
 extension EmptyStateView where Actions == EmptyView {
     init(doodle: EmptyDoodle, title: String) {
         self.init(doodle: doodle, title: title) { EmptyView() }
+    }
+}
+
+// MARK: Outlined cards
+
+/// A card drawn as a line, with nothing filled behind it, after the owner's
+/// reference for a transaction's details: rows grouped by what they say,
+/// a card to each group. Settings' groups are the same, with lines between
+/// their rows.
+struct OutlinedCardShape: ViewModifier {
+    var padding = EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16)
+
+    func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: StarHashMetrics.outlinedCardRadius, style: .continuous)
+        content
+            .padding(padding)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .overlay(shape.strokeBorder(Color.starhashOutline, lineWidth: 1))
+            .contentShape(shape)
+    }
+}
+
+extension View {
+    /// A card or tile of its own drawn as a line, as the outlined cards are,
+    /// over the page's own colour rather than nothing, so it stays solid
+    /// when lifted over others (a pinned code being moved).
+    func starhashOutlinedTile(in shape: some InsettableShape) -> some View {
+        background(Color.starhashBackground, in: shape)
+            .overlay(shape.strokeBorder(Color.starhashOutline, lineWidth: 1))
+            .starhashContainerSurface()
+    }
+}
+
+extension View {
+    /// This content in an outlined card: `OutlinedCardShape`.
+    func starhashOutlinedCard(padding: EdgeInsets = EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16)) -> some View {
+        modifier(OutlinedCardShape(padding: padding))
+    }
+}
+
+/// A row of an outlined card: the label on the left in the text colour,
+/// the value on the right in the quieter one, as the reference's.
+struct DetailRow<Value: View>: View {
+    let label: String
+    @ViewBuilder var value: Value
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Text(catalog: label)
+                .starhashFont(17, relativeTo: .body)
+                .foregroundStyle(Color.starhashPrimaryText)
+                .lineLimit(1)
+            Spacer(minLength: 8)
+            value
+                .multilineTextAlignment(.trailing)
+        }
+        .padding(.vertical, 11)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+extension DetailRow where Value == Text {
+    /// A row with words for its value; `numeric` sets them as a number.
+    init(_ label: String, _ value: String, numeric: Bool = false) {
+        self.label = label
+        self.value = Text(catalog: value)
+            .font(numeric ? .starhashNumber(17, relativeTo: .body) : .starhash(.body, weight: .medium))
+            .foregroundStyle(Color.starhashSecondaryText)
+    }
+}
+
+/// A list of things to do in one filled card, after the owner's reference:
+/// each row its icon, its words and a chevron, a line between rows from
+/// where the words start.
+struct ActionList<Content: View>: View {
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: StarHashMetrics.outlinedCardRadius, style: .continuous)
+        VStack(spacing: 0) {
+            Group(subviews: content) { rows in
+                ForEach(Array(rows.enumerated()), id: \.offset) { index, row in
+                    if index > 0 {
+                        Rectangle()
+                            .fill(Color.starhashSeparator)
+                            .frame(height: 1)
+                            .padding(.leading, ActionRow.textInset)
+                    }
+                    row
+                }
+            }
+        }
+        .starhashContainer(.starhashCard, in: shape)
+    }
+}
+
+/// One thing to do in an `ActionList`: its icon, its words and a chevron;
+/// red, icon and words, when it deletes.
+struct ActionRow: View {
+    let title: String
+    let symbol: String
+    var isDestructive = false
+    let action: () -> Void
+
+    /// Where a row's words start, from the card's edge, so the lines
+    /// between rows start there too.
+    static let textInset: CGFloat = 56
+
+    init(_ title: String, symbol: String, isDestructive: Bool = false, action: @escaping () -> Void) {
+        self.title = title
+        self.symbol = symbol
+        self.isDestructive = isDestructive
+        self.action = action
+    }
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 0) {
+                // Outline, as the reference's list draws its icons.
+                Image(symbol: symbol, outline: true)
+                    .font(.system(size: 19, weight: .semibold))
+                    .frame(width: 24)
+                    .padding(.leading, 16)
+                    .padding(.trailing, Self.textInset - 16 - 24)
+                Text(catalog: title)
+                    .starhashFont(17, relativeTo: .body)
+                    .lineLimit(1)
+                Spacer(minLength: 8)
+                if !isDestructive {
+                    Image(symbol: "chevron.right")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color.starhashTertiaryText)
+                        .padding(.trailing, 16)
+                }
+            }
+            .foregroundStyle(isDestructive ? AnyShapeStyle(Color.starhashDestructive) : AnyShapeStyle(Color.starhashPrimaryText))
+            .frame(minHeight: 56)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.hapticPlain)
     }
 }

@@ -13,6 +13,7 @@ struct ActivitySearchView: View {
     let onOpen: (StarHashKit.Transaction) -> Void
     let onVerify: (StarHashKit.Transaction) -> Void
     let onFail: (StarHashKit.Transaction) -> Void
+    let onPayAgain: (Recipient) -> Void
     let onDelete: (StarHashKit.Transaction) -> Void
     let onSwipeDelete: (StarHashKit.Transaction) -> Void
 
@@ -47,10 +48,10 @@ struct ActivitySearchView: View {
                 LazyVStack(spacing: 0) {
                     ActivityTransactionRows(
                         transactions: results,
-                        showsDate: true,
                         onOpen: onOpen,
                         onVerify: onVerify,
                         onFail: onFail,
+                        onPayAgain: onPayAgain,
                         onDelete: onDelete,
                         onSwipeDelete: onSwipeDelete
                     )

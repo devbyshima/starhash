@@ -151,6 +151,16 @@ struct ActivitySummaryTests {
         #expect(ActivitySummary.axisTicks(for: highest) == expected)
     }
 
+    @Test func ownTransfersAreNeitherSpentNorReceived() {
+        var topUp = Self.tx(2000, at: Self.now)
+        topUp.category = TransactionCategory.ownAccounts.rawValue
+        var offload = Self.tx(500, .incoming, at: Self.now)
+        offload.category = TransactionCategory.ownAccounts.rawValue
+        let totals = ActivitySummary.totals(of: [topUp, offload, Self.tx(700, at: Self.now)])
+        #expect(totals.spent == 700)
+        #expect(totals.received == 0)
+    }
+
     // MARK: List
 
     @Test func groupsByDayNewestFirst() {
@@ -171,6 +181,27 @@ struct ActivitySummaryTests {
         #expect(title(Self.date(2026, 10, 1, 0)) == "Yesterday")
         #expect(title(Self.date(2026, 9, 25, 0)) == "Fri 25 Sept" || title(Self.date(2026, 9, 25, 0)) == "Fri 25 Sep")
         #expect(title(Self.date(2025, 9, 25, 0)).contains("2025"))
+    }
+
+    @Test func groupsByMonthNewestFirst() {
+        let sections = ActivitySummary.groupedByMonth([
+            Self.tx(1, at: Self.date(2026, 8, 31, 9)),
+            Self.tx(2, at: Self.date(2026, 10, 1, 8)),
+            Self.tx(3, at: Self.date(2026, 10, 2, 13)),
+            Self.tx(4, at: Self.date(2025, 10, 2, 13)),
+        ], calendar: Self.calendar)
+        #expect(sections.map(\.day) == [Self.date(2026, 10, 1, 0), Self.date(2026, 8, 1, 0), Self.date(2025, 10, 1, 0)])
+        #expect(sections.first?.transactions.map(\.amount) == [3, 2])
+    }
+
+    @Test func monthTitlesAndRowDates() {
+        #expect(ActivitySummary.monthTitle(for: Self.date(2026, 8, 1, 0), now: Self.now, calendar: Self.calendar, locale: Self.locale) == "August")
+        #expect(ActivitySummary.monthTitle(for: Self.date(2025, 8, 1, 0), now: Self.now, calendar: Self.calendar, locale: Self.locale) == "August 2025")
+        // French writes its months in lower case; a heading still starts with a capital.
+        #expect(ActivitySummary.monthTitle(for: Self.date(2026, 10, 1, 0), now: Self.now, calendar: Self.calendar, locale: Locale(identifier: "fr_RW")) == "Octobre")
+        let row = ActivitySummary.rowDate(for: Self.date(2026, 8, 31), now: Self.now, calendar: Self.calendar, locale: Self.locale)
+        #expect(row == "31 Aug")
+        #expect(ActivitySummary.rowDate(for: Self.date(2025, 8, 31), now: Self.now, calendar: Self.calendar, locale: Self.locale).contains("2025"))
     }
 
     // MARK: Search

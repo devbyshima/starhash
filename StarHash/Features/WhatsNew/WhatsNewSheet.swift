@@ -245,7 +245,7 @@ private struct WhatsNewFeaturePage: View {
                 // reads.
                 Image(symbol: feature.symbol)
                     .font(.system(size: 64, weight: .regular))
-                    .foregroundStyle(Color.brandNight)
+                    .foregroundStyle(Color.brandForest)
             }
         }
         .clipShape(shape)

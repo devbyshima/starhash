@@ -8,8 +8,20 @@ enum AppEnvironment {
         #if DEBUG
         if DebugLaunch.inMemory { return DebugLaunch.seededStore() }
         #endif
-        return StarHashStore(fileURL: StarHashStore.defaultFileURL)
+        let store = StarHashStore(fileURL: StarHashStore.defaultFileURL)
+        store.ownAccounts = ownAccounts
+        return store
     }()
+
+    /// The owner's two numbers, with two SIMs set in Settings.
+    static func ownAccounts() -> OwnAccounts? {
+        let defaults = UserDefaults.standard
+        guard defaults.integer(forKey: PreferenceKey.simCount) == 2 else { return nil }
+        return OwnAccounts(
+            numbers: [defaults.string(forKey: PreferenceKey.profileNumber) ?? "", defaults.string(forKey: PreferenceKey.secondNumber) ?? ""],
+            name: defaults.string(forKey: PreferenceKey.profileName)
+        )
+    }
 
     /// Buy's codes. Debug launches with -inMemory start from the defaults
     /// in a throwaway list.
@@ -68,7 +80,7 @@ enum AppTab: String, Hashable, CaseIterable, Identifiable {
         switch self {
         case .pay: "Pay"
         case .buy: "Buy"
-        case .activity: "Activity"
+        case .activity: "Transactions"
         case .settings: "Settings"
         }
     }
@@ -159,8 +171,8 @@ final class AppRouter {
     /// Switches to Pay with `recipient` chosen under the amount, and the
     /// amount when one is asked for (a scanned code's); Pay then dials them
     /// once there is an amount.
-    func pay(_ recipient: Recipient, amount: Int? = nil) {
-        payRequest = PayRequest(recipient: recipient, amount: amount)
+    func pay(_ recipient: Recipient, amount: Int? = nil, photoID: UUID? = nil) {
+        payRequest = PayRequest(recipient: recipient, amount: amount, photoID: photoID)
         show(.pay)
     }
 
@@ -201,7 +213,7 @@ final class AppRouter {
         }
         if url.host() == "pay", query.contains(where: { $0.name == "to" }) {
             if let request = PaymentQR.parse(url.absoluteString) {
-                pay(request.recipient, amount: request.amount)
+                pay(request.recipient, amount: request.amount, photoID: request.photoID)
             } else {
                 show(.pay)
             }
@@ -245,6 +257,8 @@ struct PayRequest: Identifiable, Equatable {
     let recipient: Recipient
     /// The amount a scanned code asked for, typed in for them.
     var amount: Int?
+    /// The owner's photo on StarHash's server, when their code shares it.
+    var photoID: UUID?
 }
 
 /// A scam warning's advice, shown over the app from its notification.

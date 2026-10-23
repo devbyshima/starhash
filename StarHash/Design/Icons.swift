@@ -4,6 +4,8 @@ import UIKit
 /// StarHash's own icons, one puffy style for the whole app: round and
 /// soft, closed shapes filled and traced so every corner is a small curve,
 /// open glyphs a thin round line, one colour, all on the same 18pt grid.
+/// Each also has an outline form, its closed shapes drawn as a line, which
+/// the tab bar shows for the pages not chosen.
 /// `scripts/make_icons.swift` draws them into `Icons.xcassets` as custom
 /// SF Symbols, so they size with the font, take the foreground style and
 /// work wherever an SF Symbol does: views, menus, widgets, controls.
@@ -18,13 +20,17 @@ enum StarIcon: String, CaseIterable {
     case bolt, box, bus, calendar, camera, car, card, cart, cash, chartBar, chartLine, chat, check, checkCircle
     case chevronLeft, chevronRight, chevronUpDown, circle, clock, close, closeCircle, code, cup, document, download, drop
     case envelope, eye, faceID, film, flag, food, fuel, game, gear, gift, globe, graduation, hash, health, heart
-    case history, hourglass, house, info, lightbulb, location, lock, messageCheck, messageQuestion, more, parking
-    case pencil, people, person, personAlert, personCircle, phone, pin, play, plus, qrCode, received, reset, scan
+    case hashSquare, history, hourglass, house, info, lightbulb, location, lock, messageCheck, messageQuestion, more, parking
+    case pencil, people, person, personAlert, personCircle, phone, pin, play, plus, qrCode, received, reset
     case seal, search, sendBack, shieldAlert, shieldLock, share, simCard, sound, sparkles, star, store, sunset, swap
     case ticket, torch, torchOn, touchID, trash, tray, tv, unpin, wifi
 
-    /// The symbol's name in the asset catalog.
+    /// The symbol's name in the asset catalog: its filled form.
     var assetName: String { "Icons/" + rawValue }
+
+    /// Its outline form, drawn beside it by the script: closed shapes as a
+    /// line, for a tab that is not chosen.
+    var outlineAssetName: String { assetName + "Outline" }
 
     /// The icon drawn for an SF Symbol's name, or nil when there is none.
     init?(symbol: String) {
@@ -106,6 +112,8 @@ enum StarIcon: String, CaseIterable {
         "lock.shield.fill": .shieldLock,
         "magnifyingglass": .search,
         "number": .hash,
+        "number.square": .hashSquare,
+        "number.square.fill": .hashSquare,
         "opticid": .eye,
         "parkingsign": .parking,
         "pencil": .pencil,
@@ -122,7 +130,8 @@ enum StarIcon: String, CaseIterable {
         "play.circle.fill": .play,
         "plus": .plus,
         "qrcode": .qrCode,
-        "qrcode.viewfinder": .scan,
+        // Scanning shows the QR code itself, after the owner's reference.
+        "qrcode.viewfinder": .qrCode,
         "questionmark.bubble.fill": .messageQuestion,
         "shippingbox.fill": .box,
         "simcard.fill": .simCard,
@@ -159,6 +168,16 @@ extension Image {
             self.init(icon: icon)
         } else {
             self.init(systemName: symbol)
+        }
+    }
+
+    /// The same, in its outline form when `outline` is true (a tab that is
+    /// not chosen) and filled otherwise.
+    init(symbol: String, outline: Bool) {
+        if let icon = StarIcon(symbol: symbol) {
+            self.init(outline ? icon.outlineAssetName : icon.assetName)
+        } else {
+            self.init(systemName: outline ? symbol.replacingOccurrences(of: ".fill", with: "") : symbol)
         }
     }
 }

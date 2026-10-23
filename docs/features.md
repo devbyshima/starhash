@@ -7,7 +7,7 @@ A tour of what StarHash does, screen by screen. For the codes it dials see [Code
 - [Pay](#pay)
 - [Choosing a recipient](#choosing-a-recipient)
 - [Buy](#buy)
-- [Activity](#activity)
+- [Transactions](#transactions)
 - [Transaction details](#transaction-details)
 - [Nearby](#nearby)
 - [Settings](#settings)
@@ -16,7 +16,7 @@ A tour of what StarHash does, screen by screen. For the codes it dials see [Code
 
 ## Getting around
 
-A floating glass tab bar holds Activity on the left, Pay in the middle and Settings on the right. The round button at the top left of Pay switches the middle place to Buy and back, and the bar remembers whichever showed last. The bar shrinks while a page scrolls down and steps aside for pushed screens and search. Every press is felt, and page changes play a short haptic of their own.
+A floating glass tab bar holds Transactions on the left, Pay in the middle and Settings on the right. The round button at the top left of Pay switches the middle place to Buy and back, and the bar remembers whichever showed last. The bar shrinks while a page scrolls down and steps aside for pushed screens and search. Every press is felt, and page changes play a short haptic of their own.
 
 ## Onboarding
 
@@ -56,13 +56,13 @@ The recipient screen opens with the keyboard up on its numbers, since most payme
 3. **Recent**: up to ten people and codes you paid last.
 4. **Contacts**: matched letters are highlighted.
 
-A number saved in your Contacts always shows under the name you saved it with, here, in Activity and on Pay, ahead of the name a wallet's message gives. The total rides in a bar above the keyboard. A contact with several numbers asks which one, each shown with its carrier's logo, and a long press opens a contact's details with this year's total. Picking someone dials at once: the iPhone's call prompt, showing the whole code, is the approval. With Save transactions on, the payment is then saved as Pending, and dialling the same recipient and amount again within five minutes reuses it rather than adding a second.
+A number saved in your Contacts always shows under the name you saved it with, here, in Transactions and on Pay, ahead of the name a wallet's message gives. The total rides in a bar above the keyboard. A contact with several numbers asks which one, each shown with its carrier's logo, and a long press opens a contact's details with this year's total. Picking someone dials at once: the iPhone's call prompt, showing the whole code, is the approval. With Save transactions on, the payment is then saved as Pending, and dialling the same recipient and amount again within five minutes reuses it rather than adding a second.
 
 Ten digits or more is a phone number (`+250 788 123 456` becomes `0788123456`); fewer is a MoMo Pay merchant code. Numbers starting 072 or 073 are Airtel, the rest MTN.
 
 ## Buy
 
-Codes you dial often, each on a card with its symbol, name and code, and a call button beside it. Buy's codes are not logged in Activity: the menu each one opens asks for the amount and your PIN itself.
+Codes you dial often, each on a card with its symbol, name and code, and a call button beside it. Buy's codes are not logged in Transactions: the menu each one opens asks for the amount and your PIN itself.
 
 - It comes with four: Pending approvals, Cash out, Gwamon' Pack and Airport parking.
 - **+** adds your own: a name, a code that starts with `*` or `#` and ends with `#`, an optional note, and one of thirty symbols.
@@ -72,7 +72,7 @@ Codes you dial often, each on a card with its symbol, name and code, and a call 
 
 Delete All Data brings back the four codes Buy came with.
 
-## Activity
+## Transactions
 
 - **W M Y** picks This Week (the default, Monday to Sunday whatever the iPhone's region), This Month or This Year.
 - A summary card shows what you spent, what came in and the fees, over a bar chart you can press and slide along.

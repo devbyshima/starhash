@@ -31,7 +31,7 @@ StarHash only dials a recipient it can pay: a sender whose number is masked in a
 
 ## Buy's codes
 
-Buy comes with four codes. Each opens a menu that asks for the amount and your PIN, so Buy's dials are not logged in Activity.
+Buy comes with four codes. Each opens a menu that asks for the amount and your PIN, so Buy's dials are not logged in Transactions.
 
 | Code | What it does |
 | --- | --- |
@@ -44,7 +44,7 @@ These are MTN codes, shown whichever wallet you use. You can add your own: a cod
 
 ## Fees
 
-Pay never shows a fee. Fees appear only in Activity, once a payment is confirmed:
+Pay never shows a fee. Fees appear only in Transactions, once a payment is confirmed:
 
 - **Confirmed by SMS**: the fee is the one in your wallet's message.
 - **Confirmed by hand**: the fee is worked out from the carriers' published prices, for the wallet the payment was dialled with.
