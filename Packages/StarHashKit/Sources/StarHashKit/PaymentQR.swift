@@ -59,6 +59,10 @@ public enum PaymentQR {
         guard !trimmed.isEmpty else { return nil }
         let request = link(trimmed) ?? ussd(trimmed) ?? emv(trimmed) ?? loose(trimmed)
         guard var request, request.recipient.isPayable else { return nil }
+        // A number's carrier comes from its prefix, and with it the code that
+        // pays it (to the wallet's own network or the other), so only a
+        // Rwandan mobile number is one StarHash can pay.
+        if request.recipient.kind == .phone, !request.recipient.isRwandanMobile { return nil }
         if let amount = request.amount, amount <= 0 || amount > Money.maximumAmount { request.amount = nil }
         return request
     }

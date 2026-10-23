@@ -22,7 +22,8 @@ extension PreferenceKey {
     /// held back with a warning. On unless turned off in Settings.
     static let scamWarnings = "scamWarnings"
     /// The owner's name and number, for the QR code others scan to pay
-    /// them (`OwnerProfile`).
+    /// them (`OwnerProfile`). With two SIMs, the number is the default
+    /// SIM's (`OwnerSIMs`).
     static let profileName = "profileName"
     static let profileNumber = "profileNumber"
     /// How many SIMs pay from this iPhone (1 or 2), and the other one's
@@ -33,8 +34,8 @@ extension PreferenceKey {
     static let appLanguage = "appLanguage"
     static let secondNumber = "secondNumber"
     /// Whether the hint to set the iPhone's default voice line, shown the
-    /// first time an owner with SIMs on both carriers switches wallet, has
-    /// been seen.
+    /// first time an owner with two SIMs changes the default one, has been
+    /// seen.
     static let seenVoiceLineHint = "seenVoiceLineHint"
     /// Whether the on-device model may name the categories the rules
     /// cannot (iOS 26 and later, with Apple Intelligence).

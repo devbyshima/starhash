@@ -44,6 +44,7 @@ struct RootView: View {
             }
         }
         .animation(.smooth, value: wallet.isEmpty)
+        .keepsDefaultSIMInStep()
         .sheet(isPresented: welcomeNotePresented) {
             DeveloperNoteSheet(afterOnboarding: true)
         }

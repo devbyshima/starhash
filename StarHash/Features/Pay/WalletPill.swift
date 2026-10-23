@@ -3,36 +3,17 @@ import SwiftUI
 
 /// The wallet just above Pay's keypad, where the amount's currency once
 /// sat: the carrier's logo alone, straight on the page with nothing behind
-/// it, and a menu of the owner's wallets, each with the SIM it lives on
-/// (two SIMs on different carriers give both). Payments and Balance dial
-/// the new wallet's codes from the next tap. (Rwanda's one currency needs
-/// no pill of its own; the amount reads out with it.)
+/// it, and a menu of the owner's wallets, one for each SIM (`SIMMenu`).
+/// The one chosen is the default SIM: payments and Balance dial its
+/// wallet's codes from the next tap, and the QR code carries its number.
+/// (Rwanda's one currency needs no pill of its own; the amount reads out
+/// with it.)
 struct WalletPill: View {
     @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
-    @AppStorage(PreferenceKey.seenVoiceLineHint) private var seenVoiceLineHint = false
     @OwnWallets private var ownWallets
-    /// The wallet just switched to, while the voice line hint is up.
-    @State private var hintFor: OwnerWallets.Wallet?
 
     var body: some View {
-        Menu {
-            // Toggles rather than a picker: a picker's rows drop the second
-            // line, and the SIM's number is what tells two wallets apart.
-            ForEach(ownWallets.wallets) { option in
-                Toggle(isOn: Binding(
-                    get: { wallet == option.network },
-                    set: { if $0 { choose(option) } }
-                )) {
-                    // Straight in the row, so the menu reads the logo as its
-                    // icon and the number as the line under the name.
-                    Image(option.network.logoAsset)
-                    Text(verbatim: option.network.walletName)
-                    if let sim = option.sim {
-                        Text(verbatim: sim.formattedDestination)
-                    }
-                }
-            }
-        } label: {
+        SIMMenu(answersDebugHint: true) {
             // The logo alone, on the page: the menu names the wallets. The
             // tap area keeps the pill's size it once had.
             Image(wallet.logoAsset)
@@ -44,33 +25,11 @@ struct WalletPill: View {
                 .contentShape(Capsule())
                 .animation(.smooth(duration: 0.25), value: wallet)
         }
-        .menuOrder(.fixed)
         .buttonStyle(.hapticPlain)
-        .sensoryFeedback(.selection, trigger: wallet)
         .accessibilityLabel("Wallet: \(wallet.walletName)")
+        // With two SIMs, which one: two on one carrier share the logo.
+        .accessibilityValue(ownWallets.hasTwoSIMs ? Text(verbatim: ownWallets.defaultSIM?.formattedDestination ?? "") : Text(verbatim: ""))
         .accessibilityHint("Switches the wallet you pay from")
-        .sheet(item: $hintFor) { option in
-            VoiceLineHintSheet(wallet: option)
-        }
-        #if DEBUG
-        // -voiceLineHint: the hint for the wallet not chosen, for screenshots.
-        .task {
-            guard DebugLaunch.arguments.contains("-voiceLineHint") else { return }
-            try? await Task.sleep(for: .milliseconds(500))
-            hintFor = ownWallets.wallets.first { $0.network != wallet } ?? ownWallets.wallets.first
-        }
-        #endif
-    }
-
-    /// The wallet switched to, and the first time an owner with SIMs on both
-    /// carriers switches, the hint to make that SIM the iPhone's voice line.
-    private func choose(_ option: OwnerWallets.Wallet) {
-        guard option.network != wallet else { return }
-        wallet = option.network
-        if ownWallets.hasBothCarriers, !seenVoiceLineHint {
-            seenVoiceLineHint = true
-            hintFor = option
-        }
     }
 }
 

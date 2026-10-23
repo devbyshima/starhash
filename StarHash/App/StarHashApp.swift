@@ -43,6 +43,14 @@ struct StarHashApp: App {
             UserDefaults.standard.set("Shima Serein", forKey: PreferenceKey.profileName)
             UserDefaults.standard.set("0788123456", forKey: PreferenceKey.profileNumber)
         }
+        // -twoSIMs [airtel]: -profile's number and a second SIM, on MTN
+        // too or on Airtel, for the default SIM's screens.
+        if DebugLaunch.arguments.contains("-twoSIMs") {
+            let other = DebugLaunch.value(after: "-twoSIMs") == "airtel" ? "0722 123 456" : "0791 234 567"
+            UserDefaults.standard.set("0788123456", forKey: PreferenceKey.profileNumber)
+            UserDefaults.standard.set(other, forKey: PreferenceKey.secondNumber)
+            UserDefaults.standard.set(2, forKey: PreferenceKey.simCount)
+        }
         if DebugLaunch.arguments.contains("-resetOnboarding") {
             UserDefaults.standard.set(false, forKey: PreferenceKey.hasOnboarded)
         }
