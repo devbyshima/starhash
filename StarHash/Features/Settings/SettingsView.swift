@@ -146,6 +146,10 @@ private struct SettingsRootList: View {
             SettingsFooter()
                 .id("starhash")
         }
+        // The SIM card's rows come and go as a description does, the whole
+        // page making room on its spring, from the menu, the keyboard or
+        // the sheet alike.
+        .animation(SettingsCaptionMotion.open, value: simRowsShown)
         .onChange(of: appearance) { _, appearance in AppAppearance.apply(appearance) }
         .fileExporter(
             isPresented: Binding(get: { exportDocument != nil }, set: { if !$0 { exportDocument = nil } }),
@@ -245,6 +249,7 @@ private struct SettingsRootList: View {
                         .font(.starhashNumber(16, relativeTo: .body))
                         .frame(maxWidth: 150)
                 }
+                .transition(SettingsCaptionMotion.transition)
             }
             // Once both numbers are in, in the Other SIM row's place.
             if ownWallets.hasTwoSIMs, let sim = ownWallets.defaultSIM {
@@ -260,9 +265,9 @@ private struct SettingsRootList: View {
                     .accessibilityLabel("Default SIM")
                     .accessibilityValue(Text(verbatim: sim.formattedDestination))
                 }
+                .transition(SettingsCaptionMotion.transition)
             }
         }
-        .animation(.smooth(duration: 0.3), value: Recipient.ownNumber(secondNumber) == nil)
         .sheet(isPresented: $choosesSIMToKeep) {
             KeepSIMSheet(sims: [profileNumber, secondNumber].compactMap(Recipient.ownNumber)) { sim in
                 choosesSIMToKeep = false
@@ -280,6 +285,12 @@ private struct SettingsRootList: View {
                 if secondNumber != recipient.formattedDestination { secondNumber = recipient.formattedDestination }
             }
         }
+    }
+
+    /// Which of the SIM card's rows show: Other SIM while its number is
+    /// asked for, Default SIM once both are in.
+    private var simRowsShown: [Bool] {
+        [simCount == 2 && Recipient.ownNumber(secondNumber) == nil, ownWallets.hasTwoSIMs]
     }
 
     /// Two SIMs to one: when both numbers are in, the owner says which SIM
@@ -302,7 +313,7 @@ private struct SettingsRootList: View {
     /// the wallet follows the kept SIM's network, since it is the one that
     /// pays now.
     private func keepOnly(_ sim: Recipient) {
-        withAnimation(.smooth(duration: 0.3)) {
+        withAnimation(SettingsCaptionMotion.open) {
             profileNumber = sim.destination
             secondNumber = ""
             simCount = 1
