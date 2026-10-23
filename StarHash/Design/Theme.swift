@@ -77,6 +77,9 @@ extension Color {
     /// What is filled (a list of actions, the summary, fields): #F5F6F5 on
     /// white, #262626 on #171717.
     static let starhashCard = Color(light: .brandMist, dark: .brandCoal)
+    /// A list row as a finger presses it, edge to edge: Activity's
+    /// transactions, as a system list highlights a cell.
+    static let starhashRowHighlight = Color(light: .brandMist, dark: .brandCoal)
     /// Controls sitting on a card (icon tiles, date pill, text fields).
     static let starhashCardRaised = Color(light: .brandCloud, dark: .brandSlate)
     /// The line round an outlined card (a transaction's details, Settings'

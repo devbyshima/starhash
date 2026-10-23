@@ -16,8 +16,14 @@ enum ActivityLayout {
     static let tileSize: CGFloat = 44
     static let tileGap: CGFloat = 16
     static let rowPadding: CGFloat = 8
-    /// The press and the context menu's preview round a row by this much.
-    static let rowRadius: CGFloat = 16
+    /// A long press on a pending row lifts it with its tile this far from
+    /// the card's edges, as Contacts lifts a contact.
+    static let rowPreviewInset: CGFloat = 9
+    /// A long press on a confirmed row lifts its page's top, after the
+    /// owner's reference: the room its bar takes on the page above the
+    /// tile, and the card's height, which cuts the details off.
+    static let previewTop: CGFloat = 66
+    static let previewHeight: CGFloat = 527
     /// A month's heading: its room above, and below before the first row.
     static let monthTop: CGFloat = 30
     static let monthBottom: CGFloat = 0
@@ -187,6 +193,12 @@ extension StarHashKit.Transaction {
     }
 
     var activityCategory: TransactionCategory? { knownCategory }
+
+    /// The category's name as a transaction's details give it: one of
+    /// StarHash's, else one an older version kept, else None.
+    var activityCategoryTitle: String {
+        activityCategory?.title ?? category?.capitalized ?? "None"
+    }
 
     /// What VoiceOver reads for a row.
     @MainActor

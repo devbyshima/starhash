@@ -3,10 +3,17 @@ import SwiftUI
 
 /// Transactions as rows straight on the page, after the owner's reference:
 /// one month of Activity's list, or the search results. A row opens its
-/// details; its context menu verifies it, marks it failed or deletes it
-/// (asking first), and a swipe deletes it outright, the row sliding aside
+/// details. A long press lifts it as the system's context menu does,
+/// after the owner's references: a confirmed transaction lifts the top of
+/// its page and nothing more; one not yet confirmed lifts the row itself
+/// with its menu under it (verify it, mark it failed, pay again, or delete
+/// it, asking first). A swipe deletes it outright, the row sliding aside
 /// and the trash beside it; deleted, it shrinks and fades as the rows under
 /// it close up.
+///
+/// The rows reach past the page's padding to the screen's edges, so a
+/// press fills the width as a list's highlight does; the caller pads them
+/// by `StarHashMetrics.screenPadding`.
 struct ActivityTransactionRows: View {
     let transactions: [StarHashKit.Transaction]
     let onOpen: (StarHashKit.Transaction) -> Void
@@ -14,13 +21,16 @@ struct ActivityTransactionRows: View {
     let onVerify: (StarHashKit.Transaction) -> Void
     /// Mark as Failed, on a pending payment.
     let onFail: (StarHashKit.Transaction) -> Void
+    /// Pay Again, or Send Money for money received.
+    let onPayAgain: (Recipient) -> Void
     let onDelete: (StarHashKit.Transaction) -> Void
     /// The swipe's delete, which does not ask.
     let onSwipeDelete: (StarHashKit.Transaction) -> Void
     /// The date on each row; under a day's heading, the time is enough.
     var showsDate = true
 
-    private let shape = RoundedRectangle(cornerRadius: ActivityLayout.rowRadius, style: .continuous)
+    /// The list's width inside the page's padding: the lifted card's.
+    @State private var width: CGFloat = 0
 
     var body: some View {
         // Lazy, so a long list of results is built only as it scrolls in.
@@ -29,6 +39,7 @@ struct ActivityTransactionRows: View {
                 row(transaction)
             }
         }
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
     }
 
     private func row(_ transaction: StarHashKit.Transaction) -> some View {
@@ -39,38 +50,65 @@ struct ActivityTransactionRows: View {
             onOpen(transaction)
         } label: {
             ActivityTransactionRow(transaction: transaction, showsDate: showsDate)
-                .contentShape(shape)
+                .padding(.horizontal, StarHashMetrics.screenPadding)
+                .contentShape(Rectangle())
         }
         .buttonStyle(ActivityRowButtonStyle())
-        .contentShape(.contextMenuPreview, shape)
+        .contentShape(.contextMenuPreview, Rectangle())
+        // Empty for a confirmed row, which opens no menu here: its preview
+        // is lifted by the one below.
         .contextMenu {
-            // A failed payment can still be verified, in case it went
-            // through after all.
             if transaction.status != .confirmed {
-                Button {
-                    onVerify(transaction)
-                } label: {
-                    Label("Verify", symbol: "checkmark.message")
-                }
+                menu(transaction)
             }
+        } preview: {
+            TransactionRowPreview(transaction: transaction, width: width, showsDate: showsDate)
+        }
+        .previewContextMenu(
+            isEnabled: transaction.status == .confirmed,
+            size: CGSize(width: width, height: ActivityLayout.previewHeight),
+            highlight: .starhashRowHighlight,
+            onOpen: { onOpen(transaction) }
+        ) {
+            TransactionPreview(transaction: transaction, width: width)
+        }
+        .activitySwipeToDelete { onSwipeDelete(transaction) }
+        .padding(.horizontal, -StarHashMetrics.screenPadding)
+        .transition(.asymmetric(
+            insertion: .scale(scale: 0.9, anchor: .top).combined(with: .opacity),
+            removal: .scale(scale: 0.85).combined(with: .opacity)
+        ))
+    }
+
+    /// The pending row's menu, in groups as Contacts' is: settling it (a
+    /// failed payment can still be verified, in case it went through after
+    /// all), paying again, and deleting it.
+    @ViewBuilder
+    private func menu(_ transaction: StarHashKit.Transaction) -> some View {
+        Section {
+            Button("Verify", symbol: "checkmark.message") { onVerify(transaction) }
             if transaction.status == .pending {
-                Button {
-                    onFail(transaction)
-                } label: {
-                    Label("Mark as Failed", symbol: "xmark.circle")
+                Button("Mark as Failed", symbol: "xmark.circle") { onFail(transaction) }
+            }
+        }
+        // A sender read from an SMS may be masked or have no number at
+        // all; there is nothing safe to dial then.
+        if transaction.counterparty.isPayable {
+            Section {
+                if transaction.direction == .outgoing {
+                    Button("Pay Again", symbol: "arrow.uturn.backward.circle") { onPayAgain(transaction.counterparty) }
+                } else {
+                    Button("Send Money", symbol: "arrow.uturn.backward.circle") { onPayAgain(transaction.counterparty) }
                 }
             }
+        }
+        Section {
             Button(role: .destructive) {
                 onDelete(transaction)
             } label: {
                 DestructiveMenuLabel("Delete")
             }
         }
-        .activitySwipeToDelete { onSwipeDelete(transaction) }
-        .transition(.asymmetric(
-            insertion: .scale(scale: 0.9, anchor: .top).combined(with: .opacity),
-            removal: .scale(scale: 0.85).combined(with: .opacity)
-        ))
     }
 }
 
@@ -83,6 +121,8 @@ struct ActivityTransactionRows: View {
 struct ActivityTransactionRow: View {
     let transaction: StarHashKit.Transaction
     var showsDate = true
+    /// The line under it; not on the card a long press lifts.
+    var showsDivider = true
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -125,8 +165,10 @@ struct ActivityTransactionRow: View {
         // A line under the row from where its words start to where the
         // amount ends.
         .overlay(alignment: .bottom) {
-            SheetDivider()
-                .padding(.leading, ActivityLayout.tileSize + ActivityLayout.tileGap)
+            if showsDivider {
+                SheetDivider()
+                    .padding(.leading, ActivityLayout.tileSize + ActivityLayout.tileGap)
+            }
         }
         .contentShape(Rectangle())
         .accessibilityElement(children: .ignore)
@@ -172,12 +214,14 @@ struct ActivityTransactionRow: View {
     }
 }
 
-/// A row dims a little as it is pressed. Silent: the tap plays its haptic
-/// as it lands, since a long press opens the menu.
+/// A row turns grey edge to edge as it is pressed, at once, and fades
+/// back as it is let go or lifts, as a system list's cell highlights.
+/// Silent: the tap plays its haptic as it lands, since a long press opens
+/// the menu.
 struct ActivityRowButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .opacity(configuration.isPressed ? 0.6 : 1)
-            .animation(.snappy(duration: 0.18), value: configuration.isPressed)
+            .background(Color.starhashRowHighlight.opacity(configuration.isPressed ? 1 : 0))
+            .animation(configuration.isPressed ? nil : .easeOut(duration: 0.25), value: configuration.isPressed)
     }
 }

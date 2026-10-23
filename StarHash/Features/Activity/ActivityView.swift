@@ -148,6 +148,7 @@ struct ActivityView: View {
                             onOpen: open,
                             onVerify: verify,
                             onFail: markFailed,
+                            onPayAgain: payAgain,
                             onDelete: requestDelete,
                             onSwipeDelete: swipeDelete,
                             showsDate: false
@@ -206,6 +207,7 @@ struct ActivityView: View {
             onOpen: open,
             onVerify: verify,
             onFail: markFailed,
+            onPayAgain: payAgain,
             onDelete: requestDelete,
             onSwipeDelete: swipeDelete
         )
@@ -237,8 +239,8 @@ struct ActivityView: View {
         router.openTransactionID = transaction.id
     }
 
-    /// Pay Again on the details page: back to the list, and the recipient
-    /// to Pay.
+    /// Pay Again on the details page or a row's menu: back to the list, and
+    /// the recipient to Pay.
     private func payAgain(_ recipient: Recipient) {
         router.openTransactionID = nil
         router.pay(recipient)
