@@ -44,7 +44,7 @@ If the shortcut seems to have stopped (your last three payments all went unconfi
 
 ## Verify a payment by hand
 
-A payment its message never reached (the automation was off, or the message came before it was set up) can still be settled by that message. Open the payment and tap **Verify** (or hold it in Activity, or tap **Verify** on its reminder), copy the wallet's message in Messages, and tap **Paste Message**. iOS lets no app read your messages, so this is the one way StarHash sees it.
+A payment its message never reached (the automation was off, or the message came before it was set up) can still be settled by that message. Open the payment and tap **Verify** (or hold it in Transactions, or tap **Verify** on its reminder), copy the wallet's message in Messages, and tap **Paste Message**. iOS lets no app read your messages, so this is the one way StarHash sees it.
 
 StarHash reads it as the automation would and applies it only when it is this payment's: the same amount, the same number or merchant code, the same wallet, within six hours. A message that it went through confirms it with the fee, reference and balance; one that it failed marks it failed; MoMoAdvance's adds its access fee. Any other message changes nothing, and StarHash says it's not the right message. **Confirm Without Message** is the last resort, for a message deleted or never sent; its fee comes from the carriers' prices.
 

@@ -88,7 +88,7 @@ public enum ReleaseHistory {
                       detail: "Keep the codes you dial often, like pending approvals, cash out and bundles, and dial them in a tap. Pin up to eight to the top."),
                 .init(symbol: "location.fill", title: "Nearby",
                       detail: "Turn it on and StarHash remembers where you paid a number or a code, and suggests it when you are back there."),
-                .init(symbol: "clock.fill", title: "Every payment in Activity",
+                .init(symbol: "clock.fill", title: "Every payment in Transactions",
                       detail: "See what you spent by day, week, month or year, with a chart, search and the details of each payment."),
                 .init(symbol: "checkmark.message.fill", title: "Auto-verify",
                       detail: "Add one shortcut and your MTN MoMo or Airtel Money messages confirm each payment, with its fee and your new balance."),

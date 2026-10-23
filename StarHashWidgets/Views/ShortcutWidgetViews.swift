@@ -14,7 +14,7 @@ enum WidgetAction: CaseIterable {
         case .scan: "Scan"
         case .balance: "Balance"
         case .buy: "Buy"
-        case .activity: "Activity"
+        case .activity: "Transactions"
         }
     }
 

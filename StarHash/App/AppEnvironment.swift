@@ -80,7 +80,7 @@ enum AppTab: String, Hashable, CaseIterable, Identifiable {
         switch self {
         case .pay: "Pay"
         case .buy: "Buy"
-        case .activity: "Activity"
+        case .activity: "Transactions"
         case .settings: "Settings"
         }
     }

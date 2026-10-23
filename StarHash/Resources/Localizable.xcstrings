@@ -349,23 +349,7 @@
         }
       }
     },
-    "Activity": {
-      "localizations": {
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ibikorwa"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Activité"
-          }
-        }
-      }
-    },
-    "Activity keeps each payment by day,\nwith a chart and search.": {
+    "Transactions keeps each payment by day,\nwith a chart and search.": {
       "localizations": {
         "rw": {
           "stringUnit": {
@@ -376,7 +360,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Activité garde chaque paiement par jour,\navec un graphique et une recherche."
+            "value": "Transactions garde chaque paiement par jour,\navec un graphique et une recherche."
           }
         }
       }
@@ -2264,7 +2248,7 @@
         }
       }
     },
-    "Every payment in Activity": {
+    "Every payment in Transactions": {
       "localizations": {
         "rw": {
           "stringUnit": {
@@ -2275,7 +2259,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Chaque paiement dans Activité"
+            "value": "Chaque paiement dans Transactions"
           }
         }
       }
@@ -6737,7 +6721,7 @@
         }
       }
     },
-    "The USSD codes, fees and limits StarHash uses come from the providers' published information, and the providers may change them without notice. Activity is a record kept for you, from what you dial and the messages you pass to StarHash; your provider's records are the ones that count. With auto-verify on, a payment that no message confirms within an hour is marked failed; if it did go through, mark it as confirmed. StarHash's reminders and summaries are worked out from that record, and iOS decides when they show: a reminder that is late or never comes says nothing about whether a payment went through.": {
+    "The USSD codes, fees and limits StarHash uses come from the providers' published information, and the providers may change them without notice. The Transactions page is a record kept for you, from what you dial and the messages you pass to StarHash; your provider's records are the ones that count. With auto-verify on, a payment that no message confirms within an hour is marked failed; if it did go through, mark it as confirmed. StarHash's reminders and summaries are worked out from that record, and iOS decides when they show: a reminder that is late or never comes says nothing about whether a payment went through.": {
       "localizations": {
         "rw": {
           "stringUnit": {
@@ -6748,7 +6732,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les codes USSD, frais et limites qu'utilise StarHash viennent des informations publiées par les opérateurs, qui peuvent les modifier sans préavis. Activité est un historique tenu pour vous, à partir de ce que vous composez et des messages que vous transmettez à StarHash ; ce sont les relevés de votre opérateur qui font foi. Avec la vérification auto activée, un paiement qu'aucun message ne confirme dans l'heure est marqué comme échoué ; s'il est bien passé, marquez-le comme confirmé. Les rappels et résumés de StarHash sont établis à partir de cet historique, et iOS décide quand ils s'affichent : un rappel en retard ou absent ne dit rien de la réussite d'un paiement."
+            "value": "Les codes USSD, frais et limites qu'utilise StarHash viennent des informations publiées par les opérateurs, qui peuvent les modifier sans préavis. La page Transactions est un historique tenu pour vous, à partir de ce que vous composez et des messages que vous transmettez à StarHash ; ce sont les relevés de votre opérateur qui font foi. Avec la vérification auto activée, un paiement qu'aucun message ne confirme dans l'heure est marqué comme échoué ; s'il est bien passé, marquez-le comme confirmé. Les rappels et résumés de StarHash sont établis à partir de cet historique, et iOS décide quand ils s'affichent : un rappel en retard ou absent ne dit rien de la réussite d'un paiement."
           }
         }
       }
@@ -8248,7 +8232,7 @@
         }
       }
     },
-    "You are responsible for your iPhone, its passcode and who can use it. StarHash's Face ID lock keeps Activity private, but your wallet is protected by your PIN. Never share your PIN with anyone, including someone who says they are from StarHash or your provider.": {
+    "You are responsible for your iPhone, its passcode and who can use it. StarHash's Face ID lock keeps your transactions private, but your wallet is protected by your PIN. Never share your PIN with anyone, including someone who says they are from StarHash or your provider.": {
       "localizations": {
         "rw": {
           "stringUnit": {
@@ -8259,7 +8243,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vous êtes responsable de votre iPhone, de son code et de qui peut l'utiliser. Le verrouillage Face ID de StarHash garde Activité privée, mais c'est votre PIN qui protège votre portefeuille. Ne partagez jamais votre PIN avec personne, y compris quelqu'un qui dit venir de StarHash ou de votre opérateur."
+            "value": "Vous êtes responsable de votre iPhone, de son code et de qui peut l'utiliser. Le verrouillage Face ID de StarHash garde vos transactions privées, mais c'est votre PIN qui protège votre portefeuille. Ne partagez jamais votre PIN avec personne, y compris quelqu'un qui dit venir de StarHash ou de votre opérateur."
           }
         }
       }

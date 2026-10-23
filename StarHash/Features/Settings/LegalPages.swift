@@ -118,7 +118,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "Codes, fees and records",
-                text: "The USSD codes, fees and limits StarHash uses come from the providers' published information, and the providers may change them without notice. Activity is a record kept for you, from what you dial and the messages you pass to StarHash; your provider's records are the ones that count. With auto-verify on, a payment that no message confirms within an hour is marked failed; if it did go through, mark it as confirmed. StarHash's reminders and summaries are worked out from that record, and iOS decides when they show: a reminder that is late or never comes says nothing about whether a payment went through."
+                text: "The USSD codes, fees and limits StarHash uses come from the providers' published information, and the providers may change them without notice. The Transactions page is a record kept for you, from what you dial and the messages you pass to StarHash; your provider's records are the ones that count. With auto-verify on, a payment that no message confirms within an hour is marked failed; if it did go through, mark it as confirmed. StarHash's reminders and summaries are worked out from that record, and iOS decides when they show: a reminder that is late or never comes says nothing about whether a payment went through."
             ),
             .init(
                 title: "Free, with source available",
@@ -130,7 +130,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "Your iPhone and your PIN",
-                text: "You are responsible for your iPhone, its passcode and who can use it. StarHash's Face ID lock keeps Activity private, but your wallet is protected by your PIN. Never share your PIN with anyone, including someone who says they are from StarHash or your provider."
+                text: "You are responsible for your iPhone, its passcode and who can use it. StarHash's Face ID lock keeps your transactions private, but your wallet is protected by your PIN. Never share your PIN with anyone, including someone who says they are from StarHash or your provider."
             ),
             .init(
                 title: "Changes to these terms",

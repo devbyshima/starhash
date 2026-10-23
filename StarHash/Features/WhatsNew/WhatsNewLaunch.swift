@@ -66,13 +66,13 @@ enum WhatsNewSample {
         highlights: [
             .init(symbol: "number", title: "Pay in a few taps", detail: "Type an amount, pick who gets it, and StarHash dials the code."),
             .init(symbol: "phone.fill", title: "Buy", detail: "The codes you dial often, one tap each, up to eight pinned."),
-            .init(symbol: "clock.fill", title: "Activity", detail: "Every payment by day, week, month or year, with a chart."),
+            .init(symbol: "clock.fill", title: "Transactions", detail: "Every payment by day, week, month or year, with a chart."),
             .init(symbol: "checkmark.message.fill", title: "Auto-verify", detail: "Your wallet's messages confirm each payment for you."),
         ],
         pages: [
             .init(symbol: "number", title: "Pay in a few taps", detail: "Type an amount, pick a contact or a merchant code, and StarHash dials your wallet's code for you.", video: "WhatsNewSamplePay"),
             .init(symbol: "phone.fill", title: "Buy", detail: "Keep the codes you dial often, like cash out and bundles, and dial each one in a tap.", video: "WhatsNewSampleBuy"),
-            .init(symbol: "clock.fill", title: "Activity", detail: "See what you spent by day, week, month or year, with a chart and every payment's details.", video: "WhatsNewSampleActivity"),
+            .init(symbol: "clock.fill", title: "Transactions", detail: "See what you spent by day, week, month or year, with a chart and every payment's details.", video: "WhatsNewSampleActivity"),
             .init(symbol: "checkmark.message.fill", title: "Auto-verify", detail: "Your wallet's messages confirm each payment, with its fee and balance. Thank you for using StarHash.", video: "WhatsNewSampleAutoVerify"),
         ]
     )

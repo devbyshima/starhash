@@ -24,7 +24,7 @@ enum QuickActions {
             item(String(starhash: "Balance"), subtitle: wallet.walletName, symbol: "banknote.fill",
                  link: "starhash://dial?code=" + (USSD.balance(for: wallet).addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? "")),
             item(String(starhash: "Buy"), symbol: "bag.fill", link: "starhash://buy"),
-            item(String(starhash: "Activity"), symbol: "clock.fill", link: "starhash://activity"),
+            item(String(starhash: "Transactions"), symbol: "clock.fill", link: "starhash://activity"),
         ]
     }
 

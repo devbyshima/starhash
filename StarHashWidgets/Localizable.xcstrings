@@ -7,12 +7,12 @@
     "%lld/%lld": {
       "shouldTranslate": false
     },
-    "Activity": {
+    "Transactions": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Activité"
+            "value": "Transactions"
           }
         },
         "rw": {
