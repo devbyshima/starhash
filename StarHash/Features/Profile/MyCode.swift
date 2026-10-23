@@ -163,9 +163,10 @@ struct ProfileFields: View {
         guard let recipient = Recipient.ownNumber(draftNumber) else {
             return String(starhash: "Enter a Rwandan mobile number: 078, 079, 072 or 073.")
         }
-        // With two SIMs, the wallet's may be the other one.
-        let otherOnWallet = otherNumber.flatMap { Recipient.ownNumber($0.wrappedValue)?.network } == wallet
-        if let network = recipient.network, network != wallet, !otherOnWallet {
+        // With two SIMs both in, the wallet follows the default SIM, this
+        // one, so either carrier is right.
+        let hasOtherSIM = otherNumber.flatMap { Recipient.ownNumber($0.wrappedValue) } != nil
+        if let network = recipient.network, network != wallet, !hasOtherSIM {
             return String(starhash: "That is an \(network.name) number; you pay with \(wallet.walletName).")
         }
         return nil
@@ -219,6 +220,10 @@ struct ProfileFields: View {
                 draftOther = saved.formattedDestination
             }
         }
+        // Another default SIM chosen on Pay or in Settings trades the two
+        // numbers; the fields follow.
+        .onChange(of: number) { _, saved in draftNumber = Self.draft(draftNumber, following: saved) }
+        .onChange(of: otherNumber?.wrappedValue) { _, saved in draftOther = Self.draft(draftOther, following: saved ?? "") }
     }
 
     private var numberField: some View {
@@ -264,6 +269,16 @@ struct ProfileFields: View {
                 otherNumber.wrappedValue = ""
             }
         }
+    }
+
+    /// The field's text once its saved number has changed: the new number,
+    /// spaced, unless the text already is it (it was typed here), or
+    /// nothing when the number was cleared.
+    private static func draft(_ draft: String, following saved: String) -> String {
+        guard let number = Recipient.ownNumber(saved) else {
+            return saved.isEmpty && Recipient.ownNumber(draft) != nil ? "" : draft
+        }
+        return Recipient.ownNumber(draft)?.destination == number.destination ? draft : number.formattedDestination
     }
 
     private func problemText(_ problem: String) -> some View {

@@ -1768,6 +1768,22 @@
         }
       }
     },
+    "Default SIM": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SIM par défaut"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SIM y'ibanze"
+          }
+        }
+      }
+    },
     "Delete": {
       "localizations": {
         "rw": {
@@ -1956,6 +1972,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Composez %@ sur votre téléphone."
+          }
+        }
+      }
+    },
+    "Dial from %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilisez la SIM %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koresha SIM ya %@"
           }
         }
       }
@@ -8468,6 +8500,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Votre photo"
+          }
+        }
+      }
+    },
+    "Your QR code carries it and payments dial from it, so make it your iPhone's default voice line too": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre code QR porte son numéro et les paiements passent par elle : faites-en aussi la ligne vocale par défaut de votre iPhone"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode yawe ya QR itwara nimero yayo kandi ubwishyu buyinyuraho, bityo uyigire na Default Voice Line ya iPhone yawe"
           }
         }
       }

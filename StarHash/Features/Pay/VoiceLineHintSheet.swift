@@ -1,14 +1,16 @@
 import StarHashKit
 import SwiftUI
 
-/// Shown once, the first time an owner with SIMs on both carriers switches
-/// wallet: iOS dials a code on the iPhone's default voice line, and no app
-/// can choose the SIM, so the wallet just chosen only answers when its SIM
-/// is that line. Both carriers use *182#, so a code on the wrong SIM would
-/// reach the other wallet. The steps to set it, as the Settings app names
-/// them, and Got It.
+/// Shown once, the first time an owner with two SIMs changes the default
+/// one: iOS dials a code on the iPhone's default voice line, and no app
+/// can choose the SIM, so the SIM just chosen only answers when it is that
+/// line. Both carriers use *182#, so a code on the wrong SIM would reach
+/// the other wallet, or on one carrier the other SIM's account. The steps
+/// to set it, as the Settings app names them, and Got It.
 struct VoiceLineHintSheet: View {
     let wallet: OwnerWallets.Wallet
+    /// Both SIMs on one carrier: the title names the number, not the carrier.
+    var sharesCarrier = false
 
     @Environment(\.dismiss) private var dismiss
     @State private var height: CGFloat = 420
@@ -22,9 +24,16 @@ struct VoiceLineHintSheet: View {
         ]
     }
 
+    private var title: String {
+        if sharesCarrier, let sim = wallet.sim {
+            return String(starhash: "Dial from \(sim.formattedDestination)")
+        }
+        return String(starhash: "Dial from your \(wallet.network.name) SIM")
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            SheetHeader(String(starhash: "Dial from your \(wallet.network.name) SIM"))
+            SheetHeader(title)
 
             VStack(spacing: 14) {
                 VStack(spacing: 0) {

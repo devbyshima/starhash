@@ -156,21 +156,30 @@ struct SettingsChoiceMenu<Value: Hashable>: View {
                 }
             }
         } label: {
-            HStack(spacing: 6) {
-                Text(catalog: label(selection))
-                    .starhashFont(16, weight: .medium, relativeTo: .callout)
-                Image(symbol: "chevron.up.chevron.down")
-                    .font(.system(size: 13, weight: .semibold))
-            }
-            .foregroundStyle(Color.starhashPrimaryText)
-            .frame(minHeight: 44)
-            .contentShape(Rectangle())
+            SettingsMenuLabel(text: Text(catalog: label(selection)))
         }
         .menuOrder(.fixed)
         .buttonStyle(.hapticPlain)
         .sensoryFeedback(.selection, trigger: selection)
         .accessibilityLabel(LocalizedStringKey(title))
         .accessibilityValue(label(selection))
+    }
+}
+
+/// A menu's label at a row's end: the choice, and the up and down chevron.
+struct SettingsMenuLabel: View {
+    let text: Text
+
+    var body: some View {
+        HStack(spacing: 6) {
+            text
+                .starhashFont(16, weight: .medium, relativeTo: .callout)
+            Image(symbol: "chevron.up.chevron.down")
+                .font(.system(size: 13, weight: .semibold))
+        }
+        .foregroundStyle(Color.starhashPrimaryText)
+        .frame(minHeight: 44)
+        .contentShape(Rectangle())
     }
 }
 

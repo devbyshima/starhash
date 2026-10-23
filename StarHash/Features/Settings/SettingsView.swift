@@ -219,8 +219,9 @@ private struct SettingsRootList: View {
         }
     }
 
-    /// One SIM or two, and the other's number: money between them is
-    /// filed as moved between the owner's own accounts.
+    /// One SIM or two, the other's number, and which is the default: money
+    /// between them is filed as moved between the owner's own accounts, and
+    /// the default is the one the QR code carries and payments dial from.
     private var simsCard: some View {
         SettingsCard("Your SIMs") {
             SettingsRow(
@@ -243,6 +244,21 @@ private struct SettingsRootList: View {
                         .multilineTextAlignment(.trailing)
                         .font(.starhashNumber(16, relativeTo: .body))
                         .frame(maxWidth: 150)
+                }
+            }
+            // Once both numbers are in, in the Other SIM row's place.
+            if ownWallets.hasTwoSIMs, let sim = ownWallets.defaultSIM {
+                SettingsRow(
+                    symbol: "phone.fill",
+                    title: "Default SIM",
+                    caption: "Your QR code carries it and payments dial from it, so make it your iPhone's default voice line too"
+                ) {
+                    SIMMenu {
+                        SettingsMenuLabel(text: Text(verbatim: sim.formattedDestination))
+                    }
+                    .buttonStyle(.hapticPlain)
+                    .accessibilityLabel("Default SIM")
+                    .accessibilityValue(Text(verbatim: sim.formattedDestination))
                 }
             }
         }
