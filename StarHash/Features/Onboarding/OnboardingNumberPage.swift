@@ -14,12 +14,11 @@ import SwiftUI
 struct OnboardingNumberPage: View {
     let onDone: () -> Void
 
-    @AppStorage(PreferenceKey.profileName) private var name = ""
-    @AppStorage(PreferenceKey.profileNumber) private var number = ""
+    @Environment(Owner.self) private var owner
     @FocusState private var typing: Bool
 
     private var tint: Color { OnboardingPalette.tint }
-    private var hasNumber: Bool { Recipient.ownNumber(number) != nil }
+    private var hasNumber: Bool { owner.defaultSIM != nil }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -57,7 +56,7 @@ struct OnboardingNumberPage: View {
             .padding(.bottom, 22)
 
             VStack(spacing: 12) {
-                ProfileFields(name: $name, number: $number)
+                ProfileFields()
                 Button("Continue", action: onDone)
                     .buttonStyle(.starhashPrimaryGlowing)
                     .padding(.top, 8)

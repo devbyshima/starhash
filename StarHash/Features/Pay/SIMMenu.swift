@@ -6,7 +6,7 @@ import SwiftUI
 /// the one in use checked: Pay's wallet and Settings' Default SIM. The one
 /// chosen becomes the default SIM, the number the QR code carries and the
 /// SIM payments dial from, and the wallet follows its carrier
-/// (`OwnerSIMs`). The first time an owner with two SIMs changes it, the
+/// (`Owner`). The first time an owner with two SIMs changes it, the
 /// hint to make it the iPhone's default voice line, since iOS dials every
 /// code there.
 struct SIMMenu<Label: View>: View {
@@ -16,7 +16,8 @@ struct SIMMenu<Label: View>: View {
     @ViewBuilder let label: () -> Label
 
     @AppStorage(PreferenceKey.seenVoiceLineHint) private var seenVoiceLineHint = false
-    @OwnWallets private var ownWallets
+    @Environment(Owner.self) private var owner
+    private var ownWallets: OwnerWallets { owner.wallets }
     /// The wallet just chosen, while the voice line hint is up.
     @State private var hintFor: OwnerWallets.Wallet?
 
@@ -58,7 +59,7 @@ struct SIMMenu<Label: View>: View {
     private func choose(_ option: OwnerWallets.Wallet) {
         guard option.id != ownWallets.selected?.id else { return }
         let twoSIMs = ownWallets.hasTwoSIMs
-        StarHashPreferences.choose(option)
+        owner.choose(option)
         if twoSIMs, option.sim != nil, !seenVoiceLineHint {
             seenVoiceLineHint = true
             hintFor = option

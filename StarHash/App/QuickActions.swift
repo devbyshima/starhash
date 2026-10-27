@@ -18,7 +18,7 @@ enum QuickActions {
     /// Hands iOS the menu as things stand: run as StarHash comes to the
     /// front and goes to the background, and when the language changes.
     static func update() {
-        let wallet = StarHashPreferences.wallet
+        let wallet = AppEnvironment.owner.wallet
         UIApplication.shared.shortcutItems = [
             item(String(starhash: "Scan to Pay"), symbol: "qrcode", link: "starhash://scan"),
             item(String(starhash: "Balance"), subtitle: wallet.walletName, symbol: "banknote.fill",

@@ -1,27 +1,28 @@
 import StarHashKit
 import SwiftUI
 
-/// The one store and router the app, its views and its App Intents share.
+/// The one store, owner and router the app, its views and its App Intents
+/// share.
 @MainActor
 enum AppEnvironment {
     static let store: StarHashStore = {
+        let store: StarHashStore
         #if DEBUG
-        if DebugLaunch.inMemory { return DebugLaunch.seededStore() }
+        store = DebugLaunch.inMemory ? DebugLaunch.seededStore() : StarHashStore(fileURL: StarHashStore.defaultFileURL)
+        #else
+        store = StarHashStore(fileURL: StarHashStore.defaultFileURL)
         #endif
-        let store = StarHashStore(fileURL: StarHashStore.defaultFileURL)
-        store.ownAccounts = ownAccounts
+        store.ownAccounts = { owner.ownAccounts }
         return store
     }()
 
-    /// The owner's two numbers, with two SIMs set in Settings.
-    static func ownAccounts() -> OwnAccounts? {
-        let defaults = UserDefaults.standard
-        guard defaults.integer(forKey: PreferenceKey.simCount) == 2 else { return nil }
-        return OwnAccounts(
-            numbers: [defaults.string(forKey: PreferenceKey.profileNumber) ?? "", defaults.string(forKey: PreferenceKey.secondNumber) ?? ""],
-            name: defaults.string(forKey: PreferenceKey.profileName)
-        )
-    }
+    /// The owner's name, SIMs and wallet. A change to their own numbers
+    /// files the transfers between them afresh.
+    static let owner: Owner = {
+        let owner = Owner(defaults: .standard)
+        owner.onOwnAccountsChange = { _ = store.markOwnTransfers() }
+        return owner
+    }()
 
     /// Buy's codes. Debug launches with -inMemory start from the defaults
     /// in a throwaway list.

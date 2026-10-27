@@ -50,65 +50,10 @@ struct OwnerWalletsTests {
     }
 }
 
-@Suite("Owner's default SIM")
-struct OwnerSIMsTests {
+@Suite("A number's carrier")
+struct NumberCarrierTests {
     private let mtn = Recipient.ownNumber("0788123456")!
     private let airtel = Recipient.ownNumber("0722123456")!
-
-    @Test func choosingTheOtherSIMTradesTheNumbers() {
-        var sims = OwnerSIMs(number: "0788123456", otherNumber: "0722 123 456", wallet: .mtn)
-        sims.makeDefault(airtel)
-        #expect(sims == OwnerSIMs(number: "0722123456", otherNumber: "0788 123 456", wallet: .airtel))
-        // The default again changes nothing.
-        sims.makeDefault(airtel)
-        #expect(sims.number == "0722123456")
-    }
-
-    @Test func twoSIMsOnOneCarrierKeepTheWallet() {
-        var sims = OwnerSIMs(number: "0788123456", otherNumber: "0791 234 567", wallet: .mtn)
-        sims.makeDefault(Recipient.ownNumber("0791234567")!)
-        #expect(sims == OwnerSIMs(number: "0791234567", otherNumber: "0788 123 456", wallet: .mtn))
-    }
-
-    @Test func aWalletChosenBeforeTheDefaultMakesItsSIMTheDefault() {
-        // Airtel Money chosen on Pay while the MTN SIM came first.
-        var sims = OwnerSIMs(number: "0788123456", otherNumber: "0722 123 456", wallet: .airtel)
-        sims.followWallet()
-        #expect(sims == OwnerSIMs(number: "0722123456", otherNumber: "0788 123 456", wallet: .airtel))
-    }
-
-    @Test func theWalletFollowsTheDefaultSIM() {
-        // The default SIM's number changed to an Airtel one.
-        var sims = OwnerSIMs(number: "0733123456", otherNumber: "0788 123 456", wallet: .mtn)
-        sims.followDefaultSIM()
-        #expect(sims.wallet == .airtel)
-        #expect(sims.number == "0733123456")
-    }
-
-    @Test func aWalletNeitherSIMIsOnGoesToTheDefaults() {
-        // Airtel Money left chosen, and both SIMs on MTN.
-        var sims = OwnerSIMs(number: "0788123456", otherNumber: "0791 234 567", wallet: .airtel)
-        sims.followWallet()
-        #expect(sims.number == "0788123456")
-        sims.followDefaultSIM()
-        #expect(sims.wallet == .mtn)
-    }
-
-    @Test func oneSIMIsLeftAlone() {
-        // One SIM on another carrier than the wallet is Profile's warning to
-        // give, not a change to make.
-        let before = OwnerSIMs(number: "0788123456", otherNumber: nil, wallet: .airtel)
-        var sims = before
-        sims.followWallet()
-        sims.followDefaultSIM()
-        #expect(sims == before)
-        // Nor before the other number is whole.
-        var typing = OwnerSIMs(number: "0788123456", otherNumber: "0722 12", wallet: .airtel)
-        typing.followWallet()
-        typing.followDefaultSIM()
-        #expect(typing.number == "0788123456")
-        #expect(typing.wallet == .airtel)
-    }
 
     @Test func aScannedNumbersCarrierPicksTheCode() throws {
         // A friend's StarHash code for an Airtel number, and one for MTN.

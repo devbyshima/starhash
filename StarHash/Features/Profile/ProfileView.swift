@@ -8,10 +8,7 @@ import SwiftUI
 /// iPhone, in Settings' preferences and the photo's own file; only the
 /// photo, which goes with the code, reaches StarHash's server.
 struct ProfileView: View {
-    @AppStorage(PreferenceKey.profileName) private var name = ""
-    @AppStorage(PreferenceKey.profileNumber) private var number = ""
-    @AppStorage(PreferenceKey.simCount) private var simCount = 1
-    @AppStorage(PreferenceKey.secondNumber) private var otherNumber = ""
+    @Environment(Owner.self) private var owner
     @FocusState private var editsName: Bool
     /// The scroll view's visible height, so the empty state can sit in the
     /// middle of the room under the fields.
@@ -19,7 +16,7 @@ struct ProfileView: View {
     /// The photo, name and number's height, the part above the code.
     @State private var headerHeight: CGFloat = 0
 
-    private var recipient: Recipient? { OwnerProfile(name: name, number: number).recipient }
+    private var recipient: Recipient? { owner.codeRecipient }
 
     var body: some View {
         ScrollView {
@@ -31,13 +28,7 @@ struct ProfileView: View {
                     nameField
                         .padding(.top, 18)
 
-                    ProfileFields(
-                        name: $name,
-                        number: $number,
-                        showsName: false,
-                        centred: true,
-                        otherNumber: simCount == 2 ? $otherNumber : nil
-                    )
+                    ProfileFields(showsName: false, centred: true, showsOtherSIM: owner.usesTwoSIMs)
                         .frame(maxWidth: 360)
                         .padding(.top, 20)
                 }
@@ -82,7 +73,7 @@ struct ProfileView: View {
     private var nameField: some View {
         TextField(
             String(starhash: "Your name"),
-            text: $name,
+            text: Binding(get: { owner.name }, set: { owner.setName($0) }),
             prompt: Text("Your name").foregroundStyle(Color.starhashTertiaryText),
             axis: .vertical
         )
@@ -94,10 +85,10 @@ struct ProfileView: View {
         .textContentType(.name)
         .textInputAutocapitalization(.words)
         .submitLabel(.done)
-        .onChange(of: name) { _, typed in
+        .onChange(of: owner.name) { _, typed in
             // A return ends the name rather than starting a line.
             if typed.contains("\n") {
-                name = typed.replacingOccurrences(of: "\n", with: "")
+                owner.setName(typed.replacingOccurrences(of: "\n", with: ""))
                 editsName = false
             }
         }

@@ -21,7 +21,8 @@ struct NotificationSettingsView: View {
     @AppStorage(PreferenceKey.notificationAmounts) private var showsAmounts = true
     @AppStorage(PreferenceKey.notificationSound) private var sound = true
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
-    @OwnWallets private var ownWallets
+    @Environment(Owner.self) private var owner
+    private var ownWallets: OwnerWallets { owner.wallets }
     @AppStorage(PreferenceKey.lastVerifiedAt) private var lastVerifiedAt: Double = 0
     @AppStorage(PreferenceKey.lastMessageAt) private var lastMessageAt: Double = 0
     @AppStorage(PreferenceKey.autoVerifySince) private var autoVerifySince: Double = 0

@@ -19,7 +19,7 @@ enum StarHashWidgetData {
     /// widget to draw them.
     static func publish(shortcuts: USSDShortcutList) {
         guard let appGroup, let defaults = UserDefaults(suiteName: appGroup) else { return }
-        let snapshot = WidgetSnapshot.make(shortcuts: shortcuts.shortcuts, wallet: StarHashPreferences.wallet)
+        let snapshot = WidgetSnapshot.make(shortcuts: shortcuts.shortcuts, wallet: AppEnvironment.owner.wallet)
         defaults.set(snapshot.encoded(), forKey: WidgetSnapshot.key)
         WidgetCenter.shared.reloadAllTimelines()
     }

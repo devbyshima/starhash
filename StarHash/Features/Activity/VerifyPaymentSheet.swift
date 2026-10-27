@@ -128,7 +128,7 @@ struct VerifyPaymentSheet: View {
     /// Its fee from the carriers' prices, for the wallet it was dialled
     /// with, as Mark as Confirmed did.
     private func confirmWithoutMessage(_ transaction: StarHashKit.Transaction) {
-        let confirmed = transaction.confirmedByHand(wallet: StarHashPreferences.wallet)
+        let confirmed = transaction.confirmedByHand(wallet: AppEnvironment.owner.wallet)
         withAnimation(.smooth(duration: 0.3)) { store.update(confirmed) }
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         dismiss()

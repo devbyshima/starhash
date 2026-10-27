@@ -20,15 +20,6 @@ struct StarHashApp: App {
             // Seen too, so it does not cover the page a screenshot is after
             // (-note shows it anyway).
             UserDefaults.standard.set(true, forKey: PreferenceKey.hasSeenDeveloperNote)
-            // Onboarding asks for the wallet; skipping it needs one.
-            if (UserDefaults.standard.string(forKey: PreferenceKey.wallet) ?? "").isEmpty {
-                UserDefaults.standard.set(Recipient.Network.mtn.rawValue, forKey: PreferenceKey.wallet)
-            }
-        }
-        if let wallet = DebugLaunch.value(after: "-wallet") {
-            // "none" clears it, for onboarding as a fresh install sees it.
-            let network = Recipient.Network(rawValue: wallet)
-            UserDefaults.standard.set(network?.rawValue ?? "", forKey: PreferenceKey.wallet)
         }
         // Not "-appearance": a launch argument named after a key overrides
         // that key's saved value for the whole run.
@@ -38,18 +29,27 @@ struct StarHashApp: App {
         if DebugLaunch.arguments.contains("-nearbyHere") {
             UserDefaults.standard.set(true, forKey: PreferenceKey.nearbyLocation)
         }
+        let owner = AppEnvironment.owner
         // -profile: a name and number, for the QR code's screens.
         if DebugLaunch.arguments.contains("-profile") {
-            UserDefaults.standard.set("Shima Serein", forKey: PreferenceKey.profileName)
-            UserDefaults.standard.set("0788123456", forKey: PreferenceKey.profileNumber)
+            owner.setName("Shima Serein")
+            owner.setNumber("0788123456")
         }
         // -twoSIMs [airtel]: -profile's number and a second SIM, on MTN
         // too or on Airtel, for the default SIM's screens.
         if DebugLaunch.arguments.contains("-twoSIMs") {
-            let other = DebugLaunch.value(after: "-twoSIMs") == "airtel" ? "0722 123 456" : "0791 234 567"
-            UserDefaults.standard.set("0788123456", forKey: PreferenceKey.profileNumber)
-            UserDefaults.standard.set(other, forKey: PreferenceKey.secondNumber)
-            UserDefaults.standard.set(2, forKey: PreferenceKey.simCount)
+            owner.setNumber("0788123456")
+            owner.useTwoSIMs()
+            owner.setOtherNumber(DebugLaunch.value(after: "-twoSIMs") == "airtel" ? "0722123456" : "0791234567")
+        }
+        // Onboarding asks for the wallet; skipping it needs one. The wallet
+        // comes after the numbers, so it leads as it does at launch.
+        if DebugLaunch.arguments.contains("-skipOnboarding"), owner.chosenWallet == nil {
+            owner.choose(.mtn)
+        }
+        if let wallet = DebugLaunch.value(after: "-wallet") {
+            // "none" clears it, for onboarding as a fresh install sees it.
+            owner.choose(Recipient.Network(rawValue: wallet))
         }
         if DebugLaunch.arguments.contains("-resetOnboarding") {
             UserDefaults.standard.set(false, forKey: PreferenceKey.hasOnboarded)
@@ -88,6 +88,7 @@ struct StarHashApp: App {
                     .environment(\.locale, (AppLanguage(rawValue: language) ?? .system).locale)
                     .id(language)
                     .environment(store)
+                    .environment(AppEnvironment.owner)
                     .environment(router)
                     .environment(shortcuts)
                     .tint(Color.starhashPrimaryText)

@@ -8,7 +8,8 @@ struct ScamNoticeSheet: View {
     let notice: ScamNotice
 
     @Environment(\.dismiss) private var dismiss
-    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
+    @Environment(Owner.self) private var owner
+    private var wallet: Recipient.Network { owner.wallet }
     @State private var height: CGFloat = 0
 
     private var tips: [(symbol: String, text: String)] {

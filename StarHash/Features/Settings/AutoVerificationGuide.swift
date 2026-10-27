@@ -39,7 +39,8 @@ struct AutoVerificationGuide: View {
     @AppStorage(PreferenceKey.lastMessageAt) private var lastMessageAt: Double = 0
     @AppStorage(PreferenceKey.autoVerifySince) private var autoVerifySince: Double = 0
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
-    @OwnWallets private var ownWallets
+    @Environment(Owner.self) private var owner
+    private var ownWallets: OwnerWallets { owner.wallets }
 
     @State private var step = SettingsLaunch.guideOutcome == nil ? SettingsLaunch.guideStep : Self.checkStep
     /// Whether the step's action (Add Shortcut, Open Shortcuts) has been
