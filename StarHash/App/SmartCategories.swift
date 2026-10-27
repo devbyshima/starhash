@@ -34,7 +34,7 @@ enum SmartCategories {
         defer { running = false }
 
         var byName: [String: [StarHashKit.Transaction]] = [:]
-        for t in store.transactions where t.direction == .outgoing && t.category == nil && t.counterparty.kind == .merchant {
+        for t in store.transactions where t.direction == .outgoing && t.category == nil && !t.categoryChosenByHand && t.counterparty.kind == .merchant {
             if let category = TransactionCategorizer.category(of: t) {
                 var named = t
                 named.category = category.rawValue
@@ -52,7 +52,7 @@ enum SmartCategories {
             guard let category = await ask(about: name) else { continue }
             for t in byName[name] ?? [] {
                 // Changed by hand, or gone, while the model thought.
-                guard var current = store.transaction(id: t.id), current.category == nil else { continue }
+                guard var current = store.transaction(id: t.id), current.category == nil, !current.categoryChosenByHand else { continue }
                 current.category = category.rawValue
                 store.update(current)
             }

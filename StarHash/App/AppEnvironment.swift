@@ -20,7 +20,7 @@ enum AppEnvironment {
     /// files the transfers between them afresh.
     static let owner: Owner = {
         let owner = Owner(defaults: .standard)
-        owner.onOwnAccountsChange = { _ = store.markOwnTransfers() }
+        owner.onOwnAccountsChange = { _ = store.refileOwnTransfers() }
         return owner
     }()
 
