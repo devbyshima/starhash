@@ -1,9 +1,7 @@
 {
   "fill-specializations" : [
     {
-      "value" : {
-        "solid" : "srgb:0.39216,0.82353,0.48235,1.00000"
-      }
+      "value" : "system-light"
     },
     {
       "appearance" : "dark",
@@ -16,19 +14,24 @@
         {
           "blend-mode-specializations" : [
             {
-              "value" : "multiply"
+              "value" : "screen"
             },
             {
               "appearance" : "dark",
-              "value" : "multiply"
+              "value" : "screen"
+            },
+            {
+              "appearance" : "tinted",
+              "value" : "screen"
             }
           ],
           "fill-specializations" : [
             {
+              "value" : "system-dark"
+            },
+            {
               "appearance" : "dark",
-              "value" : {
-                "solid" : "srgb:0.39216,0.82353,0.48235,1.00000"
-              }
+              "value" : "system-light"
             }
           ],
           "glass" : true,
