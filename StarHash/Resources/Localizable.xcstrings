@@ -349,6 +349,22 @@
         }
       }
     },
+    "Change your wallet, or set Two SIMs in Settings.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hindura konti, cyangwa uhitemo SIM Ebyiri mu Igenamiterere."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changez de portefeuille, ou choisissez Deux SIM dans Réglages."
+          }
+        }
+      }
+    },
     "Transactions keeps each payment by day,\nwith a chart and search.": {
       "localizations": {
         "rw": {

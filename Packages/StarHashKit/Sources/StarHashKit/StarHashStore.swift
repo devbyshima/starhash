@@ -181,17 +181,29 @@ public final class StarHashStore {
         return transaction
     }
 
-    /// Files every transaction with one of the owner's own numbers as
-    /// `ownAccounts`, as the numbers are first given or change. Returns how
-    /// many it filed.
+    /// Files the owner's own transfers afresh, as their numbers are first
+    /// given or change: money to or from one of their numbers as
+    /// `ownAccounts`, and money filed so whose number is no longer theirs
+    /// back to what the rules make of it. A category chosen by hand stays,
+    /// and so does a move the message itself calls their own (MoMo's
+    /// virtual card), which has no number to stop being theirs. Returns
+    /// how many it changed.
     @discardableResult
-    public func markOwnTransfers() -> Int {
+    public func refileOwnTransfers() -> Int {
+        let own = TransactionCategory.ownAccounts.rawValue
         var count = 0
-        for index in transactions.indices where transactions[index].category != TransactionCategory.ownAccounts.rawValue {
-            if let own = ownCategory(for: transactions[index].counterparty) {
+        for index in transactions.indices {
+            let transaction = transactions[index]
+            guard !transaction.categoryChosenByHand, transaction.counterparty.kind == .phone else { continue }
+            let owned = ownCategory(for: transaction.counterparty) != nil
+            if owned, transaction.category != own {
                 transactions[index].category = own
-                count += 1
+            } else if !owned, transaction.category == own {
+                transactions[index].category = TransactionCategorizer.category(of: transaction)?.rawValue
+            } else {
+                continue
             }
+            count += 1
         }
         if count > 0 { sortAndSave() }
         return count

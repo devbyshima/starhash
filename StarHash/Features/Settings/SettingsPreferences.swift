@@ -21,18 +21,9 @@ extension PreferenceKey {
     /// Whether a message that looks like the wallet's but may be a scam is
     /// held back with a warning. On unless turned off in Settings.
     static let scamWarnings = "scamWarnings"
-    /// The owner's name and number, for the QR code others scan to pay
-    /// them (`OwnerProfile`). With two SIMs, the number is the default
-    /// SIM's (`OwnerSIMs`).
-    static let profileName = "profileName"
-    static let profileNumber = "profileNumber"
-    /// How many SIMs pay from this iPhone (1 or 2), and the other one's
-    /// number: money between the two is moved, not spent (`OwnAccounts`).
-    static let simCount = "simCount"
     /// The language StarHash speaks (`AppLanguage`), the iPhone's until one
     /// is chosen.
     static let appLanguage = "appLanguage"
-    static let secondNumber = "secondNumber"
     /// Whether the hint to set the iPhone's default voice line, shown the
     /// first time an owner with two SIMs changes the default one, has been
     /// seen.
@@ -95,46 +86,9 @@ enum StarHashPreferences {
     static var scamWarnings: Bool { bool(PreferenceKey.scamWarnings, default: true) }
     static var smartCategories: Bool { bool(PreferenceKey.smartCategories, default: true) }
 
-    /// The owner's name, numbers and photo as Settings keeps them; the
-    /// other SIM's only while they say they have two.
-    @MainActor
-    static var profile: OwnerProfile {
-        let defaults = UserDefaults.standard
-        let other = defaults.integer(forKey: PreferenceKey.simCount) == 2 ? defaults.string(forKey: PreferenceKey.secondNumber) : nil
-        return OwnerProfile(
-            name: defaults.string(forKey: PreferenceKey.profileName),
-            number: defaults.string(forKey: PreferenceKey.profileNumber),
-            otherNumber: other.flatMap { $0.isEmpty ? nil : $0 },
-            photo: ProfilePhoto.shared.data
-        )
-    }
-
-    @MainActor
-    static func saveProfile(_ profile: OwnerProfile) {
-        let defaults = UserDefaults.standard
-        defaults.set(profile.name ?? "", forKey: PreferenceKey.profileName)
-        defaults.set(profile.number ?? "", forKey: PreferenceKey.profileNumber)
-        // A backup with a second number brings the second SIM back with it.
-        if let other = profile.otherNumber, !other.isEmpty {
-            defaults.set(other, forKey: PreferenceKey.secondNumber)
-            defaults.set(2, forKey: PreferenceKey.simCount)
-        }
-        if let photo = profile.photo { ProfilePhoto.shared.restore(photo) }
-    }
-
     /// Pay or Buy, the page StarHash opens on.
     static var defaultPage: AppTab {
         UserDefaults.standard.string(forKey: PreferenceKey.defaultPage) == AppTab.buy.rawValue ? .buy : .pay
-    }
-
-    /// MTN MoMo until the owner picks a wallet, which onboarding asks for
-    /// before anything can be dialled.
-    static var wallet: Recipient.Network { chosenWallet ?? .mtn }
-
-    /// The wallet the owner picked, nil before onboarding has asked: what a
-    /// Shortcuts or Siri action checks, since it can run before onboarding.
-    static var chosenWallet: Recipient.Network? {
-        UserDefaults.standard.string(forKey: PreferenceKey.wallet).flatMap(Recipient.Network.init(rawValue:))
     }
 
     /// Nil until the shortcut has run once.
@@ -209,6 +163,8 @@ enum AppReset {
         if let domain = Bundle.main.bundleIdentifier {
             UserDefaults.standard.removePersistentDomain(forName: domain)
         }
+        // The owner's name, SIMs and wallet went with the rest.
+        AppEnvironment.owner.reload()
         try? FileManager.default.removeItem(at: URL.temporaryDirectory.appending(path: "Shortcut", directoryHint: .isDirectory))
         router.openTransactionID = nil
         router.show(.pay)

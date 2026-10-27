@@ -60,6 +60,15 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
     public var balanceAfter: Int?
     /// A free label such as "restaurant".
     public var category: String?
+    /// Whether the owner picked `category` themselves, on its page:
+    /// StarHash never changes one they did.
+    public var categoryChosenByHand: Bool {
+        get { chosenByHand ?? false }
+        set { chosenByHand = newValue ? true : nil }
+    }
+    /// Kept only when true, so files and backups from before it was kept
+    /// read as false.
+    private var chosenByHand: Bool?
     public var location: Coordinate?
     /// The wallet a payment was dialled with, or whose message it came
     /// from: for its fee when it is confirmed by hand, and so a message

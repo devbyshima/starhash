@@ -28,7 +28,8 @@ struct BackupDocument: FileDocument {
 enum DataTransfer {
     /// The backup of everything as it stands now.
     static func export(store: StarHashStore, shortcuts: USSDShortcutList) throws -> BackupDocument {
-        let profile = StarHashPreferences.profile
+        var profile = AppEnvironment.owner.profile
+        profile.photo = ProfilePhoto.shared.data
         let backup = StarHashBackup(
             appVersion: SettingsVersion.short,
             transactions: store.transactions,
@@ -65,9 +66,9 @@ enum DataTransfer {
 
         let transactions = store.merge(backup.transactions)
         let codes = shortcuts.merge(backup.shortcuts ?? [])
-        if let profile = backup.profile {
-            let current = StarHashPreferences.profile
-            if (current.number ?? "").isEmpty, (current.name ?? "").isEmpty { StarHashPreferences.saveProfile(profile) }
+        // The profile only when none is set, its photo with it.
+        if let profile = backup.profile, AppEnvironment.owner.restore(profile), let photo = profile.photo {
+            ProfilePhoto.shared.restore(photo)
         }
 
         guard transactions + codes > 0 else {

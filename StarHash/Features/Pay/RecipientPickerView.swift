@@ -39,7 +39,6 @@ struct RecipientPickerView: View {
     /// already on would push the wrong one under it.
     @State private var shownNearbyFix: LocationFix?
     @State private var listTouched = false
-    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
 
     @State private var query: String
     /// The search field in the header, rather than the title.

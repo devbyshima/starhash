@@ -102,11 +102,10 @@ struct MyCodeShareButton: View {
 /// itself, turning into the QR code at a tap, with Share under it; or,
 /// before they have given their number, a field for it.
 struct MyCodeSheet: View {
-    @AppStorage(PreferenceKey.profileName) private var name = ""
-    @AppStorage(PreferenceKey.profileNumber) private var number = ""
+    @Environment(Owner.self) private var owner
     @State private var height: CGFloat = 0
 
-    private var recipient: Recipient? { OwnerProfile(name: name, number: number).recipient }
+    private var recipient: Recipient? { owner.codeRecipient }
 
     var body: some View {
         VStack(spacing: 18) {
@@ -117,7 +116,7 @@ struct MyCodeSheet: View {
                 MyCodeShareButton(recipient: recipient)
                     .buttonStyle(.sheetPrimary)
             } else {
-                ProfileFields(name: $name, number: $number, onSheet: true)
+                ProfileFields(onSheet: true)
             }
         }
         .padding(.horizontal, 20)
@@ -128,10 +127,8 @@ struct MyCodeSheet: View {
 }
 
 /// The name and number fields, as onboarding, Profile and My Code show
-/// them: the number checked as it is typed.
+/// them: the number checked as it is typed, and kept (`Owner`) once whole.
 struct ProfileFields: View {
-    @Binding var name: String
-    @Binding var number: String
     /// In a sheet's card rather than on the page.
     var onSheet = false
     /// The name's field too; Profile types the name large in its header.
@@ -139,13 +136,17 @@ struct ProfileFields: View {
     /// The number in the middle of its field, with no symbol, as Profile
     /// sets everything down the middle.
     var centred = false
-    /// The other SIM's number, on Profile when the owner has two.
-    var otherNumber: Binding<String>?
+    /// The other SIM's number beside it, on Profile when the owner has two.
+    var showsOtherSIM = false
 
+    @Environment(Owner.self) private var owner
     @FocusState private var focus: Field?
     @State private var draftNumber = ""
     @State private var draftOther = ""
-    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
+
+    private var name: Binding<String> {
+        Binding(get: { owner.name }, set: { owner.setName($0) })
+    }
 
     private enum Field { case name, number, other }
 
@@ -160,14 +161,15 @@ struct ProfileFields: View {
     private var problem: String? {
         let digits = draftNumber.filter(\.isNumber)
         guard digits.count >= 10 else { return nil }
-        guard let recipient = Recipient.ownNumber(draftNumber) else {
+        guard Recipient.ownNumber(draftNumber) != nil else {
             return String(starhash: "Enter a Rwandan mobile number: 078, 079, 072 or 073.")
         }
-        // With two SIMs both in, the wallet follows the default SIM, this
-        // one, so either carrier is right.
-        let hasOtherSIM = otherNumber.flatMap { Recipient.ownNumber($0.wrappedValue) } != nil
-        if let network = recipient.network, network != wallet, !hasOtherSIM {
-            return String(starhash: "That is an \(network.name) number; you pay with \(wallet.walletName).")
+        // With two SIMs both in, the wallet follows the default SIM, so
+        // either carrier is right. With one, the number stays as typed: the
+        // owner may pay from a second SIM StarHash does not know.
+        if let network = owner.defaultSIMOnOtherCarrier {
+            return String(starhash: "That is an \(network.name) number; you pay with \(owner.wallet.walletName).")
+                + " " + String(starhash: "Change your wallet, or set Two SIMs in Settings.")
         }
         return nil
     }
@@ -177,7 +179,7 @@ struct ProfileFields: View {
             if showsName {
             field(
                 "Your name",
-                text: $name,
+                text: name,
                 prompt: "Name (optional)",
                 symbol: "person.fill"
             )
@@ -191,13 +193,13 @@ struct ProfileFields: View {
 
             // With two SIMs, both numbers side by side in one capsule, a
             // line between them.
-            if let otherNumber {
+            if showsOtherSIM {
                 HStack(spacing: 0) {
                     numberField
                     Rectangle()
                         .fill(Color.sheetDivider)
                         .frame(width: 1, height: 28)
-                    otherField(otherNumber)
+                    otherField
                 }
                 .modifier(ProfileFieldBackground(onSheet: onSheet, outlined: centred))
             } else {
@@ -215,15 +217,13 @@ struct ProfileFields: View {
         .animation(.smooth(duration: 0.2), value: problem)
         .animation(.smooth(duration: 0.2), value: otherProblem)
         .onAppear {
-            if draftNumber.isEmpty, let saved = Recipient.ownNumber(number) { draftNumber = saved.formattedDestination }
-            if draftOther.isEmpty, let saved = otherNumber.flatMap({ Recipient.ownNumber($0.wrappedValue) }) {
-                draftOther = saved.formattedDestination
-            }
+            if draftNumber.isEmpty, let saved = owner.defaultSIM { draftNumber = saved.formattedDestination }
+            if draftOther.isEmpty, let saved = owner.otherSIM { draftOther = saved.formattedDestination }
         }
         // Another default SIM chosen on Pay or in Settings trades the two
         // numbers; the fields follow.
-        .onChange(of: number) { _, saved in draftNumber = Self.draft(draftNumber, following: saved) }
-        .onChange(of: otherNumber?.wrappedValue) { _, saved in draftOther = Self.draft(draftOther, following: saved ?? "") }
+        .onChange(of: owner.defaultSIM?.destination ?? "") { _, saved in draftNumber = Self.draft(draftNumber, following: saved) }
+        .onChange(of: owner.otherSIM?.destination ?? "") { _, saved in draftOther = Self.draft(draftOther, following: saved) }
     }
 
     private var numberField: some View {
@@ -237,19 +237,14 @@ struct ProfileFields: View {
         .keyboardType(.phonePad)
         .textContentType(.telephoneNumber)
         .onChange(of: draftNumber) { old, typed in
-            // Saved only once it is a number the code can carry.
-            if let recipient = Recipient.ownNumber(typed) {
-                number = recipient.destination
-                // The whole number is in and it is right: the number
-                // pad, which has no return key, goes by itself.
-                if Recipient.ownNumber(old) == nil, problem == nil { dismissKeyboard() }
-            } else if typed.filter(\.isNumber).isEmpty {
-                number = ""
-            }
+            // Kept only once it is a number the code can carry. The whole
+            // number is in and it is right: the number pad, which has no
+            // return key, goes by itself.
+            if owner.setNumber(typed), Recipient.ownNumber(old) == nil, problem == nil { dismissKeyboard() }
         }
     }
 
-    private func otherField(_ otherNumber: Binding<String>) -> some View {
+    private var otherField: some View {
         field(
             "Other SIM",
             text: $draftOther,
@@ -260,14 +255,7 @@ struct ProfileFields: View {
         .keyboardType(.phonePad)
         .textContentType(.telephoneNumber)
         .onChange(of: draftOther) { old, typed in
-            // Kept as Settings' Other SIM row keeps it, so the two show
-            // the same number.
-            if let recipient = Recipient.ownNumber(typed) {
-                otherNumber.wrappedValue = recipient.formattedDestination
-                if Recipient.ownNumber(old) == nil { dismissKeyboard() }
-            } else if typed.filter(\.isNumber).isEmpty {
-                otherNumber.wrappedValue = ""
-            }
+            if owner.setOtherNumber(typed), Recipient.ownNumber(old) == nil { dismissKeyboard() }
         }
     }
 
@@ -312,7 +300,7 @@ struct ProfileFields: View {
         }
         // Two numbers side by side share the width, so each keeps a
         // little less to either side.
-        .padding(.horizontal, otherNumber == nil ? 18 : 10)
+        .padding(.horizontal, showsOtherSIM ? 10 : 18)
         .frame(minHeight: StarHashMetrics.primaryButtonHeight)
     }
 }

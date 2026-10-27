@@ -9,8 +9,9 @@ import SwiftUI
 /// (Rwanda's one currency needs no pill of its own; the amount reads out
 /// with it.)
 struct WalletPill: View {
-    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
-    @OwnWallets private var ownWallets
+    @Environment(Owner.self) private var owner
+    private var wallet: Recipient.Network { owner.wallet }
+    private var ownWallets: OwnerWallets { owner.wallets }
 
     var body: some View {
         SIMMenu(answersDebugHint: true) {

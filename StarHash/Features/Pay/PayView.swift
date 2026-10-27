@@ -11,7 +11,8 @@ struct PayView: View {
     @Environment(AppRouter.self) private var router
     @AppStorage(PreferenceKey.saveTransactions) private var saveTransactions = true
     @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
-    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
+    @Environment(Owner.self) private var owner
+    private var wallet: Recipient.Network { owner.wallet }
 
     @State private var input = AmountInput()
     /// The recipient picker when it is showing.

@@ -238,6 +238,8 @@ struct TransactionDetailPage: View {
     private func setCategory(_ category: String?, of transaction: StarHashKit.Transaction) {
         var changed = transaction
         changed.category = category
+        // Picked here, so StarHash leaves it as it is from now on.
+        changed.categoryChosenByHand = true
         store.update(changed)
     }
 

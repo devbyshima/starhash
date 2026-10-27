@@ -76,11 +76,11 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.saveTransactions) private var saveTransactions = true
     @AppStorage(PreferenceKey.scamWarnings) private var scamWarnings = true
     @AppStorage(PreferenceKey.smartCategories) private var smartCategories = true
-    @AppStorage(PreferenceKey.profileName) private var profileName = ""
-    @AppStorage(PreferenceKey.profileNumber) private var profileNumber = ""
-    @AppStorage(PreferenceKey.simCount) private var simCount = 1
     @AppStorage(PreferenceKey.appLanguage) private var appLanguage = AppLanguage.system.rawValue
-    @AppStorage(PreferenceKey.secondNumber) private var secondNumber = ""
+    @Environment(Owner.self) private var owner
+    private var ownWallets: OwnerWallets { owner.wallets }
+    /// The other SIM's number as it is typed, until it is whole.
+    @State private var draftSecondNumber = ""
     @FocusState private var editsSecondNumber: Bool
     /// Going back to one SIM with two numbers in: which one stays.
     @State private var choosesSIMToKeep = false
@@ -94,8 +94,6 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.lastMessageAt) private var lastMessageAt: Double = 0
     @AppStorage(PreferenceKey.autoVerifySince) private var autoVerifySince: Double = 0
     @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
-    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
-    @OwnWallets private var ownWallets
     @AppStorage(PreferenceKey.appLock) private var appLock = false
 
     @State private var confirmsDeleteAll = false
@@ -197,8 +195,7 @@ private struct SettingsRootList: View {
     /// The owner's number under their name, and their other SIM's after
     /// it when they have two.
     private var profileNumbers: String? {
-        let numbers = [profileNumber] + (simCount == 2 ? [secondNumber] : [])
-        let shown = numbers.compactMap { Recipient.ownNumber($0)?.formattedDestination }
+        let shown = [owner.defaultSIM, owner.otherSIM].compactMap { $0?.formattedDestination }
         return shown.isEmpty ? nil : shown.joined(separator: " \u{00B7} ")
     }
 
@@ -209,7 +206,7 @@ private struct SettingsRootList: View {
                 HStack(spacing: 12) {
                     ProfilePhotoView(size: 46)
                     SettingsRowText(
-                        title: profileName.isEmpty ? String(starhash: "Profile") : profileName,
+                        title: owner.name.isEmpty ? String(starhash: "Profile") : owner.name,
                         status: profileNumbers
                     )
                     Spacer(minLength: 8)
@@ -239,9 +236,9 @@ private struct SettingsRootList: View {
             }
             // Asked for here until it is in; from then on it is part of the
             // profile (the card above shows it, Profile changes it).
-            if simCount == 2, Recipient.ownNumber(secondNumber) == nil {
+            if owner.usesTwoSIMs, owner.otherSIM == nil {
                 SettingsRow(symbol: "simcard.fill", title: "Other SIM") {
-                    TextField("07X XXX XXXX", text: $secondNumber)
+                    TextField("07X XXX XXXX", text: $draftSecondNumber)
                         .focused($editsSecondNumber)
                         .keyboardType(.phonePad)
                         .textContentType(.telephoneNumber)
@@ -269,20 +266,17 @@ private struct SettingsRootList: View {
             }
         }
         .sheet(isPresented: $choosesSIMToKeep) {
-            KeepSIMSheet(sims: [profileNumber, secondNumber].compactMap(Recipient.ownNumber)) { sim in
+            KeepSIMSheet(sims: [owner.defaultSIM, owner.otherSIM].compactMap { $0 }) { sim in
                 choosesSIMToKeep = false
                 keepOnly(sim)
             }
         }
-        .onChange(of: simCount) { store.markOwnTransfers() }
-        .onChange(of: secondNumber) {
-            store.markOwnTransfers()
+        .onChange(of: draftSecondNumber) { _, typed in
             // The phone pad has no return key: a whole number is the end of
-            // it, so the keyboard goes once one is in, and it is spaced as
-            // Profile shows it.
-            if let recipient = Recipient.ownNumber(secondNumber) {
+            // it, so the keyboard goes once one is in, with its row.
+            if owner.setOtherNumber(typed) {
                 editsSecondNumber = false
-                if secondNumber != recipient.formattedDestination { secondNumber = recipient.formattedDestination }
+                draftSecondNumber = ""
             }
         }
     }
@@ -290,35 +284,30 @@ private struct SettingsRootList: View {
     /// Which of the SIM card's rows show: Other SIM while its number is
     /// asked for, Default SIM once both are in.
     private var simRowsShown: [Bool] {
-        [simCount == 2 && Recipient.ownNumber(secondNumber) == nil, ownWallets.hasTwoSIMs]
+        [owner.usesTwoSIMs && owner.otherSIM == nil, ownWallets.hasTwoSIMs]
     }
 
     /// Two SIMs to one: when both numbers are in, the owner says which SIM
     /// stays rather than StarHash dropping the second.
     private var simCountBinding: Binding<Int> {
         Binding(
-            get: { simCount },
+            get: { owner.usesTwoSIMs ? 2 : 1 },
             set: { count in
-                if count == 1, simCount == 2,
-                   Recipient.ownNumber(profileNumber) != nil, Recipient.ownNumber(secondNumber) != nil {
+                if count == 2 {
+                    owner.useTwoSIMs()
+                } else if owner.usesTwoSIMs, owner.defaultSIM != nil, owner.otherSIM != nil {
                     choosesSIMToKeep = true
                 } else {
-                    simCount = count
+                    owner.useOneSIM()
                 }
             }
         )
     }
 
-    /// The SIM kept becomes the profile's number, the other is cleared, and
-    /// the wallet follows the kept SIM's network, since it is the one that
-    /// pays now.
+    /// The SIM kept becomes the profile's number and the other is
+    /// forgotten; the wallet follows the kept SIM's network (`Owner`).
     private func keepOnly(_ sim: Recipient) {
-        withAnimation(SettingsCaptionMotion.open) {
-            profileNumber = sim.destination
-            secondNumber = ""
-            simCount = 1
-        }
-        if let network = sim.network, network != wallet { wallet = network }
+        withAnimation(SettingsCaptionMotion.open) { owner.useOneSIM(keeping: sim) }
     }
 
     private var transactionsCard: some View {

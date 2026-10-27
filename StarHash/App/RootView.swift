@@ -9,7 +9,7 @@ import SwiftUI
 /// news shows What's New, never a new install's.
 struct RootView: View {
     @AppStorage(PreferenceKey.hasOnboarded) private var hasOnboarded = false
-    @AppStorage(PreferenceKey.wallet) private var wallet = ""
+    @Environment(Owner.self) private var owner
     @AppStorage(PreferenceKey.hasSeenDeveloperNote) private var hasSeenDeveloperNote = false
     @AppStorage(PreferenceKey.hasSeenReviewNote) private var hasSeenReviewNote = false
     @Environment(AppRouter.self) private var router
@@ -34,7 +34,7 @@ struct RootView: View {
                     withAnimation(.smooth) { hasOnboarded = true }
                 }
                     .transition(.opacity)
-            } else if wallet.isEmpty {
+            } else if owner.chosenWallet == nil {
                 OnboardingWalletPage {}
                     .background(Color.starhashBackground.ignoresSafeArea())
                     .transition(.opacity)
@@ -43,8 +43,7 @@ struct RootView: View {
                     .transition(.opacity)
             }
         }
-        .animation(.smooth, value: wallet.isEmpty)
-        .keepsDefaultSIMInStep()
+        .animation(.smooth, value: owner.chosenWallet == nil)
         .sheet(isPresented: welcomeNotePresented) {
             DeveloperNoteSheet(afterOnboarding: true)
         }
@@ -86,7 +85,7 @@ struct RootView: View {
     /// Owed from the moment onboarding ends until it is closed.
     private var welcomeNotePresented: Binding<Bool> {
         Binding(
-            get: { !splashActive && (forcesNote || (hasOnboarded && !wallet.isEmpty && !hasSeenDeveloperNote)) },
+            get: { !splashActive && (forcesNote || (hasOnboarded && owner.chosenWallet != nil && !hasSeenDeveloperNote)) },
             set: { presented in
                 guard !presented else { return }
                 hasSeenDeveloperNote = true
@@ -99,7 +98,7 @@ struct RootView: View {
     /// the welcome note.
     private var whatsNewPresented: Binding<Bool> {
         Binding(
-            get: { whatsNew != nil && window.width > 0 && !splashActive && hasOnboarded && !wallet.isEmpty && hasSeenDeveloperNote && !forcesNote },
+            get: { whatsNew != nil && window.width > 0 && !splashActive && hasOnboarded && owner.chosenWallet != nil && hasSeenDeveloperNote && !forcesNote },
             set: { presented in
                 guard !presented else { return }
                 whatsNew = nil
@@ -117,7 +116,7 @@ struct RootView: View {
     /// Two weeks after StarHash was first set up, the rating note, once,
     /// never on top of the welcome note or What's New.
     private func checkReviewNote() {
-        guard hasOnboarded, !wallet.isEmpty, hasSeenDeveloperNote, whatsNew == nil else { return }
+        guard hasOnboarded, owner.chosenWallet != nil, hasSeenDeveloperNote, whatsNew == nil else { return }
         ReviewNote.startClockIfNeeded()
         if ReviewNote.isDue() { showsReviewNote = true }
     }

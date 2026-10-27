@@ -22,9 +22,6 @@ enum PreferenceKey {
     static let nearbyLocation = "nearbyLocation"
     static let saveRecents = "saveRecents"
     static let autoVerifySetUp = "autoVerifySetUp"
-    /// The wallet StarHash pays from: a `Recipient.Network` raw value,
-    /// empty until onboarding asks.
-    static let wallet = "wallet"
 }
 
 /// The language StarHash speaks, chosen in Settings rather than the

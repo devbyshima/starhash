@@ -31,7 +31,7 @@ import SwiftUI
 struct OnboardingView: View {
     let onFinish: () -> Void
 
-    @AppStorage(PreferenceKey.wallet) private var wallet = ""
+    @Environment(Owner.self) private var owner
     @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
     @AppStorage(PreferenceKey.onboardingStage) private var savedStage = 0
     @AppStorage(PreferenceKey.hasSeenDeveloperNote) private var hasSeenDeveloperNote = false
@@ -49,7 +49,7 @@ struct OnboardingView: View {
     private var stages: [Stage] { [.reel, .wallet, .number, .photo, .contacts, .nearby, .notifications, .autoVerify, .setup] }
 
     /// The wallet picked on the wallet screen, MTN MoMo until then.
-    private var chosenWallet: Recipient.Network { Recipient.Network(rawValue: wallet) ?? .mtn }
+    private var chosenWallet: Recipient.Network { owner.wallet }
 
     private var current: Stage { stages[min(stage, stages.count - 1)] }
 

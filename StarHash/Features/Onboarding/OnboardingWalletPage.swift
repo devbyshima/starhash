@@ -18,7 +18,7 @@ import SwiftUI
 struct OnboardingWalletPage: View {
     let onDone: () -> Void
 
-    @AppStorage(PreferenceKey.wallet) private var wallet = ""
+    @Environment(Owner.self) private var owner
     @State private var choice: Recipient.Network?
 
     private var tint: Color { OnboardingPalette.tint }
@@ -85,7 +85,7 @@ struct OnboardingWalletPage: View {
         .onboardingGlow(tint)
         .animation(.smooth(duration: 0.3), value: choice)
         .onAppear {
-            if choice == nil { choice = Recipient.Network(rawValue: wallet) }
+            if choice == nil { choice = owner.chosenWallet }
         }
     }
 
@@ -126,7 +126,7 @@ struct OnboardingWalletPage: View {
 
     private func save() {
         guard let choice else { return }
-        wallet = choice.rawValue
+        owner.choose(choice)
         onDone()
     }
 }
