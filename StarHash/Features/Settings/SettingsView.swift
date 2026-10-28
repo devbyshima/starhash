@@ -47,6 +47,7 @@ enum SettingsPage: Hashable {
     case featureFlags
     case profile
     case licences
+    case licence(ThirdPartyPiece)
 
     @MainActor @ViewBuilder
     var destination: some View {
@@ -61,6 +62,7 @@ enum SettingsPage: Hashable {
         case .release(let version): ReleaseDetailView(version: version)
         case .featureFlags: FeatureFlagsView()
         case .licences: LicencesView()
+        case .licence(let piece): LicenceView(piece: piece)
         }
     }
 }
@@ -654,6 +656,7 @@ enum SettingsLaunch {
         if page == "profile" { return [.profile] }
         if page == "flags" { return [.about, .featureFlags] }
         if page == "licences" { return [.about, .licences] }
+        if page == "licence" { return [.about, .licences, .licence(ThirdPartyPiece.all[0])] }
         if page == "release" { return [.whatsNew, .release(ReleaseHistory.releases[0].version)] }
         if page?.hasPrefix("guide") == true { return [.autoVerify] }
         return []
