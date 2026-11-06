@@ -2537,38 +2537,6 @@
         }
       }
     },
-    "Font": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Police"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Imyandikire"
-          }
-        }
-      }
-    },
-    "Font's source": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Source de la police"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inkomoko y'imyandikire"
-          }
-        }
-      }
-    },
     "Free": {
       "localizations": {
         "rw": {
@@ -8639,7 +8607,87 @@
     "x-callback-url": {},
     "x-cancel": {},
     "x-error": {},
-    "x-success": {}
+    "x-success": {},
+    "Built with": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fait avec"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibyo yubakishijwe"
+          }
+        }
+      }
+    },
+    "Version": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verisiyo"
+          }
+        }
+      }
+    },
+    "Licence": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Licence"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uruhushya"
+          }
+        }
+      }
+    },
+    "Source": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inkomoko"
+          }
+        }
+      }
+    },
+    "StarHash is built with the work of others, which goes out with it under their own terms: each piece below, by its name and version, with its licence, and that licence's text where it has one.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash est fait avec le travail d'autres personnes, qui l'accompagne sous ses propres conditions : chaque élément ci-dessous, avec son nom et sa version, sa licence, et le texte de cette licence quand elle en a un."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash yubakishijwe ibikorwa by'abandi, bijyana na yo bikurikije amategeko yabyo: buri kimwe kiri hasi, n'izina ryacyo na verisiyo yacyo, uruhushya rwacyo, n'inyandiko y'urwo ruhushya iyo ruyifite."
+          }
+        }
+      }
+    }
   },
   "version": "1.0"
 }
