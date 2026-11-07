@@ -112,7 +112,7 @@ struct ThirdPartyPiece: Identifiable, Hashable {
 
     var id: String { name }
 
-    static let all: [ThirdPartyPiece] = [spaceGrotesk]
+    static let all: [ThirdPartyPiece] = [spaceGrotesk, keylineIcons]
 
     static let spaceGrotesk = ThirdPartyPiece(
         name: "Space Grotesk",
@@ -124,6 +124,20 @@ struct ThirdPartyPiece: Identifiable, Hashable {
         licenceURL: URL(string: "https://openfontlicense.org")!,
         source: URL(string: "https://github.com/floriankarsten/space-grotesk")!,
         textFile: "OFL"
+    )
+
+    /// Every icon in the app and the widgets, made into symbols by
+    /// scripts/make_icons.swift from the SVGs in scripts/keyline-icons.
+    static let keylineIcons = ThirdPartyPiece(
+        name: "Keyline Icons",
+        // The release the SVGs in scripts/keyline-icons come from.
+        version: "2.5.0",
+        symbol: "sparkles",
+        licence: "MIT",
+        licenceName: "MIT License",
+        licenceURL: URL(string: "https://opensource.org/license/mit")!,
+        source: URL(string: "https://github.com/keyline-icons/keyline-icons")!,
+        textFile: "KeylineIcons"
     )
 
     /// The licence's text as its authors ship it, reflowed to the screen,

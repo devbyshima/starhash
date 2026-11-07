@@ -154,6 +154,9 @@ targets:
       # The font's licence travels with it, as the OFL asks.
       - path: StarHash/Resources/Fonts/OFL.txt
         buildPhase: resources
+      # So does the icons' MIT notice.
+      - path: StarHash/Resources/KeylineIcons.txt
+        buildPhase: resources
     dependencies:
       - package: StarHashKit
     settings:
