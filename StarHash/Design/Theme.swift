@@ -2,15 +2,15 @@ import SwiftUI
 import UIKit
 
 /// StarHash follows the system appearance in the owner's reference
-/// neutrals with their green as the accent: light mode is a white page
-/// with #F5F6F5 for what is filled and #E1E1E1 round what is outlined,
-/// words in #171717 and #707070; dark mode is a #171717 page with #262626
-/// fills and #333333 outlines, words in #FAFBFA and #A3A3A3. The green
-/// #64D27B fills (buttons, switches, the chart, the mark, the avatar) with
-/// the deep green #091D11 as the words on it (9.2:1) in either appearance;
-/// green words are a deeper shade of it on white (`brandAccentDeep`, 5.6:1)
-/// and the green itself on the dark page (9:1). Red is kept for what
-/// deletes and what failed.
+/// neutrals, with the text colour as the accent: light mode is a white
+/// page with #F5F6F5 for what is filled and #E1E1E1 round what is
+/// outlined, words in #171717 and #707070; dark mode is a #171717 page with
+/// #262626 fills and #333333 outlines, words in #FAFBFA and #A3A3A3. The
+/// accent is the near black #171717 in light mode and the near white
+/// #FAFBFA in dark: it fills (buttons, the chart, the mark, the avatar)
+/// with the page's own colour as the words on it (18:1, 17:1), and accent
+/// words are the text colour. Red is kept for what deletes and what
+/// failed, yellow for what is pending.
 ///
 /// The page and its cards share their text colours in either appearance,
 /// so the `SurfaceColor` tokens resolve the same on both; they keep the
@@ -18,14 +18,6 @@ import UIKit
 /// resolves per appearance, so nothing else needs to know which mode is on.
 extension Color {
     // MARK: The palette
-
-    /// The accent and brand colour, #64D27B.
-    static let brandAccent = Color(red: 100 / 255, green: 210 / 255, blue: 123 / 255)
-    /// The deep green, #091D11: the words on the green.
-    static let brandForest = Color(red: 9 / 255, green: 29 / 255, blue: 17 / 255)
-    /// The accent deepened for words and thin marks on white (5.6:1) and on
-    /// light mode's fills (5.2:1).
-    static let brandAccentDeep = Color(red: 53 / 255, green: 116 / 255, blue: 68 / 255)
 
     // Light mode, from the reference.
     static let brandWhite = Color.white
@@ -55,18 +47,20 @@ extension Color {
     static let brandPaperMuted = Color(red: 128 / 255, green: 128 / 255, blue: 128 / 255)
 
     /// A payment still waiting for its SMS: yellow, #F2BB07, so the three
-    /// states read apart at a glance, as they did before the redesign:
-    /// yellow pending, red failed, green confirmed.
+    /// states read apart at a glance: yellow pending, red failed, the text
+    /// colour confirmed.
     static let brandYellow = Color(red: 242 / 255, green: 187 / 255, blue: 7 / 255)
 
     /// Blood red, #C1121F: delete buttons and failed payments (5.9:1 on
     /// white).
     static let brandRed = Color(red: 193 / 255, green: 18 / 255, blue: 31 / 255)
 
-    /// The accent as it fills, the green, and what is drawn on it, the deep
-    /// green: the same in either appearance.
-    static let brandFill = Color.brandAccent
-    static let brandOnFill = Color.brandForest
+    /// The accent and brand colour as it fills: the near black on light
+    /// mode's white, the near white on dark mode's #171717, the text
+    /// colours themselves. What is drawn on it is the page's own colour
+    /// (18:1, 17:1).
+    static let brandFill = Color(light: .brandInk, dark: .brandPaper)
+    static let brandOnFill = Color(light: .brandWhite, dark: .brandInk)
 
     // MARK: Pages
 
@@ -109,7 +103,7 @@ extension Color {
         dark: .init(red: 1, green: 123 / 255, blue: 123 / 255)
     )
     /// Buy's call buttons, the one glass left on Buy: Liquid Glass tinted
-    /// the green, with the deep green phone on it.
+    /// the accent, with the phone in the page's colour on it.
     static let callGlassTint = Color.brandFill.opacity(0.92)
     static let callSolidFill = Color.clear
     static let callGlyph = Color.brandOnFill
@@ -134,11 +128,12 @@ extension Color {
     static let starhashOnDestructive = Color.white
     /// Red as text straight on the page, the same as on a card.
     static let starhashDestructiveOnPage = Color.starhashDestructive
-    /// Money coming in and a confirmed payment: the deeper green on white,
-    /// the green itself on #171717.
-    static let starhashIncoming = SurfaceColor(light: .brandAccentDeep, dark: .brandAccent)
-    /// Drawn on `starhashIncoming` as a fill (the verified tick).
-    static let starhashOnIncoming = SurfaceColor(light: .white, dark: .brandForest)
+    /// Money coming in and a confirmed payment: the accent, the text
+    /// colour. The arrow's direction tells it from money going out.
+    static let starhashIncoming = SurfaceColor(light: .brandInk, dark: .brandPaper)
+    /// Drawn on `starhashIncoming` as a fill (the verified tick): the
+    /// page's colour.
+    static let starhashOnIncoming = SurfaceColor(light: .brandWhite, dark: .brandInk)
 
     // MARK: Text on Pay
 
@@ -147,14 +142,15 @@ extension Color {
     static let paySecondaryText = Color(light: .brandGrey, dark: .brandPaperQuiet)
     /// The amount's zero, a placeholder: 3:1, as large text needs.
     static let payPlaceholderText = Color(light: .brandMuted, dark: .brandPaperMuted)
-    /// Pay's primary button: the green with the deep green on it (9.2:1),
-    /// as every primary button.
+    /// Pay's primary button: the accent with the page's colour on it, as
+    /// every primary button.
     static let payButtonFill = Color.brandFill
     static let payButtonLabel = Color.brandOnFill
     /// Glass on Pay: clear, as on every page.
     static let payGlassTint = Color.clear
-    /// The pressed digit's flash as it lifts: the green.
-    static let payKeypadFlash = Color.brandFill
+    /// The pressed digit's flash as it lifts: the quieter grey, since the
+    /// accent is the digit's own colour.
+    static let payKeypadFlash = Color(light: .brandGrey, dark: .brandPaperQuiet)
     /// Glass on any page: clear.
     static let starhashGlassTint = Color.clear
     /// The soft lift under glass that floats over a list (the recipient
@@ -168,25 +164,27 @@ extension Color {
     // MARK: The accent
 
     /// The accent as a fill: primary buttons, chart bars, a filled check.
-    static let starhashInk = SurfaceColor(light: .brandAccent, dark: .brandAccent)
-    /// Text and glyphs drawn on `starhashInk`: the deep green (9.2:1).
-    static let starhashOnInk = SurfaceColor(light: .brandForest, dark: .brandForest)
-    /// The accent as text or a thin mark (a chosen check): the deeper green
-    /// on white, the green on #171717.
-    static let starhashAccentText = SurfaceColor(light: .brandAccentDeep, dark: .brandAccent)
+    /// The near black on white, the near white on #171717.
+    static let starhashInk = SurfaceColor(light: .brandInk, dark: .brandPaper)
+    /// Text and glyphs drawn on `starhashInk`: the page's colour.
+    static let starhashOnInk = SurfaceColor(light: .brandWhite, dark: .brandInk)
+    /// The accent as text or a thin mark (a chosen check): the text colour.
+    static let starhashAccentText = SurfaceColor(light: .brandInk, dark: .brandPaper)
     /// The accent as a graphic that has to stand out (a selection ring,
-    /// progress): the green itself.
-    static let starhashAccentGraphic = SurfaceColor(light: .brandAccent, dark: .brandAccent)
-    /// A switched-on toggle: the green, its white knob on it.
-    static let starhashSwitchOn = Color.brandFill
+    /// progress).
+    static let starhashAccentGraphic = SurfaceColor(light: .brandInk, dark: .brandPaper)
+    /// A switched-on toggle: the near black in light mode; in dark, the
+    /// muted grey, since the system's white knob would vanish on the near
+    /// white (4:1 against the knob).
+    static let starhashSwitchOn = Color(light: .brandInk, dark: .brandPaperMuted)
 
-    /// The StarHash mark's star, drawn bare: the green.
-    static let starhashMarkGlyph = SurfaceColor(light: .brandAccent, dark: .brandAccent)
+    /// The StarHash mark's star, drawn bare: the accent.
+    static let starhashMarkGlyph = SurfaceColor(light: .brandInk, dark: .brandPaper)
 
-    /// Letters a search matched: the deeper green on a pale wash of the
-    /// green, and the green in dark mode.
-    static let pickerMatch = SurfaceColor(light: .brandAccentDeep, dark: .brandAccent)
-    static let pickerMatchBackground = Color(light: .brandAccent.opacity(0.16), dark: .clear)
+    /// Letters a search matched: the text colour on a wash of it, so the
+    /// match reads apart from the rest of the name.
+    static let pickerMatch = SurfaceColor(light: .brandInk, dark: .brandPaper)
+    static let pickerMatchBackground = Color(light: .brandInk.opacity(0.1), dark: .brandPaper.opacity(0.18))
 
     /// Sheets: the solid surface cards sit on (the fills' colour), the
     /// quieter text, and the fill of a filled button that is not the accent.
@@ -207,7 +205,7 @@ extension Color {
     static let sheetFilledButton = Color(light: .brandInk, dark: .brandPaper)
     /// A disabled sheet button's label, on its `sheetChip` fill.
     static let sheetDisabledLabel = Color(light: .brandGrey, dark: .brandPaperQuiet)
-    /// Verify's fill and words: the green with the deep green on it.
+    /// Verify's fill and words: the accent with the page's colour on it.
     static let confirmButton = Color.brandFill
     static let onConfirmButton = Color.brandOnFill
     /// The label on `sheetFilledButton`.
@@ -225,14 +223,18 @@ extension Color {
     /// reads as a page.
     static let noteSheetBackground = Color(light: .brandWhite, dark: .brandInk)
     /// The developer's note in the brand's own colours, so it stands apart
-    /// from the neutral page it opens over: the deep green on the green
-    /// (9.2:1), its quieter words a little lighter, and its button the other
-    /// way round.
-    static let noteBrandBackground = Color.brandAccent
-    static let noteBrandText = Color.brandForest
-    static let noteBrandSecondary = Color.brandForest.opacity(0.78)
-    static let noteBrandButton = Color.brandForest
-    static let noteBrandButtonLabel = Color.brandAccent
+    /// from the page it opens over: the page turned over, the near black
+    /// note in light mode and the near white one in dark, its quieter words
+    /// a little fainter, and its button the other way round. The note's
+    /// content takes the opposite appearance (`NoteSheetFrame`), so these
+    /// resolve against that one; `noteBrandPresentation`, behind the sheet,
+    /// against the app's.
+    static let noteBrandBackground = Color(light: .brandPaper, dark: .brandInk)
+    static let noteBrandText = Color(light: .brandInk, dark: .brandPaper)
+    static let noteBrandSecondary = Color.noteBrandText.opacity(0.78)
+    static let noteBrandButton = Color.noteBrandText
+    static let noteBrandButtonLabel = Color.noteBrandBackground
+    static let noteBrandPresentation = Color.brandFill
     /// The solid line between a card's rows.
     static let sheetDivider = Color(light: .brandDivider, dark: .brandDividerDark)
 
@@ -265,7 +267,7 @@ extension Color {
     /// The widgets' tiles, pills and circles: a step past the fills, as the
     /// reference's grey tiles stand on its card.
     static let widgetChip = Color(light: .brandCloud, dark: .brandSlate)
-    /// The widgets' symbols: the green.
+    /// The widgets' symbols: the accent.
     static let widgetAccent = Color.brandFill
 
     /// One colour per appearance, resolved by the system whenever the

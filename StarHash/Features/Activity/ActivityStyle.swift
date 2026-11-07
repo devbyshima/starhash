@@ -181,13 +181,14 @@ extension StarHashKit.Transaction {
         direction == .outgoing ? "arrow.up.right" : "arrow.down.left"
     }
 
-    /// The text colour out, green in: red is kept for what failed.
+    /// The text colour both ways, the arrow telling them apart: red is kept
+    /// for what failed.
     var activityArrowColor: AnyShapeStyle {
         direction == .outgoing ? AnyShapeStyle(Color.starhashOutgoing) : AnyShapeStyle(Color.starhashIncoming)
     }
 
-    /// The amount's colour: primary text when money left, green when it
-    /// came in. Ink stays the only accent.
+    /// The amount's colour: primary text when money left, the accent (the
+    /// same text colour) when it came in.
     var activityAmountColor: SurfaceColor {
         direction == .outgoing ? .starhashPrimaryText : .starhashIncoming
     }

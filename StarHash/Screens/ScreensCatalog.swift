@@ -337,11 +337,11 @@ enum ScreensSample {
         hasPhoto: false
     )
 
-    /// A photo to frame: soft green light on the deep green.
+    /// A photo to frame: soft grey light on the near black.
     static let photo: UIImage = UIGraphicsImageRenderer(size: CGSize(width: 900, height: 1200)).image { context in
-        UIColor(Color.brandForest).setFill()
+        UIColor(Color.brandInk).setFill()
         context.fill(CGRect(x: 0, y: 0, width: 900, height: 1200))
-        UIColor(Color.brandAccent).setFill()
+        UIColor(Color.brandGrey).setFill()
         context.cgContext.fillEllipse(in: CGRect(x: 250, y: 300, width: 400, height: 400))
         context.cgContext.fillEllipse(in: CGRect(x: 150, y: 760, width: 600, height: 600))
     }

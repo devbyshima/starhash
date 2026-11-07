@@ -6,7 +6,8 @@ import SwiftUI
 // button on its right (no close button; a sheet is swiped away), solid
 // cards whose rows are split by solid hairlines, small uppercase section
 // labels, 50pt buttons, and Beam's type scale, all on clear Liquid Glass
-// with the grabber showing. The accent is StarHash's green, as Beam's.
+// with the grabber showing. The accent is the text colour: near black, or
+// near white in dark mode.
 
 // MARK: Type
 
@@ -220,10 +221,9 @@ struct SheetIconCircle: View {
 // MARK: Buttons
 
 /// A sheet's button, Beam's: 50pt, a 16pt semibold label, a gradient fill
-/// with no glow. `.sheetPrimary` is the accent, the
-/// green with near-black text; `.sheetFilled` is the
-/// near-black (near-white in dark mode) fill for a choice that is not the
-/// accent.
+/// with no glow. `.sheetPrimary` is the accent, near
+/// black with white text (near white with near black in dark mode);
+/// `.sheetFilled` is the same fill, for a choice that is not the accent.
 struct SheetButtonStyle: ButtonStyle {
     enum Fill {
         case accent
@@ -231,8 +231,7 @@ struct SheetButtonStyle: ButtonStyle {
         /// Blood red with white words: every delete button in the app
         /// (`DeleteButton`), whatever page or sheet it is on.
         case destructive
-        /// Mark as Confirmed: white with the near black in light mode, the
-        /// money-in green with the near black in dark.
+        /// Mark as Confirmed: the accent with the page's colour on it.
         case confirm
     }
 

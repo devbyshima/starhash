@@ -451,7 +451,7 @@ private struct GuidePhoneScreenshot: View {
 /// Step 2's picture, in the same phone as step 1's and the same size, so
 /// both steps lay out alike: Shortcuts' dark Automation tab with the real
 /// screenshot of the StarHash SMS automation on it, its switch ringed, and a
-/// green check once the shortcut is verified.
+/// check once the shortcut is verified.
 private struct GuideAutomationPhone: View {
     let imageName: String
     let label: String

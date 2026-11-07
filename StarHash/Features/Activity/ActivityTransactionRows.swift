@@ -197,7 +197,7 @@ struct ActivityTransactionRow: View {
         return parts.joined(separator: " \u{00B7} ")
     }
 
-    /// The direction arrow (the text colour out, green in, as on the
+    /// The direction arrow (the text colour either way, as on the
     /// details page), then the amount, struck through when it failed.
     private var amount: some View {
         HStack(alignment: .firstTextBaseline, spacing: 4) {

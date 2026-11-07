@@ -34,9 +34,11 @@ enum DeveloperNoteKind {
     }
 }
 
-/// The note's content, shared by the sheets. The letter and its buttons
-/// are one block, centred on the page, as the reference sets them; a long
-/// Dynamic Type size scrolls instead.
+/// The note's content, shared by the sheets: the letter and its buttons as
+/// one block from the top of the sheet, which fits its height to them
+/// (`height`), so there is no empty band above or below; a long Dynamic
+/// Type size scrolls instead. The photo shares its row with the sheet's
+/// close cross.
 struct DeveloperNoteContent: View {
     let kind: DeveloperNoteKind
     let primaryTitle: String
@@ -46,35 +48,38 @@ struct DeveloperNoteContent: View {
     /// Settings' note also offers Ko-fi. Never the note onboarding ends on,
     /// nor the two-week one, whose one ask is the rating.
     var showsSupportLink = false
+    /// The letter's whole height, for the sheet's detent.
+    var height: Binding<CGFloat> = .constant(0)
 
     @Environment(\.openURL) private var openURL
 
     var body: some View {
-        GeometryReader { proxy in
-            ScrollView {
-                letter
-                    .frame(maxWidth: .infinity, minHeight: proxy.size.height)
-            }
-            .scrollIndicators(.hidden)
-            .scrollBounceBehavior(.basedOnSize)
+        ScrollView {
+            letter
+                .frame(maxWidth: .infinity)
+                .sheetHeight(height)
         }
+        .scrollIndicators(.hidden)
+        .scrollBounceBehavior(.basedOnSize)
         .starhashReadableWidth(StarHashMetrics.narrowReadableWidth)
     }
+
+    private var hasLinks: Bool { showsWriteLink || showsSupportLink }
 
     private var letter: some View {
         VStack(alignment: .leading, spacing: 0) {
             DeveloperAvatar()
-                .padding(.bottom, 16)
+                .padding(.bottom, NoteLayout.avatarGap)
             Text("A note from Shima")
                 .starhashFont(29, weight: .bold, relativeTo: .title)
                 .foregroundStyle(Color.noteBrandText)
                 .accessibilityAddTraits(.isHeader)
-                .padding(.bottom, 18)
-            VStack(alignment: .leading, spacing: 10) {
+                .padding(.bottom, NoteLayout.titleGap)
+            VStack(alignment: .leading, spacing: NoteLayout.paragraphGap) {
                 ForEach(Array(kind.paragraphs.enumerated()), id: \.offset) { _, paragraph in
                     Text(paragraph)
                         .starhashFont(16.5, relativeTo: .body)
-                        .lineSpacing(3)
+                        .lineSpacing(NoteLayout.lineSpacing)
                         .foregroundStyle(Color.noteBrandText)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -84,7 +89,7 @@ struct DeveloperNoteContent: View {
             Text("Shima")
                 .font(.custom("SnellRoundhand", size: 50, relativeTo: .largeTitle))
                 .foregroundStyle(Color.noteBrandText)
-                .padding(.top, 14)
+                .padding(.top, NoteLayout.signatureGap)
                 .accessibilityLabel("Signed, Shima")
 
             VStack(spacing: 0) {
@@ -92,15 +97,19 @@ struct DeveloperNoteContent: View {
                     .buttonStyle(NoteButtonStyle())
                 // Side by side, so the note keeps the one row of links the
                 // reference has; stacked when a large text size won't fit.
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: 0) { links }
-                    VStack(spacing: 0) { links }
+                if hasLinks {
+                    ViewThatFits(in: .horizontal) {
+                        HStack(spacing: 0) { links }
+                        VStack(spacing: 0) { links }
+                    }
                 }
             }
-            .padding(.top, 30)
+            .padding(.top, NoteLayout.buttonGap)
         }
-        .padding(.horizontal, 30)
-        .padding(.vertical, 20)
+        .padding(.horizontal, NoteLayout.sideMargin)
+        .padding(.top, NoteLayout.topMargin)
+        // The links' rows carry their own room under them.
+        .padding(.bottom, hasLinks ? 4 : NoteLayout.bottomMargin)
     }
 
     @ViewBuilder private var links: some View {
@@ -120,7 +129,7 @@ struct DeveloperNoteContent: View {
                 .starhashFont(14, relativeTo: .subheadline)
                 .foregroundStyle(Color.noteBrandSecondary)
                 .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity, minHeight: 64)
+                .frame(maxWidth: .infinity, minHeight: 56)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.hapticPlain)
@@ -140,6 +149,23 @@ private struct DeveloperAvatar: View {
             .overlay { Circle().strokeBorder(Color.noteBrandText.opacity(0.15), lineWidth: 1) }
             .accessibilityHidden(true)
     }
+}
+
+/// The note's spacing: the same breath between every part of the letter,
+/// a little more round the title and the button, and the photo's centre
+/// level with the close cross's.
+private enum NoteLayout {
+    static let sideMargin: CGFloat = 28
+    static let topMargin: CGFloat = 24
+    static let bottomMargin: CGFloat = 24
+    static let avatarGap: CGFloat = 22
+    static let titleGap: CGFloat = 18
+    static let paragraphGap: CGFloat = 16
+    static let lineSpacing: CGFloat = 5
+    static let signatureGap: CGFloat = 16
+    static let buttonGap: CGFloat = 28
+    /// The close cross's top: its 44pt circle centred on the 60pt photo.
+    static let closeTop: CGFloat = topMargin + 8
 }
 
 enum DeveloperNoteLinks {
@@ -167,13 +193,14 @@ struct DeveloperNoteSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NoteSheetFrame(onClose: { dismiss() }) {
+        NoteSheetFrame(onClose: { dismiss() }) { height in
             DeveloperNoteContent(
                 kind: .welcome,
                 primaryTitle: afterOnboarding ? "Start Using StarHash" : "Done",
                 primaryAction: { dismiss() },
                 showsWriteLink: !afterOnboarding,
-                showsSupportLink: !afterOnboarding
+                showsSupportLink: !afterOnboarding,
+                height: height
             )
         }
     }
@@ -189,8 +216,8 @@ struct ReviewNoteSheet: View {
     @Environment(\.requestReview) private var requestReview
 
     var body: some View {
-        NoteSheetFrame(onClose: { dismiss() }) {
-            DeveloperNoteContent(kind: .review, primaryTitle: "Rate on the App Store") {
+        NoteSheetFrame(onClose: { dismiss() }) { height in
+            DeveloperNoteContent(kind: .review, primaryTitle: "Rate on the App Store", primaryAction: {
                 dismiss()
                 Task {
                     // Once the sheet has gone, so the prompt is not under it.
@@ -201,46 +228,45 @@ struct ReviewNoteSheet: View {
                         requestReview()
                     }
                 }
-            }
+            }, height: height)
         }
     }
 }
 
-/// A full-height sheet with a bare close cross at its top right and no
-/// grabber, as the reference draws it.
+/// A sheet as tall as its letter, with a bare close cross at its top right,
+/// level with the photo, and no grabber, as the reference draws it.
 private struct NoteSheetFrame<Content: View>: View {
     let onClose: () -> Void
-    @ViewBuilder var content: Content
+    @ViewBuilder var content: (Binding<CGFloat>) -> Content
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var height: CGFloat = 0
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Spacer()
+        content($height)
+            .overlay(alignment: .topTrailing) {
                 Button(action: onClose) {
                     SheetGlassGlyph(symbol: "xmark")
                 }
                 .buttonStyle(.hapticPlain)
                 .accessibilityLabel("Close")
+                .padding(.trailing, 18)
+                .padding(.top, NoteLayout.closeTop)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 20)
-            content
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        // The brand's green, the same in either appearance, so the note
-        // stands apart from the page it opens over; its glass and words
-        // are light mode's on it.
-        .background(Color.noteBrandBackground.ignoresSafeArea())
-        .environment(\.colorScheme, .light)
-        .starhashContainerSurface()
-        .sheetGlass(detents: [.large])
-        .presentationBackground(Color.noteBrandBackground)
-        .presentationDragIndicator(.hidden)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            // The page turned over, so the note stands apart from the page it
+            // opens over: near black in light mode, near white in dark, its
+            // glass and words the other appearance's on it.
+            .background(Color.noteBrandBackground.ignoresSafeArea())
+            .environment(\.colorScheme, colorScheme == .dark ? .light : .dark)
+            .starhashContainerSurface()
+            .sheetGlass(detents: [height > 0 ? .height(height + 8) : .large])
+            .presentationBackground(Color.noteBrandPresentation)
+            .presentationDragIndicator(.hidden)
     }
 }
 
-/// The note's button: the deep green with the green on it, the other way
-/// round from the page, at a sheet button's size.
+/// The note's button: the note's words colour with its page colour on it,
+/// the other way round from the page, at a sheet button's size.
 private struct NoteButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label

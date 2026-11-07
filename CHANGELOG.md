@@ -30,6 +30,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Changed
 
+- StarHash drops its green: buttons, the mark, the splash, switches, charts and the empty-state drawings are near black in light mode and near white in dark. The drawings lose their trailing cords and "look here" strokes, and Shima's note is a black note over the light app (a white one over the dark), only as tall as its letter, with more room between its parts.
 - Activity is now Transactions: its tab, the page's title, the icon's quick action, Quick Pay's widget, onboarding and the terms.
 - Profile's numbers sit in an outlined box, as Settings' cards and a transaction's details do.
 - Balance on Pay, Cancel on Move and Scale and Maybe Later in onboarding are clear Liquid Glass, with no colour; only sheets are tinted.
