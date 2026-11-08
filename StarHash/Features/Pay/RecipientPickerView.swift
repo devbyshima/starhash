@@ -62,6 +62,14 @@ struct RecipientPickerView: View {
     /// Where the list is scrolled; set only by `-payScroll` (DEBUG).
     @State private var scrollPosition = ScrollPosition()
     @FocusState private var searchFocused: Bool
+    /// The StarHash owner who lists the number typed, when one does.
+    @State private var listedOwner: ListedOwner?
+
+    struct ListedOwner {
+        let number: String
+        let entry: StarHashCloud.DirectoryEntry
+        var photo: UIImage?
+    }
 
     init(amount: Int, query: String = "", nearbyFix: LocationFix? = nil, onPay: @escaping (Recipient) -> Void) {
         self.amount = amount
@@ -143,6 +151,8 @@ struct RecipientPickerView: View {
             scrolledUnder = offset
         }
         .onChange(of: query) { labelTops = [:] }
+        // Who lists the number typed, asked afresh as it changes.
+        .task(id: query) { await lookUpTypedNumber() }
         // Soft Edge under the header and into the total.
         .starhashSoftEdge()
         // Centred in what is left between the header and the total (or the
@@ -503,17 +513,49 @@ struct RecipientPickerView: View {
     // MARK: Sections
 
     /// The number or code being typed, when nothing saved has it: paid as
-    /// typed.
+    /// typed. A number a StarHash owner lists (Show My Name) shows the
+    /// name they gave where the carrier's would be, and their photo, or
+    /// their initials, in the phone's place.
     private func typedSection(_ typed: Recipient) -> some View {
-        Section {
+        let listed = listedOwner?.number == typed.destination ? listedOwner : nil
+        let tile: RecipientRow.Tile = if let photo = listed?.photo {
+            .image(photo)
+        } else if let name = listed?.entry.name {
+            .monogram(PayContact.initials(for: name))
+        } else {
+            .symbol(typed.kind == .phone ? "phone" : "storefront")
+        }
+        return Section {
             RecipientRow(
-                tile: .symbol(typed.kind == .phone ? "phone" : "storefront"),
+                tile: tile,
                 title: typed.formattedDestination,
-                subtitle: kindLabel(typed),
+                subtitle: listed?.entry.name ?? kindLabel(typed),
                 matchColor: Color.pickerMatch
             ) { choose(typed) }
         } header: {
             sectionLabel(typed.kind == .phone ? "Number" : "Merchant code")
+        }
+        .animation(.smooth(duration: 0.25), value: listed?.entry)
+    }
+
+    /// Asks StarHash's server who lists the number typed, once it has
+    /// stayed put a moment, and then for their photo.
+    private func lookUpTypedNumber() async {
+        listedOwner = nil
+        guard let typed = search.typedRecipient, typed.kind == .phone, savedMatches.isEmpty,
+              StarHashCloud.isListable(typed.destination) else { return }
+        try? await Task.sleep(for: .milliseconds(300))
+        guard !Task.isCancelled, let entry = await StarHashCloud.entry(for: typed.destination), !Task.isCancelled else { return }
+        listedOwner = ListedOwner(number: typed.destination, entry: entry)
+        #if DEBUG
+        // -directoryPhoto: a photo on hand, with no server to fetch it from.
+        if DebugLaunch.arguments.contains("-directoryPhoto") {
+            listedOwner?.photo = UIImage(named: "DeveloperPhoto")
+            return
+        }
+        #endif
+        if let id = entry.photoID, let photo = await StarHashCloud.photo(id), !Task.isCancelled {
+            listedOwner?.photo = photo
         }
     }
 
@@ -783,6 +825,9 @@ struct RecipientRow: View {
         case symbol(String)
         /// A contact's photo, showing `fallback` until it loads.
         case photo(contactID: String, fallback: Tile)
+        /// A photo already in hand: the one a StarHash owner listed with
+        /// their number.
+        case image(UIImage)
 
         /// A storefront for merchants, initials for named people, a phone
         /// for bare numbers; the photo of `photoContactID` over any of them.
@@ -928,6 +973,14 @@ struct RecipientTile: View {
                 RecipientTile(tile: fallback, size: size, fill: fill)
             }
             .accessibilityHidden(true)
+        } else if case .image(let image) = tile {
+            // Cut as a contact's photo is.
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+                .frame(width: size, height: size)
+                .clipShape(RoundedRectangle(cornerRadius: size * 0.3, style: .continuous))
+                .accessibilityHidden(true)
         } else {
             plainTile
         }
@@ -951,7 +1004,7 @@ struct RecipientTile: View {
                 Image(symbol: symbol)
                     .font(.system(size: size * 0.4))
                     .foregroundStyle(onPay ? AnyShapeStyle(Color.paySecondaryText) : AnyShapeStyle(Color.sheetSecondaryText))
-            case .photo:
+            case .photo, .image:
                 EmptyView()
             }
         }

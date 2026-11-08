@@ -2,23 +2,46 @@
 //
 // Photos: an owner who shares their photo with their QR code uploads it
 // under a random id the app made; the code carries that id, so whoever
-// scans it can fetch the photo, and no one can find a photo by a phone
-// number. A secret key, kept on the owner's iPhone, is needed to replace or
-// delete it: the server keeps only its hash.
+// scans it can fetch the photo. A secret key, kept on the owner's iPhone,
+// is needed to replace or delete it: the server keeps only its hash.
+//
+// The directory: an owner's numbers with the name they gave and their
+// photo's id, so someone typing one of those numbers to pay it sees who it
+// is. On unless the owner turns off Show My Name. Each number is kept only
+// as a keyed hash (HMAC with DIRECTORY_SECRET, which only the Worker
+// holds), so the table alone gives no number back, and the owner's key
+// (the photo's) is needed to change or clear their entry.
 //
 // Installs: once each day it is used the app sends a random id it made on
 // its first launch and its version, so the number of people using StarHash
 // can be counted, in all (installs) and each day (active_days, by Kigali's
-// date). Nothing else: no number, no name, no transactions.
+// date). Nothing else: no transactions.
 
 export interface Env {
   DB: D1Database;
+  /// The directory's numbers are hashed with it. Set with
+  /// `npx wrangler secret put DIRECTORY_SECRET`; without it the directory
+  /// is off.
+  DIRECTORY_SECRET?: string;
 }
 
 /// A photo is one small JPEG, 600 points square at most.
 const MAX_PHOTO_BYTES = 200 * 1024;
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+/// A Rwandan mobile number as the app keeps it: MTN's 078 and 079,
+/// Airtel's 072 and 073.
+const NUMBER = /^07[2389]\d{7}$/;
+
+/// An owner has one SIM or two.
+const MAX_NUMBERS = 2;
+const MAX_NAME = 60;
+
+/// An entry the app has not sent again in this long is left out of
+/// lookups: the app sends it each week while it is in use, so one from a
+/// lost or wiped iPhone lapses, and stops hiding the number's new entry.
+const ENTRY_LIFETIME_DAYS = 45;
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -41,9 +64,107 @@ export default {
     if (url.pathname === "/v1/ping" && request.method === "POST") {
       return ping(request, env);
     }
+    if (url.pathname === "/v1/directory") {
+      switch (request.method) {
+        case "PUT":
+          return putEntry(request, env);
+        case "DELETE":
+          return deleteEntry(request, env);
+        default:
+          return text(405, "Method not allowed");
+      }
+    }
+    // A POST, so the number travels in the body and never in a URL.
+    if (url.pathname === "/v1/directory/lookup" && request.method === "POST") {
+      return lookUp(request, env);
+    }
     return text(404, "Not found");
   },
 } satisfies ExportedHandler<Env>;
+
+// MARK: The directory
+
+/// Lists the owner's numbers under their name and photo, in place of what
+/// their key listed before (a number changed, a SIM dropped).
+async function putEntry(request: Request, env: Env): Promise<Response> {
+  const key = bearer(request);
+  if (!key) return text(401, "A key is needed");
+  const secret = env.DIRECTORY_SECRET;
+  if (!secret) return text(503, "Not set up");
+  let body: { numbers?: unknown; name?: unknown; photo?: unknown };
+  try {
+    body = await request.json();
+  } catch {
+    return text(400, "Bad request");
+  }
+  const given = Array.isArray(body.numbers) ? body.numbers : [];
+  const numbers = [...new Set(given.filter((n): n is string => typeof n === "string" && NUMBER.test(n)))];
+  if (numbers.length === 0 || numbers.length > MAX_NUMBERS || numbers.length !== given.length) {
+    return text(400, "Bad request");
+  }
+  const name = typeof body.name === "string" ? body.name.trim().slice(0, MAX_NAME) : "";
+  const photo = typeof body.photo === "string" && UUID.test(body.photo.toLowerCase()) ? body.photo.toLowerCase() : null;
+  // Nothing to show for a number with neither.
+  if (!name && !photo) return text(400, "Bad request");
+
+  const keyHash = await sha256(key);
+  const now = new Date().toISOString();
+  const hashes = await Promise.all(numbers.map((number) => numberHash(number, secret)));
+  await env.DB.batch([
+    env.DB.prepare("DELETE FROM directory WHERE key_hash = ?1").bind(keyHash),
+    ...hashes.map((hash) =>
+      env.DB.prepare(
+        "INSERT INTO directory (number_hash, key_hash, name, photo_id, updated_at) VALUES (?1, ?2, ?3, ?4, ?5)",
+      ).bind(hash, keyHash, name, photo, now),
+    ),
+  ]);
+  return text(200, "Saved");
+}
+
+/// Show My Name turned off, or the owner's numbers gone.
+async function deleteEntry(request: Request, env: Env): Promise<Response> {
+  const key = bearer(request);
+  if (!key) return text(401, "A key is needed");
+  await env.DB.prepare("DELETE FROM directory WHERE key_hash = ?1").bind(await sha256(key)).run();
+  return text(200, "Deleted");
+}
+
+/// The name and photo listed for a number, or 404.
+async function lookUp(request: Request, env: Env): Promise<Response> {
+  const secret = env.DIRECTORY_SECRET;
+  if (!secret) return text(404, "Not found");
+  let body: { number?: unknown };
+  try {
+    body = await request.json();
+  } catch {
+    return text(400, "Bad request");
+  }
+  const number = typeof body.number === "string" ? body.number : "";
+  if (!NUMBER.test(number)) return text(400, "Bad request");
+  const since = new Date(Date.now() - ENTRY_LIFETIME_DAYS * 86400 * 1000).toISOString();
+  const { results } = await env.DB.prepare(
+    "SELECT name, photo_id FROM directory WHERE number_hash = ?1 AND updated_at > ?2 LIMIT 2",
+  )
+    .bind(await numberHash(number, secret), since)
+    .all<{ name: string; photo_id: string | null }>();
+  // Two iPhones listing one number: the server cannot tell which holds
+  // the SIM, so it shows neither rather than maybe the wrong one.
+  if (results.length !== 1) return text(404, "Not found");
+  const entry = results[0];
+  return new Response(JSON.stringify({ name: entry.name || null, photo: entry.photo_id }), {
+    headers: { "Content-Type": "application/json", "Cache-Control": "private, max-age=300" },
+  });
+}
+
+/// The number as the directory keeps it: an HMAC under the Worker's
+/// secret, so a copy of the table gives no number back.
+async function numberHash(number: string, secret: string): Promise<string> {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, [
+    "sign",
+  ]);
+  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(number));
+  return hex(signature);
+}
 
 async function getPhoto(id: string, env: Env): Promise<Response> {
   const row = await env.DB.prepare("SELECT data FROM photos WHERE id = ?1").bind(id).first<{ data: number[] }>();
@@ -129,8 +250,11 @@ function isJPEG(body: ArrayBuffer): boolean {
 }
 
 async function sha256(value: string): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
-  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  return hex(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)));
+}
+
+function hex(bytes: ArrayBuffer): string {
+  return [...new Uint8Array(bytes)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 function text(status: number, body: string): Response {

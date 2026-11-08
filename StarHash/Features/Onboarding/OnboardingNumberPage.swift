@@ -43,7 +43,7 @@ struct OnboardingNumberPage: View {
                     .foregroundStyle(Color.starhashPrimaryText)
                     .accessibilityAddTraits(.isHeader)
                 RevealText(
-                    String(starhash: "It goes in your own QR code, so friends\nscan it to pay you. It stays on your iPhone."),
+                    String(starhash: "It goes in your own QR code, and people\nwho pay it with StarHash see your name."),
                     startIndex: RevealText.wordCount(String(starhash: "Your number")),
                     delay: RevealTiming.enterDelay
                 )

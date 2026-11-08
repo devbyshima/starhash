@@ -31,6 +31,13 @@ extension PreferenceKey {
     /// Whether the on-device model may name the categories the rules
     /// cannot (iOS 26 and later, with Apple Intelligence).
     static let smartCategories = "smartCategories"
+    /// Whether people who type the owner's number in StarHash see their
+    /// name and photo (`StarHashCloud.syncDirectory`). On unless turned off
+    /// in Settings.
+    static let showMyName = "showMyName"
+    /// Whether the notice that Show My Name is on has been seen: once,
+    /// for owners set up before it came. Onboarding tells new ones.
+    static let seenShowMyNameNotice = "seenShowMyNameNotice"
 }
 
 /// The app's look, chosen in Settings: as the iPhone is set, or always

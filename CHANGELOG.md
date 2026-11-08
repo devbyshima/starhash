@@ -8,6 +8,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Added
 
+- Show my name: typing a number to pay that belongs to someone on StarHash shows their name in place of the carrier, and their photo (or initials) in place of the phone. Your own name and numbers are shown the same way unless you turn it off in Settings, under Your SIMs; StarHash's server keeps each number only as a keyed hash. People already set up are told once, and the privacy policy says so.
 - A Third-Party Trademark Notice in Licences: whose names and logos StarHash shows (MTN, MoMo, Airtel, Apple's and others), only to say which wallet or service something is for, and that StarHash is not tied to any of them.
 - A long press on a transaction, as iOS's own lists do: a confirmed one lifts a preview of its details over the dimmed list, and a tap on the preview opens them; one still pending or failed lifts itself, with Verify, Mark as Failed, Pay Again and Delete in groups under it. A transaction turns grey from edge to edge while it is pressed.
 - Licences, in About StarHash: StarHash's own PolyForm Noncommercial licence, then everything it is built with as a list, each by its name, version and licence, opening a page of its own with its source and the licence's full text (today Space Grotesk, under the SIL Open Font License), and a note on the carriers' trademarks.

@@ -22,6 +22,9 @@ struct RootView: View {
     @State private var whatsNewStartPage = WhatsNewLaunch.startPage
     /// What's New's height follows it.
     @State private var window = WhatsNewWindow()
+    @AppStorage(PreferenceKey.showMyName) private var showMyName = true
+    @AppStorage(PreferenceKey.seenShowMyNameNotice) private var seenShowMyNameNotice = false
+    @State private var forcesShowMyNameNotice = ShowMyNameNoticeSheet.forcedAtLaunch
 
     var body: some View {
         Group {
@@ -31,6 +34,8 @@ struct RootView: View {
                     // chosen), a replay from Settings included.
                     router.showDefaultPage()
                     WhatsNewLaunch.markSeen()
+                    // Onboarding's number page said who sees the name.
+                    seenShowMyNameNotice = true
                     withAnimation(.smooth) { hasOnboarded = true }
                 }
                     .transition(.opacity)
@@ -58,6 +63,17 @@ struct RootView: View {
             if let whatsNew {
                 WhatsNewSheet(announcement: whatsNew, window: window, startPage: whatsNewStartPage)
             }
+        }
+        .sheet(isPresented: showMyNameNoticePresented) {
+            ShowMyNameNoticeSheet()
+        }
+        // The owner's listing follows their name, numbers, photo and Show My
+        // Name, two seconds after the last change, so a name typed letter
+        // by letter is sent once.
+        .task(id: StarHashCloud.directoryListing(owner: owner, showMyName: showMyName)?.state ?? "off") {
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled else { return }
+            StarHashCloud.syncDirectory(owner: owner)
         }
         #if DEBUG
         .onChange(of: router.whatsNewPreviewPage) { _, page in
@@ -106,6 +122,22 @@ struct RootView: View {
         )
     }
 
+    /// Once, for owners set up before Show My Name came, while it is on:
+    /// after the welcome note and What's New, never over either.
+    private var showMyNameNoticePresented: Binding<Bool> {
+        Binding(
+            get: {
+                guard !splashActive, hasOnboarded, owner.chosenWallet != nil, hasSeenDeveloperNote, !forcesNote, whatsNew == nil else { return false }
+                return forcesShowMyNameNotice || (!seenShowMyNameNotice && showMyName && owner.defaultSIM != nil)
+            },
+            set: { presented in
+                guard !presented else { return }
+                seenShowMyNameNotice = true
+                forcesShowMyNameNotice = false
+            }
+        )
+    }
+
     private var reviewNotePresented: Binding<Bool> {
         Binding(
             get: { showsReviewNote && !splashActive },
@@ -116,7 +148,8 @@ struct RootView: View {
     /// Two weeks after StarHash was first set up, the rating note, once,
     /// never on top of the welcome note or What's New.
     private func checkReviewNote() {
-        guard hasOnboarded, owner.chosenWallet != nil, hasSeenDeveloperNote, whatsNew == nil else { return }
+        guard hasOnboarded, owner.chosenWallet != nil, hasSeenDeveloperNote, whatsNew == nil,
+              !showMyNameNoticePresented.wrappedValue else { return }
         ReviewNote.startClockIfNeeded()
         if ReviewNote.isDue() { showsReviewNote = true }
     }

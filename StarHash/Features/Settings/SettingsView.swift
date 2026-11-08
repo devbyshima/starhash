@@ -89,6 +89,7 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
     @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
     @AppStorage(PreferenceKey.saveRecents) private var saveRecents = true
+    @AppStorage(PreferenceKey.showMyName) private var showMyName = true
     @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
     @AppStorage(PreferenceKey.defaultPage) private var defaultPage = AppTab.pay.rawValue
     @AppStorage(PreferenceKey.appearance) private var appearance = AppAppearance.system
@@ -266,6 +267,12 @@ private struct SettingsRootList: View {
                 }
                 .transition(SettingsCaptionMotion.transition)
             }
+            SettingsToggleRow(
+                symbol: "eye.fill",
+                title: "Show my name",
+                caption: "People who type your number in StarHash see your name and photo",
+                isOn: $showMyName
+            )
         }
         .sheet(isPresented: $choosesSIMToKeep) {
             KeepSIMSheet(sims: [owner.defaultSIM, owner.otherSIM].compactMap { $0 }) { sim in
