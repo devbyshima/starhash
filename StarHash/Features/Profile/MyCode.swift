@@ -4,9 +4,8 @@ import SwiftUI
 import UIKit
 
 /// The owner's code as an image to share, StarHash's own: the modules as
-/// rounded near-black dots on white, the three corner squares rounded with
-/// their eyes in the deep green, and the StarHash mark in the accent on a
-/// white tile in the middle. Error correction H leaves a third of the code
+/// rounded near-black dots on white, the three corner squares rounded, and
+/// the StarHash mark in the near black on a white tile in the middle. Error correction H leaves a third of the code
 /// to spare, far more than the mark covers, so any scanner still reads it.
 enum QRCodeImage {
     /// The code as a square image `side` pixels wide, a quiet zone of four
@@ -18,8 +17,6 @@ enum QRCodeImage {
         let module = side / CGFloat(count + quiet * 2)
         let origin = CGFloat(quiet) * module
         let ink = UIColor(red: 23 / 255, green: 23 / 255, blue: 23 / 255, alpha: 1)
-        let eye = UIColor(red: 53 / 255, green: 116 / 255, blue: 68 / 255, alpha: 1)
-        let accent = UIColor(red: 100 / 255, green: 210 / 255, blue: 123 / 255, alpha: 1)
 
         // The mark's tile: about a quarter of the code across, on whole
         // modules, an odd number so it sits dead centre.
@@ -60,7 +57,6 @@ enum QRCodeImage {
                 ring.append(UIBezierPath(roundedRect: outer.insetBy(dx: module, dy: module), cornerRadius: module * 1.3).reversing())
                 ink.setFill()
                 ring.fill()
-                eye.setFill()
                 UIBezierPath(roundedRect: outer.insetBy(dx: module * 2, dy: module * 2), cornerRadius: module).fill()
             }
 
@@ -75,7 +71,7 @@ enum QRCodeImage {
             UIBezierPath(roundedRect: tile, cornerRadius: tile.width * 0.24).fill()
             let mark = StarHashMarkShape().path(in: tile.insetBy(dx: tile.width * 0.13, dy: tile.width * 0.13)).cgPath
             cg.addPath(mark)
-            cg.setFillColor(accent.cgColor)
+            cg.setFillColor(ink.cgColor)
             cg.fillPath()
         }
     }

@@ -5,25 +5,19 @@
 #
 #   python3 scripts/make_doodles.py
 #
-# - Three tones on the page and nothing else: the green accent for the
-#   subject, and a deep green of the same hue for lines and dark fills,
-#   dark enough to hold on the white page and still green, not olive. It
-#   is the reference's light subject and deep line, moved onto StarHash's
-#   green. No white and no black but the page's own colour, which only
-#   ever shows through.
+# - Three tones on the page and nothing else, StarHash's accent and the
+#   neutrals round it: in light mode the subject and its lines in the near
+#   black #171717, the details on the subject in the page's white, and
+#   the dark fills (sleeves, shadows) in the grey #707070.
 # - Fills are flat, hand-cut blobs with soft edges and no outline
 #   (blob()). Lines are a brush pen (line()): round ends, a little uneven
 #   in width, thin for the drawing and the same width at any scale.
 # - Hands are outlines with the page showing through, filled with the
-#   page's own colour so they cover what they hold, in a deep green
-#   sleeve; a loose cord with a loop in it trails off, and a few short
-#   strokes say "look here".
-# - Dark mode has no reference, so it keeps the drawing in the near
-#   black's terms: the subject stays the accent and the details on it the
-#   deep green, the dark fills lift to a middle green that still stands
-#   off the near black, and lines straight on the page turn a lighter
-#   mint, so every line still reads and a hand's outline stays apart from
-#   the green it holds.
+#   page's own colour so they cover what they hold, in a grey sleeve.
+#   Nothing else: no strokes round the drawing, no trailing cord.
+# - Dark mode turns it over: the subject and its lines in the near white
+#   #FAFBFA, the details on it in the page's #171717, the dark fills the
+#   same grey, which still stands off the near black.
 #
 # Every point is placed here, so each canvas is trimmed to the drawing,
 # 6 points round: an empty state centres the image, and room left on one
@@ -42,8 +36,8 @@ ASSETS = os.path.join(ROOT, "StarHash", "Resources", "Assets.xcassets")
 # page: the ground, which fills hands. fill: the subject. dark: sleeves,
 # shadows, the dark half of a thing. line: lines straight on the page.
 # ink: lines drawn on the subject. chalk: lines drawn on a dark fill.
-LIGHT = dict(page="#FFFFFF", fill="#64D27B", dark="#326E41", line="#326E41", ink="#326E41", chalk="#64D27B")
-DARK = dict(page="#171717", fill="#64D27B", dark="#408A51", line="#9AE2A9", ink="#326E41", chalk="#64D27B")
+LIGHT = dict(page="#FFFFFF", fill="#171717", dark="#707070", line="#171717", ink="#FFFFFF", chalk="#FFFFFF")
+DARK = dict(page="#171717", fill="#FAFBFA", dark="#707070", line="#FAFBFA", ink="#171717", chalk="#FAFBFA")
 
 PEN = 4.6
 MARGIN = 6
@@ -281,14 +275,6 @@ def doodle(fn):
     return fn
 
 
-def ticks(d, cx, cy, start, r=(20, 38), lengths=(1, 1, 0.75, 0.2), spread=24):
-    """Three or four short strokes radiating from a point: "look here"."""
-    for i, f in enumerate(lengths):
-        a = math.radians(start + i * spread)
-        r0, r1 = r[0], r[0] + (r[1] - r[0]) * f
-        d.line("line", [(cx + r0 * math.cos(a), cy + r0 * math.sin(a)), (cx + r1 * math.cos(a), cy + r1 * math.sin(a))], w=PEN * 0.9)
-
-
 def disc(cx, cy, r, n=11, seed=0):
     """A circle's outline, a little out of round."""
     rng = random.Random(seed)
@@ -356,7 +342,6 @@ def grip(d, fingers=4, fw=15, reach=13):
 
 @doodle
 def EmptyTransactions(d):
-    ticks(d, 74, 44, 196)
     with d.turned(-12, 140, 120):
         d.blob("fill", receipt(84, 28, 112, 182), wobble=0.8)
         d.line("ink", [(102, 56), (111, 50), (120, 56), (129, 50), (138, 56), (146, 52)])
@@ -365,12 +350,10 @@ def EmptyTransactions(d):
     # a right hand holding its edge, the arm going off down the right
     with d.at(206, 196, -36, 1.3):
         fist(d)
-    d.line("line", [(222, 292), (200, 300), (180, 296), (176, 284), (186, 278), (192, 290), (180, 308), (148, 314), (114, 304), (94, 286)])
 
 
 @doodle
 def EmptyPeriod(d):
-    ticks(d, 262, 46, -100)
     with d.turned(10, 180, 115):
         d.line("line", [(144, 44), (143, 26), (150, 18), (158, 24), (157, 44)])
         d.line("line", [(204, 44), (203, 26), (210, 18), (218, 24), (217, 44)])
@@ -385,36 +368,30 @@ def EmptyPeriod(d):
     # a left hand holding its corner, the arm going off down the left
     with d.at(128, 204, 40, 1.3, flip=True):
         fist(d)
-    d.line("line", [(110, 284), (130, 294), (148, 292), (154, 280), (144, 274), (138, 286), (150, 304), (182, 310), (214, 298), (234, 280)])
 
 
 @doodle
 def EmptySearch(d):
-    ticks(d, 270, 60, -104)
     d.blob("dark", [(176, 140), (188, 156), (128, 198), (116, 182)])
     d.blob("fill", disc(220, 108, 56, seed=3))
     d.blob("dark", [(274, 100), (268, 134), (248, 158), (220, 166), (192, 160), (208, 156), (234, 148), (254, 128), (264, 100)])
     d.line("ink", [(186, 106), (191, 88), (206, 75)])
     with d.at(118, 200, 54, 1.32):
         fist(d)
-    d.line("line", [(76, 278), (96, 292), (114, 292), (122, 282), (114, 274), (106, 284), (116, 302), (150, 314), (190, 304), (218, 286)])
 
 
 @doodle
 def EmptyResults(d):
-    ticks(d, 222, 64, -84, r=(22, 38))
     d.blob("dark", [(178, 176), (194, 162), (262, 222), (248, 240)])
     d.blob("fill", disc(136, 124, 78, seed=5))
     d.blob("dark", [(74, 88), (62, 126), (72, 166), (100, 196), (136, 204), (110, 194), (84, 166), (74, 128), (82, 94)])
     d.line("ink", [(112, 108), (116, 90), (132, 80), (152, 84), (160, 100), (152, 116), (138, 124), (136, 144)])
     d.line("ink", [(136, 166), (137, 168)], w=8)
     d.line("ink", [(162, 64), (182, 74), (194, 92)])
-    d.line("line", [(256, 236), (262, 252), (256, 266), (242, 264), (240, 250), (252, 252), (250, 272), (226, 290), (186, 294), (150, 284)])
 
 
 @doodle
 def EmptyMatches(d):
-    ticks(d, 244, 58, -100)
     with d.turned(14, 160, 140):
         # fingertips round the far edge, behind the phone
         for y, r in ((128, 10), (153, 11), (178, 10)):
@@ -439,18 +416,15 @@ def EmptyMatches(d):
         d.line("line", [(171, 214), (170, 228)])
         with d.at(116, 240, 10):
             sleeve(d, 104, 54)
-            d.line("line", [(36, 34), (52, 42), (66, 38), (70, 26), (60, 22), (54, 32), (66, 44), (92, 50), (122, 46), (148, 32)])
 
 
 @doodle
 def EmptyCodes(d):
-    ticks(d, 262, 44, -110)
     with d.turned(-8, 160, 150):
         d.blob("dark", rrect(88, 96, 170, 128, 18, skew=0.07))
         d.blob("fill", rrect(72, 78, 170, 128, 18, taper=-0.04, skew=0.05))
-        # a tag's hole and its string, wandering off
+        # a tag's hole
         d.line("ink", [(92, 98), (93, 99)], w=9)
-        d.line("line", [(86, 77), (80, 62), (66, 54), (54, 60), (58, 72), (70, 68), (66, 50), (52, 34), (30, 30)])
         for (a, b) in (((130, 104), (118, 186)), ((178, 104), (166, 186)), ((100, 128), (206, 126)), ((96, 162), (202, 160))):
             d.line("ink", [a, b], w=10)
     d.blob("dark", disc(240, 88, 30, seed=7))

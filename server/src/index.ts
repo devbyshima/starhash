@@ -6,9 +6,10 @@
 // number. A secret key, kept on the owner's iPhone, is needed to replace or
 // delete it: the server keeps only its hash.
 //
-// Installs: once a day the app sends a random id it made on its first
-// launch and its version, so the number of people using StarHash can be
-// counted. Nothing else: no number, no name, no transactions.
+// Installs: once each day it is used the app sends a random id it made on
+// its first launch and its version, so the number of people using StarHash
+// can be counted, in all (installs) and each day (active_days, by Kigali's
+// date). Nothing else: no number, no name, no transactions.
 
 export interface Env {
   DB: D1Database;
@@ -98,14 +99,21 @@ async function ping(request: Request, env: Env): Promise<Response> {
   const id = typeof body.id === "string" ? body.id.toLowerCase() : "";
   if (!UUID.test(id)) return text(400, "Bad request");
   const version = typeof body.version === "string" ? body.version.slice(0, 32) : null;
-  const today = new Date().toISOString().slice(0, 10);
-  await env.DB.prepare(
-    `INSERT INTO installs (id, first_seen, last_seen, version) VALUES (?1, ?2, ?2, ?3)
-     ON CONFLICT(id) DO UPDATE SET last_seen = ?2, version = ?3`,
-  )
-    .bind(id, today, version)
-    .run();
+  const today = kigaliDate(new Date());
+  await env.DB.batch([
+    env.DB.prepare(
+      `INSERT INTO installs (id, first_seen, last_seen, version) VALUES (?1, ?2, ?2, ?3)
+       ON CONFLICT(id) DO UPDATE SET last_seen = ?2, version = ?3`,
+    ).bind(id, today, version),
+    env.DB.prepare("INSERT OR IGNORE INTO active_days (day, id) VALUES (?1, ?2)").bind(today, id),
+  ]);
   return text(200, "Counted");
+}
+
+/// The date in Kigali (UTC+2 all year, no daylight saving), where the people
+/// using StarHash are, so a day of use is their day and not UTC's.
+function kigaliDate(now: Date): string {
+  return new Date(now.getTime() + 2 * 3600 * 1000).toISOString().slice(0, 10);
 }
 
 function bearer(request: Request): string | null {

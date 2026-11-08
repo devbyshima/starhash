@@ -222,7 +222,7 @@ struct AutoVerificationGuide: View {
                         "Every \(ownWallets.messagesName) message confirms its payment.",
                         "Fees and your balance fill in by themselves.",
                         "Turn it off any time in **Settings**.",
-                    ], symbol: "checkmark")
+                    ], symbol: "checkmark", confirmed: true)
                 case .awaitingMessage:
                     GuideStepList(steps: [
                         "The shortcut works. A message through the automation proves the rest.",
@@ -451,7 +451,7 @@ private struct GuidePhoneScreenshot: View {
 /// Step 2's picture, in the same phone as step 1's and the same size, so
 /// both steps lay out alike: Shortcuts' dark Automation tab with the real
 /// screenshot of the StarHash SMS automation on it, its switch ringed, and a
-/// green check once the shortcut is verified.
+/// check once the shortcut is verified.
 private struct GuideAutomationPhone: View {
     let imageName: String
     let label: String
@@ -485,8 +485,8 @@ private struct GuideAutomationPhone: View {
                             // colour drawn on it sits behind, inside the rim.
                             Image(symbol: "checkmark.circle.fill")
                                 .font(.system(size: 22, weight: .semibold))
-                                .foregroundStyle(Color.starhashIncoming)
-                                .background(Circle().fill(Color.starhashOnIncoming).padding(5))
+                                .foregroundStyle(Color.starhashConfirmed)
+                                .background(Circle().fill(Color.starhashOnConfirmed).padding(5))
                                 .background(Circle().fill(Color(white: 0.07)).padding(2.5))
                                 .offset(x: 6, y: -8)
                                 .transition(.scale.combined(with: .opacity))
@@ -555,6 +555,8 @@ private struct GuideHighlight: View {
 private struct GuideStepList: View {
     let steps: [LocalizedStringKey]
     var symbol: String?
+    /// Ticked in the confirmed green: what works now the check passed.
+    var confirmed = false
 
     var body: some View {
         StarHashCard(fill: .starhashCard) {
@@ -570,9 +572,9 @@ private struct GuideStepList: View {
                                 .starhashFont(14, weight: .bold, relativeTo: .subheadline)
                         }
                     }
-                        .foregroundStyle(Color.starhashOnInk)
+                        .foregroundStyle(confirmed ? AnyShapeStyle(Color.starhashOnConfirmed) : AnyShapeStyle(Color.starhashOnInk))
                         .frame(width: 24, height: 24)
-                        .background(Color.starhashInk, in: Circle())
+                        .background(confirmed ? AnyShapeStyle(Color.starhashConfirmed) : AnyShapeStyle(Color.starhashInk), in: Circle())
                         .alignmentGuide(.firstTextBaseline) { $0[VerticalAlignment.center] + 5 }
                         .accessibilityHidden(true)
                     Text(step)

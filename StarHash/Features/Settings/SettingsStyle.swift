@@ -14,12 +14,12 @@ extension Color {
     static var settingsCard: Color { .starhashCard }
     /// The tile behind row symbols and the profile monogram: a visible grey
     /// on a white card, a faint veil on a near-black one.
-    static let settingsTile = Color(light: .brandForest.opacity(0.07), dark: .brandPaper.opacity(0.07))
+    static let settingsTile = Color(light: .brandInk.opacity(0.07), dark: .brandPaper.opacity(0.07))
     /// Behind every settings page: the app's page colour, so cards stand
     /// out the same way they do on Activity.
     static var settingsCanvas: Color { .starhashBackground }
-    /// The track of a switched-on toggle: the accent, with the white knob
-    /// showing on it in either appearance.
+    /// The track of a switched-on toggle: the accent in light mode, a grey
+    /// in dark, so the white knob shows on it in either appearance.
     static let settingsToggleOn = Color.starhashSwitchOn
 }
 
@@ -305,6 +305,9 @@ struct SettingsRowText: View {
     let title: String
     var caption: String?
     var status: String?
+    /// The status line's colour when it is a status (amber waiting, red
+    /// failing); the quiet grey otherwise.
+    var statusColor: Color?
     var showsCaption = false
 
     var body: some View {
@@ -313,7 +316,7 @@ struct SettingsRowText: View {
                 .starhashFont(16, weight: .medium, relativeTo: .callout)
                 .foregroundStyle(Color.starhashPrimaryText)
             if let status {
-                line(status)
+                line(status, style: statusColor.map(AnyShapeStyle.init) ?? AnyShapeStyle(Color.starhashTertiaryText))
             }
             if let caption, showsCaption {
                 line(caption)
@@ -323,10 +326,10 @@ struct SettingsRowText: View {
         .padding(.vertical, 11)
     }
 
-    private func line(_ text: String) -> some View {
+    private func line(_ text: String, style: AnyShapeStyle = AnyShapeStyle(Color.starhashTertiaryText)) -> some View {
         Text(catalog: text)
             .starhashFont(13.5, weight: .medium, relativeTo: .footnote)
-            .foregroundStyle(Color.starhashTertiaryText)
+            .foregroundStyle(style)
             .fixedSize(horizontal: false, vertical: true)
     }
 }
@@ -339,6 +342,7 @@ struct SettingsToggleRow: View {
     let title: String
     var caption: String?
     var status: String?
+    var statusColor: Color?
     @Binding var isOn: Bool
 
     @State private var showsCaption = false
@@ -347,7 +351,7 @@ struct SettingsToggleRow: View {
         Toggle(isOn: $isOn) {
             HStack(spacing: 12) {
                 SettingsCaptionIcon(symbol: symbol, hasCaption: caption != nil, showsCaption: $showsCaption)
-                SettingsRowText(title: title, caption: caption, status: status, showsCaption: showsCaption)
+                SettingsRowText(title: title, caption: caption, status: status, statusColor: statusColor, showsCaption: showsCaption)
             }
         }
         .tint(Color.settingsToggleOn)

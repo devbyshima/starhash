@@ -1,29 +1,157 @@
 import SwiftUI
 
-/// About StarHash, Licences: what StarHash is built with that is not its
-/// own, and the terms each comes under. Space Grotesk is the one
-/// third-party piece the app ships, so its copyright, licence notice and
-/// the SIL Open Font License's full text are here, as the OFL asks of an
-/// app that bundles the font (OFL FAQ 1.20), read from the copy bundled
-/// beside the font. Then StarHash's own licence, and the carriers' marks.
-/// The licences' own words stay in English, as their authors publish them.
+/// About StarHash, Licences, laid out as a third-party notice: StarHash's
+/// own licence first, then everything it is built with that is not its
+/// own as a list, each by its name and version with its licence, a row
+/// that opens the piece's own page (`LicenceView`) with the licence's full
+/// text. Then the carriers' marks. The licences' own words stay in
+/// English, as their authors publish them.
 struct LicencesView: View {
-    private static let fontSource = URL(string: "https://github.com/floriankarsten/space-grotesk")!
-    private static let ofl = URL(string: "https://openfontlicense.org")!
     private static let polyForm = URL(string: "https://polyformproject.org/licenses/noncommercial/1.0.0")!
 
-    /// The OFL's text, as Space Grotesk's authors ship it, reflowed to the
-    /// screen (`reflowed`).
-    private let fontLicence = Bundle.main.url(forResource: "OFL", withExtension: "txt")
-        .flatMap { try? String(contentsOf: $0, encoding: .utf8) }
-        .map(Self.reflowed) ?? ""
+    var body: some View {
+        SettingsScroll(spacing: 28, top: 8) {
+            LicencesHeader(symbol: "doc.text.fill", title: Text("Licences"))
+
+            SettingsCard("StarHash") {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(verbatim: "StarHash")
+                        .starhashFont(16, weight: .semibold, relativeTo: .callout)
+                        .foregroundStyle(Color.starhashPrimaryText)
+                        .accessibilityAddTraits(.isHeader)
+                    Text(verbatim: "Copyright (c) 2026 Shima")
+                    Text(verbatim: "PolyForm Noncommercial License 1.0.0")
+                }
+                .starhashFont(14.5, relativeTo: .subheadline)
+                .foregroundStyle(Color.starhashSecondaryText)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, 16)
+                .settingsRowInset()
+                LicenceLinkRow(title: "PolyForm Noncommercial", symbol: "doc.text.fill", url: Self.polyForm)
+                LicenceLinkRow(title: "Source code", symbol: "chevron.left.forwardslash.chevron.right", url: SettingsLinks.sourceCode)
+            }
+
+            SettingsCard("Built with") {
+                LicenceParagraph(text: Text("StarHash is built with the work of others, which goes out with it under their own terms: each piece below, by its name and version, with its licence, and that licence's text where it has one."))
+                ForEach(ThirdPartyPiece.all) { piece in
+                    SettingsLinkRow(
+                        page: .licence(piece),
+                        symbol: piece.symbol,
+                        title: piece.name,
+                        status: "\(piece.version) · \(piece.licence)"
+                    )
+                }
+            }
+
+            TrademarkNotice()
+        }
+        .settingsPage("Licences")
+    }
+}
+
+/// One piece's page, as a third-party notice gives it: its name and
+/// version, the licence it comes under and where it comes from, then the
+/// licence's full text from the copy bundled beside it, as the licence
+/// asks of an app that ships the piece (the OFL's FAQ 1.20 for a font).
+struct LicenceView: View {
+    let piece: ThirdPartyPiece
+    private let text: String?
+
+    init(piece: ThirdPartyPiece) {
+        self.piece = piece
+        text = piece.text
+    }
+
+    var body: some View {
+        SettingsScroll(spacing: 28, top: 8) {
+            LicencesHeader(symbol: piece.symbol, title: Text(verbatim: piece.name))
+
+            SettingsCard {
+                SettingsRow(symbol: "number", title: "Version", value: piece.version)
+                SettingsRow(symbol: "doc.text.fill", title: "Licence", value: piece.licence)
+                LicenceLinkRow(title: "Source", symbol: "chevron.left.forwardslash.chevron.right", url: piece.source)
+                LicenceLinkRow(title: piece.licenceName, symbol: "doc.text.fill", url: piece.licenceURL)
+            }
+
+            if let text {
+                SettingsCard("Licence text") {
+                    Text(verbatim: text)
+                        .starhashFont(13.5, relativeTo: .footnote)
+                        .lineSpacing(2)
+                        .foregroundStyle(Color.starhashSecondaryText)
+                        .textSelection(.enabled)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 18)
+                        .settingsRowInset()
+                }
+            }
+        }
+        .settingsPage(piece.name)
+    }
+}
+
+/// A piece StarHash ships that is not its own, by what a third-party
+/// notice gives for it: its name and version as its authors give them, the
+/// licence's SPDX id and name, where it comes from, and the licence's text,
+/// bundled beside it. Anything new that is not StarHash's own (a font, an
+/// image, a package) gets one in `all`, and its licence file in the bundle.
+struct ThirdPartyPiece: Identifiable, Hashable {
+    let name: String
+    let version: String
+    let symbol: String
+    /// The licence's SPDX id ("OFL-1.1").
+    let licence: String
+    let licenceName: String
+    let licenceURL: URL
+    let source: URL
+    /// The licence's text in the bundle, a .txt file by this name.
+    let textFile: String
+
+    var id: String { name }
+
+    static let all: [ThirdPartyPiece] = [spaceGrotesk, keylineIcons]
+
+    static let spaceGrotesk = ThirdPartyPiece(
+        name: "Space Grotesk",
+        // The bundled font's own version, from its name table.
+        version: "2.000",
+        symbol: "doc.text.fill",
+        licence: "OFL-1.1",
+        licenceName: "SIL Open Font License",
+        licenceURL: URL(string: "https://openfontlicense.org")!,
+        source: URL(string: "https://github.com/floriankarsten/space-grotesk")!,
+        textFile: "OFL"
+    )
+
+    /// Every icon in the app and the widgets, made into symbols by
+    /// scripts/make_icons.swift from the SVGs in scripts/keyline-icons.
+    static let keylineIcons = ThirdPartyPiece(
+        name: "Keyline Icons",
+        // The release the SVGs in scripts/keyline-icons come from.
+        version: "2.5.0",
+        symbol: "sparkles",
+        licence: "MIT",
+        licenceName: "MIT License",
+        licenceURL: URL(string: "https://opensource.org/license/mit")!,
+        source: URL(string: "https://github.com/keyline-icons/keyline-icons")!,
+        textFile: "KeylineIcons"
+    )
+
+    /// The licence's text as its authors ship it, reflowed to the screen,
+    /// or nil if the bundle has no copy.
+    var text: String? {
+        Bundle.main.url(forResource: textFile, withExtension: "txt")
+            .flatMap { try? String(contentsOf: $0, encoding: .utf8) }
+            .map(Self.reflowed)
+    }
 
     /// The licence's words as they are, but each paragraph on one line, so
     /// it wraps to the phone's width rather than at the file's 70
     /// characters, a heading in capitals ("PREAMBLE") on a line of its
     /// own, and without the dashed rules, which only frame its title in a
     /// text file.
-    nonisolated static func reflowed(_ text: String) -> String {
+    static func reflowed(_ text: String) -> String {
         text.replacingOccurrences(of: "\r\n", with: "\n")
             .components(separatedBy: "\n\n")
             .map { paragraph in
@@ -40,96 +168,78 @@ struct LicencesView: View {
     }
 
     /// A line in capitals alone ("PERMISSION & CONDITIONS").
-    nonisolated private static func isHeading(_ line: String) -> Bool {
+    private static func isHeading(_ line: String) -> Bool {
         line.contains(where: \.isLetter) && line == line.uppercased()
     }
+}
+
+/// The icon and title at the top of the list and of each piece's page.
+private struct LicencesHeader: View {
+    let symbol: String
+    let title: Text
 
     var body: some View {
-        SettingsScroll(spacing: 28, top: 8) {
-            header
-
-            SettingsCard("Font") {
-                entry(
-                    name: "Space Grotesk",
-                    notice: "Copyright 2020 The Space Grotesk Project Authors",
-                    licence: "SIL Open Font License, Version 1.1"
-                )
-                linkRow("Font's source", symbol: "chevron.left.forwardslash.chevron.right", url: Self.fontSource)
-                linkRow("SIL Open Font License", symbol: "doc.text.fill", url: Self.ofl)
-            }
-
-            if !fontLicence.isEmpty {
-                SettingsCard("Licence text") {
-                    Text(verbatim: fontLicence)
-                        .starhashFont(13.5, relativeTo: .footnote)
-                        .lineSpacing(2)
-                        .foregroundStyle(Color.starhashSecondaryText)
-                        .textSelection(.enabled)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.vertical, 18)
-                        .settingsRowInset()
-                }
-            }
-
-            SettingsCard("StarHash") {
-                entry(
-                    name: "StarHash",
-                    notice: "Copyright (c) 2026 Shima",
-                    licence: "PolyForm Noncommercial License 1.0.0"
-                )
-                linkRow("PolyForm Noncommercial", symbol: "doc.text.fill", url: Self.polyForm)
-                linkRow("Source code", symbol: "chevron.left.forwardslash.chevron.right", url: SettingsLinks.sourceCode)
-            }
-
-            SettingsCard("Trademarks") {
-                Text("MTN, MoMo, Airtel and Airtel Money, and their logos, are their owners' trademarks, shown only to name the wallets StarHash works with.")
-                    .starhashFont(14.5, relativeTo: .subheadline)
-                    .lineSpacing(2)
-                    .foregroundStyle(Color.starhashSecondaryText)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 18)
-                    .settingsRowInset()
-            }
-        }
-        .settingsPage("Licences")
-    }
-
-    private var header: some View {
         VStack(spacing: 0) {
-            SettingsSymbol(symbol: "doc.text.fill", size: 64)
+            SettingsSymbol(symbol: symbol, size: 64)
                 .padding(.bottom, 18)
-            Text("Licences")
+            title
                 .starhashFont(30, weight: .bold, relativeTo: .title)
                 .foregroundStyle(Color.starhashPrimaryText)
+                .multilineTextAlignment(.center)
                 .accessibilityAddTraits(.isHeader)
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 8)
     }
+}
 
-    /// A piece's name, its copyright as its authors write it, and the
-    /// licence it comes under.
-    private func entry(name: String, notice: String, licence: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(verbatim: name)
-                .starhashFont(16, weight: .semibold, relativeTo: .callout)
-                .foregroundStyle(Color.starhashPrimaryText)
-                .accessibilityAddTraits(.isHeader)
-            Text(verbatim: notice)
-                .starhashFont(14.5, relativeTo: .subheadline)
-                .foregroundStyle(Color.starhashSecondaryText)
-            Text(verbatim: licence)
-                .starhashFont(14.5, relativeTo: .subheadline)
-                .foregroundStyle(Color.starhashSecondaryText)
+/// A card's words in a row of their own: the list's opening, the
+/// trademarks.
+/// Whose names and logos StarHash shows, and that showing them claims no
+/// tie to their owners, as GO Club's Settings set it out: on Settings and
+/// in Licences.
+struct TrademarkNotice: View {
+    var body: some View {
+        SettingsCard("Third-Party Trademark Notice") {
+            VStack(alignment: .leading, spacing: 14) {
+                Text("StarHash shows the names and logos of other companies only to say which wallet, network or service a payment or a code is for.")
+                Text("MTN, MoMo, MoMoAdvance, Gwamon' Pack, Airtel, Airtel Money, Cash Power, Apple, iPhone, Face ID, Touch ID, Optic ID, Apple Intelligence, Shortcuts, App Store, GitHub and Ko-fi, their logos and every other trademark StarHash shows belong to their owners.")
+                Text("Naming them does not mean any of them is affiliated with StarHash, endorses it, sponsors it or approves of it.")
+                Text("StarHash is an independent app and is not affiliated with, endorsed by, sponsored by or associated with any of them.")
+            }
+            .starhashFont(14.5, relativeTo: .subheadline)
+            .lineSpacing(2)
+            .foregroundStyle(Color.starhashSecondaryText)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 18)
+            .settingsRowInset()
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, 16)
-        .settingsRowInset()
     }
+}
 
-    private func linkRow(_ title: String, symbol: String, url: URL) -> some View {
+private struct LicenceParagraph: View {
+    let text: Text
+
+    var body: some View {
+        text
+            .starhashFont(14.5, relativeTo: .subheadline)
+            .lineSpacing(2)
+            .foregroundStyle(Color.starhashSecondaryText)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 18)
+            .settingsRowInset()
+    }
+}
+
+/// A row that leaves the app for a web page.
+private struct LicenceLinkRow: View {
+    let title: String
+    let symbol: String
+    let url: URL
+
+    var body: some View {
         Link(destination: url) {
             SettingsRow(symbol: symbol, title: title) {
                 SettingsChevron(symbol: "arrow.up.right")

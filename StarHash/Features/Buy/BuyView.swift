@@ -46,6 +46,8 @@ struct BuyView: View {
     @State private var dragPoint: CGPoint = .zero
     @State private var grabOffset: CGSize = .zero
     @State private var gridWidth: CGFloat = 360
+    /// The width of a code's row, for its long-press preview.
+    @State private var codeWidth: CGFloat = 360
     /// True while a finger is down on a tile, arranging; false again when
     /// it lifts or the drag is cancelled, which settles the tile either way.
     @GestureState private var arrangeDragActive = false
@@ -165,12 +167,26 @@ struct BuyView: View {
                                 onOpen: { details = shortcut },
                                 onDial: { dial(shortcut.code) }
                             )
+                            // Lifted as a transaction's row is, from the
+                            // screen's whole width with its own preview that
+                            // wide, so the menu opens under the row from its
+                            // left edge; a row inside the page's margins got
+                            // its menu centred over it.
+                            .padding(.horizontal, StarHashMetrics.screenPadding)
+                            .contentShape(.contextMenuPreview, Rectangle())
                             .contextMenu {
                                 Button(shortcuts.canPin ? "Pin" : "Pinned is full", symbol: "pin") { afterMenu { pin(shortcut, true) } }
                                     .disabled(!shortcuts.canPin)
                                 Button("Edit", symbol: "pencil") { editing = ShortcutDraft(shortcut) }
                                 Button(role: .destructive) { afterMenu { requestDelete(shortcut) } } label: { DestructiveMenuLabel("Delete") }
+                            } preview: {
+                                ShortcutItem(shortcut: shortcut, onOpen: {}, onDial: {})
+                                    .frame(width: codeWidth)
+                                    .padding(.vertical, ActivityLayout.rowPreviewInset)
+                                    .frame(width: codeWidth + 2 * StarHashMetrics.screenPadding)
+                                    .background(Color.starhashBackground)
                             }
+                            .padding(.horizontal, -StarHashMetrics.screenPadding)
                             .accessibilityAction(named: "Pin") { pin(shortcut, true) }
                             .accessibilityAction(named: "Delete") { requestDelete(shortcut) }
                             .buySwipeToPin { pin(shortcut, true) }
@@ -181,6 +197,7 @@ struct BuyView: View {
                             ))
                         }
                     }
+                    .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { codeWidth = $0 }
                 }
             }
             .padding(.horizontal, StarHashMetrics.screenPadding)

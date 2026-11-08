@@ -1,20 +1,19 @@
 import SwiftUI
 import UIKit
 
-/// StarHash's own icons, one puffy style for the whole app: round and
-/// soft, closed shapes filled and traced so every corner is a small curve,
-/// open glyphs a thin round line, one colour, all on the same 18pt grid.
-/// Each also has an outline form, its closed shapes drawn as a line, which
-/// the tab bar shows for the pages not chosen.
-/// `scripts/make_icons.swift` draws them into `Icons.xcassets` as custom
-/// SF Symbols, so they size with the font, take the foreground style and
-/// work wherever an SF Symbol does: views, menus, widgets, controls.
+/// StarHash's icons, every one from Keyline Icons (keylineicons.com, MIT):
+/// the filled form is Keyline's fill style, and each also has an outline
+/// form, Keyline's stroke style, for `ActionRow` and the like.
+/// `scripts/make_icons.swift` turns Keyline's SVGs into `Icons.xcassets`
+/// as custom SF Symbols, so they size with the font, take the foreground
+/// style and work wherever an SF Symbol does: views, menus, widgets,
+/// controls.
 ///
 /// The app goes on naming its icons by their SF Symbols' names, the names
 /// stored in Buy's codes, categories and Settings rows; `Image(symbol:)`
 /// draws ours for each, and falls back to the system's for a name with no
-/// drawing yet. A new icon needs its case here, its drawing in the script
-/// and its SF Symbol names in `bySymbol`.
+/// drawing yet. A new icon needs its case here, its Keyline name in the
+/// script and its SF Symbol names in `bySymbol`.
 enum StarIcon: String, CaseIterable {
     case airplane, antenna, appearance, arrowDownLeft, arrowUpRight, bag, bank, battery, bell, bellBadge, bellSlash
     case bolt, box, bus, calendar, camera, car, card, cart, cash, chartBar, chartLine, chat, check, checkCircle

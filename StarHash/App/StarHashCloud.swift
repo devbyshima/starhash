@@ -70,24 +70,52 @@ enum StarHashCloud {
 
     // MARK: Counting
 
-    /// Says this copy is in use, at most once a day.
+    /// Says this copy is in use, once on each day it comes to the front, by
+    /// Kigali's calendar as the server counts days (so someone using it
+    /// late one evening and early the next morning counts on both days).
+    /// The day is only marked once the server has counted it: a try that
+    /// failed, offline say, is made again the next time StarHash opens.
+    /// The Simulator never counts, so test runs stay out of the numbers.
     static func pingIfDue(now: Date = .now) {
-        let defaults = UserDefaults.standard
-        let last = defaults.double(forKey: lastPingKey)
-        guard now.timeIntervalSince1970 - last > 20 * 3600 else { return }
-        defaults.set(now.timeIntervalSince1970, forKey: lastPingKey)
+        #if targetEnvironment(simulator)
+        return
+        #else
+        let day = Self.kigaliDay(of: now)
+        guard !pinging, UserDefaults.standard.string(forKey: lastPingDayKey) != day else { return }
+        pinging = true
         let id = installID
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
-        Task.detached {
-            var request = URLRequest(url: baseURL.appending(path: "v1/ping"))
-            request.httpMethod = "POST"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.httpBody = try? JSONSerialization.data(withJSONObject: ["id": id, "version": version])
-            _ = try? await URLSession.shared.data(for: request)
+        Task {
+            let counted = await Self.sendPing(id: id, version: version)
+            pinging = false
+            if counted { UserDefaults.standard.set(day, forKey: lastPingDayKey) }
         }
+        #endif
     }
 
-    private static let lastPingKey = "cloudLastPing"
+    /// Whether the server counted the ping.
+    nonisolated private static func sendPing(id: String, version: String) async -> Bool {
+        var request = URLRequest(url: baseURL.appending(path: "v1/ping"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try? JSONSerialization.data(withJSONObject: ["id": id, "version": version])
+        guard let (_, response) = try? await URLSession.shared.data(for: request) else { return false }
+        return (response as? HTTPURLResponse)?.statusCode == 200
+    }
+
+    /// A ping on its way, so coming back to the front while it is out
+    /// sends no second one.
+    private static var pinging = false
+
+    /// "2026-11-08": the date in Kigali, as the server writes a day.
+    nonisolated static func kigaliDay(of date: Date) -> String {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Africa/Kigali") ?? TimeZone(secondsFromGMT: 2 * 3600)!
+        let parts = calendar.dateComponents([.year, .month, .day], from: date)
+        return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
+    }
+
+    private static let lastPingDayKey = "cloudLastPingDay"
     private static let installIDKey = "cloudInstallID"
 
     private static var installID: String {

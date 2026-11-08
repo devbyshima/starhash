@@ -7,6 +7,20 @@ CREATE TABLE IF NOT EXISTS installs (
   version TEXT
 );
 
+-- One row for each day an install was used, by Kigali's date: the same
+-- random id and the day, so the people using StarHash each day (daily
+-- active users) can be counted, and on any day since, not only today.
+CREATE TABLE IF NOT EXISTS active_days (
+  day TEXT NOT NULL,
+  id TEXT NOT NULL,
+  PRIMARY KEY (day, id)
+) WITHOUT ROWID;
+
+-- The days already known from before active_days, an install's first and
+-- last: run again, it adds nothing.
+INSERT OR IGNORE INTO active_days (day, id) SELECT first_seen, id FROM installs;
+INSERT OR IGNORE INTO active_days (day, id) SELECT last_seen, id FROM installs;
+
 -- One row per shared photo: the random id an owner's QR code carries, the
 -- hash of the key their iPhone holds (needed to replace or delete it), and
 -- the JPEG itself, 200 KB at most. No number, no name.

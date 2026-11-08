@@ -2537,38 +2537,6 @@
         }
       }
     },
-    "Font": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Police"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Imyandikire"
-          }
-        }
-      }
-    },
-    "Font's source": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Source de la police"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inkomoko y'imyandikire"
-          }
-        }
-      }
-    },
     "Free": {
       "localizations": {
         "rw": {
@@ -3168,22 +3136,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "M"
-          }
-        }
-      }
-    },
-    "MTN, MoMo, Airtel and Airtel Money, and their logos, are their owners' trademarks, shown only to name the wallets StarHash works with.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MTN, MoMo, Airtel et Airtel Money, ainsi que leurs logos, sont des marques de leurs propriétaires, montrées seulement pour nommer les portefeuilles avec lesquels StarHash fonctionne."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MTN, MoMo, Airtel na Airtel Money, n'ibirango byabyo, ni ibya ba nyirabyo, bigaragazwa gusa mu kuvuga konti StarHash ikorana nazo."
           }
         }
       }
@@ -7154,22 +7106,6 @@
       }
     },
     "Touch ID": {},
-    "Trademarks": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Marques"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ibirango"
-          }
-        }
-      }
-    },
     "Transaction": {
       "localizations": {
         "rw": {
@@ -8639,7 +8575,167 @@
     "x-callback-url": {},
     "x-cancel": {},
     "x-error": {},
-    "x-success": {}
+    "x-success": {},
+    "Built with": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fait avec"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibyo yubakishijwe"
+          }
+        }
+      }
+    },
+    "Version": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verisiyo"
+          }
+        }
+      }
+    },
+    "Licence": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Licence"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uruhushya"
+          }
+        }
+      }
+    },
+    "Source": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inkomoko"
+          }
+        }
+      }
+    },
+    "StarHash is built with the work of others, which goes out with it under their own terms: each piece below, by its name and version, with its licence, and that licence's text where it has one.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash est fait avec le travail d'autres personnes, qui l'accompagne sous ses propres conditions : chaque élément ci-dessous, avec son nom et sa version, sa licence, et le texte de cette licence quand elle en a un."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash yubakishijwe ibikorwa by'abandi, bijyana na yo bikurikije amategeko yabyo: buri kimwe kiri hasi, n'izina ryacyo na verisiyo yacyo, uruhushya rwacyo, n'inyandiko y'urwo ruhushya iyo ruyifite."
+          }
+        }
+      }
+    },
+    "MTN, MoMo, MoMoAdvance, Gwamon' Pack, Airtel, Airtel Money, Cash Power, Apple, iPhone, Face ID, Touch ID, Optic ID, Apple Intelligence, Shortcuts, App Store, GitHub and Ko-fi, their logos and every other trademark StarHash shows belong to their owners.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MTN, MoMo, MoMoAdvance, Gwamon' Pack, Airtel, Airtel Money, Cash Power, Apple, iPhone, Face ID, Touch ID, Optic ID, Apple Intelligence, Shortcuts, App Store, GitHub na Ko-fi, ibirango byabyo n'ibindi birango byose StarHash igaragaza ni ibya ba nyirabyo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MTN, MoMo, MoMoAdvance, Gwamon' Pack, Airtel, Airtel Money, Cash Power, Apple, iPhone, Face ID, Touch ID, Optic ID, Apple Intelligence, Raccourcis, App Store, GitHub et Ko-fi, leurs logos et toute autre marque que montre StarHash appartiennent à leurs propriétaires."
+          }
+        }
+      }
+    },
+    "Naming them does not mean any of them is affiliated with StarHash, endorses it, sponsors it or approves of it.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kubavuga ntibisobanura ko hari n'umwe muri bo ufitanye isano na StarHash, uyishyigikiye, uyitera inkunga cyangwa wayemeje."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les nommer ne signifie pas qu'ils sont liés à StarHash, ni qu'ils le soutiennent, le parrainent ou l'approuvent."
+          }
+        }
+      }
+    },
+    "StarHash is an independent app and is not affiliated with, endorsed by, sponsored by or associated with any of them.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash ni porogaramu yigenga: ntaho ihuriye n'umwe muri bo, kandi nta n'umwe uyishyigikiye, uyitera inkunga cyangwa ufatanyije na yo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash est une app indépendante : elle n'est liée à aucun d'eux, et aucun d'eux ne la soutient, ne la parraine ni ne s'y associe."
+          }
+        }
+      }
+    },
+    "StarHash shows the names and logos of other companies only to say which wallet, network or service a payment or a code is for.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash igaragaza amazina n'ibirango by'izindi sosiyete gusa kugira ngo yerekane konti, umuyoboro cyangwa serivisi kwishyura cyangwa kode bireba."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash montre les noms et logos d'autres entreprises seulement pour dire à quel portefeuille, réseau ou service correspond un paiement ou un code."
+          }
+        }
+      }
+    },
+    "Third-Party Trademark Notice": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibirango by'abandi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marques de tiers"
+          }
+        }
+      }
+    }
   },
   "version": "1.0"
 }

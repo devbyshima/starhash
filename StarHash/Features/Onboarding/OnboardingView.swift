@@ -210,8 +210,8 @@ enum OnboardingMetrics {
 
 /// Colours used only by onboarding.
 enum OnboardingPalette {
-    /// The flow's tint, the accent's fill (the deep green on light mode's
-    /// green page, the green on dark mode's), whichever wallet is chosen.
+    /// The flow's tint, the accent's fill (near black in light mode, near
+    /// white in dark), whichever wallet is chosen.
     static let tint = Color.brandFill
 
     /// The iPhone mock on the permission screen: its frame and the filled

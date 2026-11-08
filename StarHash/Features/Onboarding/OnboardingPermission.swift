@@ -264,7 +264,7 @@ struct OnboardingPermission: View {
             }
             Image(symbol: "checkmark.circle.fill")
                 .font(.system(size: 30, weight: .semibold))
-                .foregroundStyle(Color.starhashIncoming)
+                .foregroundStyle(Color.starhashConfirmed)
                 .opacity(frame.tapOpacity)
                 .scaleEffect(frame.tapScale)
         }

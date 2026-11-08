@@ -8,8 +8,9 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Added
 
+- A Third-Party Trademark Notice at the foot of Settings, and in Licences: whose names and logos StarHash shows (MTN, MoMo, Airtel, Apple's and others), only to say which wallet or service something is for, and that StarHash is not tied to any of them.
 - A long press on a transaction, as iOS's own lists do: a confirmed one lifts a preview of its details over the dimmed list, and a tap on the preview opens them; one still pending or failed lifts itself, with Verify, Mark as Failed, Pay Again and Delete in groups under it. A transaction turns grey from edge to edge while it is pressed.
-- Licences, in About StarHash: Space Grotesk's copyright and the SIL Open Font License's full text, StarHash's own PolyForm Noncommercial licence, and a note on the carriers' trademarks.
+- Licences, in About StarHash: StarHash's own PolyForm Noncommercial licence, then everything it is built with as a list, each by its name, version and licence, opening a page of its own with its source and the licence's full text (today Space Grotesk, under the SIL Open Font License), and a note on the carriers' trademarks.
 - Your photo with your QR code: people who scan it see your photo beside your number (a photo saved in their Contacts comes first). It is kept on StarHash's new small server under a random id, never with your number, and removing your photo deletes it there. StarHash also counts how many people use it, by a random id once a day; the privacy policy says so.
 - Two SIMs: say so in Settings and give the other number, and money between your own SIMs is filed under Your own accounts, counted as neither spent nor received. The other number is part of your profile: Profile shows and changes it, the backup carries it, and Settings asks for it only until it is in, putting the keyboard away once it is. Going back to one SIM asks which one you keep; the wallet follows the SIM kept. With both numbers in, you choose the default SIM, on one carrier or two: in Settings' Default SIM, or in Pay's wallet menu, which lists each SIM with its wallet and number. Your QR code carries the default SIM's number, and payments use its wallet's codes, so a scanned number on the same carrier is sent to on its own network and one on the other carrier across networks. Two SIMs on different carriers give both wallets, and auto-verify and notifications speak of both carriers' messages. The first time you change the default SIM, a sheet shows how to make it the iPhone's default voice line, which is the one iOS dials codes from. A scanned number that is not a Rwandan mobile number, whose carrier StarHash cannot tell, is no longer offered for payment.
 - A Nearby suggestion passed over five times in a row stops being suggested; picking it keeps it, and paying it any other way brings it back.
@@ -30,6 +31,9 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Changed
 
+- A transaction's status is its word alone, with no dot before it, and every status takes one of three colours: green confirmed, yellow pending, red failed. Confirmed is green on a transaction's page, a failed payment's badge in the list is filled red as a pending one's is yellow, auto-verify's ticks are green once it works, and Settings shows auto-verify waiting for its first message in amber and not hearing for a week in red.
+- Every icon is now from Keyline Icons, filled where StarHash showed a filled icon and in lines where it showed an outline; Licences lists Keyline Icons under the MIT License.
+- StarHash drops its green: buttons, the mark, the splash, switches, charts and the empty-state drawings are near black in light mode and near white in dark. The drawings lose their trailing cords and "look here" strokes, and Shima's note is a black note over the light app (a white one over the dark), only as tall as its letter, with more room between its parts.
 - Activity is now Transactions: its tab, the page's title, the icon's quick action, Quick Pay's widget, onboarding and the terms.
 - Profile's numbers sit in an outlined box, as Settings' cards and a transaction's details do.
 - Balance on Pay, Cancel on Move and Scale and Maybe Later in onboarding are clear Liquid Glass, with no colour; only sheets are tinted.
@@ -67,6 +71,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Fixed
 
+- A sheet's close, confirm and Edit buttons show in light mode, as grey glass instead of white glass lost on the white sheet. A long press on one of Buy's codes opens its menu under it from the left edge, as a transaction's does, instead of centred over it.
 - Your own accounts follow your numbers: changing either SIM's number or your name, going back to one SIM, or importing a backup files the payments between your SIMs afresh, and a payment that is no longer between them leaves Your own accounts. A category you picked yourself stays as you picked it. The other SIM's number is kept only once it is whole, and with one SIM, a number on the other carrier than your wallet says how to fix it: change your wallet, or set Two SIMs.
 - Tapping a StarHash notification opens the app again, on what it is about.
 - Onboarding sets up auto-verify's shortcut and automation again, on its last screens, a replay included, instead of skipping them when auto-verify had been set up before.

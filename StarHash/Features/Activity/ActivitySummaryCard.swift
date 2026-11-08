@@ -114,7 +114,7 @@ struct ActivitySpendingChart: View {
                     y: .value("Sent", Double(bucket.total) / top),
                     width: .ratio(Self.barWidthRatio)
                 )
-                // The primary button's green gradient, with no glow: inside
+                // The primary button's gradient, with no glow: inside
                 // the card a glow spilled past each bar's edges. The
                 // pressed bar keeps full strength; the rest step back.
                 .foregroundStyle(Color.starhashInk.color(in: environment).gradient.opacity(isProminent(bucket) ? 1 : 0.4))

@@ -4,7 +4,8 @@ import SwiftUI
 /// The full-width primary capsule: "Pay", "Continue", "Get Started". After
 /// Beam's: a gradient fill, with a soft glow of the same colour under it on
 /// onboarding only (`.starhashPrimaryGlowing`); everywhere else it is flat.
-/// The accent green with near-black words on every page, Pay's included.
+/// The accent (near black, near white in dark mode) with the page's colour
+/// as its words on every page, Pay's included.
 /// The label is 18pt semibold, as measured in the reference.
 struct PrimaryButtonStyle: ButtonStyle {
     /// The design height; the paywall's button is taller than the others.

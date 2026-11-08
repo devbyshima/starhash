@@ -47,6 +47,7 @@ enum SettingsPage: Hashable {
     case featureFlags
     case profile
     case licences
+    case licence(ThirdPartyPiece)
 
     @MainActor @ViewBuilder
     var destination: some View {
@@ -61,6 +62,7 @@ enum SettingsPage: Hashable {
         case .release(let version): ReleaseDetailView(version: version)
         case .featureFlags: FeatureFlagsView()
         case .licences: LicencesView()
+        case .licence(let piece): LicenceView(piece: piece)
         }
     }
 }
@@ -134,6 +136,7 @@ private struct SettingsRootList: View {
             securityCard
             dataCard
             moreCard
+            TrademarkNotice()
 
             // Last and on its own, as GO Club's Logout: the app's delete
             // button, the width of its words, centred under the cards.
@@ -323,6 +326,7 @@ private struct SettingsRootList: View {
             title: "Auto-verify transactions",
             caption: String(starhash: "Confirm payments from \(ownWallets.messagesName) messages"),
             status: autoVerifyStatus,
+            statusColor: autoVerifyStatusColor,
             isOn: autoVerifyBinding
         )
         SettingsToggleRow(
@@ -494,6 +498,16 @@ private struct SettingsRootList: View {
     /// Auto-verify's state when it needs a word: on but still waiting for
     /// its first message through the automation, or quiet for a week.
     /// Nothing while it simply works.
+    /// Waiting for its first message reads as pending, amber; no messages
+    /// for a week as failing, red.
+    private var autoVerifyStatusColor: Color? {
+        if autoVerifyBinding.wrappedValue,
+           !StarHashPreferences.automationProven(lastMessageAt: lastMessageAt, since: autoVerifySince) {
+            return .starhashUrgentText
+        }
+        return autoVerifyLooksBroken ? .starhashDestructive : nil
+    }
+
     private var autoVerifyStatus: String? {
         if autoVerifyBinding.wrappedValue,
            !StarHashPreferences.automationProven(lastMessageAt: lastMessageAt, since: autoVerifySince) {
@@ -654,6 +668,7 @@ enum SettingsLaunch {
         if page == "profile" { return [.profile] }
         if page == "flags" { return [.about, .featureFlags] }
         if page == "licences" { return [.about, .licences] }
+        if page == "licence" { return [.about, .licences, .licence(ThirdPartyPiece.all[0])] }
         if page == "release" { return [.whatsNew, .release(ReleaseHistory.releases[0].version)] }
         if page?.hasPrefix("guide") == true { return [.autoVerify] }
         return []

@@ -111,6 +111,8 @@ struct StarHashApp: App {
             }
             // Settings' Appearance, the splash included.
             .onAppear { AppAppearance.apply(.stored) }
+            // Clair's renderer, when the Clair Mac app launched StarHash (debug builds only).
+            .screensHost()
         }
         .onChange(of: scenePhase, initial: true) { _, phase in
             // The Process Carrier SMS shortcut may have written while we
