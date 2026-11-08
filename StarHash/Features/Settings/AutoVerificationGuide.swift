@@ -49,22 +49,28 @@ struct AutoVerificationGuide: View {
     /// `lastVerifiedAt` when Verify Shortcut was tapped; nil before.
     @State private var verifyStartedAt: Double?
     @State private var verification: Verification = Self.launchVerification
-    /// The scroll view's visible height, for centring a short step.
+    /// The scroll view's visible height: from the progress bar to the
+    /// buttons.
     @State private var viewportHeight: CGFloat = 0
-    /// The step's height without the room round its title and steps.
-    @State private var contentHeight: CGFloat = 0
+    /// The title and the steps' card, as tall as this step's words make them.
+    @State private var textHeight: CGFloat = 0
 
-    /// The room over the title and under the steps: half what is left of
-    /// the visible height, at least 20pt.
-    private var centringGap: CGFloat {
-        max(20, (viewportHeight - contentHeight) / 2)
-    }
-
-    /// The title's line box leaves room over its letters that the eye does
-    /// not count, so a centred block looks low by about that much: this
-    /// moves it up, while there is room to.
-    private var opticalShift: CGFloat {
-        min(4.5, max(0, centringGap - 20))
+    /// The step laid out to fill the room between the progress bar and the
+    /// buttons: the words take what they need, the phone takes the rest
+    /// (within its bounds), and the gaps stay even, sharing whatever the
+    /// phone cannot use. With large text the phone is at its smallest and
+    /// the step scrolls.
+    private var layout: GuideLayout {
+        let gaps = GuideLayout.top + GuideLayout.middle + GuideLayout.bottom
+        let free = viewportHeight - textHeight - gaps
+        let phone = min(max(free, GuideLayout.minPhone), GuideLayout.maxPhone)
+        let extra = max(0, free - phone) / 3
+        return GuideLayout(
+            phone: phone,
+            top: GuideLayout.top + extra,
+            middle: GuideLayout.middle + extra,
+            bottom: GuideLayout.bottom + extra
+        )
     }
 
     private static var launchVerification: Verification {
@@ -89,25 +95,24 @@ struct AutoVerificationGuide: View {
             GuideProgress(count: Self.stepCount, current: step)
                 .padding(.top, 8)
             ScrollView {
+                // (Spacers do not stretch in a scroll view, so the room is
+                // worked out: `layout`.)
+                let layout = layout
                 VStack(spacing: 0) {
-                    screenshot
-                        .padding(.top, 12)
-                    // The title and the steps, centred between the phone
-                    // and the buttons: equal room over and under them,
-                    // never less than 20pt; a step too tall for the screen
-                    // scrolls with those 20pt. (Spacers do not stretch in a
-                    // scroll view, so the room is worked out.)
-                    Color.clear.frame(height: centringGap - opticalShift)
+                    screenshot(height: layout.phone)
+                        .padding(.top, layout.top)
                     VStack(spacing: 20) {
                         texts
                         stepList
                     }
-                    Color.clear.frame(height: centringGap + opticalShift)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+                        textHeight = height
+                    }
+                    .padding(.top, layout.middle)
+                    .padding(.bottom, layout.bottom)
                 }
                 .padding(.horizontal, 24)
-                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
-                    contentHeight = height - 2 * centringGap
-                }
+                .animation(.smooth(duration: 0.3), value: layout)
                 .id(step)
                 .transition(reduceMotion ? .opacity : .push(from: .trailing))
             }
@@ -165,13 +170,15 @@ struct AutoVerificationGuide: View {
     /// Automation tab with the automation made, and a check on it once a
     /// message has come through.
     @ViewBuilder
-    private var screenshot: some View {
+    private func screenshot(height: CGFloat) -> some View {
         if step == 0 {
             GuidePhoneScreenshot(
                 imageName: "GuideAddShortcut",
                 label: "Shortcuts showing StarHash SMS, with the Add Shortcut button at the bottom",
-                // The blue Add Shortcut button, as a share of the image.
-                highlight: CGRect(x: 0.055, y: 0.895, width: 0.89, height: 0.064)
+                // The blue Add Shortcut button, as a share of the image,
+                // measured from its pixels.
+                highlight: CGRect(x: 0.0597, y: 0.8961, width: 0.8806, height: 0.062),
+                height: height
             )
         } else {
             GuideAutomationPhone(
@@ -179,7 +186,8 @@ struct AutoVerificationGuide: View {
                 label: "Shortcuts' Automation tab: When I get a message containing RWF, run StarHash SMS, switched on",
                 // The switch, on.
                 highlight: CGRect(x: 0.725, y: 0.40, width: 0.185, height: 0.185),
-                isVerified: step == Self.checkStep && verification == .verified
+                isVerified: step == Self.checkStep && verification == .verified,
+                height: height
             )
         }
     }
@@ -419,29 +427,83 @@ struct AutoVerificationGuide: View {
     }
 }
 
+/// How a step is laid out between the progress bar and the buttons: the
+/// phone's height and the room above it, between it and the title, and
+/// under the steps.
+private struct GuideLayout: Equatable {
+    var phone: CGFloat
+    var top: CGFloat
+    var middle: CGFloat
+    var bottom: CGFloat
+
+    /// The least room in each gap.
+    static let top: CGFloat = 20
+    static let middle: CGFloat = 28
+    static let bottom: CGFloat = 24
+    /// The phone's bounds: small enough to leave the words their room on a
+    /// small screen or with large text, never so big it crowds them.
+    static let minPhone: CGFloat = 200
+    static let maxPhone: CGFloat = 440
+}
+
+/// The phone both steps draw, sized from its height: Shortcuts' screen in
+/// the proportions of the Add Shortcut screenshot (from the top of its
+/// sheet down), its corners as round as that sheet's, so the screenshot's
+/// own corners and the frame's are one curve and nothing is cut, and a
+/// slim bezel round it on the same curve.
+private struct GuidePhone {
+    let height: CGFloat
+
+    static let bezel: CGFloat = 5
+    /// The screenshot's size in pixels, from the top of the sheet.
+    static let screenAspect: CGFloat = 1206.0 / 2436.0
+    /// The sheet's continuous corner, as a share of the screen's width:
+    /// its curve runs 135 pixels in from 1206.
+    static let cornerShare: CGFloat = 0.073
+
+    var screen: CGSize {
+        let h = height - 2 * Self.bezel
+        return CGSize(width: h * Self.screenAspect, height: h)
+    }
+
+    var screenShape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: screen.width * Self.cornerShare, style: .continuous)
+    }
+
+    var bodyShape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: screen.width * Self.cornerShare + Self.bezel, style: .continuous)
+    }
+}
+
+extension View {
+    /// The phone's bezel, rim and shadow round a screen already clipped to
+    /// its shape.
+    fileprivate func guidePhoneBody(_ phone: GuidePhone) -> some View {
+        padding(GuidePhone.bezel)
+            .background(phone.bodyShape.fill(Color(white: 0.09)))
+            .overlay(phone.bodyShape.strokeBorder(Color.white.opacity(0.14), lineWidth: 1))
+            .shadow(color: .black.opacity(0.28), radius: 24, y: 12)
+    }
+}
+
 /// A whole real iPhone screen of Shortcuts, in a slim dark phone frame
-/// with rounded corners all round, and the control to tap ringed.
+/// with its corners on the screenshot's own curve, and the control to tap
+/// ringed inside the screen.
 private struct GuidePhoneScreenshot: View {
     let imageName: String
     let label: String
     /// What to tap, as a share of the image (0...1 on both axes).
     let highlight: CGRect
-
-    @ScaledMetric(relativeTo: .body) private var height: CGFloat = 240
+    let height: CGFloat
 
     var body: some View {
-        let screen = RoundedRectangle(cornerRadius: 26, style: .continuous)
-        let body = RoundedRectangle(cornerRadius: 31, style: .continuous)
+        let phone = GuidePhone(height: height)
         Image(imageName)
             .resizable()
-            .scaledToFit()
+            .frame(width: phone.screen.width, height: phone.screen.height)
             .overlay { GuideHighlight(rect: highlight, cornerFraction: 0.5) }
-            .clipShape(screen)
-            .padding(5)
-            .background(body.fill(Color(white: 0.09)))
-            .overlay(body.strokeBorder(Color.white.opacity(0.14), lineWidth: 1))
-            .shadow(color: .black.opacity(0.28), radius: 24, y: 12)
-            .frame(height: min(height, 360))
+            .clipShape(phone.screenShape)
+            .guidePhoneBody(phone)
             .accessibilityElement()
             .accessibilityLabel(label)
             .accessibilityAddTraits(.isImage)
@@ -457,15 +519,11 @@ private struct GuideAutomationPhone: View {
     let label: String
     let highlight: CGRect
     var isVerified = false
-
-    @ScaledMetric(relativeTo: .body) private var height: CGFloat = 240
+    let height: CGFloat
 
     var body: some View {
-        let screen = RoundedRectangle(cornerRadius: 26, style: .continuous)
-        let body = RoundedRectangle(cornerRadius: 31, style: .continuous)
-        let phoneHeight = min(height, 360)
-        // Step 1's screenshot's proportions (1206 by 2454).
-        let screenSize = CGSize(width: (phoneHeight - 10) * 1206 / 2454, height: phoneHeight - 10)
+        let phone = GuidePhone(height: height)
+        let screenSize = phone.screen
         ZStack(alignment: .top) {
             Color(white: 0.07)
             VStack(alignment: .leading, spacing: screenSize.height * 0.03) {
@@ -502,11 +560,8 @@ private struct GuideAutomationPhone: View {
             .padding(.horizontal, screenSize.width * 0.06)
         }
         .frame(width: screenSize.width, height: screenSize.height)
-        .clipShape(screen)
-        .padding(5)
-        .background(body.fill(Color(white: 0.09)))
-        .overlay(body.strokeBorder(Color.white.opacity(0.14), lineWidth: 1))
-        .shadow(color: .black.opacity(0.28), radius: 24, y: 12)
+        .clipShape(phone.screenShape)
+        .guidePhoneBody(phone)
         .animation(.spring(duration: 0.4, bounce: 0.3), value: isVerified)
         .accessibilityElement()
         .accessibilityLabel(label)
@@ -530,10 +585,12 @@ private struct GuideHighlight: View {
         GeometryReader { proxy in
             let w = proxy.size.width * rect.width
             let h = proxy.size.height * rect.height
-            RoundedRectangle(cornerRadius: h * cornerFraction, style: .continuous)
+            // Snug round the control, so it stays inside the screen's
+            // rounded corners, breathing included.
+            RoundedRectangle(cornerRadius: (h + 6) * cornerFraction, style: .continuous)
                 .strokeBorder(Color.white, lineWidth: 2.5)
                 .shadow(color: .white.opacity(0.7), radius: 6)
-                .frame(width: w + 10, height: h + 10)
+                .frame(width: w + 6, height: h + 6)
                 .scaleEffect(breathes ? 1.04 : 1)
                 .opacity(breathes ? 0.75 : 1)
                 .position(
@@ -549,9 +606,12 @@ private struct GuideHighlight: View {
     }
 }
 
-/// Numbered steps for the person to follow, in a card: each number in a
-/// small ink disc, the text beside it. With `symbol`, every disc shows that
-/// symbol instead (a tick for what now works).
+/// Numbered steps for the person to follow, in StarHash's outlined card
+/// (Settings' and a transaction's, which Ijwi's cards follow too): a line
+/// round them on the page's own colour, solid lines between them from
+/// where the words start. Each number in a small ink disc, the text beside
+/// it. With `symbol`, every disc shows that symbol instead (a tick for
+/// what now works).
 private struct GuideStepList: View {
     let steps: [LocalizedStringKey]
     var symbol: String?
@@ -559,10 +619,12 @@ private struct GuideStepList: View {
     var confirmed = false
 
     var body: some View {
-        StarHashCard(fill: .starhashCard) {
+        VStack(spacing: 0) {
             ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
-                if index > 0 { StarHashRowSeparator(leading: 54) }
-                HStack(alignment: .firstTextBaseline, spacing: 14) {
+                if index > 0 { StarHashRowSeparator(leading: 54, trailing: 16) }
+                // The disc in the middle of its step, however many lines
+                // the step runs to.
+                HStack(alignment: .center, spacing: 14) {
                     Group {
                         if let symbol {
                             Image(symbol: symbol)
@@ -575,7 +637,6 @@ private struct GuideStepList: View {
                         .foregroundStyle(confirmed ? AnyShapeStyle(Color.starhashOnConfirmed) : AnyShapeStyle(Color.starhashOnInk))
                         .frame(width: 24, height: 24)
                         .background(confirmed ? AnyShapeStyle(Color.starhashConfirmed) : AnyShapeStyle(Color.starhashInk), in: Circle())
-                        .alignmentGuide(.firstTextBaseline) { $0[VerticalAlignment.center] + 5 }
                         .accessibilityHidden(true)
                     Text(step)
                         .font(.starhash(.body))
@@ -587,6 +648,7 @@ private struct GuideStepList: View {
                 .padding(.vertical, 14)
             }
         }
+        .starhashOutlinedCard(padding: EdgeInsets())
     }
 }
 

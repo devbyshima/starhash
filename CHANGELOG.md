@@ -32,6 +32,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Changed
 
+- Auto-verify's setup shows Shortcuts larger, filling the room between the progress bar and the buttons, its corners on the screenshot's own curve so nothing is cut off, and its steps in an outlined card as Settings' are.
 - Pay's place in the tab bar is the StarHash mark, and Transactions' is a receipt, in place of the hash and the clock, on Quick Pay's widget, the icon's quick actions, onboarding and What's New too. The bar's icons are drawn to look one size, and are outlined but for the page showing, whose icon is filled; the mark fills from its heart outward.
 - Every word on the widgets is one size, the Pay pill's as the tiles'; a long code name is cut short rather than shrunk.
 - A transaction's status is its word alone, with no dot before it, and every status takes one of three colours: green confirmed, yellow pending, red failed. Confirmed is green on a transaction's page, a failed payment's badge in the list is filled red as a pending one's is yellow, auto-verify's ticks are green once it works, and Settings shows auto-verify waiting for its first message in amber and not hearing for a week in red.
