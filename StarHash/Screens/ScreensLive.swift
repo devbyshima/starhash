@@ -5,10 +5,18 @@ import UIKit
 /// Debug-only live view for the Screens Mac app. Shows one catalog screen, writes it to
 /// `live.jpg` every frame, and acts on the taps, scrolls and typing the Mac app appends
 /// to `live.cmd` as JSON lines. Started by the serve loop, or at launch with
-/// `SCREENS_LIVE` set to a catalog id.
+/// `SCREENS_LIVE` set to a catalog id. A tap that leads to another screen
+/// (`ScreensLive.go`) shows that one and says so in `live.at`.
 @MainActor
 final class ScreensLive: NSObject {
     static var shared: ScreensLive?
+
+    /// Where a tap leads, for Clair's live view: call it from the catalog's sample closures,
+    /// `onOpen: { ScreensLive.go("detail") }`, with the ids `leadsTo` names. The live view
+    /// then goes to that screen as the app would. Anywhere else it does nothing.
+    nonisolated static func go(_ id: String, state: String = "default") {
+        Task { @MainActor in shared?.show(id, state: state, back: false) }
+    }
 
     private let window: UIWindow
     private let outDir: URL
@@ -32,7 +40,7 @@ final class ScreensLive: NSObject {
         ScreensLook.read(near: outDir).apply(to: window)
         window.rootViewController = UIHostingController(rootView: entry.make(state))
         window.makeKeyAndVisible()
-        let live = ScreensLive(window: window, outDir: outDir)
+        let live = ScreensLive(window: window, outDir: outDir, at: (entry.id, state))
         shared = live
         live.run()
     }
@@ -45,9 +53,44 @@ final class ScreensLive: NSObject {
         shared = nil
     }
 
-    private init(window: UIWindow, outDir: URL) {
+    /// The screen showing, and how many times a tap has gone to another.
+    private var current: (id: String, state: String)
+    private var moves = 0
+
+    private init(window: UIWindow, outDir: URL, at current: (id: String, state: String)) {
         self.window = window
         self.outDir = outDir
+        self.current = current
+    }
+
+    /// Goes to another screen of the catalog with a push (from the left going back), and
+    /// writes where it went to `live.at` for Clair: its trail, its Back, and the arrow.
+    private func show(_ id: String, state: String, back: Bool) {
+        guard let entry = ScreensCatalog.entries.first(where: { $0.id == id }) else { return }
+        let from = current.id
+        current = (id, state)
+        firstResponder()?.resignFirstResponder()
+        // The screen leaving stays a real view while it slides (a layer transition or a
+        // snapshot would draw black in the frames), and goes when the push ends.
+        let leaving = window.rootViewController
+        window.rootViewController = UIHostingController(rootView: entry.make(state))
+        if let old = leaving?.view, let new = window.rootViewController?.view {
+            let width = window.bounds.width
+            if back { window.addSubview(old) } else { window.insertSubview(old, belowSubview: new) }
+            new.transform = CGAffineTransform(translationX: back ? -width * 0.3 : width, y: 0)
+            UIView.animate(withDuration: 0.35, delay: 0, options: [.curveEaseInOut]) {
+                new.transform = .identity
+                old.transform = CGAffineTransform(translationX: back ? width : -width * 0.3, y: 0)
+            } completion: { _ in
+                old.removeFromSuperview()
+                _ = leaving
+            }
+        }
+        moves += 1
+        let at: [String: Any] = ["move": moves, "id": id, "state": state, "from": from, "back": back]
+        if let data = try? JSONSerialization.data(withJSONObject: at) {
+            try? data.write(to: outDir.appendingPathComponent("live.at"), options: .atomic)
+        }
     }
 
     private func run() {
@@ -78,23 +121,36 @@ final class ScreensLive: NSObject {
         // A SceneKit view needs its cover drawn in, which takes a fresh screen update.
         let hasScenes = ScreensAgent.hasSceneKitViews(in: window)
         let uncover = hasScenes ? ScreensAgent.coverSceneKitViews(in: window) : {}
-        // Every visible window of the scene, bottom to top, so the keyboard (a window of
-        // its own) shows over the screen it types into.
+        // Every visible window of the scene, bottom to top, so the app's own overlays show
+        // over the screen. Not the text effects window a text field leaves behind: it
+        // draws as solid black over everything (on iOS 27 the keyboard isn't in it, or in
+        // any of the app's windows, so it can't be drawn here; typing still reaches it).
         let windows = (window.windowScene?.windows ?? [window])
             .filter { !$0.isHidden && $0.alpha > 0 && ($0 === window || $0.windowLevel > window.windowLevel) }
+            .filter { NSStringFromClass(type(of: $0)) != "UITextEffectsWindow" }
             .sorted { $0.windowLevel < $1.windowLevel }
-        let image = UIGraphicsImageRenderer(bounds: bounds, format: format).image { _ in
-            for each in windows {
-                each.drawHierarchy(in: each.frame, afterScreenUpdates: hasScenes && each === window)
+        func render(fresh: Bool) -> UIImage {
+            UIGraphicsImageRenderer(bounds: bounds, format: format).image { _ in
+                for each in windows {
+                    each.drawHierarchy(in: each.frame, afterScreenUpdates: fresh || (hasScenes && each === window))
+                }
             }
+        }
+        var image = render(fresh: drawsFresh)
+        // A Simulator whose display isn't showing the app (asleep, locked) gives a blank
+        // snapshot: then every frame is drawn afresh, as the pictures are.
+        if !drawsFresh, Self.isBlank(image) {
+            drawsFresh = true
+            image = render(fresh: true)
         }
         uncover()
         drawSeconds += Date().timeIntervalSince(drawStarted)
         encoding.value = true
         let url = outDir.appendingPathComponent("live.jpg")
         let busy = encoding
+        let frame = image
         encoder.async {
-            if let data = image.jpegData(compressionQuality: 0.75) { try? data.write(to: url, options: .atomic) }
+            if let data = frame.jpegData(compressionQuality: 0.75) { try? data.write(to: url, options: .atomic) }
             DispatchQueue.main.async { busy.value = false }
         }
         frames += 1
@@ -108,6 +164,20 @@ final class ScreensLive: NSObject {
         }
     }
 
+    /// Frames drawn afresh rather than snapshot from the display (see writeFrame).
+    private var drawsFresh = false
+
+    /// Whether a frame came out blank: nothing but black, read from an 8 × 8 copy of it.
+    private static func isBlank(_ image: UIImage) -> Bool {
+        guard let cg = image.cgImage else { return false }
+        var pixels = [UInt8](repeating: 0, count: 8 * 8 * 4)
+        guard let context = CGContext(data: &pixels, width: 8, height: 8, bitsPerComponent: 8, bytesPerRow: 32,
+                                      space: CGColorSpaceCreateDeviceRGB(),
+                                      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return false }
+        context.draw(cg, in: CGRect(x: 0, y: 0, width: 8, height: 8))
+        return pixels.enumerated().allSatisfy { index, value in index % 4 == 3 || value < 6 }
+    }
+
     // MARK: - Commands
 
     private struct Command: Decodable {
@@ -118,6 +188,8 @@ final class ScreensLive: NSObject {
         var scroll: [Double]?   // x, y, dx, dy
         var type: String?
         var key: String?        // "return", "delete"
+        var open: String?       // "id" or "id@state": Clair's Back
+        var back: Bool?
         var sent: Double?       // Mac clock, for latency
     }
 
@@ -159,6 +231,10 @@ final class ScreensLive: NSObject {
             }
         }
         if let s = command.scroll, s.count == 4 { scroll(at: CGPoint(x: s[0], y: s[1]), by: CGVector(dx: s[2], dy: s[3])) }
+        if let open = command.open {
+            let parts = open.split(separator: "@", maxSplits: 1).map(String.init)
+            if let id = parts.first { show(id, state: parts.count > 1 ? parts[1] : "default", back: command.back ?? false) }
+        }
         if let text = command.type { (firstResponder() as? any UIKeyInput)?.insertText(text) }
         switch command.key {
         case "return": (firstResponder() as? any UIKeyInput)?.insertText("\n")
@@ -311,7 +387,10 @@ enum ScreensTouches {
 struct ScreensLiveHost: SwiftUI.View {
     let entry: ScreensEntry
     var body: some SwiftUI.View {
-        SwiftUI.Color.black.task { ScreensLive.start(entry) }
+        SwiftUI.Color.black.task {
+            ScreensAgent.allowCamera()
+            ScreensLive.start(entry)
+        }
     }
 }
 #endif

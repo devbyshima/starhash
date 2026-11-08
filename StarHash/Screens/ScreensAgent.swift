@@ -42,6 +42,8 @@ struct ScreensEntry {
     let title: String
     let flow: String
     var states: [String] = ["default"]
+    /// The ids of the screens this one goes to (a tap, a sheet, a push), for Screens' arrows.
+    var leadsTo: [String] = []
     let make: (_ state: String) -> SwiftUI.AnyView
 }
 
@@ -62,6 +64,7 @@ enum ScreensAgent {
 
     static func exportAndExit(_ entries: [ScreensEntry]) async {
         guard let outDir else { return }
+        allowCamera()
         let env = ProcessInfo.processInfo.environment
         let first = Set((env["SCREENS_FIRST"] ?? "").split(separator: ",").map(String.init))
         await export(entries, to: outDir, first: first, seq: 0)
@@ -115,7 +118,8 @@ enum ScreensAgent {
                 id: entry.id, title: entry.title, flow: entry.flow, state: state, image: file,
                 captureMS: Int(Date().timeIntervalSince(shotStarted) * 1000),
                 elements: elements(in: window),
-                specs: specsByWindow[ObjectIdentifier(window)]?.values ?? []))
+                specs: specsByWindow[ObjectIdentifier(window)]?.values ?? [],
+                leadsTo: entry.leadsTo))
             specsByWindow[ObjectIdentifier(window)] = nil
             window.isHidden = true
             window.rootViewController = nil
@@ -202,6 +206,28 @@ enum ScreensAgent {
         root is SCNView || root.subviews.contains { hasSceneKitViews(in: $0) }
     }
 
+    // MARK: - Permissions
+
+    /// Clair grants an app every permission `simctl privacy` can, but the camera isn't one
+    /// of them: a screen that asks for it leaves iOS's prompt up, which covers the device
+    /// and turns every live frame black. While Clair runs the app, the camera reads as
+    /// allowed and asking for it answers yes at once, without a prompt (the Simulator has
+    /// no camera, so the screen shows what it shows when none is found). Looked up by name,
+    /// so apps that never link AVFoundation are left alone. Nonisolated, so the stand-ins
+    /// carry no main-actor check: apps ask from any thread.
+    nonisolated static func allowCamera() {
+        guard let device = NSClassFromString("AVCaptureDevice") else { return }
+        let authorized = 3 // AVAuthorizationStatus.authorized
+        if let method = class_getClassMethod(device, NSSelectorFromString("authorizationStatusForMediaType:")) {
+            let status: @convention(block) (AnyObject, NSString) -> Int = { _, _ in authorized }
+            method_setImplementation(method, imp_implementationWithBlock(status))
+        }
+        if let method = class_getClassMethod(device, NSSelectorFromString("requestAccessForMediaType:completionHandler:")) {
+            let request: @convention(block) (AnyObject, NSString, @escaping @convention(block) (Bool) -> Void) -> Void = { _, _, done in done(true) }
+            method_setImplementation(method, imp_implementationWithBlock(request))
+        }
+    }
+
     // MARK: - Elements
 
     /// SwiftUI only builds its accessibility tree while an assistive technology or UI
@@ -283,6 +309,7 @@ struct ManifestScreen: Encodable {
     let captureMS: Int
     let elements: [ManifestElement]
     let specs: [ManifestSpec]
+    let leadsTo: [String]
 }
 
 /// Collects what `.screensSpec` reports for one screen.
@@ -401,6 +428,7 @@ enum ScreensServer {
 
     static func start() {
         guard let outDir = ScreensAgent.outDir else { return }
+        ScreensAgent.allowCamera()
         // Render once from the code the app launched with, which also warms it up.
         outDir.path.withCString { image.export($0, "", 0) }
         timer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { _ in
@@ -455,8 +483,19 @@ enum ScreensServer {
     }
 
     private static func startLive(_ outDir: URL) {
-        let dir = outDir.appendingPathComponent("live").path
-        dir.withCString { out in liveID.withCString { image.live(out, $0) } }
+        let dir = outDir.appendingPathComponent("live")
+        // After a reload or a redraw, the screen a tap went to stays, not the first one.
+        var id = liveID
+        if let data = try? Data(contentsOf: dir.appendingPathComponent("live.at")),
+           let at = try? JSONDecoder().decode(At.self, from: data) {
+            id = at.state == "default" ? at.id : "\(at.id)@\(at.state)"
+        }
+        dir.path.withCString { out in id.withCString { image.live(out, $0) } }
+    }
+
+    private struct At: Decodable {
+        let id: String
+        let state: String
     }
 }
 
