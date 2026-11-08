@@ -7,7 +7,8 @@
     "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit",
     "schema": "wrangler d1 execute starhash --remote --file schema.sql",
-    "count": "wrangler d1 execute starhash --remote --command \"SELECT COUNT(*) AS installs, SUM(last_seen >= date('now', '-30 days')) AS active_30_days FROM installs\""
+    "count": "wrangler d1 execute starhash --remote --command \"$(grep -v '^--' stats/count.sql)\"",
+    "daily": "wrangler d1 execute starhash --remote --command \"$(grep -v '^--' stats/daily.sql)\""
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261019.1",
