@@ -8,7 +8,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Added
 
-- A Third-Party Trademark Notice at the foot of Settings, and in Licences: whose names and logos StarHash shows (MTN, MoMo, Airtel, Apple's and others), only to say which wallet or service something is for, and that StarHash is not tied to any of them.
+- A Third-Party Trademark Notice in Licences: whose names and logos StarHash shows (MTN, MoMo, Airtel, Apple's and others), only to say which wallet or service something is for, and that StarHash is not tied to any of them.
 - A long press on a transaction, as iOS's own lists do: a confirmed one lifts a preview of its details over the dimmed list, and a tap on the preview opens them; one still pending or failed lifts itself, with Verify, Mark as Failed, Pay Again and Delete in groups under it. A transaction turns grey from edge to edge while it is pressed.
 - Licences, in About StarHash: StarHash's own PolyForm Noncommercial licence, then everything it is built with as a list, each by its name, version and licence, opening a page of its own with its source and the licence's full text (today Space Grotesk, under the SIL Open Font License), and a note on the carriers' trademarks.
 - Your photo with your QR code: people who scan it see your photo beside your number (a photo saved in their Contacts comes first). It is kept on StarHash's new small server under a random id, never with your number, and removing your photo deletes it there. StarHash also counts how many people use it, by a random id once a day; the privacy policy says so.
