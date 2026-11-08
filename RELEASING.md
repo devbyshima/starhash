@@ -286,7 +286,7 @@ Release(
 )
 ```
 
-Each page's video is a recording of the feature, framed in an iPhone on white:
+Each page's video is a recording of the feature, framed in an iPhone twice: on black for light mode's black card, and on white for dark mode's white card:
 
 1. Run the app in the simulator in light mode, and record the feature at normal speed:
 
@@ -294,15 +294,16 @@ Each page's video is a recording of the feature, framed in an iPhone on white:
    xcrun simctl io booted recordVideo --codec h264 split-bill.mov
    ```
 
-2. Frame it, trimming to the part worth showing. This writes `StarHash/Resources/WhatsNew/WhatsNewSplitBill.mp4`, square and silent:
+2. Frame it, trimming to the part worth showing, once on white and once on black with the same trim. This writes `StarHash/Resources/WhatsNew/WhatsNewSplitBill.mp4` and `WhatsNewSplitBillOnBlack.mp4`, square and silent:
 
    ```bash
    swift -suppress-warnings scripts/make_whats_new_video.swift split-bill.mov WhatsNewSplitBill --start 1 --end 8
+   swift -suppress-warnings scripts/make_whats_new_video.swift split-bill.mov WhatsNewSplitBillOnBlack --start 1 --end 8 --backdrop black
    ```
 
 3. Run `xcodegen generate` (or `./scripts/build.sh`) so the app bundles it, and look at the sheet in a Debug run with `-whatsNew` (`-whatsNewPage 1` opens on the first video), or open `starhash://whatsnew?page=1` on the simulator.
 
-Keep each video short (5 to 10 seconds, it loops) and the page's words to three lines. Prepare all of it on `main` before cutting the branch if you can. Added on the release branch, it counts as release bookkeeping, not a feature.
+Keep each video short (5 to 10 seconds, it loops) and the page's words to three lines, in French and Kinyarwanda too: the sheet is as tall as the longest page's words, so one long page leaves room under every shorter one. Prepare all of it on `main` before cutting the branch if you can. Added on the release branch, it counts as release bookkeeping, not a feature.
 
 ## Feature flags
 

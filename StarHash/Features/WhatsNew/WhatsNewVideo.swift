@@ -36,7 +36,8 @@ struct WhatsNewVideo: UIViewRepresentable {
             let playerLayer = layer as? AVPlayerLayer
             playerLayer?.player = player
             playerLayer?.videoGravity = .resizeAspectFill
-            backgroundColor = .white
+            // The card's own colour, white or black, until the first frame.
+            backgroundColor = .clear
             loading = Task { [weak self] in await self?.load(url) }
         }
 

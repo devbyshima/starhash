@@ -60,6 +60,30 @@ extension View {
         }
     }
 
+    /// The same sheet, with the detent showing in `selection`: setting it
+    /// moves the sheet to that height on the system's own spring, where a
+    /// new set of detents would jump there.
+    @ViewBuilder
+    func sheetGlass(detents: Set<PresentationDetent>, selection: Binding<PresentationDetent>) -> some View {
+        if #available(iOS 26.0, *) {
+            self
+                .starhashContainerSurface()
+                .presentationBackground {
+                    Color.clear
+                        .glassEffect(.regular.tint(.sheetGlassTint), in: Rectangle())
+                        .ignoresSafeArea()
+                }
+                .presentationDetents(detents, selection: selection)
+                .presentationDragIndicator(.visible)
+        } else {
+            self
+                .starhashContainerSurface()
+                .presentationBackground(Color.sheetGlassTint)
+                .presentationDetents(detents, selection: selection)
+                .presentationDragIndicator(.visible)
+        }
+    }
+
     /// The solid card a sheet's rows sit on. A page using the same pieces
     /// passes its own card colour, since its background is the sheet's.
     func sheetCard(radius: CGFloat = 22, fill: Color = .sheetSurface) -> some View {

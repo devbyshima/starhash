@@ -8799,6 +8799,422 @@
           }
         }
       }
+    },
+    "Scan to pay and your own QR code, StarHash in Kinyarwanda and French, names for the numbers you type, two SIMs, widgets and a new look.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scanner pour payer et votre propre code QR, StarHash en kinyarwanda et en français, des noms pour les numéros que vous saisissez, deux SIM, des widgets et un nouveau look."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sikana wishyure na kode yawe ya QR, StarHash mu Kinyarwanda no mu Gifaransa, amazina ya ba nyiri nimero wanditse, SIM ebyiri, widgets n'isura nshya."
+          }
+        }
+      }
+    },
+    "The scan button on Pay reads a merchant's MoMo QR code or a friend's StarHash code, and Pay is ready to dial.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le bouton de scan sur Payer lit le code QR MoMo d'un commerçant ou le code StarHash d'un ami, et Payer est prêt à composer."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buto yo gusikana kuri Ishyura isoma kode ya QR ya MoMo y'umucuruzi cyangwa kode ya StarHash y'inshuti, maze Ishyura ikaba yiteguye guhamagara."
+          }
+        }
+      }
+    },
+    "Your own QR code": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre propre code QR"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode yawe ya QR"
+          }
+        }
+      }
+    },
+    "Your name and number in a code others scan to pay you, drawn as a little tree that turns into the code at a tap.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre nom et votre numéro dans un code que les autres scannent pour vous payer, dessiné comme un petit arbre qui devient le code d'une touche."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izina ryawe na nimero yawe muri kode abandi basikana ngo bakwishyure, ishushanyije nk'igiti gito gihinduka kode iyo ukanzeho."
+          }
+        }
+      }
+    },
+    "Add one and people who scan your code see it beside your number.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajoutez-en une, et les personnes qui scannent votre code la voient à côté de votre numéro."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yishyireho, maze abasikana kode yawe bayibone iruhande rwa nimero yawe."
+          }
+        }
+      }
+    },
+    "Type a number that's on StarHash and see who it is, with their photo. Turn yours off in Settings, under Your SIMs.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saisissez un numéro présent sur StarHash et voyez qui c'est, avec sa photo. Désactivez le vôtre dans Réglages, sous Vos SIM."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andika nimero iri kuri StarHash urebe uwo ari we, n'ifoto ye. Zimya iyawe mu Igenamiterere, munsi ya SIM zawe."
+          }
+        }
+      }
+    },
+    "Kinyarwanda and French": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kinyarwanda et français"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikinyarwanda n'Igifaransa"
+          }
+        }
+      }
+    },
+    "Choose StarHash's language in Settings, and it changes at once, dates and numbers too.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez la langue de StarHash dans Réglages, et elle change aussitôt, dates et nombres compris."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hitamo ururimi rwa StarHash mu Igenamiterere, ruhinduka ako kanya, n'amatariki n'imibare."
+          }
+        }
+      }
+    },
+    "Two SIMs": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deux SIM"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SIM ebyiri"
+          }
+        }
+      }
+    },
+    "Pay from either SIM, and money moved between your own SIMs isn't counted as spent.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payez depuis l'une ou l'autre SIM, et l'argent déplacé entre vos propres SIM n'est pas compté comme dépensé."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ishyura ukoresheje SIM iyo ari yo yose, kandi amafaranga wimuye hagati ya SIM zawe ntabarwa nk'ayo wakoresheje."
+          }
+        }
+      }
+    },
+    "Widgets": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widgets"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widgets"
+          }
+        }
+      }
+    },
+    "Dial Buy's codes and open Pay from your Home Screen, and hold StarHash's icon for Scan to Pay, Balance, Buy and Transactions.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Composez les codes d'Acheter et ouvrez Payer depuis l'écran d'accueil, et maintenez l'icône de StarHash pour Scanner pour payer, Solde, Acheter et Transactions."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hamagara kode za Gura kandi ufungure Ishyura uhereye ku rupapuro rw'ibanze rwa iPhone, kandi ukande umwanya munini ku kimenyetso cya StarHash ubone Sikana wishyure, Reba asigaye, Gura n'Ibikorwa."
+          }
+        }
+      }
+    },
+    "Paste your wallet's message for a payment, and StarHash confirms it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collez le message de votre portefeuille pour un paiement, et StarHash le confirme."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shyiramo ubutumwa bwa konti yawe bw'ubwishyu, maze StarHash ibwemeze."
+          }
+        }
+      }
+    },
+    "A message that looks like MoMo's but comes from someone's own number is held back with a warning.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un message qui ressemble à ceux de MoMo mais vient du numéro d'un particulier est retenu, avec une alerte."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubutumwa busa n'ubwa MoMo ariko buturutse kuri nimero y'umuntu bufatirwa, hamwe n'umuburo."
+          }
+        }
+      }
+    },
+    "Export and import": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exporter et importer"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kohereza no kwinjiza amakuru"
+          }
+        }
+      }
+    },
+    "Everything StarHash keeps, as one file, in Settings under Your Data.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tout ce que StarHash garde, en un seul fichier, dans Réglages sous Vos données."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibyo StarHash ibika byose, mu dosiye imwe, mu Igenamiterere munsi ya Amakuru yawe."
+          }
+        }
+      }
+    },
+    "A new look": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un nouveau look"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Isura nshya"
+          }
+        }
+      }
+    },
+    "Black and white, with outlined cards, new drawings and a new launch animation.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En noir et blanc, avec des cartes à contour, de nouveaux dessins et une nouvelle animation au lancement."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umukara n'umweru, amakarita azengurutswe n'umurongo, ibishushanyo bishya, n'ishusho nshya igaragara iyo StarHash ifunguka."
+          }
+        }
+      }
+    },
+    "Scan a MoMo or StarHash code, and pay.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scannez un code MoMo ou StarHash, et payez."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sikana kode ya MoMo cyangwa ya StarHash, wishyure."
+          }
+        }
+      }
+    },
+    "Others scan it to pay you.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les autres le scannent pour vous payer."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abandi bayisikana ngo bakwishyure."
+          }
+        }
+      }
+    },
+    "See who a number is before you pay.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voyez à qui est un numéro avant de payer."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menya nyiri nimero mbere yo kwishyura."
+          }
+        }
+      }
+    },
+    "StarHash in your language.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash dans votre langue."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash mu rurimi rwawe."
+          }
+        }
+      }
+    },
+    "Tap the scan button on Pay and point it at a MoMo QR code or a friend's StarHash code. Pay is ready to dial.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touchez le bouton de scan sur Payer et visez un code MoMo ou StarHash. Payer est prêt à composer."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kanda buto yo gusikana kuri Ishyura, uyerekeze kuri kode ya MoMo cyangwa ya StarHash. Ishyura iba yiteguye."
+          }
+        }
+      }
+    },
+    "Your name, number and photo in a code others scan to pay you. Tap the tree to see the code.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre nom, votre numéro et votre photo dans un code à scanner pour vous payer. Touchez l'arbre pour le voir."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izina ryawe, nimero yawe n'ifoto yawe muri kode abandi basikana ngo bakwishyure. Kanda ku giti urebe kode."
+          }
+        }
+      }
+    },
+    "Type a number that's on StarHash and see who it is, with their photo, before you pay.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saisissez un numéro présent sur StarHash et voyez qui c'est, avec sa photo, avant de payer."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andika nimero iri kuri StarHash urebe uwo ari we, n'ifoto ye, mbere yo kwishyura."
+          }
+        }
+      }
+    },
+    "Choose English, French or Kinyarwanda in Settings, and everything in StarHash changes at once.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez l'anglais, le français ou le kinyarwanda dans Réglages, et tout StarHash change aussitôt."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hitamo Icyongereza, Igifaransa cyangwa Ikinyarwanda mu Igenamiterere, maze StarHash yose ihinduke ako kanya."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

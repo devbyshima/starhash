@@ -1,11 +1,14 @@
-// Frames a screen recording (or a screenshot) in an iPhone on white, as a
-// What's New page shows it, and writes the square video the app plays:
+// Frames a screen recording (or a screenshot) in an iPhone on white, or on
+// black with --backdrop black, as a What's New page shows it, and writes the
+// square video the app plays:
 //
-//   swift scripts/make_whats_new_video.swift <recording.mov | screenshot.png> <Name> [--start 1.5] [--end 9] [--seconds 4] [--out file.mp4]
+//   swift scripts/make_whats_new_video.swift <recording.mov | screenshot.png> <Name> [--start 1.5] [--end 9] [--seconds 4] [--backdrop black] [--out file.mp4]
 //
 // The result is StarHash/Resources/WhatsNew/<Name>.mp4 (or --out), 1080 by 1080,
 // H.264 with no sound track, which a release's `Release.Page(video:)` names
-// as "<Name>". Record the simulator with
+// as "<Name>". Each video is made twice: on white as <Name> for dark mode's
+// white card, and on black as <Name>OnBlack for light mode's black card,
+// from the same recording and trim. Record the simulator with
 // `xcrun simctl io booted recordVideo --codec h264 feature.mov`, at 1x
 // speed, in light mode, then trim with --start and --end. A screenshot
 // becomes a still --seconds long. Run `xcodegen generate` after adding a
@@ -37,10 +40,13 @@ while let argument = arguments.next() {
     }
 }
 guard positional.count == 2 else {
-    FileHandle.standardError.write(Data("usage: swift scripts/make_whats_new_video.swift <recording.mov | screenshot.png> <Name> [--start s] [--end s] [--seconds n] [--out file.mp4]\n".utf8))
+    FileHandle.standardError.write(Data("usage: swift scripts/make_whats_new_video.swift <recording.mov | screenshot.png> <Name> [--start s] [--end s] [--seconds n] [--backdrop black] [--out file.mp4]\n".utf8))
     exit(2)
 }
 func seconds(_ key: String) -> Double? { options[key].flatMap(Double.init) }
+/// `--backdrop black`: the phone on black, for the black card light mode
+/// shows (`<Name>OnBlack`); white otherwise, for dark mode's white card.
+let onBlack = options["backdrop"] == "black"
 let input = URL(fileURLWithPath: positional[0])
 let name = positional[1]
 let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
@@ -75,7 +81,7 @@ func rounded(_ rect: CGRect, _ radius: CGFloat) -> CGPath {
 /// the screen, drawn once.
 func backdrop() -> CGImage {
     let context = CGContext(data: nil, width: canvas, height: canvas, bitsPerComponent: 8, bytesPerRow: 0, space: space, bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue)!
-    context.setFillColor(gray(1))
+    context.setFillColor(gray(onBlack ? 0 : 1))
     context.fill(CGRect(x: 0, y: 0, width: size, height: size))
 
     // Side buttons, under the body so only their edges show: the action
