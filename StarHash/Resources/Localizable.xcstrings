@@ -2585,22 +2585,6 @@
         }
       }
     },
-    "Friends who scan your code see it\nbeside your number, so they know it's you.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vos amis qui scannent votre code la voient\nà côté de votre numéro, et savent que c'est vous."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inshuti zisikana kode yawe ziyibona\niruhande rwa nimero yawe, zikamenya ko ari wowe."
-          }
-        }
-      }
-    },
     "Got It": {
       "localizations": {
         "fr": {
@@ -8796,6 +8780,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Izina ryawe n'ifoto yawe, ku banditse nimero yawe muri StarHash, igihe cyose Erekana izina ryanjye ifunguye. Nta kindi uretse seriveri ya StarHash ivugwa haruguru. Nta matangazo ifite, nta n'ikode y'abandi ikusanya amakuru. Saba ikintu gishya na kode yayo bifungura GitHub muri mushakisha yawe, naho Shyigikira kuri Ko-fi igafungura Ko-fi, buri kimwe hakurikijwe politiki y'ibanga yacyo. Kode yose ukanze inyura kuri telefoni yawe n'ikigo cyawe cy'itumanaho, hakurikijwe politiki zabo."
+          }
+        }
+      }
+    },
+    "People who scan your code see it\nbeside your number, so they know it's you.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les personnes qui scannent votre code la voient\nà côté de votre numéro, et savent que c'est vous."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abasikana kode yawe bayibona\niruhande rwa nimero yawe, bakamenya ko ari wowe."
           }
         }
       }
