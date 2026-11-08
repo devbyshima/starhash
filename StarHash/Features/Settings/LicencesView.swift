@@ -43,9 +43,7 @@ struct LicencesView: View {
                 }
             }
 
-            SettingsCard("Trademarks") {
-                LicenceParagraph(text: Text("MTN, MoMo, Airtel and Airtel Money, and their logos, are their owners' trademarks, shown only to name the wallets StarHash works with."))
-            }
+            TrademarkNotice()
         }
         .settingsPage("Licences")
     }
@@ -197,6 +195,29 @@ private struct LicencesHeader: View {
 
 /// A card's words in a row of their own: the list's opening, the
 /// trademarks.
+/// Whose names and logos StarHash shows, and that showing them claims no
+/// tie to their owners, as GO Club's Settings set it out: on Settings and
+/// in Licences.
+struct TrademarkNotice: View {
+    var body: some View {
+        SettingsCard("Third-Party Trademark Notice") {
+            VStack(alignment: .leading, spacing: 14) {
+                Text("StarHash shows the names and logos of other companies only to say which wallet, network or service a payment or a code is for.")
+                Text("MTN, MoMo, MoMoAdvance, Gwamon' Pack, Airtel, Airtel Money, Cash Power, Apple, iPhone, Face ID, Touch ID, Optic ID, Apple Intelligence, Shortcuts, App Store, GitHub and Ko-fi, their logos and every other trademark StarHash shows belong to their owners.")
+                Text("Naming them does not mean any of them is affiliated with StarHash, endorses it, sponsors it or approves of it.")
+                Text("StarHash is an independent app and is not affiliated with, endorsed by, sponsored by or associated with any of them.")
+            }
+            .starhashFont(14.5, relativeTo: .subheadline)
+            .lineSpacing(2)
+            .foregroundStyle(Color.starhashSecondaryText)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 18)
+            .settingsRowInset()
+        }
+    }
+}
+
 private struct LicenceParagraph: View {
     let text: Text
 

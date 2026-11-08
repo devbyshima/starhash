@@ -136,6 +136,7 @@ private struct SettingsRootList: View {
             securityCard
             dataCard
             moreCard
+            TrademarkNotice()
 
             // Last and on its own, as GO Club's Logout: the app's delete
             // button, the width of its words, centred under the cards.
