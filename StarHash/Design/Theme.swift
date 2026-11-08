@@ -194,10 +194,11 @@ extension Color {
     /// disabled button): a step past its cards, so they read on the sheet and
     /// on its cards alike.
     static let sheetChip = Color(light: .brandCloud, dark: .brandSlate)
-    /// The glass of a sheet's header buttons (close, confirm, Edit): white
-    /// in light mode, so they read as the sheet's own; the usual clear glass
-    /// in dark.
-    static let sheetControlTint = Color(light: .brandWhite, dark: .clear)
+    /// The glass of a sheet's header buttons (close, confirm, Edit): the
+    /// sheet's chip grey in light mode, since white glass vanished into the
+    /// white sheet and left a bare glyph; the usual clear glass in dark,
+    /// which already reads on the dark sheet.
+    static let sheetControlTint = Color(light: .brandCloud, dark: .clear)
     /// Text and marks straight on a sheet, with nothing behind them (a
     /// title, a hero name, a label, a text button): the sheet's own text
     /// colour.
