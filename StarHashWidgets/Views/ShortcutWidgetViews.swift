@@ -26,7 +26,7 @@ enum WidgetAction: CaseIterable {
         case .scan: "qrcode"
         case .balance: "banknote.fill"
         case .buy: "bag.fill"
-        case .activity: "clock.fill"
+        case .activity: "receipt.fill"
         }
     }
 

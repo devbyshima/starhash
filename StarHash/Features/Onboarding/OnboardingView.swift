@@ -58,7 +58,7 @@ struct OnboardingView: View {
               description: "Type an amount, pick who gets it,\nand StarHash dials the code for you."),
         .init(symbol: "storefront.fill", title: "Pay anyone",
               description: "Any MTN or Airtel number, or a merchant\ncode. StarHash knows which is which."),
-        .init(symbol: "clock.fill", title: "Every payment, logged",
+        .init(symbol: "receipt.fill", title: "Every payment, logged",
               description: "Transactions keeps each payment by day,\nwith a chart and search."),
         .init(symbol: "lock.shield.fill", title: "Private by design",
               description: "No account and no tracking. Your PIN only\never goes into your wallet's own prompt."),

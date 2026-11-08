@@ -121,6 +121,7 @@ let icons: [Icon] = [
     Icon(name: "play", keyline: "circle-play"),
     Icon(name: "plus", keyline: "plus"),
     Icon(name: "qrCode", keyline: "qr-code"),
+    Icon(name: "receipt", keyline: "receipt"),
     Icon(name: "received", keyline: "circle-arrow-down"),
     Icon(name: "reset", keyline: "rotate-ccw"),
     Icon(name: "seal", keyline: "badge-check"),

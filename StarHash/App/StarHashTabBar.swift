@@ -78,12 +78,10 @@ struct StarHashTabBar: View {
 
     private func icon(_ item: TabBarItem, isSelected: Bool) -> some View {
         let symbol = item.symbol(payPage: router.payPage)
-        return Image(symbol: symbol)
-            .font(.system(size: TabBarMetrics.symbolSize, weight: .semibold))
+        return glyph(symbol, isSelected: isSelected)
             // The page showing in the accent, the rest in the text colour.
             .foregroundStyle(isSelected ? Color.starhashAccentText : Color.starhashPrimaryText)
             .animation(.smooth(duration: 0.2), value: isSelected)
-            .contentTransition(.symbolEffect(.replace))
             .frame(width: TabBarMetrics.itemWidth, height: TabBarMetrics.height)
             .contentShape(Rectangle())
             .accessibilityElement()
@@ -93,6 +91,39 @@ struct StarHashTabBar: View {
             .accessibilityShowsLargeContentViewer {
                 Label(LocalizedStringKey(item.title(payPage: router.payPage)), symbol: symbol)
             }
+    }
+
+    /// Pay is StarHash's own mark, Pay being StarHash; the rest are their
+    /// icons. The mark is drawn at the size the icons' filled shapes reach,
+    /// in the same colours, so it sits in the row as one of them. Between
+    /// Pay and Buy the two blur into each other, as the icons' replace does.
+    ///
+    /// The page showing is filled, the rest in outline. An icon's two forms
+    /// are both drawn and one shown, so the swap rides the colour's own fade
+    /// rather than setting off the symbols' replace effect. The mark is one
+    /// shape that fills from its heart outward (`TabMarkShape`).
+    @ViewBuilder
+    private func glyph(_ symbol: String, isSelected: Bool) -> some View {
+        if symbol == AppTab.pay.symbol {
+            TabMarkShape(fill: isSelected ? 1 : 0)
+                .frame(width: TabBarMetrics.markSize, height: TabBarMetrics.markSize)
+                .transition(.blurReplace)
+        } else {
+            ZStack {
+                iconImage(symbol, outline: true)
+                    .opacity(isSelected ? 0 : 1)
+                iconImage(symbol, outline: false)
+                    .opacity(isSelected ? 1 : 0)
+            }
+            .transition(.blurReplace)
+        }
+    }
+
+    private func iconImage(_ symbol: String, outline: Bool) -> some View {
+        Image(symbol: symbol, outline: outline)
+            .font(.system(size: TabBarMetrics.symbolSize * TabBarMetrics.glyphScale(symbol), weight: .semibold))
+            .contentTransition(.symbolEffect(.replace))
+            .transition(.blurReplace)
     }
 
     /// A tap chooses the symbol under it; a drag carries the lens and
@@ -177,6 +208,27 @@ enum TabBarMetrics {
     static let itemWidth: CGFloat = 66
     static let endInset: CGFloat = 8
     static let symbolSize: CGFloat = 24
+    /// The mark's square on Pay's tab: its star fills about four fifths of
+    /// it, a little wider than tall, as much ink as the gear beside it.
+    static let markSize: CGFloat = 28
+    /// The outlined mark's line: as much ink as the outlined gear beside
+    /// it, measured at 3x (2,093 pixels against the gear's 2,156; 2.2 was
+    /// heavier), and the 6 pixels of the receipt's line.
+    static let markLine: CGFloat = 2
+
+    /// Each icon's scale, so the bar's glyphs look one size. At one font
+    /// size they did not: measured on screen (3x), the receipt was 65 by 79
+    /// pixels and the bag 65 by 72, both solid, against the gear's 72
+    /// square with its teeth and hole. A solid shape looks bigger than its
+    /// box, so each is scaled halfway between matching the gear's box and
+    /// matching its ink.
+    static func glyphScale(_ symbol: String) -> CGFloat {
+        switch symbol {
+        case AppTab.activity.symbol: 0.87
+        case AppTab.buy.symbol: 0.94
+        default: 1
+        }
+    }
     static let bottomGap: CGFloat = 28
     static let compactScale: CGFloat = 0.8
     /// What a page keeps clear at its foot for the bar: its height above
@@ -282,4 +334,63 @@ struct PayBuySwitcher: View {
             router.show(target)
         }
     }
+}
+
+/// Pay's mark in the tab bar: outlined while another page shows, filled on
+/// Pay, and one shape between the two, so it never shows two marks at
+/// once. The outline is a line inside the star's own edge, so outlined and
+/// filled share one silhouette, round where the star turns inward; the
+/// triangle stays solid, as an outline would close it to a speck. Filling,
+/// a disc opens at the star's heart and spreads out to the tips, as the
+/// splash opens a dot there before the arms come; emptying runs it back.
+/// Filled all the way, it is exactly `StarHashMarkShape`.
+struct TabMarkShape: Shape {
+    /// 0 the outline, 1 filled.
+    var fill: CGFloat
+
+    var animatableData: CGFloat {
+        get { fill }
+        set { fill = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        let scale = min(rect.width, rect.height) / StarHashMarkShape.side
+        let origin = CGPoint(x: rect.midX - StarHashMarkShape.side / 2 * scale, y: rect.midY - StarHashMarkShape.side / 2 * scale)
+        func point(_ p: CGPoint) -> CGPoint {
+            CGPoint(x: origin.x + p.x * scale, y: origin.y + p.y * scale)
+        }
+        var star = Path()
+        star.addLines(StarHashMarkShape.star.map(point))
+        star.closeSubpath()
+        var triangle = Path()
+        triangle.addLines(StarHashMarkShape.triangle.map(point))
+        triangle.closeSubpath()
+
+        let starPart: Path
+        if fill >= 1 {
+            starPart = star
+        } else {
+            // Twice the line, half of it outside the edge and cut away.
+            let outline = star
+                .strokedPath(StrokeStyle(lineWidth: 2 * TabBarMetrics.markLine, lineJoin: .round))
+                .intersection(star)
+            let heart = point(Self.heart)
+            let radius = Self.reach * scale * max(fill, 0)
+            let disc = Path(ellipseIn: CGRect(x: heart.x - radius, y: heart.y - radius, width: radius * 2, height: radius * 2))
+            starPart = fill > 0 ? outline.union(star.intersection(disc)) : outline
+        }
+        var mark = starPart
+        mark.addPath(triangle)
+        return mark
+    }
+
+    /// Where the star's five arms meet, in the artwork's units (the
+    /// splash's heart).
+    private static let heart = CGPoint(x: 404, y: 384)
+
+    /// From the heart to the farthest corner, so the disc covers the star
+    /// as it reaches 1.
+    private static let reach: CGFloat = StarHashMarkShape.star
+        .map { hypot($0.x - heart.x, $0.y - heart.y) }
+        .max() ?? StarHashMarkShape.side
 }
