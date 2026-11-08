@@ -25,6 +25,10 @@ struct RootView: View {
     @AppStorage(PreferenceKey.showMyName) private var showMyName = true
     @AppStorage(PreferenceKey.seenShowMyNameNotice) private var seenShowMyNameNotice = false
     @State private var forcesShowMyNameNotice = ShowMyNameNoticeSheet.forcedAtLaunch
+    /// The tabs have been on screen a moment. The notes and sheets that open
+    /// on their own wait for it: opened in the same instant the tabs take
+    /// onboarding's place, the welcome note was just there, with no slide.
+    @State private var tabsSettled = false
 
     var body: some View {
         Group {
@@ -46,6 +50,12 @@ struct RootView: View {
             } else {
                 TabContainer()
                     .transition(.opacity)
+                    // Once onboarding's fade into the tabs is over.
+                    .task {
+                        try? await Task.sleep(for: .milliseconds(450))
+                        tabsSettled = true
+                    }
+                    .onDisappear { tabsSettled = false }
             }
         }
         .animation(.smooth, value: owner.chosenWallet == nil)
@@ -101,7 +111,7 @@ struct RootView: View {
     /// Owed from the moment onboarding ends until it is closed.
     private var welcomeNotePresented: Binding<Bool> {
         Binding(
-            get: { !splashActive && (forcesNote || (hasOnboarded && owner.chosenWallet != nil && !hasSeenDeveloperNote)) },
+            get: { tabsSettled && !splashActive && (forcesNote || (hasOnboarded && owner.chosenWallet != nil && !hasSeenDeveloperNote)) },
             set: { presented in
                 guard !presented else { return }
                 hasSeenDeveloperNote = true
@@ -114,7 +124,7 @@ struct RootView: View {
     /// the welcome note.
     private var whatsNewPresented: Binding<Bool> {
         Binding(
-            get: { whatsNew != nil && window.width > 0 && !splashActive && hasOnboarded && owner.chosenWallet != nil && hasSeenDeveloperNote && !forcesNote },
+            get: { tabsSettled && whatsNew != nil && window.width > 0 && !splashActive && hasOnboarded && owner.chosenWallet != nil && hasSeenDeveloperNote && !forcesNote },
             set: { presented in
                 guard !presented else { return }
                 whatsNew = nil
@@ -127,7 +137,7 @@ struct RootView: View {
     private var showMyNameNoticePresented: Binding<Bool> {
         Binding(
             get: {
-                guard !splashActive, hasOnboarded, owner.chosenWallet != nil, hasSeenDeveloperNote, !forcesNote, whatsNew == nil else { return false }
+                guard tabsSettled, !splashActive, hasOnboarded, owner.chosenWallet != nil, hasSeenDeveloperNote, !forcesNote, whatsNew == nil else { return false }
                 return forcesShowMyNameNotice || (!seenShowMyNameNotice && showMyName && owner.defaultSIM != nil)
             },
             set: { presented in
@@ -140,7 +150,7 @@ struct RootView: View {
 
     private var reviewNotePresented: Binding<Bool> {
         Binding(
-            get: { showsReviewNote && !splashActive },
+            get: { tabsSettled && showsReviewNote && !splashActive },
             set: { showsReviewNote = $0 }
         )
     }

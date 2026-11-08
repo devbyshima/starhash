@@ -75,6 +75,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Fixed
 
+- Shima's note at the end of onboarding slides up over Pay, as a sheet does, rather than appearing all at once.
 - The launch animation's mark is gone before the app shows, rather than fading out over Pay.
 - A sheet's close, confirm and Edit buttons show in light mode, as grey glass instead of white glass lost on the white sheet. A long press on one of Buy's codes opens its menu under it from the left edge, as a transaction's does, instead of centred over it.
 - Your own accounts follow your numbers: changing either SIM's number or your name, going back to one SIM, or importing a backup files the payments between your SIMs afresh, and a payment that is no longer between them leaves Your own accounts. A category you picked yourself stays as you picked it. The other SIM's number is kept only once it is whole, and with one SIM, a number on the other carrier than your wallet says how to fix it: change your wallet, or set Two SIMs.
