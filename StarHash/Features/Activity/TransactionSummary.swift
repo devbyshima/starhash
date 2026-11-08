@@ -96,19 +96,16 @@ struct TransactionDetailCards<CategoryRow: View>: View {
         }
     }
 
-    /// A dot and the word, in the status's colour.
+    /// The word alone, in the status's colour.
     private func statusValue(_ status: StarHashKit.Transaction.Status) -> some View {
         let color: AnyShapeStyle = switch status {
         case .confirmed: AnyShapeStyle(Color.starhashIncoming)
         case .pending: AnyShapeStyle(Color.starhashUrgentText)
         case .failed: AnyShapeStyle(Color.starhashDestructive)
         }
-        return HStack(spacing: 6) {
-            Circle().fill(color).frame(width: 7, height: 7)
-            Text(statusTitle(status))
-                .starhashFont(17, relativeTo: .body)
-                .foregroundStyle(color)
-        }
+        return Text(statusTitle(status))
+            .starhashFont(17, relativeTo: .body)
+            .foregroundStyle(color)
     }
 
     /// Why StarHash failed it, when it did rather than its owner.

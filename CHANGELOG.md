@@ -31,6 +31,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Changed
 
+- A transaction's status is its word alone, in its colour (Confirmed, Pending, Failed), with no dot before it.
 - Every icon is now from Keyline Icons, filled where StarHash showed a filled icon and in lines where it showed an outline; Licences lists Keyline Icons under the MIT License.
 - StarHash drops its green: buttons, the mark, the splash, switches, charts and the empty-state drawings are near black in light mode and near white in dark. The drawings lose their trailing cords and "look here" strokes, and Shima's note is a black note over the light app (a white one over the dark), only as tall as its letter, with more room between its parts.
 - Activity is now Transactions: its tab, the page's title, the icon's quick action, Quick Pay's widget, onboarding and the terms.
