@@ -31,6 +31,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Changed
 
+- Every word on the widgets is one size, the Pay pill's as the tiles'; a long code name is cut short rather than shrunk.
 - A transaction's status is its word alone, with no dot before it, and every status takes one of three colours: green confirmed, yellow pending, red failed. Confirmed is green on a transaction's page, a failed payment's badge in the list is filled red as a pending one's is yellow, auto-verify's ticks are green once it works, and Settings shows auto-verify waiting for its first message in amber and not hearing for a week in red.
 - Every icon is now from Keyline Icons, filled where StarHash showed a filled icon and in lines where it showed an outline; Licences lists Keyline Icons under the MIT License.
 - StarHash drops its green: buttons, the mark, the splash, switches, charts and the empty-state drawings are near black in light mode and near white in dark. The drawings lose their trailing cords and "look here" strokes, and Shima's note is a black note over the light app (a white one over the dark), only as tall as its letter, with more room between its parts.

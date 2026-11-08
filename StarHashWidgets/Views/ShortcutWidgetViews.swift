@@ -122,12 +122,11 @@ struct BuyTilesWidgetView: View {
                 .frame(height: 20, alignment: .leading)
                 .accessibilityHidden(true)
             Spacer(minLength: 0)
-            // A code's name is the owner's own and may be long: it
-            // shrinks a little before it is cut.
+            // A code's name is the owner's own and may be long: it is cut
+            // rather than shrunk, so every tile's words are one size.
             title
-                .font(.widget(15))
+                .font(.widget(WidgetMetrics.textSize))
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .foregroundStyle(Color.widgetText)
@@ -169,10 +168,9 @@ struct QuickPayWidgetView: View {
             HStack(spacing: 12) {
                 StarHashMark(size: 30)
                 Text(family == .systemSmall ? "Pay" : "Pay someone")
-                    .font(.widget(19))
+                    .font(.widget(WidgetMetrics.textSize))
                     .foregroundStyle(Color.widgetSecondaryText)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, 14)
@@ -204,6 +202,8 @@ enum WidgetMetrics {
     static let padding: CGFloat = 16
     static let gap: CGFloat = 8
     static let tileRadius: CGFloat = 14
+    /// Every word on every widget is this size, the pill's as the tiles'.
+    static let textSize: CGFloat = 15
 }
 
 extension Font {
