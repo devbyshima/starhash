@@ -305,6 +305,9 @@ struct SettingsRowText: View {
     let title: String
     var caption: String?
     var status: String?
+    /// The status line's colour when it is a status (amber waiting, red
+    /// failing); the quiet grey otherwise.
+    var statusColor: Color?
     var showsCaption = false
 
     var body: some View {
@@ -313,7 +316,7 @@ struct SettingsRowText: View {
                 .starhashFont(16, weight: .medium, relativeTo: .callout)
                 .foregroundStyle(Color.starhashPrimaryText)
             if let status {
-                line(status)
+                line(status, style: statusColor.map(AnyShapeStyle.init) ?? AnyShapeStyle(Color.starhashTertiaryText))
             }
             if let caption, showsCaption {
                 line(caption)
@@ -323,10 +326,10 @@ struct SettingsRowText: View {
         .padding(.vertical, 11)
     }
 
-    private func line(_ text: String) -> some View {
+    private func line(_ text: String, style: AnyShapeStyle = AnyShapeStyle(Color.starhashTertiaryText)) -> some View {
         Text(catalog: text)
             .starhashFont(13.5, weight: .medium, relativeTo: .footnote)
-            .foregroundStyle(Color.starhashTertiaryText)
+            .foregroundStyle(style)
             .fixedSize(horizontal: false, vertical: true)
     }
 }
@@ -339,6 +342,7 @@ struct SettingsToggleRow: View {
     let title: String
     var caption: String?
     var status: String?
+    var statusColor: Color?
     @Binding var isOn: Bool
 
     @State private var showsCaption = false
@@ -347,7 +351,7 @@ struct SettingsToggleRow: View {
         Toggle(isOn: $isOn) {
             HStack(spacing: 12) {
                 SettingsCaptionIcon(symbol: symbol, hasCaption: caption != nil, showsCaption: $showsCaption)
-                SettingsRowText(title: title, caption: caption, status: status, showsCaption: showsCaption)
+                SettingsRowText(title: title, caption: caption, status: status, statusColor: statusColor, showsCaption: showsCaption)
             }
         }
         .tint(Color.settingsToggleOn)

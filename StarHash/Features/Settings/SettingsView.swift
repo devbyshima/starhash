@@ -326,6 +326,7 @@ private struct SettingsRootList: View {
             title: "Auto-verify transactions",
             caption: String(starhash: "Confirm payments from \(ownWallets.messagesName) messages"),
             status: autoVerifyStatus,
+            statusColor: autoVerifyStatusColor,
             isOn: autoVerifyBinding
         )
         SettingsToggleRow(
@@ -497,6 +498,16 @@ private struct SettingsRootList: View {
     /// Auto-verify's state when it needs a word: on but still waiting for
     /// its first message through the automation, or quiet for a week.
     /// Nothing while it simply works.
+    /// Waiting for its first message reads as pending, amber; no messages
+    /// for a week as failing, red.
+    private var autoVerifyStatusColor: Color? {
+        if autoVerifyBinding.wrappedValue,
+           !StarHashPreferences.automationProven(lastMessageAt: lastMessageAt, since: autoVerifySince) {
+            return .starhashUrgentText
+        }
+        return autoVerifyLooksBroken ? .starhashDestructive : nil
+    }
+
     private var autoVerifyStatus: String? {
         if autoVerifyBinding.wrappedValue,
            !StarHashPreferences.automationProven(lastMessageAt: lastMessageAt, since: autoVerifySince) {

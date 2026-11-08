@@ -99,7 +99,7 @@ struct TransactionDetailCards<CategoryRow: View>: View {
     /// The word alone, in the status's colour.
     private func statusValue(_ status: StarHashKit.Transaction.Status) -> some View {
         let color: AnyShapeStyle = switch status {
-        case .confirmed: AnyShapeStyle(Color.starhashIncoming)
+        case .confirmed: AnyShapeStyle(Color.starhashConfirmedText)
         case .pending: AnyShapeStyle(Color.starhashUrgentText)
         case .failed: AnyShapeStyle(Color.starhashDestructive)
         }

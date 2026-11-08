@@ -47,9 +47,17 @@ extension Color {
     static let brandPaperMuted = Color(red: 128 / 255, green: 128 / 255, blue: 128 / 255)
 
     /// A payment still waiting for its SMS: yellow, #F2BB07, so the three
-    /// states read apart at a glance: yellow pending, red failed, the text
-    /// colour confirmed.
+    /// states read apart at a glance: yellow pending, red failed, green
+    /// confirmed.
     static let brandYellow = Color(red: 242 / 255, green: 187 / 255, blue: 7 / 255)
+
+    /// Confirmed, the third status colour beside pending's yellow and
+    /// failed's red: green, #64D27B, on the dark page (9:1), and a deeper
+    /// #357444 on white (5.6:1), where the green itself is too light to read.
+    /// StarHash's accent is black and white; this green only ever says
+    /// something went through (a confirmed payment, a check that passed).
+    static let brandGreen = Color(red: 100 / 255, green: 210 / 255, blue: 123 / 255)
+    static let brandGreenDeep = Color(red: 53 / 255, green: 116 / 255, blue: 68 / 255)
 
     /// Blood red, #C1121F: delete buttons and failed payments (5.9:1 on
     /// white).
@@ -119,6 +127,13 @@ extension Color {
     /// mode (10:1 on #171717), a deep amber on light mode's white (#8A6500,
     /// 5.3:1), where the yellow is 1.8:1.
     static let starhashUrgentText = Color(light: .init(red: 138 / 255, green: 101 / 255, blue: 0), dark: .brandYellow)
+    /// Confirmed as words (on a transaction's page): the deep green on white,
+    /// the green on #171717.
+    static let starhashConfirmedText = Color(light: .brandGreenDeep, dark: .brandGreen)
+    /// Confirmed as a fill (the verified tick, a ticked step), with the
+    /// page's colour drawn on it.
+    static let starhashConfirmed = Color(light: .brandGreenDeep, dark: .brandGreen)
+    static let starhashOnConfirmed = Color(light: .white, dark: .brandInk)
     /// Money going out, as an arrow or an amount: the text colour. Red is
     /// kept for what failed or deletes.
     static let starhashOutgoing = SurfaceColor(light: .brandInk, dark: .brandPaper)
