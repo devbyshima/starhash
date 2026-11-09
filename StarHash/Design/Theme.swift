@@ -4,11 +4,11 @@ import UIKit
 /// StarHash follows the system appearance in the owner's reference
 /// neutrals, with the text colour as the accent: light mode is a white
 /// page with #F5F6F5 for what is filled and #E1E1E1 round what is
-/// outlined, words in #171717 and #707070; dark mode is a #171717 page with
+/// outlined, words in #171717 and #707070; dark mode is a #101010 page with
 /// #262626 fills and #333333 outlines, words in #FAFBFA and #A3A3A3. The
 /// accent is the near black #171717 in light mode and the near white
 /// #FAFBFA in dark: it fills (buttons, the chart, the mark, the avatar)
-/// with the page's own colour as the words on it (18:1, 17:1), and accent
+/// with the page's own colour as the words on it (18:1 either way), and accent
 /// words are the text colour. Red is kept for what deletes and what
 /// failed, yellow for what is pending.
 ///
@@ -34,14 +34,17 @@ extension Color {
     static let brandGrey = Color(red: 112 / 255, green: 112 / 255, blue: 112 / 255)
     static let brandMuted = Color(red: 138 / 255, green: 138 / 255, blue: 138 / 255)
 
-    // Dark mode, from the reference: the page is `brandInk`.
+    // Dark mode, from the reference.
+    /// The dark page, #101010: a step darker than light mode's words, after
+    /// the owner's reference.
+    static let brandNight = Color(red: 16 / 255, green: 16 / 255, blue: 16 / 255)
     /// What is filled on the dark page, and a step further for the controls
     /// on it, which is also the line round an outlined card.
     static let brandCoal = Color(red: 38 / 255, green: 38 / 255, blue: 38 / 255)
     static let brandSlate = Color(red: 51 / 255, green: 51 / 255, blue: 51 / 255)
     static let brandDividerDark = Color(red: 61 / 255, green: 61 / 255, blue: 63 / 255)
-    /// Words: #FAFBFA, the quieter #A3A3A3 (7:1), placeholders #808080
-    /// (4.5:1).
+    /// Words: #FAFBFA, the quieter #A3A3A3 (7.5:1), placeholders #808080
+    /// (4.8:1).
     static let brandPaper = Color(red: 250 / 255, green: 251 / 255, blue: 250 / 255)
     static let brandPaperQuiet = Color(red: 163 / 255, green: 163 / 255, blue: 163 / 255)
     static let brandPaperMuted = Color(red: 128 / 255, green: 128 / 255, blue: 128 / 255)
@@ -64,20 +67,20 @@ extension Color {
     static let brandRed = Color(red: 193 / 255, green: 18 / 255, blue: 31 / 255)
 
     /// The accent and brand colour as it fills: the near black on light
-    /// mode's white, the near white on dark mode's #171717, the text
+    /// mode's white, the near white on dark mode's #101010, the text
     /// colours themselves. What is drawn on it is the page's own colour
-    /// (18:1, 17:1).
+    /// (18:1 either way).
     static let brandFill = Color(light: .brandInk, dark: .brandPaper)
-    static let brandOnFill = Color(light: .brandWhite, dark: .brandInk)
+    static let brandOnFill = Color(light: .brandWhite, dark: .brandNight)
 
     // MARK: Pages
 
-    /// Screen background: white, or #171717.
-    static let starhashBackground = Color(light: .brandWhite, dark: .brandInk)
+    /// Screen background: white, or #101010.
+    static let starhashBackground = Color(light: .brandWhite, dark: .brandNight)
     /// Pay's background, the same as every page's.
     static let starhashPayBackground = Color.starhashBackground
     /// What is filled (a list of actions, the summary, fields): #F5F6F5 on
-    /// white, #262626 on #171717.
+    /// white, #262626 on #101010.
     static let starhashCard = Color(light: .brandMist, dark: .brandCoal)
     /// A list row as a finger presses it, edge to edge: Activity's
     /// transactions, as a system list highlights a cell.
@@ -94,8 +97,8 @@ extension Color {
 
     // MARK: Text
 
-    /// #171717 on white and its fills (18:1, 17:1), #FAFBFA on #171717 and
-    /// its fills (17:1, 14:1).
+    /// #171717 on white and its fills (18:1, 17:1), #FAFBFA on #101010 and
+    /// its fills (18:1, 15:1).
     static let starhashPrimaryText = SurfaceColor(light: .brandInk, dark: .brandPaper)
     /// The quieter text: 4.5:1 or more on either page and its fills.
     static let starhashSecondaryText = SurfaceColor(light: .brandGrey, dark: .brandPaperQuiet)
@@ -124,16 +127,16 @@ extension Color {
     static let starhashUrgent = Color.brandYellow
     static let starhashOnUrgent = Color.brandInk
     /// Pending as words (on a transaction's page): the yellow itself in dark
-    /// mode (10:1 on #171717), a deep amber on light mode's white (#8A6500,
+    /// mode (11:1 on #101010), a deep amber on light mode's white (#8A6500,
     /// 5.3:1), where the yellow is 1.8:1.
     static let starhashUrgentText = Color(light: .init(red: 138 / 255, green: 101 / 255, blue: 0), dark: .brandYellow)
     /// Confirmed as words (on a transaction's page): the deep green on white,
-    /// the green on #171717.
+    /// the green on #101010.
     static let starhashConfirmedText = Color(light: .brandGreenDeep, dark: .brandGreen)
     /// Confirmed as a fill (the verified tick, a ticked step), with the
     /// page's colour drawn on it.
     static let starhashConfirmed = Color(light: .brandGreenDeep, dark: .brandGreen)
-    static let starhashOnConfirmed = Color(light: .white, dark: .brandInk)
+    static let starhashOnConfirmed = Color(light: .white, dark: .brandNight)
     /// Money going out, as an arrow or an amount: the text colour. Red is
     /// kept for what failed or deletes.
     static let starhashOutgoing = SurfaceColor(light: .brandInk, dark: .brandPaper)
@@ -148,7 +151,7 @@ extension Color {
     static let starhashIncoming = SurfaceColor(light: .brandInk, dark: .brandPaper)
     /// Drawn on `starhashIncoming` as a fill (the verified tick): the
     /// page's colour.
-    static let starhashOnIncoming = SurfaceColor(light: .brandWhite, dark: .brandInk)
+    static let starhashOnIncoming = SurfaceColor(light: .brandWhite, dark: .brandNight)
 
     // MARK: Text on Pay
 
@@ -179,10 +182,10 @@ extension Color {
     // MARK: The accent
 
     /// The accent as a fill: primary buttons, chart bars, a filled check.
-    /// The near black on white, the near white on #171717.
+    /// The near black on white, the near white on #101010.
     static let starhashInk = SurfaceColor(light: .brandInk, dark: .brandPaper)
     /// Text and glyphs drawn on `starhashInk`: the page's colour.
-    static let starhashOnInk = SurfaceColor(light: .brandWhite, dark: .brandInk)
+    static let starhashOnInk = SurfaceColor(light: .brandWhite, dark: .brandNight)
     /// The accent as text or a thin mark (a chosen check): the text colour.
     static let starhashAccentText = SurfaceColor(light: .brandInk, dark: .brandPaper)
     /// The accent as a graphic that has to stand out (a selection ring,
@@ -195,6 +198,7 @@ extension Color {
 
     /// The StarHash mark's star, drawn bare: the accent.
     static let starhashMarkGlyph = SurfaceColor(light: .brandInk, dark: .brandPaper)
+
 
     /// Letters a search matched: the text colour on a wash of it, so the
     /// match reads apart from the rest of the name.
@@ -225,10 +229,10 @@ extension Color {
     static let confirmButton = Color.brandFill
     static let onConfirmButton = Color.brandOnFill
     /// The label on `sheetFilledButton`.
-    static let sheetFilledLabel = Color(light: .white, dark: .brandInk)
+    static let sheetFilledLabel = Color(light: .white, dark: .brandNight)
     /// A sheet's background: the page's own white in light mode, the page's
-    /// #171717 let mostly through the glass in dark.
-    static let sheetGlassTint = Color(light: .brandWhite, dark: .brandInk.opacity(0.6))
+    /// #101010 let mostly through the glass in dark.
+    static let sheetGlassTint = Color(light: .brandWhite, dark: .brandNight.opacity(0.6))
     /// The tab bar's lens under the page showing: a veil of the text colour
     /// over the clear glass. Its rim is light along the top and dark down
     /// the sides, as glass's is.
@@ -237,7 +241,7 @@ extension Color {
     static let tabBarLensEdgeDark = Color(light: .black.opacity(0.1), dark: .black.opacity(0.3))
     /// The note sheets' background: the page's own colour, so the note
     /// reads as a page.
-    static let noteSheetBackground = Color(light: .brandWhite, dark: .brandInk)
+    static let noteSheetBackground = Color(light: .brandWhite, dark: .brandNight)
     /// The developer's note in the brand's own colours, so it stands apart
     /// from the page it opens over: the page turned over, the near black
     /// note in light mode and the near white one in dark, its quieter words
@@ -245,7 +249,7 @@ extension Color {
     /// content takes the opposite appearance (`NoteSheetFrame`), so these
     /// resolve against that one; `noteBrandPresentation`, behind the sheet,
     /// against the app's.
-    static let noteBrandBackground = Color(light: .brandPaper, dark: .brandInk)
+    static let noteBrandBackground = Color(light: .brandPaper, dark: .brandNight)
     static let noteBrandText = Color(light: .brandInk, dark: .brandPaper)
     static let noteBrandSecondary = Color.noteBrandText.opacity(0.78)
     static let noteBrandButton = Color.noteBrandText
@@ -275,7 +279,7 @@ extension Color {
 
     /// The widgets sit on the Home Screen's wallpaper in the app's page
     /// colours.
-    static let widgetCard = Color(light: .brandWhite, dark: .brandInk)
+    static let widgetCard = Color(light: .brandWhite, dark: .brandNight)
     /// Words on the widgets: the text colours.
     static let widgetText = Color(light: .brandInk, dark: .brandPaper)
     /// The quieter words on a widget (the pill's "Pay").
