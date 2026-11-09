@@ -60,6 +60,30 @@ extension View {
         }
     }
 
+    /// The same sheet, with the detent showing in `selection`: setting it
+    /// moves the sheet to that height on the system's own spring, where a
+    /// new set of detents would jump there.
+    @ViewBuilder
+    func sheetGlass(detents: Set<PresentationDetent>, selection: Binding<PresentationDetent>) -> some View {
+        if #available(iOS 26.0, *) {
+            self
+                .starhashContainerSurface()
+                .presentationBackground {
+                    Color.clear
+                        .glassEffect(.regular.tint(.sheetGlassTint), in: Rectangle())
+                        .ignoresSafeArea()
+                }
+                .presentationDetents(detents, selection: selection)
+                .presentationDragIndicator(.visible)
+        } else {
+            self
+                .starhashContainerSurface()
+                .presentationBackground(Color.sheetGlassTint)
+                .presentationDetents(detents, selection: selection)
+                .presentationDragIndicator(.visible)
+        }
+    }
+
     /// The solid card a sheet's rows sit on. A page using the same pieces
     /// passes its own card colour, since its background is the sheet's.
     func sheetCard(radius: CGFloat = 22, fill: Color = .sheetSurface) -> some View {
@@ -288,6 +312,14 @@ private struct SheetButtonBody: View {
         }
     }
 
+    /// The accent's fills (Filled, the accent, Verify) are lit as every
+    /// primary button is; the red keeps its own gradient, and a disabled
+    /// button is flat.
+    private func surface(_ colors: (fill: Color, label: Color)) -> AnyShapeStyle {
+        guard isEnabled else { return AnyShapeStyle(Color.sheetChip) }
+        return fill == .destructive ? AnyShapeStyle(colors.fill.gradient) : AnyShapeStyle(.starhashAccentLit)
+    }
+
     var body: some View {
         let colors = colors
         configuration.label
@@ -297,7 +329,7 @@ private struct SheetButtonBody: View {
             .padding(.horizontal, fillsWidth ? 16 : 32)
             .frame(maxWidth: fillsWidth ? .infinity : nil)
             .frame(minHeight: 50)
-            .background((isEnabled ? colors.fill : Color.sheetChip).gradient, in: Capsule())
+            .background(surface(colors), in: Capsule())
             .contentShape(Capsule())
             .opacity(configuration.isPressed ? 0.9 : 1)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)

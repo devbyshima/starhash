@@ -21,6 +21,22 @@ CREATE TABLE IF NOT EXISTS active_days (
 INSERT OR IGNORE INTO active_days (day, id) SELECT first_seen, id FROM installs;
 INSERT OR IGNORE INTO active_days (day, id) SELECT last_seen, id FROM installs;
 
+-- One row per number an owner lists under Show My Name (on unless they turn
+-- it off): the number as an HMAC under the Worker's DIRECTORY_SECRET, never
+-- the number itself; the hash of the key their iPhone holds (the photo's);
+-- the name they gave and their photo's id, either of which may be empty.
+-- The app sends its rows again each week, and lookups skip rows older than
+-- 45 days. Two keys listing one number show neither.
+CREATE TABLE IF NOT EXISTS directory (
+  number_hash TEXT NOT NULL,
+  key_hash TEXT NOT NULL,
+  name TEXT NOT NULL,
+  photo_id TEXT,
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY (number_hash, key_hash)
+) WITHOUT ROWID;
+CREATE INDEX IF NOT EXISTS directory_by_key ON directory (key_hash);
+
 -- One row per shared photo: the random id an owner's QR code carries, the
 -- hash of the key their iPhone holds (needed to replace or delete it), and
 -- the JPEG itself, 200 KB at most. No number, no name.

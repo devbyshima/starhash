@@ -31,7 +31,7 @@ struct OnboardingPhotoPage: View {
                     .foregroundStyle(Color.starhashPrimaryText)
                     .accessibilityAddTraits(.isHeader)
                 RevealText(
-                    String(starhash: "Friends who scan your code see it\nbeside your number, so they know it's you."),
+                    String(starhash: "People who scan your code see it\nbeside your number, so they know it's you."),
                     startIndex: RevealText.wordCount(String(starhash: "Your photo")),
                     delay: RevealTiming.enterDelay
                 )

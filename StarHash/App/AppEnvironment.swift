@@ -91,7 +91,7 @@ enum AppTab: String, Hashable, CaseIterable, Identifiable {
         switch self {
         case .pay: "number"
         case .buy: "bag.fill"
-        case .activity: "clock.fill"
+        case .activity: "receipt.fill"
         case .settings: "gearshape.fill"
         }
     }

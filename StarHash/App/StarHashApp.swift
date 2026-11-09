@@ -20,6 +20,8 @@ struct StarHashApp: App {
             // Seen too, so it does not cover the page a screenshot is after
             // (-note shows it anyway).
             UserDefaults.standard.set(true, forKey: PreferenceKey.hasSeenDeveloperNote)
+            // And Show My Name's notice (-showMyNameNotice shows it anyway).
+            UserDefaults.standard.set(true, forKey: PreferenceKey.seenShowMyNameNotice)
         }
         // Not "-appearance": a launch argument named after a key overrides
         // that key's saved value for the whole run.
@@ -125,6 +127,8 @@ struct StarHashApp: App {
                 QuickActions.update()
                 // Counted as in use, once a day, by a random id alone.
                 StarHashCloud.pingIfDue()
+                // The owner's listing, sent again when it is a week old.
+                StarHashCloud.syncDirectory(owner: AppEnvironment.owner)
                 store.reloadFromDisk()
                 PaymentExpiry.run()
                 Task { await StarHashNotifications.shared.sync() }

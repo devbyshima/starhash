@@ -266,14 +266,16 @@ private struct NoteSheetFrame<Content: View>: View {
 }
 
 /// The note's button: the note's words colour with its page colour on it,
-/// the other way round from the page, at a sheet button's size.
+/// the other way round from the page, at a sheet button's size, lit as
+/// every primary button is (against the note's own appearance, whose
+/// accent is the note's words colour).
 private struct NoteButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.sheet(17, .semibold, relativeTo: .headline))
             .foregroundStyle(Color.noteBrandButtonLabel)
             .frame(maxWidth: .infinity, minHeight: 54)
-            .background(Color.noteBrandButton, in: Capsule())
+            .background(.starhashAccentLit, in: Capsule())
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.snappy(duration: 0.18), value: configuration.isPressed)
             .starhashPressHaptic(configuration.isPressed, weight: .medium)

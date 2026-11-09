@@ -2585,22 +2585,6 @@
         }
       }
     },
-    "Friends who scan your code see it\nbeside your number, so they know it's you.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vos amis qui scannent votre code la voient\nà côté de votre numéro, et savent que c'est vous."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inshuti zisikana kode yawe ziyibona\niruhande rwa nimero yawe, zikamenya ko ari wowe."
-          }
-        }
-      }
-    },
     "Got It": {
       "localizations": {
         "fr": {
@@ -2793,22 +2777,6 @@
         }
       }
     },
-    "In Settings you can stop StarHash saving transactions, using contacts, remembering recent recipients, Nearby, auto-verify and each of its notifications at any time. You can delete any transaction, or erase everything with Delete All Data. Deleting the app removes it all too.": {
-      "localizations": {
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mu Igenamiterere, igihe icyo ari cyo cyose ushobora kubuza StarHash kubika ibikorwa, gukoresha abo muvugana no kwibuka abo wishyuye vuba, ndetse ukazimya Hafi aha, Kugenzura byikora na buri menyesha yayo. Ushobora gusiba igikorwa icyo ari cyo cyose, cyangwa ugasiba byose ukoresheje Siba amakuru yose. Gusiba porogaramu na byo bikuraho byose."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dans Réglages, vous pouvez à tout moment empêcher StarHash d'enregistrer les transactions, d'utiliser les contacts, de retenir les destinataires récents, À proximité, la vérification auto et chacune de ses notifications. Vous pouvez supprimer n'importe quelle transaction, ou tout effacer avec Supprimer toutes les données. Supprimer l'app efface aussi tout."
-          }
-        }
-      }
-    },
     "In Shortcuts, check **StarHash SMS** was added under that name.": {
       "localizations": {
         "rw": {
@@ -2853,22 +2821,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Il revient directement ici. Rien n'est enregistré."
-          }
-        }
-      }
-    },
-    "It goes in your own QR code, so friends\nscan it to pay you. It stays on your iPhone.": {
-      "localizations": {
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ijya muri kode yawe ya QR, kugira ngo inshuti zawe\nziyisikane zikwishyure. Iguma kuri iPhone yawe."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Il figure dans votre propre code QR, pour que vos amis\nle scannent pour vous payer. Il reste sur votre iPhone."
           }
         }
       }
@@ -3873,22 +3825,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rien de ce qui suit n'arrive tant que vous ne le faites pas"
-          }
-        }
-      }
-    },
-    "Nothing beyond StarHash's own server above. It has no advertising and no third-party code that collects data. Request a Feature and the source code open GitHub in your browser, and Support on Ko-fi opens Ko-fi, each under its own privacy policy. Every code you dial goes through your phone and your provider, under theirs.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rien d'autre que le serveur de StarHash ci-dessus. Pas de publicité, ni de code tiers qui collecte des données. Demander une fonctionnalité et le code source ouvrent GitHub dans votre navigateur, et Soutenir sur Ko-fi ouvre Ko-fi, chacun selon sa propre politique de confidentialité. Chaque code que vous composez passe par votre téléphone et votre opérateur, selon la leur."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nta kindi uretse seriveri ya StarHash ivugwa haruguru. Nta matangazo ifite, nta n'ikode y'abandi ikusanya amakuru. Saba ikintu gishya na kode yayo bifungura GitHub muri mushakisha yawe, naho Shyigikira kuri Ko-fi igafungura Ko-fi, buri kimwe hakurikijwe politiki y'ibanga yacyo. Kode yose ukanze inyura kuri telefoni yawe n'ikigo cyawe cy'itumanaho, hakurikijwe politiki zabo."
           }
         }
       }
@@ -6128,22 +6064,6 @@
         }
       }
     },
-    "StarHash has no account and no tracking. Your payments stay on your iPhone. Only your profile photo, if you add one, and an anonymous count of who uses StarHash reach its server.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "StarHash n'a ni compte ni pistage. Vos paiements restent sur votre iPhone. Seule votre photo de profil, si vous en ajoutez une, et un décompte anonyme des utilisateurs de StarHash arrivent sur son serveur."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "StarHash nta konti igira, nta n'ubwo igukurikirana. Ubwishyu bwawe buguma kuri iPhone yawe. Ifoto y'umwirondoro wawe gusa, niba wayishyizeho, n'umubare utavuga amazina w'abakoresha StarHash ni byo bigera kuri seriveri yayo."
-          }
-        }
-      }
-    },
     "StarHash is Locked": {
       "localizations": {
         "rw": {
@@ -7406,22 +7326,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ebyiri"
-          }
-        }
-      }
-    },
-    "Two things reach it. Your profile photo, if you add one: it is kept under a random id that your QR code carries, so people who scan your code see it, and never with your name or number; only your iPhone holds the key that can change or delete it, and removing your photo deletes it. And once a day, a random id made when StarHash was installed, with its version, so the number of people using StarHash can be counted. Nothing else is sent: no number, no name, no payment, no location.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Deux choses y arrivent. Votre photo de profil, si vous en ajoutez une : elle est gardée sous un identifiant aléatoire que porte votre code QR, pour que les personnes qui scannent votre code la voient, et jamais avec votre nom ou votre numéro ; seul votre iPhone détient la clé qui peut la modifier ou la supprimer, et retirer votre photo la supprime. Et une fois par jour, un identifiant aléatoire créé à l'installation de StarHash, avec sa version, pour compter le nombre de personnes qui utilisent StarHash. Rien d'autre n'est envoyé : ni numéro, ni nom, ni paiement, ni position."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ibintu bibiri ni byo biyigeraho. Ifoto y'umwirondoro wawe, niba wayishyizeho: ibikwa ku kimenyetso cy'impfabusa kode yawe ya QR itwara, kugira ngo abasikana kode yawe bayibone, kandi ntibikwa hamwe n'izina cyangwa nimero yawe; iPhone yawe yonyine ni yo ifite urufunguzo rwo kuyihindura cyangwa kuyisiba, kandi gukuraho ifoto yawe birayisiba. N'inshuro imwe ku munsi, ikimenyetso cy'impfabusa cyakozwe igihe StarHash yashyirwagaho, hamwe n'ubwoko bwayo, kugira ngo umubare w'abakoresha StarHash ubarwe. Nta kindi cyoherezwa: nta nimero, nta zina, nta bwishyu, nta hantu uri."
           }
         }
       }
@@ -8732,6 +8636,582 @@
           "stringUnit": {
             "state": "translated",
             "value": "Marques de tiers"
+          }
+        }
+      }
+    },
+    "Show my name": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher mon nom"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erekana izina ryanjye"
+          }
+        }
+      }
+    },
+    "People who type your number in StarHash see your name and photo": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les personnes qui saisissent votre numéro dans StarHash voient votre nom et votre photo"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abanditse nimero yawe muri StarHash babona izina ryawe n'ifoto yawe"
+          }
+        }
+      }
+    },
+    "Turn it off any time in Settings, under Your SIMs": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désactivez-le à tout moment dans Réglages, sous Vos SIM"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wabizimya igihe icyo ari cyo cyose mu Igenamiterere, munsi ya SIM zawe"
+          }
+        }
+      }
+    },
+    "Your name on StarHash": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre nom sur StarHash"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izina ryawe kuri StarHash"
+          }
+        }
+      }
+    },
+    "It goes in your own QR code, and people\nwho pay it with StarHash see your name.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il figure dans votre propre code QR, et ceux\nqui le paient avec StarHash voient votre nom."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ijya muri kode yawe ya QR, kandi abakwishyura\nbakoresheje StarHash babona izina ryawe."
+          }
+        }
+      }
+    },
+    "StarHash has no account and no tracking. Your payments stay on your iPhone. Only your photo, your name and numbers (so people paying you see who you are, unless you turn that off) and an anonymous count of who uses StarHash reach its server.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash n'a ni compte ni pistage. Vos paiements restent sur votre iPhone. Seuls votre photo, votre nom et vos numéros (pour que ceux qui vous paient voient qui vous êtes, sauf si vous le désactivez) et un décompte anonyme des utilisateurs de StarHash arrivent sur son serveur."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash nta konti igira, nta n'ubwo igukurikirana. Ubwishyu bwawe buguma kuri iPhone yawe. Ifoto yawe, izina ryawe na nimero zawe gusa (kugira ngo abakwishyura bamenye uwo uri we, keretse ubizimije), n'umubare utavuga amazina w'abakoresha StarHash ni byo bigera kuri seriveri yayo."
+          }
+        }
+      }
+    },
+    "Three things reach it. Your profile photo, if you add one: it is kept under a random id that your QR code carries, so people who scan your code see it; only your iPhone holds the key that can change or delete it, and removing your photo deletes it. Your name with your numbers, unless you turn off Show my name in Settings, so people who type one of your numbers in StarHash see your name and photo: each number is kept only as a code made with a secret key the server holds, never as the number itself, and turning Show my name off, or removing your numbers, deletes them there. And once a day, a random id made when StarHash was installed, with its version, so the number of people using StarHash can be counted. Nothing else is sent: no payment, no contact, no location.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trois choses y arrivent. Votre photo de profil, si vous en ajoutez une : elle est gardée sous un identifiant aléatoire que porte votre code QR, pour que les personnes qui scannent votre code la voient ; seul votre iPhone détient la clé qui peut la modifier ou la supprimer, et retirer votre photo la supprime. Votre nom avec vos numéros, sauf si vous désactivez Afficher mon nom dans Réglages, pour que les personnes qui saisissent l'un de vos numéros dans StarHash voient votre nom et votre photo : chaque numéro n'est gardé que sous la forme d'un code créé avec une clé secrète que détient le serveur, jamais tel quel, et désactiver Afficher mon nom, ou retirer vos numéros, les y supprime. Et une fois par jour, un identifiant aléatoire créé à l'installation de StarHash, avec sa version, pour compter le nombre de personnes qui utilisent StarHash. Rien d'autre n'est envoyé : ni paiement, ni contact, ni position."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibintu bitatu ni byo biyigeraho. Ifoto y'umwirondoro wawe, niba wayishyizeho: ibikwa ku kimenyetso cy'impfabusa kode yawe ya QR itwara, kugira ngo abasikana kode yawe bayibone; iPhone yawe yonyine ni yo ifite urufunguzo rwo kuyihindura cyangwa kuyisiba, kandi gukuraho ifoto yawe birayisiba. Izina ryawe hamwe na nimero zawe, keretse uzimije Erekana izina ryanjye mu Igenamiterere, kugira ngo abanditse imwe muri nimero zawe muri StarHash babone izina ryawe n'ifoto yawe: buri nimero ibikwa gusa nka kode ikozwe n'urufunguzo rw'ibanga seriveri ifite, ntibikwa uko iri, kandi kuzimya Erekana izina ryanjye, cyangwa gukuraho nimero zawe, birazisibayo. N'inshuro imwe ku munsi, ikimenyetso cy'impfabusa cyakozwe igihe StarHash yashyirwagaho, hamwe n'ubwoko bwayo, kugira ngo umubare w'abakoresha StarHash ubarwe. Nta kindi cyoherezwa: nta bwishyu, nta bo muvugana, nta hantu uri."
+          }
+        }
+      }
+    },
+    "In Settings you can stop StarHash saving transactions, using contacts, remembering recent recipients, Nearby, auto-verify, Show my name and each of its notifications at any time. You can delete any transaction, or erase everything with Delete All Data. Deleting the app removes it all from your iPhone; your name and numbers stay on StarHash's server until they lapse 45 days later, so turn off Show my name first to remove them at once.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dans Réglages, vous pouvez à tout moment empêcher StarHash d'enregistrer les transactions, d'utiliser les contacts, de retenir les destinataires récents, À proximité, la vérification auto, Afficher mon nom et chacune de ses notifications. Vous pouvez supprimer n'importe quelle transaction, ou tout effacer avec Supprimer toutes les données. Supprimer l'app efface tout de votre iPhone ; votre nom et vos numéros restent sur le serveur de StarHash jusqu'à leur expiration, 45 jours plus tard : désactivez d'abord Afficher mon nom pour les retirer aussitôt."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mu Igenamiterere, igihe icyo ari cyo cyose ushobora kubuza StarHash kubika ibikorwa, gukoresha abo muvugana no kwibuka abo wishyuye vuba, ndetse ukazimya Hafi aha, Kugenzura byikora, Erekana izina ryanjye na buri menyesha yayo. Ushobora gusiba igikorwa icyo ari cyo cyose, cyangwa ugasiba byose ukoresheje Siba amakuru yose. Gusiba porogaramu bikuraho byose kuri iPhone yawe; izina ryawe na nimero zawe biguma kuri seriveri ya StarHash kugeza bishaje nyuma y'iminsi 45, bityo banza uzimye Erekana izina ryanjye kugira ngo bivanweho ako kanya."
+          }
+        }
+      }
+    },
+    "Your name and photo, with people who type your number in StarHash, while Show my name is on. Nothing else beyond StarHash's own server above. It has no advertising and no third-party code that collects data. Request a Feature and the source code open GitHub in your browser, and Support on Ko-fi opens Ko-fi, each under its own privacy policy. Every code you dial goes through your phone and your provider, under theirs.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre nom et votre photo, avec les personnes qui saisissent votre numéro dans StarHash, tant qu'Afficher mon nom est activé. Rien d'autre que le serveur de StarHash ci-dessus. Pas de publicité, ni de code tiers qui collecte des données. Demander une fonctionnalité et le code source ouvrent GitHub dans votre navigateur, et Soutenir sur Ko-fi ouvre Ko-fi, chacun selon sa propre politique de confidentialité. Chaque code que vous composez passe par votre téléphone et votre opérateur, selon la leur."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izina ryawe n'ifoto yawe, ku banditse nimero yawe muri StarHash, igihe cyose Erekana izina ryanjye ifunguye. Nta kindi uretse seriveri ya StarHash ivugwa haruguru. Nta matangazo ifite, nta n'ikode y'abandi ikusanya amakuru. Saba ikintu gishya na kode yayo bifungura GitHub muri mushakisha yawe, naho Shyigikira kuri Ko-fi igafungura Ko-fi, buri kimwe hakurikijwe politiki y'ibanga yacyo. Kode yose ukanze inyura kuri telefoni yawe n'ikigo cyawe cy'itumanaho, hakurikijwe politiki zabo."
+          }
+        }
+      }
+    },
+    "People who scan your code see it\nbeside your number, so they know it's you.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les personnes qui scannent votre code la voient\nà côté de votre numéro, et savent que c'est vous."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abasikana kode yawe bayibona\niruhande rwa nimero yawe, bakamenya ko ari wowe."
+          }
+        }
+      }
+    },
+    "Scan to pay and your own QR code, StarHash in Kinyarwanda and French, names for the numbers you type, two SIMs, widgets and a new look.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scanner pour payer et votre propre code QR, StarHash en kinyarwanda et en français, des noms pour les numéros que vous saisissez, deux SIM, des widgets et un nouveau look."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sikana wishyure na kode yawe ya QR, StarHash mu Kinyarwanda no mu Gifaransa, amazina ya ba nyiri nimero wanditse, SIM ebyiri, widgets n'isura nshya."
+          }
+        }
+      }
+    },
+    "The scan button on Pay reads a merchant's MoMo QR code or a friend's StarHash code, and Pay is ready to dial.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le bouton de scan sur Payer lit le code QR MoMo d'un commerçant ou le code StarHash d'un ami, et Payer est prêt à composer."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buto yo gusikana kuri Ishyura isoma kode ya QR ya MoMo y'umucuruzi cyangwa kode ya StarHash y'inshuti, maze Ishyura ikaba yiteguye guhamagara."
+          }
+        }
+      }
+    },
+    "Your own QR code": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre propre code QR"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kode yawe ya QR"
+          }
+        }
+      }
+    },
+    "Your name and number in a code others scan to pay you, drawn as a little tree that turns into the code at a tap.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre nom et votre numéro dans un code que les autres scannent pour vous payer, dessiné comme un petit arbre qui devient le code d'une touche."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izina ryawe na nimero yawe muri kode abandi basikana ngo bakwishyure, ishushanyije nk'igiti gito gihinduka kode iyo ukanzeho."
+          }
+        }
+      }
+    },
+    "Add one and people who scan your code see it beside your number.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajoutez-en une, et les personnes qui scannent votre code la voient à côté de votre numéro."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yishyireho, maze abasikana kode yawe bayibone iruhande rwa nimero yawe."
+          }
+        }
+      }
+    },
+    "Type a number that's on StarHash and see who it is, with their photo. Turn yours off in Settings, under Your SIMs.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saisissez un numéro présent sur StarHash et voyez qui c'est, avec sa photo. Désactivez le vôtre dans Réglages, sous Vos SIM."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andika nimero iri kuri StarHash urebe uwo ari we, n'ifoto ye. Zimya iyawe mu Igenamiterere, munsi ya SIM zawe."
+          }
+        }
+      }
+    },
+    "Kinyarwanda and French": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kinyarwanda et français"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikinyarwanda n'Igifaransa"
+          }
+        }
+      }
+    },
+    "Choose StarHash's language in Settings, and it changes at once, dates and numbers too.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez la langue de StarHash dans Réglages, et elle change aussitôt, dates et nombres compris."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hitamo ururimi rwa StarHash mu Igenamiterere, ruhinduka ako kanya, n'amatariki n'imibare."
+          }
+        }
+      }
+    },
+    "Two SIMs": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deux SIM"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SIM ebyiri"
+          }
+        }
+      }
+    },
+    "Pay from either SIM, and money moved between your own SIMs isn't counted as spent.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payez depuis l'une ou l'autre SIM, et l'argent déplacé entre vos propres SIM n'est pas compté comme dépensé."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ishyura ukoresheje SIM iyo ari yo yose, kandi amafaranga wimuye hagati ya SIM zawe ntabarwa nk'ayo wakoresheje."
+          }
+        }
+      }
+    },
+    "Widgets": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widgets"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widgets"
+          }
+        }
+      }
+    },
+    "Dial Buy's codes and open Pay from your Home Screen, and hold StarHash's icon for Scan to Pay, Balance, Buy and Transactions.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Composez les codes d'Acheter et ouvrez Payer depuis l'écran d'accueil, et maintenez l'icône de StarHash pour Scanner pour payer, Solde, Acheter et Transactions."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hamagara kode za Gura kandi ufungure Ishyura uhereye ku rupapuro rw'ibanze rwa iPhone, kandi ukande umwanya munini ku kimenyetso cya StarHash ubone Sikana wishyure, Reba asigaye, Gura n'Ibikorwa."
+          }
+        }
+      }
+    },
+    "Paste your wallet's message for a payment, and StarHash confirms it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collez le message de votre portefeuille pour un paiement, et StarHash le confirme."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shyiramo ubutumwa bwa konti yawe bw'ubwishyu, maze StarHash ibwemeze."
+          }
+        }
+      }
+    },
+    "A message that looks like MoMo's but comes from someone's own number is held back with a warning.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un message qui ressemble à ceux de MoMo mais vient du numéro d'un particulier est retenu, avec une alerte."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubutumwa busa n'ubwa MoMo ariko buturutse kuri nimero y'umuntu bufatirwa, hamwe n'umuburo."
+          }
+        }
+      }
+    },
+    "Export and import": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exporter et importer"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kohereza no kwinjiza amakuru"
+          }
+        }
+      }
+    },
+    "Everything StarHash keeps, as one file, in Settings under Your Data.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tout ce que StarHash garde, en un seul fichier, dans Réglages sous Vos données."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibyo StarHash ibika byose, mu dosiye imwe, mu Igenamiterere munsi ya Amakuru yawe."
+          }
+        }
+      }
+    },
+    "A new look": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un nouveau look"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Isura nshya"
+          }
+        }
+      }
+    },
+    "Black and white, with outlined cards, new drawings and a new launch animation.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En noir et blanc, avec des cartes à contour, de nouveaux dessins et une nouvelle animation au lancement."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umukara n'umweru, amakarita azengurutswe n'umurongo, ibishushanyo bishya, n'ishusho nshya igaragara iyo StarHash ifunguka."
+          }
+        }
+      }
+    },
+    "Scan a MoMo or StarHash code, and pay.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scannez un code MoMo ou StarHash, et payez."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sikana kode ya MoMo cyangwa ya StarHash, wishyure."
+          }
+        }
+      }
+    },
+    "Others scan it to pay you.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les autres le scannent pour vous payer."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abandi bayisikana ngo bakwishyure."
+          }
+        }
+      }
+    },
+    "See who a number is before you pay.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voyez à qui est un numéro avant de payer."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menya nyiri nimero mbere yo kwishyura."
+          }
+        }
+      }
+    },
+    "StarHash in your language.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash dans votre langue."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StarHash mu rurimi rwawe."
+          }
+        }
+      }
+    },
+    "Tap the scan button on Pay and point it at a MoMo QR code or a friend's StarHash code. Pay is ready to dial.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touchez le bouton de scan sur Payer et visez un code MoMo ou StarHash. Payer est prêt à composer."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kanda buto yo gusikana kuri Ishyura, uyerekeze kuri kode ya MoMo cyangwa ya StarHash. Ishyura iba yiteguye."
+          }
+        }
+      }
+    },
+    "Your name, number and photo in a code others scan to pay you. Tap the tree to see the code.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre nom, votre numéro et votre photo dans un code à scanner pour vous payer. Touchez l'arbre pour le voir."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izina ryawe, nimero yawe n'ifoto yawe muri kode abandi basikana ngo bakwishyure. Kanda ku giti urebe kode."
+          }
+        }
+      }
+    },
+    "Type a number that's on StarHash and see who it is, with their photo, before you pay.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saisissez un numéro présent sur StarHash et voyez qui c'est, avec sa photo, avant de payer."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andika nimero iri kuri StarHash urebe uwo ari we, n'ifoto ye, mbere yo kwishyura."
+          }
+        }
+      }
+    },
+    "Choose English, French or Kinyarwanda in Settings, and everything in StarHash changes at once.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez l'anglais, le français ou le kinyarwanda dans Réglages, et tout StarHash change aussitôt."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hitamo Icyongereza, Igifaransa cyangwa Ikinyarwanda mu Igenamiterere, maze StarHash yose ihinduke ako kanya."
           }
         }
       }

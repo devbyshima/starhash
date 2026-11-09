@@ -17,6 +17,7 @@ struct SplashView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.self) private var environment
     @State private var clock = SplashClock()
+    @State private var leaving = false
 
     var body: some View {
         let colour = Color.starhashMarkGlyph.color(in: environment)
@@ -26,10 +27,12 @@ struct SplashView: View {
                 SplashFrame(time: time, centre: CGPoint(x: size.width / 2, y: size.height / 2), colour: colour)
                     .draw(in: &context)
             }
+            .opacity(leaving ? 0 : 1)
+            .scaleEffect(leaving && !reduceMotion ? SplashMotion.exitScale : 1)
             // Hands over on the splash's own clock, so a slow first frame
             // never cuts the stroke short.
             .onChange(of: !reduceMotion && time >= SplashMotion.finish) { _, done in
-                if done { onFinish() }
+                if done { leave() }
             }
         }
         .background(Color.starhashBackground)
@@ -38,11 +41,23 @@ struct SplashView: View {
             guard reduceMotion else { return }
             Task {
                 try? await Task.sleep(for: .seconds(0.4))
-                onFinish()
+                leave()
             }
         }
         .accessibilityElement()
         .accessibilityLabel("StarHash")
+    }
+
+    /// The mark goes first, on the page alone, and only then does the page
+    /// fade into the app: fading the two together showed the mark half
+    /// there over Pay.
+    private func leave() {
+        guard !leaving else { return }
+        withAnimation(.easeIn(duration: SplashMotion.exit)) {
+            leaving = true
+        } completion: {
+            onFinish()
+        }
     }
 }
 
@@ -100,6 +115,10 @@ private enum SplashMotion {
     static let settle: Double = 0.21
     /// When the splash hands over to the app.
     static let finish: Double = 1.35
+    /// How long the mark takes to go, shrinking a little as it fades,
+    /// before the page fades into the app.
+    static let exit: Double = 0.16
+    static let exitScale: CGFloat = 0.9
     /// A time long after everything has settled, for Reduce Motion.
     static let still: Double = 60
 }

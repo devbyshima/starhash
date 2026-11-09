@@ -8,7 +8,8 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Added
 
-- A Third-Party Trademark Notice at the foot of Settings, and in Licences: whose names and logos StarHash shows (MTN, MoMo, Airtel, Apple's and others), only to say which wallet or service something is for, and that StarHash is not tied to any of them.
+- Show my name: typing a number to pay that belongs to someone on StarHash shows their name in place of the carrier, and their photo (or initials) in place of the phone. Your own name and numbers are shown the same way unless you turn it off in Settings, under Your SIMs; StarHash's server keeps each number only as a keyed hash. People already set up are told once, and the privacy policy says so.
+- A Third-Party Trademark Notice in Licences: whose names and logos StarHash shows (MTN, MoMo, Airtel, Apple's and others), only to say which wallet or service something is for, and that StarHash is not tied to any of them.
 - A long press on a transaction, as iOS's own lists do: a confirmed one lifts a preview of its details over the dimmed list, and a tap on the preview opens them; one still pending or failed lifts itself, with Verify, Mark as Failed, Pay Again and Delete in groups under it. A transaction turns grey from edge to edge while it is pressed.
 - Licences, in About StarHash: StarHash's own PolyForm Noncommercial licence, then everything it is built with as a list, each by its name, version and licence, opening a page of its own with its source and the licence's full text (today Space Grotesk, under the SIL Open Font License), and a note on the carriers' trademarks.
 - Your photo with your QR code: people who scan it see your photo beside your number (a photo saved in their Contacts comes first). It is kept on StarHash's new small server under a random id, never with your number, and removing your photo deletes it there. StarHash also counts how many people use it, by a random id once a day; the privacy policy says so.
@@ -31,6 +32,12 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Changed
 
+- Dark mode's page is a deeper near black, #101010, on every screen, sheet, widget and drawing, and the launch screen.
+- What's New's videos show StarHash in the appearance you use, dark in dark mode and light in light mode, and auto-verify's setup shows Shortcuts as light or dark as the app, with StarHash's own icon on the shortcut.
+- Buttons, the report's bars and onboarding's symbols are lit the same way in light and dark mode, lighter at the top and deeper at the foot, so the near black and the near white read as one kind of thing.
+- Auto-verify's setup shows Shortcuts larger, filling the room between the progress bar and the buttons, its corners on the screenshot's own curve so nothing is cut off, and its steps in an outlined card as Settings' are.
+- Pay's place in the tab bar is the StarHash mark, and Transactions' is a receipt, in place of the hash and the clock, on Quick Pay's widget, the icon's quick actions, onboarding and What's New too. The bar's icons are drawn to look one size, and are outlined but for the page showing, whose icon is filled, the mark among them.
+- Every word on the widgets is one size, the Pay pill's as the tiles'; a long code name is cut short rather than shrunk.
 - A transaction's status is its word alone, with no dot before it, and every status takes one of three colours: green confirmed, yellow pending, red failed. Confirmed is green on a transaction's page, a failed payment's badge in the list is filled red as a pending one's is yellow, auto-verify's ticks are green once it works, and Settings shows auto-verify waiting for its first message in amber and not hearing for a week in red.
 - Every icon is now from Keyline Icons, filled where StarHash showed a filled icon and in lines where it showed an outline; Licences lists Keyline Icons under the MIT License.
 - StarHash drops its green: buttons, the mark, the splash, switches, charts and the empty-state drawings are near black in light mode and near white in dark. The drawings lose their trailing cords and "look here" strokes, and Shima's note is a black note over the light app (a white one over the dark), only as tall as its letter, with more room between its parts.
@@ -71,6 +78,8 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Fixed
 
+- Shima's note at the end of onboarding slides up over Pay, as a sheet does, rather than appearing all at once.
+- The launch animation's mark is gone before the app shows, rather than fading out over Pay.
 - A sheet's close, confirm and Edit buttons show in light mode, as grey glass instead of white glass lost on the white sheet. A long press on one of Buy's codes opens its menu under it from the left edge, as a transaction's does, instead of centred over it.
 - Your own accounts follow your numbers: changing either SIM's number or your name, going back to one SIM, or importing a backup files the payments between your SIMs afresh, and a payment that is no longer between them leaves Your own accounts. A category you picked yourself stays as you picked it. The other SIM's number is kept only once it is whole, and with one SIM, a number on the other carrier than your wallet says how to fix it: change your wallet, or set Two SIMs.
 - Tapping a StarHash notification opens the app again, on what it is about.

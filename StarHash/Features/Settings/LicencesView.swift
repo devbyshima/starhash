@@ -193,12 +193,11 @@ private struct LicencesHeader: View {
     }
 }
 
-/// A card's words in a row of their own: the list's opening, the
-/// trademarks.
 /// Whose names and logos StarHash shows, and that showing them claims no
-/// tie to their owners, as GO Club's Settings set it out: on Settings and
-/// in Licences.
-struct TrademarkNotice: View {
+/// tie to their owners, as GO Club's Settings set it out. It belongs with
+/// the licences, the other things StarHash owes to others, so it lives
+/// here and not on Settings' own page.
+private struct TrademarkNotice: View {
     var body: some View {
         SettingsCard("Third-Party Trademark Notice") {
             VStack(alignment: .leading, spacing: 14) {
@@ -218,6 +217,7 @@ struct TrademarkNotice: View {
     }
 }
 
+/// A card's words in a row of their own: the list's opening.
 private struct LicenceParagraph: View {
     let text: Text
 

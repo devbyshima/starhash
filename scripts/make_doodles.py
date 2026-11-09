@@ -16,7 +16,7 @@
 #   page's own colour so they cover what they hold, in a grey sleeve.
 #   Nothing else: no strokes round the drawing, no trailing cord.
 # - Dark mode turns it over: the subject and its lines in the near white
-#   #FAFBFA, the details on it in the page's #171717, the dark fills the
+#   #FAFBFA, the details on it in the page's #101010, the dark fills the
 #   same grey, which still stands off the near black.
 #
 # Every point is placed here, so each canvas is trimmed to the drawing,
@@ -37,7 +37,7 @@ ASSETS = os.path.join(ROOT, "StarHash", "Resources", "Assets.xcassets")
 # shadows, the dark half of a thing. line: lines straight on the page.
 # ink: lines drawn on the subject. chalk: lines drawn on a dark fill.
 LIGHT = dict(page="#FFFFFF", fill="#171717", dark="#707070", line="#171717", ink="#FFFFFF", chalk="#FFFFFF")
-DARK = dict(page="#171717", fill="#FAFBFA", dark="#707070", line="#FAFBFA", ink="#171717", chalk="#FAFBFA")
+DARK = dict(page="#101010", fill="#FAFBFA", dark="#707070", line="#FAFBFA", ink="#101010", chalk="#FAFBFA")
 
 PEN = 4.6
 MARGIN = 6

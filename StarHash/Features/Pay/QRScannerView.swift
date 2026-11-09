@@ -48,8 +48,13 @@ struct QRScannerView: View {
             case .notDetermined:
                 EmptyView()
             }
+            #if DEBUG
+            if let text = DebugLaunch.value(after: "-scanCode") {
+                ScanCodeStandIn(text: text)
+            }
+            #endif
             viewfinder
-                .opacity(camera.access == .authorized && camera.isAvailable ? 1 : 0)
+                .opacity(showsViewfinder ? 1 : 0)
         }
         .overlay(alignment: .top) { header }
         .overlay(alignment: .bottom) { footer }
@@ -82,6 +87,13 @@ struct QRScannerView: View {
     }
 
     // MARK: Pieces
+
+    private var showsViewfinder: Bool {
+        #if DEBUG
+        if DebugLaunch.value(after: "-scanCode") != nil { return true }
+        #endif
+        return camera.access == .authorized && camera.isAvailable
+    }
 
     private var header: some View {
         HStack {
@@ -377,3 +389,38 @@ private struct QRCameraPreview: UIViewRepresentable {
         var previewLayer: AVCaptureVideoPreviewLayer { layer as! AVCaptureVideoPreviewLayer }
     }
 }
+
+#if DEBUG
+/// `-scanCode` (DEBUG): the code being read, held up in the square where
+/// the camera's picture would be, a little turned, on a dim backdrop, so
+/// a recording of the scan in the Simulator, which has no camera, shows
+/// one (What's New's video).
+private struct ScanCodeStandIn: View {
+    let text: String
+
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack {
+                LinearGradient(
+                    colors: [Color(white: 0.24), Color(white: 0.1)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                if let image = QRCodeImage.image(for: text, side: 720) {
+                    Image(uiImage: image)
+                        .interpolation(.none)
+                        .resizable()
+                        .frame(width: 236, height: 236)
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .shadow(color: .black.opacity(0.5), radius: 18, y: 10)
+                        .rotationEffect(.degrees(-5))
+                        // The viewfinder's middle: 40 points above the screen's.
+                        .position(x: proxy.size.width / 2, y: proxy.size.height / 2 - 40)
+                }
+            }
+        }
+        .ignoresSafeArea()
+        .accessibilityHidden(true)
+    }
+}
+#endif

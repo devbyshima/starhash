@@ -39,6 +39,12 @@ private struct PrimaryButtonBody: View {
         return onPay ? .payButtonLabel : Color.starhashOnInk.color(in: environment)
     }
 
+    /// The accent lit from above, the same in either appearance; flat when
+    /// disabled. (Pay's fill is the accent too.)
+    private var surface: AnyShapeStyle {
+        isEnabled ? AnyShapeStyle(.starhashAccentLit) : AnyShapeStyle(fill)
+    }
+
     var body: some View {
         configuration.label
             .starhashFont(18, weight: .semibold, relativeTo: .body)
@@ -50,7 +56,7 @@ private struct PrimaryButtonBody: View {
             // The design height, growing only when a large text size makes
             // the label wrap, so the label is never cut off.
             .frame(minHeight: height)
-            .background(fill.gradient, in: Capsule())
+            .background(surface, in: Capsule())
             // The glow is the button's own colour, so it lifts off the page
             // in either appearance; a disabled button gets none.
             .shadow(color: glows && isEnabled ? fill.opacity(0.35) : .clear, radius: 7, y: 3)

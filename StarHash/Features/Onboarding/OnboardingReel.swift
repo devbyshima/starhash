@@ -74,7 +74,7 @@ struct OnboardingReel: View {
         let size = OnboardingMetrics.iconSize
         let image = Image(symbol: symbol)
             .font(.system(size: size - 20))
-            .foregroundStyle(tint.gradient)
+            .foregroundStyle(.starhashAccentLit)
             // One phase's symbol becomes the next instead of cutting to it.
             .contentTransition(.symbolEffect(.replace.downUp))
             .frame(width: size, height: size)
