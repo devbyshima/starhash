@@ -7,7 +7,7 @@
 <!-- Pick one; CONTRIBUTING.md has the branch rules. -->
 
 - [ ] `main`: a feature, or a fix for something not yet released
-- [ ] `release/X.Y`: a fix for a version in beta or on the App Store (no new features)
+- [ ] `release/X.Y`: a fix for a version on TestFlight or the App Store (no new features)
 
 ## Checklist
 

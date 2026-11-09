@@ -105,7 +105,7 @@ The full picture is in [Privacy](docs/privacy.md), and the app carries its own P
 | [Privacy](docs/privacy.md) | Permissions, what is stored where, and what never leaves the phone |
 | [Development](docs/development.md) | Requirements, scripts, tests, debug launch arguments and the project layout |
 | [Contributing](CONTRIBUTING.md) | Branch rules, commits, pull requests and feature flags |
-| [Releasing](RELEASING.md) | Release branches, betas, the App Store and hotfixes, step by step |
+| [Releasing](RELEASING.md) | Release branches, TestFlight, the App Store and hotfixes, step by step |
 | [Changelog](CHANGELOG.md) | What each version changed |
 
 Have an idea? [Request a feature](https://github.com/devbyshima/starhash/issues/new?template=feature_request.yml).

@@ -2,8 +2,8 @@ import StarHashKit
 import SwiftUI
 
 /// StarHash itself, one row away from Settings: What's New, the onboarding
-/// again, the developer's note and the source code, and in dev and beta
-/// builds the feature flags.
+/// again, the developer's note and the source code, and in the dev build
+/// the feature flags.
 struct AboutStarHashView: View {
     @AppStorage(PreferenceKey.hasOnboarded) private var hasOnboarded = true
     @State private var showsDeveloperNote = SettingsLaunch.opensDeveloperNote

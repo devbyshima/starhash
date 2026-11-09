@@ -1,10 +1,11 @@
 import StarHashKit
 import SwiftUI
 
-/// Feature Flags, under About StarHash in dev and beta builds only: this
-/// build's channel, then a switch for each flag, which starts where its
-/// rollout puts it in this channel. The App Store build never shows the
-/// page and ignores the switches (`ReleaseChannel.allowsOverrides`).
+/// Feature Flags, under About StarHash in the dev build only: this build's
+/// channel, then a switch for each flag, which starts where its rollout
+/// puts it in this channel. The release build (TestFlight's and the App
+/// Store's) never shows the page and ignores the switches
+/// (`ReleaseChannel.allowsOverrides`).
 struct FeatureFlagsView: View {
     /// The switches as this page last saw them; each change writes through
     /// to UserDefaults, which `@FeatureFlagged` follows.

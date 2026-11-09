@@ -9,11 +9,10 @@ options:
   # widgets and StarHashKit), chosen in StarHash's own Settings.
   knownRegions: [en, fr, rw, Base]
 
-# One configuration per release channel (RELEASING.md). Beta is Release
-# with its own channel, archived from a release branch for TestFlight.
+# Two builds (RELEASING.md): Debug, the dev build run from Xcode, and
+# Release, the build that goes to TestFlight and the App Store.
 configs:
   Debug: debug
-  Beta: release
   Release: release
 
 packages:
@@ -48,13 +47,12 @@ settings:
   configs:
     Debug:
       STARHASH_CHANNEL: dev
-    Beta:
-      STARHASH_CHANNEL: beta
     Release:
       STARHASH_CHANNEL: production
 
 schemes:
-  # Dev runs and the App Store archive (production channel).
+  # Dev runs (Debug), and the archive for TestFlight and the App Store
+  # (Release).
   StarHash:
     build:
       targets:
@@ -69,21 +67,6 @@ schemes:
       config: Debug
     archive:
       config: Release
-  # TestFlight betas from a release branch (beta channel).
-  StarHash Beta:
-    build:
-      targets:
-        StarHash: all
-    run:
-      config: Beta
-    test:
-      config: Beta
-    profile:
-      config: Beta
-    analyze:
-      config: Beta
-    archive:
-      config: Beta
 
 targets:
   StarHash:

@@ -2,7 +2,7 @@
 
 Every change people using StarHash would notice, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html), as [RELEASING.md](RELEASING.md) applies them to the app.
 
-A version's section starts as `Unreleased` when its release branch is cut and gets its date when it ships to the App Store. Betas and release candidates (`v1.0.0-beta.1`, `v1.0.0-rc.1`) have no sections of their own: what they bring is in their version's.
+A version's section starts as `Unreleased` when its release branch is cut and gets its date when it ships to the App Store. Release candidates (`v1.0.0-rc.1`), the builds on TestFlight, have no sections of their own: what they bring is in their version's.
 
 ## [Unreleased]
 

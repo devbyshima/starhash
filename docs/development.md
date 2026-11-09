@@ -41,7 +41,7 @@ DERIVED=.build/mine ./scripts/build.sh  # use a build folder of your own
 swift -suppress-warnings scripts/make_whats_new_video.swift rec.mov WhatsNewName   # a What's New video
 ```
 
-`build.sh` prints only errors, warnings from StarHash's own sources and the result. Set `DEST` to build for another destination, for example `DEST="generic/platform=iOS"` for a device, and `SCHEME="StarHash Beta" CONFIG=Beta` for the beta channel's build. Anything after it goes to `xcodebuild`.
+`build.sh` prints only errors, warnings from StarHash's own sources and the result. Set `DEST` to build for another destination, for example `DEST="generic/platform=iOS"` for a device, and `CONFIG=Release` for the release build. Anything after it goes to `xcodebuild`.
 
 Builds and screenshots each take a lock in `.build/`, so runs started side by side wait their turn.
 
@@ -85,7 +85,7 @@ Debug builds read these, in Xcode's scheme or after the screenshot script's name
 | `-settingsPage <page>` | Open a Settings page: `profile`, `whatsNew`, `terms`, `privacy`, `about`, `guide` and more |
 | `-AppleLanguages "(rw)"` | Run in Kinyarwanda |
 | `-locked`, `-splash`, `-note`, `-reviewNote` | The lock screen, the launch splash, the developer's note or the rating note |
-| `-featureFlag.<key> YES\|NO` | Switch a feature flag on or off for the run (dev and beta channels) |
+| `-featureFlag.<key> YES\|NO` | Switch a feature flag on or off for the run (the dev build) |
 | `-whatsNew`, `-whatsNewPage <n>` | The What's New sheet over the app (the newest release's, or a sample), on page n. `starhash://whatsnew?page=<n>` opens it in a Debug build that is already running |
 
 Each screen reads its own arguments where it uses them, so to find one not listed here (such as `-buyArrange`, `-payChooser` or `-confirmDelete`), search the sources for its name. The shared ones are in `StarHash/App/DebugLaunch.swift` and the keypad's in `StarHash/Features/Pay/PayDebug.swift`.
@@ -123,9 +123,9 @@ Anything that can be tested without the UI belongs in StarHashKit.
 
 Branches, channels, versions, tags and every release step are in [RELEASING.md](../RELEASING.md), and the branch rules for pull requests in [CONTRIBUTING.md](../CONTRIBUTING.md). In short:
 
-- **Channels**: `main` is dev (the **StarHash** scheme, Debug), the newest `release/X.Y` is beta (**StarHash Beta**, the Beta configuration, for TestFlight), and the App Store build is production (**StarHash**, Release). The configuration sets `STARHASH_CHANNEL`, which Info.plist passes to the app.
+- **Builds**: two, both from the **StarHash** scheme: the dev build (Debug, the dev channel) from `main` or any branch, and the release build (Release, the production channel) from `release/X.Y`, which goes to TestFlight and then the App Store. The configuration sets `STARHASH_CHANNEL`, which Info.plist passes to the app.
 - **Version**: `MARKETING_VERSION` in `project.yml`, set with `./scripts/bump_version.sh`.
-- **Build number**: `CURRENT_PROJECT_VERSION` counts App Store uploads of one version: 1 for its first, and one more before archiving each one after it (`./scripts/bump_version.sh build`). App Store Connect refuses a number it already has for the same version. Settings shows it after the version, as in `1.0.0 (1)`, with the channel after it in dev and beta builds.
+- **Build number**: `CURRENT_PROJECT_VERSION` counts App Store uploads of one version: 1 for its first, and one more before archiving each one after it (`./scripts/bump_version.sh build`). App Store Connect refuses a number it already has for the same version. Settings shows it after the version, as in `1.0.0 (1)`, with "Dev" after it in the dev build.
 - **What's New**: add a release at the top of `ReleaseHistory.releases` in StarHashKit before the release candidate. **Changelog**: [CHANGELOG.md](../CHANGELOG.md).
 - **Feature flags**: unfinished work merges on `main` behind a flag in `StarHash/App/FeatureFlags.swift`. See [Feature flags](../RELEASING.md#feature-flags).
 - **App Store id**: once the App Store record exists, set `DeveloperNoteLinks.appStoreID` so Rate on the App Store opens the review page.
