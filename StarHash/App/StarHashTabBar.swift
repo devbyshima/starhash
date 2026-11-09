@@ -100,14 +100,19 @@ struct StarHashTabBar: View {
     ///
     /// The page showing is filled, the rest in outline. An icon's two forms
     /// are both drawn and one shown, so the swap rides the colour's own fade
-    /// rather than setting off the symbols' replace effect. The mark is one
-    /// shape that fills from its heart outward (`TabMarkShape`).
+    /// rather than setting off the symbols' replace effect; the mark's two
+    /// forms do the same, with nothing of their own on top.
     @ViewBuilder
     private func glyph(_ symbol: String, isSelected: Bool) -> some View {
         if symbol == AppTab.pay.symbol {
-            TabMarkShape(fill: isSelected ? 1 : 0)
-                .frame(width: TabBarMetrics.markSize, height: TabBarMetrics.markSize)
-                .transition(.blurReplace)
+            ZStack {
+                TabMarkShape()
+                    .opacity(isSelected ? 0 : 1)
+                StarHashMarkShape()
+                    .opacity(isSelected ? 1 : 0)
+            }
+            .frame(width: TabBarMetrics.markSize, height: TabBarMetrics.markSize)
+            .transition(.blurReplace)
         } else {
             ZStack {
                 iconImage(symbol, outline: true)
@@ -336,23 +341,12 @@ struct PayBuySwitcher: View {
     }
 }
 
-/// Pay's mark in the tab bar: outlined while another page shows, filled on
-/// Pay, and one shape between the two, so it never shows two marks at
-/// once. The outline is a line inside the star's own edge, so outlined and
-/// filled share one silhouette, round where the star turns inward; the
-/// triangle stays solid, as an outline would close it to a speck. Filling,
-/// a disc opens at the star's heart and spreads out to the tips, as the
-/// splash opens a dot there before the arms come; emptying runs it back.
-/// Filled all the way, it is exactly `StarHashMarkShape`.
+/// Pay's mark in the tab bar while another page shows: a line inside the
+/// star's own edge, so it and the filled mark (`StarHashMarkShape`, on Pay)
+/// share one silhouette, round where the star turns inward; the triangle
+/// stays solid, as an outline would close it to a speck. The two are
+/// stacked and one shown, as every icon's two forms are.
 struct TabMarkShape: Shape {
-    /// 0 the outline, 1 filled.
-    var fill: CGFloat
-
-    var animatableData: CGFloat {
-        get { fill }
-        set { fill = newValue }
-    }
-
     func path(in rect: CGRect) -> Path {
         let scale = min(rect.width, rect.height) / StarHashMarkShape.side
         let origin = CGPoint(x: rect.midX - StarHashMarkShape.side / 2 * scale, y: rect.midY - StarHashMarkShape.side / 2 * scale)
@@ -366,31 +360,11 @@ struct TabMarkShape: Shape {
         triangle.addLines(StarHashMarkShape.triangle.map(point))
         triangle.closeSubpath()
 
-        let starPart: Path
-        if fill >= 1 {
-            starPart = star
-        } else {
-            // Twice the line, half of it outside the edge and cut away.
-            let outline = star
-                .strokedPath(StrokeStyle(lineWidth: 2 * TabBarMetrics.markLine, lineJoin: .round))
-                .intersection(star)
-            let heart = point(Self.heart)
-            let radius = Self.reach * scale * max(fill, 0)
-            let disc = Path(ellipseIn: CGRect(x: heart.x - radius, y: heart.y - radius, width: radius * 2, height: radius * 2))
-            starPart = fill > 0 ? outline.union(star.intersection(disc)) : outline
-        }
-        var mark = starPart
+        // Twice the line, half of it outside the edge and cut away.
+        var mark = star
+            .strokedPath(StrokeStyle(lineWidth: 2 * TabBarMetrics.markLine, lineJoin: .round))
+            .intersection(star)
         mark.addPath(triangle)
         return mark
     }
-
-    /// Where the star's five arms meet, in the artwork's units (the
-    /// splash's heart).
-    private static let heart = CGPoint(x: 404, y: 384)
-
-    /// From the heart to the farthest corner, so the disc covers the star
-    /// as it reaches 1.
-    private static let reach: CGFloat = StarHashMarkShape.star
-        .map { hypot($0.x - heart.x, $0.y - heart.y) }
-        .max() ?? StarHashMarkShape.side
 }
