@@ -34,6 +34,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 - Dark mode's page is a deeper near black, #101010, on every screen, sheet, widget and drawing, and the launch screen.
 - What's New's videos show StarHash in the appearance you use, dark in dark mode and light in light mode, and auto-verify's setup shows Shortcuts as light or dark as the app, with StarHash's own icon on the shortcut.
+- Buttons, the report's bars and onboarding's symbols are lit the same way in light and dark mode, lighter at the top and deeper at the foot, so the near black and the near white read as one kind of thing.
 - Auto-verify's setup shows Shortcuts larger, filling the room between the progress bar and the buttons, its corners on the screenshot's own curve so nothing is cut off, and its steps in an outlined card as Settings' are.
 - Pay's place in the tab bar is the StarHash mark, and Transactions' is a receipt, in place of the hash and the clock, on Quick Pay's widget, the icon's quick actions, onboarding and What's New too. The bar's icons are drawn to look one size, and are outlined but for the page showing, whose icon is filled; the mark fills from its heart outward.
 - Every word on the widgets is one size, the Pay pill's as the tiles'; a long code name is cut short rather than shrunk.

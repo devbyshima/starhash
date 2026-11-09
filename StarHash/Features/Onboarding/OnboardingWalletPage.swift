@@ -39,7 +39,7 @@ struct OnboardingWalletPage: View {
                     } else {
                         Image(symbol: "simcard.fill")
                             .font(.system(size: 72, weight: .medium))
-                            .foregroundStyle(tint.gradient)
+                            .foregroundStyle(.starhashAccentLit)
                     }
                 }
                 .id(choice)

@@ -199,6 +199,20 @@ extension Color {
     /// The StarHash mark's star, drawn bare: the accent.
     static let starhashMarkGlyph = SurfaceColor(light: .brandInk, dark: .brandPaper)
 
+    /// The accent as a surface you press or read as a block (buttons, the
+    /// chart's bars, onboarding's symbols), lit from above the same way in
+    /// either appearance: lighter at the top and deeper at the foot, by the
+    /// same step in lightness on the near black (#333333 to #0A0A0A) and the
+    /// near white, which can go no lighter (#FFFFFF to #D4D4D4). The words on
+    /// it keep 12:1 or more from top to foot. Drawn with `AccentLitStyle`.
+    static let accentLitTop = SurfaceColor(
+        light: Color(red: 51 / 255, green: 51 / 255, blue: 51 / 255),
+        dark: .white
+    )
+    static let accentLitFoot = SurfaceColor(
+        light: Color(red: 10 / 255, green: 10 / 255, blue: 10 / 255),
+        dark: Color(red: 212 / 255, green: 212 / 255, blue: 212 / 255)
+    )
 
     /// Letters a search matched: the text colour on a wash of it, so the
     /// match reads apart from the rest of the name.
@@ -350,6 +364,32 @@ struct SurfaceColor: ShapeStyle, Hashable {
     /// The colour on the page, for UIKit pieces drawn over it (navigation
     /// bar titles).
     var onPage: Color { Color(light: page, dark: dark) }
+}
+
+/// The accent lit from above (`accentLitTop` to `accentLitFoot`), for the
+/// appearance it is drawn in: every primary, sheet and capsule button, the
+/// chart's bars and onboarding's symbols wear it, so they read as one kind
+/// of thing in light and dark alike. Disabled buttons stay flat.
+struct AccentLitStyle: ShapeStyle {
+    func resolve(in environment: EnvironmentValues) -> LinearGradient {
+        LinearGradient.starhashAccentLit(in: environment)
+    }
+}
+
+extension ShapeStyle where Self == AccentLitStyle {
+    static var starhashAccentLit: AccentLitStyle { AccentLitStyle() }
+}
+
+extension LinearGradient {
+    /// `AccentLitStyle` resolved, where a gradient itself is needed (the
+    /// chart's bars).
+    static func starhashAccentLit(in environment: EnvironmentValues) -> LinearGradient {
+        LinearGradient(
+            colors: [Color.accentLitTop.color(in: environment), Color.accentLitFoot.color(in: environment)],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    }
 }
 
 extension SurfaceColor {

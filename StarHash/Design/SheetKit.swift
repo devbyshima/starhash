@@ -312,6 +312,14 @@ private struct SheetButtonBody: View {
         }
     }
 
+    /// The accent's fills (Filled, the accent, Verify) are lit as every
+    /// primary button is; the red keeps its own gradient, and a disabled
+    /// button is flat.
+    private func surface(_ colors: (fill: Color, label: Color)) -> AnyShapeStyle {
+        guard isEnabled else { return AnyShapeStyle(Color.sheetChip) }
+        return fill == .destructive ? AnyShapeStyle(colors.fill.gradient) : AnyShapeStyle(.starhashAccentLit)
+    }
+
     var body: some View {
         let colors = colors
         configuration.label
@@ -321,7 +329,7 @@ private struct SheetButtonBody: View {
             .padding(.horizontal, fillsWidth ? 16 : 32)
             .frame(maxWidth: fillsWidth ? .infinity : nil)
             .frame(minHeight: 50)
-            .background((isEnabled ? colors.fill : Color.sheetChip).gradient, in: Capsule())
+            .background(surface(colors), in: Capsule())
             .contentShape(Capsule())
             .opacity(configuration.isPressed ? 0.9 : 1)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)

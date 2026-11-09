@@ -112,7 +112,7 @@ struct StarHashCapsuleButtonStyle: ButtonStyle {
             .frame(minHeight: height)
             // A capsule at the design height; a rounded card, not a clipped
             // pill, when a large text size wraps the label.
-            .background(RoundedRectangle(cornerRadius: height / 2, style: .continuous).fill(Color.starhashInk))
+            .background(RoundedRectangle(cornerRadius: height / 2, style: .continuous).fill(.starhashAccentLit))
             .frame(minHeight: 44)
             .contentShape(Rectangle())
             .scaleEffect(configuration.isPressed ? 0.95 : 1)

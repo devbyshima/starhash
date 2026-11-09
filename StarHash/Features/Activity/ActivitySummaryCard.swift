@@ -114,10 +114,11 @@ struct ActivitySpendingChart: View {
                     y: .value("Sent", Double(bucket.total) / top),
                     width: .ratio(Self.barWidthRatio)
                 )
-                // The primary button's gradient, with no glow: inside
-                // the card a glow spilled past each bar's edges. The
-                // pressed bar keeps full strength; the rest step back.
-                .foregroundStyle(Color.starhashInk.color(in: environment).gradient.opacity(isProminent(bucket) ? 1 : 0.4))
+                // The primary button's light (`AccentLitStyle`), with no
+                // glow: inside the card a glow spilled past each bar's
+                // edges. The pressed bar keeps full strength; the rest
+                // step back.
+                .foregroundStyle(LinearGradient.starhashAccentLit(in: environment).opacity(isProminent(bucket) ? 1 : 0.4))
                 .clipShape(UnevenRoundedRectangle(topLeadingRadius: barRadius, topTrailingRadius: barRadius, style: .continuous))
                 .accessibilityLabel(ActivitySummary.spokenName(of: bucket, period: period, calendar: calendar, locale: .starhash))
                 .accessibilityValue(Money.formatWithCurrency(bucket.total))
