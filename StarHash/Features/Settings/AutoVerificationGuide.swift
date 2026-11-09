@@ -165,10 +165,12 @@ struct AutoVerificationGuide: View {
 
     // MARK: Content
 
-    /// What Shortcuts shows at this step, from a real iPhone: the whole
-    /// Add Shortcut screen in a phone frame, its button ringed; then the
-    /// Automation tab with the automation made, and a check on it once a
-    /// message has come through.
+    /// What Shortcuts shows at this step, from a real iPhone, in the
+    /// appearance the app is in (the asset catalog holds a light and a dark
+    /// picture, StarHash's own icon on both): the whole Add Shortcut screen
+    /// in a phone frame, its button ringed; then the Automation tab with
+    /// the automation made, and a check on it once a message has come
+    /// through.
     @ViewBuilder
     private func screenshot(height: CGFloat) -> some View {
         if step == 0 {
@@ -511,9 +513,9 @@ private struct GuidePhoneScreenshot: View {
 }
 
 /// Step 2's picture, in the same phone as step 1's and the same size, so
-/// both steps lay out alike: Shortcuts' dark Automation tab with the real
-/// screenshot of the StarHash SMS automation on it, its switch ringed, and a
-/// check once the shortcut is verified.
+/// both steps lay out alike: Shortcuts' Automation tab, light or dark as the
+/// app is, with the real screenshot of the StarHash SMS automation on it,
+/// its switch ringed, and a check once the shortcut is verified.
 private struct GuideAutomationPhone: View {
     let imageName: String
     let label: String
@@ -521,15 +523,33 @@ private struct GuideAutomationPhone: View {
     var isVerified = false
     let height: CGFloat
 
+    @Environment(\.colorScheme) private var colorScheme
+
+    /// Shortcuts' own colours, not StarHash's: the tab's grouped background,
+    /// its title and the cards of the automations under this one.
+    private var tabBackground: Color {
+        colorScheme == .dark ? Color(white: 0.07) : Color(red: 242 / 255, green: 242 / 255, blue: 247 / 255)
+    }
+
+    private var tabTitle: Color {
+        colorScheme == .dark ? Color.white.opacity(0.85) : Color.black.opacity(0.85)
+    }
+
+    private func otherAutomation(_ index: Int) -> Color {
+        colorScheme == .dark
+            ? Color.white.opacity(0.07 - Double(index) * 0.02)
+            : Color.white.opacity(0.9 - Double(index) * 0.3)
+    }
+
     var body: some View {
         let phone = GuidePhone(height: height)
         let screenSize = phone.screen
         ZStack(alignment: .top) {
-            Color(white: 0.07)
+            tabBackground
             VStack(alignment: .leading, spacing: screenSize.height * 0.03) {
                 // Shortcuts' large title, drawn as the screenshots are.
                 RoundedRectangle(cornerRadius: 2)
-                    .fill(Color.white.opacity(0.85))
+                    .fill(tabTitle)
                     .frame(width: screenSize.width * 0.5, height: screenSize.height * 0.028)
                     .padding(.top, screenSize.height * 0.11)
                 Image(imageName)
@@ -545,7 +565,7 @@ private struct GuideAutomationPhone: View {
                                 .font(.system(size: 22, weight: .semibold))
                                 .foregroundStyle(Color.starhashConfirmed)
                                 .background(Circle().fill(Color.starhashOnConfirmed).padding(5))
-                                .background(Circle().fill(Color(white: 0.07)).padding(2.5))
+                                .background(Circle().fill(tabBackground).padding(2.5))
                                 .offset(x: 6, y: -8)
                                 .transition(.scale.combined(with: .opacity))
                         }
@@ -553,7 +573,7 @@ private struct GuideAutomationPhone: View {
                 // The automations under it, faded: the tab is a list.
                 ForEach(0..<3, id: \.self) { index in
                     RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(Color.white.opacity(0.07 - Double(index) * 0.02))
+                        .fill(otherAutomation(index))
                         .frame(height: screenSize.height * 0.1)
                 }
             }
@@ -569,9 +589,10 @@ private struct GuideAutomationPhone: View {
     }
 }
 
-/// A soft white ring around the part of a screenshot to look at, breathing
-/// gently (still when Reduce Motion is on). The screenshots are always the
-/// dark Shortcuts, so the ring is white in both appearances.
+/// A soft ring around the part of a screenshot to look at, breathing
+/// gently (still when Reduce Motion is on): white on dark mode's Shortcuts,
+/// the near black on light mode's, with a fainter glow there, since a dark
+/// glow on white reads as a shadow.
 private struct GuideHighlight: View {
     /// A share of the screenshot, 0...1 on both axes.
     let rect: CGRect
@@ -579,7 +600,10 @@ private struct GuideHighlight: View {
     let cornerFraction: CGFloat
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
     @State private var breathes = false
+
+    private var ring: Color { colorScheme == .dark ? .brandPaper : .brandInk }
 
     var body: some View {
         GeometryReader { proxy in
@@ -588,8 +612,8 @@ private struct GuideHighlight: View {
             // Snug round the control, so it stays inside the screen's
             // rounded corners, breathing included.
             RoundedRectangle(cornerRadius: (h + 6) * cornerFraction, style: .continuous)
-                .strokeBorder(Color.white, lineWidth: 2.5)
-                .shadow(color: .white.opacity(0.7), radius: 6)
+                .strokeBorder(ring, lineWidth: 2.5)
+                .shadow(color: ring.opacity(colorScheme == .dark ? 0.7 : 0.35), radius: 6)
                 .frame(width: w + 6, height: h + 6)
                 .scaleEffect(breathes ? 1.04 : 1)
                 .opacity(breathes ? 0.75 : 1)

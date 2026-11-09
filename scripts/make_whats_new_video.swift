@@ -6,11 +6,13 @@
 //
 // The result is StarHash/Resources/WhatsNew/<Name>.mp4 (or --out), 1080 by 1080,
 // H.264 with no sound track, which a release's `Release.Page(video:)` names
-// as "<Name>". Each video is made twice: on white as <Name> for dark mode's
-// white card, and on black as <Name>OnBlack for light mode's black card,
-// from the same recording and trim. Record the simulator with
+// as "<Name>". Each video is made twice, so the phone in it shows StarHash
+// in the appearance the person is in: recorded in dark mode and framed on
+// white as <Name> for dark mode's white card, and recorded in light mode
+// and framed on black as <Name>OnBlack for light mode's black card, both
+// trimmed to the same moments. Record the simulator with
 // `xcrun simctl io booted recordVideo --codec h264 feature.mov`, at 1x
-// speed, in light mode, then trim with --start and --end. A screenshot
+// speed, once in each appearance, then trim with --start and --end. A screenshot
 // becomes a still --seconds long. Run `xcodegen generate` after adding a
 // new video so the app bundles it.
 //
@@ -45,7 +47,8 @@ guard positional.count == 2 else {
 }
 func seconds(_ key: String) -> Double? { options[key].flatMap(Double.init) }
 /// `--backdrop black`: the phone on black, for the black card light mode
-/// shows (`<Name>OnBlack`); white otherwise, for dark mode's white card.
+/// shows (`<Name>OnBlack`, a light mode recording); white otherwise, for
+/// dark mode's white card (`<Name>`, a dark mode recording).
 let onBlack = options["backdrop"] == "black"
 let input = URL(fileURLWithPath: positional[0])
 let name = positional[1]

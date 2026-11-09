@@ -3,7 +3,8 @@ import SwiftUI
 
 /// What's New, once, after an update (`WhatsNewLaunch`): a first page
 /// listing the release's news, then a page for each feature, its video on
-/// a card (black in light mode, white in dark) over its name and a few
+/// a card (black in light mode, white in dark, the app in the video in the
+/// appearance the person is in) over its name and a few
 /// lines, with the page dots and Next (Done on the last page) under them
 /// all. The sheet fits the page showing: on the list, just as tall as the
 /// list; on a feature, as tall as the card and the longest feature's words,
@@ -296,7 +297,8 @@ private struct WhatsNewFeatureText: View {
 /// A feature: its video on a card, square and as wide as the sheet allows,
 /// then its words. The card is the sheet turned over, black in light mode
 /// and white in dark, so it stands apart from the sheet either way, and
-/// plays the video made on its colour.
+/// plays the video made on its colour, which was recorded in that card's
+/// appearance: StarHash in the phone looks as it does around it.
 private struct WhatsNewFeaturePage: View {
     let feature: Release.Page
     /// The page is the one showing, so its video plays.
@@ -335,8 +337,9 @@ private struct WhatsNewFeaturePage: View {
 
     private var card: some View {
         let shape = RoundedRectangle(cornerRadius: WhatsNewMetrics.cardRadius, style: .continuous)
-        // The video made on the card's colour (`<Name>OnBlack` on black),
-        // or the one on white when there is no other.
+        // The video made on the card's colour and recorded in this
+        // appearance (`<Name>OnBlack`, light mode's, on black; `<Name>`, dark
+        // mode's, on white), or the one on white when there is no other.
         let video = (onBlack ? Bundle.main.url(forResource: feature.video + "OnBlack", withExtension: "mp4") : nil)
             ?? Bundle.main.url(forResource: feature.video, withExtension: "mp4")
         let onBlackVideo = onBlack && video?.lastPathComponent.hasSuffix("OnBlack.mp4") == true

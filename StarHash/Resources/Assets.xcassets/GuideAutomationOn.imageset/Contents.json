@@ -1,6 +1,10 @@
 {
   "images" : [
-    { "filename" : "GuideAutomationOn.png", "idiom" : "universal", "scale" : "3x" }
+    { "filename" : "GuideAutomationOn.png", "idiom" : "universal", "scale" : "3x" },
+    {
+      "appearances" : [ { "appearance" : "luminosity", "value" : "dark" } ],
+      "filename" : "GuideAutomationOn-dark.png", "idiom" : "universal", "scale" : "3x"
+    }
   ],
   "info" : { "author" : "xcode", "version" : 1 }
 }
