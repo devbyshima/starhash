@@ -4,7 +4,7 @@ How a change goes from `main` to TestFlight to the App Store, and how a fix reac
 
 ## The model
 
-New work lands on `main`. When a version is ready to stabilise, a `release/X.Y` branch is cut from `main`. That branch takes only fixes, goes to TestFlight as betas, then to the App Store, and stays alive for that version's patch releases. A fix is always made on the oldest release branch that has the bug, then merged forward into each newer release branch and `main`, so it can never be lost.
+New work lands on `main`. When a version is ready to stabilise, a `release/X.Y` branch is cut from `main`. That branch takes only fixes, goes to TestFlight as release candidates, then to the App Store, and stays alive for that version's patch releases. A fix is always made on the oldest release branch that has the bug, then merged forward into each newer release branch and `main`, so it can never be lost.
 
 ```text
 main          o---o---o---o---o---o---o---o---o---o   (1.2.0 work)
@@ -12,20 +12,21 @@ main          o---o---o---o---o---o---o---o---o---o   (1.2.0 work)
                         \            | merge     | merge
 release/1.1              o---o---o---o---o---o---o
                              |       |   |       |
-                          beta.1   rc.1 v1.1.0  v1.1.1 (a hotfix)
+                           rc.1    rc.2 v1.1.0  v1.1.1 (a hotfix)
 ```
 
-## Channels
+## Builds
 
-| Channel | Built from | Xcode scheme (configuration) | Goes to | Who sees it |
-| --- | --- | --- | --- | --- |
-| **dev** | `main` | **StarHash** (Debug) | Xcode, the simulator, your own iPhone | You |
-| **beta** | the newest `release/X.Y`, tagged `vX.Y.Z-beta.N` | **StarHash Beta** (Beta) | TestFlight | Testers |
-| **production** | `release/X.Y`, tagged `vX.Y.Z-rc.N`, then `vX.Y.Z` | **StarHash** (Release) | TestFlight, then the App Store | Everyone |
+StarHash has two builds, both from the **StarHash** scheme:
 
-The configuration stamps the channel into Info.plist (`StarHashChannel`), so the app knows which one it is: Settings shows it after the version in dev and beta builds ("1.1.0 (2) Beta"), and it decides where each [feature flag](#feature-flags) starts.
+| Build | Channel | Configuration | Built from | Goes to | Who sees it |
+| --- | --- | --- | --- | --- | --- |
+| **Dev** | dev | Debug | `main`, or any branch | Xcode, the simulator, your own iPhone | You |
+| **Release** | production | Release | `release/X.Y`, tagged `vX.Y.Z-rc.N`, then `vX.Y.Z` | TestFlight, then the App Store | Testers, then everyone |
 
-At most two release branches are looked after at once: the one on the App Store (production) and, while a new version is in beta, the newer one. When a version reaches the App Store, the one before it is retired: no more fixes go to it. Its branch and tags stay.
+The configuration stamps the channel into Info.plist (`StarHashChannel`), so the app knows which build it is: Settings shows "Dev" after the version in the dev build ("1.1.0 (2) Dev"), and it decides where each [feature flag](#feature-flags) starts. What testers try on TestFlight is the release build itself, so the build that passes is the one that ships.
+
+At most two release branches are looked after at once: the one on the App Store and, while a new version is on TestFlight, the newer one. When a version reaches the App Store, the one before it is retired: no more fixes go to it. Its branch and tags stay.
 
 CI follows the same lines ([`.github/workflows`](.github/workflows)):
 
@@ -33,7 +34,7 @@ CI follows the same lines ([`.github/workflows`](.github/workflows)):
 | --- | --- | --- |
 | Pull request to `main` or `release/**` | `ci.yml` | StarHashKit tests, the app built in the target's configuration, the version checks |
 | Push to `main` | `deliver.yml` | Tests, then a dev simulator build, kept as an artifact for 14 days |
-| Push to `release/**`, or a `-beta.N` tag | `deliver.yml` | Tests, then an unsigned Beta archive, kept 30 days |
+| Push to `release/**` | `deliver.yml` | Tests, then an unsigned Release archive, kept 30 days |
 | A `-rc.N` or final `vX.Y.Z` tag | `deliver.yml` | Tests, the release checks, then an unsigned Release archive, kept 90 days |
 
 CI builds and tests, and stops there. TestFlight and App Store uploads are made from Xcode, signed with the team's account.
@@ -55,8 +56,7 @@ Tags are annotated, made on release branches only, and pushed:
 
 | Tag | Marks | Built with |
 | --- | --- | --- |
-| `v1.1.0-beta.1`, `-beta.2`, ... | A TestFlight beta | StarHash Beta |
-| `v1.1.0-rc.1`, `-rc.2`, ... | The App Store build, on TestFlight for a last look | StarHash |
+| `v1.1.0-rc.1`, `-rc.2`, ... | An upload to TestFlight: the release build, which may go to the App Store as it is | StarHash (Release) |
 | `v1.1.0` | The version on the App Store: the last rc's code, with its changelog dated | |
 
 The **build number** (`CURRENT_PROJECT_VERSION`) counts uploads to App Store Connect for one version. It starts at 1 with each new version and goes up by one before every upload after that, since App Store Connect refuses a number it already has for that version. Each tag's message names the build it was uploaded as.
@@ -79,7 +79,7 @@ The **build number** (`CURRENT_PROJECT_VERSION`) counts uploads to App Store Con
 | Change | Branch from | Pull request into | Then |
 | --- | --- | --- | --- |
 | A feature, or a fix for something not yet released | `main` | `main` | |
-| A fix for the version in beta | `release/X.Y` (the beta's) | `release/X.Y` | Merge forward into `main` |
+| A fix for the version on TestFlight | `release/X.Y` (that version's) | `release/X.Y` | Merge forward into `main` |
 | A fix for the version on the App Store | the oldest supported `release/X.Y` with the bug | that branch | A patch release, then merge forward |
 | Unfinished work | `main` | `main`, behind a feature flag | |
 
@@ -89,7 +89,7 @@ A release branch never takes a new feature. If one is wanted in a version that h
 
 When `main` has what the next version should have (here `main` is at `1.1.0`):
 
-1. Make sure nothing unfinished will ship. In `StarHash/App/FeatureFlags.swift`, each flag for unfinished work must be `.off` or `.dev`, so the beta and the App Store build leave it out.
+1. Make sure nothing unfinished will ship. In `StarHash/App/FeatureFlags.swift`, each flag for unfinished work must be `.off` or `.dev`, so the release build leaves it out.
 2. Open the version's changelog section, and cut the branch:
 
    ```bash
@@ -120,55 +120,36 @@ When `main` has what the next version should have (here `main` is at `1.1.0`):
    git push origin main
    ```
 
-## 2. Run a beta
+## 2. Try it on TestFlight
 
-Each beta is an upload of the release branch built with the **StarHash Beta** scheme.
+Every TestFlight upload is the release build (the **StarHash** scheme, Release) as a release candidate, tagged `-rc.N`. The one that passes is the one submitted: nothing is rebuilt.
 
-1. Raise the build number, except for the version's very first upload (build 1):
-
-   ```bash
-   git switch release/1.1
-   git pull --ff-only
-   ./scripts/bump_version.sh build
-   git commit -am "chore: 1.1.0 build 2"
-   ```
-
-2. In Xcode, pick the **StarHash Beta** scheme and **Any iOS Device**, then **Product > Archive**. In the Organizer, **Distribute App > App Store Connect > Upload**.
-3. Once the upload is accepted, tag what was uploaded and push it:
-
-   ```bash
-   git tag -a v1.1.0-beta.1 -m "1.1.0 (2), TestFlight beta"
-   git push origin release/1.1 v1.1.0-beta.1
-   ```
-
-4. In App Store Connect, add the build to your TestFlight testers.
-
-Fixes from testing go through pull requests into `release/1.1`, each with a line under `## [1.1.0]` in the changelog. After each one, [merge forward](#5-merge-forward). Then repeat this section for `beta.2`, and so on.
-
-## 3. Promote to production
-
-The App Store build uses the **StarHash** scheme (production channel), so it is uploaded once more as a release candidate and checked on TestFlight before it goes for review. The build that passes is the one submitted: nothing is rebuilt.
-
-1. Add the version's What's New at the top of `ReleaseHistory.releases` in StarHashKit, dated the day you will submit it, with its [What's New sheet](#the-whats-new-sheet) for a new MAJOR.MINOR, and raise the build:
+1. Add the version's What's New at the top of `ReleaseHistory.releases` in StarHashKit, dated the day you expect to submit it, with its [What's New sheet](#the-whats-new-sheet) for a new MAJOR.MINOR (once, before the first rc). For every upload after the version's first (build 1), raise the build:
 
    ```bash
    git switch release/1.1
    git pull --ff-only
-   ./scripts/bump_version.sh build
+   ./scripts/bump_version.sh build                 # not before build 1
    git commit -am "docs: What's New for 1.1.0"
    ./scripts/check_release.sh refs/tags/v1.1.0-rc.1
    ```
 
-2. In Xcode, pick the **StarHash** scheme and **Any iOS Device**, archive and upload as for a beta. Then tag it:
+2. In Xcode, pick the **StarHash** scheme and **Any iOS Device**, then **Product > Archive** (archives are always Release). In the Organizer, **Distribute App > App Store Connect > Upload**.
+3. Once the upload is accepted, tag what was uploaded and push it:
 
    ```bash
-   git tag -a v1.1.0-rc.1 -m "1.1.0 (3), App Store candidate"
+   git tag -a v1.1.0-rc.1 -m "1.1.0 (1), release candidate"
    git push origin release/1.1 v1.1.0-rc.1
    ```
 
-3. Try the build on TestFlight. If it needs a fix, fix it on the branch and upload `rc.2` the same way.
-4. In App Store Connect, choose that build for version 1.1.0 and submit it for review.
-5. When Apple approves it and it is released, date the changelog and tag the version. In `CHANGELOG.md`, change `## [1.1.0] - Unreleased` to today's date and point its link at the tag:
+4. In App Store Connect, add the build to your TestFlight testers.
+
+Fixes from testing go through pull requests into `release/1.1`, each with a line under `## [1.1.0]` in the changelog. After each one, [merge forward](#5-merge-forward). Then repeat this section for `rc.2`, and so on.
+
+## 3. Ship to the App Store
+
+1. In App Store Connect, choose the release candidate that passed for version 1.1.0 and submit it for review.
+2. When Apple approves it and it is released, date the changelog and tag the version. In `CHANGELOG.md`, change `## [1.1.0] - Unreleased` to today's date and point its link at the tag:
 
    ```markdown
    ## [1.1.0] - 2026-11-02
@@ -178,13 +159,13 @@ The App Store build uses the **StarHash** scheme (production channel), so it is 
 
    ```bash
    git commit -am "docs: 1.1.0 is on the App Store"
-   git diff --stat v1.1.0-rc.1 HEAD                # only CHANGELOG.md
+   git diff --stat v1.1.0-rc.2 HEAD                # only CHANGELOG.md
    ./scripts/check_release.sh refs/tags/v1.1.0
-   git tag -a v1.1.0 -m "1.1.0 (3), App Store"
+   git tag -a v1.1.0 -m "1.1.0 (2), App Store"
    git push origin release/1.1 v1.1.0
    ```
 
-6. [Merge forward](#5-merge-forward) so `main` has the dated changelog and every fix. The release before this one (here `release/1.0`) is now retired.
+3. [Merge forward](#5-merge-forward) so `main` has the dated changelog and every fix. The release before this one (here `release/1.0`) is now retired.
 
 To publish the notes on GitHub as well (optional):
 
@@ -194,7 +175,7 @@ gh release create v1.1.0 --verify-tag --title "StarHash 1.1.0" --notes "See CHAN
 
 ## 4. Ship a hotfix
 
-A bug in the App Store version is fixed on the oldest supported release branch that has it, released as a patch, then carried forward. Here 1.1.0 is on the App Store and 1.2.0 is in beta on `release/1.2`.
+A bug in the App Store version is fixed on the oldest supported release branch that has it, released as a patch, then carried forward. Here 1.1.0 is on the App Store and 1.2.0 is on TestFlight from `release/1.2`.
 
 1. Branch from the release branch and make the fix, with a test in StarHashKit where it can have one:
 
@@ -221,12 +202,12 @@ A bug in the App Store version is fixed on the oldest supported release branch t
    ```
 
 2. Open a pull request into `release/1.1`. Once CI passes, merge it.
-3. Release it as in [Promote to production](#3-promote-to-production), with 1.1.1 for 1.1.0: upload an rc with the **StarHash** scheme, tag `v1.1.1-rc.1`, submit it for review, then date the changelog and tag `v1.1.1`. A What's New entry is optional for a patch. A beta is optional too: skip it when the fix is small and the rc covers it.
+3. Release it as in [Try it on TestFlight](#2-try-it-on-testflight) and [Ship to the App Store](#3-ship-to-the-app-store), with 1.1.1 for 1.1.0: upload an rc with the **StarHash** scheme, tag `v1.1.1-rc.1`, submit it for review, then date the changelog and tag `v1.1.1`. A What's New entry is optional for a patch.
 4. [Merge forward](#5-merge-forward) into `release/1.2`, then into `main`.
 
 ## 5. Merge forward
 
-After every change to a release branch (a beta fix, a hotfix, a release), merge it into the next newer release branch, if there is one, and then into `main`. Merging, rather than copying commits, lets git keep track: a fix that was merged forward can't be lost.
+After every change to a release branch (a fix from TestFlight, a hotfix, a release), merge it into the next newer release branch, if there is one, and then into `main`. Merging, rather than copying commits, lets git keep track: a fix that was merged forward can't be lost.
 
 ```bash
 git switch release/1.2
@@ -308,18 +289,17 @@ Keep each video short (5 to 10 seconds, it loops) and the page's words to three 
 
 ## Feature flags
 
-Unfinished work can be merged on `main` behind a flag, so `main` stays ready to cut at any time. A flag is set per channel by its rollout, and a dev or beta build can switch it on that device:
+Unfinished work can be merged on `main` behind a flag, so `main` stays ready to cut at any time. A flag is set per build by its rollout, and the dev build can switch it on that device:
 
-| Rollout | dev | beta | production |
-| --- | --- | --- | --- |
-| `.off` | off | off | off |
-| `.dev` | on | off | off |
-| `.beta` | on | on | off |
-| `.everywhere` | on | on | on |
+| Rollout | Dev | Release |
+| --- | --- | --- |
+| `.off` | off | off |
+| `.dev` | on | off |
+| `.everywhere` | on | on |
 
-Declare a flag in `FeatureFlag.all` (`StarHash/App/FeatureFlags.swift`) and read it with `@FeatureFlagged(.splitBill) private var splitsBills` in a view or `FeatureFlags.isOn(.splitBill)` elsewhere. In dev and beta builds, **Settings > About StarHash > Feature Flags** switches each one on that iPhone, and a Debug run can take one as a launch argument: `-featureFlag.splitBill YES`. The App Store build ignores both.
+Declare a flag in `FeatureFlag.all` (`StarHash/App/FeatureFlags.swift`) and read it with `@FeatureFlagged(.splitBill) private var splitsBills` in a view or `FeatureFlags.isOn(.splitBill)` elsewhere. In the dev build, **Settings > About StarHash > Feature Flags** switches each one on that iPhone, and a Debug run can take one as a launch argument: `-featureFlag.splitBill YES`. The release build ignores both.
 
-A flag's life: `.dev` while it is built, `.beta` once testers should try it (on `main` before cutting the branch, or on the release branch as a fix if it was cut with `.dev`), and when it ships, delete the flag and its checks. A release branch can turn a flag off, but never on for work that isn't finished.
+A flag's life: `.dev` while it is built, and when it is finished, delete the flag and its checks so it ships (on `main` before cutting the branch). Testers on TestFlight see what the App Store will. A release branch can turn a flag off, but never on for work that isn't finished.
 
 ## GitHub settings
 

@@ -25,8 +25,8 @@ case "${1:-}" in
     ;;
   *)
     version="$1"
-    # The App Store takes three numbers and nothing after them: a beta or
-    # release candidate is told apart by its tag and build, not its version.
+    # The App Store takes three numbers and nothing after them: a release
+    # candidate is told apart by its tag and build, not its version.
     [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "not a version: $version (MAJOR.MINOR.PATCH, no suffix)" >&2; exit 2; }
     [ "$version" != "$current_version" ] || { echo "already $version; use '$0 build' to raise the build number" >&2; exit 2; }
     build=1

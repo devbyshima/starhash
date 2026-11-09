@@ -615,15 +615,16 @@ enum SettingsVersion {
         Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
     }
 
-    /// "StarHash version 1.1.0, build 2, Beta", for VoiceOver.
+    /// "StarHash version 1.1.0, build 2, Dev", for VoiceOver.
     static var spoken: String {
         let channel = ReleaseChannel.current
         let spoken = String(starhash: "StarHash version \(short), build \(build)")
         return channel == .production ? spoken : "\(spoken), \(channel.title)"
     }
 
-    /// "1.0.0 (1)", the version and its build, then the channel for a dev
-    /// or TestFlight build: "1.1.0 (2) Beta". The App Store's has none.
+    /// "1.0.0 (1)", the version and its build, then the channel for the dev
+    /// build: "1.1.0 (2) Dev". The release build (TestFlight's and the App
+    /// Store's) has none.
     static var full: String {
         let channel = ReleaseChannel.current
         return channel == .production ? "\(short) (\(build))" : "\(short) (\(build)) \(channel.title)"
