@@ -21,7 +21,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "StarHash", "Resources", "StarHash SMS.shortcut")
 
 BUNDLE_ID = "com.devbyshima.starhash"
-TEAM_ID = "7WHQR6L96K"
+TEAM_ID = "W46T258AXM"
 INTENT = "ProcessCarrierSMSIntent"
 
 action = {
@@ -57,7 +57,9 @@ workflow = {
     "WFWorkflowClientVersion": "2607.0.2",
     "WFWorkflowMinimumClientVersion": 900,
     "WFWorkflowMinimumClientVersionString": "900",
-    # A hash glyph on a dark tile.
+    # Shortcuts' own default glyph on black. Shortcuts shows StarHash's icon
+    # on the shortcut in its place, from its one action's app, but only
+    # while BUNDLE_ID is the app installed on that iPhone.
     "WFWorkflowIcon": {"WFWorkflowIconGlyphNumber": 59511, "WFWorkflowIconStartColor": 255},
     "WFWorkflowImportQuestions": [],
     "WFWorkflowTypes": [],
