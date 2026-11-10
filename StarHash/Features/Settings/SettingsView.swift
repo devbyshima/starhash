@@ -282,11 +282,13 @@ private struct SettingsRootList: View {
         }
         .onChange(of: draftSecondNumber) { _, typed in
             // The phone pad has no return key: a whole number is the end of
-            // it, so the keyboard goes once one is in, with its row.
-            if owner.setOtherNumber(typed) {
-                editsSecondNumber = false
-                draftSecondNumber = ""
-            }
+            // it, so the keyboard goes once one is in, with its row. Emptying
+            // the field after it comes back here too, and `setOtherNumber`
+            // would take an empty field for the owner clearing the number
+            // and forget the one just kept.
+            guard !typed.isEmpty, owner.setOtherNumber(typed) else { return }
+            editsSecondNumber = false
+            draftSecondNumber = ""
         }
     }
 
