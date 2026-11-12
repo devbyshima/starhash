@@ -16,8 +16,8 @@ import UIKit
 ///    message and comes straight back (x-callback-url). That proves the
 ///    shortcut, and turns auto-verify on; the automation is proven only by
 ///    a real message through it, so the step then waits for one, and until
-///    one comes nothing is failed for want of a message
-///    (`StarHashPreferences.automationProven`).
+///    one comes nothing is failed for want of a message (`AutoVerify`'s
+///    Waiting).
 struct AutoVerificationGuide: View {
     /// In onboarding: the close button on the right, which skips the
     /// setup. Pushed from Settings there is none.
@@ -35,10 +35,7 @@ struct AutoVerificationGuide: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    @AppStorage(PreferenceKey.lastVerifiedAt) private var lastVerifiedAt: Double = 0
-    @AppStorage(PreferenceKey.lastMessageAt) private var lastMessageAt: Double = 0
-    @AppStorage(PreferenceKey.autoVerifySince) private var autoVerifySince: Double = 0
-    @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
+    @Environment(AutoVerify.self) private var autoVerify
     @Environment(Owner.self) private var owner
     private var ownWallets: OwnerWallets { owner.wallets }
 
@@ -46,8 +43,9 @@ struct AutoVerificationGuide: View {
     /// Whether the step's action (Add Shortcut, Open Shortcuts) has been
     /// tapped, which brings up Continue.
     @State private var didAct = false
-    /// `lastVerifiedAt` when Verify Shortcut was tapped; nil before.
-    @State private var verifyStartedAt: Double?
+    /// When the shortcut had last run as Verify Shortcut was tapped
+    /// (`.distantPast` for never); nil before it is tapped.
+    @State private var verifyStartedAt: Date?
     @State private var verification: Verification = Self.launchVerification
     /// The scroll view's visible height: from the progress bar to the
     /// buttons.
@@ -133,16 +131,16 @@ struct AutoVerificationGuide: View {
         // Back on the left steps back through the setup, then leaves it;
         // close on the right, over onboarding only.
         .starhashBackAndClose(back: goBack, close: onClose)
-        .onChange(of: lastVerifiedAt) { checkVerification() }
+        .onChange(of: autoVerify.shortcutRanAt) { checkVerification() }
         // A real message through the automation, while the step waits.
-        .onChange(of: lastMessageAt) {
+        .onChange(of: automationProven) {
             guard verification == .awaitingMessage, automationProven else { return }
             withAnimation(.smooth) { verification = .verified }
         }
         .onChange(of: router.shortcutCallback) { _, callback in
             guard let callback, verification == .waiting else { return }
             // Shortcuts came back: either the action ran (and wrote
-            // lastVerifiedAt), or the shortcut was missing or failed.
+            // `shortcutRanAt`), or the shortcut was missing or failed.
             Task {
                 try? await Task.sleep(for: .milliseconds(400))
                 checkVerification()
@@ -408,7 +406,7 @@ struct AutoVerificationGuide: View {
     }
 
     private func runVerification() {
-        verifyStartedAt = lastVerifiedAt
+        verifyStartedAt = autoVerify.shortcutRanAt ?? .distantPast
         withAnimation(.smooth) { verification = .waiting }
         if let url = StarHashShortcut.verificationURL { openURL(url) }
     }
@@ -417,15 +415,18 @@ struct AutoVerificationGuide: View {
     /// step waits for a real message through the automation, unless one
     /// has come already.
     private func checkVerification() {
-        guard let start = verifyStartedAt, lastVerifiedAt > start else { return }
+        guard let start = verifyStartedAt, let ran = autoVerify.shortcutRanAt, ran > start else { return }
         verifyStartedAt = nil
-        autoVerifySetUp = true
-        PaymentExpiry.markSetUp()
+        autoVerify.finishSetUp()
         withAnimation(.smooth) { verification = automationProven ? .verified : .awaitingMessage }
     }
 
+    /// A real message has come through the automation since the setup.
     private var automationProven: Bool {
-        StarHashPreferences.automationProven(lastMessageAt: lastMessageAt, since: autoVerifySince)
+        switch autoVerify.status() {
+        case .active, .looksBroken: true
+        case .off, .waiting: false
+        }
     }
 }
 

@@ -36,7 +36,7 @@ extension StarHashPreferences {
             monthlySummary: bool(PreferenceKey.notifyMonthlySummary, default: defaults.monthlySummary),
             summaryHour: saved.object(forKey: PreferenceKey.summaryHour) as? Int ?? defaults.summaryHour,
             showsAmounts: bool(PreferenceKey.notificationAmounts, default: defaults.showsAmounts),
-            failsUnconfirmed: PaymentExpiry.isActive
+            failsUnconfirmed: AppEnvironment.autoVerify.status() == .active
         )
     }
 

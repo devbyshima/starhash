@@ -104,22 +104,6 @@ struct AutoVerifyTests {
         #expect(store.transactions.count == 2)
     }
 
-    // MARK: A broken shortcut
-
-    @Test func threeUnconfirmedAndAQuietWeekLooksBroken() {
-        let payments = (1...3).map { Self.payment(minutesAgo: Double($0) * 120) }
-        let quiet = Self.now.addingTimeInterval(-8 * 24 * 3600)
-        #expect(AutoVerify.looksBroken(payments, lastMessageAt: quiet, now: Self.now))
-        // A message this week says the shortcut runs.
-        #expect(!AutoVerify.looksBroken(payments, lastMessageAt: Self.now.addingTimeInterval(-3600), now: Self.now))
-    }
-
-    @Test func oneConfirmedPaymentMeansItWorks() {
-        var payments = (1...3).map { Self.payment(minutesAgo: Double($0) * 120) }
-        payments[1].status = .confirmed
-        #expect(!AutoVerify.looksBroken(payments, lastMessageAt: nil, now: Self.now))
-    }
-
     // MARK: The notification
 
     @Test func theReminderSaysItFailedAtTheHour() throws {

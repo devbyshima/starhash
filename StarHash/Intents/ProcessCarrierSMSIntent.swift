@@ -50,14 +50,15 @@ struct ProcessCarrierSMSIntent: AppIntent {
     func perform() async throws -> some IntentResult {
         // Any run proves the shortcut reaches StarHash; the setup guide
         // watches this to show its success state.
-        StarHashPreferences.markVerified()
+        let autoVerify = AppEnvironment.autoVerify
+        autoVerify.shortcutRan()
 
         guard !AutoVerificationSample.isSample(message) else { return .result() }
         // A real message, so the automation hands them over: what the
         // setup's own check cannot prove, and what auto-verify waits for
         // before failing any payment on its own.
-        StarHashPreferences.markMessageArrived()
-        guard StarHashPreferences.autoVerifyOn,
+        autoVerify.messageArrived()
+        guard autoVerify.status() != .off,
               StarHashPreferences.saveTransactions else { return .result() }
         // A look-alike of the wallet's message (from someone's own number,
         // or asking for money back) is never logged, and the owner is
@@ -86,7 +87,7 @@ struct ProcessCarrierSMSIntent: AppIntent {
             return .result()
         }
         // Awake anyway: any payment past its hour fails now too.
-        PaymentExpiry.run()
+        autoVerify.expireUnconfirmed()
         await StarHashNotifications.shared.sync()
         return .result()
     }

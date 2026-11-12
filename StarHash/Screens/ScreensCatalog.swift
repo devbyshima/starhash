@@ -259,6 +259,7 @@ private extension View {
             .environment(\.locale, AppLanguage.stored.locale)
             .environment(ScreensSample.store)
             .environment(ScreensSample.owner)
+            .environment(ScreensSample.autoVerify)
             .environment(AppRouter())
             .environment(ScreensSample.shortcuts)
             .tint(Color.starhashPrimaryText)
@@ -286,6 +287,16 @@ enum ScreensSample {
         for transaction in SampleData.transactions() { store.add(transaction) }
         store.expireUnconfirmed(dialledSince: .distantPast)
         return store
+    }()
+
+    /// Auto-verify set up and proven by a message, in defaults of its own,
+    /// so Settings shows it working.
+    static let autoVerify: AutoVerify = {
+        let autoVerify = AutoVerify(store: store, defaults: defaults("ScreensAutoVerify"))
+        autoVerify.shortcutRan()
+        autoVerify.finishSetUp()
+        autoVerify.messageArrived()
+        return autoVerify
     }()
 
     /// An owner with a name, one MTN SIM and its number, in defaults of

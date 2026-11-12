@@ -24,6 +24,10 @@ enum AppEnvironment {
         return owner
     }()
 
+    /// Auto-verify's state, over the same store: whether the SMS confirm
+    /// payments, and the expiry of those they do not.
+    static let autoVerify = AutoVerify(store: store)
+
     /// Buy's codes. Debug launches with -inMemory start from the defaults
     /// in a throwaway list.
     static let shortcuts: USSDShortcutList = {

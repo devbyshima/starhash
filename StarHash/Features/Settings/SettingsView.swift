@@ -93,10 +93,7 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
     @AppStorage(PreferenceKey.defaultPage) private var defaultPage = AppTab.pay.rawValue
     @AppStorage(PreferenceKey.appearance) private var appearance = AppAppearance.system
-    @AppStorage(PreferenceKey.lastVerifiedAt) private var lastVerifiedAt: Double = 0
-    @AppStorage(PreferenceKey.lastMessageAt) private var lastMessageAt: Double = 0
-    @AppStorage(PreferenceKey.autoVerifySince) private var autoVerifySince: Double = 0
-    @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
+    @Environment(AutoVerify.self) private var autoVerify
     @AppStorage(PreferenceKey.appLock) private var appLock = false
 
     @State private var confirmsDeleteAll = false
@@ -179,12 +176,7 @@ private struct SettingsRootList: View {
         }
         .sheet(isPresented: $confirmsAutoVerifyOff) {
             TurnOffAutoVerifySheet {
-                withAnimation(.smooth) {
-                    StarHashPreferences.turnOffAutoVerify()
-                    autoVerifySetUp = false
-                    lastVerifiedAt = 0
-                    lastMessageAt = 0
-                }
+                withAnimation(.smooth) { autoVerify.turnOff() }
             }
         }
         .alert("Location is off", isPresented: $locationRefused) {
@@ -492,38 +484,25 @@ private struct SettingsRootList: View {
         exportDocument = try? DataTransfer.export(store: store, shortcuts: shortcuts)
     }
 
-    /// No message for a week and the last payments all unconfirmed: the
-    /// shortcut has likely stopped, and payments are no longer failed for
-    /// want of a message until one comes (`AutoVerify.looksBroken`).
-    private var autoVerifyLooksBroken: Bool {
-        autoVerifyBinding.wrappedValue && AutoVerify.looksBroken(
-            store.transactions,
-            lastMessageAt: Date(timeIntervalSince1970: lastMessageAt),
-            now: .now
-        )
-    }
-
     /// Auto-verify's state when it needs a word: on but still waiting for
-    /// its first message through the automation, or quiet for a week.
-    /// Nothing while it simply works.
-    /// Waiting for its first message reads as pending, amber; no messages
-    /// for a week as failing, red.
+    /// its first message through the automation, or quiet for a week (the
+    /// automation has likely stopped, and nothing fails until a message
+    /// comes). Nothing while it simply works. Waiting reads as pending,
+    /// amber; a quiet week as failing, red.
     private var autoVerifyStatusColor: Color? {
-        if autoVerifyBinding.wrappedValue,
-           !StarHashPreferences.automationProven(lastMessageAt: lastMessageAt, since: autoVerifySince) {
-            return .starhashUrgentText
+        switch autoVerify.status() {
+        case .waiting: .starhashUrgentText
+        case .looksBroken: .starhashDestructive
+        case .off, .active: nil
         }
-        return autoVerifyLooksBroken ? .starhashDestructive : nil
     }
 
     private var autoVerifyStatus: String? {
-        if autoVerifyBinding.wrappedValue,
-           !StarHashPreferences.automationProven(lastMessageAt: lastMessageAt, since: autoVerifySince) {
-            return String(starhash: "Waiting for a \(ownWallets.messagesName) message to come through")
+        switch autoVerify.status() {
+        case .waiting: String(starhash: "Waiting for a \(ownWallets.messagesName) message to come through")
+        case .looksBroken: String(starhash: "No \(ownWallets.messagesName) messages for a week. Check the automation")
+        case .off, .active: nil
         }
-        return autoVerifyLooksBroken
-            ? String(starhash: "No \(ownWallets.messagesName) messages for a week. Check the automation")
-            : nil
     }
 
     /// On once the setup finished with a working shortcut. Switching it on
@@ -531,7 +510,7 @@ private struct SettingsRootList: View {
     /// switching it off asks first, since payments then stay Pending.
     private var autoVerifyBinding: Binding<Bool> {
         Binding {
-            lastVerifiedAt > 0 && autoVerifySetUp
+            autoVerify.status() != .off
         } set: { isOn in
             if isOn { setUpAutoVerify() } else { confirmsAutoVerifyOff = true }
         }

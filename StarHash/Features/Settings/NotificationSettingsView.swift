@@ -8,7 +8,6 @@ import UserNotifications
 /// reschedules what is waiting at once.
 struct NotificationSettingsView: View {
     @Environment(\.scenePhase) private var scenePhase
-    @Environment(StarHashStore.self) private var store
 
     @AppStorage(PreferenceKey.notifyPaymentReminders) private var paymentReminders = true
     @AppStorage(PreferenceKey.paymentReminderDelay) private var reminderDelay = NotificationPlan.defaultReminderDelay
@@ -20,12 +19,9 @@ struct NotificationSettingsView: View {
     @AppStorage(PreferenceKey.summaryHour) private var summaryHour = NotificationPlan.defaultSummaryHour
     @AppStorage(PreferenceKey.notificationAmounts) private var showsAmounts = true
     @AppStorage(PreferenceKey.notificationSound) private var sound = true
-    @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
     @Environment(Owner.self) private var owner
     private var ownWallets: OwnerWallets { owner.wallets }
-    @AppStorage(PreferenceKey.lastVerifiedAt) private var lastVerifiedAt: Double = 0
-    @AppStorage(PreferenceKey.lastMessageAt) private var lastMessageAt: Double = 0
-    @AppStorage(PreferenceKey.autoVerifySince) private var autoVerifySince: Double = 0
+    @Environment(AutoVerify.self) private var autoVerify
 
     /// What iOS last said, so the page opens as it will stay; nil until
     /// it has answered once.
@@ -160,20 +156,11 @@ struct NotificationSettingsView: View {
         )
     }
 
-    private var autoVerifyOn: Bool { autoVerifySetUp && lastVerifiedAt > 0 }
+    private var autoVerifyOn: Bool { autoVerify.status() != .off }
 
     /// Auto-verify fails a payment no message confirms within the hour, so
-    /// the reminder says that instead (`PaymentExpiry`). Read here from the
-    /// page's own values, so it follows them.
-    private var failsUnconfirmed: Bool {
-        autoVerifyOn
-            && StarHashPreferences.automationProven(lastMessageAt: lastMessageAt, since: autoVerifySince)
-            && !AutoVerify.looksBroken(
-                store.transactions,
-                lastMessageAt: Date(timeIntervalSince1970: lastMessageAt),
-                now: .now
-            )
-    }
+    /// the reminder says that instead (`AutoVerify.expireUnconfirmed`).
+    private var failsUnconfirmed: Bool { autoVerify.status() == .active }
 
     /// Above everything while iOS does not let StarHash notify: Turn On
     /// asks the first time, and after a refusal the Settings app is the
