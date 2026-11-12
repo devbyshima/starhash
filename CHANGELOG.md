@@ -8,6 +8,10 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Added
 
+- The Report, rebuilt after a reference dashboard: Total Spent with the span, how it compares with the same days of the period before, the average a day, the top category, money received and fees; Top Spending Categories and Top 3 Expenses (a tap opens the payment); Spending by Category as a ring with each category's colour and icon, and Show More for every category; the chart; By Payment Type (shops, people and what was bought); Key Metrics (the highest and lowest spending days, what was most spent on, the average a day, the number of payments); and Savings Potential, what a 10% smaller budget for the category most spent on would keep. Arrows step back through earlier weeks, months and years, a menu narrows the report to one category, and Export shares it as a PDF.
+- Gifts, a new category, found by itself for gift shops and florists.
+- A person with no photo wears a silhouette (DiceBear's Shadows) in place of the person or phone icon: on Profile, and for a number with no name. Each number keeps its own.
+
 - Show my name: typing a number to pay that belongs to someone on StarHash shows their name in place of the carrier, and their photo (or initials) in place of the phone. Your own name and numbers are shown the same way unless you turn it off in Settings, under Your SIMs; StarHash's server keeps each number only as a keyed hash. People already set up are told once, and the privacy policy says so.
 - A Third-Party Trademark Notice in Licences: whose names and logos StarHash shows (MTN, MoMo, Airtel, Apple's and others), only to say which wallet or service something is for, and that StarHash is not tied to any of them.
 - A long press on a transaction, as iOS's own lists do: a confirmed one lifts a preview of its details over the dimmed list, and a tap on the preview opens them; one still pending or failed lifts itself, with Verify, Mark as Failed, Pay Again and Delete in groups under it. A transaction turns grey from edge to edge while it is pressed.
@@ -77,6 +81,11 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 - A number saved in your Contacts always shows under the name you saved it with.
 
 ### Fixed
+
+- A contact's number abroad or a landline is no longer offered for payment: it would have been dialled as an MTN number. The rule a scanned code already followed now holds everywhere.
+- The weekly and monthly summaries no longer count money moved between your own accounts as a payment ("You sent 0 RWF in 1 payment").
+- The mark in the tab bar fades to its new colour with the other icons when the appearance changes, and its triangle is outlined with the rest of it when Pay is not showing.
+- The auto-verify shortcut's action named an older build of StarHash, so Shortcuts showed its own wand rather than StarHash's icon; it is made per build now.
 
 - Shima's note at the end of onboarding slides up over Pay, as a sheet does, rather than appearing all at once.
 - The launch animation's mark is gone before the app shows, rather than fading out over Pay.

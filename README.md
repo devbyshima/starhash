@@ -1,128 +1,141 @@
-<!-- prettier-ignore -->
+<p align="center">
+  <img src="docs/images/icon.svg" width="96" alt="StarHash" />
+</p>
+
+<h1 align="center">StarHash</h1>
+
+<p align="center">
+  <b>MTN MoMo and Airtel Money in Rwanda, without the USSD menus</b>
+</p>
+<p align="center">
+  Type an amount, pick who gets it, and StarHash dials the code. Every payment then lands in one place.
+</p>
+
 <div align="center">
 
-<img src="docs/images/icon.svg" alt="" height="96" />
-
-# StarHash
-
-*MTN MoMo and Airtel Money in Rwanda, without the USSD menus.*
-
-[![Platform: iOS 18+](https://img.shields.io/badge/iOS-18%2B-3020FE?style=flat-square&logo=apple)](#getting-started)
-[![Swift 6](https://img.shields.io/badge/Swift-6-F05138?style=flat-square&logo=swift&logoColor=white)](https://www.swift.org)
-[![SwiftUI](https://img.shields.io/badge/UI-SwiftUI-171717?style=flat-square)](https://developer.apple.com/xcode/swiftui/)
-[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20Noncommercial-616161?style=flat-square)](LICENSE)
-[![Support on Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20StarHash-00D957?style=flat-square&logo=ko-fi&logoColor=white)](https://ko-fi.com/devbyshima)
-
-[Features](#features) • [Getting started](#getting-started) • [How it works](#how-it-works) • [Privacy](#privacy) • [Docs](#documentation)
-
-<img src="docs/images/pay.png" alt="Pay: an amount of 5,000 on the keypad, with Balance and Pay below" width="200" />
-<img src="docs/images/activity.png" alt="Transactions in dark mode: this week's spending, a bar chart and today's payments" width="200" />
-<img src="docs/images/transaction.png" alt="A confirmed merchant payment with its fee, reference and a map of where it was paid" width="200" />
-<img src="docs/images/buy.png" alt="Buy in dark mode: saved USSD codes, each with its call button" width="200" />
+  <img src="https://img.shields.io/badge/Status-Source%20Available-707070?style=for-the-badge&labelColor=171717" alt="Status" />
+  <img src="https://img.shields.io/badge/Stack-Swift%206%20%7C%20SwiftUI-707070?style=for-the-badge&labelColor=171717" alt="Stack" />
+  <img src="https://img.shields.io/badge/Platform-iOS%2018%2B-707070?style=for-the-badge&labelColor=171717" alt="Platform" />
 
 </div>
 
-StarHash is a free, source-available iPhone app for paying with MTN MoMo or Airtel Money in Rwanda. Type an amount, pick who gets it, and StarHash dials your wallet's USSD code for you, then keeps every payment in one place.
+<br>
 
-> [!IMPORTANT]
-> StarHash never sees your PIN and never moves money. It only dials the code: the iPhone's call prompt, showing the whole code, is your approval, and your wallet's own prompt asks for your PIN as always.
+## <img src="https://api.iconify.design/lucide/telescope.svg?color=%23707070" width="20" height="20">&nbsp; The Problem
+Paying with mobile money in Rwanda still means menus built for a feature phone.
 
-## Features
+<table width="100%">
+  <tr>
+    <td width="33%" valign="top" align="center">
+      <h3 align="center">USSD menus</h3>
+      <p align="center">Every payment is <code>*182#</code>, a number for each menu, the amount and the recipient typed by hand.</p>
+    </td>
+    <td width="33%" valign="top" align="center">
+      <h3 align="center">History in SMS</h3>
+      <p align="center">What you paid lives in a thread of carrier messages, with no search and no names.</p>
+    </td>
+    <td width="33%" valign="top" align="center">
+      <h3 align="center">No overview</h3>
+      <p align="center">Nothing tells you what a month cost, or where the money went.</p>
+    </td>
+  </tr>
+</table>
 
-- **Pay in a few taps**: type an amount, pick a contact, a recent recipient or a merchant code, and the code is dialled at once. A contact's saved name always comes first.
-- **Scan to pay**: scan a merchant's MoMo QR code or a friend's StarHash code, type the amount (or have it filled in) and pay, with no recipient screen.
-- **Your own QR code**: add your number in onboarding or Settings' Profile, with your photo, and others scan your code to pay you. It stands as a little tree of blocks that turns into the QR code at a tap.
-- **Both wallets**: MTN MoMo or Airtel Money, switched from Pay, with the right code for numbers on either network.
-- **Transactions**: every payment by day, a chart for this week, month or year, and search across everything. Airtime, bundles, electricity, water and TV show as bought, not sent, and payments sort into categories (by Apple Intelligence on iOS 26 and later).
-- **Auto-verify**: a Shortcuts automation passes your wallet's SMS to StarHash, which confirms each payment with its fee, reference and new balance.
-- **Buy**: the codes you dial often (pending approvals, cash out, bundles), one tap each, with up to eight pinned to the top.
-- **Nearby**: an opt-in suggestion of the shops you paid where you are standing, never of your contacts.
-- **Scam warnings**: a message that looks like MoMo's but comes from someone's own number is never logged, and you are warned before you send anything back.
-- **Widgets**: Buy's codes on the Home Screen, each its symbol and name, dialled without opening the app; Scan to Pay as a small widget and in Control Center.
-- **Export and import**: everything StarHash keeps, as one file you can move to another iPhone.
-- **English and Kinyarwanda**, chosen in the Settings app.
-- **Private by design**: no account, no tracking, your payments stay on the phone, and an optional Face ID lock. Only a photo you share with your QR code, and an anonymous daily count of who uses StarHash, reach its small server (`server/`).
-- **Shortcuts and Siri**: Pay with StarHash, Check Wallet Balance and Process Carrier SMS.
+<br>
 
-## Getting started
+## <img src="https://api.iconify.design/lucide/cpu.svg?color=%23707070" width="20" height="20">&nbsp; The Solution
+StarHash builds the USSD code for you and keeps the record the carrier never gave you. It never sees your PIN and never moves money itself.
 
-> [!NOTE]
-> StarHash is not on the App Store yet, so for now you build it from source.
+1. **Pay:** type an amount, pick a contact, a recent recipient or a merchant code, or scan a QR code.
+2. **Approve:** the iPhone's call prompt shows the whole code; your wallet asks for your PIN as always.
+3. **Confirm:** a Shortcuts automation hands the wallet's SMS to StarHash, which marks the payment confirmed with its fee, reference and balance.
+4. **Report:** a week, month or year at a glance: the total and how it compares, top categories and payments, a ring of categories, payment types, key days and a saving to try. Export it as a PDF.
 
-You need:
+The codes and fees are in [Codes and fees](docs/codes-and-fees.md), the automation in [Auto-verify](docs/auto-verify.md), and how the code fits together in [ARCHITECTURE.md](ARCHITECTURE.md).
 
-- A Mac with [Xcode 27](https://developer.apple.com/xcode/) and [XcodeGen](https://github.com/yonaskolb/XcodeGen)
-- An iPhone on iOS 18 or later, with an MTN or Airtel Rwanda SIM to dial
-- An Apple ID for signing (a free personal team works)
+<br>
 
-Then:
+## <img src="https://api.iconify.design/lucide/shield-check.svg?color=%23707070" width="20" height="20">&nbsp; Privacy
 
-1. Clone the repo and install XcodeGen:
-   ```bash
-   git clone https://github.com/devbyshima/starhash.git
-   cd starhash
-   brew install xcodegen
-   ```
-2. Set your own `DEVELOPMENT_TEAM` and the StarHash target's `PRODUCT_BUNDLE_IDENTIFIER` in `project.yml`.
-3. Generate the project and open it:
-   ```bash
-   xcodegen generate
-   open StarHash.xcodeproj
-   ```
-4. Choose your iPhone and run the **StarHash** scheme.
+| **What** | **Where it goes** |
+| :-- | :-- |
+| **Payments** | One file on the iPhone, in your own backups. Never sent anywhere. |
+| **Your PIN** | Never seen. Your wallet asks for it. |
+| **Contacts** | Read on the phone only, to name recipients. |
+| **Location** | Only with Nearby on, only while you pay, never for contacts. |
+| **Your QR photo** | Sent to StarHash's small server (`server/`) only when you share your code. |
+| **Usage** | An anonymous daily count of installs. No analytics, no third-party packages. |
 
-> [!TIP]
-> The simulator cannot dial: Pay shows the code in an alert instead. To look around with sample data, run with the launch arguments `-inMemory -skipOnboarding`.
+More in [Privacy](docs/privacy.md).
 
-See [Development](docs/development.md) for the build scripts, tests, screenshots and debug launch arguments.
+<br>
 
-## How it works
+## <img src="https://api.iconify.design/lucide/images.svg?color=%23707070" width="20" height="20">&nbsp; Visuals
 
-1. You type an amount and pick a recipient. StarHash builds the USSD code, for example `*182*8*1*CODE*AMOUNT#` for a merchant, and opens it as a `tel:` link.
-2. The iPhone asks to call, you confirm, and your wallet asks for your PIN.
-3. StarHash records the payment as **Pending**. When your wallet's confirmation SMS arrives, the Auto-verify automation marks it **Confirmed** with its fee and reference. You can also confirm it, or mark it failed, by hand.
+| Pay | Transactions | Report |
+| :---: | :---: | :---: |
+| <img src="docs/images/pay.png" width="100%" alt="Pay: an amount of 5,000 on the keypad" /> | <img src="docs/images/activity.png" width="100%" alt="Transactions: this week's spending and today's payments" /> | <img src="docs/images/report.png" width="100%" alt="Report: the month's total, its average and top categories" /> |
+| **A payment** | **Buy** | **Key metrics** |
+| <img src="docs/images/transaction.png" width="100%" alt="A confirmed merchant payment with its fee and reference" /> | <img src="docs/images/buy.png" width="100%" alt="Buy: saved USSD codes, each with its call button" /> | <img src="docs/images/report-metrics.png" width="100%" alt="Report in dark mode: payment types and key metrics" /> |
 
-Every code StarHash dials, and how fees are worked out, is in [Codes and fees](docs/codes-and-fees.md). Setting up the SMS automation is covered in [Auto-verify](docs/auto-verify.md).
+<br>
 
-> [!WARNING]
-> The Airtel Money codes follow Airtel Rwanda's published guides, and its SMS formats follow the template Airtel Africa uses in other countries. Neither has been checked on a real Airtel SIM yet.
+## <img src="https://api.iconify.design/lucide/layers.svg?color=%23707070" width="20" height="20">&nbsp; Tech Stack
 
-## Privacy
+| **Part** | **Technology** |
+| :-- | :-- |
+| **App** | Swift 6 and SwiftUI, Liquid Glass on iOS 26 and later, Swift Charts |
+| **Core** | `StarHashKit`, a Foundation-only Swift package with Swift Testing tests |
+| **Shortcuts and widgets** | App Intents, WidgetKit, a Control Center control |
+| **Server** | A Cloudflare Worker with D1 (`server/`) |
+| **Languages** | English, French and Kinyarwanda |
 
-- Everything stays on your iPhone: payments in one file, settings in the app's preferences, both part of your own backups.
-- StarHash has no network code of its own, no analytics and no third-party packages.
-- Contacts are read on the phone only. Location is used only with Nearby on, only while you pay, and never for your contacts. Face ID is asked for only if you turn the lock on.
+<br>
 
-The full picture is in [Privacy](docs/privacy.md), and the app carries its own Privacy Policy under Settings.
+## <img src="https://api.iconify.design/lucide/rocket.svg?color=%23707070" width="20" height="20">&nbsp; Getting Started
+StarHash is not on the App Store yet, so build it from source. You need a Mac with Xcode 27 and [XcodeGen](https://github.com/yonaskolb/XcodeGen), an iPhone on iOS 18 or later with an MTN or Airtel Rwanda SIM, and an Apple ID to sign with (a free team works).
 
-## Documentation
+```bash
+git clone https://github.com/devbyshima/starhash.git
+cd starhash
+brew install xcodegen
+xcodegen generate
+open StarHash.xcodeproj
+```
 
-| Page | What's inside |
-| --- | --- |
-| [Features](docs/features.md) | A tour of Pay, Buy, Transactions, Nearby, Settings, Shortcuts and the look |
-| [Codes and fees](docs/codes-and-fees.md) | Every USSD code, how numbers are read, and the fee tables |
-| [Auto-verify](docs/auto-verify.md) | The Shortcuts automation, how messages are matched, and using it with your own build |
-| [Privacy](docs/privacy.md) | Permissions, what is stored where, and what never leaves the phone |
-| [Development](docs/development.md) | Requirements, scripts, tests, debug launch arguments and the project layout |
-| [Contributing](CONTRIBUTING.md) | Branch rules, commits, pull requests and feature flags |
-| [Releasing](RELEASING.md) | Release branches, TestFlight, the App Store and hotfixes, step by step |
-| [Changelog](CHANGELOG.md) | What each version changed |
+Set your own `DEVELOPMENT_TEAM` and bundle id in `project.yml`, then run the **StarHash** scheme on your iPhone. The simulator cannot dial; run it with `-inMemory -skipOnboarding` to look around with sample data. Scripts, tests and debug arguments are in [Development](docs/development.md).
 
-Have an idea? [Request a feature](https://github.com/devbyshima/starhash/issues/new?template=feature_request.yml).
+<br>
 
-## Support
+## <img src="https://api.iconify.design/lucide/map.svg?color=%23707070" width="20" height="20">&nbsp; Roadmap
+- [x] **Pay** by contact, recent, merchant code or QR code, on MTN MoMo or Airtel Money
+- [x] **Auto-verify** payments from the wallet's SMS
+- [x] **Report** with categories, payment types, key metrics and PDF export
+- [x] **Widgets**, Shortcuts and Siri, Face ID lock, export and import
+- [ ] **App Store** release
+- [ ] **Airtel Money** codes and messages checked on a real SIM
+- [ ] **Widgets** that read your own codes (needs a paid developer team)
 
-StarHash is free, with no ads and nothing to buy. If it saves you time and you'd like to give something back, you can [buy me a coffee on Ko-fi](https://ko-fi.com/devbyshima). The app has the same link in Settings, under More.
+<br>
 
-## License
+## <img src="https://api.iconify.design/lucide/heart-handshake.svg?color=%23707070" width="20" height="20">&nbsp; Acknowledgements
+- [Space Grotesk](https://github.com/floriankarsten/space-grotesk) by Florian Karsten, under the SIL Open Font License 1.1
+- [Keyline Icons](https://github.com/keyline-icons/keyline-icons), under the MIT License
+- [DiceBear](https://www.dicebear.com)'s Shadows silhouettes, under CC0 1.0
 
-StarHash is source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE).
-You may use, study and change it for any non-commercial purpose. Selling it, or using it in
-anything that earns money, is not allowed. Versions published before this change remain under GPL-3.0.
+The MTN and Airtel logos are trademarks of MTN Group and Airtel Africa, shown only to tell the two wallets apart; StarHash is not affiliated with either.
 
-The StarHash name and icon are not covered by the license: a modified version must use its own
-name and icon.
+StarHash is source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE): use, study and change it for anything non-commercial. The StarHash name and icon are not covered; a modified version needs its own. Versions published before this licence remain under GPL-3.0.
 
-## Credits
+<br>
 
-Space Grotesk by Florian Karsten, under the SIL Open Font License 1.1. The MTN and Airtel logos are trademarks of MTN Group and Airtel Africa, shown only to tell the two wallets apart; StarHash is not affiliated with either.
+<div align="center">
+
+[![GitHub](https://img.shields.io/badge/GitHub-171717?style=flat&logo=github&logoColor=white)](https://github.com/devbyshima)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-171717?style=flat&logo=ko-fi&logoColor=white)](https://ko-fi.com/devbyshima)
+
+</div>
+
+<p align="center">
+  <sub>Made by Shima</sub>
+</p>
