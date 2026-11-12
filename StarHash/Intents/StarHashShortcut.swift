@@ -6,11 +6,11 @@ import UIKit
 /// (when a message containing RWF arrives, which every M-Money and
 /// AirtelMoney message does, run immediately) is made by hand, as the
 /// guide shows: the one written into the shared file for iOS 27 never
-/// appeared on a real iPhone. It is shared
-/// from iCloud, so one tap opens Shortcuts' own Add Shortcut screen. With
-/// no link it would fall back to a signed file in the bundle
-/// (scripts/make_shortcut.py) through the share sheet; that file is not
-/// bundled at present.
+/// appeared on a real iPhone. It comes from a signed file in the bundle
+/// (StarHash/Resources/StarHash SMS.shortcut, made by
+/// scripts/make_shortcut.py for this app's bundle id and team) through the
+/// share sheet, Shortcuts opening its Add Shortcut screen; or from an
+/// iCloud link for the bundle id, once one is shared.
 @MainActor
 enum StarHashShortcut {
     /// The name the shortcut is installed under, and run by.
@@ -25,13 +25,11 @@ enum StarHashShortcut {
     /// as it was when shared.
     private static let iCloudLinks: [String: URL] = [:]
 
-    /// The October link, shared from the old id and team
-    /// (com.fulltimestudio.starhash, 7WHQR6L96K), kept until each build
-    /// has its own above.
-    private static let legacyLink = URL(string: "https://www.icloud.com/shortcuts/d13eee82797e4c41b2da5a6b5aa03309")
-
+    /// This build's link. No fallback to another build's: October's link
+    /// named the old id and team (com.fulltimestudio.starhash, 7WHQR6L96K),
+    /// so Shortcuts showed its wand on it and could not run it here.
     static var iCloudLink: URL? {
-        Bundle.main.bundleIdentifier.flatMap { iCloudLinks[$0] } ?? legacyLink
+        Bundle.main.bundleIdentifier.flatMap { iCloudLinks[$0] }
     }
 
     /// Opens Shortcuts on the shortcut's Add Shortcut screen.

@@ -39,6 +39,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--bundle-id", default=from_project("PRODUCT_BUNDLE_IDENTIFIER"))
 parser.add_argument("--team", default=from_project("DEVELOPMENT_TEAM"))
 parser.add_argument("--out", default=os.path.join(ROOT, "StarHash", "Resources", "StarHash SMS.shortcut"))
+parser.add_argument("--icon", help="a PNG for the shortcut's icon, in place of Shortcuts' glyph")
 args = parser.parse_args()
 
 OUT = os.path.abspath(args.out)
@@ -110,6 +111,12 @@ workflow = {
         },
     }],
 }
+
+if args.icon == "none":
+    del workflow["WFWorkflowIcon"]
+elif args.icon:
+    with open(args.icon, "rb") as f:
+        workflow["WFWorkflowIcon"]["WFWorkflowIconImageData"] = f.read()
 
 with tempfile.TemporaryDirectory() as folder:
     unsigned = os.path.join(folder, "StarHash SMS.shortcut")
