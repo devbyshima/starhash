@@ -91,6 +91,7 @@ struct StarHashApp: App {
                     .id(language)
                     .environment(store)
                     .environment(AppEnvironment.owner)
+                    .environment(AppEnvironment.autoVerify)
                     .environment(router)
                     .environment(shortcuts)
                     .tint(Color.starhashPrimaryText)
@@ -107,7 +108,7 @@ struct StarHashApp: App {
                     .task(id: scenePhase == .active) {
                         while scenePhase == .active, !Task.isCancelled {
                             try? await Task.sleep(for: .seconds(60))
-                            PaymentExpiry.run()
+                            AppEnvironment.autoVerify.expireUnconfirmed()
                         }
                     }
             }
@@ -130,7 +131,8 @@ struct StarHashApp: App {
                 // The owner's listing, sent again when it is a week old.
                 StarHashCloud.syncDirectory(owner: AppEnvironment.owner)
                 store.reloadFromDisk()
-                PaymentExpiry.run()
+                AppEnvironment.autoVerify.reload()
+                AppEnvironment.autoVerify.expireUnconfirmed()
                 Task { await StarHashNotifications.shared.sync() }
                 // Categories for what came in while away, by the rules and
                 // then by the on-device model.

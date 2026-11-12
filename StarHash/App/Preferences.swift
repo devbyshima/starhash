@@ -21,7 +21,6 @@ enum PreferenceKey {
     static let enableContacts = "enableContacts"
     static let nearbyLocation = "nearbyLocation"
     static let saveRecents = "saveRecents"
-    static let autoVerifySetUp = "autoVerifySetUp"
 }
 
 /// The language StarHash speaks, chosen in Settings rather than the
