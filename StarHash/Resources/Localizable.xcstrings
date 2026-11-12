@@ -10447,6 +10447,22 @@
           }
         }
       }
+    },
+    "Tap its name at the top, then **Choose Icon** and **StarHash**.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touchez son nom en haut, puis **Choisir une icône** et **StarHash**."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kanda izina ryayo hejuru, hanyuma **Choose Icon** na **StarHash**."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

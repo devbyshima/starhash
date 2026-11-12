@@ -8,16 +8,14 @@
 # iOS only imports signed shortcut files.
 #
 #   python3 scripts/make_shortcut.py
-#   python3 scripts/make_shortcut.py --bundle-id com.fulltimestudio.starhash --out serein.shortcut
+#   python3 scripts/make_shortcut.py --bundle-id <another build's id> --out other.shortcut
 #
-# Output: StarHash/Resources/StarHash SMS.shortcut, the file shared for
-# StarHashShortcut.iCloudLinks (bundled only if the links are ever removed).
-# The action names the app by bundle id and team, read from project.yml by
-# default: Shortcuts only runs it, and only shows the app's icon for it,
-# on an iPhone with that very app installed. A build under another id (the
-# owner's own iPhone keeps an older one) needs a shortcut of its own, made
-# with --bundle-id and shared under its own link. Regenerate after renaming
-# the intent, the bundle id or the team.
+# Output: StarHash/Resources/StarHash SMS.shortcut, the file the app bundles
+# and auto-verify's guide installs (StarHashShortcut). The action names the
+# app by bundle id and team, read from project.yml by default: Shortcuts
+# only runs it on an iPhone with that very app installed. A build under
+# another id needs a shortcut of its own, made with --bundle-id.
+# Regenerate after renaming the intent, the bundle id or the team.
 import argparse
 import os
 import plistlib
@@ -39,7 +37,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--bundle-id", default=from_project("PRODUCT_BUNDLE_IDENTIFIER"))
 parser.add_argument("--team", default=from_project("DEVELOPMENT_TEAM"))
 parser.add_argument("--out", default=os.path.join(ROOT, "StarHash", "Resources", "StarHash SMS.shortcut"))
-parser.add_argument("--icon", help="a PNG for the shortcut's icon, in place of Shortcuts' glyph")
 args = parser.parse_args()
 
 OUT = os.path.abspath(args.out)
@@ -80,11 +77,10 @@ workflow = {
     "WFWorkflowClientVersion": "2607.0.2",
     "WFWorkflowMinimumClientVersion": 900,
     "WFWorkflowMinimumClientVersionString": "900",
-    # Shortcuts' own default glyph on black. Shortcuts shows the icon of its
-    # one action's app in its place, but only while BUNDLE_ID and TEAM_ID
-    # name the app installed on that iPhone: the link shared in October
-    # named com.fulltimestudio.starhash under the old team 7WHQR6L96K, so
-    # every iPhone showed this wand instead.
+    # Shortcuts' own default glyph and colour. A file can name no app for its
+    # icon (Shortcuts ignores an image here, and glyph 61440, an app's
+    # icon, shows a placeholder until Shortcuts knows which app), so the
+    # guide has the owner choose StarHash's icon in Shortcuts by hand.
     "WFWorkflowIcon": {"WFWorkflowIconGlyphNumber": 59511, "WFWorkflowIconStartColor": 255},
     "WFWorkflowImportQuestions": [],
     "WFWorkflowTypes": [],
@@ -111,12 +107,6 @@ workflow = {
         },
     }],
 }
-
-if args.icon == "none":
-    del workflow["WFWorkflowIcon"]
-elif args.icon:
-    with open(args.icon, "rb") as f:
-        workflow["WFWorkflowIcon"]["WFWorkflowIconImageData"] = f.read()
 
 with tempfile.TemporaryDirectory() as folder:
     unsigned = os.path.join(folder, "StarHash SMS.shortcut")

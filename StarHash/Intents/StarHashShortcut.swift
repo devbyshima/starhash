@@ -19,15 +19,15 @@ enum StarHashShortcut {
     /// The shared shortcut for each build's bundle id (Share › Copy iCloud
     /// Link in Shortcuts on iOS 27), made by scripts/make_shortcut.py with
     /// that id: its action names the app by bundle id and team, and
-    /// Shortcuts only runs it, and only shows StarHash's icon on it rather
-    /// than its own wand, when they are the app's on that iPhone. Share it
-    /// again after changing the shortcut: a link is a copy of the shortcut
-    /// as it was when shared.
+    /// Shortcuts only runs it when they are the app's on that iPhone. Share
+    /// it again after changing the shortcut: a link is a copy of the
+    /// shortcut as it was when shared. Neither a link nor the file can give
+    /// the shortcut StarHash's icon; the guide has it chosen in Shortcuts.
     private static let iCloudLinks: [String: URL] = [:]
 
     /// This build's link. No fallback to another build's: October's link
     /// named the old id and team (com.fulltimestudio.starhash, 7WHQR6L96K),
-    /// so Shortcuts showed its wand on it and could not run it here.
+    /// so Shortcuts could not run it here.
     static var iCloudLink: URL? {
         Bundle.main.bundleIdentifier.flatMap { iCloudLinks[$0] }
     }

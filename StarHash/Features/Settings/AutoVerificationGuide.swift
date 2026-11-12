@@ -214,6 +214,9 @@ struct AutoVerificationGuide: View {
             GuideStepList(steps: [
                 "Tap **Add Shortcut** below.",
                 "In Shortcuts, tap **Add Shortcut**.",
+                // A shortcut file names no app for its icon, so Shortcuts
+                // shows its wand until StarHash's is chosen by hand.
+                "Tap its name at the top, then **Choose Icon** and **StarHash**.",
                 "Come back and tap **Continue**.",
             ])
         } else if step == 1 {
