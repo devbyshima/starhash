@@ -16,10 +16,23 @@ enum StarHashShortcut {
     /// The name the shortcut is installed under, and run by.
     static let name = AutoVerificationSample.shortcutName
 
-    /// The shared shortcut, automation included (Share › Copy iCloud Link
-    /// in Shortcuts on iOS 27). Share it again after changing the shortcut:
-    /// a link is a copy of the shortcut as it was when shared.
-    static let iCloudLink = URL(string: "https://www.icloud.com/shortcuts/d13eee82797e4c41b2da5a6b5aa03309")
+    /// The shared shortcut for each build's bundle id (Share › Copy iCloud
+    /// Link in Shortcuts on iOS 27), made by scripts/make_shortcut.py with
+    /// that id: its action names the app by bundle id and team, and
+    /// Shortcuts only runs it, and only shows StarHash's icon on it rather
+    /// than its own wand, when they are the app's on that iPhone. Share it
+    /// again after changing the shortcut: a link is a copy of the shortcut
+    /// as it was when shared.
+    private static let iCloudLinks: [String: URL] = [:]
+
+    /// The October link, shared from the old id and team
+    /// (com.fulltimestudio.starhash, 7WHQR6L96K), kept until each build
+    /// has its own above.
+    private static let legacyLink = URL(string: "https://www.icloud.com/shortcuts/d13eee82797e4c41b2da5a6b5aa03309")
+
+    static var iCloudLink: URL? {
+        Bundle.main.bundleIdentifier.flatMap { iCloudLinks[$0] } ?? legacyLink
+    }
 
     /// Opens Shortcuts on the shortcut's Add Shortcut screen.
     static func install(openURL: OpenURLAction) {
