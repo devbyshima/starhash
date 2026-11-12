@@ -110,7 +110,7 @@ struct ThirdPartyPiece: Identifiable, Hashable {
 
     var id: String { name }
 
-    static let all: [ThirdPartyPiece] = [spaceGrotesk, keylineIcons]
+    static let all: [ThirdPartyPiece] = [spaceGrotesk, keylineIcons, shadows]
 
     static let spaceGrotesk = ThirdPartyPiece(
         name: "Space Grotesk",
@@ -136,6 +136,20 @@ struct ThirdPartyPiece: Identifiable, Hashable {
         licenceURL: URL(string: "https://opensource.org/license/mit")!,
         source: URL(string: "https://github.com/keyline-icons/keyline-icons")!,
         textFile: "KeylineIcons"
+    )
+
+    /// The silhouettes a person with no photo wears (`ShadowAvatar`),
+    /// fetched by scripts/make_avatars.py from DiceBear's Shadows style.
+    static let shadows = ThirdPartyPiece(
+        name: "DiceBear Shadows",
+        // DiceBear's major version the drawings come from (its 10.x API).
+        version: "10",
+        symbol: "person.fill",
+        licence: "CC0-1.0",
+        licenceName: "Creative Commons Zero",
+        licenceURL: URL(string: "https://creativecommons.org/publicdomain/zero/1.0/")!,
+        source: URL(string: "https://www.dicebear.com/styles/shadows/")!,
+        textFile: "DiceBearShadows"
     )
 
     /// The licence's text as its authors ship it, reflowed to the screen,
