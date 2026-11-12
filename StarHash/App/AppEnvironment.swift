@@ -115,10 +115,6 @@ final class AppRouter {
     private(set) var pagesHidingTabBar: Set<AppTab> = []
     /// Shrunk while a page scrolls down.
     private(set) var isTabBarCompact = false
-    /// Where the tab bar's capsule sits in the window, full size and
-    /// showing: the screen's Distortion Wave leaves it uncovered, so the
-    /// live bar floats over the wave. Not observed: nothing redraws by it.
-    @ObservationIgnored var tabBarFrame: CGRect?
 
     /// Opens on the default page chosen in Settings, Pay or Buy.
     init() {

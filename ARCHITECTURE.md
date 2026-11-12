@@ -46,7 +46,7 @@ One folder per part of the app:
 
 #### [StarHash/Design](StarHash/Design)
 
-The design system: `Theme` (every colour, `StarHashMetrics`, Space Grotesk), `Glass` (Liquid Glass with an iOS 18 fallback, containers, Soft Edge), `SheetKit`, `Components`, `Icons` (Keyline icons as custom symbols), `ShadowAvatar`, `DistortionWave` (Metal shaders over snapshots in `Shaders/`: the screen's wave that carries a picked recipient back to Pay, and the sheet's that turns a confirmation sheet into its `SheetOutcome`), haptics and the glass segmented control.
+The design system: `Theme` (every colour, `StarHashMetrics`, Space Grotesk), `Glass` (Liquid Glass with an iOS 18 fallback, containers, Soft Edge), `SheetKit`, `Components`, `Icons` (Keyline icons as custom symbols), `ShadowAvatar`, `DistortionWave` (a Metal shader over snapshots in `Shaders/`, the wave that turns a confirmation sheet into its `SheetOutcome`), haptics and the glass segmented control.
 
 #### [StarHash/Intents](StarHash/Intents)
 
