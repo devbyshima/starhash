@@ -120,6 +120,19 @@ struct NotificationPlanTests {
         #expect(weekly.body == "You sent 12,500 RWF in 2 payments and received 7,000 RWF this week.")
     }
 
+    /// Money moved between the owner's own accounts is no payment: a
+    /// week of nothing else has no summary, and it never adds to the count.
+    @Test func ownTransfersAreNoPayments() throws {
+        var own = Self.tx(30_000, at: Self.date(2026, 10, 1))
+        own.category = TransactionCategory.ownAccounts.rawValue
+        let alone = NotificationPlan.scheduled(for: [own], settings: .init(weeklyDay: 1, monthlySummary: false, summaryHour: 18), now: Self.now, calendar: Self.calendar)
+        #expect(!alone.contains { $0.kind == .weeklySummary })
+
+        let mixed = NotificationPlan.scheduled(for: [own, Self.tx(2_500, at: Self.date(2026, 10, 1))], settings: .init(weeklyDay: 1, monthlySummary: false, summaryHour: 18), now: Self.now, calendar: Self.calendar)
+        let weekly = try #require(mixed.first { $0.kind == .weeklySummary })
+        #expect(weekly.body == "You sent 2,500 RWF in 1 payment this week.")
+    }
+
     @Test func noSummaryForAnEmptyPeriod() {
         let old = Self.tx(10_000, at: Self.date(2026, 8, 1))
         let plan = NotificationPlan.scheduled(for: [old], settings: .init(), now: Self.now, calendar: Self.calendar)

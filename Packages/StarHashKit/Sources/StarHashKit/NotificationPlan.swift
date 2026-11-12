@@ -275,7 +275,10 @@ public enum NotificationPlan {
         of transactions: [Transaction],
         settings: Settings
     ) -> Item? {
-        let counted = transactions.filter { $0.status != .failed }
+        // Money moved between the owner's own accounts is neither sent nor
+        // received, so it is no payment either: a week of nothing else
+        // once read "You sent 0 RWF in 1 payment".
+        let counted = transactions.filter { $0.status != .failed && !$0.isOwnTransfer }
         guard !counted.isEmpty else { return nil }
         let totals = ActivitySummary.totals(of: counted)
         let payments = counted.filter { $0.direction == .outgoing }.count
