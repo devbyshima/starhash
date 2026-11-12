@@ -1,3 +1,4 @@
+import StarHashKit
 import SwiftUI
 import UIKit
 
@@ -303,6 +304,55 @@ extension Color {
     static let widgetChip = Color(light: .brandCloud, dark: .brandSlate)
     /// The widgets' symbols: the accent.
     static let widgetAccent = Color.brandFill
+
+    // MARK: Report
+
+    /// The Report's inner tiles: the page's own colour inside a card, as
+    /// the reference's white tiles stand on its grey cards.
+    static let reportTile = Color(light: .brandWhite, dark: .brandNight)
+    /// The bubbles of By Payment Type, after the reference's violet ones:
+    /// the largest solid, the rest a pale wash with the violet on it.
+    /// The white of a category's icon on its colour, and of the words in
+    /// the largest bubble.
+    static let reportIconGlyph = Color.white
+    /// A soft drop under each category icon, as the reference's.
+    static let reportIconShadow = Color.black.opacity(0.12)
+    static let reportBubble = Color(red: 124 / 255, green: 92 / 255, blue: 1)
+    static let reportBubbleWash = Color(light: Color(red: 238 / 255, green: 233 / 255, blue: 1), dark: Color(red: 52 / 255, green: 44 / 255, blue: 84 / 255))
+    static let reportBubbleOnWash = Color(light: Color(red: 98 / 255, green: 66 / 255, blue: 230 / 255), dark: Color(red: 196 / 255, green: 180 / 255, blue: 1))
+
+    private static func rgb(_ hex: UInt32) -> Color {
+        Color(red: Double((hex >> 16) & 0xFF) / 255, green: Double((hex >> 8) & 0xFF) / 255, blue: Double(hex & 0xFF) / 255)
+    }
+
+    /// Each category's two colours on the Report, after the owner's
+    /// reference (groceries green, food orange, rides yellow, stays violet,
+    /// travel cyan): its icon's circle runs from the light one at the top
+    /// to the deep one, and its slice of the ring is the deep one. The one
+    /// place StarHash shows hues beyond yellow and red, so the categories
+    /// tell apart at a glance; white icons sit on every deep colour.
+    static func reportCategory(_ category: TransactionCategory) -> (light: Color, deep: Color) {
+        let pair: (UInt32, UInt32) = switch category {
+        case .airtime: (0xFFD86B, 0xF2A900)
+        case .bundles: (0x6FE0F0, 0x12AFD3)
+        case .electricity: (0xFFC46B, 0xF08A00)
+        case .water: (0x7DB4FF, 0x2F6BFF)
+        case .tv: (0x9B9BFF, 0x5B4BF0)
+        case .restaurant: (0xFFA77E, 0xFF5E3A)
+        case .groceries: (0x8BE77A, 0x22B82F)
+        case .transport: (0xFFDA66, 0xF5B300)
+        case .bills: (0xA9B4CF, 0x5E6E95)
+        case .shopping: (0xFF9ACB, 0xEC4B97)
+        case .health: (0xFF8C99, 0xE93B53)
+        case .education: (0x6FE2C4, 0x0FA586)
+        case .family: (0xC29BFF, 0x8350F5)
+        case .gifts: (0xFF95DF, 0xCF3BAE)
+        case .savings: (0x7CD9A0, 0x1F9D5A)
+        case .ownAccounts: (0xC4C4C4, 0x8E8E8E)
+        case .other: (0xC9C9C9, 0x8A8A8A)
+        }
+        return (rgb(pair.0), rgb(pair.1))
+    }
 
     /// One colour per appearance, resolved by the system whenever the
     /// appearance changes.
