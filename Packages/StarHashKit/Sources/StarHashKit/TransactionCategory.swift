@@ -21,6 +21,7 @@ public enum TransactionCategory: String, CaseIterable, Codable, Identifiable, Se
     case health
     case education
     case family
+    case gifts
     case savings
     case ownAccounts
     case other
@@ -117,6 +118,7 @@ public enum TransactionCategorizer {
         (.bills, ["irembo", " rra ", "tax", "rssb", "mutuelle", "insurance", "assurance", "radiant", "sanlam"]),
         (.education, ["school", "ecole", "école", "college", "university", "universite", "academy", "ishuri", "lycee", "lycée", "urubuto", "tuition"]),
         (.groceries, ["supermarket", "super market", "simba", "ndoli", "market", "alimentation", "grocer", "frulep", "kigali hub", "sawa citi", "carrefour", "nakumatt"]),
+        (.gifts, [" gift", "gifts", "cadeau", "impano", "flower", "fleur", "florist", "souvenir"]),
         (.restaurant, ["restaurant", "resto", "cafe", "café", "coffee", "bar ", " bar", "pizza", "burger", "kfc", "java house", "brioche", "grill", "lounge", "bistro", "kitchen", "food", "pili-pili", "pili pili", "poivre", "bakery", "patisserie"]),
         (.shopping, ["shop", "boutique", "store", "mall", "fashion", "electronics", "hardware", "quincaillerie"]),
         (.savings, ["ejo heza", "savings", "sacco", " bank", "equity", "i&m", "bk ", "cogebanque", "ecobank", "access bank", "bpr"]),

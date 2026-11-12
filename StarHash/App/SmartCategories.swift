@@ -102,6 +102,7 @@ enum ModelCategory {
     case health
     case education
     case family
+    case gifts
     case savings
     case other
 
