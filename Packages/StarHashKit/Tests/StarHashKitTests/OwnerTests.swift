@@ -50,6 +50,38 @@ struct OwnerTests {
         #expect(owner.otherSIM?.destination == "0722123456")
     }
 
+    @Test func theOtherNumberIsNeverTheDefaultOne() {
+        let owner = Owner(defaults: freshDefaults())
+        owner.setNumber("0788123456")
+        owner.useTwoSIMs()
+        // However it is written, the default's number is refused.
+        #expect(owner.isDefaultNumber("+250 788 123 456"))
+        #expect(!owner.setOtherNumber("+250 788 123 456"))
+        #expect(!owner.setOtherNumber("0788 123 456"))
+        #expect(owner.otherSIM == nil)
+        #expect(owner.setOtherNumber("0722 123 456"))
+        // Nor can the default become the other's.
+        #expect(owner.isOtherNumber("0722123456"))
+        #expect(!owner.setNumber("0722123456"))
+        #expect(owner.defaultSIM?.destination == "0788123456")
+        #expect(owner.otherSIM?.destination == "0722123456")
+    }
+
+    @Test func oneNumberKeptTwiceIsReadAsOne() {
+        let defaults = freshDefaults()
+        defaults.set("0788123456", forKey: "profileNumber")
+        defaults.set("0788 123 456", forKey: "secondNumber")
+        defaults.set(2, forKey: "simCount")
+        let owner = Owner(defaults: defaults)
+        #expect(owner.defaultSIM?.destination == "0788123456")
+        #expect(owner.otherSIM == nil)
+
+        let restored = Owner(defaults: freshDefaults())
+        restored.restore(OwnerProfile(name: "Shima", number: "0788123456", otherNumber: "0788123456"))
+        #expect(restored.otherSIM == nil)
+        #expect(!restored.usesTwoSIMs)
+    }
+
     @Test func numbersSavedSpacedStillRead() {
         // Settings kept the other SIM's number as it showed it.
         let defaults = freshDefaults()

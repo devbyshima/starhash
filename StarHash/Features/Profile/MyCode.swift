@@ -149,8 +149,12 @@ struct ProfileFields: View {
     /// What is wrong with the other SIM's number: it need only be a
     /// Rwandan mobile number, on either network.
     private var otherProblem: String? {
-        guard draftOther.filter(\.isNumber).count >= 10, Recipient.ownNumber(draftOther) == nil else { return nil }
-        return String(starhash: "Enter a Rwandan mobile number: 078, 079, 072 or 073.")
+        guard draftOther.filter(\.isNumber).count >= 10 else { return nil }
+        guard Recipient.ownNumber(draftOther) != nil else {
+            return String(starhash: "Enter a Rwandan mobile number: 078, 079, 072 or 073.")
+        }
+        // One SIM cannot be both: `Owner` keeps neither the same twice.
+        return owner.isDefaultNumber(draftOther) ? String(starhash: "This is your first SIM's number.") : nil
     }
 
     /// What is wrong with the number typed, once it is long enough to tell.
@@ -159,6 +163,9 @@ struct ProfileFields: View {
         guard digits.count >= 10 else { return nil }
         guard Recipient.ownNumber(draftNumber) != nil else {
             return String(starhash: "Enter a Rwandan mobile number: 078, 079, 072 or 073.")
+        }
+        if owner.isOtherNumber(draftNumber) {
+            return String(starhash: "This is your other SIM's number.")
         }
         // With two SIMs both in, the wallet follows the default SIM, so
         // either carrier is right. With one, the number stays as typed: the
@@ -212,6 +219,7 @@ struct ProfileFields: View {
         }
         .animation(.smooth(duration: 0.2), value: problem)
         .animation(.smooth(duration: 0.2), value: otherProblem)
+        .sensoryFeedback(.error, trigger: owner.isDefaultNumber(draftOther) || owner.isOtherNumber(draftNumber)) { _, repeated in repeated }
         .onAppear {
             if draftNumber.isEmpty, let saved = owner.defaultSIM { draftNumber = saved.formattedDestination }
             if draftOther.isEmpty, let saved = owner.otherSIM { draftOther = saved.formattedDestination }

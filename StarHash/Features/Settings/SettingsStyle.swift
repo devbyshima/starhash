@@ -264,6 +264,8 @@ struct SettingsRow<Trailing: View>: View {
     var caption: String?
     /// Something the row has to report, always shown.
     var status: String?
+    /// The status line's colour, when it is a problem (red).
+    var statusColor: Color?
     @ViewBuilder var trailing: Trailing
 
     @State private var showsCaption = false
@@ -271,7 +273,7 @@ struct SettingsRow<Trailing: View>: View {
     var body: some View {
         HStack(spacing: 12) {
             SettingsCaptionIcon(symbol: symbol, hasCaption: caption != nil, showsCaption: $showsCaption)
-            SettingsRowText(title: title, caption: caption, status: status, showsCaption: showsCaption)
+            SettingsRowText(title: title, caption: caption, status: status, statusColor: statusColor, showsCaption: showsCaption)
             Spacer(minLength: 8)
             trailing
         }

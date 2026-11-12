@@ -27,7 +27,7 @@ Foundation and Observation only, a `public` interface, iOS 18 and macOS 15, test
 - **Reading messages:** `CarrierSMS` (`parse`, `parseFailure`, `parseOverdraft` for MTN's and Airtel's SMS), `ScamCheck`, `Verification`, `AutoVerify` (the one-hour window, `looksBroken`).
 - **The store:** `StarHashStore`, `@MainActor @Observable`, one JSON file and every rule for matching a message to a payment, retries, own transfers, expiry and Verify.
 - **The owner:** `Owner` (name, default and other SIM, wallet, and the rules between them), `OwnerWallets`, `OwnAccounts`.
-- **Reading the history:** `ActivitySummary` (totals, the chart's buckets, day and month groups, search), `SpendingReport` (the Report page: comparison with the period before, categories, top payments, payment types, key days, the saving), `TransactionCategory` and `TransactionCategorizer`.
+- **Reading the history:** `ActivitySummary` (totals, the chart's buckets, day and month groups, search), `SpendingReport` (the Report page: comparison with the period before and with the usual, the summary's insight, categories, top payments, payment types, each day spent on and the key days), `TransactionCategory` and `TransactionCategorizer`.
 - **Everything else:** `NotificationPlan` (what each local notification says and when), `Nearby`, `StarHashBackup` and `OwnerProfile`, `WidgetSnapshot`, `FeatureFlag` and `ReleaseChannel`, `ReleaseHistory` and `WhatsNew`, `StarHashLanguage` with `String(starhash:)` and `String(kit:)`.
 
 ### The App [SWIFTUI]
@@ -41,12 +41,12 @@ The lifecycle and the wiring. `AppEnvironment` holds the single `StarHashStore`,
 One folder per part of the app:
 
 - **Pay:** `PayView` and its keypad, `RecipientPickerView` (contacts, recents, Nearby, a typed number), `QRScannerView`, `PaymentServices` (`USSDDialer`, `PaymentLocation`).
-- **Activity** (the Transactions tab): `ActivityView`, `TransactionDetailPage`, `VerifyPaymentSheet`, and the Report: `ReportPage`, `ReportCards`, `ReportExport` (the PDF).
+- **Activity** (the Transactions tab): `ActivityView` (the period control, `ActivitySummaryCard`'s chart, every transaction by month), `TransactionDetailPage`, `VerifyPaymentSheet`, and the Report: `ReportPage`, `ReportCards` (the summary sentence, the cards, the Payment Types orbs, the By Day calendar and `ReportFlowLayout`, which sets the sentences word by word), `ReportExport` (the PDF) and `ReportGallery` (Debug only: every sentence length, in every language).
 - **Buy**, **Profile** (the owner's photo, numbers and `QRTreeView`), **Settings** (`SettingsView`, `AutoVerificationGuide`, `NotificationSettingsView`, `LicencesView`), **Onboarding**, **Safety** and **WhatsNew**.
 
 #### [StarHash/Design](StarHash/Design)
 
-The design system: `Theme` (every colour, `StarHashMetrics`, Space Grotesk), `Glass` (Liquid Glass with an iOS 18 fallback, containers, Soft Edge), `SheetKit`, `Components`, `Icons` (Keyline icons as custom symbols), `ShadowAvatar`, haptics and the glass segmented control.
+The design system: `Theme` (every colour, `StarHashMetrics`, Space Grotesk), `Glass` (Liquid Glass with an iOS 18 fallback, containers, Soft Edge), `SheetKit`, `Components`, `Icons` (Keyline icons as custom symbols), `ShadowAvatar`, `DistortionWave` (Metal shaders over snapshots in `Shaders/`: the screen's wave that carries a picked recipient back to Pay, and the sheet's that turns a confirmation sheet into its `SheetOutcome`), haptics and the glass segmented control.
 
 #### [StarHash/Intents](StarHash/Intents)
 
