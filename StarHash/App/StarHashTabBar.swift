@@ -49,6 +49,9 @@ struct StarHashTabBar: View {
         }
         .frame(width: layout.width, height: TabBarMetrics.height, alignment: .topLeading)
         .contentShape(Capsule())
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+            if !router.isTabBarHidden, !router.isTabBarCompact { router.tabBarFrame = frame }
+        }
         .gesture(choosing(layout))
         // The bar is narrower with an end chosen. Centred here, in a frame
         // of the widest bar, so the re-centring rides the same spring as

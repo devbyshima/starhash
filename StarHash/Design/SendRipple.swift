@@ -201,7 +201,7 @@ private struct SendRippleView: View {
 
 /// Notes where each finger comes down anywhere in a window, without taking
 /// part in any gesture: it fails at once, and cancels and delays nothing.
-private final class TouchDownRecorder: UIGestureRecognizer, UIGestureRecognizerDelegate {
+final class TouchDownRecorder: UIGestureRecognizer, UIGestureRecognizerDelegate {
     private(set) var location: CGPoint?
 
     override init(target: Any?, action: Selector?) {
