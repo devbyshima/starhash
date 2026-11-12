@@ -139,30 +139,69 @@ struct SpendingReportTests {
         #expect(report.lowestDay?.total == 500)
     }
 
+    @Test func daysInOrderWithTheirTopCategory() {
+        let report = Self.report([
+            Self.tx(800, on: Self.date(2026, 11, 8), category: .transport),
+            Self.tx(1_000, on: Self.date(2026, 11, 2, 9), category: .groceries),
+            Self.tx(2_000, on: Self.date(2026, 11, 2, 18), category: .restaurant),
+        ])
+        #expect(report.days.map(\.total) == [3_000, 800])
+        #expect(report.days.map(\.count) == [2, 1])
+        #expect(report.days.map(\.category) == [.restaurant, .transport])
+        #expect(report.days.first?.day == Self.calendar.startOfDay(for: Self.date(2026, 11, 2)))
+    }
+
     @Test func noLowestDayWithOneDay() {
         let report = Self.report([Self.tx(1_000, on: Self.date(2026, 11, 2))])
         #expect(report.highestDay?.total == 1_000)
         #expect(report.lowestDay == nil)
     }
 
-    // MARK: Saving
+    // MARK: Insight
 
-    @Test func savingIsTenPercentOfTheLargestFlexibleCategory() throws {
-        let day = Self.date(2026, 11, 3)
-        let report = Self.report([
-            Self.tx(50_000, on: day, category: .bills),
-            Self.tx(4_900, on: day, category: .restaurant),
-            Self.tx(1_000, on: day, category: .shopping),
-        ])
-        let saving = try #require(report.saving)
-        #expect(saving.category == .restaurant)
-        #expect(saving.spent == 4_900)
-        #expect(saving.amount == 490)
+    /// Restaurants usually 10,000 a month; this month 25,000 in three
+    /// payments: 15,000 more, two payments' worth.
+    @Test func namesTheCategoryFurthestOverItsUsual() {
+        var items: [Transaction] = []
+        for month in 7...9 {
+            items.append(Self.tx(10_000, on: Self.date(2026, month, 3), category: .restaurant))
+            items.append(Self.tx(5_000, on: Self.date(2026, month, 4), category: .groceries))
+        }
+        items += [9_000, 8_000, 8_000].map { Self.tx($0, on: Self.date(2026, 10, 5), category: .restaurant) }
+        items.append(Self.tx(5_500, on: Self.date(2026, 10, 6), category: .groceries))
+        let report = Self.report(items, anchor: Self.date(2026, 10, 15))
+        #expect(report.usualSpent == 15_000)
+        #expect(report.insight == .more(category: .restaurant, extra: 15_000, usual: 10_000, fewerPayments: 2))
     }
 
-    @Test func noSavingWithOnlyFixedCosts() {
-        let report = Self.report([Self.tx(50_000, on: Self.date(2026, 11, 3), category: .education)])
-        #expect(report.saving == nil)
+    @Test func lessThanUsualWhenNothingRises() {
+        let items = [
+            Self.tx(20_000, on: Self.date(2026, 9, 3), category: .groceries),
+            Self.tx(15_000, on: Self.date(2026, 10, 3), category: .groceries),
+        ]
+        let report = Self.report(items, anchor: Self.date(2026, 10, 15))
+        #expect(report.insight == .less(by: 5_000))
+    }
+
+    @Test func theTopShareWithNothingToCompare() {
+        let report = Self.report([
+            Self.tx(3_000, on: Self.date(2026, 11, 3), category: .restaurant),
+            Self.tx(1_000, on: Self.date(2026, 11, 4), category: .transport),
+        ])
+        #expect(report.usualSpent == nil)
+        #expect(report.insight == .share(category: .restaurant, share: 0.75))
+    }
+
+    /// Ten days into November, the usual is the first ten days of the
+    /// months before, and a month with nothing spent does not count.
+    @Test func theUsualKeepsToTheSameSpanAndSkipsEmptyPeriods() {
+        let report = Self.report([
+            Self.tx(4_000, on: Self.date(2026, 8, 5)),
+            Self.tx(90_000, on: Self.date(2026, 8, 25)),
+            Self.tx(2_000, on: Self.date(2026, 10, 5)),
+            Self.tx(1_000, on: Self.date(2026, 11, 5)),
+        ])
+        #expect(report.usualSpent == 3_000)
     }
 
     // MARK: Filter and navigation
@@ -192,13 +231,18 @@ struct SpendingReportTests {
         #expect(ActivityPeriod.month.title(for: october, now: Self.now, calendar: Self.calendar, locale: Self.locale) == "October 2026")
         #expect(ActivityPeriod.year.title(for: Self.date(2025, 3, 1), now: Self.now, calendar: Self.calendar, locale: Self.locale) == "2025")
         #expect(ActivityPeriod.month.name(for: Self.now, calendar: Self.calendar, locale: Self.locale) == "November 2026")
+        // Mid-sentence, a month keeps its language's case.
+        let french = Locale(identifier: "fr_FR")
+        #expect(ActivityPeriod.month.name(for: Self.now, calendar: Self.calendar, locale: french) == "Novembre 2026")
+        #expect(ActivityPeriod.month.name(for: Self.now, calendar: Self.calendar, locale: french, inSentence: true) == "novembre 2026")
+        #expect(ActivityPeriod.month.name(for: Self.now, calendar: Self.calendar, locale: Self.locale, inSentence: true) == "November 2026")
     }
 
     @Test func emptyReport() {
         let report = Self.report([])
         #expect(report.isEmpty)
         #expect(report.categories.isEmpty)
-        #expect(report.saving == nil)
+        #expect(report.insight == nil)
         #expect(report.highestDay == nil)
     }
 

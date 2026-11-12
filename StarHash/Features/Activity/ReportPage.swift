@@ -26,6 +26,8 @@ struct ReportPage: View {
     @State private var anchor = Date.now
     /// The category the report is narrowed to; nil for all of them.
     @State private var category: TransactionCategory?
+    /// The category chosen in Categories' ring, or from the summary.
+    @State private var chosenCategory: TransactionCategory?
     /// The moment the report is worked out for, refreshed as on Activity,
     /// so "This Month" rolls over by itself.
     @State private var now = Date.now
@@ -42,8 +44,22 @@ struct ReportPage: View {
     }
 
     var body: some View {
+        #if DEBUG
+        if let page = DebugLaunch.value(after: "-reportSummaries").flatMap(Int.init) {
+            ReportGallery(page: page)
+                .background(Color.starhashBackground.ignoresSafeArea())
+                .toolbar(.hidden, for: .navigationBar)
+        } else {
+            page
+        }
+        #else
+        page
+        #endif
+    }
+
+    private var page: some View {
         let report = report
-        ScrollViewReader { scroller in
+        return ScrollViewReader { scroller in
             ScrollView {
                 VStack(spacing: ReportLayout.cardSpacing) {
                     if report.isEmpty {
@@ -52,7 +68,21 @@ struct ReportPage: View {
                             .padding(.top, 80)
                             .transition(.opacity)
                     } else {
-                        ReportContent(report: report, calendar: calendar, rollsDigits: !reduceMotion, onOpen: open)
+                        ReportContent(
+                            report: report,
+                            calendar: calendar,
+                            period: periodPhrase,
+                            chosenCategory: $chosenCategory,
+                            rollsDigits: !reduceMotion,
+                            onOpen: open,
+                            onShowCategory: { shown in
+                                withAnimation(.easeOut(duration: 0.2)) { chosenCategory = shown }
+                                withAnimation(.smooth(duration: 0.45)) { scroller.scrollTo(ReportContent.Card.breakdown, anchor: .top) }
+                            },
+                            onNarrow: { narrowed in
+                                withAnimation(.smooth(duration: 0.3)) { category = narrowed }
+                            }
+                        )
                             .transition(.opacity)
                     }
                 }
@@ -84,6 +114,8 @@ struct ReportPage: View {
             if phase == .active { refreshNow() }
         }
         .onChange(of: store.transactions.count) { refreshNow() }
+        // A category chosen belongs to the report it was chosen in.
+        .onChange(of: [period.rawValue, anchor.description, category?.rawValue ?? ""]) { chosenCategory = nil }
         #if DEBUG
         .onAppear(perform: applyDebugLaunch)
         #endif
@@ -91,50 +123,37 @@ struct ReportPage: View {
 
     // MARK: Header
 
+    /// Two buttons only, at the owner's ask: back, and More, which holds
+    /// everything else. The title carries the period and the category
+    /// under it, as they are no longer on buttons.
     private func header(_ report: SpendingReport) -> some View {
-        VStack(spacing: 10) {
-            HStack(spacing: 12) {
-                Button { dismiss() } label: {
-                    StarHashCircleGlyph(symbol: "chevron.left")
-                }
-                .buttonStyle(.hapticPlain)
-                .accessibilityLabel("Back")
-                Text("Report")
-                    .starhashFont(24, weight: .bold, relativeTo: .title2)
-                    .foregroundStyle(Color.starhashPrimaryText)
-                    .lineLimit(1)
-                    .accessibilityAddTraits(.isHeader)
-                Spacer(minLength: 8)
-                GlassSegmentedControl(
-                    options: ActivityPeriod.choices,
-                    selection: period,
-                    onSelect: choosePeriod,
-                    label: \.shortLabel,
-                    accessibilityLabel: \.title
-                )
+        HStack(spacing: 12) {
+            Button { dismiss() } label: {
+                StarHashCircleGlyph(symbol: "chevron.left")
             }
-            .frame(minHeight: ActivityLayout.topBarHeight)
-
-            HStack(spacing: 8) {
-                stepButton(-1, symbol: "chevron.left", label: "Earlier")
-                Text(period.title(for: anchor, now: now, calendar: calendar, locale: .starhash))
-                    .starhashFont(16, weight: .semibold, relativeTo: .headline)
-                    .foregroundStyle(Color.starhashPrimaryText)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                    .contentTransition(.opacity)
-                    .accessibilityAddTraits(.updatesFrequently)
-                stepButton(1, symbol: "chevron.right", label: "Later")
-                    .disabled(report.isCurrent || report.interval.end > now)
-                Spacer(minLength: 4)
-                categoryMenu
-                ShareLink(item: ReportPDF(report: report, title: exportTitle(report), calendar: calendar), preview: SharePreview(exportTitle(report))) {
-                    StarHashCircleGlyph(symbol: "square.and.arrow.up.fill")
+            .buttonStyle(.hapticPlain)
+            .accessibilityLabel("Back")
+            Spacer(minLength: 8)
+            moreMenu(report)
+        }
+        .frame(minHeight: ActivityLayout.topBarHeight)
+        // The title centred on the screen at the size of every other
+        // page's (`PageTitle`), clear of the two buttons.
+        .overlay {
+            VStack(spacing: 0) {
+                PageTitle(text: "Report")
+                // The period is the summary's first words; only a category
+                // narrowed to is said here.
+                if let category {
+                    Text(String(starhash: "\(category.title) only"))
+                        .reportFont(.detail)
+                        .foregroundStyle(Color.starhashSecondaryText)
+                        .transition(.opacity)
                 }
-                .buttonStyle(.hapticPlain)
-                .disabled(report.isEmpty)
-                .accessibilityLabel("Export Report")
             }
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+            .padding(.horizontal, 44 + 12)
         }
         .padding(.horizontal, StarHashMetrics.screenPadding)
         .padding(.bottom, 4)
@@ -142,60 +161,83 @@ struct ReportPage: View {
         .starhashClearsWindowControls()
     }
 
-    private func stepButton(_ steps: Int, symbol: String, label: LocalizedStringKey) -> some View {
-        Button {
-            withAnimation(reduceMotion ? .easeInOut(duration: 0.2) : .smooth(duration: 0.35)) {
-                anchor = period.anchor(anchor, movedBy: steps, calendar: calendar)
+    /// What the summary opens with: "This month", "In October 2026", "In
+    /// the week of Nov 2".
+    private var periodPhrase: String {
+        guard let interval = period.interval(now: anchor, calendar: calendar), !interval.contains(now) else {
+            return switch period {
+            case .week, .today: String(starhash: "This week")
+            case .year, .allTime: String(starhash: "This year")
+            case .month: String(starhash: "This month")
             }
-        } label: {
-            Image(symbol: symbol)
-                .font(.system(size: 13, weight: .bold))
-                .foregroundStyle(Color.starhashPrimaryText)
-                .frame(width: 32, height: 32)
-                .starhashGlass(in: Circle(), interactive: true, tint: .clear)
-                .frame(width: 44, height: 44)
-                .contentShape(Rectangle())
         }
-        .buttonStyle(.hapticPlain)
-        .accessibilityLabel(label)
+        if period == .week {
+            return String(starhash: "In the week of \(SpendingReport.dayText(interval.start))")
+        }
+        return String(starhash: "In \(period.name(for: anchor, calendar: calendar, locale: .starhash, inSentence: true))")
     }
 
-    /// Narrows the report to one category, or All Categories.
-    private var categoryMenu: some View {
+    /// The period (week, month or year), stepping back and forth through
+    /// them, the category, and Export.
+    private func moreMenu(_ report: SpendingReport) -> some View {
         Menu {
-            Picker(selection: categoryBinding) {
-                Text("All Categories").tag(TransactionCategory?.none)
-                ForEach(TransactionCategory.choices) { choice in
-                    Label(choice.title, symbol: choice.symbol).tag(TransactionCategory?.some(choice))
+            Picker(selection: periodBinding) {
+                ForEach(ActivityPeriod.choices) { choice in
+                    Text(choice.unitTitle).tag(choice)
                 }
             } label: {
                 EmptyView()
             }
             .pickerStyle(.inline)
-        } label: {
-            HStack(spacing: 6) {
-                // The chosen category's icon alone, as its name would not
-                // fit beside the arrows; Total Spent names it.
-                if let category {
-                    ReportCategoryIcon(category: category, size: 24)
-                } else {
-                    Text("All")
-                        .starhashFont(15, weight: .semibold, relativeTo: .subheadline)
-                        .lineLimit(1)
+            Section {
+                Button { step(-1) } label: {
+                    Label(String(starhash: "Earlier"), symbol: "chevron.left")
                 }
-                Image(symbol: "chevron.up.chevron.down")
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(Color.starhashSecondaryText)
+                Button { step(1) } label: {
+                    Label(String(starhash: "Later"), symbol: "chevron.right")
+                }
+                .disabled(report.isCurrent || report.interval.end > now)
+                if !report.isCurrent {
+                    Button { withAnimation(.smooth(duration: 0.35)) { anchor = now } } label: {
+                        Label(period.title, symbol: "calendar")
+                    }
+                }
             }
-            .foregroundStyle(Color.starhashPrimaryText)
-            .padding(.horizontal, 14)
-            .frame(height: 44)
-            .starhashGlass(interactive: true, tint: .clear)
+            Menu {
+                Picker(selection: categoryBinding) {
+                    Text("All Categories").tag(TransactionCategory?.none)
+                    ForEach(TransactionCategory.choices) { choice in
+                        Label(choice.title, symbol: choice.symbol).tag(TransactionCategory?.some(choice))
+                    }
+                } label: {
+                    EmptyView()
+                }
+                .pickerStyle(.inline)
+            } label: {
+                Label(String(starhash: "Category"), symbol: category?.symbol ?? "chart.bar.fill")
+            }
+            Section {
+                ShareLink(item: ReportPDF(report: report, title: exportTitle(report), period: periodPhrase, calendar: calendar), preview: SharePreview(exportTitle(report))) {
+                    Label(String(starhash: "Export Report"), symbol: "square.and.arrow.up.fill")
+                }
+                .disabled(report.isEmpty)
+            }
+        } label: {
+            StarHashCircleGlyph(symbol: "ellipsis")
         }
         .menuStyle(.button)
         .buttonStyle(.hapticPlain)
-        .accessibilityLabel(String(starhash: "Category"))
-        .accessibilityValue(category?.title ?? String(starhash: "All Categories"))
+        .accessibilityLabel(String(starhash: "More"))
+    }
+
+    private var periodBinding: Binding<ActivityPeriod> {
+        Binding(get: { period }, set: choosePeriod)
+    }
+
+    private func step(_ steps: Int) {
+        withAnimation(reduceMotion ? .easeInOut(duration: 0.2) : .smooth(duration: 0.35)) {
+            anchor = period.anchor(anchor, movedBy: steps, calendar: calendar)
+        }
     }
 
     private var categoryBinding: Binding<TransactionCategory?> {
@@ -256,7 +298,7 @@ struct ReportPage: View {
         if DebugLaunch.arguments.contains("-reportPDF") {
             let report = report
             do {
-                let url = try ReportPDF(report: report, title: exportTitle(report), calendar: calendar).render()
+                let url = try ReportPDF(report: report, title: exportTitle(report), period: periodPhrase, calendar: calendar).render()
                 print("ReportPDF:", url.path)
             } catch {
                 print("ReportPDF failed:", error)
@@ -271,48 +313,41 @@ struct ReportPage: View {
 struct ReportContent: View {
     /// Each card, by name, for `-reportCard`.
     enum Card: String {
-        case overview, categories, expenses, breakdown, chart, types, metrics, saving
+        case summary, overview, breakdown, expenses, types, chart
     }
 
     let report: SpendingReport
     let calendar: Calendar
+    /// "This month": what the summary opens with.
+    let period: String
+    @Binding var chosenCategory: TransactionCategory?
     var rollsDigits = true
     /// Opens a payment's page; nil in the PDF.
     var onOpen: ((StarHashKit.Transaction) -> Void)?
+    /// Shows a category in Categories; nil in the PDF.
+    var onShowCategory: ((TransactionCategory) -> Void)?
+    /// Narrows the report to a category; nil in the PDF.
+    var onNarrow: ((TransactionCategory) -> Void)?
     var isExport = false
 
     var body: some View {
         VStack(spacing: ReportLayout.cardSpacing) {
-            ReportOverviewCard(
-                report: report,
-                rangeText: report.period.rangeText(for: report.interval.start, calendar: calendar, locale: .starhash) ?? "",
-                rollsDigits: rollsDigits
-            )
+            ReportSummary(report: report, period: period, onCategory: onShowCategory)
+                .id(Card.summary)
+            ReportOverviewCard(report: report, rollsDigits: rollsDigits)
             .id(Card.overview)
             if !report.categories.isEmpty {
-                ReportTopCategoriesCard(report: report)
-                    .id(Card.categories)
-                ReportTopExpensesCard(report: report, onOpen: onOpen)
-                    .id(Card.expenses)
-                ReportBreakdownCard(report: report, showsEverything: isExport)
+                ReportBreakdownCard(report: report, chosen: $chosenCategory, onNarrow: onNarrow, showsEverything: isExport)
                     .id(Card.breakdown)
+                ReportLargestCard(report: report, onOpen: onOpen)
+                    .id(Card.expenses)
             }
-            ReportChartCard(
-                report: report,
-                buckets: ActivitySummary.buckets(for: report.transactions, period: report.period, now: report.interval.start, calendar: calendar, locale: .starhash),
-                calendar: calendar
-            )
-            .id(Card.chart)
             if !report.types.isEmpty {
-                ReportTypesCard(report: report)
+                ReportTypesCard(report: report, isStill: isExport)
                     .id(Card.types)
             }
-            ReportMetricsCard(report: report)
-                .id(Card.metrics)
-            if let saving = report.saving {
-                ReportSavingCard(saving: saving)
-                    .id(Card.saving)
-            }
+            ReportChartCard(report: report, calendar: calendar, isStill: isExport)
+                .id(Card.chart)
         }
     }
 }

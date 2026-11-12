@@ -9216,54 +9216,6 @@
         }
       }
     },
-    "%lld days": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld jours"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Iminsi %lld"
-          }
-        }
-      }
-    },
-    "A quick look at this period.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Un aperçu rapide de cette période."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Incamake y'iki gihe."
-          }
-        }
-      }
-    },
-    "A small change to try next time.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Un petit changement à essayer la prochaine fois."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Impinduka nto wagerageza ubutaha."
-          }
-        }
-      }
-    },
     "All": {
       "localizations": {
         "fr": {
@@ -9308,86 +9260,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ugereranyije ku munsi"
-          }
-        }
-      }
-    },
-    "By Payment Type": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Par type de paiement"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ukurikije ubwoko bw'ubwishyu"
-          }
-        }
-      }
-    },
-    "Each bar is a day. Press and hold one to see it.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chaque barre est un jour. Maintenez-en une pour la voir."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Buri nkingi ni umunsi. Kanda ku nkingi uyifate kugira ngo uyirebe."
-          }
-        }
-      }
-    },
-    "Each bar is a month. Press and hold one to see it.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chaque barre est un mois. Maintenez-en une pour la voir."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Buri nkingi ni ukwezi. Kanda ku nkingi uyifate kugira ngo uyirebe."
-          }
-        }
-      }
-    },
-    "Each bar is a year.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chaque barre est une année."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Buri nkingi ni umwaka."
-          }
-        }
-      }
-    },
-    "Each bar is four hours.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chaque barre fait quatre heures."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Buri nkingi ni amasaha ane."
           }
         }
       }
@@ -9440,38 +9312,6 @@
         }
       }
     },
-    "Highest spending day": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Jour le plus dépensier"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Umunsi wakoresheje menshi"
-          }
-        }
-      }
-    },
-    "Key Metrics": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chiffres clés"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Imibare y'ingenzi"
-          }
-        }
-      }
-    },
     "Later": {
       "localizations": {
         "fr": {
@@ -9484,70 +9324,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ibikurikira"
-          }
-        }
-      }
-    },
-    "Lowest spending day": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Jour le moins dépensier"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Umunsi wakoresheje make"
-          }
-        }
-      }
-    },
-    "Most spent on": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Plus grosse dépense"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Icyo wakoreyeho menshi"
-          }
-        }
-      }
-    },
-    "None yet": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aucune pour l'instant"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nta na kimwe"
-          }
-        }
-      }
-    },
-    "Nothing spent then": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rien dépensé alors"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nta cyakoreshejwe icyo gihe"
           }
         }
       }
@@ -9568,22 +9344,6 @@
         }
       }
     },
-    "Savings Potential": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Économies possibles"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ibyo wazigama"
-          }
-        }
-      }
-    },
     "Shops": {
       "localizations": {
         "fr": {
@@ -9596,22 +9356,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Amaduka"
-          }
-        }
-      }
-    },
-    "Shops, people and what you bought.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Commerces, personnes et achats."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Amaduka, abantu n'ibyo waguze."
           }
         }
       }
@@ -9644,38 +9388,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Erekana byinshi"
-          }
-        }
-      }
-    },
-    "Spending Over Time": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dépenses dans le temps"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ibyakoreshejwe uko iminsi igenda"
-          }
-        }
-      }
-    },
-    "Spending by Category": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dépenses par catégorie"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ibyakoreshejwe ku cyiciro"
           }
         }
       }
@@ -9744,86 +9456,6 @@
         }
       }
     },
-    "The categories you spent the most on.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les catégories où vous avez le plus dépensé."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ibyiciro wakoresheje menshi."
-          }
-        }
-      }
-    },
-    "Top 3 Expenses": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les 3 plus grosses dépenses"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ibintu 3 wakoresheje menshi"
-          }
-        }
-      }
-    },
-    "Top Spending Categories": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Catégories principales"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ibyiciro by'imbere"
-          }
-        }
-      }
-    },
-    "Top category": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Catégorie principale"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Icyiciro cy'imbere"
-          }
-        }
-      }
-    },
-    "Total Spent": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Total dépensé"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Byose byakoreshejwe"
-          }
-        }
-      }
-    },
     "Total spent": {
       "localizations": {
         "fr": {
@@ -9840,146 +9472,978 @@
         }
       }
     },
-    "Where your money went.": {
+    "%@ of your spending went to %@.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Où est passé votre argent."
+            "value": "%1$@ de vos dépenses sont allées à %2$@."
           }
         },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aho amafaranga yawe yagiye."
+            "value": "%1$@ by'ibyo wakoresheje byagiye kuri %2$@."
           }
         }
       }
     },
-    "You spent %@ on %@ in this report. A %@ smaller budget for it next time would leave you an extra %@.": {
+    "%lld payments, %@ of your spending.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vous avez dépensé %1$@ en %2$@ dans ce rapport. Un budget %3$@ plus petit la prochaine fois vous laisserait %4$@ de plus."
+            "value": "%1$lld paiements, %2$@ de vos dépenses."
           }
         },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wakoresheje %1$@ kuri %2$@ muri iyi raporo. Uramutse ugabanyijeho %3$@ ubutaha, wasigarana andi %4$@."
+            "value": "Ubwishyu %1$lld, %2$@ by'ibyo wakoresheje."
           }
         }
       }
     },
-    "Your largest payments in this report.": {
+    "1 payment, %@ of your spending.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vos plus gros paiements dans ce rapport."
+            "value": "1 paiement, %@ de vos dépenses."
           }
         },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ubwishyu bwawe bunini muri iyi raporo."
+            "value": "Ubwishyu 1, %@ by'ibyo wakoresheje."
           }
         }
       }
     },
-    "day %lld of %lld": {
+    "Categories": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "jour %1$lld sur %2$lld"
+            "value": "Catégories"
           }
         },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "umunsi wa %1$lld muri %2$lld"
+            "value": "Ibyiciro"
           }
         }
       }
     },
-    "vs. before": {
+    "Largest payments": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "par rapport à avant"
+            "value": "Plus gros paiements"
           }
         },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "ugereranyije n'ibyabanje"
+            "value": "Ubwishyu bunini"
           }
         }
       }
     },
-    "vs. last month": {
+    "Over time": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "vs. le mois dernier"
+            "value": "Dans le temps"
           }
         },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "ugereranyije n'ukwezi gushize"
+            "value": "Uko iminsi igenda"
           }
         }
       }
     },
-    "vs. last week": {
+    "Payment types": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "vs. la semaine dernière"
+            "value": "Types de paiement"
           }
         },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "ugereranyije n'icyumweru gishize"
+            "value": "Ubwoko bw'ubwishyu"
           }
         }
       }
     },
-    "vs. last year": {
+    "Save up to %@": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "vs. l'an dernier"
+            "value": "Économisez jusqu'à %@"
           }
         },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "ugereranyije n'umwaka ushize"
+            "value": "Zigama kugeza kuri %@"
           }
         }
       }
     },
-    "vs. yesterday": {
+    "Skipping %lld of them next month would get you back on track.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "vs. hier"
+            "value": "En sauter %lld le mois prochain vous remettrait sur la bonne voie."
           }
         },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "ugereranyije n'ejo hashize"
+            "value": "Kureka %lld muri byo ukwezi gutaha byagusubiza ku murongo."
+          }
+        }
+      }
+    },
+    "Skipping %lld of them next week would get you back on track.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En sauter %lld la semaine prochaine vous remettrait sur la bonne voie."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kureka %lld muri byo icyumweru gitaha byagusubiza ku murongo."
+          }
+        }
+      }
+    },
+    "Skipping %lld of them next year would get you back on track.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En sauter %lld l'an prochain vous remettrait sur la bonne voie."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kureka %lld muri byo umwaka utaha byagusubiza ku murongo."
+          }
+        }
+      }
+    },
+    "Tap one to see it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touchez-en un pour le voir."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kanda kuri kimwe ukirebe."
+          }
+        }
+      }
+    },
+    "You spent %@ less than usual.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez dépensé %@ de moins que d'habitude."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wakoresheje %@ munsi y'ibisanzwe."
+          }
+        }
+      }
+    },
+    "You spent %@ more on %@ than usual.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez dépensé %1$@ de plus en %2$@ que d'habitude."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wakoresheje %1$@ kurenza ibisanzwe kuri %2$@."
+          }
+        }
+      }
+    },
+    "You're on track.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous êtes sur la bonne voie."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uri ku murongo mwiza."
+          }
+        }
+      }
+    },
+    "Year": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Année"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umwaka"
+          }
+        }
+      }
+    },
+    "Week": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Semaine"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icyumweru"
+          }
+        }
+      }
+    },
+    "Month": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mois"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukwezi"
+          }
+        }
+      }
+    },
+    "All Time": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depuis le début"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igihe cyose"
+          }
+        }
+      }
+    },
+    "%@ less than last month.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de moins que le mois dernier."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ munsi y'ukwezi gushize."
+          }
+        }
+      }
+    },
+    "%@ less than last week.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de moins que la semaine dernière."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ munsi y'icyumweru gishize."
+          }
+        }
+      }
+    },
+    "%@ less than last year.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de moins que l'an dernier."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ munsi y'umwaka ushize."
+          }
+        }
+      }
+    },
+    "%@ more than last month.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de plus que le mois dernier."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ hejuru y'ukwezi gushize."
+          }
+        }
+      }
+    },
+    "%@ more than last week.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de plus que la semaine dernière."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ hejuru y'icyumweru gishize."
+          }
+        }
+      }
+    },
+    "%@ more than last year.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de plus que l'an dernier."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ hejuru y'umwaka ushize."
+          }
+        }
+      }
+    },
+    "%@ spent.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ dépensés."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ byakoreshejwe."
+          }
+        }
+      }
+    },
+    "That's %@ in one payment.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soit %@ en un seul paiement."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ni %@ mu bwishyu bumwe."
+          }
+        }
+      }
+    },
+    "That's %@ across %lld payments.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soit %1$@ en %2$lld paiements."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ni %1$@ mu bwishyu %2$lld."
+          }
+        }
+      }
+    },
+    "Show %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erekana %@"
+          }
+        }
+      }
+    },
+    "Show Only %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher seulement %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erekana %@ gusa"
+          }
+        }
+      }
+    },
+    "%@ only": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ seulement"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ gusa"
+          }
+        }
+      }
+    },
+    "payment": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "paiement"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ubwishyu"
+          }
+        }
+      }
+    },
+    "payments": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "paiements"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ubwishyu"
+          }
+        }
+      }
+    },
+    "Over 1 day.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sur 1 jour."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mu munsi 1."
+          }
+        }
+      }
+    },
+    "Over %lld days.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sur %lld jours."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mu minsi %lld."
+          }
+        }
+      }
+    },
+    "Made and received.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoyés et reçus."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwo wishyuye n'ubwo wakiriye."
+          }
+        }
+      }
+    },
+    "Money that came in.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'argent reçu."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amafaranga yinjiye."
+          }
+        }
+      }
+    },
+    "%@ of what you spent.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de ce que vous avez dépensé."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ by'ibyo wakoresheje."
+          }
+        }
+      }
+    },
+    "%@ went to %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ sont allés à %2$@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ byagiye kuri %2$@"
+          }
+        }
+      }
+    },
+    "1 payment, %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 paiement, %@."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu 1, %@."
+          }
+        }
+      }
+    },
+    "%lld payments, %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld paiements, %2$@."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu %1$lld, %2$@."
+          }
+        }
+      }
+    },
+    "Your largest payment was %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre plus gros paiement était de %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu bwawe bunini bwari %@"
+          }
+        }
+      }
+    },
+    "Your %lld largest came to %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vos %1$lld plus gros paiements font %2$@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu bwawe %1$lld bunini bwose ni %2$@"
+          }
+        }
+      }
+    },
+    "%@ of everything you spent.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de tout ce que vous avez dépensé."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ by'ibyo wakoresheje byose."
+          }
+        }
+      }
+    },
+    "%@ went to shops": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ sont allés aux commerces"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ byagiye mu maduka"
+          }
+        }
+      }
+    },
+    "%@ went to people": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ sont allés à des personnes"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ byagiye ku bantu"
+          }
+        }
+      }
+    },
+    "%@ went on airtime, bundles and bills": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ est allé au crédit, aux forfaits et aux factures"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ byagiye ku ma inite, amapaki na fagitire"
+          }
+        }
+      }
+    },
+    "Your biggest day was %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre plus grosse journée était le %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umunsi wakoresheje menshi ni %@"
+          }
+        }
+      }
+    },
+    "%@ that day.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ce jour-là."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ uwo munsi."
+          }
+        }
+      }
+    },
+    "%@ that day. The quietest was %@, at %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ ce jour-là. Le plus calme était le %2$@, avec %3$@."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ uwo munsi. Umunsi wakoresheje make ni %2$@, %3$@."
+          }
+        }
+      }
+    },
+    "This month": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce mois-ci"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uku kwezi"
+          }
+        }
+      }
+    },
+    "This week": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette semaine"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iki cyumweru"
+          }
+        }
+      }
+    },
+    "In the week of %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La semaine du %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mu cyumweru cya %@"
+          }
+        }
+      }
+    },
+    "In %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mu %@"
+          }
+        }
+      }
+    },
+    "Kept": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conservée"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yagumishijwe"
+          }
+        }
+      }
+    },
+    "Turned off": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désactivée"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yazimijwe"
+          }
+        }
+      }
+    },
+    "By day": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Par jour"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ku munsi"
+          }
+        }
+      }
+    },
+    "You spent %@ on %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez dépensé %1$@ le %2$@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wakoresheje %1$@ ku wa %2$@"
+          }
+        }
+      }
+    },
+    "%lld payments, mostly %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld paiements, surtout %2$@."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu %1$lld, ahanini %2$@."
+          }
+        }
+      }
+    },
+    "This is your first SIM's number.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "C'est le numéro de votre première SIM."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iyi ni nimero ya SIM yawe ya mbere."
+          }
+        }
+      }
+    },
+    "This is your other SIM's number.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "C'est le numéro de votre autre SIM."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iyi ni nimero ya SIM yawe indi."
           }
         }
       }

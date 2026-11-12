@@ -8,6 +8,8 @@ import UniformTypeIdentifiers
 struct ReportPDF: Transferable {
     let report: SpendingReport
     let title: String
+    /// What the summary opens with: "This month".
+    let period: String
     let calendar: Calendar
 
     static var transferRepresentation: some TransferRepresentation {
@@ -21,7 +23,7 @@ struct ReportPDF: Transferable {
 
     @MainActor
     func render() throws -> URL {
-        let content = ReportExportPage(report: report, title: title, calendar: calendar)
+        let content = ReportExportPage(report: report, title: title, period: period, calendar: calendar)
             .environment(\.colorScheme, .light)
             .environment(\.locale, .starhash)
         let renderer = ImageRenderer(content: content)
@@ -53,6 +55,7 @@ struct ReportPDF: Transferable {
 private struct ReportExportPage: View {
     let report: SpendingReport
     let title: String
+    let period: String
     let calendar: Calendar
 
     var body: some View {
@@ -66,7 +69,7 @@ private struct ReportExportPage: View {
                     .foregroundStyle(Color.starhashPrimaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            ReportContent(report: report, calendar: calendar, rollsDigits: false, onOpen: nil, isExport: true)
+            ReportContent(report: report, calendar: calendar, period: period, chosenCategory: .constant(nil), rollsDigits: false, isExport: true)
         }
         .padding(20)
         .frame(width: 430)

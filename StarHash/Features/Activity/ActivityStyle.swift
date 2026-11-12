@@ -244,6 +244,17 @@ extension ActivityPeriod {
     /// is too short to chart.
     static let choices: [ActivityPeriod] = [.week, .month, .year]
 
+    /// The Report's More menu: "Week", "Month", "Year".
+    var unitTitle: String {
+        switch self {
+        case .today: String(starhash: "Day")
+        case .week: String(starhash: "Week")
+        case .month: String(starhash: "Month")
+        case .year: String(starhash: "Year")
+        case .allTime: String(starhash: "All Time")
+        }
+    }
+
     /// The period control's label: a letter, as GO Club's W M.
     var shortLabel: String {
         switch self {

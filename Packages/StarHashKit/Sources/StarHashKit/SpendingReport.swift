@@ -28,6 +28,13 @@ public struct SpendingReport: Equatable, Sendable {
         /// Of everything spent in the report, 0...1.
         public let share: Double
         public var id: TransactionCategory { category }
+
+        public init(category: TransactionCategory, total: Int, count: Int, share: Double) {
+            self.category = category
+            self.total = total
+            self.count = count
+            self.share = share
+        }
     }
 
     public struct TypeTotal: Identifiable, Equatable, Sendable {
@@ -45,16 +52,37 @@ public struct SpendingReport: Equatable, Sendable {
         public let total: Int
     }
 
-    /// The reference's Savings Potential: spending a little less on the
-    /// category most spent on that is a choice (food, shopping, rides),
-    /// never bills, school or savings.
-    public struct Saving: Equatable, Sendable {
+    /// A day anything was spent: how much, in how many payments, and the
+    /// category most of it went to.
+    public struct DaySpend: Identifiable, Equatable, Sendable {
+        /// The start of the day.
+        public let day: Date
+        public let total: Int
+        public let count: Int
         public let category: TransactionCategory
-        public let spent: Int
-        /// The cut suggested, in percent.
-        public let percent: Int
-        /// What the cut would keep, in RWF.
-        public let amount: Int
+        public var id: Date { day }
+
+        public init(day: Date, total: Int, count: Int, category: TransactionCategory) {
+            self.day = day
+            self.total = total
+            self.count = count
+            self.category = category
+        }
+    }
+
+    /// The one thing worth saying about the period, after the owner's
+    /// reference ("You spent $380 more on takeout than usual"): measured
+    /// against the owner's usual, the same span of up to three periods
+    /// before that had any spending, averaged.
+    public enum Insight: Equatable, Sendable {
+        /// The category furthest over its usual: by how much, its usual,
+        /// and how many of its payments fewer would bring it back.
+        case more(category: TransactionCategory, extra: Int, usual: Int, fewerPayments: Int)
+        /// Nothing over its usual, and the whole below it, by this much.
+        case less(by: Int)
+        /// No earlier period to compare with, or nothing stands out: the
+        /// category most spent on and its share.
+        case share(category: TransactionCategory, share: Double)
     }
 
     public let period: ActivityPeriod
@@ -85,19 +113,21 @@ public struct SpendingReport: Equatable, Sendable {
     public let topExpenses: [Transaction]
     /// Spending by kind of payment, largest first, kinds with none left out.
     public let types: [TypeTotal]
+    /// Every day anything was spent, in order: the Report's calendar.
+    public let days: [DaySpend]
     public let highestDay: DayTotal?
     /// The day with the least spent of the days anything was; nil with
     /// fewer than two such days, when it would only repeat `highestDay`.
     public let lowestDay: DayTotal?
-    public let saving: Saving?
+    /// What the owner usually spends over the same span; nil with no
+    /// earlier period that had any spending.
+    public let usualSpent: Int?
+    public let insight: Insight?
 
-    /// The share of a category's spending the saving suggests cutting.
-    public static let savingPercent = 10
-    /// Categories whose spending is a choice, so a cut is a fair thing to
-    /// suggest.
-    public static let flexibleCategories: Set<TransactionCategory> = [
-        .restaurant, .groceries, .shopping, .transport, .gifts, .tv, .bundles, .airtime,
-    ]
+    /// How many periods before make the usual.
+    public static let usualPeriods = 3
+    /// The least over its usual a category must be to be named, in RWF.
+    public static let notableExtra = 1_000
 
     /// The report for the `period` holding `anchor` (today's for This
     /// Month, any earlier one to look back), as it stands at `now`.
@@ -168,17 +198,58 @@ public struct SpendingReport: Equatable, Sendable {
             }
             .sorted { $0.total != $1.total ? $0.total > $1.total : $0.type.order < $1.type.order }
 
-        let byDay = Dictionary(grouping: spending) { calendar.startOfDay(for: $0.date) }
-            .map { DayTotal(day: $0.key, total: $0.value.reduce(0) { $0 + $1.amount }) }
+        let spentByDay = Dictionary(grouping: spending) { calendar.startOfDay(for: $0.date) }
+        self.days = spentByDay
+            .map { day, items in
+                let byCategory = Dictionary(grouping: items) { $0.knownCategory ?? .other }
+                    .mapValues { $0.reduce(0) { $0 + $1.amount } }
+                let top = byCategory.max { $0.value != $1.value ? $0.value < $1.value : $0.key.rawValue > $1.key.rawValue }?.key ?? .other
+                return DaySpend(day: day, total: items.reduce(0) { $0 + $1.amount }, count: items.count, category: top)
+            }
+            .sorted { $0.day < $1.day }
+        let byDay = days.map { DayTotal(day: $0.day, total: $0.total) }
         self.highestDay = byDay.max { $0.total != $1.total ? $0.total < $1.total : $0.day > $1.day }
         self.lowestDay = byDay.count < 2 ? nil : byDay.min { $0.total != $1.total ? $0.total < $1.total : $0.day < $1.day }
 
-        self.saving = categories
-            .first { Self.flexibleCategories.contains($0.category) }
-            .flatMap { top in
-                let amount = Int((Double(top.total) * Double(Self.savingPercent) / 100).rounded())
-                return amount > 0 ? Saving(category: top.category, spent: top.total, percent: Self.savingPercent, amount: amount) : nil
+        // The usual: the same span of up to three periods before, those
+        // with anything spent, averaged, so a month away does not halve it.
+        var earlier: [[Transaction]] = []
+        var cursor = interval.start
+        for _ in 0..<Self.usualPeriods {
+            guard let before = period.interval(now: cursor.addingTimeInterval(-1), calendar: calendar) else { break }
+            cursor = before.start
+            let end = isCurrent
+                ? min(calendar.date(byAdding: .day, value: elapsed, to: before.start) ?? before.end, before.end)
+                : before.end
+            let items = Self.spending(in: narrowed).filter { before.start <= $0.date && $0.date < end }
+            if !items.isEmpty { earlier.append(items) }
+        }
+        let usualSpent = earlier.isEmpty ? nil : Int((Double(earlier.joined().reduce(0) { $0 + $1.amount }) / Double(earlier.count)).rounded())
+        self.usualSpent = usualSpent
+
+        let topShare = categories.first.map { Insight.share(category: $0.category, share: $0.share) }
+        if earlier.isEmpty {
+            self.insight = topShare
+        } else {
+            var usualByCategory: [TransactionCategory: Double] = [:]
+            for t in earlier.joined() {
+                usualByCategory[t.knownCategory ?? .other, default: 0] += Double(t.amount) / Double(earlier.count)
             }
+            let rising = categories
+                .map { item in (item: item, usual: Int((usualByCategory[item.category] ?? 0).rounded())) }
+                .filter { $0.item.total - $0.usual >= Self.notableExtra }
+                .max { ($0.item.total - $0.usual, $1.item.category.order) < ($1.item.total - $1.usual, $0.item.category.order) }
+            if let rising {
+                let extra = rising.item.total - rising.usual
+                let average = Double(rising.item.total) / Double(max(rising.item.count, 1))
+                let fewer = min(max(Int((Double(extra) / average).rounded(.up)), 1), 9)
+                self.insight = .more(category: rising.item.category, extra: extra, usual: rising.usual, fewerPayments: fewer)
+            } else if let usualSpent, spent < usualSpent {
+                self.insight = .less(by: usualSpent - spent)
+            } else {
+                self.insight = topShare
+            }
+        }
     }
 
     /// Whether there is anything to report: something spent or received.
@@ -235,8 +306,10 @@ extension ActivityPeriod {
 
     /// The period holding `anchor` by its own name, even the running one:
     /// "November 2026", "2026", "9 Nov – 15 Nov". For what outlives the
-    /// moment, such as an exported report.
-    public func name(for anchor: Date, calendar: Calendar, locale: Locale = .current) -> String {
+    /// moment, such as an exported report. `inSentence` writes a month as
+    /// the middle of a sentence has it, small where its language writes it
+    /// so ("en novembre 2026").
+    public func name(for anchor: Date, calendar: Calendar, locale: Locale = .current, inSentence: Bool = false) -> String {
         guard let interval = interval(now: anchor, calendar: calendar) else { return title }
         var calendar = calendar
         calendar.locale = locale
@@ -253,25 +326,16 @@ extension ActivityPeriod {
             month.locale = locale
             month.timeZone = calendar.timeZone
             month.setLocalizedDateFormatFromTemplate("MMMMyyyy")
+            if inSentence {
+                month.formattingContext = .middleOfSentence
+                return month.string(from: interval.start)
+            }
             let text = month.string(from: interval.start)
             return text.prefix(1).uppercased(with: locale) + text.dropFirst()
         default:
             formatter.dateTemplate = "dMMM"
             return formatter.string(from: interval.start, to: interval.end.addingTimeInterval(-1))
         }
-    }
-
-    /// The span written out under the Report's total: "1 – 31 Oct 2026".
-    public func rangeText(for anchor: Date, calendar: Calendar, locale: Locale = .current) -> String? {
-        guard let interval = interval(now: anchor, calendar: calendar) else { return nil }
-        var calendar = calendar
-        calendar.locale = locale
-        let formatter = DateIntervalFormatter()
-        formatter.calendar = calendar
-        formatter.locale = locale
-        formatter.timeZone = calendar.timeZone
-        formatter.dateTemplate = "dMMMyyyy"
-        return formatter.string(from: interval.start, to: interval.end.addingTimeInterval(-1))
     }
 }
 

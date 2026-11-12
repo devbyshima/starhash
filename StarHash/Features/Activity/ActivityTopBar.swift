@@ -1,10 +1,14 @@
 import StarHashKit
 import SwiftUI
 
-/// Activity's header, after the owner's reference: the page's title large
-/// on the left, and on the right the report and search, each round. Searching, a close button comes in on the left and the field
-/// from the right as the title goes out to the left.
+/// Activity's floating bar, as it was before the title, at the owner's ask:
+/// GO Club's period control at the leading end (Week, Month, Year, as
+/// W M Y), choosing the chart's period, and on the right the Report and
+/// search, each round. Searching, a close button comes in on the left and
+/// the field from the right as the control goes out to the left.
 struct ActivityTopBar: View {
+    let period: ActivityPeriod
+    let onPeriod: @MainActor (ActivityPeriod) -> Void
     let isSearching: Bool
     @Binding var searchText: String
     var searchFocused: FocusState<Bool>.Binding
@@ -15,13 +19,14 @@ struct ActivityTopBar: View {
     var body: some View {
         ZStack(alignment: .leading) {
             if !isSearching {
-                Text("Transactions")
-                    .starhashFont(34, weight: .bold, relativeTo: .largeTitle)
-                    .foregroundStyle(Color.starhashPrimaryText)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                    .accessibilityAddTraits(.isHeader)
-                    .transition(.offset(x: -36).combined(with: .opacity))
+                GlassSegmentedControl(
+                    options: ActivityPeriod.choices,
+                    selection: period,
+                    onSelect: onPeriod,
+                    label: \.shortLabel,
+                    accessibilityLabel: \.title
+                )
+                .transition(.offset(x: -36).combined(with: .opacity))
             }
             // One glass container, so the buttons and the search capsule
             // melt into one another as the search opens and closes.
@@ -34,7 +39,7 @@ struct ActivityTopBar: View {
                             .transition(.offset(x: 80).combined(with: .opacity))
                     } else {
                         Spacer(minLength: 0)
-                        SwapGlassButton(symbol: "chart.bar.fill", label: "Report", action: onReport)
+                        SwapGlassButton(symbol: "chart.pie.fill", label: "Report", action: onReport)
                             .transition(.opacity)
                         SwapGlassButton(symbol: "magnifyingglass", label: "Search", action: onSearch)
                             .transition(.opacity)

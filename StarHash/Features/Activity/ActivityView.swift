@@ -2,11 +2,11 @@ import StarHashKit
 import SwiftUI
 import UIKit
 
-/// The Activity tab, after the owner's reference: the title with the
-/// report, search and the owner's photo, and every transaction grouped by
-/// month. The spending summary and its chart are on the Report page, a tap
-/// away. Search replaces the list with its own full-screen view while it is
-/// open, and the tab bar steps aside meanwhile, as it does for a pushed
+/// The Activity tab: the period control with the Report and search in its
+/// bar, the spending summary and its chart for that period (the original
+/// chart, back at the owner's ask), then every transaction grouped by
+/// month. Search replaces the list with its own full-screen view while it
+/// is open, and the tab bar steps aside meanwhile, as it does for a pushed
 /// page.
 ///
 /// A transaction's details are a page pushed on the tab's own stack, opened
@@ -17,6 +17,7 @@ struct ActivityView: View {
     @Environment(StarHashStore.self) private var store
     @Environment(AppRouter.self) private var router
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// The moment the totals and chart are worked out for. Refreshed on
     /// clock, day or time zone changes and on returning to the app, so
@@ -24,6 +25,8 @@ struct ActivityView: View {
     @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
     @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
     @State private var now = Date.now
+    /// The chart's period, from the bar's control.
+    @State private var period: ActivityPeriod = .week
     /// Report or Profile, when one is pushed.
     @State private var page: ActivityRoute?
 
@@ -136,10 +139,18 @@ struct ActivityView: View {
 
     private var listScreen: some View {
         let sections = ActivitySummary.groupedByMonth(store.transactions, calendar: calendar)
+        let inPeriod = ActivitySummary.transactions(store.transactions, in: period, now: now, calendar: calendar)
         return ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
+                ActivitySummaryCard(
+                    period: period,
+                    totals: ActivitySummary.totals(of: inPeriod),
+                    buckets: ActivitySummary.buckets(for: inPeriod, period: period, now: now, calendar: calendar),
+                    calendar: calendar
+                )
+                .padding(.top, ActivityLayout.contentTop)
                 ForEach(sections) { section in
-                    monthHeader(section, isFirst: section.id == sections.first?.id)
+                    monthHeader(section)
                     // Each day of the month under its own heading.
                     ForEach(ActivitySummary.groupedByDay(section.transactions, calendar: calendar)) { day in
                         dayHeader(day)
@@ -169,12 +180,12 @@ struct ActivityView: View {
     }
 
     /// "August", "July", "December 2025": bold, as the reference's.
-    private func monthHeader(_ section: ActivitySummary.DaySection, isFirst: Bool) -> some View {
+    private func monthHeader(_ section: ActivitySummary.DaySection) -> some View {
         Text(ActivitySummary.monthTitle(for: section.day, now: now, calendar: calendar, locale: .starhash))
             .starhashFont(22, weight: .bold, relativeTo: .title2)
             .foregroundStyle(Color.starhashPrimaryText)
             .accessibilityAddTraits(.isHeader)
-            .padding(.top, isFirst ? ActivityLayout.contentTop : ActivityLayout.monthTop)
+            .padding(.top, ActivityLayout.monthTop)
             .padding(.bottom, ActivityLayout.monthBottom)
     }
 
@@ -191,6 +202,8 @@ struct ActivityView: View {
 
     private var topBar: some View {
         ActivityTopBar(
+            period: period,
+            onPeriod: choosePeriod,
             isSearching: isSearching,
             searchText: $searchText,
             searchFocused: $searchFocused,
@@ -281,6 +294,10 @@ struct ActivityView: View {
         feedbackCount += 1
     }
 
+    private func choosePeriod(_ new: ActivityPeriod) {
+        withAnimation(reduceMotion ? .easeInOut(duration: 0.25) : .smooth(duration: 0.35)) { period = new }
+    }
+
     private func beginSearch() {
         searchText = ""
         withAnimation(.smooth(duration: 0.32)) { isSearching = true }
@@ -297,12 +314,16 @@ struct ActivityView: View {
     }
 
     #if DEBUG
-    /// `-openReport`, `-activitySearch <text>`, `-openFirstTransaction`,
-    /// `-openPendingTransaction` and `-openFailedTransaction`, for
-    /// screenshots (`-activityPeriod` picks the Report's period).
+    /// `-activityPeriod`, `-openReport`, `-activitySearch <text>`,
+    /// `-openFirstTransaction`, `-openPendingTransaction` and
+    /// `-openFailedTransaction`, for screenshots (`-activityPeriod` picks
+    /// the Report's period too).
     private func applyDebugLaunch() {
         guard !didApplyDebugLaunch else { return }
         didApplyDebugLaunch = true
+        if let value = DebugLaunch.value(after: "-activityPeriod"), let chosen = ActivityPeriod(rawValue: value) {
+            period = chosen
+        }
         if DebugLaunch.arguments.contains("-openReport") { page = .report }
         if let text = DebugLaunch.value(after: "-activitySearch") {
             isSearching = true
