@@ -307,10 +307,9 @@ extension Color {
 
     // MARK: Distortion Wave
 
-    /// The Distortion Wave's light: the sheet's as a payment is confirmed,
-    /// with the circle it opens from, and the recipient screen's at the
-    /// owner's ask. A vivid green, as the owner's reference has it, deep
-    /// enough on white to read.
+    /// The Distortion Wave's light as a sheet confirms something: a vivid
+    /// green, as the owner's reference has it, deep enough on white to
+    /// read.
     static let waveConfirmed = Color(
         light: Color(red: 0.13, green: 0.68, blue: 0.24),
         dark: Color(red: 0.38, green: 0.94, blue: 0.30)

@@ -40,7 +40,6 @@ struct PayView: View {
     /// That fix once it arrives, for the picker's Nearby section.
     @State private var nearbyFix: LocationFix?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.colorScheme) private var colorScheme
     /// Whether a finger is on Pay, for the light through it.
     @GestureState private var payHeld = false
     /// Pay tapped with nothing typed, which shakes the amount.
@@ -57,7 +56,7 @@ struct PayView: View {
                     switch route {
                     case .recipients(let query):
                         RecipientPickerView(amount: input.value, query: query, nearbyFix: nearbyFix) { recipient in
-                            pay(recipient, sweeping: true)
+                            pay(recipient)
                         }
                     }
                 }
@@ -103,6 +102,7 @@ struct PayView: View {
         .onAppear(perform: applyDebugLaunch)
         .task {
             await PayShaders.prepare()
+            // The confirmation sheets' wave, ahead of its first play.
             await DistortionWave.prepare()
         }
         #if DEBUG
@@ -294,10 +294,7 @@ struct PayView: View {
     /// and dials. The amount stays, as in the call prompt's wake: a call
     /// cancelled there can be dialled again, and that retry is the same
     /// pending payment rather than a second one.
-    /// `sweeping` when someone was picked on the recipient screen: the
-    /// Distortion Wave carries the screen back to Pay, and the call prompt
-    /// waits for it.
-    private func pay(_ recipient: Recipient, sweeping: Bool = false) {
+    private func pay(_ recipient: Recipient) {
         let amount = input.value
         guard amount > 0, recipient.isPayable else { return }
         let pendingLocation = locationTask
@@ -312,27 +309,11 @@ struct PayView: View {
             recordedID = store.recordPayment(to: recipient, amount: amount, wallet: wallet, retryWindow: 5 * 60).id
         }
         let code = USSD.payment(to: recipient, amount: amount, from: wallet)
-        if sweeping, !reduceMotion {
-            DistortionWave.shared.play(dark: colorScheme == .dark, keeping: router.tabBarFrame) {
-                var transaction = SwiftUI.Transaction()
-                transaction.disablesAnimations = true
-                withTransaction(transaction) {
-                    chosenRecipient = nil
-                    path = []
-                    // The tab bar back at once, so the new screen the wave
-                    // reveals is whole and nothing springs in after it.
-                    router.setHidesTabBar(false, on: .pay)
-                }
-            }
-        } else {
-            withAnimation(.smooth(duration: 0.25)) { chosenRecipient = nil }
-            path = []
-        }
-        // The call prompt (or the alert) comes up once the picker has gone,
-        // and the wave with it: the prompt would stall it partway.
+        withAnimation(.smooth(duration: 0.25)) { chosenRecipient = nil }
+        path = []
+        // The call prompt (or the alert) comes up once the picker has gone.
         Task {
-            await DistortionWave.shared.settled()
-            try? await Task.sleep(for: .milliseconds(sweeping ? 150 : 400))
+            try? await Task.sleep(for: .milliseconds(400))
             dial(code)
         }
 
