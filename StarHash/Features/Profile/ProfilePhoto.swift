@@ -1,4 +1,5 @@
 import PhotosUI
+import StarHashKit
 import SwiftUI
 import UIKit
 
@@ -79,6 +80,8 @@ final class ProfilePhoto {
 struct ProfilePhotoView: View {
     var size: CGFloat
 
+    @Environment(Owner.self) private var owner
+
     var body: some View {
         Group {
             if let image = ProfilePhoto.shared.image {
@@ -86,10 +89,12 @@ struct ProfilePhotoView: View {
                     .resizable()
                     .scaledToFill()
             } else {
-                Image(symbol: "person.fill")
-                    .font(.system(size: size * 0.42, weight: .medium))
+                // A silhouette in the muted grey until there is a photo,
+                // its bust cut by the circle's foot as a portrait's is.
+                ShadowAvatar(seed: owner.defaultSIM?.destination ?? "owner")
                     .foregroundStyle(Color.profilePhotoGlyph)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(.top, size * 0.12)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                     .background(Color.profilePhotoFill)
             }
         }

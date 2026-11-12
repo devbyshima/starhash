@@ -59,6 +59,10 @@ import Testing
 
     @Test func onlyFullNumbersAndCodesArePayable() {
         #expect(Recipient(input: "0781234567")?.isPayable == true)
+        #expect(Recipient(input: "+250 722 123 456")?.isPayable == true)
+        // Abroad or a landline: no wallet code pays them.
+        #expect(Recipient(input: "+1 415 555 1234")?.isPayable == false)
+        #expect(Recipient(input: "0252 123 456")?.isPayable == false)
         #expect(Recipient(input: "020205")?.isPayable == true)
         // Masked senders and bank deposits read from an SMS.
         #expect(Recipient(name: "Ariane", destination: "998", kind: .phone).isPayable == false)

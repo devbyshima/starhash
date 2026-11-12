@@ -232,7 +232,14 @@ private struct SettingsRootList: View {
             // Asked for here until it is in; from then on it is part of the
             // profile (the card above shows it, Profile changes it).
             if owner.usesTwoSIMs, owner.otherSIM == nil {
-                SettingsRow(symbol: "simcard.fill", title: "Other SIM") {
+                // The first SIM's number typed again is refused (`Owner`),
+                // and said so under the row.
+                SettingsRow(
+                    symbol: "simcard.fill",
+                    title: "Other SIM",
+                    status: owner.isDefaultNumber(draftSecondNumber) ? String(starhash: "This is your first SIM's number.") : nil,
+                    statusColor: .starhashDestructive
+                ) {
                     TextField("07X XXX XXXX", text: $draftSecondNumber)
                         .focused($editsSecondNumber)
                         .keyboardType(.phonePad)
@@ -268,10 +275,10 @@ private struct SettingsRootList: View {
         }
         .sheet(isPresented: $choosesSIMToKeep) {
             KeepSIMSheet(sims: [owner.defaultSIM, owner.otherSIM].compactMap { $0 }) { sim in
-                choosesSIMToKeep = false
                 keepOnly(sim)
             }
         }
+        .sensoryFeedback(.error, trigger: owner.isDefaultNumber(draftSecondNumber)) { _, repeated in repeated }
         .onChange(of: draftSecondNumber) { _, typed in
             // The phone pad has no return key: a whole number is the end of
             // it, so the keyboard goes once one is in, with its row. Emptying

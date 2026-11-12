@@ -16,10 +16,10 @@ import UIKit
 /// script and its SF Symbol names in `bySymbol`.
 enum StarIcon: String, CaseIterable {
     case airplane, antenna, appearance, arrowDownLeft, arrowUpRight, bag, bank, battery, bell, bellBadge, bellSlash
-    case bolt, box, bus, calendar, camera, car, card, cart, cash, chartBar, chartLine, chat, check, checkCircle
+    case bolt, box, bus, calendar, camera, car, card, cart, cash, chartBar, chartLine, chartPie, chat, check, checkCircle
     case chevronLeft, chevronRight, chevronUpDown, circle, clock, close, closeCircle, code, cup, document, download, drop
     case envelope, eye, faceID, film, flag, food, fuel, game, gear, gift, globe, graduation, hash, health, heart
-    case hashSquare, history, hourglass, house, info, lightbulb, location, lock, messageCheck, messageQuestion, more, parking
+    case hashSquare, history, hourglass, house, info, lightbulb, location, lock, messageCheck, messageQuestion, more, moreHorizontal, parking
     case pencil, people, person, personAlert, personCircle, phone, pin, play, plus, qrCode, receipt, received, reset
     case seal, search, sendBack, shieldAlert, shieldLock, share, simCard, sound, sparkles, star, store, sunset, swap
     case ticket, torch, torchOn, touchID, trash, tray, tv, unpin, wifi
@@ -64,6 +64,7 @@ enum StarIcon: String, CaseIterable {
         "car.fill": .car,
         "cart.fill": .cart,
         "chart.bar.fill": .chartBar,
+        "chart.pie.fill": .chartPie,
         "chart.line.uptrend.xyaxis": .chartLine,
         "checkmark": .check,
         "checkmark.circle.fill": .checkCircle,
@@ -84,6 +85,7 @@ enum StarIcon: String, CaseIterable {
         "cup.and.saucer.fill": .cup,
         "doc.text.fill": .document,
         "drop.fill": .drop,
+        "ellipsis": .moreHorizontal,
         "ellipsis.circle.fill": .more,
         "envelope.open.fill": .envelope,
         "exclamationmark.shield.fill": .shieldAlert,

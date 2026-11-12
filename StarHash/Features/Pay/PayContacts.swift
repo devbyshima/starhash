@@ -164,7 +164,10 @@ final class PayContacts {
             let name = formatted.isEmpty ? contact.organizationName : formatted
             var seen = Set<String>()
             let recipients = contact.phoneNumbers.compactMap { labelled -> Recipient? in
+                // Only numbers StarHash can pay: one abroad or a landline
+                // would only do nothing when chosen.
                 guard let recipient = Recipient(input: labelled.value.stringValue, name: name.isEmpty ? nil : name),
+                      recipient.isPayable,
                       seen.insert(recipient.kind.rawValue + recipient.destination).inserted else { return nil }
                 return recipient
             }

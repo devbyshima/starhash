@@ -146,6 +146,7 @@ extension TransactionCategory {
         case .health: String(starhash: "Health")
         case .education: String(starhash: "Education")
         case .family: String(starhash: "Family")
+        case .gifts: String(starhash: "Gifts")
         case .savings: String(starhash: "Savings")
         case .ownAccounts: String(starhash: "Your own accounts")
         case .other: String(starhash: "Other")
@@ -167,6 +168,7 @@ extension TransactionCategory {
         case .health: "heart.fill"
         case .education: "graduationcap.fill"
         case .family: "person.2.fill"
+        case .gifts: "gift.fill"
         case .savings: "banknote.fill"
         case .ownAccounts: "arrow.left.arrow.right"
         case .other: "ellipsis.circle.fill"
@@ -241,6 +243,17 @@ extension ActivityPeriod {
     /// The periods the control offers: a week, a month and a year. A day
     /// is too short to chart.
     static let choices: [ActivityPeriod] = [.week, .month, .year]
+
+    /// The Report's More menu: "Week", "Month", "Year".
+    var unitTitle: String {
+        switch self {
+        case .today: String(starhash: "Day")
+        case .week: String(starhash: "Week")
+        case .month: String(starhash: "Month")
+        case .year: String(starhash: "Year")
+        case .allTime: String(starhash: "All Time")
+        }
+    }
 
     /// The period control's label: a letter, as GO Club's W M.
     var shortLabel: String {

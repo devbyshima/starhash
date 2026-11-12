@@ -1,3 +1,4 @@
+import StarHashKit
 import SwiftUI
 import UIKit
 
@@ -303,6 +304,96 @@ extension Color {
     static let widgetChip = Color(light: .brandCloud, dark: .brandSlate)
     /// The widgets' symbols: the accent.
     static let widgetAccent = Color.brandFill
+
+    // MARK: Distortion Wave
+
+    /// The Distortion Wave's light: the sheet's as a payment is confirmed,
+    /// with the circle it opens from, and the recipient screen's at the
+    /// owner's ask. A vivid green, as the owner's reference has it, deep
+    /// enough on white to read.
+    static let waveConfirmed = Color(
+        light: Color(red: 0.13, green: 0.68, blue: 0.24),
+        dark: Color(red: 0.38, green: 0.94, blue: 0.30)
+    )
+    /// As a payment fails, or something is turned off: StarHash's red,
+    /// lifted in dark mode to glow.
+    static let waveFailed = Color(light: .brandRed, dark: Color(red: 1.0, green: 0.32, blue: 0.34))
+    /// The tick or cross on that circle.
+    static let waveGlyph = Color.white
+
+    // MARK: Report
+
+    /// The white of a category's icon on its colour.
+    static let reportIconGlyph = Color.white
+    /// A soft drop under each category icon, as the reference's.
+    static let reportIconShadow = Color.black.opacity(0.12)
+    /// The words on Payment Types' orbs: a deep ink on their pale glass,
+    /// as the reference's, in either appearance.
+    static let reportOrbText = Color(red: 34 / 255, green: 32 / 255, blue: 52 / 255)
+    /// The orbit the chosen orb's companions ride on, and its specks.
+    static let reportOrbit = Color(light: .black.opacity(0.12), dark: .white.opacity(0.16))
+    /// The summary's saving, in the reference's green: the one green word
+    /// on the Report, beside its button.
+    static let reportSaving = Color.starhashConfirmedText
+
+    /// Each payment type's orb, after the reference's "Your mix": pale
+    /// glass lit from the top left, deepening to its colour. Shops violet,
+    /// people blue, what was bought gold.
+    static func reportType(_ type: SpendingReport.PaymentType) -> (light: Color, deep: Color) {
+        let pair: (UInt32, UInt32) = switch type {
+        case .merchants: (0xE4DCFF, 0x8B6CFF)
+        case .people: (0xD8ECFF, 0x4D9BFF)
+        case .purchases: (0xFFF1C4, 0xF2B33D)
+        }
+        return (rgb(pair.0), rgb(pair.1))
+    }
+
+    /// `scale` below 1 darkens it, for words in the colour on white.
+    private static func rgb(_ hex: UInt32, scale: Double = 1) -> Color {
+        Color(red: Double((hex >> 16) & 0xFF) / 255 * scale, green: Double((hex >> 8) & 0xFF) / 255 * scale, blue: Double(hex & 0xFF) / 255 * scale)
+    }
+
+    /// A category's name in its own colour, as the summary writes it: the
+    /// deep colour darkened enough to read on white in light mode (4.5:1
+    /// or near it, and well past 3:1 at the summary's size), the light one
+    /// on #101010 in dark.
+    static func reportCategoryText(_ category: TransactionCategory) -> Color {
+        let pair = reportCategoryHex(category)
+        return Color(light: rgb(pair.deep, scale: 0.72), dark: rgb(pair.light))
+    }
+
+    /// Each category's two colours on the Report, after the owner's
+    /// reference (groceries green, food orange, rides yellow, stays violet,
+    /// travel cyan): its icon's circle runs from the light one at the top
+    /// to the deep one, and its slice of the ring is the deep one. The one
+    /// place StarHash shows hues beyond yellow and red, so the categories
+    /// tell apart at a glance; white icons sit on every deep colour.
+    static func reportCategory(_ category: TransactionCategory) -> (light: Color, deep: Color) {
+        let pair = reportCategoryHex(category)
+        return (rgb(pair.light), rgb(pair.deep))
+    }
+
+    private static func reportCategoryHex(_ category: TransactionCategory) -> (light: UInt32, deep: UInt32) {
+        switch category {
+        case .airtime: (0xFFD86B, 0xF2A900)
+        case .bundles: (0x6FE0F0, 0x12AFD3)
+        case .electricity: (0xFFC46B, 0xF08A00)
+        case .water: (0x7DB4FF, 0x2F6BFF)
+        case .tv: (0x9B9BFF, 0x5B4BF0)
+        case .restaurant: (0xFFA77E, 0xFF5E3A)
+        case .groceries: (0x8BE77A, 0x22B82F)
+        case .transport: (0xFFDA66, 0xF5B300)
+        case .bills: (0xA9B4CF, 0x5E6E95)
+        case .shopping: (0xFF9ACB, 0xEC4B97)
+        case .health: (0xFF8C99, 0xE93B53)
+        case .education: (0x6FE2C4, 0x0FA586)
+        case .family: (0xC29BFF, 0x8350F5)
+        case .gifts: (0xFF95DF, 0xCF3BAE)
+        case .savings: (0x7CD9A0, 0x1F9D5A)
+        case .ownAccounts: (0xC4C4C4, 0x8E8E8E)
+        case .other: (0xC9C9C9, 0x8A8A8A)
+        }
+    }
 
     /// One colour per appearance, resolved by the system whenever the
     /// appearance changes.

@@ -9,23 +9,70 @@ import UIKit
 /// language, sized to its content: the title, what to do, the payment to
 /// look for in a card, what the last paste said, then Paste Message, with
 /// Confirm Without Message under it for a message deleted or never sent.
+/// Once it settles the payment, the sheet's Distortion Wave turns it into
+/// what came of it (`SheetOutcome`): Confirmed in green, or Failed in red.
 struct VerifyPaymentSheet: View {
     let transactionID: UUID
 
     @Environment(StarHashStore.self) private var store
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var height: CGFloat = 520
     /// What the last paste said, when it settled nothing.
     @State private var note: Note?
+    /// What came of it, once it is settled.
+    @State private var outcome: Outcome?
 
     private struct Note: Equatable {
         var text: String
         var isProblem: Bool
     }
 
+    private enum Outcome {
+        case confirmed, failed
+
+        /// The wave's light.
+        var tint: Color { self == .confirmed ? .waveConfirmed : .waveFailed }
+        /// The icon's circle: the green of Confirmed on the payment's page,
+        /// so the two read as one.
+        var iconTint: Color { self == .confirmed ? .starhashConfirmed : .waveFailed }
+    }
+
     private var transaction: StarHashKit.Transaction? { store.transaction(id: transactionID) }
 
     var body: some View {
+        Group {
+            if let outcome, let transaction {
+                outcomeView(outcome, transaction)
+            } else {
+                question
+            }
+        }
+        // The sheet keeps its height as it turns into its outcome, so the
+        // wave plays over one still shape.
+        .sheetHeight(outcome == nil ? $height : .constant(height))
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        // Into the home indicator's inset, as Turn Off Auto-verify's sheet.
+        .ignoresSafeArea(.container, edges: .bottom)
+        .sheetGlass(detents: [.height(height - 4)])
+        #if DEBUG
+        // -verifyMessage <text>: pasted as the sheet opens, for screenshots.
+        .task {
+            guard let text = DebugLaunch.value(after: "-verifyMessage") else { return }
+            try? await Task.sleep(for: .milliseconds(800))
+            verify(text)
+        }
+        // -verifyConfirm: Confirm Without Message, as if tapped.
+        .task {
+            guard DebugLaunch.arguments.contains("-verifyConfirm"), let transaction else { return }
+            try? await Task.sleep(for: .milliseconds(1500))
+            confirmWithoutMessage(transaction)
+        }
+        #endif
+    }
+
+    private var question: some View {
         VStack(spacing: 0) {
             SheetHeader("Verify")
 
@@ -55,19 +102,26 @@ struct VerifyPaymentSheet: View {
                 .animation(.smooth(duration: 0.25), value: note)
             }
         }
-        .sheetHeight($height)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        // Into the home indicator's inset, as Turn Off Auto-verify's sheet.
-        .ignoresSafeArea(.container, edges: .bottom)
-        .sheetGlass(detents: [.height(height - 4)])
-        #if DEBUG
-        // -verifyMessage <text>: pasted as the sheet opens, for screenshots.
-        .task {
-            guard let text = DebugLaunch.value(after: "-verifyMessage") else { return }
-            try? await Task.sleep(for: .milliseconds(500))
-            verify(text)
+    }
+
+    /// Confirmed, with what the message filled in, or Failed, with why.
+    private func outcomeView(_ outcome: Outcome, _ transaction: StarHashKit.Transaction) -> some View {
+        var rows: [(label: String, value: String)] = []
+        if outcome == .confirmed {
+            if let fee = transaction.fee { rows.append((String(starhash: "Fee"), Money.formatWithCurrency(fee))) }
+            if let reference = transaction.reference { rows.append((String(starhash: "Code"), reference)) }
+            if let balance = transaction.balanceAfter { rows.append((String(starhash: "Balance"), Money.formatWithCurrency(balance))) }
         }
-        #endif
+        rows.append((transaction.counterparty.kind == .phone ? String(starhash: "Number") : String(starhash: "Merchant code"), transaction.counterparty.formattedDestination))
+        return SheetOutcome(
+            symbol: outcome == .confirmed ? "checkmark" : "xmark",
+            tint: outcome.iconTint,
+            label: outcome == .confirmed ? String(starhash: "Confirmed") : String(starhash: "Failed"),
+            title: Money.formatWithCurrency(transaction.amount),
+            detail: transaction.counterparty.displayName,
+            rows: Array(rows.prefix(3)),
+            onDone: { dismiss() }
+        )
     }
 
     /// What to find in Messages: how much, to whom, and when.
@@ -107,14 +161,10 @@ struct VerifyPaymentSheet: View {
         }
         switch result {
         case .confirmed:
-            // The page says what it became: Confirmed, with its fee. Played
-            // here rather than by the sheet, which is going.
-            UINotificationFeedbackGenerator().notificationOccurred(.success)
-            dismiss()
+            settle(.confirmed)
         case .failed:
-            // Failed, with the wallet's message as the reason.
-            UINotificationFeedbackGenerator().notificationOccurred(.warning)
-            dismiss()
+            // Failed, with the wallet's message as the reason on the page.
+            settle(.failed)
         case .overdraft(let paid):
             let fee = Money.formatWithCurrency(paid.accessFee ?? 0)
             show(Note(text: String(starhash: "MoMoAdvance's fee of \(fee) is added. Now paste the payment's own message."), isProblem: false))
@@ -130,8 +180,18 @@ struct VerifyPaymentSheet: View {
     private func confirmWithoutMessage(_ transaction: StarHashKit.Transaction) {
         let confirmed = transaction.confirmedByHand(wallet: AppEnvironment.owner.wallet)
         withAnimation(.smooth(duration: 0.3)) { store.update(confirmed) }
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
-        dismiss()
+        settle(.confirmed)
+    }
+
+    /// Turns the sheet into its outcome on the sheet's wave.
+    private func settle(_ new: Outcome) {
+        SheetOutcome.reveal(
+            tint: new.tint,
+            dark: colorScheme == .dark,
+            reduceMotion: reduceMotion,
+            feel: new == .confirmed ? .success : .warning,
+            show: { outcome = new }
+        )
     }
 
     /// What a paste said, felt as well: a problem buzzes as an error.

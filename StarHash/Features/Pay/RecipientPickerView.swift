@@ -515,7 +515,7 @@ struct RecipientPickerView: View {
     /// The number or code being typed, when nothing saved has it: paid as
     /// typed. A number a StarHash owner lists (Show My Name) shows the
     /// name they gave where the carrier's would be, and their photo, or
-    /// their initials, in the phone's place.
+    /// their initials, in the silhouette's place.
     private func typedSection(_ typed: Recipient) -> some View {
         let listed = listedOwner?.number == typed.destination ? listedOwner : nil
         let tile: RecipientRow.Tile = if let photo = listed?.photo {
@@ -523,7 +523,7 @@ struct RecipientPickerView: View {
         } else if let name = listed?.entry.name {
             .monogram(PayContact.initials(for: name))
         } else {
-            .symbol(typed.kind == .phone ? "phone" : "storefront")
+            typed.kind == .phone ? .shadow(seed: typed.destination) : .symbol("storefront")
         }
         return Section {
             RecipientRow(
@@ -823,21 +823,25 @@ struct RecipientRow: View {
     indirect enum Tile {
         case monogram(String)
         case symbol(String)
+        /// A person known only by their number: a silhouette picked by it
+        /// (`ShadowAvatar`).
+        case shadow(seed: String)
         /// A contact's photo, showing `fallback` until it loads.
         case photo(contactID: String, fallback: Tile)
         /// A photo already in hand: the one a StarHash owner listed with
         /// their number.
         case image(UIImage)
 
-        /// A storefront for merchants, initials for named people, a phone
-        /// for bare numbers; the photo of `photoContactID` over any of them.
+        /// A storefront for merchants, initials for named people, a
+        /// silhouette for bare numbers; the photo of `photoContactID` over
+        /// any of them.
         static func `for`(_ recipient: Recipient, photoContactID: String?) -> Tile {
             let plain: Tile = if recipient.kind == .merchant {
                 .symbol("storefront")
             } else if let name = recipient.name {
                 .monogram(PayContact.initials(for: name))
             } else {
-                .symbol("phone")
+                .shadow(seed: recipient.destination)
             }
             guard let photoContactID else { return plain }
             return .photo(contactID: photoContactID, fallback: plain)
@@ -1004,12 +1008,19 @@ struct RecipientTile: View {
                 Image(symbol: symbol)
                     .font(.system(size: size * 0.4))
                     .foregroundStyle(onPay ? AnyShapeStyle(Color.paySecondaryText) : AnyShapeStyle(Color.sheetSecondaryText))
+            case .shadow(let seed):
+                // The bust fills the tile to its foot, cut by its corners.
+                ShadowAvatar(seed: seed)
+                    .foregroundStyle(onPay ? AnyShapeStyle(Color.paySecondaryText) : AnyShapeStyle(Color.sheetSecondaryText))
+                    .padding(.top, size * 0.14)
+                    .frame(width: size, height: size, alignment: .bottom)
             case .photo, .image:
                 EmptyView()
             }
         }
         .frame(width: size, height: size)
         .background(fill.map(AnyShapeStyle.init) ?? (onPay ? AnyShapeStyle(Color.payWash) : AnyShapeStyle(Color.starhashPrimaryText.opacity(0.1))), in: RoundedRectangle(cornerRadius: size * 0.25, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: size * 0.25, style: .continuous))
         .accessibilityHidden(true)
     }
 }

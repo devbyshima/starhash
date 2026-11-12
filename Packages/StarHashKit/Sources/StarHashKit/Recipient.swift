@@ -89,14 +89,17 @@ public struct Recipient: Codable, Hashable, Sendable {
         return String(d[0..<4]) + " " + String(d[4..<7]) + " " + String(d[7..<10])
     }
 
-    /// Whether StarHash can dial a payment to it: a full phone number, or a
-    /// merchant code. A sender read from a carrier SMS can be masked
+    /// Whether StarHash can dial a payment to it: a Rwandan mobile number,
+    /// or a merchant code. A sender read from a carrier SMS can be masked
     /// ("*********998" keeps "998") or have no number at all (a bank
-    /// deposit); dialling those would send money to the wrong place.
+    /// deposit), and a contact's number can be abroad or a landline: MoMo
+    /// and Airtel Money pay neither, and since any number off Airtel's
+    /// prefixes reads as MTN, dialling one would send money to the wrong
+    /// place. The same rule a scanned code is held to.
     public var isPayable: Bool {
         guard !destination.isEmpty, destination.allSatisfy(\.isASCIIDigit) else { return false }
         switch kind {
-        case .phone: return destination.count >= 10
+        case .phone: return isRwandanMobile
         case .merchant: return destination.count < 10
         }
     }

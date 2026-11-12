@@ -101,10 +101,12 @@ public final class Owner {
 
     /// Keeps `typed` as the default SIM's number once it is whole, forgets
     /// the number when nothing is typed, and leaves it while it is half
-    /// typed. Returns whether `typed` is a whole number.
+    /// typed, or while it is the other SIM's (`isOtherNumber`). Returns
+    /// whether `typed` was kept.
     @discardableResult
     public func setNumber(_ typed: String) -> Bool {
         if let sim = Recipient.ownNumber(typed) {
+            guard !isOtherNumber(typed) else { return false }
             change {
                 defaultSIM = sim
                 followDefaultSIM()
@@ -115,11 +117,13 @@ public final class Owner {
         return false
     }
 
-    /// `setNumber` for the other SIM, while the owner pays from two.
+    /// `setNumber` for the other SIM, while the owner pays from two: never
+    /// the default SIM's number (`isDefaultNumber`).
     @discardableResult
     public func setOtherNumber(_ typed: String) -> Bool {
         guard usesTwoSIMs else { return false }
         if let sim = Recipient.ownNumber(typed) {
+            guard !isDefaultNumber(typed) else { return false }
             change {
                 otherSIM = sim
                 followDefaultSIM()
@@ -128,6 +132,20 @@ public final class Owner {
         }
         if !typed.contains(where: \.isNumber) { change { otherSIM = nil } }
         return false
+    }
+
+    /// Whether `typed` is the default SIM's number, however it is spaced or
+    /// prefixed: two SIMs never share one, so it cannot be the other's.
+    public func isDefaultNumber(_ typed: String) -> Bool {
+        guard let typed = Recipient.ownNumber(typed), let defaultSIM else { return false }
+        return typed.destination == defaultSIM.destination
+    }
+
+    /// Whether `typed` is the other SIM's number, so it cannot be the
+    /// default's.
+    public func isOtherNumber(_ typed: String) -> Bool {
+        guard usesTwoSIMs, let typed = Recipient.ownNumber(typed), let otherSIM else { return false }
+        return typed.destination == otherSIM.destination
     }
 
     /// Two SIMs, the other's number still to come.
@@ -186,7 +204,8 @@ public final class Owner {
         change {
             name = profile.name ?? ""
             defaultSIM = profile.number.flatMap(Recipient.ownNumber)
-            if let other = profile.otherNumber.flatMap(Recipient.ownNumber) {
+            // A backup holding one number twice brings one SIM.
+            if let other = profile.otherNumber.flatMap(Recipient.ownNumber), other.destination != defaultSIM?.destination {
                 usesTwoSIMs = true
                 otherSIM = other
             }
@@ -208,6 +227,9 @@ public final class Owner {
         usesTwoSIMs = defaults.integer(forKey: Key.simCount) == 2
         // Saved spaced before numbers were kept bare; read either.
         otherSIM = usesTwoSIMs ? defaults.string(forKey: Key.otherNumber).flatMap(Recipient.ownNumber) : nil
+        // Kept twice before the two had to differ: the other is asked for
+        // again.
+        if otherSIM?.destination == defaultSIM?.destination { otherSIM = nil }
         chosenWallet = defaults.string(forKey: Key.wallet).flatMap(Recipient.Network.init(rawValue:))
     }
 
