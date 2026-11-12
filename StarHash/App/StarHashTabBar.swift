@@ -15,6 +15,7 @@ import SwiftUI
 struct StarHashTabBar: View {
     @Environment(AppRouter.self) private var router
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
 
     /// Where a finger dragging along the bar holds the lens, while it does.
     @State private var dragX: CGFloat?
@@ -82,6 +83,10 @@ struct StarHashTabBar: View {
             // The page showing in the accent, the rest in the text colour.
             .foregroundStyle(isSelected ? Color.starhashAccentText : Color.starhashPrimaryText)
             .animation(.smooth(duration: 0.2), value: isSelected)
+            // A change of appearance fades every glyph to its new colour
+            // together. The symbols' images faded by themselves but the
+            // mark, a shape, snapped, as nothing told its fill to move.
+            .animation(.smooth(duration: 0.3), value: colorScheme)
             .frame(width: TabBarMetrics.itemWidth, height: TabBarMetrics.height)
             .contentShape(Rectangle())
             .accessibilityElement()
@@ -220,6 +225,9 @@ enum TabBarMetrics {
     /// it, measured at 3x (2,093 pixels against the gear's 2,156; 2.2 was
     /// heavier), and the 6 pixels of the receipt's line.
     static let markLine: CGFloat = 2
+    /// The outlined triangle's line, inside its edge: at 2 its opening,
+    /// a triangle 2.3pt from edge to centre, closed to a speck.
+    static let markTriangleLine: CGFloat = 1.3
 
     /// Each icon's scale, so the bar's glyphs look one size. At one font
     /// size they did not: measured on screen (3x), the receipt was 65 by 79
@@ -343,9 +351,12 @@ struct PayBuySwitcher: View {
 
 /// Pay's mark in the tab bar while another page shows: a line inside the
 /// star's own edge, so it and the filled mark (`StarHashMarkShape`, on Pay)
-/// share one silhouette, round where the star turns inward; the triangle
-/// stays solid, as an outline would close it to a speck. The two are
-/// stacked and one shown, as every icon's two forms are.
+/// share one silhouette, round where the star turns inward, and the
+/// triangle outlined with it, so the whole mark reads as one outline (a
+/// solid triangle under an open star looked like two icons). The
+/// triangle's line is lighter (`markTriangleLine`), as the star's would
+/// close its small opening to a speck. The two forms are stacked and one
+/// shown, as every icon's two forms are.
 struct TabMarkShape: Shape {
     func path(in rect: CGRect) -> Path {
         let scale = min(rect.width, rect.height) / StarHashMarkShape.side
@@ -364,7 +375,11 @@ struct TabMarkShape: Shape {
         var mark = star
             .strokedPath(StrokeStyle(lineWidth: 2 * TabBarMetrics.markLine, lineJoin: .round))
             .intersection(star)
-        mark.addPath(triangle)
+        mark.addPath(
+            triangle
+                .strokedPath(StrokeStyle(lineWidth: 2 * TabBarMetrics.markTriangleLine, lineJoin: .round))
+                .intersection(triangle)
+        )
         return mark
     }
 }
