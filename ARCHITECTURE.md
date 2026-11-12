@@ -50,7 +50,7 @@ The design system: `Theme` (every colour, `StarHashMetrics`, Space Grotesk), `Gl
 
 #### [StarHash/Intents](StarHash/Intents)
 
-App Intents: `ProcessCarrierSMSIntent` (what the Shortcuts automation runs on each SMS), `CheckBalanceIntent`, `OpenPayIntent`, and `StarHashShortcut` (the shared shortcut's links and its test run).
+App Intents: `ProcessCarrierSMSIntent` (what the Shortcuts automation runs on each SMS), `CheckBalanceIntent`, `OpenPayIntent`, and `StarHashShortcut` (the bundled shortcut, its links and its test run).
 
 ### Extensions [WIDGETKIT]
 
@@ -67,7 +67,7 @@ A Cloudflare Worker with one D1 database: `/v1/photos/:id` for the photo shared 
 ## External Pieces
 
 - **The carriers:** the USSD codes and SMS formats StarHash reads are MTN Rwanda's and Airtel Rwanda's, written down in [Codes and fees](docs/codes-and-fees.md).
-- **Shortcuts:** the "StarHash SMS" shortcut, made and signed by `scripts/make_shortcut.py` and shared by iCloud link, one per bundle id.
+- **Shortcuts:** the "StarHash SMS" shortcut, made and signed by `scripts/make_shortcut.py` for the bundle id and team and bundled in the app. A shortcut file cannot give it StarHash's icon, so auto-verify's guide has the owner choose it in Shortcuts.
 - **Shipped with the app:** Space Grotesk (SIL OFL 1.1), Keyline Icons (MIT) and DiceBear's Shadows silhouettes (CC0 1.0), each listed under Licences in the app with its licence bundled.
 
 ## Tooling
