@@ -44,12 +44,27 @@ These are MTN codes, shown whichever wallet you use. You can add your own: a cod
 
 ## Fees
 
-Pay never shows a fee. Fees appear only in Transactions, once a payment is confirmed:
+Pay shows no fee, except when it offers to split a payment (below). Fees appear in Transactions once a payment is confirmed:
 
 - **Confirmed by SMS**: the fee is the one in your wallet's message.
 - **Confirmed by hand**: the fee is worked out from the carriers' published prices, for the wallet the payment was dialled with.
 
 A pending payment has no fee yet, and marking a payment failed clears it.
+
+### Splitting large payments
+
+MTN charges 250 to send up to 150,000 and 1,500 from 150,001, so a large payment can cost less sent as several smaller ones. With **Split large payments** on (Settings, Pay & Buy; off until you turn it on), Pay offers to do that whenever it saves something:
+
+| Amount (RWF) | Parts | Fees in parts | As one payment | Saved |
+| --- | --- | --- | --- | --- |
+| 150,001 to 300,000 | 2 | 500 | 1,500 | 1,000 |
+| 300,001 to 450,000 | 3 | 750 | 1,500 | 750 |
+| 450,001 to 600,000 | 4 | 1,000 | 1,500 | 500 |
+| 600,001 to 750,000 | 5 | 1,250 | 1,500 | 250 |
+
+The parts are 150,000 each and then what is left, so 400,000 goes as 150,000, 150,000 and 100,000. Larger amounts save too from 2,000,001 to 2,600,000 and from 5,000,001 to 7,160,000, as one part at the top of a band and the rest (2,300,000 goes as 2,000,000, 150,000 and 150,000, for 2,000 rather than 3,000). StarHash takes the cheapest plan, and fewer parts when two cost the same. Only MTN MoMo to MTN MoMo is split: payments to the other network, Airtel Money to Airtel Money and merchant codes cost the same or nothing whatever the amount. A plan never has more than five parts, since each is a PIN to type.
+
+Each part is dialled on its own from the parts' sheet and is its own transaction, confirmed by its own SMS. Dialling a part again after a cancelled call keeps it one payment.
 
 ### Published prices used (checked 4 October 2026)
 

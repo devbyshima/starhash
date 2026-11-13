@@ -10463,6 +10463,278 @@
           }
         }
       }
+    },
+    "Send in %lld parts": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohereza mu bice %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoyer en %lld parties"
+          }
+        }
+      }
+    },
+    "Part %lld": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igice cya %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partie %lld"
+          }
+        }
+      }
+    },
+    "Part %lld, %@, %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igice cya %lld, %@, %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partie %lld, %@, %@"
+          }
+        }
+      }
+    },
+    "Fees in parts": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibiguzi mu bice"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frais en plusieurs fois"
+          }
+        }
+      }
+    },
+    "Fee as one payment": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikiguzi mu bwishyu bumwe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frais en un seul paiement"
+          }
+        }
+      }
+    },
+    "Send Part %lld": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohereza igice cya %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoyer la partie %lld"
+          }
+        }
+      }
+    },
+    "Send as One Payment": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohereza nk'ubwishyu bumwe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoyer en un seul paiement"
+          }
+        }
+      }
+    },
+    "Dial Part %lld Again": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongera ukande igice cya %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recomposer la partie %lld"
+          }
+        }
+      }
+    },
+    "Stop Here": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hagarara aha"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrêter ici"
+          }
+        }
+      }
+    },
+    "Not sent yet": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ntikiroherezwa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore envoyée"
+          }
+        }
+      }
+    },
+    "Part dialled": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cyakanzwe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Composée"
+          }
+        }
+      }
+    },
+    "Split large payments": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gabanyamo ibice ubwishyu bunini"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fractionner les gros paiements"
+          }
+        }
+      }
+    },
+    "Offer to send a MoMo payment over 150,000 in parts when that costs less in fees": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iyo ubwishyu bwa MoMo burenze 150,000, StarHash igusaba kubwohereza mu bice niba ibiguzi biba bike"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proposer d'envoyer un paiement MoMo de plus de 150 000 en plusieurs fois quand les frais sont moins élevés"
+          }
+        }
+      }
+    },
+    "Part %lld of %lld": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igice cya %lld kuri %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partie %lld sur %lld"
+          }
+        }
+      }
+    },
+    "%lld of %lld": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld kuri %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld sur %lld"
+          }
+        }
+      }
+    },
+    "Part": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igice"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partie"
+          }
+        }
+      }
+    },
+    "Whole payment": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu bwose"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paiement entier"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

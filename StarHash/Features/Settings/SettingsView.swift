@@ -91,6 +91,7 @@ private struct SettingsRootList: View {
     @AppStorage(Preferences.saveRecents) private var saveRecents: Bool
     @AppStorage(Preferences.showMyName) private var showMyName: Bool
     @AppStorage(Preferences.confirmDeletes) private var confirmDeletes: Bool
+    @AppStorage(Preferences.splitLargePayments) private var splitLargePayments: Bool
     @AppStorage(PreferenceKey.defaultPage) private var defaultPage = AppTab.pay.rawValue
     @AppStorage(PreferenceKey.appearance) private var appearance = AppAppearance.system
     @Environment(AutoVerify.self) private var autoVerify
@@ -398,6 +399,12 @@ private struct SettingsRootList: View {
                 choices: [AppTab.pay.rawValue, AppTab.buy.rawValue]
             ) { $0 == AppTab.buy.rawValue ? AppTab.buy.title : AppTab.pay.title }
         }
+        SettingsToggleRow(
+            symbol: "banknote.fill",
+            title: "Split large payments",
+            caption: "Offer to send a MoMo payment over 150,000 in parts when that costs less in fees",
+            isOn: $splitLargePayments
+        )
     }
     }
 

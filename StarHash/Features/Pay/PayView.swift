@@ -11,6 +11,7 @@ struct PayView: View {
     @Environment(AppRouter.self) private var router
     @AppStorage(Preferences.saveTransactions) private var saveTransactions: Bool
     @AppStorage(Preferences.nearbyLocation) private var nearbyLocation: Bool
+    @AppStorage(Preferences.splitLargePayments) private var splitLargePayments: Bool
     @Environment(Owner.self) private var owner
     private var wallet: Recipient.Network { owner.wallet }
 
@@ -47,6 +48,10 @@ struct PayView: View {
     @State private var didApplyDebugLaunch = false
     /// The QR scanner, over everything.
     @State private var isScanning = false
+    /// A payment going in parts, while its sheet is up.
+    @State private var splitRequest: SplitPaymentRequest?
+    /// Where that payment is being made: every part takes the place.
+    @State private var splitPlace = PaymentPlace()
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -82,6 +87,14 @@ struct PayView: View {
             if router.takeScanRequest() {
                 path = []
                 isScanning = true
+            }
+        }
+        .sheet(item: $splitRequest) { request in
+            SplitPaymentSheet(request: request) { amount, split in
+                record(amount, to: request.recipient, split: split, place: splitPlace)
+            } sendWhole: {
+                // The call prompt comes up once the sheet has gone.
+                send(request.plan.amount, to: request.recipient, place: splitPlace)
             }
         }
         .fullScreenCover(isPresented: $isScanning) {
@@ -290,45 +303,66 @@ struct PayView: View {
         }
     }
 
-    /// Records the payment (pending until its SMS), goes back to the keypad
-    /// and dials. The amount stays, as in the call prompt's wake: a call
-    /// cancelled there can be dialled again, and that retry is the same
-    /// pending payment rather than a second one.
+    /// Goes back to the keypad and sends the payment: records it (pending
+    /// until its SMS) and dials. The amount stays, as in the call prompt's
+    /// wake: a call cancelled there can be dialled again, and that retry is
+    /// the same pending payment rather than a second one. With Split Large
+    /// Payments on, a payment that costs less in parts opens their sheet
+    /// instead, which dials each part.
     private func pay(_ recipient: Recipient) {
         let amount = input.value
         guard amount > 0, recipient.isPayable else { return }
-        let pendingLocation = locationTask
-        let ticket = placeTicket
+        let place = PaymentPlace(location: locationTask, ticket: placeTicket)
         locationTask = nil
 
         // Paid, however it was chosen: a Nearby suggestion passed over
         // before is suggested again.
         NearbyMissesStore.paid(recipient)
-        var recordedID: UUID?
-        if saveTransactions {
-            recordedID = store.recordPayment(to: recipient, amount: amount, wallet: wallet).id
-        }
-        let code = USSD.payment(to: recipient, amount: amount, from: wallet)
         withAnimation(.smooth(duration: 0.25)) { chosenRecipient = nil }
         path = []
-        // The call prompt (or the alert) comes up once the picker has gone.
+        if splitLargePayments, let plan = SplitPlan.cheapest(sending: amount, to: recipient, from: wallet) {
+            splitPlace = place
+            let request = SplitPaymentRequest(recipient: recipient, plan: plan, wallet: wallet)
+            Task {
+                // Up once the picker has gone.
+                try? await Task.sleep(for: .milliseconds(400))
+                splitRequest = request
+            }
+            return
+        }
+        send(amount, to: recipient, place: place)
+    }
+
+    /// Records the payment, then dials it once the picker or the parts'
+    /// sheet has gone, so the call prompt (or the alert) comes up over the
+    /// keypad.
+    private func send(_ amount: Int, to recipient: Recipient, place: PaymentPlace) {
+        record(amount, to: recipient, split: nil, place: place)
+        let code = USSD.payment(to: recipient, amount: amount, from: wallet)
         Task {
             try? await Task.sleep(for: .milliseconds(400))
             dial(code)
         }
+    }
 
-        // The location goes on the payment once it arrives, never before
-        // dialling: its map, and what Nearby suggests from, when
-        // `Nearby.remembersPlace` allows. The store drops it when Nearby
-        // was turned off, or everything erased, while it was coming.
-        if let pendingLocation, let recordedID, let ticket {
+    /// Records a payment as pending, when transactions are kept, and
+    /// returns its id. The location goes on it once it arrives, never
+    /// before dialling: its map, and what Nearby suggests from, when
+    /// `Nearby.remembersPlace` allows. The store drops it when Nearby was
+    /// turned off, or everything erased, while it was coming.
+    @discardableResult
+    private func record(_ amount: Int, to recipient: Recipient, split: StarHashKit.Transaction.Split?, place: PaymentPlace) -> UUID? {
+        guard saveTransactions else { return nil }
+        let recordedID = store.recordPayment(to: recipient, amount: amount, wallet: wallet, split: split).id
+        if let location = place.location, let ticket = place.ticket {
             Task {
-                guard let fix = await pendingLocation.value, Preferences.nearbyLocation.value() else { return }
+                guard let fix = await location.value, Preferences.nearbyLocation.value() else { return }
                 let isContact = recipient.kind == .phone ? await PayContacts.shared.knowsContact(recipient) : nil
                 guard Nearby.remembersPlace(of: recipient, isContact: isContact) else { return }
                 store.attachPlace(fix.coordinate, to: recordedID, ticket: ticket)
             }
         }
+        return recordedID
     }
 
     private func dial(_ code: String) {
@@ -351,8 +385,24 @@ struct PayView: View {
             openPicker(query: PayDebug.query ?? "")
         }
         if DebugLaunch.arguments.contains("-payScan") { isScanning = true }
+        // -paySplit: Split large payments on (StarHashApp) and Pay tapped
+        // on the chosen recipient, for the parts' sheet (with an amount
+        // that saves).
+        if DebugLaunch.arguments.contains("-paySplit") {
+            Task {
+                try? await Task.sleep(for: .seconds(1))
+                next()
+            }
+        }
         #endif
     }
+}
+
+/// Where a payment is being made, once the fix arrives: the locating run
+/// for it and the store's ticket from when that started.
+private struct PaymentPlace {
+    var location: Task<LocationFix?, Never>?
+    var ticket: StarHashStore.PlaceTicket?
 }
 
 /// Balance's capsule: clear Liquid Glass with no tint, as the header
