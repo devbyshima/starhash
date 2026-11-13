@@ -55,9 +55,9 @@ enum StarHashShortcut {
             URLQueryItem(name: "name", value: name),
             URLQueryItem(name: "input", value: "text"),
             URLQueryItem(name: "text", value: AutoVerificationSample.message),
-            URLQueryItem(name: "x-success", value: "starhash://shortcut/success"),
-            URLQueryItem(name: "x-error", value: "starhash://shortcut/error"),
-            URLQueryItem(name: "x-cancel", value: "starhash://shortcut/cancel"),
+            URLQueryItem(name: "x-success", value: StarHashLink.shortcutRan(.success).url.absoluteString),
+            URLQueryItem(name: "x-error", value: StarHashLink.shortcutRan(.error).url.absoluteString),
+            URLQueryItem(name: "x-cancel", value: StarHashLink.shortcutRan(.cancel).url.absoluteString),
         ]
         return components.url
     }

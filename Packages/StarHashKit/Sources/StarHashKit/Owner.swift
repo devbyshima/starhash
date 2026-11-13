@@ -134,6 +134,27 @@ public final class Owner {
         return false
     }
 
+    /// What is wrong with `typed` as the default SIM's number, once it is
+    /// long enough to tell; nil when it is kept as it is. With one SIM, a
+    /// number on the other carrier is kept but warned about: the owner may
+    /// pay from a second SIM StarHash does not know.
+    public func problem(withNumber typed: String) -> NumberProblem? {
+        guard typed.filter(\.isNumber).count >= 10 else { return nil }
+        guard Recipient.ownNumber(typed) != nil else { return .notRwandanMobile }
+        if isOtherNumber(typed) { return .otherSIMsNumber }
+        if let network = defaultSIMOnOtherCarrier { return .otherCarrier(network, wallet: wallet) }
+        return nil
+    }
+
+    /// What is wrong with `typed` as the other SIM's number: it need only
+    /// be a Rwandan mobile number, on either network, and not the default
+    /// SIM's.
+    public func problem(withOtherNumber typed: String) -> NumberProblem? {
+        guard typed.filter(\.isNumber).count >= 10 else { return nil }
+        guard Recipient.ownNumber(typed) != nil else { return .notRwandanMobile }
+        return isDefaultNumber(typed) ? .defaultSIMsNumber : nil
+    }
+
     /// Whether `typed` is the default SIM's number, however it is spaced or
     /// prefixed: two SIMs never share one, so it cannot be the other's.
     public func isDefaultNumber(_ typed: String) -> Bool {
@@ -289,4 +310,17 @@ public final class Owner {
         guard let both, chosenWallet != nil, let network = both.default.network, network != chosenWallet else { return }
         chosenWallet = network
     }
+}
+
+/// Why a number typed for one of the owner's SIMs is refused or warned
+/// about (`Owner.problem(withNumber:)`, `problem(withOtherNumber:)`).
+public enum NumberProblem: Equatable, Sendable {
+    /// Not a Rwandan mobile number: 078, 079, 072 or 073.
+    case notRwandanMobile
+    /// The other SIM's: two SIMs never share a number.
+    case otherSIMsNumber
+    /// The default SIM's.
+    case defaultSIMsNumber
+    /// Kept, but on `network` while the owner pays with `wallet`.
+    case otherCarrier(Recipient.Network, wallet: Recipient.Network)
 }

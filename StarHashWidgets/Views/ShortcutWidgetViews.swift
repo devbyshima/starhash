@@ -33,17 +33,17 @@ enum WidgetAction: CaseIterable {
     /// The StarHash link it opens; Balance's carries the wallet's code.
     func link(wallet: Recipient.Network) -> String {
         switch self {
-        case .pay: "starhash://pay"
-        case .scan: "starhash://scan"
-        case .buy: "starhash://buy"
-        case .activity: "starhash://activity"
+        case .pay: StarHashLink.page(.pay).url.absoluteString
+        case .scan: StarHashLink.scan.url.absoluteString
+        case .buy: StarHashLink.page(.buy).url.absoluteString
+        case .activity: StarHashLink.page(.activity).url.absoluteString
         case .balance: Self.dialLink(USSD.balance(for: wallet))
         }
     }
 
     /// The StarHash link that dials `code`.
     static func dialLink(_ code: String) -> String {
-        "starhash://dial?code=" + (code.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? "")
+        StarHashLink.dial(code: code).url.absoluteString
     }
 }
 
@@ -104,7 +104,7 @@ struct BuyTilesWidgetView: View {
             .accessibilityLabel(Text(verbatim: code.name))
             .accessibilityHint(Text("Dials \(code.code)"))
         case .add:
-            Button(intent: OpenStarHashIntent(link: "starhash://buy")) {
+            Button(intent: OpenStarHashIntent(link: StarHashLink.page(.buy).url.absoluteString)) {
                 label(symbol: "plus", title: Text("Add a code"))
             }
             .buttonStyle(.plain)

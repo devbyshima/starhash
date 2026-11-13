@@ -198,8 +198,8 @@ final class StarHashNotifications {
             store.markFailed(id)
             await sync()
         case UNNotificationDefaultActionIdentifier:
-            if let id = transactionID, let url = URL(string: "starhash://transaction/\(id.uuidString)") {
-                AppEnvironment.router.handle(url)
+            if let id = transactionID {
+                AppEnvironment.router.handle(StarHashLink.transaction(id).url)
             } else if kind == .scamWarning {
                 AppEnvironment.router.scamNotice = ScamNotice(message: body)
             } else {

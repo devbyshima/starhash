@@ -25,6 +25,26 @@ struct OwnerTests {
         return owner
     }
 
+    /// Profile and Settings say the same thing about a number, because
+    /// `Owner` says it.
+    @Test func aNumberRefusedSaysWhy() {
+        let owner = twoSIMs("0788123456", "0791234567", wallet: .mtn)
+        #expect(owner.problem(withNumber: "0788 12") == nil)
+        #expect(owner.problem(withNumber: "0252 123 456") == .notRwandanMobile)
+        #expect(owner.problem(withNumber: "0791 234 567") == .otherSIMsNumber)
+        #expect(owner.problem(withOtherNumber: "0252123456") == .notRwandanMobile)
+        #expect(owner.problem(withOtherNumber: "+250 788 123 456") == .defaultSIMsNumber)
+        #expect(owner.problem(withOtherNumber: "0722123456") == nil)
+    }
+
+    /// With one SIM, a number on the other carrier is kept, and warned about.
+    @Test func oneSIMOnTheOtherCarrierIsWarnedAbout() {
+        let owner = Owner(defaults: freshDefaults())
+        owner.choose(.mtn)
+        #expect(owner.setNumber("0722123456"))
+        #expect(owner.problem(withNumber: "0722123456") == .otherCarrier(.airtel, wallet: .mtn))
+    }
+
     @Test func onlyAWholeNumberIsKept() {
         let defaults = freshDefaults()
         let owner = Owner(defaults: defaults)

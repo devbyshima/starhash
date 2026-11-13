@@ -232,12 +232,12 @@ private struct SettingsRootList: View {
             // Asked for here until it is in; from then on it is part of the
             // profile (the card above shows it, Profile changes it).
             if owner.usesTwoSIMs, owner.otherSIM == nil {
-                // The first SIM's number typed again is refused (`Owner`),
-                // and said so under the row.
+                // A number `Owner` refuses (the first SIM's typed again, a
+                // landline) is said so under the row, as on Profile.
                 SettingsRow(
                     symbol: "simcard.fill",
                     title: "Other SIM",
-                    status: owner.isDefaultNumber(draftSecondNumber) ? String(starhash: "This is your first SIM's number.") : nil,
+                    status: owner.problem(withOtherNumber: draftSecondNumber)?.message,
                     statusColor: .starhashDestructive
                 ) {
                     TextField("07X XXX XXXX", text: $draftSecondNumber)
@@ -278,7 +278,7 @@ private struct SettingsRootList: View {
                 keepOnly(sim)
             }
         }
-        .sensoryFeedback(.error, trigger: owner.isDefaultNumber(draftSecondNumber)) { _, repeated in repeated }
+        .sensoryFeedback(.error, trigger: owner.problem(withOtherNumber: draftSecondNumber) != nil) { _, repeated in repeated }
         .onChange(of: draftSecondNumber) { _, typed in
             // The phone pad has no return key: a whole number is the end of
             // it, so the keyboard goes once one is in, with its row. Emptying
