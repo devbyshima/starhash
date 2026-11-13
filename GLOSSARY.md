@@ -42,6 +42,16 @@ _Avoid_: payee, beneficiary
 A transaction's category that the owner picked themselves. StarHash never changes it.
 _Avoid_: manual category, override
 
+## StarHash's server
+
+**Show My Name listing**:
+The owner's numbers on StarHash's server, with the name they gave and their photo's id, so someone typing one of the numbers to pay sees who it is. The server keeps each number only as a keyed hash. Sent when it changes and weekly, and cleared with Show My Name off or Delete All Data (`ServerSync`).
+_Avoid_: directory entry, profile
+
+**Daily count**:
+A random id, made on the first count, sent once each Kigali day StarHash is used, so the people using it can be counted. Nothing about the owner goes with it. Never from the Simulator.
+_Avoid_: analytics, tracking, heartbeat
+
 ## Auto-verify
 
 **Auto-verify**:

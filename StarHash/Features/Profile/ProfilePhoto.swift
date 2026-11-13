@@ -5,7 +5,7 @@ import UIKit
 
 /// The owner's photo, chosen from their library on Profile: kept as one
 /// small JPEG in Application Support, beside the transactions, and on
-/// StarHash's server for their QR code (`StarHashCloud.syncPhoto`). Export
+/// StarHash's server for their QR code (`ServerSync.photoChanged`). Export
 /// carries it in the backup's profile.
 @MainActor @Observable
 final class ProfilePhoto {
@@ -34,20 +34,20 @@ final class ProfilePhoto {
     func set(_ square: UIImage) {
         guard let jpeg = square.jpegData(compressionQuality: 0.85) else { return }
         save(jpeg)
-        StarHashCloud.syncPhoto()
+        AppEnvironment.serverSync.photoChanged()
     }
 
     /// Keeps a photo from a backup as it is.
     func restore(_ data: Data) {
         guard UIImage(data: data) != nil else { return }
         save(data)
-        StarHashCloud.syncPhoto()
+        AppEnvironment.serverSync.photoChanged()
     }
 
     func remove() {
         try? FileManager.default.removeItem(at: url)
         image = nil
-        StarHashCloud.syncPhoto()
+        AppEnvironment.serverSync.photoChanged()
     }
 
     private func save(_ jpeg: Data) {
