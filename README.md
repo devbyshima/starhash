@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/images/icon-dark.png" />
-    <img src="docs/images/icon.png" width="96" alt="StarHash" />
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/icon-light.png" />
+    <img src="docs/images/icon-dark.png" width="96" alt="StarHash" />
   </picture>
 </p>
 
