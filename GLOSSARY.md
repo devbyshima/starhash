@@ -26,6 +26,14 @@ _Avoid_: network, account
 Money moved between the owner's own accounts (their two SIMs, or MoMo's virtual card): neither spent nor received. Filed under Your Own Accounts.
 _Avoid_: self-transfer, internal transfer
 
+**Counts**:
+Whether a transaction counts in the owner's totals, chart, Report and summaries: it does unless it failed or is an own transfer. A pending payment counts, since it was dialled and most go through; a fee counts only once confirmed (`Transaction.counts`).
+_Avoid_: valid, included
+
+**Recipient**:
+Who a payment goes to: a Rwandan mobile number or a merchant code. Two recipients are the same when their number or code is (`Recipient.Identity`), whatever name each was saved under; a contact can hold several.
+_Avoid_: payee, beneficiary
+
 **Category chosen by hand**:
 A transaction's category that the owner picked themselves. StarHash never changes it.
 _Avoid_: manual category, override
