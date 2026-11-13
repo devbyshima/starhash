@@ -31,9 +31,9 @@ struct RecipientPickerView: View {
     @Environment(StarHashStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @Environment(\.floatingBarBottom) private var floatingBarBottom
-    @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
-    @AppStorage(PreferenceKey.saveRecents) private var saveRecents = true
-    @AppStorage(PreferenceKey.nearbyLocation) private var nearbyEnabled = false
+    @AppStorage(Preferences.enableContacts) private var enableContacts: Bool
+    @AppStorage(Preferences.saveRecents) private var saveRecents: Bool
+    @AppStorage(Preferences.nearbyLocation) private var nearbyEnabled: Bool
     /// The fix the Nearby section is built from. Taken only until the
     /// list is first touched: a section appearing above rows a finger is
     /// already on would push the wrong one under it.
@@ -424,90 +424,39 @@ struct RecipientPickerView: View {
 
     // MARK: Picking
 
+    /// What the list shows for the search, each person or till once
+    /// (`RecipientList`), from what the owner's settings let it read.
+    private var list: RecipientList<PayContact> {
+        RecipientList(
+            query: query,
+            nearby: nearbySuggestions,
+            recents: saveRecents ? store.recentRecipients() : [],
+            namedPast: saveRecents ? store.recentRecipients(limit: 50).filter { $0.name != nil } : [],
+            contacts: enableContacts ? contacts.contacts : []
+        )
+    }
+
     private var search: RecipientSearch { RecipientSearch(query: query) }
+    private var nearby: [Recipient] { list.nearby }
+    private var recents: [Recipient] { list.recents }
+    private var matchingContacts: [PayContact] { list.contacts }
+    private var savedMatches: [Recipient] { list.savedMatches }
+    /// What the keyboard's Search key pays.
+    private var typedRecipient: Recipient? { list.typed }
 
-    /// Recent recipients matching the search, less the one already at the
-    /// top as an exact match. While searching, a recent number that belongs
-    /// to a contact with several numbers is left to the contact's row, which
-    /// offers all of them, so the person shows once.
-    private var recents: [Recipient] {
-        let found = matchingRecents
-        guard !search.isEmpty else { return found }
-        let multiNumber = matchingContactsUnfiltered.filter { $0.recipients.count > 1 }
-        return found.filter { recent in
-            !multiNumber.contains { contact in contact.recipients.contains { Self.same($0, recent) } }
-        }
-    }
-
-    /// Contacts matching the search, less any already at the top. While
-    /// searching, a contact with one number that Recent already shows is
-    /// left out, so the same person or till is not listed twice.
-    private var matchingContacts: [PayContact] {
-        let found = matchingContactsUnfiltered
-        guard !search.isEmpty else { return found }
-        let shown = matchingRecents
-        return found.filter { contact in
-            !(contact.recipients.count == 1 && shown.contains { Self.same($0, contact.recipients[0]) })
-        }
-    }
-
-    private var matchingRecents: [Recipient] {
-        guard saveRecents else { return [] }
-        let suggested = nearby
-        return store.recentRecipients().filter { recent in
-            search.matches(recent) && !isTyped(recent) && !suggested.contains { Self.same($0, recent) }
-        }
+    private var showsNoMatches: Bool {
+        list.findsNothing && contacts.access != .denied
     }
 
     /// Numbers and codes paid where the phone is now, nearest first, from
     /// where the saved payments were made, less any passed over five times
-    /// in a row (`NearbyMisses`). Only before anything is typed: a search is
-    /// looking for someone in particular.
-    private var nearby: [Recipient] {
-        guard nearbyEnabled, search.isEmpty, let fix = shownNearbyFix else { return [] }
+    /// in a row (`NearbyMisses`).
+    private var nearbySuggestions: [Recipient] {
+        guard nearbyEnabled, let fix = shownNearbyFix else { return [] }
         let found = Nearby.suggestions(
             from: store.transactions, latitude: fix.latitude, longitude: fix.longitude, accuracy: fix.accuracy, limit: 8
         ).map(\.recipient)
         return Array(NearbyMissesStore.filter(found).prefix(3))
-    }
-
-    private var matchingContactsUnfiltered: [PayContact] {
-        guard enableContacts else { return [] }
-        return contacts.contacts.filter { search.matches($0) && !$0.recipients.contains(where: isTyped) }
-    }
-
-    /// The same number or code, whatever name each side has saved it under.
-    private static func same(_ a: Recipient, _ b: Recipient) -> Bool {
-        a.kind == b.kind && a.destination == b.destination
-    }
-
-    /// Saved recipients (contacts, and past recipients with a name) whose
-    /// number or code is exactly the one typed. They take the top of the
-    /// list in place of the bare number, so a saved till or friend is paid
-    /// by name. One row per name.
-    private var savedMatches: [Recipient] {
-        guard search.typedRecipient != nil else { return [] }
-        let past = saveRecents ? store.recentRecipients(limit: 50).filter { $0.name != nil } : []
-        let saved = enableContacts ? contacts.contacts.flatMap(\.recipients) : []
-        var names = Set<String>()
-        return (saved + past).filter { isTyped($0) && names.insert(($0.name ?? "").lowercased()).inserted }
-    }
-
-    /// Whether `recipient` is the number or code in the search field.
-    private func isTyped(_ recipient: Recipient) -> Bool {
-        guard let typed = search.typedRecipient else { return false }
-        return recipient.kind == typed.kind && recipient.destination == typed.destination
-    }
-
-    private var showsNoMatches: Bool {
-        !search.isEmpty && search.typedRecipient == nil && recents.isEmpty && matchingContacts.isEmpty
-            && contacts.access != .denied
-    }
-
-    /// What the keyboard's Search key pays: the saved recipient the typed
-    /// number or code belongs to, or the number or code itself.
-    private var typedRecipient: Recipient? {
-        savedMatches.first ?? search.typedRecipient
     }
 
     // MARK: Sections
@@ -732,7 +681,7 @@ struct RecipientPickerView: View {
     /// that is not in Contacts.
     private func contact(for recipient: Recipient) -> PayContact? {
         guard enableContacts else { return nil }
-        return contacts.contacts.first { $0.recipients.contains { Self.same($0, recipient) } }
+        return contacts.contacts.first { $0.recipients.contains { $0.identity == recipient.identity } }
     }
 
     private func choose(_ recipient: Recipient) {

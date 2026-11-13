@@ -210,47 +210,29 @@ final class AppRouter {
             Task { _ = await USSDDialer.open(url) }
             return
         }
-        guard url.scheme == "starhash" else { return }
-        let query = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
-        if url.host() == "help" {
-            show(.settings)
-            return
-        }
-        if url.host() == "pay", query.contains(where: { $0.name == "to" }) {
-            if let request = PaymentQR.parse(url.absoluteString) {
-                pay(request.recipient, amount: request.amount, photoID: request.photoID)
-            } else {
-                show(.pay)
-            }
-            return
-        }
-        if let tab = url.host().flatMap(AppTab.init(rawValue:)) {
-            show(tab)
-            return
-        }
-        switch url.host() {
-        case "shortcut":
-            let result = ShortcutCallback.Result(rawValue: url.lastPathComponent) ?? .error
+        guard let link = StarHashLink(url: url) else { return }
+        switch link {
+        case .page(let page):
+            if let tab = AppTab(rawValue: page.rawValue) { show(tab) }
+        case .payment(let request):
+            pay(request.recipient, amount: request.amount, photoID: request.photoID)
+        case .shortcutRan(let result):
             shortcutCallback = ShortcutCallback(result: result)
-        case "transaction":
-            if let id = UUID(uuidString: url.lastPathComponent) {
-                show(.activity)
-                openTransactionID = id
-            }
-        case "scan":
+        case .transaction(let id):
+            show(.activity)
+            openTransactionID = id
+        case .scan:
             scan()
-        case "dial":
-            if let code = query.first(where: { $0.name == "code" })?.value.flatMap(USSDShortcut.code(from:)),
-               let tel = USSD.telURL(for: code) {
+        case .dial(let code):
+            if let tel = USSD.telURL(for: code) {
                 Task { _ = await USSDDialer.open(tel) }
             }
-        #if DEBUG
-        case "whatsnew":
-            let page = URLComponents(url: url, resolvingAgainstBaseURL: false)?
-                .queryItems?.first { $0.name == "page" }?.value.flatMap(Int.init)
-            whatsNewPreviewPage = page ?? 0
-        #endif
-        default: break
+        case .whatsNew(let page):
+            #if DEBUG
+            whatsNewPreviewPage = page
+            #else
+            _ = page
+            #endif
         }
     }
 }
@@ -273,14 +255,9 @@ struct ScamNotice: Identifiable, Equatable {
     let message: String
 }
 
-/// How a shortcut StarHash ran through x-callback-url finished.
+/// How a shortcut StarHash ran through x-callback-url finished. Its own
+/// id, so the same answer twice still reads as a new one.
 struct ShortcutCallback: Equatable {
-    enum Result: String {
-        case success
-        case error
-        case cancel
-    }
-
     let id = UUID()
-    let result: Result
+    let result: StarHashLink.ShortcutResult
 }

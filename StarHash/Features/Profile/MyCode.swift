@@ -146,36 +146,9 @@ struct ProfileFields: View {
 
     private enum Field { case name, number, other }
 
-    /// What is wrong with the other SIM's number: it need only be a
-    /// Rwandan mobile number, on either network.
-    private var otherProblem: String? {
-        guard draftOther.filter(\.isNumber).count >= 10 else { return nil }
-        guard Recipient.ownNumber(draftOther) != nil else {
-            return String(starhash: "Enter a Rwandan mobile number: 078, 079, 072 or 073.")
-        }
-        // One SIM cannot be both: `Owner` keeps neither the same twice.
-        return owner.isDefaultNumber(draftOther) ? String(starhash: "This is your first SIM's number.") : nil
-    }
+    private var otherProblem: String? { owner.problem(withOtherNumber: draftOther)?.message }
 
-    /// What is wrong with the number typed, once it is long enough to tell.
-    private var problem: String? {
-        let digits = draftNumber.filter(\.isNumber)
-        guard digits.count >= 10 else { return nil }
-        guard Recipient.ownNumber(draftNumber) != nil else {
-            return String(starhash: "Enter a Rwandan mobile number: 078, 079, 072 or 073.")
-        }
-        if owner.isOtherNumber(draftNumber) {
-            return String(starhash: "This is your other SIM's number.")
-        }
-        // With two SIMs both in, the wallet follows the default SIM, so
-        // either carrier is right. With one, the number stays as typed: the
-        // owner may pay from a second SIM StarHash does not know.
-        if let network = owner.defaultSIMOnOtherCarrier {
-            return String(starhash: "That is an \(network.name) number; you pay with \(owner.wallet.walletName).")
-                + " " + String(starhash: "Change your wallet, or set Two SIMs in Settings.")
-        }
-        return nil
-    }
+    private var problem: String? { owner.problem(withNumber: draftNumber)?.message }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -323,6 +296,23 @@ private struct ProfileFieldBackground: ViewModifier {
             content.starhashOutlinedTile(in: Capsule())
         } else {
             content.starhashContainer(.starhashCard, in: Capsule())
+        }
+    }
+}
+
+extension NumberProblem {
+    /// Said under the number's field, on Profile and in Settings.
+    var message: String {
+        switch self {
+        case .notRwandanMobile:
+            String(starhash: "Enter a Rwandan mobile number: 078, 079, 072 or 073.")
+        case .otherSIMsNumber:
+            String(starhash: "This is your other SIM's number.")
+        case .defaultSIMsNumber:
+            String(starhash: "This is your first SIM's number.")
+        case .otherCarrier(let network, let wallet):
+            String(starhash: "That is an \(network.name) number; you pay with \(wallet.walletName).")
+                + " " + String(starhash: "Change your wallet, or set Two SIMs in Settings.")
         }
     }
 }

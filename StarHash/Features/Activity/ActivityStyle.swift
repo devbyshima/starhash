@@ -41,7 +41,7 @@ private struct DeleteTransactionDialog: ViewModifier {
     let asAlert: Bool
     let onDelete: (StarHashKit.Transaction) -> Void
 
-    @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
+    @AppStorage(Preferences.confirmDeletes) private var confirmDeletes: Bool
 
     private var isPresented: Binding<Bool> {
         Binding(get: { transaction != nil }, set: { if !$0 { transaction = nil } })

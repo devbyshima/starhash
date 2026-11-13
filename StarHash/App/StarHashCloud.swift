@@ -109,7 +109,7 @@ enum StarHashCloud {
         #if targetEnvironment(simulator)
         return
         #else
-        let listing = directoryListing(owner: owner, showMyName: StarHashPreferences.bool(PreferenceKey.showMyName, default: true))
+        let listing = directoryListing(owner: owner, showMyName: Preferences.showMyName.value())
         let state = listing?.state ?? Self.unlisted
         let defaults = UserDefaults.standard
         let sent = defaults.string(forKey: directoryStateKey)
@@ -137,6 +137,18 @@ enum StarHashCloud {
             }
         }
         #endif
+    }
+
+    /// Delete All Data: `erase` runs with what was last sent to the
+    /// directory kept through it. With the owner's numbers gone there is no
+    /// listing, so the next sync deletes theirs from the server, and keeps
+    /// trying until it has; with the record wiped too, it took the owner
+    /// for one never listed and left their name there for 45 days.
+    static func keepingDirectoryState(through erase: () -> Void) {
+        let defaults = UserDefaults.standard
+        let sent = defaults.string(forKey: directoryStateKey)
+        erase()
+        if let sent { defaults.set(sent, forKey: directoryStateKey) }
     }
 
     /// Whether the server took it: a listing put, or none cleared.

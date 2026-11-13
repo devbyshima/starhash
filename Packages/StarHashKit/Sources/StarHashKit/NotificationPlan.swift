@@ -164,33 +164,49 @@ public enum NotificationPlan {
 
     // MARK: At once
 
-    /// What a carrier SMS just did, worth a word: a payment it confirmed,
-    /// or money it logged as received. `previous` is the transaction as it
-    /// stood before the message, nil when the message added it; a message
-    /// applied twice changes nothing and says nothing.
-    public static func afterMessage(applied transaction: Transaction, previous: Transaction?, settings: Settings) -> Item? {
-        let name = transaction.counterparty.displayName
-        if let previous {
-            guard settings.confirmedPayments, previous.status == .pending,
-                  transaction.status == .confirmed, transaction.direction == .outgoing else { return nil }
-            var body = settings.showsAmounts
-                ? String(kit: "\(Money.formatWithCurrency(transaction.amount)) to \(name) went through.")
-                : String(kit: "Your payment to \(name) went through.")
-            if settings.showsAmounts {
-                let details = [
-                    transaction.fee.map { String(kit: "fee \(Money.formatWithCurrency($0))") },
-                    transaction.balanceAfter.map { String(kit: "balance \(Money.formatWithCurrency($0))") },
-                ].compactMap(\.self)
-                if !details.isEmpty {
-                    let line = details.joined(separator: ", ")
-                    body += " " + line.prefix(1).uppercased() + line.dropFirst() + "."
-                }
-            }
-            return Item(
-                id: "payment-confirmed.\(transaction.id.uuidString)", kind: .paymentConfirmed, date: nil,
-                title: String(kit: "Payment confirmed"), body: body, transactionID: transaction.id
-            )
+    /// What a message just did, worth a word (`AutoVerify.receive`): a
+    /// payment it confirmed, even one auto-verify had failed for want of
+    /// it, so "didn't go through" is not the last word; money it logged as
+    /// received; or a look-alike held back, whatever the settings. Nothing
+    /// for the rest: a message applied twice changes nothing, and one
+    /// saying a payment failed already said so on screen.
+    public static func after(_ outcome: AutoVerify.Outcome, settings: Settings, at date: Date = .now) -> Item? {
+        switch outcome {
+        case .confirmed(let transaction, _):
+            return confirmed(transaction, settings: settings)
+        case .added(let transaction):
+            return received(transaction, settings: settings)
+        case .scam(let warning):
+            return scamWarning(warning, settings: settings, at: date)
+        case .sample, .ignored, .alreadyApplied, .failed, .overdraft, .unmatched:
+            return nil
         }
+    }
+
+    private static func confirmed(_ transaction: Transaction, settings: Settings) -> Item? {
+        let name = transaction.counterparty.displayName
+        guard settings.confirmedPayments, transaction.direction == .outgoing else { return nil }
+        var body = settings.showsAmounts
+            ? String(kit: "\(Money.formatWithCurrency(transaction.amount)) to \(name) went through.")
+            : String(kit: "Your payment to \(name) went through.")
+        if settings.showsAmounts {
+            let details = [
+                transaction.fee.map { String(kit: "fee \(Money.formatWithCurrency($0))") },
+                transaction.balanceAfter.map { String(kit: "balance \(Money.formatWithCurrency($0))") },
+            ].compactMap(\.self)
+            if !details.isEmpty {
+                let line = details.joined(separator: ", ")
+                body += " " + line.prefix(1).uppercased() + line.dropFirst() + "."
+            }
+        }
+        return Item(
+            id: "payment-confirmed.\(transaction.id.uuidString)", kind: .paymentConfirmed, date: nil,
+            title: String(kit: "Payment confirmed"), body: body, transactionID: transaction.id
+        )
+    }
+
+    private static func received(_ transaction: Transaction, settings: Settings) -> Item? {
+        let name = transaction.counterparty.displayName
         guard settings.moneyReceived, transaction.direction == .incoming else { return nil }
         var body = settings.showsAmounts
             ? String(kit: "\(name) sent you \(Money.formatWithCurrency(transaction.amount)).")
@@ -275,13 +291,11 @@ public enum NotificationPlan {
         of transactions: [Transaction],
         settings: Settings
     ) -> Item? {
-        // Money moved between the owner's own accounts is neither sent nor
-        // received, so it is no payment either: a week of nothing else
-        // once read "You sent 0 RWF in 1 payment".
-        let counted = transactions.filter { $0.status != .failed && !$0.isOwnTransfer }
-        guard !counted.isEmpty else { return nil }
-        let totals = ActivitySummary.totals(of: counted)
-        let payments = counted.filter { $0.direction == .outgoing }.count
+        // Only what counts: an own transfer is no payment either, and a week
+        // of nothing else once read "You sent 0 RWF in 1 payment".
+        let totals = ActivitySummary.totals(of: transactions)
+        guard totals.count > 0 else { return nil }
+        let payments = transactions.count(where: \.countsAsSpent)
         let paymentsPhrase = payments == 1 ? String(kit: "1 payment") : String(kit: "\(payments) payments")
         let body: String
         if settings.showsAmounts {

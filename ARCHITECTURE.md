@@ -22,19 +22,22 @@ Everything that can be tested lives in one Foundation-only Swift package, `StarH
 
 Foundation and Observation only, a `public` interface, iOS 18 and macOS 15, tested on the Mac by `scripts/test.sh` with Swift Testing (`Packages/StarHashKit/Tests`). The app target has no tests of its own, so any rule worth testing belongs here.
 
+- **Choosing who to pay:** `RecipientList` (the picker's Nearby, saved matches, Recent and Contacts for a search, each person once by `Recipient.Identity`) and `RecipientSearch`.
 - **Money and people:** `Recipient` (a name, the digits and a kind: ten or more digits is a phone, fewer a merchant code; `network` from the prefix, `isPayable`), `Transaction` (direction, status, fee, MoMoAdvance's access fee, wallet, category), `Money`, `AmountInput`, `Tariff` (the carriers' published fees).
-- **Dialling:** `USSD` (`payment(to:amount:from:)`, `balance`, `telURL`), `USSDShortcut` and `USSDShortcutList` (Buy's codes), `PaymentQR` (scanned codes and StarHash's own `starhash://pay` link).
-- **Reading messages:** `CarrierSMS` (`parse`, `parseFailure`, `parseOverdraft` for MTN's and Airtel's SMS), `ScamCheck`, `Verification`, `AutoVerify` (the one-hour window, `looksBroken`).
-- **The store:** `StarHashStore`, `@MainActor @Observable`, one JSON file and every rule for matching a message to a payment, retries, own transfers, expiry and Verify.
-- **The owner:** `Owner` (name, default and other SIM, wallet, and the rules between them), `OwnerWallets`, `OwnAccounts`.
+- **Dialling:** `USSD` (`payment(to:amount:from:)`, `balance`, `telURL`), `USSDShortcut` and `USSDShortcutList` (Buy's codes), `PaymentQR` (scanned codes and StarHash's own `starhash://pay` link), `StarHashLink` (every starhash:// link, made and read in one place: the router, quick actions, notifications, widgets and the shortcut's callback).
+- **Reading messages:** `CarrierSMS` (`read`, one entry for the three kinds of `WalletMessage`, over `parse`, `parseFailure` and `parseOverdraft` for MTN's and Airtel's SMS), `ScamCheck`, `Verification`, and `AutoVerify`: `receive`, everything a message does in one place (the sample, Off, scam warnings, the store, expiry), returning an `Outcome`; the setup's `check` (`beginCheck`, `checkReturned`); the one-hour window; `looksBroken`.
+- **The store:** `StarHashStore`, `@MainActor @Observable`, kept in a `TransactionFile` (`JSONTransactionFile` on the phone, `MemoryTransactionFile` in tests, which can play it sealed or damaged), and every rule for matching a message to a payment (`apply` says what it did: `Applied`), retries (`retryWindow`), own transfers, expiry and Verify. What the owner settles by hand goes through its verbs (`markFailed`, `confirmByHand`, `chooseCategory`), and so do the categories StarHash works out (`categorizeByRules`, `fillCategory`) and the place a payment was made (`attachPlace` with a `PlaceTicket`); there is no way to replace a transaction whole.
+- **The owner:** `Owner` (name, default and other SIM, wallet, and the rules between them, with `NumberProblem` for why a number is refused), `OwnerWallets`, `OwnAccounts`.
+- **Settings' choices:** `Preferences` (every switch and notification choice, under its key with its one default) and `NotificationPlan.Settings.stored`.
+- **The first run:** `FirstRun` (onboarding's screens, the one left saved by name, and the sheets that open after it, one at a time, in order).
 - **Reading the history:** `ActivitySummary` (totals, the chart's buckets, day and month groups, search), `SpendingReport` (the Report page: comparison with the period before and with the usual, the summary's insight, categories, top payments, payment types, each day spent on and the key days), `TransactionCategory` and `TransactionCategorizer`.
-- **Everything else:** `NotificationPlan` (what each local notification says and when), `Nearby`, `StarHashBackup` and `OwnerProfile`, `WidgetSnapshot`, `FeatureFlag` and `ReleaseChannel`, `ReleaseHistory` and `WhatsNew`, `StarHashLanguage` with `String(starhash:)` and `String(kit:)`.
+- **Everything else:** `NotificationPlan` (what each local notification says and when), `Nearby` (and `remembersPlace`: a shop's place always, a number's only when it is no contact), `StarHashBackup` and `OwnerProfile`, `WidgetSnapshot`, `FeatureFlag` and `ReleaseChannel`, `ReleaseHistory` and `WhatsNew`, `StarHashLanguage` with `String(starhash:)` and `String(kit:)`.
 
 ### The App [SWIFTUI]
 
 #### [StarHash/App](StarHash/App)
 
-The lifecycle and the wiring. `AppEnvironment` holds the single `StarHashStore`, `Owner` and `AppRouter` (tabs, the open transaction, `starhash://` and `tel:` links). `StarHashApp` reloads the store, runs `PaymentExpiry`, syncs notifications (`StarHashNotifications`) and publishes the widgets' snapshot. Also `StarHashCloud` (the Worker's client), `AppLock` (the Face ID lock), `QuickActions`, `SmartCategories` (Apple Intelligence on iOS 26), `FeatureFlags`, `DebugLaunch` and `SampleData`.
+The lifecycle and the wiring. `AppEnvironment` holds the single `StarHashStore`, `Owner` and `AppRouter` (tabs, the open transaction, `starhash://` and `tel:` links). `StarHashApp` reloads the store, runs `AutoVerify.expireUnconfirmed`, syncs notifications (`StarHashNotifications`) and publishes the widgets' snapshot. Also `StarHashCloud` (the Worker's client), `AppLock` (the Face ID lock), `QuickActions`, `SmartCategories` (Apple Intelligence on iOS 26), `FeatureFlags`, `DebugLaunch` and `SampleData`.
 
 #### [StarHash/Features](StarHash/Features)
 
@@ -50,7 +53,7 @@ The design system: `Theme` (every colour, `StarHashMetrics`, Space Grotesk), `Gl
 
 #### [StarHash/Intents](StarHash/Intents)
 
-App Intents: `ProcessCarrierSMSIntent` (what the Shortcuts automation runs on each SMS), `CheckBalanceIntent`, `OpenPayIntent`, and `StarHashShortcut` (the bundled shortcut, its links and its test run).
+App Intents: `ProcessCarrierSMSIntent` (what the Shortcuts automation runs on each SMS: `AutoVerify.receive`, then the notification its outcome is worth), `CheckBalanceIntent`, `OpenPayIntent`, and `StarHashShortcut` (the bundled shortcut, its links and its test run).
 
 ### Extensions [WIDGETKIT]
 
@@ -85,8 +88,8 @@ A Cloudflare Worker with one D1 database: `/v1/photos/:id` for the photo shared 
 ## What does a confirmation look like?
 
 1. The wallet's SMS arrives, and the owner's automation runs the "StarHash SMS" shortcut, which calls `ProcessCarrierSMSIntent(message:sender:)` without opening the app.
-2. The intent holds back a look-alike with `ScamCheck`, reads the message with `CarrierSMS`, and calls the store's `apply`, `applyFailure` or `applyOverdraft`.
-3. `apply` confirms the closest open payment with the same amount, wallet and number or code within six hours, taking the fee, reference and balance from the SMS; with none, it adds the movement as a new transaction. `PaymentExpiry` then fails what no message confirmed within the hour, and `StarHashNotifications` reschedules.
+2. The intent hands it to `AutoVerify.receive`, which holds back a look-alike with `ScamCheck`, reads the message with `CarrierSMS.read`, and calls the store's `apply`, `applyFailure` or `applyOverdraft`. The intent posts what `NotificationPlan.after` makes of the outcome.
+3. `apply` confirms the closest open payment with the same amount, wallet and number or code within six hours, taking the fee, reference and balance from the SMS; with none, it adds the movement as a new transaction. `AutoVerify.expireUnconfirmed` then fails what no message confirmed within the hour, and `StarHashNotifications` reschedules.
 4. By hand, the owner pastes the message into Verify (`StarHashStore.verify`), or uses Confirm Without Message (the fee from `Tariff`).
 
 ## What does the Development flow look like?
@@ -101,12 +104,14 @@ Work goes on `main`, unfinished work behind a `FeatureFlag`. `./scripts/build.sh
 
 Things the code relies on that are easy to break:
 
-- **Money:** an amount is always positive whole RWF; the direction gives the sign. A failed payment counts for nothing, a pending one counts, money moved between the owner's own accounts is neither spent nor received, and a fee counts only on a confirmed payment. `ActivitySummary.totals` holds that rule; `buckets`, `NotificationPlan`'s summaries and `SpendingReport` follow it.
+- **Money:** an amount is always positive whole RWF; the direction gives the sign. A failed payment counts for nothing, a pending one counts, money moved between the owner's own accounts is neither spent nor received, and a fee counts only on a confirmed payment. `Transaction.counts`, `countsAsSpent` and `countedFee` hold that rule; `ActivitySummary`, `SpendingReport` and `NotificationPlan` ask them and never filter for it themselves.
 - **Fees** come only from the SMS, or from `Tariff` when a payment is confirmed by hand. MoMoAdvance's access fee is kept apart and added on top.
-- **Matching:** a message applied twice is caught by its reference or its moment. A payment failed for want of a message stays open to a late one; one failed by hand is never revived. A category chosen by hand is never changed.
+- **Matching:** a message applied twice is caught by its reference or its moment. A payment failed for want of a message stays open to a late one; one failed by hand is never revived. Only a pending payment is marked failed by hand. A category chosen by hand is never changed: the store's verbs hold these, so a screen cannot skip them.
 - **Dialling:** only an `isPayable` recipient is dialled: a Rwandan mobile number or a merchant code. iOS dials on the default voice line; StarHash cannot choose the SIM.
-- **The store** is one instance on the main actor, shared by views and intents. A file it cannot read is set aside, never overwritten.
+- **The store** is one instance on the main actor, shared by views and intents. A file it cannot decode is set aside, never overwritten. While the file is sealed (before the first unlock after a restart) nothing is written, and the messages that come are applied again over the whole history once it reads, so one cannot stand beside the payment it confirms.
 - **The owner's** name, numbers and wallet go through `Owner`, never `UserDefaults` or `@AppStorage` directly.
+- **Settings' choices** each have one default, in `Preferences`: views read them with `@AppStorage(Preferences.x)`, everything else with `Preferences.x.value()`, and neither writes a default of its own.
+- **Delete All Data** keeps the directory's record of what it last sent through the wipe, so the owner's Show My Name listing is deleted from the server after it.
 - **Text** built at run time goes through `String(starhash:)` (`String(kit:)` in the package), never `String(localized:)`, so the language chosen in Settings applies at once. There are three catalogs: the app's, the package's and the widgets'.
 - **The shortcut contract:** `ProcessCarrierSMSIntent`'s name and parameters, the bundle id and the team are written into the shared shortcut, and the app builds with `ENABLE_DEBUG_DYLIB: NO`, or Shortcuts cannot run the action.
 - **Shared sources:** `Theme.swift`, `Icons.swift` and the mark compile into the widgets too, so they hold nothing app-only.

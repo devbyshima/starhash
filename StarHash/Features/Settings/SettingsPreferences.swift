@@ -2,18 +2,12 @@ import StarHashKit
 import SwiftUI
 
 extension PreferenceKey {
-    /// Whether deleting one transaction asks first. Turned off with Don't
-    /// Ask Again on the question itself, back on in Settings.
-    static let confirmDeletes = "confirmDeletes"
     /// Where StarHash opens, and where the tab bar's middle place starts:
     /// "pay" or "buy". Pay unless chosen otherwise in Settings.
     static let defaultPage = "defaultPage"
     /// The app's look, an `AppAppearance` raw value: as the iPhone is set
     /// unless chosen otherwise in Settings.
     static let appearance = "appearance"
-    /// Whether a message that looks like the wallet's but may be a scam is
-    /// held back with a warning. On unless turned off in Settings.
-    static let scamWarnings = "scamWarnings"
     /// The language StarHash speaks (`AppLanguage`), the iPhone's until one
     /// is chosen.
     static let appLanguage = "appLanguage"
@@ -21,13 +15,6 @@ extension PreferenceKey {
     /// first time an owner with two SIMs changes the default one, has been
     /// seen.
     static let seenVoiceLineHint = "seenVoiceLineHint"
-    /// Whether the on-device model may name the categories the rules
-    /// cannot (iOS 26 and later, with Apple Intelligence).
-    static let smartCategories = "smartCategories"
-    /// Whether people who type the owner's number in StarHash see their
-    /// name and photo (`StarHashCloud.syncDirectory`). On unless turned off
-    /// in Settings.
-    static let showMyName = "showMyName"
     /// Whether the notice that Show My Name is on has been seen: once,
     /// for owners set up before it came. Onboarding tells new ones.
     static let seenShowMyNameNotice = "seenShowMyNameNotice"
@@ -70,22 +57,9 @@ enum AppAppearance: String, CaseIterable {
     }
 }
 
-/// Preference values read outside a view (App Intents, permission
-/// helpers), with the same defaults the Settings toggles show: everything
-/// on except Nearby, which needs location permission first. @AppStorage
-/// defaults only apply inside views, so code elsewhere reads through here.
+/// Settings' choices read outside a view, where `@AppStorage` cannot be;
+/// the choices themselves and their defaults are `Preferences`'.
 enum StarHashPreferences {
-    static func bool(_ key: String, default value: Bool) -> Bool {
-        UserDefaults.standard.object(forKey: key) as? Bool ?? value
-    }
-
-    static var saveTransactions: Bool { bool(PreferenceKey.saveTransactions, default: true) }
-    static var saveRecents: Bool { bool(PreferenceKey.saveRecents, default: true) }
-    static var enableContacts: Bool { bool(PreferenceKey.enableContacts, default: true) }
-    static var nearbyLocation: Bool { bool(PreferenceKey.nearbyLocation, default: false) }
-    static var scamWarnings: Bool { bool(PreferenceKey.scamWarnings, default: true) }
-    static var smartCategories: Bool { bool(PreferenceKey.smartCategories, default: true) }
-
     /// Pay or Buy, the page StarHash opens on.
     static var defaultPage: AppTab {
         UserDefaults.standard.string(forKey: PreferenceKey.defaultPage) == AppTab.buy.rawValue ? .buy : .pay
@@ -107,13 +81,18 @@ enum AppReset {
         SmartCategories.reset()
         StarHashWidgetData.erase()
         ProfilePhoto.shared.remove()
-        if let domain = Bundle.main.bundleIdentifier {
-            UserDefaults.standard.removePersistentDomain(forName: domain)
+        // The directory's record of what it was sent outlives the wipe, so
+        // the owner's listing is deleted from the server after it.
+        StarHashCloud.keepingDirectoryState {
+            if let domain = Bundle.main.bundleIdentifier {
+                UserDefaults.standard.removePersistentDomain(forName: domain)
+            }
         }
         // The owner's name, SIMs and wallet went with the rest, and
         // auto-verify's state.
         AppEnvironment.owner.reload()
         AppEnvironment.autoVerify.reload()
+        StarHashCloud.syncDirectory(owner: AppEnvironment.owner)
         try? FileManager.default.removeItem(at: URL.temporaryDirectory.appending(path: "Shortcut", directoryHint: .isDirectory))
         router.openTransactionID = nil
         router.show(.pay)

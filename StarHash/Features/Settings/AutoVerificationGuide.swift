@@ -43,10 +43,10 @@ struct AutoVerificationGuide: View {
     /// Whether the step's action (Add Shortcut, Open Shortcuts) has been
     /// tapped, which brings up Continue.
     @State private var didAct = false
-    /// When the shortcut had last run as Verify Shortcut was tapped
-    /// (`.distantPast` for never); nil before it is tapped.
-    @State private var verifyStartedAt: Date?
-    @State private var verification: Verification = Self.launchVerification
+    /// A check's outcome to show without running it (debug launches).
+    @State private var shownCheck = Self.launchCheck
+    /// The check, `AutoVerify`'s.
+    private var verification: AutoVerify.Check { shownCheck ?? autoVerify.check }
     /// The scroll view's visible height: from the progress bar to the
     /// buttons.
     @State private var viewportHeight: CGFloat = 0
@@ -71,19 +71,14 @@ struct AutoVerificationGuide: View {
         )
     }
 
-    private static var launchVerification: Verification {
+    private static var launchCheck: AutoVerify.Check? {
         switch SettingsLaunch.guideOutcome {
         case "guideFailed": .failed
         case "guideWaiting": .awaitingMessage
-        case "guideVerified": .verified
-        default: .idle
+        case "guideVerified": .proven
+        default: nil
         }
     }
-
-    /// The check: not run, running, the shortcut ran but no real message
-    /// has come through the automation yet, one has, or the shortcut did
-    /// not run.
-    private enum Verification { case idle, waiting, awaitingMessage, verified, failed }
 
     static let stepCount = 3
     private static let checkStep = 2
@@ -131,34 +126,25 @@ struct AutoVerificationGuide: View {
         // Back on the left steps back through the setup, then leaves it;
         // close on the right, over onboarding only.
         .starhashBackAndClose(back: goBack, close: onClose)
-        .onChange(of: autoVerify.shortcutRanAt) { checkVerification() }
-        // A real message through the automation, while the step waits.
-        .onChange(of: automationProven) {
-            guard verification == .awaitingMessage, automationProven else { return }
-            withAnimation(.smooth) { verification = .verified }
-        }
+        // Shortcuts came back, the action's run given a moment to land.
         .onChange(of: router.shortcutCallback) { _, callback in
-            guard let callback, verification == .waiting else { return }
-            // Shortcuts came back: either the action ran (and wrote
-            // `shortcutRanAt`), or the shortcut was missing or failed.
+            guard let callback, verification == .running else { return }
             Task {
                 try? await Task.sleep(for: .milliseconds(400))
-                checkVerification()
-                if verification == .waiting, callback.result != .success {
-                    withAnimation(.smooth) { verification = .failed }
-                }
+                withAnimation(.smooth) { autoVerify.checkReturned(callback.result) }
             }
         }
         .onChange(of: scenePhase) { _, phase in
             // Back without a callback (the person switched apps by hand).
-            guard phase == .active, verification == .waiting else { return }
+            guard phase == .active, verification == .running else { return }
             Task {
                 try? await Task.sleep(for: .seconds(1.5))
-                checkVerification()
-                if verification == .waiting { withAnimation(.smooth) { verification = .failed } }
+                withAnimation(.smooth) { autoVerify.checkReturned(nil) }
             }
         }
-        .sensoryFeedback(.success, trigger: verification == .verified)
+        .onDisappear { autoVerify.resetCheck() }
+        .animation(.smooth, value: autoVerify.check)
+        .sensoryFeedback(.success, trigger: verification == .proven)
     }
 
     // MARK: Content
@@ -186,7 +172,7 @@ struct AutoVerificationGuide: View {
                 label: "Shortcuts' Automation tab: When I get a message containing RWF, run StarHash SMS, switched on",
                 // The switch, on.
                 highlight: CGRect(x: 0.725, y: 0.40, width: 0.185, height: 0.185),
-                isVerified: step == Self.checkStep && verification == .verified,
+                isVerified: step == Self.checkStep && verification == .proven,
                 height: height
             )
         }
@@ -198,7 +184,7 @@ struct AutoVerificationGuide: View {
         case 1: "Turn on the automation"
         default:
             switch verification {
-            case .verified: "You're all set"
+            case .proven: "You're all set"
             case .awaitingMessage: "Waiting for a message"
             case .failed: "Shortcut didn't run"
             default: "Check it works"
@@ -228,7 +214,7 @@ struct AutoVerificationGuide: View {
         } else {
             Group {
                 switch verification {
-                case .verified:
+                case .proven:
                     GuideStepList(steps: [
                         "Every \(ownWallets.messagesName) message confirms its payment.",
                         "Fees and your balance fill in by themselves.",
@@ -346,12 +332,12 @@ struct AutoVerificationGuide: View {
     @ViewBuilder
     private var verifyButtons: some View {
         switch verification {
-        case .verified, .awaitingMessage:
+        case .proven, .awaitingMessage:
             // Waiting needs nothing more here: the message can come any
             // time, and Settings says auto-verify is waiting until then.
             Button("Done", action: finish)
                 .buttonStyle(GuideButtonStyle(prominent: true))
-        case .waiting:
+        case .running:
             Button {} label: {
                 HStack(spacing: 10) {
                     ProgressView().tint(Color.starhashSecondaryText)
@@ -385,7 +371,7 @@ struct AutoVerificationGuide: View {
         didAct = true
     }
 
-    /// Auto-verify is already on by now (`checkVerification`).
+    /// Auto-verify is already on by now (the check finished the setup).
     private func finish() {
         if let onDone { onDone() } else { dismiss() }
     }
@@ -404,32 +390,17 @@ struct AutoVerificationGuide: View {
         withAnimation(reduceMotion ? .easeInOut(duration: 0.3) : .smooth(duration: 0.45)) {
             step = next
             didAct = false
-            verification = .idle
+            shownCheck = nil
+            autoVerify.resetCheck()
         }
     }
 
+    /// The shortcut runs with the sample; its run finishes the setup
+    /// (`AutoVerify.beginCheck`).
     private func runVerification() {
-        verifyStartedAt = autoVerify.shortcutRanAt ?? .distantPast
-        withAnimation(.smooth) { verification = .waiting }
+        shownCheck = nil
+        withAnimation(.smooth) { autoVerify.beginCheck() }
         if let url = StarHashShortcut.verificationURL { openURL(url) }
-    }
-
-    /// The shortcut ran: auto-verify goes on, counting from now, and the
-    /// step waits for a real message through the automation, unless one
-    /// has come already.
-    private func checkVerification() {
-        guard let start = verifyStartedAt, let ran = autoVerify.shortcutRanAt, ran > start else { return }
-        verifyStartedAt = nil
-        autoVerify.finishSetUp()
-        withAnimation(.smooth) { verification = automationProven ? .verified : .awaitingMessage }
-    }
-
-    /// A real message has come through the automation since the setup.
-    private var automationProven: Bool {
-        switch autoVerify.status() {
-        case .active, .looksBroken: true
-        case .off, .waiting: false
-        }
     }
 }
 

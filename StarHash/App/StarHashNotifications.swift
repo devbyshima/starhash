@@ -2,45 +2,13 @@ import StarHashKit
 import SwiftUI
 import UserNotifications
 
-extension PreferenceKey {
-    /// The Notifications page's choices (`NotificationPlan.Settings`).
-    static let notifyPaymentReminders = "notifyPaymentReminders"
-    /// Minutes, one of `NotificationPlan.reminderDelays`.
-    static let paymentReminderDelay = "paymentReminderDelay"
-    static let notifyConfirmedPayments = "notifyConfirmedPayments"
-    static let notifyMoneyReceived = "notifyMoneyReceived"
-    static let notifyWeeklySummary = "notifyWeeklySummary"
-    /// A `Calendar` weekday, 1 for Sunday.
-    static let weeklySummaryDay = "weeklySummaryDay"
-    static let notifyMonthlySummary = "notifyMonthlySummary"
-    /// The hour both summaries come, 0 to 23.
-    static let summaryHour = "summaryHour"
-    static let notificationAmounts = "notificationAmounts"
-    static let notificationSound = "notificationSound"
-}
-
 extension StarHashPreferences {
-    /// The Notifications page's choices, with the defaults it shows, and
-    /// whether auto-verify fails unconfirmed payments.
+    /// The Notifications page's choices, and whether auto-verify fails
+    /// unconfirmed payments.
     @MainActor
     static var notifications: NotificationPlan.Settings {
-        let defaults = NotificationPlan.Settings()
-        let saved = UserDefaults.standard
-        return NotificationPlan.Settings(
-            paymentReminders: bool(PreferenceKey.notifyPaymentReminders, default: defaults.paymentReminders),
-            reminderDelay: saved.object(forKey: PreferenceKey.paymentReminderDelay) as? Int ?? defaults.reminderDelay,
-            confirmedPayments: bool(PreferenceKey.notifyConfirmedPayments, default: defaults.confirmedPayments),
-            moneyReceived: bool(PreferenceKey.notifyMoneyReceived, default: defaults.moneyReceived),
-            weeklySummary: bool(PreferenceKey.notifyWeeklySummary, default: defaults.weeklySummary),
-            weeklyDay: saved.object(forKey: PreferenceKey.weeklySummaryDay) as? Int ?? defaults.weeklyDay,
-            monthlySummary: bool(PreferenceKey.notifyMonthlySummary, default: defaults.monthlySummary),
-            summaryHour: saved.object(forKey: PreferenceKey.summaryHour) as? Int ?? defaults.summaryHour,
-            showsAmounts: bool(PreferenceKey.notificationAmounts, default: defaults.showsAmounts),
-            failsUnconfirmed: AppEnvironment.autoVerify.status() == .active
-        )
+        .stored(failsUnconfirmed: AppEnvironment.autoVerify.status() == .active)
     }
-
-    static var notificationSound: Bool { bool(PreferenceKey.notificationSound, default: true) }
 }
 
 extension UNAuthorizationStatus {
@@ -165,22 +133,12 @@ final class StarHashNotifications {
         center.removeDeliveredNotifications(withIdentifiers: settled)
     }
 
-    /// A carrier SMS was just applied to `transaction`, which stood as
-    /// `previous` before it (nil when the message added it): says so, when
-    /// the owner asked to hear of it.
-    func messageApplied(_ transaction: StarHashKit.Transaction, previous: StarHashKit.Transaction?) async {
-        guard let item = NotificationPlan.afterMessage(
-            applied: transaction, previous: previous, settings: StarHashPreferences.notifications
-        ), await authorizationStatus().allowsDelivery else { return }
-        try? await center.add(request(for: item))
-    }
-
-    /// A message that looks like the wallet's may be a scam: says so at
-    /// once, whatever the Notifications page says, since StarHash did not
-    /// log it and the owner may be about to send money back.
-    func warnOfScam(_ warning: ScamWarning) async {
-        let item = NotificationPlan.scamWarning(warning, settings: StarHashPreferences.notifications)
-        guard await authorizationStatus().allowsDelivery else { return }
+    /// Says what a message just did, when it is worth a word
+    /// (`NotificationPlan.after`): a scam warning whatever the
+    /// Notifications page says, the rest only when the owner asked.
+    func announce(_ outcome: AutoVerify.Outcome) async {
+        guard let item = NotificationPlan.after(outcome, settings: StarHashPreferences.notifications),
+              await authorizationStatus().allowsDelivery else { return }
         try? await center.add(request(for: item))
     }
 
@@ -204,14 +162,12 @@ final class StarHashNotifications {
         case Action.fail:
             // StarHash may have woken in the background just for this.
             store.reloadFromDisk()
-            guard let id = transactionID, let transaction = store.transaction(id: id) else { return }
-            if transaction.status == .pending {
-                store.update(transaction.markedFailed())
-            }
+            guard let id = transactionID else { return }
+            store.markFailed(id)
             await sync()
         case UNNotificationDefaultActionIdentifier:
-            if let id = transactionID, let url = URL(string: "starhash://transaction/\(id.uuidString)") {
-                AppEnvironment.router.handle(url)
+            if let id = transactionID {
+                AppEnvironment.router.handle(StarHashLink.transaction(id).url)
             } else if kind == .scamWarning {
                 AppEnvironment.router.scamNotice = ScamNotice(message: body)
             } else {
@@ -226,7 +182,7 @@ final class StarHashNotifications {
         let content = UNMutableNotificationContent()
         content.title = item.title
         content.body = item.body
-        content.sound = StarHashPreferences.notificationSound ? .default : nil
+        content.sound = Preferences.notificationSound.value() ? .default : nil
         // Payments stack apart from the summaries.
         content.threadIdentifier = item.transactionID == nil ? "summaries" : "payments"
         var userInfo: [String: Any] = ["kind": item.kind.rawValue]

@@ -33,7 +33,7 @@ import Testing
             wallet: .mtn, direction: .incoming,
             counterparty: Recipient(name: "Serein Shima", destination: "515", kind: .phone),
             amount: 2000, fee: nil, date: .now, reference: "1", balanceAfter: nil, category: nil
-        ))
+        )).transaction
         #expect(received.isOwnTransfer)
         let other = store.recordPayment(to: Recipient(name: "Ariane", destination: "0788999000", kind: .phone), amount: 700)
         #expect(!other.isOwnTransfer)
@@ -63,16 +63,10 @@ import Testing
     @Test func aCategoryChosenByHandStays() throws {
         let store = StarHashStore(fileURL: nil)
         let toOther = store.recordPayment(to: Recipient(name: "Me", destination: "0722000515", kind: .phone), amount: 5000)
-        var gift = try #require(store.transaction(id: toOther.id))
-        gift.category = TransactionCategory.family.rawValue
-        gift.categoryChosenByHand = true
-        store.update(gift)
+        store.chooseCategory(TransactionCategory.family.rawValue, for: toOther.id)
         // Picked as Your own accounts by hand, with no second SIM given.
         let toFriend = store.recordPayment(to: Recipient(name: "Ariane", destination: "0788999000", kind: .phone), amount: 700)
-        var mine = try #require(store.transaction(id: toFriend.id))
-        mine.category = TransactionCategory.ownAccounts.rawValue
-        mine.categoryChosenByHand = true
-        store.update(mine)
+        store.chooseCategory(TransactionCategory.ownAccounts.rawValue, for: toFriend.id)
 
         store.ownAccounts = { own }
         #expect(store.refileOwnTransfers() == 0)

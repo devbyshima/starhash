@@ -20,11 +20,11 @@ enum QuickActions {
     static func update() {
         let wallet = AppEnvironment.owner.wallet
         UIApplication.shared.shortcutItems = [
-            item(String(starhash: "Scan to Pay"), symbol: "qrcode", link: "starhash://scan"),
+            item(String(starhash: "Scan to Pay"), symbol: "qrcode", link: StarHashLink.scan.url.absoluteString),
             item(String(starhash: "Balance"), subtitle: wallet.walletName, symbol: "banknote.fill",
-                 link: "starhash://dial?code=" + (USSD.balance(for: wallet).addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? "")),
-            item(String(starhash: "Buy"), symbol: "bag.fill", link: "starhash://buy"),
-            item(String(starhash: "Transactions"), symbol: "receipt.fill", link: "starhash://activity"),
+                 link: StarHashLink.dial(code: USSD.balance(for: wallet)).url.absoluteString),
+            item(String(starhash: "Buy"), symbol: "bag.fill", link: StarHashLink.page(.buy).url.absoluteString),
+            item(String(starhash: "Transactions"), symbol: "receipt.fill", link: StarHashLink.page(.activity).url.absoluteString),
         ]
     }
 

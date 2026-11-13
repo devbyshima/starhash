@@ -63,6 +63,12 @@ extension Transaction {
     public var isOwnTransfer: Bool {
         knownCategory?.isOwnTransfer ?? false
     }
+
+    /// A merchant payment with no category yet, and none chosen by hand:
+    /// what StarHash may name, by the rules or the on-device model.
+    public var awaitsCategory: Bool {
+        direction == .outgoing && counterparty.kind == .merchant && category == nil && !categoryChosenByHand
+    }
 }
 
 /// Works out a payment's category from what is known of it: the name it was

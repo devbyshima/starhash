@@ -77,29 +77,37 @@ struct NotificationPlanTests {
         confirmed.status = .confirmed
         confirmed.fee = 100
         confirmed.balanceAfter = 12_000
-        let item = try #require(NotificationPlan.afterMessage(applied: confirmed, previous: pending, settings: .init(confirmedPayments: true)))
+        let item = try #require(NotificationPlan.after(.confirmed(confirmed, wasFailed: false), settings: .init(confirmedPayments: true)))
         #expect(item.kind == .paymentConfirmed)
         #expect(item.date == nil)
         #expect(item.body == "5,000 RWF to Aline went through. Fee 100 RWF, balance 12,000 RWF.")
     }
 
+    @Test func aLateMessageAfterAutoVerifyFailedThePaymentSaysItWentThrough() throws {
+        var confirmed = Self.tx(5_000, at: Self.now, status: .confirmed)
+        confirmed.fee = 100
+        let item = try #require(NotificationPlan.after(.confirmed(confirmed, wasFailed: true), settings: .init(confirmedPayments: true)))
+        #expect(item.kind == .paymentConfirmed)
+        #expect(item.body.hasPrefix("5,000 RWF to Aline went through."))
+    }
+
     @Test func aMessageAppliedTwiceSaysNothing() {
         let confirmed = Self.tx(5_000, at: Self.now, status: .confirmed)
-        #expect(NotificationPlan.afterMessage(applied: confirmed, previous: confirmed, settings: .init(confirmedPayments: true)) == nil)
+        #expect(NotificationPlan.after(.alreadyApplied(confirmed), settings: .init(confirmedPayments: true)) == nil)
     }
 
     @Test func moneyReceivedOnByDefaultAndOffWhenTurnedOff() throws {
         let received = Self.tx(20_000, .incoming, at: Self.now, source: .sms, balance: 32_000)
-        #expect(NotificationPlan.afterMessage(applied: received, previous: nil, settings: .init(moneyReceived: false)) == nil)
-        let item = try #require(NotificationPlan.afterMessage(applied: received, previous: nil, settings: .init()))
+        #expect(NotificationPlan.after(.added(received), settings: .init(moneyReceived: false)) == nil)
+        let item = try #require(NotificationPlan.after(.added(received), settings: .init()))
         #expect(item.body == "Aline sent you 20,000 RWF. Balance 32,000 RWF.")
-        let hidden = try #require(NotificationPlan.afterMessage(applied: received, previous: nil, settings: .init(moneyReceived: true, showsAmounts: false)))
+        let hidden = try #require(NotificationPlan.after(.added(received), settings: .init(moneyReceived: true, showsAmounts: false)))
         #expect(hidden.body == "Aline sent you money.")
     }
 
     @Test func aPaymentMadeOutsideStarHashSaysNothing() {
         let logged = Self.tx(5_000, at: Self.now, source: .sms)
-        #expect(NotificationPlan.afterMessage(applied: logged, previous: nil, settings: .init(confirmedPayments: true, moneyReceived: true)) == nil)
+        #expect(NotificationPlan.after(.added(logged), settings: .init(confirmedPayments: true, moneyReceived: true)) == nil)
     }
 
     // MARK: Summaries

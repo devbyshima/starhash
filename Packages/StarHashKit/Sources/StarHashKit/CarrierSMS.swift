@@ -80,7 +80,27 @@ public struct OverdraftUse: Hashable, Sendable {
 /// in RWF, with the currency before the amount as Rwanda's messages write
 /// it. No Rwandan message has been published to check them against, so
 /// they are deliberately loose.
+/// What a wallet's message says, read once (`CarrierSMS.read`).
+public enum WalletMessage: Hashable, Sendable {
+    /// Money sent or received.
+    case transaction(ParsedSMS)
+    /// A payment that did not go through.
+    case failure(ParsedSMS)
+    /// MoMoAdvance paying for a payment.
+    case overdraft(OverdraftUse)
+}
+
 public enum CarrierSMS {
+    /// The three kinds of wallet message, tried in one order for every
+    /// reader (the automation and Verify). Nil for anything else: a bank's
+    /// text, a promotion, a look-alike that reads as none of them.
+    public static func read(_ text: String) -> WalletMessage? {
+        if let sms = parse(text) { return .transaction(sms) }
+        if let failure = parseFailure(text) { return .failure(failure) }
+        if let use = parseOverdraft(text) { return .overdraft(use) }
+        return nil
+    }
+
     /// Nil when the text is not a MoMo or Airtel Money transaction message.
     public static func parse(_ text: String) -> ParsedSMS? {
         let message = normalized(text)

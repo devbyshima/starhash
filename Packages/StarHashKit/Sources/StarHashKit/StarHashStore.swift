@@ -10,11 +10,12 @@ public final class StarHashStore {
     public private(set) var transactions: [Transaction] = []
 
     /// Bumped whenever the locations are wiped (Nearby turned off, Delete
-    /// All Data). A payment notes it when it starts locating, so a fix that
-    /// arrives after a wipe is dropped rather than written back.
-    public private(set) var locationsGeneration = 0
+    /// All Data), so a `PlaceTicket` taken before a wipe is stale.
+    @ObservationIgnored private var locationsGeneration = 0
 
-    @ObservationIgnored private let fileURL: URL?
+    /// Where the transactions are kept (`TransactionFile`); nil keeps them
+    /// in memory alone.
+    @ObservationIgnored private let file: (any TransactionFile)?
 
     /// The owner's own numbers, read afresh each time a payment or message
     /// comes in (the app reads them from its settings): money between them
@@ -33,17 +34,31 @@ public final class StarHashStore {
     /// file reads again and they are merged into it.
     @ObservationIgnored private var hasReadFile = true
 
-    /// `fileURL` nil keeps everything in memory (tests, previews).
-    public init(fileURL: URL?) {
-        self.fileURL = fileURL
+    /// The wallet messages applied while the file was sealed, in order,
+    /// with when each came. The store saw none of the history then, so a
+    /// message for a payment dialled before the restart could only be added
+    /// beside it; once the file reads, they are applied again over the
+    /// whole history, and confirm that payment instead.
+    @ObservationIgnored private var sealedMessages: [(message: WalletMessage, receivedAt: Date)] = []
+    /// What those messages added while sealed, set aside when they are
+    /// applied again.
+    @ObservationIgnored private var sealedAdditions: Set<UUID> = []
+
+    /// `file` nil keeps everything in memory and saves nothing (previews,
+    /// most tests).
+    public init(file: (any TransactionFile)?) {
+        self.file = file
         reloadFromDisk()
     }
 
-    public static var defaultFileURL: URL {
-        let folder = URL.applicationSupportDirectory.appending(path: "StarHash", directoryHint: .isDirectory)
-        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        return folder.appending(path: "transactions.json")
+    /// The transactions as one JSON file at `fileURL`; nil keeps them in
+    /// memory.
+    public convenience init(fileURL: URL?) {
+        self.init(file: fileURL.map { JSONTransactionFile(url: $0) })
     }
+
+    /// Where the app keeps its transactions.
+    public static var defaultFileURL: URL { JSONTransactionFile.standardURL }
 
     // MARK: Reading
 
@@ -55,11 +70,10 @@ public final class StarHashStore {
     /// ones StarHash can dial again: a merchant read from an SMS without
     /// its code is left out.
     public func recentRecipients(limit: Int = 10) -> [Recipient] {
-        var seen = Set<String>()
+        var seen = Set<Recipient.Identity>()
         var result: [Recipient] = []
         for t in transactions where t.direction == .outgoing && t.counterparty.isPayable {
-            let key = t.counterparty.kind.rawValue + t.counterparty.destination
-            if seen.insert(key).inserted { result.append(t.counterparty) }
+            if seen.insert(t.counterparty.identity).inserted { result.append(t.counterparty) }
             if result.count == limit { break }
         }
         return result
@@ -81,12 +95,6 @@ public final class StarHashStore {
 
     public func add(_ transaction: Transaction) {
         transactions.append(transaction)
-        sortAndSave()
-    }
-
-    public func update(_ transaction: Transaction) {
-        guard let index = transactions.firstIndex(where: { $0.id == transaction.id }) else { return }
-        transactions[index] = transaction
         sortAndSave()
     }
 
@@ -130,34 +138,32 @@ public final class StarHashStore {
     public func eraseAll() {
         locationsGeneration += 1
         transactions.removeAll()
-        guard let fileURL else { return }
-        let folder = fileURL.deletingLastPathComponent()
-        let stem = fileURL.deletingPathExtension().lastPathComponent
-        let files = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
-        for file in files where file.lastPathComponent.hasPrefix(stem) {
-            try? FileManager.default.removeItem(at: file)
-        }
+        sealedMessages = []
+        sealedAdditions = []
+        file?.erase()
     }
+
+    /// How long after dialling the same payment again counts as a retry.
+    public static let retryWindow: TimeInterval = 5 * 60
 
     /// A payment just dialled from StarHash, pending until its SMS arrives.
     ///
     /// The amount stays on Pay's keypad after dialling, so a call cancelled
-    /// at the system prompt can be dialled again. With `retryWindow`, a
-    /// pending payment from StarHash to the same recipient for the same
-    /// amount, dialled less than that long ago, is taken to be that retry:
-    /// it moves to `date` instead of a second one being added. It has no fee
-    /// until the SMS confirming it gives one. `wallet` is the wallet it was
-    /// dialled with.
+    /// at the system prompt can be dialled again. A pending payment from
+    /// StarHash to the same recipient for the same amount, dialled less
+    /// than `retryWindow` ago, is taken to be that retry: it moves to `date`
+    /// instead of a second one being added. It has no fee until the SMS
+    /// confirming it gives one. `wallet` is the wallet it was dialled with.
     @discardableResult
     public func recordPayment(
         to recipient: Recipient,
         amount: Int,
         date: Date = .now,
         location: Transaction.Coordinate? = nil,
-        wallet: Recipient.Network? = nil,
-        retryWindow: TimeInterval = 0
+        wallet: Recipient.Network? = nil
     ) -> Transaction {
-        if retryWindow > 0, let index = transactions.firstIndex(where: {
+        let retryWindow = Self.retryWindow
+        if let index = transactions.firstIndex(where: {
             $0.status == .pending && $0.source == .app && $0.direction == .outgoing
                 && $0.amount == amount && $0.counterparty.kind == recipient.kind
                 && $0.counterparty.destination == recipient.destination
@@ -179,6 +185,96 @@ public final class StarHashStore {
         transaction.category = ownCategory(for: recipient)
         add(transaction)
         return transaction
+    }
+
+    // MARK: By hand
+
+    /// The owner says a pending payment did not go through: it stays,
+    /// struck through, and counts for nothing. Only a pending one: a
+    /// confirmed payment is its wallet's word, and a failed one already is.
+    /// Returns it failed, or nil when it was not pending or is gone.
+    @discardableResult
+    public func markFailed(_ id: UUID) -> Transaction? {
+        guard let index = index(of: id), transactions[index].status == .pending else { return nil }
+        transactions[index] = transactions[index].markedFailed()
+        save()
+        return transactions[index]
+    }
+
+    /// Confirm Without Message: the owner says it went through with no
+    /// message to show, so its fee comes from `Tariff` for the wallet it
+    /// was dialled with (`fallback` for one saved before that was kept).
+    /// Returns it confirmed, or nil when it already was or is gone.
+    @discardableResult
+    public func confirmByHand(_ id: UUID, fallback: Recipient.Network) -> Transaction? {
+        guard let index = index(of: id), transactions[index].status != .confirmed else { return nil }
+        transactions[index] = transactions[index].confirmedByHand(wallet: fallback)
+        save()
+        return transactions[index]
+    }
+
+    /// A category the owner picked on the payment's page (nil for none):
+    /// a category chosen by hand, which StarHash never changes after.
+    public func chooseCategory(_ category: String?, for id: UUID) {
+        guard let index = index(of: id) else { return }
+        transactions[index].category = category
+        transactions[index].categoryChosenByHand = true
+        save()
+    }
+
+    // MARK: Categories StarHash works out
+
+    /// Names by the rules (`TransactionCategorizer`) every payment that
+    /// `awaitsCategory`, saved once for them all. Returns how many it named.
+    @discardableResult
+    public func categorizeByRules() -> Int {
+        var count = 0
+        for index in transactions.indices where transactions[index].awaitsCategory {
+            guard let category = TransactionCategorizer.category(of: transactions[index]) else { continue }
+            transactions[index].category = category.rawValue
+            count += 1
+        }
+        if count > 0 { save() }
+        return count
+    }
+
+    /// A category worked out elsewhere (the on-device model): it only fills
+    /// a gap, so one named meanwhile, by hand above all, stays. Returns
+    /// whether it was taken.
+    @discardableResult
+    public func fillCategory(_ category: TransactionCategory, for id: UUID) -> Bool {
+        guard let index = index(of: id), transactions[index].awaitsCategory else { return false }
+        transactions[index].category = category.rawValue
+        save()
+        return true
+    }
+
+    // MARK: Places
+
+    /// Leave to write where a payment was made once its fix arrives: taken
+    /// when locating starts. Nearby turned off or Delete All Data in
+    /// between makes it stale, and a late fix is dropped.
+    public struct PlaceTicket: Equatable, Sendable {
+        fileprivate let generation: Int
+    }
+
+    public func placeTicket() -> PlaceTicket {
+        PlaceTicket(generation: locationsGeneration)
+    }
+
+    /// Where a payment was made, from a fix that came after it was dialled
+    /// (`Nearby.remembersPlace` decides whether it should be kept at all).
+    /// Returns false when the ticket is stale or the payment is gone.
+    @discardableResult
+    public func attachPlace(_ place: Transaction.Coordinate, to id: UUID, ticket: PlaceTicket) -> Bool {
+        guard ticket.generation == locationsGeneration, let index = index(of: id) else { return false }
+        transactions[index].location = place
+        save()
+        return true
+    }
+
+    private func index(of id: UUID) -> Int? {
+        transactions.firstIndex { $0.id == id }
     }
 
     /// Files the owner's own transfers afresh, as their numbers are first
@@ -209,17 +305,36 @@ public final class StarHashStore {
         return count
     }
 
+    /// What `apply` did with a message.
+    public enum Applied: Equatable, Sendable {
+        /// It confirmed a payment StarHash dialled; `previous` is how that
+        /// payment stood before (pending, or failed for want of a message).
+        case confirmed(Transaction, previous: Transaction)
+        /// It logged a movement StarHash did not dial.
+        case added(Transaction)
+        /// It had been applied before, to this transaction: nothing changed.
+        case alreadyApplied(Transaction)
+
+        /// The transaction it confirmed, added or found.
+        public var transaction: Transaction {
+            switch self {
+            case .confirmed(let t, _), .added(let t), .alreadyApplied(let t): t
+            }
+        }
+    }
+
     /// Applies a carrier SMS: confirms the matching pending payment (same
     /// amount and destination, dialled within 6 hours of the message; the
     /// closest one when there are several) or adds a new transaction. A
-    /// message already applied changes nothing. Returns the transaction it
-    /// confirmed or added.
+    /// message already applied changes nothing.
     @discardableResult
-    public func apply(_ sms: ParsedSMS, receivedAt now: Date = .now) -> Transaction {
-        if let existing = alreadyApplied(sms) { return existing }
+    public func apply(_ sms: ParsedSMS, receivedAt now: Date = .now) -> Applied {
+        if !hasReadFile { sealedMessages.append((.transaction(sms), now)) }
+        if let existing = alreadyApplied(sms) { return .alreadyApplied(existing) }
         let date = sms.date ?? now
         if sms.direction == .outgoing, let index = pendingMatch(for: sms, at: date) {
-            return confirm(at: index, with: sms)
+            let previous = transactions[index]
+            return .confirmed(confirm(at: index, with: sms), previous: previous)
         }
         let transaction = Transaction(
             direction: sms.direction, counterparty: sms.counterparty, amount: sms.amount,
@@ -227,8 +342,9 @@ public final class StarHashStore {
             reference: sms.reference, balanceAfter: sms.balanceAfter, category: ownCategory(for: sms.counterparty) ?? sms.category,
             wallet: sms.wallet, messageDate: sms.date
         )
+        if !hasReadFile { sealedAdditions.insert(transaction.id) }
         add(transaction)
-        return transaction
+        return .added(transaction)
     }
 
     /// Confirms the payment at `index` with the message that says it went
@@ -270,6 +386,7 @@ public final class StarHashStore {
     /// record of attempts it did not dial. Returns the payment it failed.
     @discardableResult
     public func applyFailure(_ sms: ParsedSMS, receivedAt now: Date = .now) -> Transaction? {
+        if !hasReadFile { sealedMessages.append((.failure(sms), now)) }
         guard sms.direction == .outgoing, !sms.counterparty.destination.isEmpty,
               let index = pendingMatch(for: sms, at: sms.date ?? now) else { return nil }
         var failed = transactions[index].markedFailed()
@@ -288,6 +405,7 @@ public final class StarHashStore {
     /// is ignored. Returns the payment it added the fee to.
     @discardableResult
     public func applyOverdraft(_ use: OverdraftUse, receivedAt now: Date = .now) -> Transaction? {
+        if !hasReadFile { sealedMessages.append((.overdraft(use), now)) }
         guard use.accessFee > 0, let index = overdraftMatch(for: use, at: use.date ?? now) else { return nil }
         return addAccessFee(of: use, at: index)
     }
@@ -320,7 +438,8 @@ public final class StarHashStore {
     public func verify(_ id: UUID, withMessage text: String) -> Verification? {
         guard let index = transactions.firstIndex(where: { $0.id == id }) else { return nil }
         let payment = transactions[index]
-        if let sms = CarrierSMS.parse(text) {
+        switch CarrierSMS.read(text) {
+        case .transaction(let sms):
             guard settles(payment, with: sms, at: sms.date) else {
                 return .anotherPayment(amount: sms.amount, counterparty: sms.counterparty)
             }
@@ -330,8 +449,7 @@ public final class StarHashStore {
             }
             guard let index = transactions.firstIndex(where: { $0.id == id }) else { return nil }
             return .confirmed(confirm(at: index, with: sms))
-        }
-        if let failure = CarrierSMS.parseFailure(text) {
+        case .failure(let failure):
             guard settles(payment, with: failure, at: failure.date) else {
                 return .anotherPayment(amount: failure.amount, counterparty: failure.counterparty)
             }
@@ -340,14 +458,14 @@ public final class StarHashStore {
             transactions[index] = failed
             save()
             return .failed(failed)
-        }
-        if let use = CarrierSMS.parseOverdraft(text) {
+        case .overdraft(let use):
             guard use.accessFee > 0, overdraftCovers(payment, use, at: use.date ?? payment.date) else {
                 return .anotherPayment(amount: use.amount, counterparty: nil)
             }
             return .overdraft(addAccessFee(of: use, at: index))
+        case nil:
+            return .notAMessage
         }
-        return .notAMessage
     }
 
     /// Marks failed every payment dialled from StarHash since `since` that
@@ -458,28 +576,46 @@ public final class StarHashStore {
     /// foreground). A file that cannot be decoded is moved aside rather than
     /// overwritten, so it can still be recovered.
     public func reloadFromDisk() {
-        guard let fileURL else { return }
-        switch Self.read(fileURL) {
+        guard let file else { return }
+        switch file.read() {
         case .missing:
-            hasReadFile = true
-        case .unreadable:
+            settleSealed()
+        case .sealed:
             hasReadFile = false
         case .damaged:
-            Self.setAside(fileURL)
-            hasReadFile = true
+            file.setAside()
+            settleSealed()
         case .read(let saved):
             if hasReadFile {
                 transactions = saved.sorted { $0.date > $1.date }
             } else {
                 // What changed while the file was sealed is newer than the
-                // file, so it wins; everything else comes from the file.
-                let inMemory = Set(transactions.map(\.id))
-                transactions = (transactions + saved.filter { !inMemory.contains($0.id) })
+                // file, so it wins; everything else comes from the file. The
+                // messages that came meanwhile are applied again over it all.
+                let kept = transactions.filter { !sealedAdditions.contains($0.id) }
+                let inMemory = Set(kept.map(\.id))
+                transactions = (kept + saved.filter { !inMemory.contains($0.id) })
                     .sorted { $0.date > $1.date }
-                hasReadFile = true
-                write(to: fileURL)
+                let queued = sealedMessages
+                settleSealed()
+                for (message, receivedAt) in queued {
+                    switch message {
+                    case .transaction(let sms): apply(sms, receivedAt: receivedAt)
+                    case .failure(let sms): applyFailure(sms, receivedAt: receivedAt)
+                    case .overdraft(let use): applyOverdraft(use, receivedAt: receivedAt)
+                    }
+                }
+                file.write(transactions)
             }
         }
+    }
+
+    /// The file reads, or there is none to read: what is in memory is all
+    /// there is, and nothing is waiting to be applied again.
+    private func settleSealed() {
+        hasReadFile = true
+        sealedMessages = []
+        sealedAdditions = []
     }
 
     private func sortAndSave() {
@@ -488,45 +624,12 @@ public final class StarHashStore {
     }
 
     private func save() {
-        guard let fileURL else { return }
+        guard let file else { return }
         if !hasReadFile {
             // Merges and writes once the file reads; until then, memory only.
             reloadFromDisk()
             return
         }
-        write(to: fileURL)
-    }
-
-    /// Readable once the phone has been unlocked after a restart, so the
-    /// Process Carrier SMS action can log a payment while it is locked.
-    private func write(to fileURL: URL) {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        if let data = try? encoder.encode(transactions) {
-            try? data.write(to: fileURL, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
-        }
-    }
-
-    private enum FileState {
-        case missing
-        case unreadable
-        case damaged
-        case read([Transaction])
-    }
-
-    private static func read(_ url: URL) -> FileState {
-        guard FileManager.default.fileExists(atPath: url.path) else { return .missing }
-        guard let data = try? Data(contentsOf: url) else { return .unreadable }
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        guard let decoded = try? decoder.decode([Transaction].self, from: data) else { return .damaged }
-        return .read(decoded)
-    }
-
-    /// "transactions.json" becomes "transactions.damaged-<time>.json".
-    private static func setAside(_ url: URL) {
-        let stamp = Int(Date.now.timeIntervalSince1970)
-        let backup = url.deletingPathExtension().appendingPathExtension("damaged-\(stamp).json")
-        try? FileManager.default.moveItem(at: url, to: backup)
+        file.write(transactions)
     }
 }

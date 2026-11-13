@@ -22,7 +22,7 @@ struct RootView: View {
     @State private var whatsNewStartPage = WhatsNewLaunch.startPage
     /// What's New's height follows it.
     @State private var window = WhatsNewWindow()
-    @AppStorage(PreferenceKey.showMyName) private var showMyName = true
+    @AppStorage(Preferences.showMyName) private var showMyName: Bool
     @AppStorage(PreferenceKey.seenShowMyNameNotice) private var seenShowMyNameNotice = false
     @State private var forcesShowMyNameNotice = ShowMyNameNoticeSheet.forcedAtLaunch
     /// The tabs have been on screen a moment. The notes and sheets that open
@@ -108,10 +108,30 @@ struct RootView: View {
         }
     }
 
+    /// What `FirstRun` decides from, now.
+    private var firstRun: FirstRun.State {
+        FirstRun.State(
+            hasOnboarded: hasOnboarded,
+            hasWallet: owner.chosenWallet != nil,
+            hasSeenWelcomeNote: hasSeenDeveloperNote,
+            forcesWelcomeNote: forcesNote,
+            whatsNewPending: whatsNew != nil,
+            // Once, for owners set up before Show My Name came, while it is on.
+            showMyNameNoticeDue: forcesShowMyNameNotice || (!seenShowMyNameNotice && showMyName && owner.defaultSIM != nil),
+            reviewNoteDue: showsReviewNote
+        )
+    }
+
+    /// Whether `sheet` is the one `FirstRun` says comes next, once the tabs
+    /// have settled and the splash has gone.
+    private func shows(_ sheet: FirstRun.Sheet) -> Bool {
+        tabsSettled && !splashActive && FirstRun.next(firstRun) == sheet
+    }
+
     /// Owed from the moment onboarding ends until it is closed.
     private var welcomeNotePresented: Binding<Bool> {
         Binding(
-            get: { tabsSettled && !splashActive && (forcesNote || (hasOnboarded && owner.chosenWallet != nil && !hasSeenDeveloperNote)) },
+            get: { shows(.welcomeNote) },
             set: { presented in
                 guard !presented else { return }
                 hasSeenDeveloperNote = true
@@ -120,11 +140,10 @@ struct RootView: View {
         )
     }
 
-    /// Over the app once the splash has gone, and never over onboarding or
-    /// the welcome note.
+    /// Over the app once its window is measured, for the sheet's height.
     private var whatsNewPresented: Binding<Bool> {
         Binding(
-            get: { tabsSettled && whatsNew != nil && window.width > 0 && !splashActive && hasOnboarded && owner.chosenWallet != nil && hasSeenDeveloperNote && !forcesNote },
+            get: { shows(.whatsNew) && window.width > 0 },
             set: { presented in
                 guard !presented else { return }
                 whatsNew = nil
@@ -132,14 +151,9 @@ struct RootView: View {
         )
     }
 
-    /// Once, for owners set up before Show My Name came, while it is on:
-    /// after the welcome note and What's New, never over either.
     private var showMyNameNoticePresented: Binding<Bool> {
         Binding(
-            get: {
-                guard tabsSettled, !splashActive, hasOnboarded, owner.chosenWallet != nil, hasSeenDeveloperNote, !forcesNote, whatsNew == nil else { return false }
-                return forcesShowMyNameNotice || (!seenShowMyNameNotice && showMyName && owner.defaultSIM != nil)
-            },
+            get: { shows(.showMyNameNotice) },
             set: { presented in
                 guard !presented else { return }
                 seenShowMyNameNotice = true
@@ -150,16 +164,15 @@ struct RootView: View {
 
     private var reviewNotePresented: Binding<Bool> {
         Binding(
-            get: { tabsSettled && showsReviewNote && !splashActive },
+            get: { shows(.reviewNote) },
             set: { showsReviewNote = $0 }
         )
     }
 
     /// Two weeks after StarHash was first set up, the rating note, once,
-    /// never on top of the welcome note or What's New.
+    /// when nothing else is waiting to show.
     private func checkReviewNote() {
-        guard hasOnboarded, owner.chosenWallet != nil, hasSeenDeveloperNote, whatsNew == nil,
-              !showMyNameNoticePresented.wrappedValue else { return }
+        guard FirstRun.reviewNoteMayCome(firstRun) else { return }
         ReviewNote.startClockIfNeeded()
         if ReviewNote.isDue() { showsReviewNote = true }
     }

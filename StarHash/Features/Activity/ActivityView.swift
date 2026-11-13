@@ -22,8 +22,8 @@ struct ActivityView: View {
     /// The moment the totals and chart are worked out for. Refreshed on
     /// clock, day or time zone changes and on returning to the app, so
     /// "Today" and "This Week" roll over by themselves.
-    @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
-    @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
+    @AppStorage(Preferences.enableContacts) private var enableContacts: Bool
+    @AppStorage(Preferences.confirmDeletes) private var confirmDeletes: Bool
     @State private var now = Date.now
     /// The chart's period, from the bar's control.
     @State private var period: ActivityPeriod = .week
@@ -268,7 +268,7 @@ struct ActivityView: View {
     /// The payment did not go through: it stays in Activity, struck
     /// through, and counts towards nothing.
     private func markFailed(_ transaction: StarHashKit.Transaction) {
-        withAnimation(.smooth(duration: 0.3)) { store.update(transaction.markedFailed()) }
+        withAnimation(.smooth(duration: 0.3)) { _ = store.markFailed(transaction.id) }
         failedCount += 1
     }
 

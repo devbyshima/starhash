@@ -88,7 +88,7 @@ struct AutoVerifyTests {
         let store = Self.store(old)
         store.expireUnconfirmed(dialledSince: .distantPast, now: Self.now)
         let sms = try #require(CarrierSMS.parse("*165*S*5000 RWF transferred to Aline (250788123456) from 1234567. Fee was: 100 RWF. New balance: 12000 RWF."))
-        let applied = store.apply(sms, receivedAt: Self.now)
+        let applied = store.apply(sms, receivedAt: Self.now).transaction
         #expect(applied.id == old.id)
         #expect(store.transactions.count == 1)
         #expect(store.transactions[0].status == .confirmed)

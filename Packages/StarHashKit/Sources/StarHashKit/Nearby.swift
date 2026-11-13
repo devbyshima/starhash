@@ -11,6 +11,15 @@ import Foundation
 /// (`maximumAccuracy`), and a suggestion needs the person to be within the
 /// two fixes' uncertainty of a payment, never less than `minimumRadius`.
 public enum Nearby {
+    /// Whether a payment keeps where it was made: a merchant code always, a
+    /// number only when it is not one of the person's contacts, so paying
+    /// someone they know never records where they were. `isContact` is nil
+    /// when the contacts cannot be read: StarHash cannot tell, so a
+    /// number's place is not kept.
+    public static func remembersPlace(of recipient: Recipient, isContact: Bool?) -> Bool {
+        recipient.kind == .merchant || isContact == false
+    }
+
     /// A fix any worse than this cannot tell neighbouring tills apart.
     public static let maximumAccuracy: Double = 50
 
@@ -35,7 +44,7 @@ public enum Nearby {
         from transactions: [Transaction], latitude: Double, longitude: Double, accuracy: Double, limit: Int = 3
     ) -> [Suggestion] {
         guard accuracy >= 0, accuracy <= maximumAccuracy else { return [] }
-        var best: [String: Suggestion] = [:]
+        var best: [Recipient.Identity: Suggestion] = [:]
         for t in transactions where t.direction == .outgoing && t.status != .failed && t.counterparty.isPayable {
             // A place saved before its accuracy was kept never counts: no
             // fix was checked then, and paying a contact kept one too.
@@ -43,7 +52,7 @@ public enum Nearby {
                   placeAccuracy >= 0, placeAccuracy <= maximumAccuracy else { continue }
             let distance = Self.distance(latitude, longitude, place.latitude, place.longitude)
             guard distance <= max(minimumRadius, accuracy + placeAccuracy) else { continue }
-            let key = t.counterparty.kind.rawValue + t.counterparty.destination
+            let key = t.counterparty.identity
             if var found = best[key] {
                 found.visits += 1
                 found.distance = min(found.distance, distance)

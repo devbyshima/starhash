@@ -18,7 +18,7 @@ struct ContactDetailSheet: View {
     let onPay: (Recipient) -> Void
 
     @Environment(StarHashStore.self) private var store
-    @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
+    @AppStorage(Preferences.enableContacts) private var enableContacts: Bool
     /// The number Pay pays: the only one, or the one chosen.
     @State private var chosen: Recipient?
     /// The content's height, so the sheet opens exactly as tall as what it

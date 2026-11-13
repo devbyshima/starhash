@@ -29,7 +29,7 @@ struct StarHashApp: App {
             UserDefaults.standard.set(appearance, forKey: PreferenceKey.appearance)
         }
         if DebugLaunch.arguments.contains("-nearbyHere") {
-            UserDefaults.standard.set(true, forKey: PreferenceKey.nearbyLocation)
+            UserDefaults.standard.set(true, forKey: Preferences.nearbyLocation.key)
         }
         let owner = AppEnvironment.owner
         // -profile: a name and number, for the QR code's screens.
@@ -55,6 +55,25 @@ struct StarHashApp: App {
         }
         if DebugLaunch.arguments.contains("-resetOnboarding") {
             UserDefaults.standard.set(false, forKey: PreferenceKey.hasOnboarded)
+        }
+        // -resetAutoVerify: auto-verify off, as on a fresh install.
+        if DebugLaunch.arguments.contains("-resetAutoVerify") {
+            AppEnvironment.autoVerify.turnOff()
+        }
+        // -receiveMessage <text>: the Process Carrier SMS action runs on it
+        // at launch, as the automation would, with auto-verify set up first
+        // and turned off again after when it was off before.
+        if let message = DebugLaunch.value(after: "-receiveMessage") {
+            let autoVerify = AppEnvironment.autoVerify
+            let wasOff = autoVerify.status() == .off
+            if wasOff {
+                autoVerify.receive(AutoVerificationSample.message, sender: nil)
+                autoVerify.finishSetUp()
+            }
+            Task { @MainActor in
+                _ = try? await ProcessCarrierSMSIntent(message: message, sender: DebugLaunch.value(after: "-sender")).perform()
+                if wasOff { autoVerify.turnOff() }
+            }
         }
         #endif
         Self.useBrandTypeInNavigationBars()

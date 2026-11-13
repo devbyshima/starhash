@@ -92,19 +92,15 @@ public enum ActivitySummary {
         return transactions.filter { interval.start <= $0.date && $0.date < interval.end }
     }
 
-    /// Failed transactions moved no money, so they count for nothing.
-    /// Pending ones do: they were dialled and most go through.
+    /// What was spent and received, by `Transaction.counts`.
     public static func totals(of transactions: [Transaction]) -> Totals {
         var totals = Totals()
-        // Money moved between the owner's own accounts is neither.
-        for t in transactions where t.status != .failed && !t.isOwnTransfer {
+        for t in transactions where t.counts {
             totals.count += 1
             switch t.direction {
             case .outgoing:
                 totals.spent += t.amount
-                // Only confirmed payments: by SMS (its fee), or by hand (the
-                // fee from `Tariff`). A pending payment has none yet.
-                if t.status == .confirmed { totals.fees += t.fee ?? 0 }
+                totals.fees += t.countedFee
             case .incoming:
                 totals.received += t.amount
             }
@@ -157,7 +153,7 @@ public enum ActivitySummary {
         calendar: Calendar,
         locale: Locale = .current
     ) -> [Bucket] {
-        let outgoing = transactions.filter { $0.direction == .outgoing && $0.status != .failed && !$0.isOwnTransfer }
+        let outgoing = transactions.filter(\.countsAsSpent)
         var buckets = emptyBuckets(for: period, earliest: outgoing.map(\.date).min(), now: now, calendar: calendar, locale: locale)
         guard let first = buckets.first, let last = buckets.last else { return buckets }
         let span = DateInterval(start: first.interval.start, end: last.interval.end)

@@ -170,14 +170,14 @@ public struct SpendingReport: Equatable, Sendable {
             let end = isCurrent
                 ? min(calendar.date(byAdding: .day, value: elapsed, to: before.start) ?? before.end, before.end)
                 : before.end
-            previous = Self.spending(in: narrowed)
+            previous = narrowed.filter(\.countsAsSpent)
                 .filter { before.start <= $0.date && $0.date < end }
                 .reduce(0) { $0 + $1.amount }
         }
         self.previousSpent = previous
         self.change = previous > 0 ? Double(totals.spent - previous) / Double(previous) : nil
 
-        let spending = Self.spending(in: inPeriod)
+        let spending = inPeriod.filter(\.countsAsSpent)
         let spent = totals.spent
 
         let byCategory = Dictionary(grouping: spending) { $0.knownCategory ?? .other }
@@ -221,7 +221,7 @@ public struct SpendingReport: Equatable, Sendable {
             let end = isCurrent
                 ? min(calendar.date(byAdding: .day, value: elapsed, to: before.start) ?? before.end, before.end)
                 : before.end
-            let items = Self.spending(in: narrowed).filter { before.start <= $0.date && $0.date < end }
+            let items = narrowed.filter(\.countsAsSpent).filter { before.start <= $0.date && $0.date < end }
             if !items.isEmpty { earlier.append(items) }
         }
         let usualSpent = earlier.isEmpty ? nil : Int((Double(earlier.joined().reduce(0) { $0 + $1.amount }) / Double(earlier.count)).rounded())
@@ -262,11 +262,6 @@ public struct SpendingReport: Equatable, Sendable {
     public static func type(of transaction: Transaction) -> PaymentType {
         if transaction.isPurchase { return .purchases }
         return transaction.counterparty.kind == .merchant ? .merchants : .people
-    }
-
-    /// What counts as spent, as `ActivitySummary.totals` counts it.
-    static func spending(in transactions: [Transaction]) -> [Transaction] {
-        transactions.filter { $0.direction == .outgoing && $0.status != .failed && !$0.isOwnTransfer }
     }
 
     /// Whole calendar days from `start` to `end`, so a daylight saving day

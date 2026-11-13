@@ -182,10 +182,10 @@ enum ScreensCatalog {
         ScreensPushed(page: page) { $0.destination }
     }
 
-    /// An onboarding screen. `OnboardingView` starts on the stage saved in
-    /// the defaults, so the stage is saved just before it is made.
-    private static func onboarding(_ stage: OnboardingView.Stage) -> some View {
-        UserDefaults.standard.set(stage.rawValue, forKey: PreferenceKey.onboardingStage)
+    /// An onboarding screen. `OnboardingView` starts on the screen saved
+    /// (`FirstRun`), so it is saved just before the view is made.
+    private static func onboarding(_ screen: FirstRun.Screen) -> some View {
+        FirstRun.save(screen)
         return OnboardingView {}.screensStill()
     }
 }
@@ -293,9 +293,9 @@ enum ScreensSample {
     /// so Settings shows it working.
     static let autoVerify: AutoVerify = {
         let autoVerify = AutoVerify(store: store, defaults: defaults("ScreensAutoVerify"))
-        autoVerify.shortcutRan()
+        autoVerify.receive(AutoVerificationSample.message, sender: nil)
         autoVerify.finishSetUp()
-        autoVerify.messageArrived()
+        autoVerify.receive("Bank: 1,000 RWF", sender: nil)
         return autoVerify
     }()
 

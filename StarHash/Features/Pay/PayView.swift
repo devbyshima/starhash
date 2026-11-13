@@ -9,8 +9,8 @@ import SwiftUI
 struct PayView: View {
     @Environment(StarHashStore.self) private var store
     @Environment(AppRouter.self) private var router
-    @AppStorage(PreferenceKey.saveTransactions) private var saveTransactions = true
-    @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
+    @AppStorage(Preferences.saveTransactions) private var saveTransactions: Bool
+    @AppStorage(Preferences.nearbyLocation) private var nearbyLocation: Bool
     @Environment(Owner.self) private var owner
     private var wallet: Recipient.Network { owner.wallet }
 
@@ -34,9 +34,9 @@ struct PayView: View {
     /// Which locating run is current, so a late answer from an older one
     /// is ignored.
     @State private var locatingRun = UUID()
-    /// The store's location wipe count when locating started: a fix that
-    /// arrives after a wipe (Nearby turned off, Delete All Data) is dropped.
-    @State private var locationsGeneration = 0
+    /// Taken when locating started: a fix that arrives after a wipe
+    /// (Nearby turned off, Delete All Data) is dropped by the store.
+    @State private var placeTicket: StarHashStore.PlaceTicket?
     /// That fix once it arrives, for the picker's Nearby section.
     @State private var nearbyFix: LocationFix?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -245,7 +245,7 @@ struct PayView: View {
         locationTask = nil
         let run = UUID()
         locatingRun = run
-        locationsGeneration = store.locationsGeneration
+        placeTicket = store.placeTicket()
         #if DEBUG
         if let fix = DebugLaunch.nearbyFix {
             nearbyFix = fix
@@ -298,7 +298,7 @@ struct PayView: View {
         let amount = input.value
         guard amount > 0, recipient.isPayable else { return }
         let pendingLocation = locationTask
-        let generation = locationsGeneration
+        let ticket = placeTicket
         locationTask = nil
 
         // Paid, however it was chosen: a Nearby suggestion passed over
@@ -306,7 +306,7 @@ struct PayView: View {
         NearbyMissesStore.paid(recipient)
         var recordedID: UUID?
         if saveTransactions {
-            recordedID = store.recordPayment(to: recipient, amount: amount, wallet: wallet, retryWindow: 5 * 60).id
+            recordedID = store.recordPayment(to: recipient, amount: amount, wallet: wallet).id
         }
         let code = USSD.payment(to: recipient, amount: amount, from: wallet)
         withAnimation(.smooth(duration: 0.25)) { chosenRecipient = nil }
@@ -318,34 +318,26 @@ struct PayView: View {
         }
 
         // The location goes on the payment once it arrives, never before
-        // dialling: its map, and what Nearby suggests from. Only for a
-        // merchant code or a number that is not one of the person's
-        // contacts: paying someone they know never records where they were.
-        if let pendingLocation, let recordedID {
+        // dialling: its map, and what Nearby suggests from, when
+        // `Nearby.remembersPlace` allows. The store drops it when Nearby
+        // was turned off, or everything erased, while it was coming.
+        if let pendingLocation, let recordedID, let ticket {
             Task {
-                guard let fix = await pendingLocation.value,
-                      await Self.remembersPlace(of: recipient),
-                      // Nearby could have been turned off, or everything
-                      // erased, while the fix was coming.
-                      StarHashPreferences.nearbyLocation,
-                      store.locationsGeneration == generation,
-                      var transaction = store.transaction(id: recordedID) else { return }
-                transaction.location = fix.coordinate
-                store.update(transaction)
+                guard let fix = await pendingLocation.value, Preferences.nearbyLocation.value() else { return }
+                let isContact = recipient.kind == .phone ? await Self.isContact(recipient) : nil
+                guard Nearby.remembersPlace(of: recipient, isContact: isContact) else { return }
+                store.attachPlace(fix.coordinate, to: recordedID, ticket: ticket)
             }
         }
     }
 
-    /// Whether a payment keeps where it was made: a merchant code always, a
-    /// number only when it is not in Contacts. A number needs the contacts
-    /// read first; when StarHash cannot read them it cannot tell, so the
-    /// place is not kept.
-    private static func remembersPlace(of recipient: Recipient) async -> Bool {
-        guard recipient.kind == .phone else { return true }
+    /// Whether a number is one of the person's contacts, read first; nil
+    /// when StarHash cannot read them, so cannot tell.
+    private static func isContact(_ recipient: Recipient) async -> Bool? {
         let contacts = PayContacts.shared
         await contacts.loadIfAllowed()
-        guard contacts.hasLoaded, contacts.access == .authorized else { return false }
-        return !contacts.isContact(recipient)
+        guard contacts.hasLoaded, contacts.access == .authorized else { return nil }
+        return contacts.isContact(recipient)
     }
 
     private func dial(_ code: String) {
@@ -410,7 +402,7 @@ private struct PayChosenRecipient: View {
 
     @State private var sharedPhoto: UIImage?
 
-    @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
+    @AppStorage(Preferences.enableContacts) private var enableContacts: Bool
     private var contacts: PayContacts { .shared }
 
     var body: some View {
