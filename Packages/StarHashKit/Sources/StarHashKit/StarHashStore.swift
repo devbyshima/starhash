@@ -13,7 +13,9 @@ public final class StarHashStore {
     /// All Data), so a `PlaceTicket` taken before a wipe is stale.
     @ObservationIgnored private var locationsGeneration = 0
 
-    @ObservationIgnored private let fileURL: URL?
+    /// Where the transactions are kept (`TransactionFile`); nil keeps them
+    /// in memory alone.
+    @ObservationIgnored private let file: (any TransactionFile)?
 
     /// The owner's own numbers, read afresh each time a payment or message
     /// comes in (the app reads them from its settings): money between them
@@ -32,17 +34,31 @@ public final class StarHashStore {
     /// file reads again and they are merged into it.
     @ObservationIgnored private var hasReadFile = true
 
-    /// `fileURL` nil keeps everything in memory (tests, previews).
-    public init(fileURL: URL?) {
-        self.fileURL = fileURL
+    /// The wallet messages applied while the file was sealed, in order,
+    /// with when each came. The store saw none of the history then, so a
+    /// message for a payment dialled before the restart could only be added
+    /// beside it; once the file reads, they are applied again over the
+    /// whole history, and confirm that payment instead.
+    @ObservationIgnored private var sealedMessages: [(message: WalletMessage, receivedAt: Date)] = []
+    /// What those messages added while sealed, set aside when they are
+    /// applied again.
+    @ObservationIgnored private var sealedAdditions: Set<UUID> = []
+
+    /// `file` nil keeps everything in memory and saves nothing (previews,
+    /// most tests).
+    public init(file: (any TransactionFile)?) {
+        self.file = file
         reloadFromDisk()
     }
 
-    public static var defaultFileURL: URL {
-        let folder = URL.applicationSupportDirectory.appending(path: "StarHash", directoryHint: .isDirectory)
-        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        return folder.appending(path: "transactions.json")
+    /// The transactions as one JSON file at `fileURL`; nil keeps them in
+    /// memory.
+    public convenience init(fileURL: URL?) {
+        self.init(file: fileURL.map { JSONTransactionFile(url: $0) })
     }
+
+    /// Where the app keeps its transactions.
+    public static var defaultFileURL: URL { JSONTransactionFile.standardURL }
 
     // MARK: Reading
 
@@ -122,13 +138,9 @@ public final class StarHashStore {
     public func eraseAll() {
         locationsGeneration += 1
         transactions.removeAll()
-        guard let fileURL else { return }
-        let folder = fileURL.deletingLastPathComponent()
-        let stem = fileURL.deletingPathExtension().lastPathComponent
-        let files = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
-        for file in files where file.lastPathComponent.hasPrefix(stem) {
-            try? FileManager.default.removeItem(at: file)
-        }
+        sealedMessages = []
+        sealedAdditions = []
+        file?.erase()
     }
 
     /// How long after dialling the same payment again counts as a retry.
@@ -317,6 +329,7 @@ public final class StarHashStore {
     /// message already applied changes nothing.
     @discardableResult
     public func apply(_ sms: ParsedSMS, receivedAt now: Date = .now) -> Applied {
+        if !hasReadFile { sealedMessages.append((.transaction(sms), now)) }
         if let existing = alreadyApplied(sms) { return .alreadyApplied(existing) }
         let date = sms.date ?? now
         if sms.direction == .outgoing, let index = pendingMatch(for: sms, at: date) {
@@ -329,6 +342,7 @@ public final class StarHashStore {
             reference: sms.reference, balanceAfter: sms.balanceAfter, category: ownCategory(for: sms.counterparty) ?? sms.category,
             wallet: sms.wallet, messageDate: sms.date
         )
+        if !hasReadFile { sealedAdditions.insert(transaction.id) }
         add(transaction)
         return .added(transaction)
     }
@@ -372,6 +386,7 @@ public final class StarHashStore {
     /// record of attempts it did not dial. Returns the payment it failed.
     @discardableResult
     public func applyFailure(_ sms: ParsedSMS, receivedAt now: Date = .now) -> Transaction? {
+        if !hasReadFile { sealedMessages.append((.failure(sms), now)) }
         guard sms.direction == .outgoing, !sms.counterparty.destination.isEmpty,
               let index = pendingMatch(for: sms, at: sms.date ?? now) else { return nil }
         var failed = transactions[index].markedFailed()
@@ -390,6 +405,7 @@ public final class StarHashStore {
     /// is ignored. Returns the payment it added the fee to.
     @discardableResult
     public func applyOverdraft(_ use: OverdraftUse, receivedAt now: Date = .now) -> Transaction? {
+        if !hasReadFile { sealedMessages.append((.overdraft(use), now)) }
         guard use.accessFee > 0, let index = overdraftMatch(for: use, at: use.date ?? now) else { return nil }
         return addAccessFee(of: use, at: index)
     }
@@ -560,28 +576,46 @@ public final class StarHashStore {
     /// foreground). A file that cannot be decoded is moved aside rather than
     /// overwritten, so it can still be recovered.
     public func reloadFromDisk() {
-        guard let fileURL else { return }
-        switch Self.read(fileURL) {
+        guard let file else { return }
+        switch file.read() {
         case .missing:
-            hasReadFile = true
-        case .unreadable:
+            settleSealed()
+        case .sealed:
             hasReadFile = false
         case .damaged:
-            Self.setAside(fileURL)
-            hasReadFile = true
+            file.setAside()
+            settleSealed()
         case .read(let saved):
             if hasReadFile {
                 transactions = saved.sorted { $0.date > $1.date }
             } else {
                 // What changed while the file was sealed is newer than the
-                // file, so it wins; everything else comes from the file.
-                let inMemory = Set(transactions.map(\.id))
-                transactions = (transactions + saved.filter { !inMemory.contains($0.id) })
+                // file, so it wins; everything else comes from the file. The
+                // messages that came meanwhile are applied again over it all.
+                let kept = transactions.filter { !sealedAdditions.contains($0.id) }
+                let inMemory = Set(kept.map(\.id))
+                transactions = (kept + saved.filter { !inMemory.contains($0.id) })
                     .sorted { $0.date > $1.date }
-                hasReadFile = true
-                write(to: fileURL)
+                let queued = sealedMessages
+                settleSealed()
+                for (message, receivedAt) in queued {
+                    switch message {
+                    case .transaction(let sms): apply(sms, receivedAt: receivedAt)
+                    case .failure(let sms): applyFailure(sms, receivedAt: receivedAt)
+                    case .overdraft(let use): applyOverdraft(use, receivedAt: receivedAt)
+                    }
+                }
+                file.write(transactions)
             }
         }
+    }
+
+    /// The file reads, or there is none to read: what is in memory is all
+    /// there is, and nothing is waiting to be applied again.
+    private func settleSealed() {
+        hasReadFile = true
+        sealedMessages = []
+        sealedAdditions = []
     }
 
     private func sortAndSave() {
@@ -590,45 +624,12 @@ public final class StarHashStore {
     }
 
     private func save() {
-        guard let fileURL else { return }
+        guard let file else { return }
         if !hasReadFile {
             // Merges and writes once the file reads; until then, memory only.
             reloadFromDisk()
             return
         }
-        write(to: fileURL)
-    }
-
-    /// Readable once the phone has been unlocked after a restart, so the
-    /// Process Carrier SMS action can log a payment while it is locked.
-    private func write(to fileURL: URL) {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        if let data = try? encoder.encode(transactions) {
-            try? data.write(to: fileURL, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
-        }
-    }
-
-    private enum FileState {
-        case missing
-        case unreadable
-        case damaged
-        case read([Transaction])
-    }
-
-    private static func read(_ url: URL) -> FileState {
-        guard FileManager.default.fileExists(atPath: url.path) else { return .missing }
-        guard let data = try? Data(contentsOf: url) else { return .unreadable }
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        guard let decoded = try? decoder.decode([Transaction].self, from: data) else { return .damaged }
-        return .read(decoded)
-    }
-
-    /// "transactions.json" becomes "transactions.damaged-<time>.json".
-    private static func setAside(_ url: URL) {
-        let stamp = Int(Date.now.timeIntervalSince1970)
-        let backup = url.deletingPathExtension().appendingPathExtension("damaged-\(stamp).json")
-        try? FileManager.default.moveItem(at: url, to: backup)
+        file.write(transactions)
     }
 }

@@ -84,6 +84,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Fixed
 
+- A payment whose message came while the iPhone was still locked after a restart no longer shows twice, once pending and once confirmed: the message now confirms the payment once StarHash can read its history.
 - Delete All Data now takes your name off Show My Name on StarHash's server. It stayed listed there for up to 45 days, though the privacy policy says removing your numbers deletes them.
 - A payment auto-verify marked failed after an hour with no message, then confirmed by a message that came late, now says it went through, when payment notifications are on. Until now the last word was that it didn't.
 - A contact's number abroad or a landline is no longer offered for payment: it would have been dialled as an MTN number. The rule a scanned code already followed now holds everywhere.
