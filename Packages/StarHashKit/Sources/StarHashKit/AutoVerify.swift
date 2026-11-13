@@ -98,11 +98,34 @@ public final class AutoVerify {
 
     private var isSetUp = false
     /// When the shortcut last reached StarHash, the setup's sample run
-    /// included; nil until it has. The setup guide compares it with the
-    /// moment it ran the sample.
-    public private(set) var shortcutRanAt: Date?
+    /// included; nil until it has.
+    private(set) var shortcutRanAt: Date?
+
+    /// The setup's own check, as the guide shows it (`beginCheck`).
+    public private(set) var check: Check = .idle
+    /// When the shortcut had last run as the check began.
+    @ObservationIgnored private var checkStartedAfter: Date?
     /// When a real wallet message last came through the automation.
     private var lastMessageAt: Date?
+    /// The setup's check: Verify Shortcut runs the shortcut by hand with
+    /// the sample, which proves the shortcut, not the automation (Proven,
+    /// in GLOSSARY.md).
+    public enum Check: Equatable, Sendable {
+        /// Not run.
+        case idle
+        /// Shortcuts was opened with the sample; waiting for the shortcut
+        /// to reach StarHash.
+        case running
+        /// The shortcut ran and the setup finished, but no real message has
+        /// come through the automation since: Waiting.
+        case awaitingMessage
+        /// The shortcut ran, and a real message has come through the
+        /// automation: Proven.
+        case proven
+        /// The shortcut did not run: missing, failed or cancelled.
+        case failed
+    }
+
     /// When the setup last finished: payments dialled before it never fail
     /// for want of a message, and messages before it prove nothing.
     private var since: Date?
@@ -198,21 +221,55 @@ public final class AutoVerify {
         defaults.object(forKey: key) as? Bool ?? true
     }
 
+    // MARK: The setup's check
+
+    /// Verify Shortcut was tapped: the check runs until the shortcut
+    /// reaches StarHash, which finishes the setup (`receive`), or Shortcuts
+    /// comes back without it (`checkReturned`).
+    public func beginCheck() {
+        checkStartedAfter = shortcutRanAt ?? .distantPast
+        check = .running
+    }
+
+    /// Back from Shortcuts: with its answer, or with none when the owner
+    /// came back by hand. The Process Carrier SMS action may have run in
+    /// another process, so what it wrote is read first. Still not run, the
+    /// check failed, unless Shortcuts says it succeeded and the run is yet
+    /// to land.
+    public func checkReturned(_ result: StarHashLink.ShortcutResult?) {
+        guard check == .running else { return }
+        if let ran = date(Key.shortcutRanAt), ran != shortcutRanAt { shortcutRan(at: ran) }
+        if check == .running, result != .success { check = .failed }
+    }
+
+    /// The guide moved to another step, or was left.
+    public func resetCheck() {
+        check = .idle
+        checkStartedAfter = nil
+    }
+
     // MARK: Changing
 
     /// The shortcut reached StarHash: any run of the Process Carrier SMS
-    /// action, the setup's sample included.
+    /// action, the setup's sample included. A check waiting for it passes,
+    /// and the setup finishes.
     func shortcutRan(at now: Date = .now) {
         shortcutRanAt = now
         write(now, Key.shortcutRanAt)
+        if check == .running, let start = checkStartedAfter, now > start {
+            checkStartedAfter = nil
+            finishSetUp(at: now)
+            check = isProven ? .proven : .awaitingMessage
+        }
     }
 
     /// A real wallet message came through the automation. Kept even while
     /// auto-verify is off: the setup date keeps it from proving a later
-    /// setup.
+    /// setup. A check waiting for one is now proven.
     func messageArrived(at now: Date = .now) {
         lastMessageAt = now
         write(now, Key.lastMessageAt)
+        if check == .awaitingMessage, isProven { check = .proven }
     }
 
     /// The setup's check passed: auto-verify is on, counting from now.
@@ -249,6 +306,9 @@ public final class AutoVerify {
             since = now
             write(now, Key.since)
         }
+        // A message the action logged in another process proves a check
+        // that was waiting for one.
+        if check == .awaitingMessage, isProven { check = .proven }
     }
 
     // MARK: Expiry
