@@ -7,8 +7,8 @@ import SwiftUI
 /// what it does, and the code where a transaction shows its amount. The
 /// call button dials and a tap opens the code's details; holding a row
 /// offers Pin, Edit and Delete, a swipe from the right deletes it and one
-/// from the left pins it (up to eight, as tiles at the top). It comes with MoMo's pending approvals and cash out, MTN's Gwamon'
-/// Pack and the airport's parking; the + at the top right adds one's own,
+/// from the left pins it (up to eight, as tiles at the top). It comes with MoMo's pending approvals and cash out,
+/// the airport's parking and MTN's virtual card; the + at the top right adds one's own,
 /// in Keaser's New Category sheet (`ShortcutEditor`). The menu a code opens
 /// asks for the amount and the PIN, so nothing is logged in Activity.
 struct BuyView: View {

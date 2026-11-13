@@ -64,7 +64,7 @@ Ten digits or more is a phone number (`+250 788 123 456` becomes `0788123456`); 
 
 Codes you dial often, each on a card with its symbol, name and code, and a call button beside it. Buy's codes are not logged in Transactions: the menu each one opens asks for the amount and your PIN itself.
 
-- It comes with four: Pending approvals, Cash out, Gwamon' Pack and Airport parking.
+- It comes with four: Pending approvals, Cash out, Airport parking and MTN Virtual Card.
 - **+** adds your own: a name, a code that starts with `*` or `#` and ends with `#`, an optional note, and one of thirty symbols.
 - Tap a card for its details (Edit, Dial, Delete). Hold it for Pin, Edit and Delete.
 - Pin up to eight codes as tiles at the top, dialled in one tap. Rearrange in a pinned code's menu sets them wiggling so you can drag them into order.

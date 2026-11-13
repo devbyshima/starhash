@@ -12,7 +12,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 - Confirmation sheets end in what came of them, on a ring of green or red light from their icon that moves like liquid (not with Reduce Motion): Verify turns into Confirmed in green (with the fee, code and balance the message filled in) or Failed in red, Turn Off Auto-verify into Turned off, and Keep SIM into the SIM kept, each with Done.
 - Transactions opens on its chart again: what you spent this week, month or year with money received and fees, chosen with the W M Y control where the title was, above every transaction by month. The Report and search stay beside it.
 - Gifts, a new category, found by itself for gift shops and florists.
-- A person with no photo wears a silhouette (DiceBear's Shadows) in place of the person or phone icon: on Profile, and for a number with no name. Each number keeps its own.
+- A person with no photo wears a silhouette (DiceBear's Shadows) in place of the person or phone icon: on Profile, and for a number with no name. Who wears which is drawn at random on each iPhone, and each person keeps theirs.
 
 - Show my name: typing a number to pay that belongs to someone on StarHash shows their name in place of the carrier, and their photo (or initials) in place of the phone. Your own name and numbers are shown the same way unless you turn it off in Settings, under Your SIMs; StarHash's server keeps each number only as a keyed hash. People already set up are told once, and the privacy policy says so.
 - A Third-Party Trademark Notice in Licences: whose names and logos StarHash shows (MTN, MoMo, Airtel, Apple's and others), only to say which wallet or service something is for, and that StarHash is not tied to any of them.
@@ -38,6 +38,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Changed
 
+- Buy no longer comes with Gwamon' Pack (*154*0#). A list you have changed keeps it until you delete it.
 - Dark mode's page is a deeper near black, #101010, on every screen, sheet, widget and drawing, and the launch screen.
 - What's New's videos show StarHash in the appearance you use, dark in dark mode and light in light mode, and auto-verify's setup shows Shortcuts as light or dark as the app, with StarHash's own icon on the shortcut.
 - Buttons, the report's bars and onboarding's symbols are lit the same way in light and dark mode, lighter at the top and deeper at the foot, so the near black and the near white read as one kind of thing.

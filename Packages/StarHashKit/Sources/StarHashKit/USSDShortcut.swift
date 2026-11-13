@@ -54,13 +54,6 @@ public struct USSDShortcut: Codable, Hashable, Identifiable, Sendable {
             symbol: "banknote.fill"
         ),
         USSDShortcut(
-            id: UUID(uuidString: "5E2A7C1E-0003-4000-8000-000000000003")!,
-            name: "Gwamon' Pack",
-            code: "*154*0#",
-            detail: "MTN's minutes and data, for 7 days",
-            symbol: "gift.fill"
-        ),
-        USSDShortcut(
             id: UUID(uuidString: "5E2A7C1E-0004-4000-8000-000000000004")!,
             name: "Airport parking",
             code: "*182*3*8#",
@@ -78,8 +71,9 @@ public struct USSDShortcut: Codable, Hashable, Identifiable, Sendable {
 
     /// The defaults every list had before new ones were added, so a list
     /// saved then gets each later one once, while one its owner deleted
-    /// stays deleted.
-    static let firstDefaultIDs: Set<UUID> = Set(defaults.prefix(4).map(\.id))
+    /// stays deleted. The third, MTN's Gwamon' Pack (0003), is no longer a
+    /// default; a list that kept it keeps it.
+    static let firstDefaultIDs: Set<UUID> = Set((1...4).map { UUID(uuidString: "5E2A7C1E-000\($0)-4000-8000-00000000000\($0)")! })
 
     /// `input` as a code to dial, or nil if it is not one: spaces dropped,
     /// then a * or # first, a # last, and only digits, * and # between,
