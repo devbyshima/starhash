@@ -56,17 +56,23 @@ struct StarHashApp: App {
         if DebugLaunch.arguments.contains("-resetOnboarding") {
             UserDefaults.standard.set(false, forKey: PreferenceKey.hasOnboarded)
         }
+        // -resetAutoVerify: auto-verify off, as on a fresh install.
+        if DebugLaunch.arguments.contains("-resetAutoVerify") {
+            AppEnvironment.autoVerify.turnOff()
+        }
         // -receiveMessage <text>: the Process Carrier SMS action runs on it
-        // at launch, as the automation would, with auto-verify set up and
-        // proven first (it stays so on this simulator).
+        // at launch, as the automation would, with auto-verify set up first
+        // and turned off again after when it was off before.
         if let message = DebugLaunch.value(after: "-receiveMessage") {
             let autoVerify = AppEnvironment.autoVerify
-            if autoVerify.status() == .off {
+            let wasOff = autoVerify.status() == .off
+            if wasOff {
                 autoVerify.receive(AutoVerificationSample.message, sender: nil)
                 autoVerify.finishSetUp()
             }
             Task { @MainActor in
                 _ = try? await ProcessCarrierSMSIntent(message: message, sender: DebugLaunch.value(after: "-sender")).perform()
+                if wasOff { autoVerify.turnOff() }
             }
         }
         #endif
