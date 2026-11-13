@@ -1,5 +1,6 @@
-# StarHash's server: the owners' photos for their QR codes, and an
-# anonymous count of the people using StarHash. On the devbyshima account.
+# StarHash's server: the owners' photos for their QR codes, Show My Name's
+# directory, and an anonymous count of the people using StarHash. On the
+# devbyshima account.
 name = "starhash"
 main = "src/index.ts"
 compatibility_date = "2026-10-01"
@@ -10,3 +11,8 @@ workers_dev = true
 binding = "DB"
 database_name = "starhash"
 database_id = "b662112c-7cca-4c9b-8077-b2d8041b06b0"
+
+# Each night at 03:00 in Kigali (01:00 UTC), the directory's entries not
+# sent again for 45 days are deleted (`scheduled` in src/index.ts).
+[triggers]
+crons = ["0 1 * * *"]

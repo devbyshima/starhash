@@ -34,24 +34,97 @@ enum StarHashCloud {
     }
 
     private static let photoIDKey = "cloudPhotoID"
+    /// Set from a change until the server has taken it, so one that did
+    /// not reach it (offline, say) is sent again.
+    private static let photoUnsentKey = "cloudPhotoUnsent"
+    /// A photo's id whose delete the server has not confirmed, kept through
+    /// Delete All Data so the photo is still deleted after it.
+    private static let photoToDeleteKey = "cloudPhotoToDelete"
+
+    /// Counts the sends, so only the latest one's answer decides whether
+    /// the photo is still unsent.
+    private static var photoSends = 0
 
     /// Uploads the owner's photo, or deletes it from the server when they
-    /// have none. Run whenever it changes.
+    /// have none. Run whenever it changes; until the server has taken it,
+    /// it is sent again each time StarHash comes to the front
+    /// (`resendPhotoIfNeeded`).
     static func syncPhoto() {
+        UserDefaults.standard.set(true, forKey: photoUnsentKey)
+        photoSends += 1
+        let send = photoSends
         let id = photoID
         let data = ProfilePhoto.shared.data
-        Task.detached {
-            guard let key = await photoKey() else { return }
-            var request = URLRequest(url: baseURL.appending(path: "v1/photos/\(id.uuidString.lowercased())"))
-            request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
-            if let data {
-                request.httpMethod = "PUT"
-                request.setValue("image/jpeg", forHTTPHeaderField: "Content-Type")
-                request.httpBody = data
-            } else {
-                request.httpMethod = "DELETE"
+        Task {
+            let answer = await Self.sendPhoto(data, id: id)
+            if data == nil, answer != .failed { forgetPhotoToDelete(id) }
+            guard send == photoSends else { return }
+            switch answer {
+            case .taken:
+                UserDefaults.standard.removeObject(forKey: photoUnsentKey)
+            case .notYours where data != nil:
+                // The id belongs to a key this iPhone does not have: one
+                // restored from a backup made before the key went into
+                // backups. A new id takes the photo, and the listing
+                // follows it.
+                UserDefaults.standard.removeObject(forKey: photoIDKey)
+                syncPhoto()
+                syncDirectory(owner: AppEnvironment.owner)
+            case .notYours:
+                // Nothing this iPhone can delete.
+                UserDefaults.standard.removeObject(forKey: photoUnsentKey)
+            case .failed:
+                break
             }
-            _ = try? await URLSession.shared.data(for: request)
+        }
+    }
+
+    /// Sends again what the server has not taken: the owner's photo or its
+    /// removal, and a photo Delete All Data left to delete. Run each time
+    /// StarHash comes to the front.
+    static func resendPhotoIfNeeded() {
+        let defaults = UserDefaults.standard
+        if let id = defaults.string(forKey: photoToDeleteKey).flatMap(UUID.init(uuidString:)) {
+            Task {
+                if await Self.sendPhoto(nil, id: id) != .failed { forgetPhotoToDelete(id) }
+            }
+        }
+        if defaults.bool(forKey: photoUnsentKey) { syncPhoto() }
+    }
+
+    private static func forgetPhotoToDelete(_ id: UUID) {
+        guard UserDefaults.standard.string(forKey: photoToDeleteKey) == id.uuidString else { return }
+        UserDefaults.standard.removeObject(forKey: photoToDeleteKey)
+    }
+
+    /// What the server made of a photo sent or deleted.
+    private enum PhotoAnswer {
+        /// Saved, deleted, or already gone.
+        case taken
+        /// The id is held under another key.
+        case notYours
+        /// Not reached, or refused for another reason: try again later.
+        case failed
+    }
+
+    /// Puts `data` under `id`, or deletes what is there when it is nil.
+    nonisolated private static func sendPhoto(_ data: Data?, id: UUID) async -> PhotoAnswer {
+        guard let key = await photoKey() else { return .failed }
+        var request = URLRequest(url: baseURL.appending(path: "v1/photos/\(id.uuidString.lowercased())"))
+        request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
+        if let data {
+            request.httpMethod = "PUT"
+            request.setValue("image/jpeg", forHTTPHeaderField: "Content-Type")
+            request.httpBody = data
+        } else {
+            request.httpMethod = "DELETE"
+        }
+        guard let (_, response) = try? await URLSession.shared.data(for: request),
+              let status = (response as? HTTPURLResponse)?.statusCode else { return .failed }
+        switch status {
+        case 200: return .taken
+        case 403: return .notYours
+        default: return .failed
         }
     }
 
@@ -139,16 +212,25 @@ enum StarHashCloud {
         #endif
     }
 
-    /// Delete All Data: `erase` runs with what was last sent to the
-    /// directory kept through it. With the owner's numbers gone there is no
-    /// listing, so the next sync deletes theirs from the server, and keeps
-    /// trying until it has; with the record wiped too, it took the owner
-    /// for one never listed and left their name there for 45 days.
-    static func keepingDirectoryState(through erase: () -> Void) {
+    /// Delete All Data: `erase` runs with what the server still needs from
+    /// this iPhone kept through it, so the owner's name, numbers and photo
+    /// are deleted there after it. What was last sent to the directory:
+    /// with the owner's numbers gone there is no listing, so the next sync
+    /// deletes theirs, and keeps trying until it has (with the record wiped
+    /// too, it took the owner for one never listed and left their name
+    /// there). And the photo, when the server has not yet confirmed its
+    /// delete: it is deleted again each time StarHash comes to the front
+    /// until it has, with the key the Keychain keeps through the wipe.
+    /// Run it after `ProfilePhoto.remove`.
+    static func keepingServerState(through erase: () -> Void) {
         let defaults = UserDefaults.standard
         let sent = defaults.string(forKey: directoryStateKey)
+        let photoUnsent = defaults.bool(forKey: photoUnsentKey) && ProfilePhoto.shared.data == nil
+        let photoToDelete = defaults.string(forKey: photoToDeleteKey)
+            ?? (photoUnsent ? defaults.string(forKey: photoIDKey) : nil)
         erase()
         if let sent { defaults.set(sent, forKey: directoryStateKey) }
+        if let photoToDelete { defaults.set(photoToDelete, forKey: photoToDeleteKey) }
     }
 
     /// Whether the server took it: a listing put, or none cleared.
@@ -273,20 +355,32 @@ enum StarHashCloud {
     // MARK: The key
 
     /// The owner's secret key, for their photo and their listing alike: 32
-    /// random bytes, made once and kept in the Keychain, on this iPhone
-    /// only. (Its Keychain account is still "photoKey", from when the photo
-    /// was all it was for.)
+    /// random bytes, made once and kept in the Keychain. It goes into the
+    /// iPhone's encrypted backups (never iCloud Keychain), so a new iPhone
+    /// restored from one can still replace or delete the photo and the
+    /// listing the old one made. (Its Keychain account is still "photoKey",
+    /// from when the photo was all it was for.)
     nonisolated private static func photoKey() async -> String? {
         let account = "photoKey"
-        let query: [String: Any] = [
+        let item: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: "StarHashCloud",
             kSecAttrAccount as String: account,
-            kSecReturnData as String: true,
         ]
+        var query = item
+        query[kSecReturnData as String] = true
+        query[kSecReturnAttributes as String] = true
         var found: CFTypeRef?
         if SecItemCopyMatching(query as CFDictionary, &found) == errSecSuccess,
-           let data = found as? Data, let key = String(data: data, encoding: .utf8) {
+           let attributes = found as? [String: Any],
+           let data = attributes[kSecValueData as String] as? Data,
+           let key = String(data: data, encoding: .utf8) {
+            // Earlier builds kept the key on its iPhone only, so a restored
+            // iPhone lost it; it moves into the backups from now on.
+            if attributes[kSecAttrAccessible as String] as? String != kSecAttrAccessibleAfterFirstUnlock as String {
+                let moved: [String: Any] = [kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock]
+                SecItemUpdate(item as CFDictionary, moved as CFDictionary)
+            }
             return key
         }
         var bytes = [UInt8](repeating: 0, count: 32)
@@ -296,7 +390,7 @@ enum StarHashCloud {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: "StarHashCloud",
             kSecAttrAccount as String: account,
-            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock,
             kSecValueData as String: Data(key.utf8),
         ]
         return SecItemAdd(add as CFDictionary, nil) == errSecSuccess ? key : nil

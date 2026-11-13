@@ -64,9 +64,10 @@ public enum Preferences {
 }
 
 extension NotificationPlan.Settings {
-    /// The Notifications page's choices as saved, with `failsUnconfirmed`
-    /// from auto-verify, which is no choice on the page.
-    public static func stored(in defaults: UserDefaults = .standard, failsUnconfirmed: Bool) -> Self {
+    /// The Notifications page's choices as saved, with
+    /// `failsUnconfirmedSince` from auto-verify, which is no choice on the
+    /// page.
+    public static func stored(in defaults: UserDefaults = .standard, failsUnconfirmedSince: Date?) -> Self {
         Self(
             paymentReminders: Preferences.paymentReminders.value(in: defaults),
             reminderDelay: Preferences.reminderDelay.value(in: defaults),
@@ -77,7 +78,7 @@ extension NotificationPlan.Settings {
             monthlySummary: Preferences.monthlySummary.value(in: defaults),
             summaryHour: Preferences.summaryHour.value(in: defaults),
             showsAmounts: Preferences.showsAmounts.value(in: defaults),
-            failsUnconfirmed: failsUnconfirmed
+            failsUnconfirmedSince: failsUnconfirmedSince
         )
     }
 }
