@@ -31,6 +31,10 @@ struct StarHashApp: App {
         if DebugLaunch.arguments.contains("-nearbyHere") {
             UserDefaults.standard.set(true, forKey: Preferences.nearbyLocation.key)
         }
+        // -paySplit: Split large payments on, for the parts' sheet.
+        if DebugLaunch.arguments.contains("-paySplit") {
+            UserDefaults.standard.set(true, forKey: Preferences.splitLargePayments.key)
+        }
         let owner = AppEnvironment.owner
         // -profile: a name and number, for the QR code's screens.
         if DebugLaunch.arguments.contains("-profile") {

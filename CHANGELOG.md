@@ -6,6 +6,10 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ## [Unreleased]
 
+### Added
+
+- Split large payments, a new setting under Pay & Buy, off until you turn it on. A MoMo to MoMo payment that costs less in parts is then sent as a few smaller ones: 300,000 as two of 150,000 costs 500 in fees rather than 1,500. Pay shows the parts and what they cost against one payment, and dials one part at a time, each with its own PIN, showing whether each is waiting for its SMS or confirmed; the whole amount can still go as one payment. Each part is its own transaction, marked Part 1 of 2 in Transactions, with the whole payment on its page.
+
 ## [1.0.0] - Unreleased
 
 The first release: pay with MTN MoMo or Airtel Money without typing USSD codes, and keep every payment in one place.

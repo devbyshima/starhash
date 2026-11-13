@@ -20,8 +20,8 @@ public struct Preference<Value: Sendable>: Sendable {
 }
 
 /// Every choice in Settings: everything on, every notification included,
-/// except Nearby (it needs location permission first) and the Face ID
-/// lock. The keys are the ones StarHash has always kept them under.
+/// except Nearby (it needs location permission first), the Face ID lock
+/// and splitting large payments. The keys are the ones StarHash has always kept them under.
 public enum Preferences {
     // MARK: Transactions and paying
 
@@ -35,6 +35,10 @@ public enum Preferences {
     /// Whether the on-device model may name the categories the rules
     /// cannot (iOS 26 and later, with Apple Intelligence).
     public static let smartCategories = Preference("smartCategories", default: true)
+    /// Whether Pay offers to send a payment in parts when they cost less
+    /// in fees together (`SplitPlan`). Off until the owner turns it on: it
+    /// means a PIN for every part.
+    public static let splitLargePayments = Preference("splitLargePayments", default: false)
 
     // MARK: Security
 

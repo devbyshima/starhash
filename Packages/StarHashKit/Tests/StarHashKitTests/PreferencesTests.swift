@@ -18,6 +18,7 @@ struct PreferencesTests {
         #expect(Preferences.scamWarnings.value(in: defaults))
         #expect(!Preferences.nearbyLocation.value(in: defaults))
         #expect(!Preferences.appLock.value(in: defaults))
+        #expect(!Preferences.splitLargePayments.value(in: defaults))
     }
 
     @Test func aChoiceMadeIsKept() {

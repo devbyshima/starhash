@@ -154,18 +154,25 @@ public final class StarHashStore {
     /// than `retryWindow` ago, is taken to be that retry: it moves to `date`
     /// instead of a second one being added. It has no fee until the SMS
     /// confirming it gives one. `wallet` is the wallet it was dialled with.
+    ///
+    /// A part of a split payment (`split`) is its own payment, though the
+    /// parts before it went to the same recipient for the same amount a
+    /// minute ago: only that part, still pending, dialled again is its
+    /// retry, however long after.
     @discardableResult
     public func recordPayment(
         to recipient: Recipient,
         amount: Int,
         date: Date = .now,
         location: Transaction.Coordinate? = nil,
-        wallet: Recipient.Network? = nil
+        wallet: Recipient.Network? = nil,
+        split: Transaction.Split? = nil
     ) -> Transaction {
         let retryWindow = Self.retryWindow
         if let index = transactions.firstIndex(where: {
-            $0.status == .pending && $0.source == .app && $0.direction == .outgoing
-                && $0.amount == amount && $0.counterparty.kind == recipient.kind
+            guard $0.status == .pending, $0.source == .app, $0.direction == .outgoing, $0.split == split else { return false }
+            if split != nil { return true }
+            return $0.amount == amount && $0.counterparty.kind == recipient.kind
                 && $0.counterparty.destination == recipient.destination
                 && date.timeIntervalSince($0.date) >= 0 && date.timeIntervalSince($0.date) < retryWindow
         }) {
@@ -180,11 +187,19 @@ public final class StarHashStore {
         }
         var transaction = Transaction(
             direction: .outgoing, counterparty: recipient, amount: amount,
-            date: date, status: .pending, source: .app, location: location, wallet: wallet
+            date: date, status: .pending, source: .app, location: location, wallet: wallet,
+            split: split
         )
         transaction.category = ownCategory(for: recipient)
         add(transaction)
         return transaction
+    }
+
+    /// Every part dialled of the split payment `id`, first part first.
+    public func parts(ofSplit id: UUID) -> [Transaction] {
+        transactions
+            .filter { $0.split?.id == id }
+            .sorted { ($0.split?.part ?? 0, $0.date) < ($1.split?.part ?? 0, $1.date) }
     }
 
     // MARK: By hand

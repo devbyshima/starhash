@@ -30,6 +30,10 @@ public enum Tariff {
         }
     }
 
+    /// The largest amount each of MTN's bands takes: the size a part of a
+    /// `SplitPlan` is tried at, as large as it can be for its fee.
+    static var bandTops: [Int] { mtnOnNet.map(\.range.upperBound) }
+
     /// MTN MoMo to MoMo, by amount.
     private static let mtnOnNet: [(range: ClosedRange<Int>, fee: Int)] = [
         (1...1_000, 20),

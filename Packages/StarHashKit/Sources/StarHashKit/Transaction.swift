@@ -86,6 +86,9 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
     /// and kept apart so the payment's own message, whichever of the two
     /// arrives first, adds to it rather than replacing it.
     public var accessFee: Int?
+    /// Which part it is when a `SplitPlan` sent the payment in parts; nil
+    /// for a payment sent whole, and for anything a message added.
+    public var split: Split?
 
     public init(
         id: UUID = UUID(),
@@ -103,7 +106,8 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
         wallet: Recipient.Network? = nil,
         messageDate: Date? = nil,
         failureReason: FailureReason? = nil,
-        accessFee: Int? = nil
+        accessFee: Int? = nil,
+        split: Split? = nil
     ) {
         self.id = id
         self.direction = direction
@@ -121,6 +125,7 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
         self.messageDate = messageDate
         self.failureReason = failureReason
         self.accessFee = accessFee
+        self.split = split
     }
 
     /// The amount with its sign: negative when money left.

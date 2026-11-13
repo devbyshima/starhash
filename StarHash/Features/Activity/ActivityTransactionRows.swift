@@ -176,7 +176,8 @@ struct ActivityTransactionRow: View {
         .accessibilityAddTraits(.isButton)
     }
 
-    /// "0788 123 998 \u{00B7} 22 Oct, 13:12". A named merchant shows its code;
+    /// "0788 123 998 \u{00B7} 22 Oct, 13:12", with "Part 1 of 2" before the
+    /// time for a part of a split payment. A named merchant shows its code;
     /// an unnamed recipient already shows its number as the name, so only
     /// the date and time; under a day's heading, the time alone.
     private var detailLine: String {
@@ -187,6 +188,11 @@ struct ActivityTransactionRow: View {
             parts.append(String(starhash: "Between your accounts"))
         } else if transaction.counterparty.name?.isEmpty == false, !transaction.counterparty.destination.isEmpty {
             parts.append(transaction.counterparty.formattedDestination)
+        }
+        // A payment Pay sent in parts says which one it is, so the parts
+        // read as one payment rather than the same one twice.
+        if let split = transaction.split {
+            parts.append(String(starhash: "Part \(split.part) of \(split.count)"))
         }
         let time = transaction.date.formatted(Date.FormatStyle(date: .omitted, time: .shortened, locale: .starhash))
         if showsDate {

@@ -41,7 +41,7 @@ struct TransactionHero: View {
 /// The reference's three cards, with StarHash's details in them: how it
 /// went and the wallet it went through; who it went to and the carrier's
 /// code for it; and the money, the amount with its fee and the balance it
-/// left. A row with nothing to say is left out. The category row under
+/// left. A part of a split payment has a card of its own after the first. A row with nothing to say is left out. The category row under
 /// Status is the caller's: the page's menu, or the preview's words.
 struct TransactionDetailCards<CategoryRow: View>: View {
     let transaction: StarHashKit.Transaction
@@ -60,6 +60,16 @@ struct TransactionDetailCards<CategoryRow: View>: View {
                 }
             }
             .starhashOutlinedCard()
+
+            // One of the payments Pay sent a larger one in, to pay less in
+            // fees: which part, and how much went in all.
+            if let split = transaction.split {
+                VStack(spacing: 0) {
+                    DetailRow("Part", String(starhash: "\(split.part) of \(split.count)"))
+                    DetailRow("Whole payment", Money.formatWithCurrency(split.total), numeric: true)
+                }
+                .starhashOutlinedCard()
+            }
 
             VStack(spacing: 0) {
                 DetailRow(
