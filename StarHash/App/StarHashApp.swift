@@ -149,6 +149,8 @@ struct StarHashApp: App {
                 StarHashCloud.pingIfDue()
                 // The owner's listing, sent again when it is a week old.
                 StarHashCloud.syncDirectory(owner: AppEnvironment.owner)
+                // A photo change the server has not taken yet.
+                StarHashCloud.resendPhotoIfNeeded()
                 store.reloadFromDisk()
                 AppEnvironment.autoVerify.reload()
                 AppEnvironment.autoVerify.expireUnconfirmed()

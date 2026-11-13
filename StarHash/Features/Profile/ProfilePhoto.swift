@@ -4,8 +4,9 @@ import SwiftUI
 import UIKit
 
 /// The owner's photo, chosen from their library on Profile: kept as one
-/// small JPEG in Application Support, beside the transactions, and never
-/// sent anywhere. Export carries it in the backup's profile.
+/// small JPEG in Application Support, beside the transactions, and on
+/// StarHash's server for their QR code (`StarHashCloud.syncPhoto`). Export
+/// carries it in the backup's profile.
 @MainActor @Observable
 final class ProfilePhoto {
     static let shared = ProfilePhoto()

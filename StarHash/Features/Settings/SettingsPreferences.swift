@@ -81,9 +81,9 @@ enum AppReset {
         SmartCategories.reset()
         StarHashWidgetData.erase()
         ProfilePhoto.shared.remove()
-        // The directory's record of what it was sent outlives the wipe, so
-        // the owner's listing is deleted from the server after it.
-        StarHashCloud.keepingDirectoryState {
+        // What the server still has from this iPhone outlives the wipe, so
+        // the owner's listing and photo are deleted from it after it.
+        StarHashCloud.keepingServerState {
             if let domain = Bundle.main.bundleIdentifier {
                 UserDefaults.standard.removePersistentDomain(forName: domain)
             }

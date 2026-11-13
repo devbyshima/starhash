@@ -25,8 +25,9 @@ INSERT OR IGNORE INTO active_days (day, id) SELECT last_seen, id FROM installs;
 -- it off): the number as an HMAC under the Worker's DIRECTORY_SECRET, never
 -- the number itself; the hash of the key their iPhone holds (the photo's);
 -- the name they gave and their photo's id, either of which may be empty.
--- The app sends its rows again each week, and lookups skip rows older than
--- 45 days. Two keys listing one number show neither.
+-- The app sends its rows again each week; lookups skip rows older than 45
+-- days, and the Worker deletes them each night. Two keys listing one number
+-- show neither.
 CREATE TABLE IF NOT EXISTS directory (
   number_hash TEXT NOT NULL,
   key_hash TEXT NOT NULL,

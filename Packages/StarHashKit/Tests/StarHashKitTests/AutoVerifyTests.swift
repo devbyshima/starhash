@@ -108,9 +108,34 @@ struct AutoVerifyTests {
 
     @Test func theReminderSaysItFailedAtTheHour() throws {
         let pending = Self.payment(minutesAgo: 5)
-        let item = try #require(NotificationPlan.reminder(for: pending, settings: .init(failsUnconfirmed: true)))
+        let item = try #require(NotificationPlan.reminder(for: pending, settings: .init(failsUnconfirmedSince: .distantPast)))
         #expect(item.kind == .paymentExpired)
         #expect(item.date == pending.date.addingTimeInterval(AutoVerify.confirmationWindow))
         #expect(item.body == "No M\u{2011}Money message confirmed 5,000 RWF to Aline within an hour, so StarHash marked it failed.")
+    }
+
+    /// A payment dialled before the setup never fails for want of a
+    /// message, so its reminder only asks whether it went through.
+    @Test func aPaymentFromBeforeTheSetupIsOnlyReminded() throws {
+        let pending = Self.payment(minutesAgo: 5)
+        let settings = NotificationPlan.Settings(failsUnconfirmedSince: Self.now)
+        let item = try #require(NotificationPlan.reminder(for: pending, settings: settings))
+        #expect(item.kind == .paymentReminder)
+    }
+
+    /// What the reminder promises is what the expiry does, for payments
+    /// dialled on either side of the setup.
+    @Test func theReminderPromisesOnlyWhatTheExpiryDoes() throws {
+        let setup = Self.now.addingTimeInterval(-30 * 60)
+        let before = Self.payment(minutesAgo: 40)
+        let after = Self.payment(minutesAgo: 20)
+        let store = Self.store(before, after)
+        let settings = NotificationPlan.Settings(failsUnconfirmedSince: setup)
+        let failed = Set(store.expireUnconfirmed(dialledSince: setup, now: Self.now.addingTimeInterval(2 * 3600)).map(\.id))
+        for payment in [before, after] {
+            let item = try #require(NotificationPlan.reminder(for: payment, settings: settings))
+            #expect((item.kind == .paymentExpired) == failed.contains(payment.id))
+        }
+        #expect(failed == [after.id])
     }
 }

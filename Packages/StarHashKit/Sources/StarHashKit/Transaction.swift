@@ -145,6 +145,17 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
     /// `Tariff` when confirmed by hand. A pending payment has none yet.
     public var countedFee: Int { countsAsSpent && status == .confirmed ? fee ?? 0 : 0 }
 
+    // MARK: Failing on its own
+
+    /// Whether auto-verify, Active since `since` (its setup), fails this
+    /// payment when no message confirms it within the hour: one dialled
+    /// from StarHash since then, and still pending. The expiry and the
+    /// reminder that announces it both ask this, so what the Owner is told
+    /// and what happens cannot part.
+    public func failsUnconfirmed(dialledSince since: Date) -> Bool {
+        status == .pending && source == .app && direction == .outgoing && date >= since
+    }
+
     /// `fee` for a payment the wallet charged `walletFee` for, with
     /// MoMoAdvance's access fee on top when the overdraft paid for it.
     func fee(adding walletFee: Int?) -> Int? {

@@ -160,7 +160,7 @@ struct NotificationSettingsView: View {
 
     /// Auto-verify fails a payment no message confirms within the hour, so
     /// the reminder says that instead (`AutoVerify.expireUnconfirmed`).
-    private var failsUnconfirmed: Bool { autoVerify.status() == .active }
+    private var failsUnconfirmed: Bool { autoVerify.failsUnconfirmedSince() != nil }
 
     /// Above everything while iOS does not let StarHash notify: Turn On
     /// asks the first time, and after a refusal the Settings app is the

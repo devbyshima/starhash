@@ -324,20 +324,11 @@ struct PayView: View {
         if let pendingLocation, let recordedID, let ticket {
             Task {
                 guard let fix = await pendingLocation.value, Preferences.nearbyLocation.value() else { return }
-                let isContact = recipient.kind == .phone ? await Self.isContact(recipient) : nil
+                let isContact = recipient.kind == .phone ? await PayContacts.shared.knowsContact(recipient) : nil
                 guard Nearby.remembersPlace(of: recipient, isContact: isContact) else { return }
                 store.attachPlace(fix.coordinate, to: recordedID, ticket: ticket)
             }
         }
-    }
-
-    /// Whether a number is one of the person's contacts, read first; nil
-    /// when StarHash cannot read them, so cannot tell.
-    private static func isContact(_ recipient: Recipient) async -> Bool? {
-        let contacts = PayContacts.shared
-        await contacts.loadIfAllowed()
-        guard contacts.hasLoaded, contacts.access == .authorized else { return nil }
-        return contacts.isContact(recipient)
     }
 
     private func dial(_ code: String) {
