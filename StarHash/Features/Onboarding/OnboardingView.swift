@@ -25,33 +25,21 @@ import SwiftUI
 ///      offered every time, a replay included, so the shortcut and the
 ///      automation can always be set up from here.
 ///
-/// The screen reached is saved as it changes, so a flow left unfinished
-/// opens again where it was left; finishing clears it. The tint is the
+/// The screen reached is saved by name as it changes (`FirstRun`), so a
+/// flow left unfinished opens again where it was left; finishing clears it. The tint is the
 /// accent throughout; the wallets show as their logos.
 struct OnboardingView: View {
     let onFinish: () -> Void
 
     @Environment(Owner.self) private var owner
     @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
-    @AppStorage(PreferenceKey.onboardingStage) private var savedStage = 0
     @AppStorage(PreferenceKey.hasSeenDeveloperNote) private var hasSeenDeveloperNote = false
-    @State private var stage = OnboardingLaunch.initialStage ?? UserDefaults.standard.integer(forKey: PreferenceKey.onboardingStage)
-
-    enum Stage: Int {
-        case reel, wallet, number, photo, contacts, nearby, notifications, autoVerify, setup
-    }
-
-    /// Every screen there can be, for the debug launch's range.
-    static let stageCount = 9
-
-    /// The screens, in order. Both wallets' messages can be read, so
-    /// everyone sees auto-verify and its setup.
-    private var stages: [Stage] { [.reel, .wallet, .number, .photo, .contacts, .nearby, .notifications, .autoVerify, .setup] }
+    /// The screens are `FirstRun.Screen`'s, in its order. Both wallets'
+    /// messages can be read, so everyone sees auto-verify and its setup.
+    @State private var current = OnboardingLaunch.initialScreen ?? FirstRun.savedScreen()
 
     /// The wallet picked on the wallet screen, MTN MoMo until then.
     private var chosenWallet: Recipient.Network { owner.wallet }
-
-    private var current: Stage { stages[min(stage, stages.count - 1)] }
 
     private static let phases: [OnboardingReel.Phase] = [
         .init(symbol: "number", title: "No more USSD menus",
@@ -87,15 +75,15 @@ struct OnboardingView: View {
                     .transition(.blurOutUp)
             case .nearby:
                 OnboardingPermission(config: nearby)
-                    .id(Stage.nearby)
+                    .id(FirstRun.Screen.nearby)
                     .transition(.blurOutUp)
             case .notifications:
                 OnboardingPermission(config: notifications)
-                    .id(Stage.notifications)
+                    .id(FirstRun.Screen.notifications)
                     .transition(.blurOutUp)
             case .autoVerify:
                 OnboardingPermission(config: autoVerify)
-                    .id(Stage.autoVerify)
+                    .id(FirstRun.Screen.autoVerify)
                     .transition(.blurOutUp)
             case .setup:
                 // The setup in full, in its own navigation bar: back steps
@@ -108,7 +96,7 @@ struct OnboardingView: View {
                 .transition(.blurOutUp)
             }
         }
-        .onChange(of: stage, initial: true) { _, stage in savedStage = stage }
+        .onChange(of: current, initial: true) { _, screen in FirstRun.save(screen) }
     }
 
     private var contacts: OnboardingPermission.Config {
@@ -181,7 +169,7 @@ struct OnboardingView: View {
     /// the first screen. Shima's note is owed again, so it opens over Pay
     /// (`RootView`), and again on the next launch if the app is quit first.
     private func finish() {
-        savedStage = 0
+        FirstRun.save(nil)
         hasSeenDeveloperNote = false
         // The two weeks before the note asking for a rating start now.
         ReviewNote.startClockIfNeeded()
@@ -189,13 +177,13 @@ struct OnboardingView: View {
     }
 
     private func advance() {
-        guard stage < stages.count - 1 else { return finish() }
-        withAnimation(.smooth(duration: 0.45)) { stage += 1 }
+        guard let next = current.next else { return finish() }
+        withAnimation(.smooth(duration: 0.45)) { current = next }
     }
 
     private func goBack() {
-        guard stage > 0 else { return }
-        withAnimation(.smooth(duration: 0.45)) { stage -= 1 }
+        guard let previous = current.previous else { return }
+        withAnimation(.smooth(duration: 0.45)) { current = previous }
     }
 }
 
@@ -305,10 +293,12 @@ extension View {
 /// where it was left.
 @MainActor
 enum OnboardingLaunch {
-    static var initialStage: Int? {
+    /// `-onboardingPage <n>`: the nth screen, counted from 0.
+    static var initialScreen: FirstRun.Screen? {
         #if DEBUG
-        guard let stage = DebugLaunch.value(after: "-onboardingPage").flatMap(Int.init) else { return nil }
-        return min(max(stage, 0), OnboardingView.stageCount - 1)
+        guard let page = DebugLaunch.value(after: "-onboardingPage").flatMap(Int.init) else { return nil }
+        let screens = FirstRun.Screen.allCases
+        return screens[min(max(page, 0), screens.count - 1)]
         #else
         return nil
         #endif

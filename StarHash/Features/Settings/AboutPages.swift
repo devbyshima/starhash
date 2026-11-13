@@ -13,7 +13,7 @@ struct AboutStarHashView: View {
             SettingsCard {
                 SettingsLinkRow(page: .whatsNew, symbol: "sparkles", title: "What's New", caption: "What each version brought")
                 Button {
-                    UserDefaults.standard.set(0, forKey: PreferenceKey.onboardingStage)
+                    FirstRun.save(nil)
                     withAnimation(.smooth) { hasOnboarded = false }
                 } label: {
                     SettingsRow(symbol: "play.circle.fill", title: "Replay Onboarding", caption: "See the welcome screens again")
