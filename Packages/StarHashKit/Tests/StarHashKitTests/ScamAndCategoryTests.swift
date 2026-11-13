@@ -105,7 +105,7 @@ import Testing
             direction: .outgoing, counterparty: Recipient(name: "Airtime", destination: "", kind: .merchant),
             amount: 1_000, reference: "1", category: "airtime"
         )
-        let applied = store.apply(sms)
+        let applied = store.apply(sms).transaction
         #expect(applied.category == "airtime")
         #expect(applied.isPurchase)
     }

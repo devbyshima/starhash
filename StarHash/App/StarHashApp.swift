@@ -56,6 +56,19 @@ struct StarHashApp: App {
         if DebugLaunch.arguments.contains("-resetOnboarding") {
             UserDefaults.standard.set(false, forKey: PreferenceKey.hasOnboarded)
         }
+        // -receiveMessage <text>: the Process Carrier SMS action runs on it
+        // at launch, as the automation would, with auto-verify set up and
+        // proven first (it stays so on this simulator).
+        if let message = DebugLaunch.value(after: "-receiveMessage") {
+            let autoVerify = AppEnvironment.autoVerify
+            if autoVerify.status() == .off {
+                autoVerify.receive(AutoVerificationSample.message, sender: nil)
+                autoVerify.finishSetUp()
+            }
+            Task { @MainActor in
+                _ = try? await ProcessCarrierSMSIntent(message: message, sender: DebugLaunch.value(after: "-sender")).perform()
+            }
+        }
         #endif
         Self.useBrandTypeInNavigationBars()
         // Before launch finishes, so a tap that opened StarHash is heard.

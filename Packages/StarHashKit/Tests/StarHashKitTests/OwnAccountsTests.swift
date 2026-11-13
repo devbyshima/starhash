@@ -33,7 +33,7 @@ import Testing
             wallet: .mtn, direction: .incoming,
             counterparty: Recipient(name: "Serein Shima", destination: "515", kind: .phone),
             amount: 2000, fee: nil, date: .now, reference: "1", balanceAfter: nil, category: nil
-        ))
+        )).transaction
         #expect(received.isOwnTransfer)
         let other = store.recordPayment(to: Recipient(name: "Ariane", destination: "0788999000", kind: .phone), amount: 700)
         #expect(!other.isOwnTransfer)

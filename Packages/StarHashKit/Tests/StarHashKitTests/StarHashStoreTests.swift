@@ -240,7 +240,7 @@ import Testing
         let early = store.recordPayment(to: john, amount: 5_000, date: noon.addingTimeInterval(-3_000))
         let late = store.recordPayment(to: john, amount: 5_000, date: noon.addingTimeInterval(-60))
 
-        let confirmed = store.apply(sentSMS(at: noon))
+        let confirmed = store.apply(sentSMS(at: noon)).transaction
         #expect(confirmed.id == late.id)
         #expect(confirmed.status == .confirmed)
         #expect(confirmed.fee == 100)
@@ -252,7 +252,7 @@ import Testing
     @Test func smsOutsideTheWindowIsANewTransaction() {
         let store = StarHashStore(fileURL: nil)
         store.recordPayment(to: john, amount: 5_000, date: noon.addingTimeInterval(-7 * 3600))
-        let logged = store.apply(sentSMS(at: noon))
+        let logged = store.apply(sentSMS(at: noon)).transaction
         #expect(logged.source == .sms)
         #expect(store.transactions.count == 2)
     }
@@ -261,13 +261,13 @@ import Testing
         let store = StarHashStore(fileURL: nil)
         store.recordPayment(to: john, amount: 5_000, date: noon.addingTimeInterval(-60))
         // Transfers sent carry no reference; the date tells them apart.
-        let first = store.apply(sentSMS(at: noon))
-        let again = store.apply(sentSMS(at: noon))
+        let first = store.apply(sentSMS(at: noon)).transaction
+        let again = store.apply(sentSMS(at: noon)).transaction
         #expect(again.id == first.id)
         #expect(store.transactions.count == 1)
 
-        let withReference = store.apply(sentSMS(amount: 900, at: nil, reference: "1203948571"))
-        let repeated = store.apply(sentSMS(amount: 900, at: nil, reference: "1203948571"))
+        let withReference = store.apply(sentSMS(amount: 900, at: nil, reference: "1203948571")).transaction
+        let repeated = store.apply(sentSMS(amount: 900, at: nil, reference: "1203948571")).transaction
         #expect(repeated.id == withReference.id)
         #expect(store.transactions.count == 2)
     }
@@ -283,7 +283,7 @@ import Testing
             direction: .outgoing,
             counterparty: Recipient(name: "Pili-Pili Invest", destination: "", kind: .merchant),
             amount: 15_000, fee: 0, date: noon, reference: "145891386684"
-        ))
+        )).transaction
         #expect(confirmed.id == toPili.id)
         #expect(confirmed.counterparty.destination == "020205")
         #expect(store.transaction(id: toJohn.id)?.status == .pending)
@@ -319,7 +319,7 @@ import Testing
         #expect(pending.status == .pending)
         #expect(pending.fee == nil)
 
-        let paid = store.apply(sentSMS(amount: 5_000, at: noon.addingTimeInterval(30)))
+        let paid = store.apply(sentSMS(amount: 5_000, at: noon.addingTimeInterval(30))).transaction
         #expect(paid.status == .confirmed)
         #expect(paid.fee == 168)
         #expect(paid.walletFee == 100)

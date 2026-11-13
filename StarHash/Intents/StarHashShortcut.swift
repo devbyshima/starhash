@@ -1,3 +1,4 @@
+import StarHashKit
 import SwiftUI
 import UIKit
 

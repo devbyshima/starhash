@@ -51,6 +51,46 @@ public final class AutoVerify {
         static let shortcutRanAt = "lastVerifiedAt"
         static let lastMessageAt = "lastMessageAt"
         static let since = "autoVerifySince"
+        /// Settings' switches a message obeys, kept by the app.
+        static let saveTransactions = "saveTransactions"
+        static let scamWarnings = "scamWarnings"
+    }
+
+    /// What one message did (`receive`).
+    public enum Outcome: Equatable, Sendable {
+        /// The setup's own sample: it proves the shortcut and saves nothing.
+        case sample
+        /// Nothing to do: auto-verify is off, transactions are not kept, or
+        /// it is no wallet message (a bank's text, say).
+        case ignored
+        /// A look-alike of the wallet's message, never logged: the owner
+        /// is to be warned before they send anything back.
+        case scam(ScamWarning)
+        /// A payment StarHash dialled went through. `wasFailed` when
+        /// auto-verify had already failed it for want of a message.
+        case confirmed(Transaction, wasFailed: Bool)
+        /// A movement StarHash did not dial, now logged: money received,
+        /// or a payment made outside StarHash.
+        case added(Transaction)
+        /// A message applied before: nothing changed.
+        case alreadyApplied(Transaction)
+        /// The wallet says a payment StarHash dialled did not go through.
+        case failed(Transaction)
+        /// MoMoAdvance paid for a payment: its access fee joined it.
+        case overdraft(Transaction)
+        /// A wallet's failure or MoMoAdvance message about no payment
+        /// StarHash knows: StarHash keeps no record of attempts it did not
+        /// dial.
+        case unmatched
+
+        /// Whether it reached the transactions, so what is scheduled from
+        /// them is worked out again. Expiry runs with every one that did.
+        public var reachedTransactions: Bool {
+            switch self {
+            case .sample, .ignored, .scam: false
+            default: true
+            }
+        }
     }
 
     @ObservationIgnored private let defaults: UserDefaults
@@ -110,11 +150,59 @@ public final class AutoVerify {
         }
     }
 
+    // MARK: Receiving
+
+    /// A message handed over by the owner's Shortcuts automation (the
+    /// Process Carrier SMS action), with who sent it when the shortcut
+    /// passes that on. Everything a message does happens here, in this
+    /// order: any run proves the shortcut; the setup's sample stops there;
+    /// any other message proves the automation; nothing more while
+    /// auto-verify is off or transactions are not kept; a look-alike is
+    /// held back; a wallet's message confirms, logs, fails or adds its
+    /// access fee; and then any payment past its hour fails.
+    @discardableResult
+    public func receive(_ message: String, sender: String?, at now: Date = .now) -> Outcome {
+        shortcutRan(at: now)
+        guard !AutoVerificationSample.isSample(message) else { return .sample }
+        // A real message, so the automation hands them over: what the
+        // setup's own check cannot prove, and what auto-verify waits for
+        // before failing any payment on its own. Bank texts count too: the
+        // automation runs for every message with RWF in it.
+        messageArrived(at: now)
+        guard status(at: now) != .off, preference(Key.saveTransactions) else { return .ignored }
+        if preference(Key.scamWarnings), let warning = ScamCheck.check(message, sender: sender) {
+            return .scam(warning)
+        }
+        let outcome: Outcome
+        switch CarrierSMS.read(message) {
+        case .transaction(let sms):
+            outcome = switch store.apply(sms, receivedAt: now) {
+            case .confirmed(let t, let previous): .confirmed(t, wasFailed: previous.status == .failed)
+            case .added(let t): .added(t)
+            case .alreadyApplied(let t): .alreadyApplied(t)
+            }
+        case .failure(let failure):
+            outcome = store.applyFailure(failure, receivedAt: now).map(Outcome.failed) ?? .unmatched
+        case .overdraft(let use):
+            outcome = store.applyOverdraft(use, receivedAt: now).map(Outcome.overdraft) ?? .unmatched
+        case nil:
+            return .ignored
+        }
+        // Awake anyway: any payment past its hour fails now too.
+        expireUnconfirmed(now: now)
+        return outcome
+    }
+
+    /// A Settings switch, on unless turned off.
+    private func preference(_ key: String) -> Bool {
+        defaults.object(forKey: key) as? Bool ?? true
+    }
+
     // MARK: Changing
 
     /// The shortcut reached StarHash: any run of the Process Carrier SMS
     /// action, the setup's sample included.
-    public func shortcutRan(at now: Date = .now) {
+    func shortcutRan(at now: Date = .now) {
         shortcutRanAt = now
         write(now, Key.shortcutRanAt)
     }
@@ -122,7 +210,7 @@ public final class AutoVerify {
     /// A real wallet message came through the automation. Kept even while
     /// auto-verify is off: the setup date keeps it from proving a later
     /// setup.
-    public func messageArrived(at now: Date = .now) {
+    func messageArrived(at now: Date = .now) {
         lastMessageAt = now
         write(now, Key.lastMessageAt)
     }
@@ -184,5 +272,21 @@ public final class AutoVerify {
 
     private func write(_ date: Date, _ key: String) {
         defaults.set(date.timeIntervalSince1970, forKey: key)
+    }
+}
+
+/// The sample message the setup guide sends through the shortcut to check
+/// it works. It parses like a real merchant payment, so the whole path is
+/// exercised, but `AutoVerify.receive` recognises it and saves nothing.
+public enum AutoVerificationSample {
+    /// What the guide tells the owner to name the shortcut, and runs by name.
+    public static let shortcutName = "StarHash SMS"
+
+    private static let marker = "STARHASH TEST"
+
+    public static let message = "TxId: 0000000000. Your payment of 1,000 RWF to \(marker) 000000 has been completed at 2024-01-01 12:00:00. Your new balance: 0 RWF. Fee was 0 RWF."
+
+    public static func isSample(_ text: String) -> Bool {
+        text.localizedCaseInsensitiveContains(marker)
     }
 }

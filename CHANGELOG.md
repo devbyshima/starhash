@@ -84,6 +84,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Fixed
 
+- A payment auto-verify marked failed after an hour with no message, then confirmed by a message that came late, now says it went through, when payment notifications are on. Until now the last word was that it didn't.
 - A contact's number abroad or a landline is no longer offered for payment: it would have been dialled as an MTN number. The rule a scanned code already followed now holds everywhere.
 - The weekly and monthly summaries no longer count money moved between your own accounts as a payment ("You sent 0 RWF in 1 payment").
 - The mark in the tab bar fades to its new colour with the other icons when the appearance changes, and its triangle is outlined with the rest of it when Pay is not showing.

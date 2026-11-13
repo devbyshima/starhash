@@ -209,17 +209,35 @@ public final class StarHashStore {
         return count
     }
 
+    /// What `apply` did with a message.
+    public enum Applied: Equatable, Sendable {
+        /// It confirmed a payment StarHash dialled; `previous` is how that
+        /// payment stood before (pending, or failed for want of a message).
+        case confirmed(Transaction, previous: Transaction)
+        /// It logged a movement StarHash did not dial.
+        case added(Transaction)
+        /// It had been applied before, to this transaction: nothing changed.
+        case alreadyApplied(Transaction)
+
+        /// The transaction it confirmed, added or found.
+        public var transaction: Transaction {
+            switch self {
+            case .confirmed(let t, _), .added(let t), .alreadyApplied(let t): t
+            }
+        }
+    }
+
     /// Applies a carrier SMS: confirms the matching pending payment (same
     /// amount and destination, dialled within 6 hours of the message; the
     /// closest one when there are several) or adds a new transaction. A
-    /// message already applied changes nothing. Returns the transaction it
-    /// confirmed or added.
+    /// message already applied changes nothing.
     @discardableResult
-    public func apply(_ sms: ParsedSMS, receivedAt now: Date = .now) -> Transaction {
-        if let existing = alreadyApplied(sms) { return existing }
+    public func apply(_ sms: ParsedSMS, receivedAt now: Date = .now) -> Applied {
+        if let existing = alreadyApplied(sms) { return .alreadyApplied(existing) }
         let date = sms.date ?? now
         if sms.direction == .outgoing, let index = pendingMatch(for: sms, at: date) {
-            return confirm(at: index, with: sms)
+            let previous = transactions[index]
+            return .confirmed(confirm(at: index, with: sms), previous: previous)
         }
         let transaction = Transaction(
             direction: sms.direction, counterparty: sms.counterparty, amount: sms.amount,
@@ -228,7 +246,7 @@ public final class StarHashStore {
             wallet: sms.wallet, messageDate: sms.date
         )
         add(transaction)
-        return transaction
+        return .added(transaction)
     }
 
     /// Confirms the payment at `index` with the message that says it went
@@ -320,7 +338,8 @@ public final class StarHashStore {
     public func verify(_ id: UUID, withMessage text: String) -> Verification? {
         guard let index = transactions.firstIndex(where: { $0.id == id }) else { return nil }
         let payment = transactions[index]
-        if let sms = CarrierSMS.parse(text) {
+        switch CarrierSMS.read(text) {
+        case .transaction(let sms):
             guard settles(payment, with: sms, at: sms.date) else {
                 return .anotherPayment(amount: sms.amount, counterparty: sms.counterparty)
             }
@@ -330,8 +349,7 @@ public final class StarHashStore {
             }
             guard let index = transactions.firstIndex(where: { $0.id == id }) else { return nil }
             return .confirmed(confirm(at: index, with: sms))
-        }
-        if let failure = CarrierSMS.parseFailure(text) {
+        case .failure(let failure):
             guard settles(payment, with: failure, at: failure.date) else {
                 return .anotherPayment(amount: failure.amount, counterparty: failure.counterparty)
             }
@@ -340,14 +358,14 @@ public final class StarHashStore {
             transactions[index] = failed
             save()
             return .failed(failed)
-        }
-        if let use = CarrierSMS.parseOverdraft(text) {
+        case .overdraft(let use):
             guard use.accessFee > 0, overdraftCovers(payment, use, at: use.date ?? payment.date) else {
                 return .anotherPayment(amount: use.amount, counterparty: nil)
             }
             return .overdraft(addAccessFee(of: use, at: index))
+        case nil:
+            return .notAMessage
         }
-        return .notAMessage
     }
 
     /// Marks failed every payment dialled from StarHash since `since` that

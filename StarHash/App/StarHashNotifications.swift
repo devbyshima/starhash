@@ -165,22 +165,12 @@ final class StarHashNotifications {
         center.removeDeliveredNotifications(withIdentifiers: settled)
     }
 
-    /// A carrier SMS was just applied to `transaction`, which stood as
-    /// `previous` before it (nil when the message added it): says so, when
-    /// the owner asked to hear of it.
-    func messageApplied(_ transaction: StarHashKit.Transaction, previous: StarHashKit.Transaction?) async {
-        guard let item = NotificationPlan.afterMessage(
-            applied: transaction, previous: previous, settings: StarHashPreferences.notifications
-        ), await authorizationStatus().allowsDelivery else { return }
-        try? await center.add(request(for: item))
-    }
-
-    /// A message that looks like the wallet's may be a scam: says so at
-    /// once, whatever the Notifications page says, since StarHash did not
-    /// log it and the owner may be about to send money back.
-    func warnOfScam(_ warning: ScamWarning) async {
-        let item = NotificationPlan.scamWarning(warning, settings: StarHashPreferences.notifications)
-        guard await authorizationStatus().allowsDelivery else { return }
+    /// Says what a message just did, when it is worth a word
+    /// (`NotificationPlan.after`): a scam warning whatever the
+    /// Notifications page says, the rest only when the owner asked.
+    func announce(_ outcome: AutoVerify.Outcome) async {
+        guard let item = NotificationPlan.after(outcome, settings: StarHashPreferences.notifications),
+              await authorizationStatus().allowsDelivery else { return }
         try? await center.add(request(for: item))
     }
 

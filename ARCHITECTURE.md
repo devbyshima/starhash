@@ -24,7 +24,7 @@ Foundation and Observation only, a `public` interface, iOS 18 and macOS 15, test
 
 - **Money and people:** `Recipient` (a name, the digits and a kind: ten or more digits is a phone, fewer a merchant code; `network` from the prefix, `isPayable`), `Transaction` (direction, status, fee, MoMoAdvance's access fee, wallet, category), `Money`, `AmountInput`, `Tariff` (the carriers' published fees).
 - **Dialling:** `USSD` (`payment(to:amount:from:)`, `balance`, `telURL`), `USSDShortcut` and `USSDShortcutList` (Buy's codes), `PaymentQR` (scanned codes and StarHash's own `starhash://pay` link).
-- **Reading messages:** `CarrierSMS` (`parse`, `parseFailure`, `parseOverdraft` for MTN's and Airtel's SMS), `ScamCheck`, `Verification`, `AutoVerify` (the one-hour window, `looksBroken`).
+- **Reading messages:** `CarrierSMS` (`read`, one entry for the three kinds of `WalletMessage`, over `parse`, `parseFailure` and `parseOverdraft` for MTN's and Airtel's SMS), `ScamCheck`, `Verification`, and `AutoVerify`: `receive`, everything a message does in one place (the sample, Off, scam warnings, the store, expiry), returning an `Outcome`; the one-hour window; `looksBroken`.
 - **The store:** `StarHashStore`, `@MainActor @Observable`, one JSON file and every rule for matching a message to a payment, retries, own transfers, expiry and Verify.
 - **The owner:** `Owner` (name, default and other SIM, wallet, and the rules between them), `OwnerWallets`, `OwnAccounts`.
 - **Reading the history:** `ActivitySummary` (totals, the chart's buckets, day and month groups, search), `SpendingReport` (the Report page: comparison with the period before and with the usual, the summary's insight, categories, top payments, payment types, each day spent on and the key days), `TransactionCategory` and `TransactionCategorizer`.
@@ -34,7 +34,7 @@ Foundation and Observation only, a `public` interface, iOS 18 and macOS 15, test
 
 #### [StarHash/App](StarHash/App)
 
-The lifecycle and the wiring. `AppEnvironment` holds the single `StarHashStore`, `Owner` and `AppRouter` (tabs, the open transaction, `starhash://` and `tel:` links). `StarHashApp` reloads the store, runs `PaymentExpiry`, syncs notifications (`StarHashNotifications`) and publishes the widgets' snapshot. Also `StarHashCloud` (the Worker's client), `AppLock` (the Face ID lock), `QuickActions`, `SmartCategories` (Apple Intelligence on iOS 26), `FeatureFlags`, `DebugLaunch` and `SampleData`.
+The lifecycle and the wiring. `AppEnvironment` holds the single `StarHashStore`, `Owner` and `AppRouter` (tabs, the open transaction, `starhash://` and `tel:` links). `StarHashApp` reloads the store, runs `AutoVerify.expireUnconfirmed`, syncs notifications (`StarHashNotifications`) and publishes the widgets' snapshot. Also `StarHashCloud` (the Worker's client), `AppLock` (the Face ID lock), `QuickActions`, `SmartCategories` (Apple Intelligence on iOS 26), `FeatureFlags`, `DebugLaunch` and `SampleData`.
 
 #### [StarHash/Features](StarHash/Features)
 
@@ -50,7 +50,7 @@ The design system: `Theme` (every colour, `StarHashMetrics`, Space Grotesk), `Gl
 
 #### [StarHash/Intents](StarHash/Intents)
 
-App Intents: `ProcessCarrierSMSIntent` (what the Shortcuts automation runs on each SMS), `CheckBalanceIntent`, `OpenPayIntent`, and `StarHashShortcut` (the bundled shortcut, its links and its test run).
+App Intents: `ProcessCarrierSMSIntent` (what the Shortcuts automation runs on each SMS: `AutoVerify.receive`, then the notification its outcome is worth), `CheckBalanceIntent`, `OpenPayIntent`, and `StarHashShortcut` (the bundled shortcut, its links and its test run).
 
 ### Extensions [WIDGETKIT]
 
@@ -85,8 +85,8 @@ A Cloudflare Worker with one D1 database: `/v1/photos/:id` for the photo shared 
 ## What does a confirmation look like?
 
 1. The wallet's SMS arrives, and the owner's automation runs the "StarHash SMS" shortcut, which calls `ProcessCarrierSMSIntent(message:sender:)` without opening the app.
-2. The intent holds back a look-alike with `ScamCheck`, reads the message with `CarrierSMS`, and calls the store's `apply`, `applyFailure` or `applyOverdraft`.
-3. `apply` confirms the closest open payment with the same amount, wallet and number or code within six hours, taking the fee, reference and balance from the SMS; with none, it adds the movement as a new transaction. `PaymentExpiry` then fails what no message confirmed within the hour, and `StarHashNotifications` reschedules.
+2. The intent hands it to `AutoVerify.receive`, which holds back a look-alike with `ScamCheck`, reads the message with `CarrierSMS.read`, and calls the store's `apply`, `applyFailure` or `applyOverdraft`. The intent posts what `NotificationPlan.after` makes of the outcome.
+3. `apply` confirms the closest open payment with the same amount, wallet and number or code within six hours, taking the fee, reference and balance from the SMS; with none, it adds the movement as a new transaction. `AutoVerify.expireUnconfirmed` then fails what no message confirmed within the hour, and `StarHashNotifications` reschedules.
 4. By hand, the owner pastes the message into Verify (`StarHashStore.verify`), or uses Confirm Without Message (the fee from `Tariff`).
 
 ## What does the Development flow look like?

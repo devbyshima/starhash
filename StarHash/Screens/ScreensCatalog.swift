@@ -293,9 +293,9 @@ enum ScreensSample {
     /// so Settings shows it working.
     static let autoVerify: AutoVerify = {
         let autoVerify = AutoVerify(store: store, defaults: defaults("ScreensAutoVerify"))
-        autoVerify.shortcutRan()
+        autoVerify.receive(AutoVerificationSample.message, sender: nil)
         autoVerify.finishSetUp()
-        autoVerify.messageArrived()
+        autoVerify.receive("Bank: 1,000 RWF", sender: nil)
         return autoVerify
     }()
 
