@@ -483,8 +483,7 @@ public final class StarHashStore {
         var expired: [Transaction] = []
         for index in transactions.indices {
             let t = transactions[index]
-            guard t.status == .pending, t.source == .app, t.direction == .outgoing,
-                  t.date >= since, now.timeIntervalSince(t.date) >= window else { continue }
+            guard t.failsUnconfirmed(dialledSince: since), now.timeIntervalSince(t.date) >= window else { continue }
             var failed = t.markedFailed()
             failed.failureReason = .noMessage
             transactions[index] = failed

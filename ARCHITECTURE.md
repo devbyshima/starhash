@@ -65,7 +65,7 @@ Buy's codes as Home Screen tiles, Quick Pay, and Scan to Pay in Control Center. 
 
 #### [server](server)
 
-A Cloudflare Worker with one D1 database: `/v1/photos/:id` for the photo shared with a QR code, `/v1/directory` and `/v1/directory/lookup` for Show My Name (numbers kept only as HMACs), and `/v1/ping` for the daily count. `schema.sql` defines the tables; `stats/` holds the usage queries.
+A Cloudflare Worker with one D1 database: `/v1/photos/:id` for the photo shared with a QR code, `/v1/directory` and `/v1/directory/lookup` for Show My Name (numbers kept only as HMACs), and `/v1/ping` for the daily count, with a nightly cron (`scheduled`, `wrangler.toml`) that deletes directory entries not sent again for 45 days. `schema.sql` defines the tables; `stats/` holds the usage queries.
 
 ## External Pieces
 
@@ -106,12 +106,14 @@ Things the code relies on that are easy to break:
 
 - **Money:** an amount is always positive whole RWF; the direction gives the sign. A failed payment counts for nothing, a pending one counts, money moved between the owner's own accounts is neither spent nor received, and a fee counts only on a confirmed payment. `Transaction.counts`, `countsAsSpent` and `countedFee` hold that rule; `ActivitySummary`, `SpendingReport` and `NotificationPlan` ask them and never filter for it themselves.
 - **Fees** come only from the SMS, or from `Tariff` when a payment is confirmed by hand. MoMoAdvance's access fee is kept apart and added on top.
+- **Expiry:** a reminder says a payment failed only when the expiry will fail it: both ask `Transaction.failsUnconfirmed` with `AutoVerify.failsUnconfirmedSince` (the setup's moment, while Active), and turning auto-verify off reschedules the reminders.
 - **Matching:** a message applied twice is caught by its reference or its moment. A payment failed for want of a message stays open to a late one; one failed by hand is never revived. Only a pending payment is marked failed by hand. A category chosen by hand is never changed: the store's verbs hold these, so a screen cannot skip them.
 - **Dialling:** only an `isPayable` recipient is dialled: a Rwandan mobile number or a merchant code. iOS dials on the default voice line; StarHash cannot choose the SIM.
 - **The store** is one instance on the main actor, shared by views and intents. A file it cannot decode is set aside, never overwritten. While the file is sealed (before the first unlock after a restart) nothing is written, and the messages that come are applied again over the whole history once it reads, so one cannot stand beside the payment it confirms.
 - **The owner's** name, numbers and wallet go through `Owner`, never `UserDefaults` or `@AppStorage` directly.
 - **Settings' choices** each have one default, in `Preferences`: views read them with `@AppStorage(Preferences.x)`, everything else with `Preferences.x.value()`, and neither writes a default of its own.
-- **Delete All Data** keeps the directory's record of what it last sent through the wipe, so the owner's Show My Name listing is deleted from the server after it.
+- **Delete All Data** keeps what the server still has from this iPhone through the wipe (`StarHashCloud.keepingServerState`, run after `ProfilePhoto.remove`): the directory's record of what it last sent, and a photo whose delete is unconfirmed, so the owner's listing and photo are deleted from the server after it. The Keychain key that can delete them survives the wipe and goes into the iPhone's encrypted backups.
+- **Contacts** are read only while Enable contacts is on: `PayContacts` checks it itself, and lets go of what it read when it is turned off.
 - **Text** built at run time goes through `String(starhash:)` (`String(kit:)` in the package), never `String(localized:)`, so the language chosen in Settings applies at once. There are three catalogs: the app's, the package's and the widgets'.
 - **The shortcut contract:** `ProcessCarrierSMSIntent`'s name and parameters, the bundle id and the team are written into the shared shortcut, and the app builds with `ENABLE_DEBUG_DYLIB: NO`, or Shortcuts cannot run the action. The iCloud link is a copy of the shortcut as it was shared: after making the file again, share a new link.
 - **Shared sources:** `Theme.swift`, `Icons.swift` and the mark compile into the widgets too, so they hold nothing app-only.

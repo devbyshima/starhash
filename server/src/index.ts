@@ -10,7 +10,8 @@
 // is. On unless the owner turns off Show My Name. Each number is kept only
 // as a keyed hash (HMAC with DIRECTORY_SECRET, which only the Worker
 // holds), so the table alone gives no number back, and the owner's key
-// (the photo's) is needed to change or clear their entry.
+// (the photo's) is needed to change or clear their entry. An entry not
+// sent again for 45 days is deleted each night.
 //
 // Installs: once each day it is used the app sends a random id it made on
 // its first launch and its version, so the number of people using StarHash
@@ -39,8 +40,9 @@ const MAX_NUMBERS = 2;
 const MAX_NAME = 60;
 
 /// An entry the app has not sent again in this long is left out of
-/// lookups: the app sends it each week while it is in use, so one from a
-/// lost or wiped iPhone lapses, and stops hiding the number's new entry.
+/// lookups and deleted that night (`scheduled`): the app sends it each
+/// week while it is in use, so one from a lost or wiped iPhone, or from a
+/// deleted app, lapses, and stops hiding the number's new entry.
 const ENTRY_LIFETIME_DAYS = 45;
 
 export default {
@@ -80,7 +82,19 @@ export default {
     }
     return text(404, "Not found");
   },
+
+  /// Each night (the cron in wrangler.toml): the directory's lapsed
+  /// entries are deleted, not only left out of lookups.
+  async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
+    await env.DB.prepare("DELETE FROM directory WHERE updated_at <= ?1").bind(lapsedBefore(new Date())).run();
+  },
 } satisfies ExportedHandler<Env>;
+
+/// The moment an entry not sent since has lapsed: lookups skip it and the
+/// nightly run deletes it, by the one rule.
+function lapsedBefore(now: Date): string {
+  return new Date(now.getTime() - ENTRY_LIFETIME_DAYS * 86400 * 1000).toISOString();
+}
 
 // MARK: The directory
 
@@ -141,7 +155,7 @@ async function lookUp(request: Request, env: Env): Promise<Response> {
   }
   const number = typeof body.number === "string" ? body.number : "";
   if (!NUMBER.test(number)) return text(400, "Bad request");
-  const since = new Date(Date.now() - ENTRY_LIFETIME_DAYS * 86400 * 1000).toISOString();
+  const since = lapsedBefore(new Date());
   const { results } = await env.DB.prepare(
     "SELECT name, photo_id FROM directory WHERE number_hash = ?1 AND updated_at > ?2 LIMIT 2",
   )

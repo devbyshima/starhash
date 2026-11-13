@@ -177,6 +177,9 @@ private struct SettingsRootList: View {
         .sheet(isPresented: $confirmsAutoVerifyOff) {
             TurnOffAutoVerifySheet {
                 withAnimation(.smooth) { autoVerify.turnOff() }
+                // Off fails nothing, so a reminder queued to say a payment
+                // failed goes back to asking whether it went through.
+                Task { await StarHashNotifications.shared.sync() }
             }
         }
         .alert("Location is off", isPresented: $locationRefused) {
@@ -554,13 +557,14 @@ private struct SettingsRootList: View {
         }
     }
 
-    /// Turning contacts on asks for access the first time.
+    /// Turning contacts on asks for access the first time; turning them
+    /// off lets go of the ones read.
     private var contactsBinding: Binding<Bool> {
         Binding {
             enableContacts
         } set: { isOn in
             enableContacts = isOn
-            guard isOn else { return }
+            guard isOn else { return PayContacts.shared.forget() }
             Task { await SettingsContactsAccess.request() }
         }
     }

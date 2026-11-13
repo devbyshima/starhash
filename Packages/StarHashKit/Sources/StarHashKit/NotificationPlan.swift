@@ -24,11 +24,13 @@ public enum NotificationPlan {
         /// Off keeps amounts and balances off the Lock Screen: the
         /// notifications say what happened, not how much.
         public var showsAmounts: Bool
-        /// Auto-verify is on and working, so a payment no message confirms
-        /// within the hour fails on its own (`AutoVerify`): its reminder
-        /// becomes word that it failed, at the hour, in place of a nudge.
-        /// Not a choice on the page; the app works it out.
-        public var failsUnconfirmed: Bool
+        /// While auto-verify is Active, the moment it was set up: a payment
+        /// dialled since then that no message confirms within the hour
+        /// fails on its own (`Transaction.failsUnconfirmed`), so its
+        /// reminder becomes word that it failed, at the hour, in place of a
+        /// nudge. Nil while auto-verify fails none. Not a choice on the
+        /// page; the app asks `AutoVerify.failsUnconfirmedSince`.
+        public var failsUnconfirmedSince: Date?
 
         public init(
             paymentReminders: Bool = true,
@@ -40,7 +42,7 @@ public enum NotificationPlan {
             monthlySummary: Bool = true,
             summaryHour: Int = NotificationPlan.defaultSummaryHour,
             showsAmounts: Bool = true,
-            failsUnconfirmed: Bool = false
+            failsUnconfirmedSince: Date? = nil
         ) {
             self.paymentReminders = paymentReminders
             self.reminderDelay = reminderDelay
@@ -51,7 +53,7 @@ public enum NotificationPlan {
             self.monthlySummary = monthlySummary
             self.summaryHour = summaryHour
             self.showsAmounts = showsAmounts
-            self.failsUnconfirmed = failsUnconfirmed
+            self.failsUnconfirmedSince = failsUnconfirmedSince
         }
     }
 
@@ -135,7 +137,7 @@ public enum NotificationPlan {
         guard settings.paymentReminders, transaction.status == .pending,
               transaction.source == .app, transaction.direction == .outgoing else { return nil }
         let name = transaction.counterparty.displayName
-        if settings.failsUnconfirmed {
+        if let since = settings.failsUnconfirmedSince, transaction.failsUnconfirmed(dialledSince: since) {
             let messages = transaction.wallet.map { String(kit: "\($0.messagesName) message") } ?? String(kit: "message")
             let what = settings.showsAmounts
                 ? String(kit: "\(Money.formatWithCurrency(transaction.amount)) to \(name)")

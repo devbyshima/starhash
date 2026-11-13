@@ -31,7 +31,7 @@ struct PreferencesTests {
     /// The Notifications page and the plan agree on every default, because
     /// both read them here.
     @Test func storedNotificationSettingsStartAsThePlansDefaults() {
-        let stored = NotificationPlan.Settings.stored(in: Self.defaults(), failsUnconfirmed: false)
+        let stored = NotificationPlan.Settings.stored(in: Self.defaults(), failsUnconfirmedSince: nil)
         #expect(stored == NotificationPlan.Settings())
     }
 }
