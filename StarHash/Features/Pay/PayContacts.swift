@@ -108,9 +108,21 @@ final class PayContacts {
             .joined(separator: " ")
     }
 
+    /// Whether the Owner lets StarHash use their contacts: Enable contacts,
+    /// checked here so no caller can read them while it is off.
+    private var isOn: Bool { Preferences.enableContacts.value() }
+
+    /// Lets go of every contact read: Enable contacts was turned off.
+    func forget() {
+        guard hasLoaded || !contacts.isEmpty else { return }
+        contacts = []
+        hasLoaded = false
+    }
+
     /// Asks for access the first time, then reads every contact with a
-    /// phone number.
+    /// phone number. Reads nothing while Enable contacts is off.
     func load() async {
+        guard isOn else { return forget() }
         if access == .notDetermined {
             _ = await PayContacts.requestAccess()
             access = PayContacts.currentAccess()
@@ -128,9 +140,20 @@ final class PayContacts {
     /// asks for it: for places other than the picker, which is where the
     /// permission prompt belongs.
     func loadIfAllowed() async {
+        guard isOn else { return forget() }
         access = PayContacts.currentAccess()
         guard !hasLoaded, access == .authorized || access == .limited else { return }
         await load()
+    }
+
+    /// Whether `recipient`'s number is saved in Contacts, reading them
+    /// first if need be; nil when StarHash may not read them (Enable
+    /// contacts off, no access, or only some contacts shared), so cannot
+    /// tell.
+    func knowsContact(_ recipient: Recipient) async -> Bool? {
+        await loadIfAllowed()
+        guard isOn, hasLoaded, access == .authorized else { return nil }
+        return isContact(recipient)
     }
 
     static func currentAccess() -> Access {

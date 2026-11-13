@@ -310,8 +310,17 @@ public final class AutoVerify {
     /// what it failed.
     @discardableResult
     public func expireUnconfirmed(now: Date = .now) -> [Transaction] {
-        guard status(at: now) == .active, let since else { return [] }
+        guard let since = failsUnconfirmedSince(at: now) else { return [] }
         return store.expireUnconfirmed(dialledSince: since, now: now)
+    }
+
+    /// The setup's moment while auto-verify fails payments no message
+    /// confirms, which it does only while Active: those dialled since then
+    /// fail at the hour (`Transaction.failsUnconfirmed`). Nil while it
+    /// fails none. The reminders ask this too, so they promise a failure
+    /// only for a payment that will get one.
+    public func failsUnconfirmedSince(at now: Date = .now) -> Date? {
+        status(at: now) == .active ? since : nil
     }
 
     // MARK: Storage

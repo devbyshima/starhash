@@ -7,7 +7,7 @@ extension StarHashPreferences {
     /// unconfirmed payments.
     @MainActor
     static var notifications: NotificationPlan.Settings {
-        .stored(failsUnconfirmed: AppEnvironment.autoVerify.status() == .active)
+        .stored(failsUnconfirmedSince: AppEnvironment.autoVerify.failsUnconfirmedSince())
     }
 }
 

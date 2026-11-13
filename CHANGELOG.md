@@ -98,6 +98,10 @@ The first release: pay with MTN MoMo or Airtel Money without typing USSD codes, 
 
 ### Fixed
 
+- A payment reminder no longer says StarHash marked a payment failed when it did not: for a payment dialled before auto-verify was set up, which never fails for want of a message, or after auto-verify is turned off. It asks whether the payment went through instead.
+- With Enable contacts off, StarHash no longer reads your contacts to decide whether to keep where you paid a number, and lets go of the ones it had read.
+- A change to your photo, or its removal, that did not reach StarHash's server (offline, say) is sent again the next time StarHash opens, Delete All Data included, so a removed photo is deleted there. An iPhone restored from a backup keeps the key that can change or delete it, and one restored before now gives the photo a new id rather than being refused.
+- A Show My Name listing not sent again for 45 days, from a lost iPhone or a deleted app, is now deleted from StarHash's server each night, as the privacy policy says, rather than only left out of lookups.
 - A payment whose message came while the iPhone was still locked after a restart no longer shows twice, once pending and once confirmed: the message now confirms the payment once StarHash can read its history.
 - Delete All Data now takes your name off Show My Name on StarHash's server. It stayed listed there for up to 45 days, though the privacy policy says removing your numbers deletes them.
 - A payment auto-verify marked failed after an hour with no message, then confirmed by a message that came late, now says it went through, when payment notifications are on. Until now the last word was that it didn't.
