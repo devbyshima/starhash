@@ -157,7 +157,7 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
     /// the carriers' prices, for the wallet it was dialled with (`wallet`
     /// for payments saved before that was kept); money received costs
     /// nothing here.
-    public func confirmedByHand(wallet fallback: Recipient.Network) -> Transaction {
+    func confirmedByHand(wallet fallback: Recipient.Network) -> Transaction {
         var confirmed = self
         confirmed.status = .confirmed
         confirmed.failureReason = nil
@@ -169,7 +169,7 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
 
     /// Marked as failed: it did not go through, so it stays, struck
     /// through, and counts towards nothing.
-    public func markedFailed() -> Transaction {
+    func markedFailed() -> Transaction {
         var failed = self
         failed.status = .failed
         failed.fee = nil

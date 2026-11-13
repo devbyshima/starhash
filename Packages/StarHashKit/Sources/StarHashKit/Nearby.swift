@@ -11,6 +11,15 @@ import Foundation
 /// (`maximumAccuracy`), and a suggestion needs the person to be within the
 /// two fixes' uncertainty of a payment, never less than `minimumRadius`.
 public enum Nearby {
+    /// Whether a payment keeps where it was made: a merchant code always, a
+    /// number only when it is not one of the person's contacts, so paying
+    /// someone they know never records where they were. `isContact` is nil
+    /// when the contacts cannot be read: StarHash cannot tell, so a
+    /// number's place is not kept.
+    public static func remembersPlace(of recipient: Recipient, isContact: Bool?) -> Bool {
+        recipient.kind == .merchant || isContact == false
+    }
+
     /// A fix any worse than this cannot tell neighbouring tills apart.
     public static let maximumAccuracy: Double = 50
 

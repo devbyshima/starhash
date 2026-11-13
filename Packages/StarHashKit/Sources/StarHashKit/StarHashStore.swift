@@ -10,9 +10,8 @@ public final class StarHashStore {
     public private(set) var transactions: [Transaction] = []
 
     /// Bumped whenever the locations are wiped (Nearby turned off, Delete
-    /// All Data). A payment notes it when it starts locating, so a fix that
-    /// arrives after a wipe is dropped rather than written back.
-    public private(set) var locationsGeneration = 0
+    /// All Data), so a `PlaceTicket` taken before a wipe is stale.
+    @ObservationIgnored private var locationsGeneration = 0
 
     @ObservationIgnored private let fileURL: URL?
 
@@ -84,12 +83,6 @@ public final class StarHashStore {
         sortAndSave()
     }
 
-    public func update(_ transaction: Transaction) {
-        guard let index = transactions.firstIndex(where: { $0.id == transaction.id }) else { return }
-        transactions[index] = transaction
-        sortAndSave()
-    }
-
     public func delete(id: UUID) {
         transactions.removeAll { $0.id == id }
         save()
@@ -138,26 +131,28 @@ public final class StarHashStore {
             try? FileManager.default.removeItem(at: file)
         }
     }
+    /// How long after dialling the same payment again counts as a retry.
+    public static let retryWindow: TimeInterval = 5 * 60
+
 
     /// A payment just dialled from StarHash, pending until its SMS arrives.
     ///
     /// The amount stays on Pay's keypad after dialling, so a call cancelled
-    /// at the system prompt can be dialled again. With `retryWindow`, a
-    /// pending payment from StarHash to the same recipient for the same
-    /// amount, dialled less than that long ago, is taken to be that retry:
-    /// it moves to `date` instead of a second one being added. It has no fee
-    /// until the SMS confirming it gives one. `wallet` is the wallet it was
-    /// dialled with.
+    /// at the system prompt can be dialled again. A pending payment from
+    /// StarHash to the same recipient for the same amount, dialled less
+    /// than `retryWindow` ago, is taken to be that retry: it moves to `date`
+    /// instead of a second one being added. It has no fee until the SMS
+    /// confirming it gives one. `wallet` is the wallet it was dialled with.
     @discardableResult
     public func recordPayment(
         to recipient: Recipient,
         amount: Int,
         date: Date = .now,
         location: Transaction.Coordinate? = nil,
-        wallet: Recipient.Network? = nil,
-        retryWindow: TimeInterval = 0
+        wallet: Recipient.Network? = nil
     ) -> Transaction {
-        if retryWindow > 0, let index = transactions.firstIndex(where: {
+        let retryWindow = Self.retryWindow
+        if let index = transactions.firstIndex(where: {
             $0.status == .pending && $0.source == .app && $0.direction == .outgoing
                 && $0.amount == amount && $0.counterparty.kind == recipient.kind
                 && $0.counterparty.destination == recipient.destination
@@ -180,6 +175,96 @@ public final class StarHashStore {
         add(transaction)
         return transaction
     }
+    // MARK: By hand
+
+    /// The owner says a pending payment did not go through: it stays,
+    /// struck through, and counts for nothing. Only a pending one: a
+    /// confirmed payment is its wallet's word, and a failed one already is.
+    /// Returns it failed, or nil when it was not pending or is gone.
+    @discardableResult
+    public func markFailed(_ id: UUID) -> Transaction? {
+        guard let index = index(of: id), transactions[index].status == .pending else { return nil }
+        transactions[index] = transactions[index].markedFailed()
+        save()
+        return transactions[index]
+    }
+
+    /// Confirm Without Message: the owner says it went through with no
+    /// message to show, so its fee comes from `Tariff` for the wallet it
+    /// was dialled with (`fallback` for one saved before that was kept).
+    /// Returns it confirmed, or nil when it already was or is gone.
+    @discardableResult
+    public func confirmByHand(_ id: UUID, fallback: Recipient.Network) -> Transaction? {
+        guard let index = index(of: id), transactions[index].status != .confirmed else { return nil }
+        transactions[index] = transactions[index].confirmedByHand(wallet: fallback)
+        save()
+        return transactions[index]
+    }
+
+    /// A category the owner picked on the payment's page (nil for none):
+    /// a category chosen by hand, which StarHash never changes after.
+    public func chooseCategory(_ category: String?, for id: UUID) {
+        guard let index = index(of: id) else { return }
+        transactions[index].category = category
+        transactions[index].categoryChosenByHand = true
+        save()
+    }
+
+    // MARK: Categories StarHash works out
+
+    /// Names by the rules (`TransactionCategorizer`) every payment that
+    /// `awaitsCategory`, saved once for them all. Returns how many it named.
+    @discardableResult
+    public func categorizeByRules() -> Int {
+        var count = 0
+        for index in transactions.indices where transactions[index].awaitsCategory {
+            guard let category = TransactionCategorizer.category(of: transactions[index]) else { continue }
+            transactions[index].category = category.rawValue
+            count += 1
+        }
+        if count > 0 { save() }
+        return count
+    }
+
+    /// A category worked out elsewhere (the on-device model): it only fills
+    /// a gap, so one named meanwhile, by hand above all, stays. Returns
+    /// whether it was taken.
+    @discardableResult
+    public func fillCategory(_ category: TransactionCategory, for id: UUID) -> Bool {
+        guard let index = index(of: id), transactions[index].awaitsCategory else { return false }
+        transactions[index].category = category.rawValue
+        save()
+        return true
+    }
+
+    // MARK: Places
+
+    /// Leave to write where a payment was made once its fix arrives: taken
+    /// when locating starts. Nearby turned off or Delete All Data in
+    /// between makes it stale, and a late fix is dropped.
+    public struct PlaceTicket: Equatable, Sendable {
+        fileprivate let generation: Int
+    }
+
+    public func placeTicket() -> PlaceTicket {
+        PlaceTicket(generation: locationsGeneration)
+    }
+
+    /// Where a payment was made, from a fix that came after it was dialled
+    /// (`Nearby.remembersPlace` decides whether it should be kept at all).
+    /// Returns false when the ticket is stale or the payment is gone.
+    @discardableResult
+    public func attachPlace(_ place: Transaction.Coordinate, to id: UUID, ticket: PlaceTicket) -> Bool {
+        guard ticket.generation == locationsGeneration, let index = index(of: id) else { return false }
+        transactions[index].location = place
+        save()
+        return true
+    }
+
+    private func index(of id: UUID) -> Int? {
+        transactions.firstIndex { $0.id == id }
+    }
+
 
     /// Files the owner's own transfers afresh, as their numbers are first
     /// given or change: money to or from one of their numbers as

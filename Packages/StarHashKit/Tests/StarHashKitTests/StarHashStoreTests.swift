@@ -27,8 +27,8 @@ import Testing
 
     @Test func aRetriedDialReusesThePendingPayment() {
         let store = StarHashStore(fileURL: nil)
-        let first = store.recordPayment(to: pili, amount: 15_000, date: noon, retryWindow: 300)
-        let retry = store.recordPayment(to: pili, amount: 15_000, date: noon.addingTimeInterval(60), retryWindow: 300)
+        let first = store.recordPayment(to: pili, amount: 15_000, date: noon)
+        let retry = store.recordPayment(to: pili, amount: 15_000, date: noon.addingTimeInterval(60))
         #expect(store.transactions.count == 1)
         #expect(retry.id == first.id)
         #expect(retry.date == noon.addingTimeInterval(60))
@@ -36,17 +36,17 @@ import Testing
 
     @Test func aDifferentAmountOrALaterDialIsANewPayment() {
         let store = StarHashStore(fileURL: nil)
-        store.recordPayment(to: pili, amount: 15_000, date: noon, retryWindow: 300)
-        store.recordPayment(to: pili, amount: 16_000, date: noon.addingTimeInterval(60), retryWindow: 300)
-        store.recordPayment(to: pili, amount: 15_000, date: noon.addingTimeInterval(600), retryWindow: 300)
+        store.recordPayment(to: pili, amount: 15_000, date: noon)
+        store.recordPayment(to: pili, amount: 16_000, date: noon.addingTimeInterval(60))
+        store.recordPayment(to: pili, amount: 15_000, date: noon.addingTimeInterval(600))
         #expect(store.transactions.count == 3)
     }
 
     @Test func aPaymentKeepsTheWalletItWasDialledWith() throws {
         let store = StarHashStore(fileURL: nil)
-        let payment = store.recordPayment(to: john, amount: 5_000, date: noon, wallet: .airtel, retryWindow: 300)
+        let payment = store.recordPayment(to: john, amount: 5_000, date: noon, wallet: .airtel)
         #expect(payment.wallet == .airtel)
-        let retry = store.recordPayment(to: john, amount: 5_000, date: noon.addingTimeInterval(60), wallet: .mtn, retryWindow: 300)
+        let retry = store.recordPayment(to: john, amount: 5_000, date: noon.addingTimeInterval(60), wallet: .mtn)
         #expect(retry.wallet == .mtn)
 
         // A payment saved before the wallet was kept still decodes.
@@ -121,13 +121,74 @@ import Testing
         #expect(store.transactions[0].counterparty.name == "John Doe")
     }
 
-    @Test func wipingTheLocationsMovesTheGenerationOn() {
+    /// A fix that arrives after Nearby was turned off, or everything was
+    /// erased, is dropped rather than written back.
+    @Test func aPlaceFromBeforeAWipeIsDropped() {
+        let here = Transaction.Coordinate(latitude: -1.95, longitude: 30.09)
         let store = StarHashStore(fileURL: nil)
-        let start = store.locationsGeneration
+        let paid = store.recordPayment(to: pili, amount: 700, date: noon)
+        let ticket = store.placeTicket()
+        #expect(store.attachPlace(here, to: paid.id, ticket: ticket))
+        #expect(store.transaction(id: paid.id)?.location == here)
+
         store.clearLocations()
-        #expect(store.locationsGeneration == start + 1)
+        #expect(!store.attachPlace(here, to: paid.id, ticket: ticket))
+        #expect(store.transaction(id: paid.id)?.location == nil)
+        let fresh = store.placeTicket()
         store.eraseAll()
-        #expect(store.locationsGeneration == start + 2)
+        #expect(!store.attachPlace(here, to: paid.id, ticket: fresh))
+    }
+
+    @Test(arguments: [
+        (Recipient.Kind.merchant, Bool?.none, true),
+        (.merchant, true, true),
+        (.phone, false, true),
+        (.phone, true, false),
+        (.phone, nil, false),
+    ])
+    func aPlaceIsKeptForShopsAndStrangersOnly(kind: Recipient.Kind, isContact: Bool?, kept: Bool) {
+        let recipient = Recipient(name: "X", destination: kind == .phone ? "0788123456" : "020205", kind: kind)
+        #expect(Nearby.remembersPlace(of: recipient, isContact: isContact) == kept)
+    }
+
+    // MARK: By hand
+
+    @Test func onlyAPendingPaymentIsMarkedFailed() throws {
+        let store = StarHashStore(fileURL: nil)
+        let pending = store.recordPayment(to: john, amount: 700, date: noon)
+        let failed = try #require(store.markFailed(pending.id))
+        #expect(failed.status == .failed)
+        #expect(failed.failureReason == nil)
+        #expect(store.markFailed(pending.id) == nil)
+
+        let confirmed = store.recordPayment(to: pili, amount: 900, date: noon)
+        store.confirmByHand(confirmed.id, fallback: .mtn)
+        #expect(store.markFailed(confirmed.id) == nil)
+        #expect(store.transaction(id: confirmed.id)?.status == .confirmed)
+    }
+
+    @Test func confirmingByHandTakesTheTariffFeeOnce() throws {
+        let store = StarHashStore(fileURL: nil)
+        let payment = store.recordPayment(to: john, amount: 5_000, date: noon, wallet: .mtn)
+        let confirmed = try #require(store.confirmByHand(payment.id, fallback: .airtel))
+        #expect(confirmed.status == .confirmed)
+        #expect(confirmed.fee == Tariff.fee(sending: 5_000, to: john, from: .mtn))
+        #expect(store.confirmByHand(payment.id, fallback: .mtn) == nil)
+    }
+
+    /// The rules and the on-device model fill only a gap: a category chosen
+    /// by hand, even none, stays.
+    @Test func aCategoryChosenByHandIsNeverFilledIn() {
+        let store = StarHashStore(fileURL: nil)
+        let shop = Recipient(name: "Simba Supermarket", destination: "009911", kind: .merchant)
+        let chosen = store.recordPayment(to: shop, amount: 4_000, date: noon)
+        let open = store.recordPayment(to: shop, amount: 5_000, date: noon.addingTimeInterval(-3600))
+        store.chooseCategory(nil, for: chosen.id)
+        #expect(store.categorizeByRules() == 1)
+        #expect(store.transaction(id: chosen.id)?.category == nil)
+        #expect(store.transaction(id: open.id)?.category != nil)
+        #expect(!store.fillCategory(.restaurant, for: chosen.id))
+        #expect(!store.fillCategory(.restaurant, for: open.id))
     }
 
     @Test func theFeeComesOnlyFromTheSMS() {
@@ -146,10 +207,14 @@ import Testing
         #expect(silent.transactions[0].fee == nil)
     }
 
-    @Test func withoutARetryWindowEveryDialIsRecorded() {
+    /// Only a payment still pending is taken for a retry: one settled
+    /// went through or did not, and the next dial is a payment of its own.
+    @Test func aSettledPaymentIsNeverARetry() {
         let store = StarHashStore(fileURL: nil)
-        store.recordPayment(to: john, amount: 5_000, date: noon)
-        store.recordPayment(to: john, amount: 5_000, date: noon.addingTimeInterval(30))
+        let first = store.recordPayment(to: john, amount: 5_000, date: noon)
+        store.confirmByHand(first.id, fallback: .mtn)
+        let second = store.recordPayment(to: john, amount: 5_000, date: noon.addingTimeInterval(30))
+        #expect(second.id != first.id)
         #expect(store.transactions.count == 2)
     }
 
@@ -185,9 +250,8 @@ import Testing
 
     @Test func clearLocationsRemovesEveryCoordinate() {
         let store = StarHashStore(fileURL: nil)
-        var paid = store.recordPayment(to: john, amount: 700, date: noon)
-        paid.location = .init(latitude: -1.95, longitude: 30.09)
-        store.update(paid)
+        let paid = store.recordPayment(to: john, amount: 700, date: noon)
+        store.attachPlace(.init(latitude: -1.95, longitude: 30.09), to: paid.id, ticket: store.placeTicket())
         store.clearLocations()
         #expect(store.transactions.allSatisfy { $0.location == nil })
     }
@@ -386,7 +450,7 @@ import Testing
     @Test func verifyTakesBackAMessageLoggedOnItsOwn() throws {
         let store = StarHashStore(fileURL: nil)
         let payment = store.recordPayment(to: john, amount: 5_000, date: noon, wallet: .mtn)
-        store.update(payment.markedFailed())
+        store.markFailed(payment.id)
         let text = transferText(at: noon.addingTimeInterval(30))
         store.apply(try #require(CarrierSMS.parse(text)))
         #expect(store.transactions.count == 2)

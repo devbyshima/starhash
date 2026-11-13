@@ -194,10 +194,8 @@ final class StarHashNotifications {
         case Action.fail:
             // StarHash may have woken in the background just for this.
             store.reloadFromDisk()
-            guard let id = transactionID, let transaction = store.transaction(id: id) else { return }
-            if transaction.status == .pending {
-                store.update(transaction.markedFailed())
-            }
+            guard let id = transactionID else { return }
+            store.markFailed(id)
             await sync()
         case UNNotificationDefaultActionIdentifier:
             if let id = transactionID, let url = URL(string: "starhash://transaction/\(id.uuidString)") {

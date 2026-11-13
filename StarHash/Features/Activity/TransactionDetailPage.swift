@@ -231,16 +231,13 @@ struct TransactionDetailPage: View {
     /// The payment did not go through: it stays, struck through, and
     /// counts towards nothing.
     private func markFailed(_ transaction: StarHashKit.Transaction) {
-        withAnimation(.smooth(duration: 0.3)) { store.update(transaction.markedFailed()) }
+        withAnimation(.smooth(duration: 0.3)) { _ = store.markFailed(transaction.id) }
         failedCount += 1
     }
 
+    /// Picked here, so StarHash leaves it as it is from now on.
     private func setCategory(_ category: String?, of transaction: StarHashKit.Transaction) {
-        var changed = transaction
-        changed.category = category
-        // Picked here, so StarHash leaves it as it is from now on.
-        changed.categoryChosenByHand = true
-        store.update(changed)
+        store.chooseCategory(category, for: transaction.id)
     }
 
     /// Asks first, unless Don't Ask Again was chosen.

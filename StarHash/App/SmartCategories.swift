@@ -33,29 +33,22 @@ enum SmartCategories {
         running = true
         defer { running = false }
 
-        var byName: [String: [StarHashKit.Transaction]] = [:]
-        for t in store.transactions where t.direction == .outgoing && t.category == nil && !t.categoryChosenByHand && t.counterparty.kind == .merchant {
-            if let category = TransactionCategorizer.category(of: t) {
-                var named = t
-                named.category = category.rawValue
-                store.update(named)
-            } else if let name = t.counterparty.name, !name.isEmpty {
-                byName[name, default: []].append(t)
-            }
+        store.categorizeByRules()
+        guard isAvailable else { return }
+        // What the rules could not name, by the name it was paid under.
+        let byName = Dictionary(grouping: store.transactions.filter { $0.awaitsCategory && !($0.counterparty.name ?? "").isEmpty }) {
+            $0.counterparty.name ?? ""
         }
-        guard isAvailable, !byName.isEmpty else { return }
+        guard !byName.isEmpty else { return }
 
         var asked = Set(UserDefaults.standard.stringArray(forKey: askedKey) ?? [])
         for name in byName.keys.sorted() where !asked.contains(name.lowercased()) {
             guard !Task.isCancelled else { break }
             asked.insert(name.lowercased())
             guard let category = await ask(about: name) else { continue }
-            for t in byName[name] ?? [] {
-                // Changed by hand, or gone, while the model thought.
-                guard var current = store.transaction(id: t.id), current.category == nil, !current.categoryChosenByHand else { continue }
-                current.category = category.rawValue
-                store.update(current)
-            }
+            // Fills only a gap: one named by hand, or gone, while the model
+            // thought is left as it is.
+            for t in byName[name] ?? [] { store.fillCategory(category, for: t.id) }
         }
         UserDefaults.standard.set(Array(asked), forKey: askedKey)
     }
