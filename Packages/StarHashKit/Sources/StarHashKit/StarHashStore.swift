@@ -54,11 +54,10 @@ public final class StarHashStore {
     /// ones StarHash can dial again: a merchant read from an SMS without
     /// its code is left out.
     public func recentRecipients(limit: Int = 10) -> [Recipient] {
-        var seen = Set<String>()
+        var seen = Set<Recipient.Identity>()
         var result: [Recipient] = []
         for t in transactions where t.direction == .outgoing && t.counterparty.isPayable {
-            let key = t.counterparty.kind.rawValue + t.counterparty.destination
-            if seen.insert(key).inserted { result.append(t.counterparty) }
+            if seen.insert(t.counterparty.identity).inserted { result.append(t.counterparty) }
             if result.count == limit { break }
         }
         return result
@@ -131,9 +130,9 @@ public final class StarHashStore {
             try? FileManager.default.removeItem(at: file)
         }
     }
+
     /// How long after dialling the same payment again counts as a retry.
     public static let retryWindow: TimeInterval = 5 * 60
-
 
     /// A payment just dialled from StarHash, pending until its SMS arrives.
     ///
@@ -175,6 +174,7 @@ public final class StarHashStore {
         add(transaction)
         return transaction
     }
+
     // MARK: By hand
 
     /// The owner says a pending payment did not go through: it stays,
@@ -264,7 +264,6 @@ public final class StarHashStore {
     private func index(of id: UUID) -> Int? {
         transactions.firstIndex { $0.id == id }
     }
-
 
     /// Files the owner's own transfers afresh, as their numbers are first
     /// given or change: money to or from one of their numbers as

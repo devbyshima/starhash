@@ -44,7 +44,7 @@ public enum Nearby {
         from transactions: [Transaction], latitude: Double, longitude: Double, accuracy: Double, limit: Int = 3
     ) -> [Suggestion] {
         guard accuracy >= 0, accuracy <= maximumAccuracy else { return [] }
-        var best: [String: Suggestion] = [:]
+        var best: [Recipient.Identity: Suggestion] = [:]
         for t in transactions where t.direction == .outgoing && t.status != .failed && t.counterparty.isPayable {
             // A place saved before its accuracy was kept never counts: no
             // fix was checked then, and paying a contact kept one too.
@@ -52,7 +52,7 @@ public enum Nearby {
                   placeAccuracy >= 0, placeAccuracy <= maximumAccuracy else { continue }
             let distance = Self.distance(latitude, longitude, place.latitude, place.longitude)
             guard distance <= max(minimumRadius, accuracy + placeAccuracy) else { continue }
-            let key = t.counterparty.kind.rawValue + t.counterparty.destination
+            let key = t.counterparty.identity
             if var found = best[key] {
                 found.visits += 1
                 found.distance = min(found.distance, distance)
