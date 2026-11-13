@@ -90,7 +90,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 - A contact's number abroad or a landline is no longer offered for payment: it would have been dialled as an MTN number. The rule a scanned code already followed now holds everywhere.
 - The weekly and monthly summaries no longer count money moved between your own accounts as a payment ("You sent 0 RWF in 1 payment").
 - The mark in the tab bar fades to its new colour with the other icons when the appearance changes, and its triangle is outlined with the rest of it when Pay is not showing.
-- The auto-verify shortcut's action named an older build of StarHash, so Shortcuts could not find the app behind it; it now comes with the app, made for it. Shortcuts gives a shortcut it imports its own wand for an icon, so setting it up now includes choosing StarHash's icon for it in Shortcuts.
+- The auto-verify shortcut's action named an older build of StarHash, so Shortcuts could not find the app behind it; it is now made for it. Add Shortcut opens Shortcuts on it straight away again, and it arrives with StarHash's icon.
 
 - Shima's note at the end of onboarding slides up over Pay, as a sheet does, rather than appearing all at once.
 - The launch animation's mark is gone before the app shows, rather than fading out over Pay.

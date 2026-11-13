@@ -197,14 +197,7 @@ struct AutoVerificationGuide: View {
     @ViewBuilder
     private var stepList: some View {
         if step == 0 {
-            GuideStepList(steps: [
-                "Tap **Add Shortcut** below.",
-                "In Shortcuts, tap **Add Shortcut**.",
-                // A shortcut file names no app for its icon, so Shortcuts
-                // shows its wand until StarHash's is chosen by hand.
-                "Tap its name at the top, then **Choose Icon** and **StarHash**.",
-                "Come back and tap **Continue**.",
-            ])
+            GuideStepList(steps: addShortcutSteps)
         } else if step == 1 {
             GuideStepList(steps: [
                 "Tap **Open Shortcuts** below and go to **Automation**.",
@@ -358,6 +351,19 @@ struct AutoVerificationGuide: View {
                     .buttonStyle(GuideButtonStyle(prominent: true))
             }
         }
+    }
+
+    /// The iCloud link was shared with StarHash's icon chosen, and the
+    /// shortcut arrives wearing it. A shortcut file names no app for its
+    /// icon, so without a link Shortcuts shows its wand until StarHash's is
+    /// chosen by hand.
+    private var addShortcutSteps: [LocalizedStringKey] {
+        let choosesIcon: [LocalizedStringKey] = StarHashShortcut.iCloudLink == nil
+            ? ["Tap its name at the top, then **Choose Icon** and **StarHash**."]
+            : []
+        return ["Tap **Add Shortcut** below.", "In Shortcuts, tap **Add Shortcut**."]
+            + choosesIcon
+            + ["Come back and tap **Continue**."]
     }
 
     private func addShortcut() {

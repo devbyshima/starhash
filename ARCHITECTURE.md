@@ -70,7 +70,7 @@ A Cloudflare Worker with one D1 database: `/v1/photos/:id` for the photo shared 
 ## External Pieces
 
 - **The carriers:** the USSD codes and SMS formats StarHash reads are MTN Rwanda's and Airtel Rwanda's, written down in [Codes and fees](docs/codes-and-fees.md).
-- **Shortcuts:** the "StarHash SMS" shortcut, made and signed by `scripts/make_shortcut.py` for the bundle id and team and bundled in the app. A shortcut file cannot give it StarHash's icon, so auto-verify's guide has the owner choose it in Shortcuts.
+- **Shortcuts:** the "StarHash SMS" shortcut, made and signed by `scripts/make_shortcut.py` for the bundle id and team and bundled in the app, and shared from an iPhone as an iCloud link with StarHash's icon chosen (`StarHashShortcut.iCloudLinks`). The link opens Shortcuts straight away and carries the icon; a file cannot, so a build with no link falls back to the file through the share sheet and the guide has the owner choose the icon.
 - **Shipped with the app:** Space Grotesk (SIL OFL 1.1), Keyline Icons (MIT) and DiceBear's Shadows silhouettes (CC0 1.0), each listed under Licences in the app with its licence bundled.
 
 ## Tooling
@@ -113,7 +113,7 @@ Things the code relies on that are easy to break:
 - **Settings' choices** each have one default, in `Preferences`: views read them with `@AppStorage(Preferences.x)`, everything else with `Preferences.x.value()`, and neither writes a default of its own.
 - **Delete All Data** keeps the directory's record of what it last sent through the wipe, so the owner's Show My Name listing is deleted from the server after it.
 - **Text** built at run time goes through `String(starhash:)` (`String(kit:)` in the package), never `String(localized:)`, so the language chosen in Settings applies at once. There are three catalogs: the app's, the package's and the widgets'.
-- **The shortcut contract:** `ProcessCarrierSMSIntent`'s name and parameters, the bundle id and the team are written into the shared shortcut, and the app builds with `ENABLE_DEBUG_DYLIB: NO`, or Shortcuts cannot run the action.
+- **The shortcut contract:** `ProcessCarrierSMSIntent`'s name and parameters, the bundle id and the team are written into the shared shortcut, and the app builds with `ENABLE_DEBUG_DYLIB: NO`, or Shortcuts cannot run the action. The iCloud link is a copy of the shortcut as it was shared: after making the file again, share a new link.
 - **Shared sources:** `Theme.swift`, `Icons.swift` and the mark compile into the widgets too, so they hold nothing app-only.
 - **Colours** come only from `Theme.swift`.
 
