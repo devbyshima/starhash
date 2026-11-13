@@ -30,6 +30,10 @@ enum DebugLaunch {
         return store
     }
 
+    /// `-paySplitDialled`: the parts' sheet partway, its parts marked
+    /// dialled with nothing dialled (`Dialler`).
+    static var dialsNothing: Bool { arguments.contains("-paySplitDialled") }
+
     /// `-nearbyHere`: Pay acts as if the phone were at Kigali Heights, for
     /// screenshots of the picker's Nearby section.
     static var nearbyFix: LocationFix? {

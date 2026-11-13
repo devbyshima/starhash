@@ -991,7 +991,7 @@ private struct ContactsAccessCard: View {
                     Image(symbol: "person.crop.circle.badge.questionmark")
                         .foregroundStyle(Color.starhashPrimaryText)
                 }
-                Button("Open Settings") { USSDDialer.openSettings() }
+                Button("Open Settings") { SettingsAppLink.open() }
                     .buttonStyle(.starhashCapsule(height: 36, horizontalPadding: 16))
             }
             .padding(16)

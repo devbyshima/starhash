@@ -26,6 +26,10 @@ _Avoid_: network, account
 Money moved between the owner's own accounts (their two SIMs, or MoMo's virtual card): neither spent nor received. Filed under Your Own Accounts.
 _Avoid_: self-transfer, internal transfer
 
+**Paying**:
+Sending a payment to a recipient, from the amount to the code dialled: refused for a recipient that cannot be paid, recorded before it is dialled, whole or as a split payment, with the place it was made for Nearby (`Paying`). Dialling a code that pays no one (Buy's codes, Balance) is not paying.
+_Avoid_: checkout, transfer
+
 **Split payment**:
 One payment sent as several smaller ones because together they cost less in fees (MTN's fee jumps from 250 to 1,500 past 150,000). Each is a **part**, its own transaction with its own SMS. Offered only with Split large payments on.
 _Avoid_: instalment, chunk

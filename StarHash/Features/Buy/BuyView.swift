@@ -13,6 +13,7 @@ import SwiftUI
 /// asks for the amount and the PIN, so nothing is logged in Activity.
 struct BuyView: View {
     @Environment(USSDShortcutList.self) private var shortcuts
+    @Environment(Dialler.self) private var dialler
 
     /// The sheet open: a new code, or one being edited.
     @State private var editing: ShortcutDraft?
@@ -30,9 +31,6 @@ struct BuyView: View {
         case dial(String)
         case delete(USSDShortcut)
     }
-    /// A code the system would not dial (the simulator, an iPad), shown in
-    /// an alert so it can be dialled by hand.
-    @State private var undialledCode: String?
     @State private var deletedCount = 0
     @State private var pinnedCount = 0
     /// Eight pinned already, when one more was asked for.
@@ -123,19 +121,7 @@ struct BuyView: View {
         ) {
             if let codeToDelete { delete(codeToDelete) }
         }
-        .alert(
-            "Can't dial on this device",
-            isPresented: Binding(get: { undialledCode != nil }, set: { if !$0 { undialledCode = nil } }),
-            presenting: undialledCode
-        ) { code in
-            Button("Copy Code") {
-                UIPasteboard.general.string = code
-                UINotificationFeedbackGenerator().notificationOccurred(.success)
-            }
-            Button("OK", role: .cancel) {}
-        } message: { code in
-            Text("Dial \(code) on your phone.")
-        }
+        .dialFailureAlert()
         #if DEBUG
         // -buyNew: the editor for a new code; -buyEdit: editing the first;
         // -buyDetails: the first code's details.
@@ -418,11 +404,7 @@ struct BuyView: View {
     }
 
     private func dial(_ code: String) {
-        Task {
-            if await !USSDDialer.dial(code) {
-                undialledCode = code
-            }
-        }
+        dialler.dial(code)
     }
 }
 

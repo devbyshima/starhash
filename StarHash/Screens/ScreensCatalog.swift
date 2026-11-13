@@ -260,6 +260,8 @@ private extension View {
             .environment(ScreensSample.store)
             .environment(ScreensSample.owner)
             .environment(ScreensSample.autoVerify)
+            .environment(ScreensSample.paying)
+            .environment(AppEnvironment.dialler)
             .environment(AppRouter())
             .environment(ScreensSample.shortcuts)
             .tint(Color.starhashPrimaryText)
@@ -291,6 +293,12 @@ enum ScreensSample {
 
     /// Auto-verify set up and proven by a message, in defaults of its own,
     /// so Settings shows it working.
+    /// Paying over the sample store, dialling nothing.
+    static let paying = Paying(
+        store: store, owner: owner,
+        dial: { _ in }, locate: { _ in nil }, isContact: { _ in nil }
+    )
+
     static let autoVerify: AutoVerify = {
         let autoVerify = AutoVerify(store: store, defaults: defaults("ScreensAutoVerify"))
         autoVerify.receive(AutoVerificationSample.message, sender: nil)

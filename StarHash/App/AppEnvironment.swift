@@ -28,6 +28,18 @@ enum AppEnvironment {
     /// payments, and the expiry of those they do not.
     static let autoVerify = AutoVerify(store: store)
 
+    /// Every code StarHash dials, and the alert for one it could not.
+    static let dialler = Dialler()
+
+    /// Paying someone: Pay, Pay Again, a scanned code and the parts' sheet.
+    static let paying = Paying(
+        store: store,
+        owner: owner,
+        dial: { dialler.dial($0) },
+        locate: { await PaymentLocation.forPaying($0) },
+        isContact: { await PayContacts.shared.knowsContact($0) }
+    )
+
     /// Buy's codes. Debug launches with -inMemory start from the defaults
     /// in a throwaway list.
     static let shortcuts: USSDShortcutList = {
@@ -207,7 +219,7 @@ final class AppRouter {
     /// starhash://whatsnew?page=<n> shows What's New.
     func handle(_ url: URL) {
         if url.scheme == "tel" {
-            Task { _ = await USSDDialer.open(url) }
+            AppEnvironment.dialler.open(url)
             return
         }
         guard let link = StarHashLink(url: url) else { return }
@@ -224,9 +236,7 @@ final class AppRouter {
         case .scan:
             scan()
         case .dial(let code):
-            if let tel = USSD.telURL(for: code) {
-                Task { _ = await USSDDialer.open(tel) }
-            }
+            AppEnvironment.dialler.dial(code)
         case .whatsNew(let page):
             #if DEBUG
             whatsNewPreviewPage = page
