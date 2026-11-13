@@ -2553,18 +2553,18 @@
         }
       }
     },
-    "Free and open source": {
+    "Free, with public source code": {
       "localizations": {
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ni ubuntu, kandi kode yayo irafunguye"
+            "value": "Ni ubuntu, kode yayo iri ku mugaragaro"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gratuit et open source"
+            "value": "Gratuit, avec un code source public"
           }
         }
       }
@@ -3621,18 +3621,18 @@
         }
       }
     },
-    "No account, no servers and no tracking. Everything stays on your iPhone.": {
+    "No account and no tracking. Your payments stay on your iPhone.": {
       "localizations": {
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nta konti, nta seriveri, kandi nta gukurikiranwa. Byose biguma kuri iPhone yawe."
+            "value": "Nta konti, nta gukurikiranwa. Ubwishyu bwawe buguma kuri iPhone yawe."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pas de compte, pas de serveur, pas de pistage. Tout reste sur votre iPhone."
+            "value": "Pas de compte, pas de pistage. Vos paiements restent sur votre iPhone."
           }
         }
       }
@@ -6112,18 +6112,18 @@
         }
       }
     },
-    "StarHash is free, and its code is open for anyone to read and improve.": {
+    "StarHash is free, and its source code is public for anyone to read.": {
       "localizations": {
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "StarHash ni ubuntu, kandi kode yayo ifunguriye buri wese kuyisoma no kuyinoza."
+            "value": "StarHash ni ubuntu, kandi kode yayo iri ku mugaragaro: buri wese ashobora kuyisoma."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "StarHash est gratuit, et son code est ouvert à tous pour le lire et l'améliorer."
+            "value": "StarHash est gratuit, et son code source est public : chacun peut le lire."
           }
         }
       }
