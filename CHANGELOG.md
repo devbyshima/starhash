@@ -6,6 +6,10 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ## [Unreleased]
 
+## [1.0.0] - Unreleased
+
+The first release: pay with MTN MoMo or Airtel Money without typing USSD codes, and keep every payment in one place.
+
 ### Added
 
 - The Report, rebuilt after reference designs and kept minimal. It opens with one sentence about the period: what you spent more on than usual (the same days of up to three periods before), how many fewer payments would get you back on track and what that would save; or that you spent less than usual. Then Total Spent with how it compares, the average a day, payments, money received and fees; Categories as a ring with each category's colour and icon, and Show More; your largest payments, each with its recipient's photo, initials or shop as in Transactions (a tap opens one); Payment Types as glass orbs for shops, people and what was bought, which drift and, at a tap, bring one to the middle with its figures; and By Day, a calendar of the period with a small icon under each day you spent on and your biggest day boxed (a tap on a day says what it came to; a year is twelve rows of dots, darker the more you spent). Its header is the back button and More, which holds the period (week, month or year), earlier and later periods, the category to narrow it to, and Export, which shares it as a PDF. The cards are outlined, as Settings' are, each with its name inside at the top, one large sentence, and a grey line of detail at its foot; a long summary steps down a size rather than fill the screen, and no word is left alone on its last line.
@@ -35,6 +39,15 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 - Auto-verify reads MoMoAdvance's messages: when MTN's overdraft pays for a payment, its access fee joins that payment's fee, on a row of its own in the payment's details.
 - Verify replaces Mark as Confirmed: paste the wallet's message for a payment, and StarHash confirms it (or marks it failed) only if the message is that payment's, with its real fee, reference and balance. Confirm Without Message stays as the last resort.
 - Support on Ko-fi, in Settings' More, and Buy Shima a coffee in the developer's note, each opening Shima's Ko-fi page in the browser. StarHash stays free.
+- Pay: type an amount, pick a contact, a recent recipient, a number or a merchant code, and StarHash dials the wallet's code. The PIN is only ever typed into the wallet's own prompt.
+- MTN MoMo and Airtel Money, chosen during onboarding and switched from Pay.
+- Buy: the codes dialled often (pending approvals, cash out, bundles), one tap each, with up to eight pinned to the top.
+- Nearby: an opt-in suggestion of the numbers and codes paid at the place you are in.
+- Activity: every payment by day, week, month or year, with a chart, search and each payment's details.
+- Auto-verify: a Shortcuts automation passes the wallet's SMS to StarHash, which confirms each payment with its fee, reference and new balance, and fails one no message confirms within the hour.
+- Notifications: reminders for pending payments, word of confirmed and received money, and weekly and monthly summaries, each chosen in Settings.
+- Face ID lock, an Appearance setting (System, Dark or Light), and Shortcuts and Siri actions.
+- No account and no tracking: payments stay on the iPhone and never reach StarHash's small server.
 
 ### Changed
 
@@ -101,25 +114,6 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 - Onboarding sets up auto-verify's shortcut and automation again, on its last screens, a replay included, instead of skipping them when auto-verify had been set up before.
 - This Week runs Monday to Sunday and holds all of the week's payments, today's included, whatever region the iPhone is set to; on a Sunday it held only that day where weeks start on Sunday.
 - Onboarding's auto-verify screen keeps Set Up level with Continue on the screens before it.
-
-## [1.0.0] - Unreleased
-
-The first release: pay with MTN MoMo or Airtel Money without typing USSD codes, and keep every payment in one place.
-
-### Added
-
-- Pay: type an amount, pick a contact, a recent recipient, a number or a merchant code, and StarHash dials the wallet's code. The PIN is only ever typed into the wallet's own prompt.
-- MTN MoMo and Airtel Money, chosen during onboarding and switched from Pay.
-- Buy: the codes dialled often (pending approvals, cash out, bundles), one tap each, with up to eight pinned to the top.
-- Nearby: an opt-in suggestion of the numbers and codes paid at the place you are in.
-- Activity: every payment by day, week, month or year, with a chart, search and each payment's details.
-- Auto-verify: a Shortcuts automation passes the wallet's SMS to StarHash, which confirms each payment with its fee, reference and new balance, and fails one no message confirms within the hour.
-- Notifications: reminders for pending payments, word of confirmed and received money, and weekly and monthly summaries, each chosen in Settings.
-- Face ID lock, an Appearance setting (System, Dark or Light), and Shortcuts and Siri actions.
-- No account, no server and no tracking: everything stays on the iPhone.
-
-### Fixed
-
 - The auto-verify guide has a step of its own for making the automation in Shortcuts (the one the shared shortcut was meant to bring on iOS 27 never appeared), and auto-verify waits for a real message through it before failing any payment on its own, so a missing automation no longer fails payments that went through.
 - Auto-verify reads more MTN MoMo messages: payments through MoMo's partners (airtime, banks, savings) under the partner's own name, transfers whose message leaves out the number, and refunds.
 
