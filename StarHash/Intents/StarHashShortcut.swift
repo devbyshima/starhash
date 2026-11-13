@@ -7,24 +7,28 @@ import UIKit
 /// (when a message containing RWF arrives, which every M-Money and
 /// AirtelMoney message does, run immediately) is made by hand, as the
 /// guide shows: the one written into the shared file for iOS 27 never
-/// appeared on a real iPhone. It comes from a signed file in the bundle
-/// (StarHash/Resources/StarHash SMS.shortcut, made by
-/// scripts/make_shortcut.py for this app's bundle id and team) through the
-/// share sheet, Shortcuts opening its Add Shortcut screen; or from an
-/// iCloud link for the bundle id, once one is shared.
+/// appeared on a real iPhone. It comes from an iCloud link for the bundle
+/// id, which opens Shortcuts on its Add Shortcut screen at once; a build
+/// with no link (another bundle id) falls back to the signed file in the
+/// bundle (StarHash/Resources/StarHash SMS.shortcut, made by
+/// scripts/make_shortcut.py for the bundle id and team) through the share
+/// sheet.
 @MainActor
 enum StarHashShortcut {
     /// The name the shortcut is installed under, and run by.
     static let name = AutoVerificationSample.shortcutName
 
-    /// The shared shortcut for each build's bundle id (Share › Copy iCloud
-    /// Link in Shortcuts on iOS 27), made by scripts/make_shortcut.py with
-    /// that id: its action names the app by bundle id and team, and
-    /// Shortcuts only runs it when they are the app's on that iPhone. Share
-    /// it again after changing the shortcut: a link is a copy of the
-    /// shortcut as it was when shared. Neither a link nor the file can give
-    /// the shortcut StarHash's icon; the guide has it chosen in Shortcuts.
-    private static let iCloudLinks: [String: URL] = [:]
+    /// The shared shortcut for each build's bundle id: the bundled file
+    /// added on an iPhone, StarHash's icon chosen for it (Choose Icon, Apps,
+    /// StarHash), then Share › Copy iCloud Link. Its action names the app
+    /// by bundle id and team, and Shortcuts only runs it when they are the
+    /// app's on that iPhone. The link carries the chosen icon, which the
+    /// file cannot, so the shortcut arrives with StarHash's logo (iOS 27,
+    /// 2026-11-13). Share it again after changing the shortcut: a link is a
+    /// copy of the shortcut as it was when shared.
+    private static let iCloudLinks: [String: URL] = [
+        "com.devbyshima.starhash": URL(string: "https://www.icloud.com/shortcuts/eaf3526c8479442e862b379ab5161883")!,
+    ]
 
     /// This build's link. No fallback to another build's: October's link
     /// named the old id and team (com.fulltimestudio.starhash, 7WHQR6L96K),
