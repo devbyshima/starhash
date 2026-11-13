@@ -101,7 +101,7 @@ Work goes on `main`, unfinished work behind a `FeatureFlag`. `./scripts/build.sh
 
 Things the code relies on that are easy to break:
 
-- **Money:** an amount is always positive whole RWF; the direction gives the sign. A failed payment counts for nothing, a pending one counts, money moved between the owner's own accounts is neither spent nor received, and a fee counts only on a confirmed payment. `ActivitySummary.totals` holds that rule; `buckets`, `NotificationPlan`'s summaries and `SpendingReport` follow it.
+- **Money:** an amount is always positive whole RWF; the direction gives the sign. A failed payment counts for nothing, a pending one counts, money moved between the owner's own accounts is neither spent nor received, and a fee counts only on a confirmed payment. `Transaction.counts`, `countsAsSpent` and `countedFee` hold that rule; `ActivitySummary`, `SpendingReport` and `NotificationPlan` ask them and never filter for it themselves.
 - **Fees** come only from the SMS, or from `Tariff` when a payment is confirmed by hand. MoMoAdvance's access fee is kept apart and added on top.
 - **Matching:** a message applied twice is caught by its reference or its moment. A payment failed for want of a message stays open to a late one; one failed by hand is never revived. A category chosen by hand is never changed.
 - **Dialling:** only an `isPayable` recipient is dialled: a Rwandan mobile number or a merchant code. iOS dials on the default voice line; StarHash cannot choose the SIM.

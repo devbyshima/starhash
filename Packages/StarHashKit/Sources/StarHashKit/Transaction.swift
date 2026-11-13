@@ -129,6 +129,22 @@ public struct Transaction: Codable, Identifiable, Hashable, Sendable {
     /// The wallet's own fee, without MoMoAdvance's.
     public var walletFee: Int? { fee.map { $0 - (accessFee ?? 0) } }
 
+    // MARK: What counts
+
+    /// Whether it counts in the owner's totals at all. A failed payment
+    /// moved no money. A pending one counts: it was dialled, and most go
+    /// through. Money moved between the owner's own accounts is neither
+    /// spent nor received. Every total, chart, report and summary asks
+    /// this, so the rule lives here once.
+    public var counts: Bool { status != .failed && !isOwnTransfer }
+
+    /// Money that counts as spent: an outgoing payment that counts.
+    public var countsAsSpent: Bool { direction == .outgoing && counts }
+
+    /// The fee it counts for: only a confirmed payment's, by SMS or from
+    /// `Tariff` when confirmed by hand. A pending payment has none yet.
+    public var countedFee: Int { countsAsSpent && status == .confirmed ? fee ?? 0 : 0 }
+
     /// `fee` for a payment the wallet charged `walletFee` for, with
     /// MoMoAdvance's access fee on top when the overdraft paid for it.
     func fee(adding walletFee: Int?) -> Int? {

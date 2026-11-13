@@ -161,6 +161,36 @@ struct ActivitySummaryTests {
         #expect(totals.received == 0)
     }
 
+    /// The one rule every total, chart, report and summary asks.
+    @Test(arguments: [
+        // status, direction, own transfer, counts, spent, fee counted
+        (Transaction.Status.confirmed, Transaction.Direction.outgoing, false, true, true, 100),
+        (.pending, .outgoing, false, true, true, 0),
+        (.failed, .outgoing, false, false, false, 0),
+        (.confirmed, .incoming, false, true, false, 0),
+        (.failed, .incoming, false, false, false, 0),
+        (.confirmed, .outgoing, true, false, false, 0),
+        (.confirmed, .incoming, true, false, false, 0),
+        (.pending, .outgoing, true, false, false, 0),
+    ])
+    func whatCounts(
+        status: Transaction.Status, direction: Transaction.Direction, ownTransfer: Bool,
+        counts: Bool, spent: Bool, fee: Int
+    ) {
+        var t = Self.tx(1000, direction, fee: 100, at: Self.now, status: status)
+        if ownTransfer { t.category = TransactionCategory.ownAccounts.rawValue }
+        #expect(t.counts == counts)
+        #expect(t.countsAsSpent == spent)
+        #expect(t.countedFee == fee)
+    }
+
+    @Test func ownTransfersStayOffTheChart() {
+        var topUp = Self.tx(2000, at: Self.now)
+        topUp.category = TransactionCategory.ownAccounts.rawValue
+        let buckets = ActivitySummary.buckets(for: [topUp, Self.tx(700, at: Self.now)], period: .week, now: Self.now, calendar: Self.calendar, locale: Self.locale)
+        #expect(buckets.reduce(0) { $0 + $1.total } == 700)
+    }
+
     // MARK: List
 
     @Test func groupsByDayNewestFirst() {
