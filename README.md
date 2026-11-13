@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="docs/images/icon.svg" width="96" alt="StarHash" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/icon-dark.png" />
+    <img src="docs/images/icon.png" width="96" alt="StarHash" />
+  </picture>
 </p>
 
 <h1 align="center">StarHash</h1>
@@ -74,9 +77,9 @@ More in [Privacy](docs/privacy.md).
 
 | Pay | Transactions | Report |
 | :---: | :---: | :---: |
-| <img src="docs/images/pay.png" width="100%" alt="Pay: an amount of 5,000 on the keypad" /> | <img src="docs/images/activity.png" width="100%" alt="Transactions: this week's spending and today's payments" /> | <img src="docs/images/report.png" width="100%" alt="Report: the month's total, its average and top categories" /> |
-| **A payment** | **Buy** | **Key metrics** |
-| <img src="docs/images/transaction.png" width="100%" alt="A confirmed merchant payment with its fee and reference" /> | <img src="docs/images/buy.png" width="100%" alt="Buy: saved USSD codes, each with its call button" /> | <img src="docs/images/report-metrics.png" width="100%" alt="Report in dark mode: payment types and key metrics" /> |
+| <img src="docs/images/pay.png" width="100%" alt="Pay: an amount of 5,000 on the keypad" /> | <img src="docs/images/activity.png" width="100%" alt="Transactions in dark mode: this week's spending chart and November's payments" /> | <img src="docs/images/report.png" width="100%" alt="Report: the month's summary sentence, total spent and categories" /> |
+| **A payment** | **Buy** | **Payment types** |
+| <img src="docs/images/transaction.png" width="100%" alt="A confirmed merchant payment with its category, code and fee" /> | <img src="docs/images/buy.png" width="100%" alt="Buy in dark mode: two pinned codes as tiles, the rest with call buttons" /> | <img src="docs/images/report-types.png" width="100%" alt="Report in dark mode: payment types as orbs and the month's biggest day" /> |
 
 <br>
 

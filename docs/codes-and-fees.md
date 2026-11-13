@@ -37,8 +37,8 @@ Buy comes with four codes. Each opens a menu that asks for the amount and your P
 | --- | --- |
 | `*182*7*1#` | Pending approvals: payments waiting for your PIN, such as a shop's or Irembo's request |
 | `*182*7*2#` | Cash out: start a withdrawal, which MTN asks for before an agent's prompt |
-| `*154*0#` | Gwamon' Pack: MTN's minutes and data, for 7 days |
 | `*182*3*8#` | Airport parking: pay a Kigali airport parking ticket |
+| `*182*2*6#` | MTN Virtual Card: top up, offload or see MoMo's virtual card |
 
 These are MTN codes, shown whichever wallet you use. You can add your own: a code must start with `*` or `#`, end with `#`, and hold only digits, `*` and `#`.
 
