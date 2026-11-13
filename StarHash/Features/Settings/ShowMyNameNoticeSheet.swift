@@ -1,3 +1,4 @@
+import StarHashKit
 import SwiftUI
 
 /// Shown once to owners who set StarHash up before Show My Name came, since
@@ -6,7 +7,7 @@ import SwiftUI
 /// owners are told on onboarding's number page instead.
 struct ShowMyNameNoticeSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @AppStorage(PreferenceKey.showMyName) private var showMyName = true
+    @AppStorage(Preferences.showMyName) private var showMyName: Bool
     @State private var height: CGFloat = 400
 
     private var points: [(symbol: String, text: String)] {

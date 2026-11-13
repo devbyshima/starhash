@@ -1,5 +1,5 @@
 import StarHashKit
-import Foundation
+import SwiftUI
 
 /// UserDefaults keys, used with @AppStorage. One place, so every screen
 /// reads and writes the same key.
@@ -14,10 +14,18 @@ enum PreferenceKey {
     /// The marketing version that last launched, so What's New shows once
     /// after an update (`WhatsNewLaunch`).
     static let lastRunVersion = "lastRunVersion"
-    static let saveTransactions = "saveTransactions"
-    static let enableContacts = "enableContacts"
-    static let nearbyLocation = "nearbyLocation"
-    static let saveRecents = "saveRecents"
+}
+
+extension AppStorage {
+    /// A choice in Settings, under its key and with its one default
+    /// (`Preferences`): `@AppStorage(Preferences.enableContacts) var on: Bool`.
+    init(_ preference: Preference<Bool>) where Value == Bool {
+        self.init(wrappedValue: preference.defaultValue, preference.key)
+    }
+
+    init(_ preference: Preference<Int>) where Value == Int {
+        self.init(wrappedValue: preference.defaultValue, preference.key)
+    }
 }
 
 /// The language StarHash speaks, chosen in Settings rather than the

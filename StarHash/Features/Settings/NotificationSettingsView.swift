@@ -9,16 +9,16 @@ import UserNotifications
 struct NotificationSettingsView: View {
     @Environment(\.scenePhase) private var scenePhase
 
-    @AppStorage(PreferenceKey.notifyPaymentReminders) private var paymentReminders = true
-    @AppStorage(PreferenceKey.paymentReminderDelay) private var reminderDelay = NotificationPlan.defaultReminderDelay
-    @AppStorage(PreferenceKey.notifyConfirmedPayments) private var confirmedPayments = true
-    @AppStorage(PreferenceKey.notifyMoneyReceived) private var moneyReceived = true
-    @AppStorage(PreferenceKey.notifyWeeklySummary) private var weeklySummary = true
-    @AppStorage(PreferenceKey.weeklySummaryDay) private var weeklyDay = NotificationPlan.defaultWeeklyDay
-    @AppStorage(PreferenceKey.notifyMonthlySummary) private var monthlySummary = true
-    @AppStorage(PreferenceKey.summaryHour) private var summaryHour = NotificationPlan.defaultSummaryHour
-    @AppStorage(PreferenceKey.notificationAmounts) private var showsAmounts = true
-    @AppStorage(PreferenceKey.notificationSound) private var sound = true
+    @AppStorage(Preferences.paymentReminders) private var paymentReminders: Bool
+    @AppStorage(Preferences.reminderDelay) private var reminderDelay: Int
+    @AppStorage(Preferences.confirmedPayments) private var confirmedPayments: Bool
+    @AppStorage(Preferences.moneyReceived) private var moneyReceived: Bool
+    @AppStorage(Preferences.weeklySummary) private var weeklySummary: Bool
+    @AppStorage(Preferences.weeklySummaryDay) private var weeklyDay: Int
+    @AppStorage(Preferences.monthlySummary) private var monthlySummary: Bool
+    @AppStorage(Preferences.summaryHour) private var summaryHour: Int
+    @AppStorage(Preferences.showsAmounts) private var showsAmounts: Bool
+    @AppStorage(Preferences.notificationSound) private var sound: Bool
     @Environment(Owner.self) private var owner
     private var ownWallets: OwnerWallets { owner.wallets }
     @Environment(AutoVerify.self) private var autoVerify

@@ -51,9 +51,6 @@ public final class AutoVerify {
         static let shortcutRanAt = "lastVerifiedAt"
         static let lastMessageAt = "lastMessageAt"
         static let since = "autoVerifySince"
-        /// Settings' switches a message obeys, kept by the app.
-        static let saveTransactions = "saveTransactions"
-        static let scamWarnings = "scamWarnings"
     }
 
     /// What one message did (`receive`).
@@ -192,8 +189,8 @@ public final class AutoVerify {
         // before failing any payment on its own. Bank texts count too: the
         // automation runs for every message with RWF in it.
         messageArrived(at: now)
-        guard status(at: now) != .off, preference(Key.saveTransactions) else { return .ignored }
-        if preference(Key.scamWarnings), let warning = ScamCheck.check(message, sender: sender) {
+        guard status(at: now) != .off, Preferences.saveTransactions.value(in: defaults) else { return .ignored }
+        if Preferences.scamWarnings.value(in: defaults), let warning = ScamCheck.check(message, sender: sender) {
             return .scam(warning)
         }
         let outcome: Outcome
@@ -214,11 +211,6 @@ public final class AutoVerify {
         // Awake anyway: any payment past its hour fails now too.
         expireUnconfirmed(now: now)
         return outcome
-    }
-
-    /// A Settings switch, on unless turned off.
-    private func preference(_ key: String) -> Bool {
-        defaults.object(forKey: key) as? Bool ?? true
     }
 
     // MARK: The setup's check

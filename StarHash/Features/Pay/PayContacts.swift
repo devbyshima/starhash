@@ -190,7 +190,7 @@ extension Recipient {
     /// the name the owner chose; otherwise `displayName`.
     @MainActor
     var shownName: String {
-        if StarHashPreferences.enableContacts, let saved = PayContacts.shared.contactName(for: self) {
+        if Preferences.enableContacts.value(), let saved = PayContacts.shared.contactName(for: self) {
             return saved
         }
         return displayName

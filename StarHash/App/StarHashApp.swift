@@ -29,7 +29,7 @@ struct StarHashApp: App {
             UserDefaults.standard.set(appearance, forKey: PreferenceKey.appearance)
         }
         if DebugLaunch.arguments.contains("-nearbyHere") {
-            UserDefaults.standard.set(true, forKey: PreferenceKey.nearbyLocation)
+            UserDefaults.standard.set(true, forKey: Preferences.nearbyLocation.key)
         }
         let owner = AppEnvironment.owner
         // -profile: a name and number, for the QR code's screens.

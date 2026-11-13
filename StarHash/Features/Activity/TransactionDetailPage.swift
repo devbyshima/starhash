@@ -19,8 +19,8 @@ struct TransactionDetailPage: View {
     @Environment(StarHashStore.self) private var store
     @Environment(AppRouter.self) private var router
 
-    @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
-    @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
+    @AppStorage(Preferences.enableContacts) private var enableContacts: Bool
+    @AppStorage(Preferences.confirmDeletes) private var confirmDeletes: Bool
     @State private var transactionToDelete: StarHashKit.Transaction?
     @State private var isVerifying = false
     @State private var feedbackCount = 0

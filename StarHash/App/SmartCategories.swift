@@ -29,7 +29,7 @@ enum SmartCategories {
     /// Fills in what it can: by the rules at once, then by the model, a
     /// few names at a time, while StarHash is open.
     static func run(on store: StarHashStore) async {
-        guard StarHashPreferences.smartCategories, !running else { return }
+        guard Preferences.smartCategories.value(), !running else { return }
         running = true
         defer { running = false }
 

@@ -102,7 +102,7 @@ struct AutoVerifyReceiveTests {
         #expect(warning.reason == .unofficialSender)
         #expect(store.transactions.isEmpty)
 
-        defaults.set(false, forKey: "scamWarnings")
+        defaults.set(false, forKey: Preferences.scamWarnings.key)
         guard case .added = autoVerify.receive(Self.received, sender: "+250 788 555 123", at: Self.now) else {
             Issue.record("not logged with warnings off"); return
         }
@@ -111,7 +111,7 @@ struct AutoVerifyReceiveTests {
     @Test func withTransactionsNotKeptEveryMessageIsIgnored() {
         let defaults = Self.defaults()
         let (autoVerify, store) = Self.autoVerify(defaults: defaults)
-        defaults.set(false, forKey: "saveTransactions")
+        defaults.set(false, forKey: Preferences.saveTransactions.key)
         #expect(autoVerify.receive(Self.received, sender: "M-Money", at: Self.now) == .ignored)
         #expect(store.transactions.isEmpty)
     }

@@ -84,6 +84,7 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Fixed
 
+- Delete All Data now takes your name off Show My Name on StarHash's server. It stayed listed there for up to 45 days, though the privacy policy says removing your numbers deletes them.
 - A payment auto-verify marked failed after an hour with no message, then confirmed by a message that came late, now says it went through, when payment notifications are on. Until now the last word was that it didn't.
 - A contact's number abroad or a landline is no longer offered for payment: it would have been dialled as an MTN number. The rule a scanned code already followed now holds everywhere.
 - The weekly and monthly summaries no longer count money moved between your own accounts as a payment ("You sent 0 RWF in 1 payment").

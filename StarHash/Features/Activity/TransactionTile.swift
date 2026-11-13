@@ -12,7 +12,7 @@ struct TransactionTile: View {
     let transaction: StarHashKit.Transaction
     var size: CGFloat = 44
 
-    @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
+    @AppStorage(Preferences.enableContacts) private var enableContacts: Bool
 
     var body: some View {
         Group {

@@ -32,7 +32,7 @@ struct OnboardingView: View {
     let onFinish: () -> Void
 
     @Environment(Owner.self) private var owner
-    @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
+    @AppStorage(Preferences.nearbyLocation) private var nearbyLocation: Bool
     @AppStorage(PreferenceKey.hasSeenDeveloperNote) private var hasSeenDeveloperNote = false
     /// The screens are `FirstRun.Screen`'s, in its order. Both wallets'
     /// messages can be read, so everyone sees auto-verify and its setup.

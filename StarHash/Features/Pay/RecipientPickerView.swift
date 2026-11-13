@@ -31,9 +31,9 @@ struct RecipientPickerView: View {
     @Environment(StarHashStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @Environment(\.floatingBarBottom) private var floatingBarBottom
-    @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
-    @AppStorage(PreferenceKey.saveRecents) private var saveRecents = true
-    @AppStorage(PreferenceKey.nearbyLocation) private var nearbyEnabled = false
+    @AppStorage(Preferences.enableContacts) private var enableContacts: Bool
+    @AppStorage(Preferences.saveRecents) private var saveRecents: Bool
+    @AppStorage(Preferences.nearbyLocation) private var nearbyEnabled: Bool
     /// The fix the Nearby section is built from. Taken only until the
     /// list is first touched: a section appearing above rows a finger is
     /// already on would push the wrong one under it.

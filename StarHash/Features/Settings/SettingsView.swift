@@ -75,9 +75,9 @@ private struct SettingsRootList: View {
     @Environment(AppRouter.self) private var router
     @Environment(USSDShortcutList.self) private var shortcuts
 
-    @AppStorage(PreferenceKey.saveTransactions) private var saveTransactions = true
-    @AppStorage(PreferenceKey.scamWarnings) private var scamWarnings = true
-    @AppStorage(PreferenceKey.smartCategories) private var smartCategories = true
+    @AppStorage(Preferences.saveTransactions) private var saveTransactions: Bool
+    @AppStorage(Preferences.scamWarnings) private var scamWarnings: Bool
+    @AppStorage(Preferences.smartCategories) private var smartCategories: Bool
     @AppStorage(PreferenceKey.appLanguage) private var appLanguage = AppLanguage.system.rawValue
     @Environment(Owner.self) private var owner
     private var ownWallets: OwnerWallets { owner.wallets }
@@ -86,15 +86,15 @@ private struct SettingsRootList: View {
     @FocusState private var editsSecondNumber: Bool
     /// Going back to one SIM with two numbers in: which one stays.
     @State private var choosesSIMToKeep = false
-    @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
-    @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
-    @AppStorage(PreferenceKey.saveRecents) private var saveRecents = true
-    @AppStorage(PreferenceKey.showMyName) private var showMyName = true
-    @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
+    @AppStorage(Preferences.enableContacts) private var enableContacts: Bool
+    @AppStorage(Preferences.nearbyLocation) private var nearbyLocation: Bool
+    @AppStorage(Preferences.saveRecents) private var saveRecents: Bool
+    @AppStorage(Preferences.showMyName) private var showMyName: Bool
+    @AppStorage(Preferences.confirmDeletes) private var confirmDeletes: Bool
     @AppStorage(PreferenceKey.defaultPage) private var defaultPage = AppTab.pay.rawValue
     @AppStorage(PreferenceKey.appearance) private var appearance = AppAppearance.system
     @Environment(AutoVerify.self) private var autoVerify
-    @AppStorage(PreferenceKey.appLock) private var appLock = false
+    @AppStorage(Preferences.appLock) private var appLock: Bool
 
     @State private var confirmsDeleteAll = false
     @State private var exportDocument: BackupDocument?

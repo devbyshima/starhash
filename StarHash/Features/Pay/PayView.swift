@@ -9,8 +9,8 @@ import SwiftUI
 struct PayView: View {
     @Environment(StarHashStore.self) private var store
     @Environment(AppRouter.self) private var router
-    @AppStorage(PreferenceKey.saveTransactions) private var saveTransactions = true
-    @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
+    @AppStorage(Preferences.saveTransactions) private var saveTransactions: Bool
+    @AppStorage(Preferences.nearbyLocation) private var nearbyLocation: Bool
     @Environment(Owner.self) private var owner
     private var wallet: Recipient.Network { owner.wallet }
 
@@ -323,7 +323,7 @@ struct PayView: View {
         // was turned off, or everything erased, while it was coming.
         if let pendingLocation, let recordedID, let ticket {
             Task {
-                guard let fix = await pendingLocation.value, StarHashPreferences.nearbyLocation else { return }
+                guard let fix = await pendingLocation.value, Preferences.nearbyLocation.value() else { return }
                 let isContact = recipient.kind == .phone ? await Self.isContact(recipient) : nil
                 guard Nearby.remembersPlace(of: recipient, isContact: isContact) else { return }
                 store.attachPlace(fix.coordinate, to: recordedID, ticket: ticket)
@@ -402,7 +402,7 @@ private struct PayChosenRecipient: View {
 
     @State private var sharedPhoto: UIImage?
 
-    @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
+    @AppStorage(Preferences.enableContacts) private var enableContacts: Bool
     private var contacts: PayContacts { .shared }
 
     var body: some View {

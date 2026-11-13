@@ -23,7 +23,7 @@ struct BuyView: View {
     @State private var afterDetails: AfterDetails?
     /// The code the delete question is about, while it is asked.
     @State private var codeToDelete: USSDShortcut?
-    @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
+    @AppStorage(Preferences.confirmDeletes) private var confirmDeletes: Bool
 
     private enum AfterDetails {
         case edit(ShortcutDraft)
@@ -852,7 +852,7 @@ private struct ShortcutEditor: View {
     /// The grid of symbols, shown once the big symbol is tapped.
     @State private var choosesSymbol = false
     @State private var asksDelete = false
-    @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
+    @AppStorage(Preferences.confirmDeletes) private var confirmDeletes: Bool
     @FocusState private var focused: Field?
 
     private let editing: USSDShortcut.ID?
@@ -1103,7 +1103,7 @@ private struct DeleteCodeDialog: ViewModifier {
     let asAlert: Bool
     let onDelete: () -> Void
 
-    @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
+    @AppStorage(Preferences.confirmDeletes) private var confirmDeletes: Bool
 
     func body(content: Content) -> some View {
         if asAlert {

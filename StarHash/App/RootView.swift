@@ -22,7 +22,7 @@ struct RootView: View {
     @State private var whatsNewStartPage = WhatsNewLaunch.startPage
     /// What's New's height follows it.
     @State private var window = WhatsNewWindow()
-    @AppStorage(PreferenceKey.showMyName) private var showMyName = true
+    @AppStorage(Preferences.showMyName) private var showMyName: Bool
     @AppStorage(PreferenceKey.seenShowMyNameNotice) private var seenShowMyNameNotice = false
     @State private var forcesShowMyNameNotice = ShowMyNameNoticeSheet.forcedAtLaunch
     /// The tabs have been on screen a moment. The notes and sheets that open
