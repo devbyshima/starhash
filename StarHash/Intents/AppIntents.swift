@@ -14,7 +14,7 @@ struct CheckBalanceIntent: AppIntent {
     @MainActor
     func perform() async throws -> some IntentResult {
         AppEnvironment.router.show(.pay)
-        if let wallet = StarHashPreferences.chosenWallet, let url = USSD.telURL(for: USSD.balance(for: wallet)) {
+        if let wallet = AppEnvironment.owner.chosenWallet, let url = USSD.telURL(for: USSD.balance(for: wallet)) {
             await UIApplication.shared.open(url)
         }
         return .result()

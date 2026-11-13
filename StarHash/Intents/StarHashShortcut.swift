@@ -1,3 +1,4 @@
+import StarHashKit
 import SwiftUI
 import UIKit
 
@@ -6,20 +7,35 @@ import UIKit
 /// (when a message containing RWF arrives, which every M-Money and
 /// AirtelMoney message does, run immediately) is made by hand, as the
 /// guide shows: the one written into the shared file for iOS 27 never
-/// appeared on a real iPhone. It is shared
-/// from iCloud, so one tap opens Shortcuts' own Add Shortcut screen. With
-/// no link it would fall back to a signed file in the bundle
-/// (scripts/make_shortcut.py) through the share sheet; that file is not
-/// bundled at present.
+/// appeared on a real iPhone. It comes from an iCloud link for the bundle
+/// id, which opens Shortcuts on its Add Shortcut screen at once; a build
+/// with no link (another bundle id) falls back to the signed file in the
+/// bundle (StarHash/Resources/StarHash SMS.shortcut, made by
+/// scripts/make_shortcut.py for the bundle id and team) through the share
+/// sheet.
 @MainActor
 enum StarHashShortcut {
     /// The name the shortcut is installed under, and run by.
     static let name = AutoVerificationSample.shortcutName
 
-    /// The shared shortcut, automation included (Share › Copy iCloud Link
-    /// in Shortcuts on iOS 27). Share it again after changing the shortcut:
-    /// a link is a copy of the shortcut as it was when shared.
-    static let iCloudLink = URL(string: "https://www.icloud.com/shortcuts/d13eee82797e4c41b2da5a6b5aa03309")
+    /// The shared shortcut for each build's bundle id: the bundled file
+    /// added on an iPhone, StarHash's icon chosen for it (Choose Icon, Apps,
+    /// StarHash), then Share › Copy iCloud Link. Its action names the app
+    /// by bundle id and team, and Shortcuts only runs it when they are the
+    /// app's on that iPhone. The link carries the chosen icon, which the
+    /// file cannot, so the shortcut arrives with StarHash's logo (iOS 27,
+    /// 2026-11-13). Share it again after changing the shortcut: a link is a
+    /// copy of the shortcut as it was when shared.
+    private static let iCloudLinks: [String: URL] = [
+        "com.devbyshima.starhash": URL(string: "https://www.icloud.com/shortcuts/eaf3526c8479442e862b379ab5161883")!,
+    ]
+
+    /// This build's link. No fallback to another build's: October's link
+    /// named the old id and team (com.fulltimestudio.starhash, 7WHQR6L96K),
+    /// so Shortcuts could not run it here.
+    static var iCloudLink: URL? {
+        Bundle.main.bundleIdentifier.flatMap { iCloudLinks[$0] }
+    }
 
     /// Opens Shortcuts on the shortcut's Add Shortcut screen.
     static func install(openURL: OpenURLAction) {
@@ -43,9 +59,9 @@ enum StarHashShortcut {
             URLQueryItem(name: "name", value: name),
             URLQueryItem(name: "input", value: "text"),
             URLQueryItem(name: "text", value: AutoVerificationSample.message),
-            URLQueryItem(name: "x-success", value: "starhash://shortcut/success"),
-            URLQueryItem(name: "x-error", value: "starhash://shortcut/error"),
-            URLQueryItem(name: "x-cancel", value: "starhash://shortcut/cancel"),
+            URLQueryItem(name: "x-success", value: StarHashLink.shortcutRan(.success).url.absoluteString),
+            URLQueryItem(name: "x-error", value: StarHashLink.shortcutRan(.error).url.absoluteString),
+            URLQueryItem(name: "x-cancel", value: StarHashLink.shortcutRan(.cancel).url.absoluteString),
         ]
         return components.url
     }

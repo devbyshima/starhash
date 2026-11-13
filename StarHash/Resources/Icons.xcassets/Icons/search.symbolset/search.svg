@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- search, Keyline Icons converted by scripts/make_icons.swift; edit it there, not here. -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="3300" height="2200">
+ <g id="Notes">
+  <rect height="2200" id="artboard" style="fill:white;opacity:1" width="3300" x="0" y="0"/>
+  <text id="template-version" style="stroke:none;fill:black;font-family:sans-serif;font-size:13;" transform="matrix(1 0 0 1 3036 1933)" text-anchor="end">Template v.2.0</text>
+ </g>
+ <g id="Guides">
+  <line id="Baseline-S" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="696" y2="696"/>
+  <line id="Capline-S" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="625.541" y2="625.541"/>
+  <line id="Baseline-M" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="1126" y2="1126"/>
+  <line id="Capline-M" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="1055.54" y2="1055.54"/>
+  <line id="Baseline-L" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="1556" y2="1556"/>
+  <line id="Capline-L" style="fill:none;stroke:#27AAE1;stroke-width:0.5;" x1="263" x2="3036" y1="1485.54" y2="1485.54"/>
+  <line id="left-margin-Regular-S" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1400" x2="1400" y1="600" y2="720"/>
+  <line id="right-margin-Regular-S" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1490.35" x2="1490.35" y1="600" y2="720"/>
+  <line id="left-margin-Regular-M" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1400" x2="1400" y1="1030" y2="1150"/>
+  <line id="right-margin-Regular-M" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1515.38" x2="1515.38" y1="1030" y2="1150"/>
+  <line id="left-margin-Regular-L" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1400" x2="1400" y1="1460" y2="1580"/>
+  <line id="right-margin-Regular-L" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1548.85" x2="1548.85" y1="1460" y2="1580"/>
+ </g>
+ <g id="Symbols">
+  <g id="Regular-S" transform="matrix(1 0 0 1 1400 696)">
+   <path d="M68.66 -43.06C68.66 -35.82 66.21 -29.16 62.06 -23.88L83.18 -2.76C84.71 -1.23 84.71 1.24 83.18 2.77C81.65 4.30 79.17 4.30 77.64 2.77L56.53 -18.34C51.24 -14.19 44.58 -11.74 37.34 -11.74C20.05 -11.74 6.02 -25.76 6.02 -43.06C6.02 -60.36 20.05 -74.38 37.34 -74.38C54.64 -74.38 68.66 -60.36 68.66 -43.06Z"/>
+  </g>
+  <g id="Regular-M" transform="matrix(1 0 0 1 1400 1126)">
+   <path d="M87.69 -45.23C87.69 -35.99 84.56 -27.48 79.26 -20.73L106.23 6.23C108.18 8.19 108.18 11.35 106.23 13.31C104.28 15.26 101.11 15.26 99.16 13.31L72.19 -13.66C65.44 -8.36 56.93 -5.23 47.69 -5.23C25.60 -5.23 7.69 -23.14 7.69 -45.23C7.69 -67.32 25.60 -85.23 47.69 -85.23C69.78 -85.23 87.69 -67.32 87.69 -45.23Z"/>
+  </g>
+  <g id="Regular-L" transform="matrix(1 0 0 1 1400 1556)">
+   <path d="M113.12 -48.13C113.12 -36.21 109.08 -25.23 102.25 -16.52L137.03 18.26C139.55 20.78 139.55 24.86 137.03 27.38C134.52 29.90 130.43 29.90 127.91 27.38L93.13 -7.40C84.42 -0.57 73.45 3.47 61.52 3.47C33.02 3.47 9.92 -19.63 9.92 -48.13C9.92 -76.63 33.02 -99.73 61.52 -99.73C90.02 -99.73 113.12 -76.63 113.12 -48.13Z"/>
+  </g>
+ </g>
+</svg>

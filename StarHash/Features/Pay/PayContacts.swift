@@ -4,7 +4,7 @@ import SwiftUI
 
 /// A contact as the recipient picker needs it: a name and the MoMo numbers
 /// it can send to, already in local form ("0788 123 456").
-struct PayContact: Identifiable, Hashable, Sendable {
+struct PayContact: Identifiable, Hashable, Sendable, RecipientContact {
     let id: String
     let name: String
     /// One recipient per distinct number, named after the contact. A saved
@@ -46,11 +46,18 @@ final class PayContacts {
     private(set) var access: Access = PayContacts.currentAccess()
     private(set) var contacts: [PayContact] = [] {
         didSet {
-            var withPhotos: [String: String] = [:]
+            var withPhotos: [Recipient.Identity: String] = [:]
             var byName: [String: String] = [:]
+            var names: [Recipient.Identity: String] = [:]
+            for contact in contacts {
+                for recipient in contact.recipients {
+                    names[recipient.identity] = names[recipient.identity] ?? contact.name
+                }
+            }
+            contactNames = names
             for contact in contacts where contact.hasPhoto {
                 for recipient in contact.recipients {
-                    withPhotos[recipient.kind.rawValue + recipient.destination] = withPhotos[recipient.kind.rawValue + recipient.destination] ?? contact.id
+                    withPhotos[recipient.identity] = withPhotos[recipient.identity] ?? contact.id
                 }
                 byName[PayContacts.nameKey(contact.name)] = byName[PayContacts.nameKey(contact.name)] ?? contact.id
             }
@@ -62,23 +69,33 @@ final class PayContacts {
     /// Which contact's photo shows for a number or code, by kind and
     /// destination, so a recent recipient saved in Contacts shows their
     /// photo too.
-    private var photoContactIDs: [String: String] = [:]
+    private var photoContactIDs: [Recipient.Identity: String] = [:]
     /// The same by name, for money received: MTN's SMS hides most of the
     /// sender's number ("*********998") but gives their name.
     private var photoContactIDsByName: [String: String] = [:]
+    /// Each saved number's or code's name in Contacts, by kind and
+    /// destination.
+    private var contactNames: [Recipient.Identity: String] = [:]
+
+    /// The name `recipient`'s number or code is saved under in Contacts,
+    /// nil when it is not saved there.
+    func contactName(for recipient: Recipient) -> String? {
+        guard !recipient.destination.isEmpty else { return nil }
+        return contactNames[recipient.identity]
+    }
 
     /// Whether `recipient`'s number is saved in Contacts. Nearby remembers
     /// only numbers and codes that are not: a contact is already a tap away.
     func isContact(_ recipient: Recipient) -> Bool {
         contacts.contains { contact in
-            contact.recipients.contains { $0.kind == recipient.kind && $0.destination == recipient.destination }
+            contact.recipients.contains { $0.identity == recipient.identity }
         }
     }
 
     /// The contact with a photo that `recipient`'s number or code belongs
     /// to, or failing that, a contact with a photo and the same name.
     func photoContactID(for recipient: Recipient) -> String? {
-        if let id = photoContactIDs[recipient.kind.rawValue + recipient.destination] { return id }
+        if let id = photoContactIDs[recipient.identity] { return id }
         guard let name = recipient.name, !name.isEmpty else { return nil }
         return photoContactIDsByName[PayContacts.nameKey(name)]
     }
@@ -145,10 +162,13 @@ final class PayContacts {
         try? CNContactStore().enumerateContacts(with: request) { contact, _ in
             let formatted = CNContactFormatter.string(from: contact, style: .fullName) ?? ""
             let name = formatted.isEmpty ? contact.organizationName : formatted
-            var seen = Set<String>()
+            var seen = Set<Recipient.Identity>()
             let recipients = contact.phoneNumbers.compactMap { labelled -> Recipient? in
+                // Only numbers StarHash can pay: one abroad or a landline
+                // would only do nothing when chosen.
                 guard let recipient = Recipient(input: labelled.value.stringValue, name: name.isEmpty ? nil : name),
-                      seen.insert(recipient.kind.rawValue + recipient.destination).inserted else { return nil }
+                      recipient.isPayable,
+                      seen.insert(recipient.identity).inserted else { return nil }
                 return recipient
             }
             guard !recipients.isEmpty else { return }
@@ -163,49 +183,16 @@ final class PayContacts {
     }
 }
 
-/// How the picker's search field matches. Letters search names; digits
-/// (spaces and "+" ignored) search numbers and codes, so "0788", "788" and
-/// "+250 788" all find 0788 123 456.
-struct RecipientSearch {
-    let query: String
-
-    private var trimmed: String { query.trimmingCharacters(in: .whitespacesAndNewlines) }
-    private var hasLetters: Bool { trimmed.contains(where: \.isLetter) }
-    private var digits: String { trimmed.filter { $0.isASCII && $0.isNumber } }
-
-    var isEmpty: Bool { trimmed.isEmpty }
-
-    /// What to mark in names: the query when it searches names, nothing
-    /// when it is a number.
-    var nameQuery: String { hasLetters ? trimmed : "" }
-
-    /// The typed number or code itself, when the field holds digits only.
-    var typedRecipient: Recipient? {
-        guard !hasLetters, !digits.isEmpty else { return nil }
-        return Recipient(input: trimmed)
-    }
-
-    /// The digit strings to look for: what was typed, and its local form
-    /// when it starts with the country code.
-    private var digitNeedles: [String] {
-        var needles = [digits]
-        if digits.hasPrefix("250"), digits.count > 3 { needles.append("0" + digits.dropFirst(3)) }
-        return needles
-    }
-
-    func matches(name: String?, destinations: [String]) -> Bool {
-        if isEmpty { return true }
-        if hasLetters { return name?.localizedStandardContains(trimmed) ?? false }
-        return destinations.contains { destination in
-            digitNeedles.contains { destination.contains($0) }
+extension Recipient {
+    /// The name to show: the one its number or code is saved under in
+    /// Contacts, while contacts are on, ahead of any other (the name a
+    /// wallet's message gave, or a merchant's registered name), since it is
+    /// the name the owner chose; otherwise `displayName`.
+    @MainActor
+    var shownName: String {
+        if Preferences.enableContacts.value(), let saved = PayContacts.shared.contactName(for: self) {
+            return saved
         }
-    }
-
-    func matches(_ recipient: Recipient) -> Bool {
-        matches(name: recipient.name, destinations: [recipient.destination])
-    }
-
-    func matches(_ contact: PayContact) -> Bool {
-        matches(name: contact.name, destinations: contact.recipients.map(\.destination))
+        return displayName
     }
 }

@@ -18,7 +18,7 @@ struct ContactDetailSheet: View {
     let onPay: (Recipient) -> Void
 
     @Environment(StarHashStore.self) private var store
-    @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
+    @AppStorage(Preferences.enableContacts) private var enableContacts: Bool
     /// The number Pay pays: the only one, or the one chosen.
     @State private var chosen: Recipient?
     /// The content's height, so the sheet opens exactly as tall as what it
@@ -107,9 +107,8 @@ struct ContactDetailSheet: View {
         HStack(spacing: 14) {
             leading(recipient)
             Text(recipient.formattedDestination)
-                .font(.sheet(16, .medium))
+                .font(.starhashNumber(16, relativeTo: .body))
                 .foregroundStyle(Color.starhashPrimaryText)
-                .monospacedDigit()
             Spacer(minLength: 8)
             if let detail = detail(for: recipient) {
                 Text(detail)
@@ -117,7 +116,7 @@ struct ContactDetailSheet: View {
                     .foregroundStyle(Color.sheetSecondaryText)
             }
             if let isChosen {
-                Image(systemName: isChosen ? "checkmark.circle.fill" : "circle")
+                Image(symbol: isChosen ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 20, weight: .medium))
                     .foregroundStyle(isChosen ? Color.starhashPrimaryText : Color.starhashTertiaryText)
                     .contentTransition(.symbolEffect(.replace))
@@ -147,7 +146,7 @@ struct ContactDetailSheet: View {
     }
 
     private var payButton: some View {
-        Button(payee == nil ? "Choose a number" : "Pay \(Money.formatWithCurrency(amount))") {
+        Button(payee == nil ? String(starhash: "Choose a number") : String(starhash: "Pay \(Money.formatWithCurrency(amount))")) {
             if let payee { onPay(payee) }
         }
         .buttonStyle(.sheetPrimary)
@@ -166,7 +165,7 @@ struct ContactDetailSheet: View {
         return VStack(spacing: 8) {
             SheetSectionLabel("This year")
             HStack(alignment: .top, spacing: 16) {
-                stat(value: Money.format(totals.amount), label: "\(Money.currency) sent")
+                stat(value: Money.format(totals.amount), label: String(starhash: "\(Money.currency) sent"))
                 stat(value: String(totals.count), label: totals.count == 1 ? "Payment" : "Payments")
             }
             .padding(16)
@@ -177,7 +176,7 @@ struct ContactDetailSheet: View {
     private func stat(value: String, label: String) -> some View {
         VStack(alignment: .leading, spacing: 1) {
             Text(value)
-                .font(.sheet(30, .bold, relativeTo: .title))
+                .font(.starhashNumber(30, weight: .bold, relativeTo: .title))
                 .foregroundStyle(Color.starhashPrimaryText)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)

@@ -11,25 +11,25 @@ public enum ActivityPeriod: String, CaseIterable, Identifiable, Sendable {
 
     public var id: Self { self }
 
-    /// The period picker's title: "This Week".
+    /// The period picker's title: String(kit: "This Week").
     public var title: String {
         switch self {
-        case .today: "Today"
-        case .week: "This Week"
-        case .month: "This Month"
-        case .year: "This Year"
-        case .allTime: "All Time"
+        case .today: String(kit: "Today")
+        case .week: String(kit: "This Week")
+        case .month: String(kit: "This Month")
+        case .year: String(kit: "This Year")
+        case .allTime: String(kit: "All Time")
         }
     }
 
-    /// Over the summary card's total: "Spent this week".
+    /// Over the summary card's total: String(kit: "Spent this week").
     public var spentCaption: String {
         switch self {
-        case .today: "Spent today"
-        case .week: "Spent this week"
-        case .month: "Spent this month"
-        case .year: "Spent this year"
-        case .allTime: "Spent in total"
+        case .today: String(kit: "Spent today")
+        case .week: String(kit: "Spent this week")
+        case .month: String(kit: "Spent this month")
+        case .year: String(kit: "Spent this year")
+        case .allTime: String(kit: "Spent in total")
         }
     }
 
@@ -44,13 +44,14 @@ public enum ActivityPeriod: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    /// The calendar span holding `now`, or nil for All Time. The week
-    /// follows `calendar`'s first weekday, so it starts on Sunday or Monday
-    /// as the user's region does.
+    /// The calendar span holding `now`, or nil for All Time. The week runs
+    /// Monday to Sunday, as weeks do in Rwanda, whatever region the iPhone
+    /// is set to: a Sunday-first region made a Sunday's week that one day
+    /// alone, and the six days before it vanished from This Week.
     public func interval(now: Date, calendar: Calendar) -> DateInterval? {
         switch self {
         case .today: calendar.dateInterval(of: .day, for: now)
-        case .week: calendar.dateInterval(of: .weekOfYear, for: now)
+        case .week: calendar.mondayFirst.dateInterval(of: .weekOfYear, for: now)
         case .month: calendar.dateInterval(of: .month, for: now)
         case .year: calendar.dateInterval(of: .year, for: now)
         case .allTime: nil
@@ -91,18 +92,15 @@ public enum ActivitySummary {
         return transactions.filter { interval.start <= $0.date && $0.date < interval.end }
     }
 
-    /// Failed transactions moved no money, so they count for nothing.
-    /// Pending ones do: they were dialled and most go through.
+    /// What was spent and received, by `Transaction.counts`.
     public static func totals(of transactions: [Transaction]) -> Totals {
         var totals = Totals()
-        for t in transactions where t.status != .failed {
+        for t in transactions where t.counts {
             totals.count += 1
             switch t.direction {
             case .outgoing:
                 totals.spent += t.amount
-                // Only confirmed payments: by SMS (its fee), or by hand (the
-                // fee from `Tariff`). A pending payment has none yet.
-                if t.status == .confirmed { totals.fees += t.fee ?? 0 }
+                totals.fees += t.countedFee
             case .incoming:
                 totals.received += t.amount
             }
@@ -155,7 +153,7 @@ public enum ActivitySummary {
         calendar: Calendar,
         locale: Locale = .current
     ) -> [Bucket] {
-        let outgoing = transactions.filter { $0.direction == .outgoing && $0.status != .failed }
+        let outgoing = transactions.filter(\.countsAsSpent)
         var buckets = emptyBuckets(for: period, earliest: outgoing.map(\.date).min(), now: now, calendar: calendar, locale: locale)
         guard let first = buckets.first, let last = buckets.last else { return buckets }
         let span = DateInterval(start: first.interval.start, end: last.interval.end)
@@ -207,7 +205,7 @@ public enum ActivitySummary {
         let start = bucket.interval.start
         switch period {
         case .today:
-            return "\(string(start, "j", calendar, locale)) to \(string(bucket.interval.end, "j", calendar, locale))"
+            return String(kit: "\(string(start, "j", calendar, locale)) to \(string(bucket.interval.end, "j", calendar, locale))")
         case .week: return string(start, "EEEEdMMMM", calendar, locale)
         case .month: return string(start, "dMMMM", calendar, locale)
         case .year: return string(start, "MMMMyyyy", calendar, locale)
@@ -244,7 +242,7 @@ public enum ActivitySummary {
                 return (day, day, index % 7 == 0)
             }
         case .week:
-            guard let week = calendar.dateInterval(of: .weekOfYear, for: now) else { return [] }
+            guard let week = calendar.mondayFirst.dateInterval(of: .weekOfYear, for: now) else { return [] }
             let symbols = calendar.shortStandaloneWeekdaySymbols
             let narrow = calendar.veryShortStandaloneWeekdaySymbols
             return subdivide(week, by: .day, calendar: calendar) { _, start in
@@ -304,15 +302,43 @@ public enum ActivitySummary {
         }
     }
 
-    /// A day group's heading: "Today", "Yesterday", "Fri 2 Oct" (in the
+    /// A day group's heading: String(kit: "Today"), String(kit: "Yesterday"), "Fri 2 Oct" (in the
     /// user's own date order), with the year once it is not this year's.
     public static func dayTitle(for day: Date, now: Date, calendar: Calendar, locale: Locale = .current) -> String {
-        if calendar.isDate(day, inSameDayAs: now) { return "Today" }
+        if calendar.isDate(day, inSameDayAs: now) { return String(kit: "Today") }
         if let yesterday = calendar.date(byAdding: .day, value: -1, to: now), calendar.isDate(day, inSameDayAs: yesterday) {
-            return "Yesterday"
+            return String(kit: "Yesterday")
         }
         let sameYear = calendar.component(.year, from: day) == calendar.component(.year, from: now)
         return string(day, sameYear ? "EEEdMMM" : "EEEdMMMyyyy", calendar, locale)
+    }
+
+    /// Groups transactions by calendar month, newest month first and newest
+    /// first within each month, as Activity lists them. A month's `day` is
+    /// its first day.
+    public static func groupedByMonth(_ transactions: [Transaction], calendar: Calendar) -> [DaySection] {
+        let groups = Dictionary(grouping: transactions) { transaction in
+            calendar.dateInterval(of: .month, for: transaction.date)?.start ?? calendar.startOfDay(for: transaction.date)
+        }
+        return groups.keys.sorted(by: >).map { month in
+            DaySection(day: month, transactions: groups[month, default: []].sorted { $0.date > $1.date })
+        }
+    }
+
+    /// A month group's heading: "August", with the year once it is not this
+    /// year's ("August 2025"). Its first letter is a capital in every
+    /// language, as a heading's is, though French writes "octobre".
+    public static func monthTitle(for month: Date, now: Date, calendar: Calendar, locale: Locale = .current) -> String {
+        let sameYear = calendar.component(.year, from: month) == calendar.component(.year, from: now)
+        let title = string(month, sameYear ? "MMMM" : "MMMMyyyy", calendar, locale)
+        return title.prefix(1).uppercased(with: locale) + title.dropFirst()
+    }
+
+    /// A row's date in a month's list: "Aug 31", with the year once it is
+    /// not this year's.
+    public static func rowDate(for date: Date, now: Date, calendar: Calendar, locale: Locale = .current) -> String {
+        let sameYear = calendar.component(.year, from: date) == calendar.component(.year, from: now)
+        return string(date, sameYear ? "MMMd" : "MMMdyyyy", calendar, locale)
     }
 
     // MARK: Search
@@ -349,5 +375,14 @@ public enum ActivitySummary {
         formatter.timeZone = calendar.timeZone
         formatter.setLocalizedDateFormatFromTemplate(template)
         return formatter.string(from: date)
+    }
+}
+
+extension Calendar {
+    /// The same calendar with weeks starting on Monday.
+    var mondayFirst: Calendar {
+        var calendar = self
+        calendar.firstWeekday = 2
+        return calendar
     }
 }

@@ -18,7 +18,7 @@ struct SwapGlassButton: View {
             // swaps one glyph for the other: the old one shrinks, blurs and
             // fades as the new one grows into focus.
             ZStack {
-                Image(systemName: symbol)
+                Image(symbol: symbol)
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundStyle(Color.starhashPrimaryText)
                     .id(symbol)

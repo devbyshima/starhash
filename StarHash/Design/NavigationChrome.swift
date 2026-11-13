@@ -3,8 +3,7 @@ import UIKit
 
 // The navigation bar's buttons, drawn by StarHash rather than the system:
 // the system draws its own glass behind bar buttons, which no tint
-// reaches, and on the blue light-mode page it came out a bright cyan.
-// These use `StarHashCircleGlyph`, the same tinted glass circle as every
+// reaches. These use `StarHashCircleGlyph`, the same glass circle as every
 // other round button.
 
 extension View {

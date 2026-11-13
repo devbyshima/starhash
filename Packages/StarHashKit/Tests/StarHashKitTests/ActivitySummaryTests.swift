@@ -41,13 +41,31 @@ struct ActivitySummaryTests {
 
     // MARK: Periods
 
-    @Test func weekFollowsTheCalendarsFirstWeekday() throws {
+    @Test func weekRunsMondayToSundayInAnyRegion() throws {
         let monday = try #require(ActivityPeriod.week.interval(now: Self.now, calendar: Self.calendar))
         #expect(monday.start == Self.date(2026, 9, 28, 0))
         var sundayFirst = Self.calendar
         sundayFirst.firstWeekday = 1
         let sunday = try #require(ActivityPeriod.week.interval(now: Self.now, calendar: sundayFirst))
-        #expect(sunday.start == Self.date(2026, 9, 27, 0))
+        #expect(sunday.start == Self.date(2026, 9, 28, 0))
+    }
+
+    /// On a Sunday, This Week is the Monday before to that Sunday, today
+    /// included, even where the region starts weeks on Sunday.
+    @Test func sundaysWeekHoldsTheWholeWeek() {
+        var sundayFirst = Self.calendar
+        sundayFirst.firstWeekday = 1
+        let sunday = Self.date(2026, 10, 11, 18)
+        let items = [
+            Self.tx(100, at: Self.date(2026, 10, 11, 9)),
+            Self.tx(200, at: Self.date(2026, 10, 5, 8)),
+            Self.tx(300, at: Self.date(2026, 10, 4, 20)),
+        ]
+        let week = ActivitySummary.transactions(items, in: .week, now: sunday, calendar: sundayFirst)
+        #expect(week.map(\.amount) == [100, 200])
+        let buckets = ActivitySummary.buckets(for: items, period: .week, now: sunday, calendar: sundayFirst, locale: Self.locale)
+        #expect(buckets.first?.label == "Mon")
+        #expect(buckets.map(\.total) == [200, 0, 0, 0, 0, 0, 100])
     }
 
     @Test func allTimeHasNoInterval() {
@@ -133,6 +151,46 @@ struct ActivitySummaryTests {
         #expect(ActivitySummary.axisTicks(for: highest) == expected)
     }
 
+    @Test func ownTransfersAreNeitherSpentNorReceived() {
+        var topUp = Self.tx(2000, at: Self.now)
+        topUp.category = TransactionCategory.ownAccounts.rawValue
+        var offload = Self.tx(500, .incoming, at: Self.now)
+        offload.category = TransactionCategory.ownAccounts.rawValue
+        let totals = ActivitySummary.totals(of: [topUp, offload, Self.tx(700, at: Self.now)])
+        #expect(totals.spent == 700)
+        #expect(totals.received == 0)
+    }
+
+    /// The one rule every total, chart, report and summary asks.
+    @Test(arguments: [
+        // status, direction, own transfer, counts, spent, fee counted
+        (Transaction.Status.confirmed, Transaction.Direction.outgoing, false, true, true, 100),
+        (.pending, .outgoing, false, true, true, 0),
+        (.failed, .outgoing, false, false, false, 0),
+        (.confirmed, .incoming, false, true, false, 0),
+        (.failed, .incoming, false, false, false, 0),
+        (.confirmed, .outgoing, true, false, false, 0),
+        (.confirmed, .incoming, true, false, false, 0),
+        (.pending, .outgoing, true, false, false, 0),
+    ])
+    func whatCounts(
+        status: Transaction.Status, direction: Transaction.Direction, ownTransfer: Bool,
+        counts: Bool, spent: Bool, fee: Int
+    ) {
+        var t = Self.tx(1000, direction, fee: 100, at: Self.now, status: status)
+        if ownTransfer { t.category = TransactionCategory.ownAccounts.rawValue }
+        #expect(t.counts == counts)
+        #expect(t.countsAsSpent == spent)
+        #expect(t.countedFee == fee)
+    }
+
+    @Test func ownTransfersStayOffTheChart() {
+        var topUp = Self.tx(2000, at: Self.now)
+        topUp.category = TransactionCategory.ownAccounts.rawValue
+        let buckets = ActivitySummary.buckets(for: [topUp, Self.tx(700, at: Self.now)], period: .week, now: Self.now, calendar: Self.calendar, locale: Self.locale)
+        #expect(buckets.reduce(0) { $0 + $1.total } == 700)
+    }
+
     // MARK: List
 
     @Test func groupsByDayNewestFirst() {
@@ -153,6 +211,27 @@ struct ActivitySummaryTests {
         #expect(title(Self.date(2026, 10, 1, 0)) == "Yesterday")
         #expect(title(Self.date(2026, 9, 25, 0)) == "Fri 25 Sept" || title(Self.date(2026, 9, 25, 0)) == "Fri 25 Sep")
         #expect(title(Self.date(2025, 9, 25, 0)).contains("2025"))
+    }
+
+    @Test func groupsByMonthNewestFirst() {
+        let sections = ActivitySummary.groupedByMonth([
+            Self.tx(1, at: Self.date(2026, 8, 31, 9)),
+            Self.tx(2, at: Self.date(2026, 10, 1, 8)),
+            Self.tx(3, at: Self.date(2026, 10, 2, 13)),
+            Self.tx(4, at: Self.date(2025, 10, 2, 13)),
+        ], calendar: Self.calendar)
+        #expect(sections.map(\.day) == [Self.date(2026, 10, 1, 0), Self.date(2026, 8, 1, 0), Self.date(2025, 10, 1, 0)])
+        #expect(sections.first?.transactions.map(\.amount) == [3, 2])
+    }
+
+    @Test func monthTitlesAndRowDates() {
+        #expect(ActivitySummary.monthTitle(for: Self.date(2026, 8, 1, 0), now: Self.now, calendar: Self.calendar, locale: Self.locale) == "August")
+        #expect(ActivitySummary.monthTitle(for: Self.date(2025, 8, 1, 0), now: Self.now, calendar: Self.calendar, locale: Self.locale) == "August 2025")
+        // French writes its months in lower case; a heading still starts with a capital.
+        #expect(ActivitySummary.monthTitle(for: Self.date(2026, 10, 1, 0), now: Self.now, calendar: Self.calendar, locale: Locale(identifier: "fr_RW")) == "Octobre")
+        let row = ActivitySummary.rowDate(for: Self.date(2026, 8, 31), now: Self.now, calendar: Self.calendar, locale: Self.locale)
+        #expect(row == "31 Aug")
+        #expect(ActivitySummary.rowDate(for: Self.date(2025, 8, 31), now: Self.now, calendar: Self.calendar, locale: Self.locale).contains("2025"))
     }
 
     // MARK: Search

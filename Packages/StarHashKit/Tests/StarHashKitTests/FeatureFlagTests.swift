@@ -13,44 +13,44 @@ struct FeatureFlagTests {
     @Test func eachRolloutReachesItsChannelsAndTheOnesBefore() {
         #expect(channels { flag(.off).isOnByDefault(in: $0) } == [])
         #expect(channels { flag(.dev).isOnByDefault(in: $0) } == [.dev])
-        #expect(channels { flag(.beta).isOnByDefault(in: $0) } == [.dev, .beta])
-        #expect(channels { flag(.everywhere).isOnByDefault(in: $0) } == [.dev, .beta, .production])
+        #expect(channels { flag(.everywhere).isOnByDefault(in: $0) } == [.dev, .production])
     }
 
-    @Test func aSwitchOnTheDeviceWinsInDevAndBeta() {
+    @Test func aSwitchOnTheDeviceWinsInDev() {
         #expect(flag(.off).isOn(in: .dev, override: true))
-        #expect(flag(.off).isOn(in: .beta, override: true))
-        #expect(!flag(.beta).isOn(in: .beta, override: false))
+        #expect(!flag(.dev).isOn(in: .dev, override: false))
         #expect(!flag(.everywhere).isOn(in: .dev, override: false))
     }
 
-    @Test func theAppStoreBuildIgnoresTheSwitch() {
+    @Test func theReleaseBuildIgnoresTheSwitch() {
         #expect(!flag(.off).isOn(in: .production, override: true))
-        #expect(!flag(.beta).isOn(in: .production, override: true))
+        #expect(!flag(.dev).isOn(in: .production, override: true))
         #expect(flag(.everywhere).isOn(in: .production, override: false))
     }
 
     @Test func noSwitchMeansTheRollout() {
         for channel in ReleaseChannel.allCases {
-            #expect(flag(.beta).isOn(in: channel, override: nil) == flag(.beta).isOnByDefault(in: channel))
+            #expect(flag(.dev).isOn(in: channel, override: nil) == flag(.dev).isOnByDefault(in: channel))
         }
     }
 
     @Test func theChannelComesFromInfoPlist() {
         #expect(ReleaseChannel(infoValue: "dev") == .dev)
-        #expect(ReleaseChannel(infoValue: "beta") == .beta)
         #expect(ReleaseChannel(infoValue: "production") == .production)
     }
 
     @Test func anythingUnknownIsProduction() {
         #expect(ReleaseChannel(infoValue: nil) == .production)
         #expect(ReleaseChannel(infoValue: "") == .production)
-        #expect(ReleaseChannel(infoValue: "Beta") == .production)
+        // The beta channel is gone: a build that still says so shows
+        // nothing unfinished.
+        #expect(ReleaseChannel(infoValue: "beta") == .production)
+        #expect(ReleaseChannel(infoValue: "Dev") == .production)
         #expect(ReleaseChannel(infoValue: "$(STARHASH_CHANNEL)") == .production)
     }
 
-    @Test func overridesAreForDevAndBetaOnly() {
-        #expect(channels(where: \.allowsOverrides) == [.dev, .beta])
+    @Test func overridesAreForTheDevBuildOnly() {
+        #expect(channels(where: \.allowsOverrides) == [.dev])
     }
 
     @Test func theSwitchHasItsOwnKey() {

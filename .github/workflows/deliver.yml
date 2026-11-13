@@ -1,12 +1,11 @@
-# A build for each channel from what lands on it (RELEASING.md):
+# One of StarHash's two builds from what lands on it (RELEASING.md):
 #
-#   main                       dev         simulator app (Debug)
-#   release/X.Y, vX.Y.Z-beta.N  beta        device archive (Beta, StarHash Beta scheme)
-#   vX.Y.Z-rc.N, vX.Y.Z         production  device archive (Release, StarHash scheme)
+#   main                               dev         simulator app (Debug)
+#   release/X.Y, vX.Y.Z-rc.N, vX.Y.Z   production  device archive (Release)
 #
-# The archives are unsigned: they prove the channel's configuration builds
-# and keep a record of each one. TestFlight and App Store uploads are made
-# from Xcode, signed with the team's account.
+# The archives are unsigned: they prove the release build builds and keep a
+# record of each one. TestFlight and App Store uploads are made from Xcode,
+# signed with the team's account.
 name: Deliver
 
 on:
@@ -88,7 +87,9 @@ jobs:
           name: ${{ steps.name.outputs.artifact }}
           path: out/*.zip
           if-no-files-found: error
-          retention-days: ${{ steps.channel.outputs.channel == 'production' && 90 || steps.channel.outputs.channel == 'beta' && 30 || 14 }}
+          # A tag's archive is kept longest, a release branch's while it is
+          # tried, main's simulator app the shortest.
+          retention-days: ${{ github.ref_type == 'tag' && 90 || steps.channel.outputs.channel == 'production' && 30 || 14 }}
 
       - name: Errors
         if: failure()

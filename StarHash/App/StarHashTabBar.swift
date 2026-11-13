@@ -15,6 +15,7 @@ import SwiftUI
 struct StarHashTabBar: View {
     @Environment(AppRouter.self) private var router
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
 
     /// Where a finger dragging along the bar holds the lens, while it does.
     @State private var dragX: CGFloat?
@@ -65,6 +66,9 @@ struct StarHashTabBar: View {
         )
         .animation(reduceMotion ? .smooth(duration: 0.2) : .spring(response: 0.3, dampingFraction: 0.78), value: router.isTabBarCompact)
         .onAppear { NavigationHaptics.shared.prepare() }
+        // Clear glass over the white page: near-black symbols in light
+        // mode, which also read over a card scrolling under.
+        .starhashContainerSurface()
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Tab bar")
     }
@@ -75,19 +79,61 @@ struct StarHashTabBar: View {
 
     private func icon(_ item: TabBarItem, isSelected: Bool) -> some View {
         let symbol = item.symbol(payPage: router.payPage)
-        return Image(systemName: symbol)
-            .font(.system(size: TabBarMetrics.symbolSize, weight: .semibold))
-            .foregroundStyle(Color.starhashPrimaryText)
-            .contentTransition(.symbolEffect(.replace))
+        return glyph(symbol, isSelected: isSelected)
+            // The page showing in the accent, the rest in the text colour.
+            .foregroundStyle(isSelected ? Color.starhashAccentText : Color.starhashPrimaryText)
+            .animation(.smooth(duration: 0.2), value: isSelected)
+            // A change of appearance fades every glyph to its new colour
+            // together. The symbols' images faded by themselves but the
+            // mark, a shape, snapped, as nothing told its fill to move.
+            .animation(.smooth(duration: 0.3), value: colorScheme)
             .frame(width: TabBarMetrics.itemWidth, height: TabBarMetrics.height)
             .contentShape(Rectangle())
             .accessibilityElement()
-            .accessibilityLabel(item.title(payPage: router.payPage))
+            .accessibilityLabel(LocalizedStringKey(item.title(payPage: router.payPage)))
             .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
             .accessibilityAction { select(item) }
             .accessibilityShowsLargeContentViewer {
-                Label(item.title(payPage: router.payPage), systemImage: symbol)
+                Label(LocalizedStringKey(item.title(payPage: router.payPage)), symbol: symbol)
             }
+    }
+
+    /// Pay is StarHash's own mark, Pay being StarHash; the rest are their
+    /// icons. The mark is drawn at the size the icons' filled shapes reach,
+    /// in the same colours, so it sits in the row as one of them. Between
+    /// Pay and Buy the two blur into each other, as the icons' replace does.
+    ///
+    /// The page showing is filled, the rest in outline. An icon's two forms
+    /// are both drawn and one shown, so the swap rides the colour's own fade
+    /// rather than setting off the symbols' replace effect; the mark's two
+    /// forms do the same, with nothing of their own on top.
+    @ViewBuilder
+    private func glyph(_ symbol: String, isSelected: Bool) -> some View {
+        if symbol == AppTab.pay.symbol {
+            ZStack {
+                TabMarkShape()
+                    .opacity(isSelected ? 0 : 1)
+                StarHashMarkShape()
+                    .opacity(isSelected ? 1 : 0)
+            }
+            .frame(width: TabBarMetrics.markSize, height: TabBarMetrics.markSize)
+            .transition(.blurReplace)
+        } else {
+            ZStack {
+                iconImage(symbol, outline: true)
+                    .opacity(isSelected ? 0 : 1)
+                iconImage(symbol, outline: false)
+                    .opacity(isSelected ? 1 : 0)
+            }
+            .transition(.blurReplace)
+        }
+    }
+
+    private func iconImage(_ symbol: String, outline: Bool) -> some View {
+        Image(symbol: symbol, outline: outline)
+            .font(.system(size: TabBarMetrics.symbolSize * TabBarMetrics.glyphScale(symbol), weight: .semibold))
+            .contentTransition(.symbolEffect(.replace))
+            .transition(.blurReplace)
     }
 
     /// A tap chooses the symbol under it; a drag carries the lens and
@@ -152,17 +198,50 @@ struct TabBarLayout: Equatable {
     }
 }
 
-/// The reference's measurements, in points: a 75pt capsule whose foot is
-/// 28pt above the screen's, a 93.3 by 59 lens 6pt in from the side and 8
-/// from top and foot, and 66pt for each symbol it is not under.
+extension EnvironmentValues {
+    /// How far above the safe area's foot the tab bar's foot sits (below
+    /// it, on a phone with a home indicator), for a bar that takes the tab
+    /// bar's place while it steps aside.
+    @Entry var floatingBarBottom: CGFloat = 8
+}
+
+/// The reference's measurements, in points: a capsule whose foot is 28pt
+/// above the screen's, a 93.3 by 59 lens, and 66pt for each symbol it is
+/// not under. The reference's capsule is 75 tall, the lens 8 from its top
+/// and foot; the owner brought it down to 71 so the lens sits 6 from every
+/// edge, as from its sides.
 enum TabBarMetrics {
-    static let height: CGFloat = 75
+    static let height: CGFloat = 71
     static let lensWidth: CGFloat = 93.33
     static let lensSideInset: CGFloat = 6
-    static let lensInset: CGFloat = 8
+    static let lensInset: CGFloat = 6
     static let itemWidth: CGFloat = 66
     static let endInset: CGFloat = 8
     static let symbolSize: CGFloat = 24
+    /// The mark's square on Pay's tab: its star fills about four fifths of
+    /// it, a little wider than tall, as much ink as the gear beside it.
+    static let markSize: CGFloat = 28
+    /// The outlined mark's line: as much ink as the outlined gear beside
+    /// it, measured at 3x (2,093 pixels against the gear's 2,156; 2.2 was
+    /// heavier), and the 6 pixels of the receipt's line.
+    static let markLine: CGFloat = 2
+    /// The outlined triangle's line, inside its edge: at 2 its opening,
+    /// a triangle 2.3pt from edge to centre, closed to a speck.
+    static let markTriangleLine: CGFloat = 1.3
+
+    /// Each icon's scale, so the bar's glyphs look one size. At one font
+    /// size they did not: measured on screen (3x), the receipt was 65 by 79
+    /// pixels and the bag 65 by 72, both solid, against the gear's 72
+    /// square with its teeth and hole. A solid shape looks bigger than its
+    /// box, so each is scaled halfway between matching the gear's box and
+    /// matching its ink.
+    static func glyphScale(_ symbol: String) -> CGFloat {
+        switch symbol {
+        case AppTab.activity.symbol: 0.87
+        case AppTab.buy.symbol: 0.94
+        default: 1
+        }
+    }
     static let bottomGap: CGFloat = 28
     static let compactScale: CGFloat = 0.8
     /// What a page keeps clear at its foot for the bar: its height above
@@ -263,9 +342,44 @@ struct PayBuySwitcher: View {
 
     var body: some View {
         let target: AppTab = page == .buy ? .pay : .buy
-        SwapGlassButton(symbol: target.symbol, label: "Switch to \(target.title)", pressHaptic: false) {
+        SwapGlassButton(symbol: target.symbol, label: String(starhash: "Switch to \(target.title)"), pressHaptic: false) {
             NavigationHaptics.shared.switchPage()
             router.show(target)
         }
+    }
+}
+
+/// Pay's mark in the tab bar while another page shows: a line inside the
+/// star's own edge, so it and the filled mark (`StarHashMarkShape`, on Pay)
+/// share one silhouette, round where the star turns inward, and the
+/// triangle outlined with it, so the whole mark reads as one outline (a
+/// solid triangle under an open star looked like two icons). The
+/// triangle's line is lighter (`markTriangleLine`), as the star's would
+/// close its small opening to a speck. The two forms are stacked and one
+/// shown, as every icon's two forms are.
+struct TabMarkShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        let scale = min(rect.width, rect.height) / StarHashMarkShape.side
+        let origin = CGPoint(x: rect.midX - StarHashMarkShape.side / 2 * scale, y: rect.midY - StarHashMarkShape.side / 2 * scale)
+        func point(_ p: CGPoint) -> CGPoint {
+            CGPoint(x: origin.x + p.x * scale, y: origin.y + p.y * scale)
+        }
+        var star = Path()
+        star.addLines(StarHashMarkShape.star.map(point))
+        star.closeSubpath()
+        var triangle = Path()
+        triangle.addLines(StarHashMarkShape.triangle.map(point))
+        triangle.closeSubpath()
+
+        // Twice the line, half of it outside the edge and cut away.
+        var mark = star
+            .strokedPath(StrokeStyle(lineWidth: 2 * TabBarMetrics.markLine, lineJoin: .round))
+            .intersection(star)
+        mark.addPath(
+            triangle
+                .strokedPath(StrokeStyle(lineWidth: 2 * TabBarMetrics.markTriangleLine, lineJoin: .round))
+                .intersection(triangle)
+        )
+        return mark
     }
 }

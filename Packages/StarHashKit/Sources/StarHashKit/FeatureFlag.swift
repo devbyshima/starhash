@@ -1,12 +1,11 @@
 import Foundation
 
-/// Where a build of StarHash goes: dev for builds run from Xcode on `main`,
-/// beta for TestFlight builds of a release branch, production for the App
-/// Store. Stamped into Info.plist by the build configuration (Debug, Beta,
+/// Which of StarHash's two builds this is: dev, the Debug build run from
+/// Xcode, or production, the Release build that goes to TestFlight and the
+/// App Store. Stamped into Info.plist by the build configuration (Debug,
 /// Release), so one binary always knows which it is.
 public enum ReleaseChannel: String, CaseIterable, Sendable {
     case dev
-    case beta
     case production
 
     /// The channel Info.plist names. A missing or unknown value, or a build
@@ -16,16 +15,15 @@ public enum ReleaseChannel: String, CaseIterable, Sendable {
         self = infoValue.flatMap(Self.init(rawValue:)) ?? .production
     }
 
-    /// Dev and beta builds honour a flag switched on this device; the App
-    /// Store build ignores it, so a switch left on by a tester can never
-    /// reach the people it was kept from.
-    public var allowsOverrides: Bool { self != .production }
+    /// The dev build honours a flag switched on this device; the release
+    /// build ignores it, so a switch left on while working can never reach
+    /// the people it was kept from.
+    public var allowsOverrides: Bool { self == .dev }
 
-    /// "Beta".
+    /// "Dev".
     public var title: String {
         switch self {
         case .dev: "Dev"
-        case .beta: "Beta"
         case .production: "Production"
         }
     }
@@ -36,15 +34,14 @@ public enum ReleaseChannel: String, CaseIterable, Sendable {
 /// (`Rollout`). Once it is on everywhere, delete the flag and its checks.
 public struct FeatureFlag: Hashable, Identifiable, Sendable {
     /// How far a flag reaches before anyone switches it on this device.
-    /// Each step includes the ones before it: beta is dev and beta.
+    /// Each step includes the ones before it.
     public enum Rollout: Sendable {
-        /// Nowhere; only a switch on a dev or beta device turns it on.
+        /// Nowhere; only a switch in a dev build turns it on.
         case off
-        /// Builds run from Xcode.
+        /// The dev build, run from Xcode.
         case dev
-        /// Dev builds and TestFlight.
-        case beta
-        /// Every build, the App Store's too: time to delete the flag.
+        /// Both builds, TestFlight's and the App Store's too: time to delete
+        /// the flag.
         case everywhere
     }
 
@@ -73,7 +70,6 @@ public struct FeatureFlag: Hashable, Identifiable, Sendable {
         switch rollout {
         case .off: false
         case .dev: channel == .dev
-        case .beta: channel != .production
         case .everywhere: true
         }
     }

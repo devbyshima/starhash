@@ -10,7 +10,12 @@ enum USSDDialer {
     /// an iPad without calling, or a code the system refused.
     static func dial(_ code: String) async -> Bool {
         guard let url = USSD.telURL(for: code) else { return false }
-        return await UIApplication.shared.open(url, options: [:])
+        return await open(url)
+    }
+
+    /// A tel: link as it is, from a widget or a link.
+    static func open(_ url: URL) async -> Bool {
+        await UIApplication.shared.open(url, options: [:])
     }
 
     static func openSettings() {

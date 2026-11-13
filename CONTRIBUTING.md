@@ -9,7 +9,7 @@ StarHash is source-available under the [PolyForm Noncommercial License 1.0.0](LI
 | Branch | What it is | What goes in |
 | --- | --- | --- |
 | `main` | The trunk, built as the dev channel | Features, refactors, docs, and fixes for anything not yet released |
-| `release/X.Y` | A version being stabilised or on the App Store (beta and production channels) | Fixes only, by pull request |
+| `release/X.Y` | A version on TestFlight or the App Store (the release build) | Fixes only, by pull request |
 | `feature/<name>`, `fix/<name>`, `docs/<name>`, `chore/<name>` | Your work, short-lived | One change, then a pull request |
 
 The rules:
@@ -46,8 +46,8 @@ A flag lets unfinished work merge on `main` without reaching testers or the App 
 
 1. Declare it in `FeatureFlag.all` (`StarHash/App/FeatureFlags.swift`) with `rollout: .dev`, a stable `key`, and a title and line for the Feature Flags page.
 2. Read it with `@FeatureFlagged(.yourFlag) private var isOn` in a view, or `FeatureFlags.isOn(.yourFlag)` elsewhere, and keep the new path behind it.
-3. Try it on a device from **Settings > About StarHash > Feature Flags** (dev and beta builds), or in a Debug run with `-featureFlag.yourKey YES`.
-4. Move it to `.beta` when testers should see it. When it ships, delete the flag and every check of it in one pull request.
+3. Try it on a device from **Settings > About StarHash > Feature Flags** (the dev build), or in a Debug run with `-featureFlag.yourKey YES`.
+4. When it is finished, delete the flag and every check of it in one pull request, so it ships in the release build.
 
 The rollouts and how release branches treat them are in [RELEASING.md](RELEASING.md#feature-flags).
 

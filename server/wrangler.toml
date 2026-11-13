@@ -1,0 +1,12 @@
+# StarHash's server: the owners' photos for their QR codes, and an
+# anonymous count of the people using StarHash. On the devbyshima account.
+name = "starhash"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+account_id = "4a77243b4e1b483028ac8d9ea4a3e58a"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "starhash"
+database_id = "b662112c-7cca-4c9b-8077-b2d8041b06b0"

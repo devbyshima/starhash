@@ -22,7 +22,7 @@ struct ActivitySummaryCard: View {
                     .foregroundStyle(Color.starhashSecondaryText)
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(Money.format(totals.spent))
-                        .starhashFont(48, weight: .bold, relativeTo: .largeTitle, tracking: 0)
+                        .font(.starhashNumber(48, weight: .bold, relativeTo: .largeTitle))
                         .foregroundStyle(Color.starhashPrimaryText)
                         // The digits roll to a new total (another period, a
                         // new payment), or fade with Reduce Motion.
@@ -56,7 +56,7 @@ struct ActivitySummaryCard: View {
 
     private var receivedLine: some View {
         HStack(spacing: 4) {
-            Image(systemName: "arrow.down.left")
+            Image(symbol: "arrow.down.left")
                 .font(.starhash(.footnote, weight: .bold))
                 .accessibilityHidden(true)
             Text("Received \(Money.format(totals.received))")
@@ -88,6 +88,7 @@ struct ActivitySpendingChart: View {
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.self) private var environment
     /// The width of the bar area, measured once the chart is laid out.
     @State private var plotWidth: CGFloat = 0
     /// The bar under a pressing finger, if any.
@@ -113,12 +114,13 @@ struct ActivitySpendingChart: View {
                     y: .value("Sent", Double(bucket.total) / top),
                     width: .ratio(Self.barWidthRatio)
                 )
-                // The primary button's blue gradient, with no glow: inside
-                // the card a glow spilled past each bar's edges. The
-                // pressed bar keeps full strength; the rest step back.
-                .foregroundStyle(Color.starhashInk.gradient.opacity(isProminent(bucket) ? 1 : 0.4))
+                // The primary button's light (`AccentLitStyle`), with no
+                // glow: inside the card a glow spilled past each bar's
+                // edges. The pressed bar keeps full strength; the rest
+                // step back.
+                .foregroundStyle(LinearGradient.starhashAccentLit(in: environment).opacity(isProminent(bucket) ? 1 : 0.4))
                 .clipShape(UnevenRoundedRectangle(topLeadingRadius: barRadius, topTrailingRadius: barRadius, style: .continuous))
-                .accessibilityLabel(ActivitySummary.spokenName(of: bucket, period: period, calendar: calendar))
+                .accessibilityLabel(ActivitySummary.spokenName(of: bucket, period: period, calendar: calendar, locale: .starhash))
                 .accessibilityValue(Money.formatWithCurrency(bucket.total))
             }
         }
@@ -143,7 +145,7 @@ struct ActivitySpendingChart: View {
                 AxisValueLabel {
                     if let position = value.as(Double.self) {
                         Text(Money.compact(Int((position * top).rounded())))
-                            .font(.starhash(.caption2))
+                            .font(.starhashNumber(11, relativeTo: .caption2))
                             .foregroundStyle(Color.starhashSecondaryText)
                     }
                 }
@@ -194,7 +196,7 @@ struct ActivitySpendingChart: View {
             let leading = min(max(barCenter - calloutSize.width / 2, 0), max(chartWidth - calloutSize.width, 0))
             let bottom = max(barTop - 6, calloutSize.height)
             ActivityChartCallout(
-                title: ActivitySummary.calloutTitle(of: selected, period: period, calendar: calendar),
+                title: ActivitySummary.calloutTitle(of: selected, period: period, calendar: calendar, locale: .starhash),
                 amount: Money.formatWithCurrency(selected.total),
                 rollsDigits: !reduceMotion
             )
@@ -267,8 +269,9 @@ struct ActivitySpendingChart: View {
     }
 }
 
-/// The small glass tag a long press raises over a bar: the period in grey
-/// over the amount, on Liquid Glass tinted with a breath of ink.
+/// The small tag a long press raises over a bar: the period in grey over
+/// the amount, on a solid raised fill a step off the card, as the chart has
+/// no glass.
 private struct ActivityChartCallout: View {
     let title: String
     let amount: String
@@ -290,7 +293,8 @@ private struct ActivityChartCallout: View {
         .fixedSize()
         .padding(.horizontal, 10)
         .padding(.vertical, 7)
-        .starhashGlass(in: Self.shape, tint: Color.starhashInk.opacity(0.1))
+        .background(Color.starhashCardRaised, in: Self.shape)
+        .shadow(color: .black.opacity(0.08), radius: 8, y: 2)
     }
 }
 

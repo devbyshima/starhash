@@ -11,7 +11,7 @@ struct WhatsNewView: View {
                 ForEach(releases) { release in
                     NavigationLink(value: SettingsPage.release(release.version)) {
                         HStack(spacing: 14) {
-                            SettingsSymbol(symbol: "sparkles", size: 44, pointSize: 19)
+                            SettingsSymbol(symbol: "sparkles", size: 44)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Version \(release.version)")
                                     .starhashFont(16, weight: .semibold, relativeTo: .callout)
@@ -79,7 +79,7 @@ struct ReleaseDetailView: View {
                 .padding(.vertical, 5)
                 .background(Color.settingsTile, in: Capsule())
                 .padding(.top, 10)
-            Text(release.summary)
+            Text(catalog: release.summary)
                 .font(.starhash(.body))
                 .foregroundStyle(Color.starhashSecondaryText)
                 .multilineTextAlignment(.center)
@@ -99,12 +99,12 @@ private struct ReleaseHighlightRow: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 16) {
-            SettingsSymbol(symbol: highlight.symbol, size: 46, pointSize: 20)
+            SettingsSymbol(symbol: highlight.symbol, size: 46)
             VStack(alignment: .leading, spacing: 3) {
-                Text(highlight.title)
+                Text(catalog: highlight.title)
                     .starhashFont(16, weight: .semibold, relativeTo: .callout)
                     .foregroundStyle(Color.starhashPrimaryText)
-                Text(highlight.detail)
+                Text(catalog: highlight.detail)
                     .starhashFont(14, relativeTo: .subheadline)
                     .foregroundStyle(Color.starhashSecondaryText)
                     .fixedSize(horizontal: false, vertical: true)
@@ -140,7 +140,7 @@ enum KigaliDay {
         parser.timeZone = kigali
         parser.dateFormat = "yyyy-MM-dd"
         guard let day = parser.date(from: date) else { return date }
-        var style = Date.FormatStyle.dateTime.day().month(.wide).year()
+        var style = Date.FormatStyle.dateTime.day().month(.wide).year().locale(.starhash)
         style.timeZone = kigali
         return day.formatted(style)
     }

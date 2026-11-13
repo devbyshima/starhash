@@ -27,11 +27,11 @@ struct LegalDocumentView: View {
             SettingsCard {
                 ForEach(Array(document.sections.enumerated()), id: \.offset) { _, section in
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(section.title)
+                        Text(catalog: section.title)
                             .starhashFont(16, weight: .semibold, relativeTo: .callout)
                             .foregroundStyle(Color.starhashPrimaryText)
                             .accessibilityAddTraits(.isHeader)
-                        Text(section.text)
+                        Text(catalog: section.text)
                             .starhashFont(14.5, relativeTo: .subheadline)
                             .lineSpacing(2)
                             .foregroundStyle(Color.starhashSecondaryText)
@@ -56,9 +56,9 @@ struct LegalDocumentView: View {
 
     private var header: some View {
         VStack(spacing: 0) {
-            SettingsSymbol(symbol: document.symbol, size: 64, pointSize: 28)
+            SettingsSymbol(symbol: document.symbol, size: 64)
                 .padding(.bottom, 18)
-            Text(document.title)
+            Text(catalog: document.title)
                 .starhashFont(30, weight: .bold, relativeTo: .title)
                 .foregroundStyle(Color.starhashPrimaryText)
                 .multilineTextAlignment(.center)
@@ -70,7 +70,7 @@ struct LegalDocumentView: View {
                 .padding(.vertical, 5)
                 .background(Color.settingsTile, in: Capsule())
                 .padding(.top, 10)
-            Text(document.summary)
+            Text(catalog: document.summary)
                 .font(.starhash(.body))
                 .foregroundStyle(Color.starhashSecondaryText)
                 .multilineTextAlignment(.center)
@@ -118,7 +118,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "Codes, fees and records",
-                text: "The USSD codes, fees and limits StarHash uses come from the providers' published information, and the providers may change them without notice. Activity is a record kept for you, from what you dial and the messages you pass to StarHash; your provider's records are the ones that count. With auto-verify on, a payment that no message confirms within an hour is marked failed; if it did go through, mark it as confirmed. StarHash's reminders and summaries are worked out from that record, and iOS decides when they show: a reminder that is late or never comes says nothing about whether a payment went through."
+                text: "The USSD codes, fees and limits StarHash uses come from the providers' published information, and the providers may change them without notice. The Transactions page is a record kept for you, from what you dial and the messages you pass to StarHash; your provider's records are the ones that count. With auto-verify on, a payment that no message confirms within an hour is marked failed; if it did go through, mark it as confirmed. StarHash's reminders and summaries are worked out from that record, and iOS decides when they show: a reminder that is late or never comes says nothing about whether a payment went through."
             ),
             .init(
                 title: "Free, with source available",
@@ -130,7 +130,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "Your iPhone and your PIN",
-                text: "You are responsible for your iPhone, its passcode and who can use it. StarHash's Face ID lock keeps Activity private, but your wallet is protected by your PIN. Never share your PIN with anyone, including someone who says they are from StarHash or your provider."
+                text: "You are responsible for your iPhone, its passcode and who can use it. StarHash's Face ID lock keeps your transactions private, but your wallet is protected by your PIN. Never share your PIN with anyone, including someone who says they are from StarHash or your provider."
             ),
             .init(
                 title: "Changes to these terms",
@@ -142,12 +142,16 @@ extension LegalDocument {
     static let privacyPolicy = LegalDocument(
         title: "Privacy Policy",
         symbol: "lock.fill",
-        effective: "2026-10-05",
-        summary: "StarHash has no account, no server and no tracking. What it keeps stays on your iPhone.",
+        effective: "2026-11-08",
+        summary: "StarHash has no account and no tracking. Your payments stay on your iPhone. Only your photo, your name and numbers (so people paying you see who you are, unless you turn that off) and an anonymous count of who uses StarHash reach its server.",
         sections: [
             .init(
                 title: "What StarHash keeps",
                 text: "Your transactions (who, how much, when, whether they are confirmed, and the fee, reference and balance when a message gives them), the categories you add, your recent recipients, Buy's codes and your settings. All of it is saved in StarHash's own storage on your iPhone, and none of it is sent anywhere."
+            ),
+            .init(
+                title: "StarHash's server",
+                text: "Three things reach it. Your profile photo, if you add one: it is kept under a random id that your QR code carries, so people who scan your code see it; only your iPhone holds the key that can change or delete it, and removing your photo deletes it. Your name with your numbers, unless you turn off Show my name in Settings, so people who type one of your numbers in StarHash see your name and photo: each number is kept only as a code made with a secret key the server holds, never as the number itself, and turning Show my name off, or removing your numbers, deletes them there. And once a day, a random id made when StarHash was installed, with its version, so the number of people using StarHash can be counted. Nothing else is sent: no payment, no contact, no location."
             ),
             .init(
                 title: "Contacts",
@@ -171,7 +175,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "What StarHash shares",
-                text: "Nothing. It has no analytics, no advertising and no third-party code that collects data. Request a Feature and the source code open GitHub in your browser, under GitHub's own privacy policy, and every code you dial goes through your phone and your provider, under theirs."
+                text: "Your name and photo, with people who type your number in StarHash, while Show my name is on. Nothing else beyond StarHash's own server above. It has no advertising and no third-party code that collects data. Request a Feature and the source code open GitHub in your browser, and Support on Ko-fi opens Ko-fi, each under its own privacy policy. Every code you dial goes through your phone and your provider, under theirs."
             ),
             .init(
                 title: "Backups",
@@ -179,7 +183,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "Your choices",
-                text: "In Settings you can stop StarHash saving transactions, using contacts, remembering recent recipients, Nearby, auto-verify and each of its notifications at any time. You can delete any transaction, or erase everything with Delete All Data. Deleting the app removes it all too."
+                text: "In Settings you can stop StarHash saving transactions, using contacts, remembering recent recipients, Nearby, auto-verify, Show my name and each of its notifications at any time. You can delete any transaction, or erase everything with Delete All Data. Deleting the app removes it all from your iPhone; your name and numbers stay on StarHash's server until they lapse 45 days later, so turn off Show my name first to remove them at once."
             ),
             .init(
                 title: "Children",

@@ -22,9 +22,10 @@ struct OnboardingPermission: View {
         var alertButtons = 2
         var primaryTitle: String
         var primaryAction: () -> Void
-        /// A quieter second choice under the button (auto-verify's Maybe
-        /// Later). Never on a screen before a system prompt: Apple allows
-        /// those one button, Continue, and no way past the prompt.
+        /// A quieter second choice beside the button, the two sharing its
+        /// place and height (auto-verify's Maybe Later). Never on a screen
+        /// before a system prompt: Apple allows those one button, Continue,
+        /// and no way past the prompt.
         var secondaryTitle: String?
         var secondaryAction: (() -> Void)?
     }
@@ -40,7 +41,8 @@ struct OnboardingPermission: View {
                 .accessibilityHidden(true)
 
             VStack(spacing: 15) {
-                Text(config.title)
+                // Rising word by word as the screen before leaves.
+                RevealText(config.title, delay: RevealTiming.enterDelay)
                     .starhashFont(28, weight: .bold, relativeTo: .title)
                     .foregroundStyle(Color.starhashPrimaryText)
                     .multilineTextAlignment(.center)
@@ -48,7 +50,7 @@ struct OnboardingPermission: View {
                     .minimumScaleFactor(0.7)
                     .accessibilityAddTraits(.isHeader)
 
-                Text(config.description)
+                RevealText(config.description, startIndex: RevealText.wordCount(config.title), delay: RevealTiming.enterDelay)
                     .font(.starhash(.footnote))
                     .foregroundStyle(Color.starhashSecondaryText)
                     .multilineTextAlignment(.center)
@@ -56,27 +58,24 @@ struct OnboardingPermission: View {
                     .minimumScaleFactor(0.7)
                     .padding(.bottom, 10)
 
-                Button(config.primaryTitle, action: config.primaryAction)
-                    .buttonStyle(.starhashPrimaryGlowing)
-                    .padding(.horizontal, 15)
-
-                if let title = config.secondaryTitle, let action = config.secondaryAction {
-                    Button(action: action) {
-                        Text(title)
-                            .font(.starhash(.subheadline, weight: .semibold))
-                            .foregroundStyle(Color.starhashSecondaryText)
-                            .frame(minHeight: 44)
-                            .contentShape(Rectangle())
+                // A second choice splits the button's place in two, the
+                // button on the left and the choice on the right, at the
+                // same height, so nothing moves from the screens before.
+                HStack(spacing: 12) {
+                    Button(LocalizedStringKey(config.primaryTitle), action: config.primaryAction)
+                        .buttonStyle(.starhashPrimaryGlowing)
+                    if let title = config.secondaryTitle, let action = config.secondaryAction {
+                        Button(LocalizedStringKey(title), action: action)
+                            .buttonStyle(.starhashSecondary)
                     }
-                    .buttonStyle(.hapticPlain)
                 }
+                .padding(.horizontal, 15)
             }
-            // A lone button sits where Continue does on the other
-            // onboarding screens, 10 points over the bottom; with a second
-            // choice under it, the two are centred in the panel.
-            .frame(height: 270, alignment: hasSecondary ? .center : .bottom)
+            // The buttons sit where Continue does on the other onboarding
+            // screens, 10 points over the bottom.
+            .frame(height: 270, alignment: .bottom)
             .padding([.horizontal, .top], 15)
-            .padding(.bottom, hasSecondary ? 15 : 10)
+            .padding(.bottom, 10)
             .frame(maxWidth: .infinity)
             // The phone fades into the page under the words.
             .background {
@@ -94,8 +93,6 @@ struct OnboardingPermission: View {
             showsAlert = true
         }
     }
-
-    private var hasSecondary: Bool { config.secondaryTitle != nil && config.secondaryAction != nil }
 
     // MARK: The iPhone
 
@@ -154,8 +151,8 @@ struct OnboardingPermission: View {
                 .padding(.leading, 24)
             Spacer(minLength: 0)
             Group {
-                Image(systemName: "wifi")
-                Image(systemName: "battery.50percent")
+                Image(symbol: "wifi")
+                Image(symbol: "battery.50percent")
             }
             .offset(y: -2)
         }
@@ -265,9 +262,9 @@ struct OnboardingPermission: View {
                     .frame(height: 13)
                     .padding(.trailing, 60)
             }
-            Image(systemName: "checkmark.circle.fill")
+            Image(symbol: "checkmark.circle.fill")
                 .font(.system(size: 30, weight: .semibold))
-                .foregroundStyle(Color.starhashIncoming)
+                .foregroundStyle(Color.starhashConfirmed)
                 .opacity(frame.tapOpacity)
                 .scaleEffect(frame.tapScale)
         }

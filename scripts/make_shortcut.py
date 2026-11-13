@@ -8,20 +8,40 @@
 # iOS only imports signed shortcut files.
 #
 #   python3 scripts/make_shortcut.py
+#   python3 scripts/make_shortcut.py --bundle-id <another build's id> --out other.shortcut
 #
-# Output: StarHash/Resources/StarHash SMS.shortcut, the file shared for
-# StarHashShortcut.iCloudLink (bundled only if the link is ever removed).
-# Regenerate it after renaming the intent, the bundle id or the team.
+# Output: StarHash/Resources/StarHash SMS.shortcut, the file the app bundles
+# and auto-verify's guide installs (StarHashShortcut). The action names the
+# app by bundle id and team, read from project.yml by default: Shortcuts
+# only runs it on an iPhone with that very app installed. A build under
+# another id needs a shortcut of its own, made with --bundle-id.
+# Regenerate after renaming the intent, the bundle id or the team.
+import argparse
 import os
 import plistlib
+import re
 import subprocess
 import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, "StarHash", "Resources", "StarHash SMS.shortcut")
 
-BUNDLE_ID = "com.fulltimestudio.starhash"
-TEAM_ID = "7WHQR6L96K"
+
+def from_project(key: str) -> str:
+    """The first value of `key` in project.yml: the app target's."""
+    with open(os.path.join(ROOT, "project.yml")) as f:
+        match = re.search(rf"^\s*{key}:\s*(\S+)", f.read(), re.M)
+    return match.group(1).strip('"') if match else ""
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--bundle-id", default=from_project("PRODUCT_BUNDLE_IDENTIFIER"))
+parser.add_argument("--team", default=from_project("DEVELOPMENT_TEAM"))
+parser.add_argument("--out", default=os.path.join(ROOT, "StarHash", "Resources", "StarHash SMS.shortcut"))
+args = parser.parse_args()
+
+OUT = os.path.abspath(args.out)
+BUNDLE_ID = args.bundle_id
+TEAM_ID = args.team
 INTENT = "ProcessCarrierSMSIntent"
 
 action = {
@@ -38,6 +58,18 @@ action = {
             "Value": {"attachmentsByRange": {"{0, 1}": {"Type": "ExtensionInput"}}, "string": "￼"},
             "WFSerializationType": "WFTextTokenString",
         },
+        # And `sender`, set to Shortcut Input's Sender, so StarHash can tell
+        # a look-alike from someone's own number from M-Money's own.
+        "sender": {
+            "Value": {
+                "attachmentsByRange": {"{0, 1}": {
+                    "Type": "ExtensionInput",
+                    "Aggrandizements": [{"Type": "WFPropertyVariableAggrandizement", "PropertyName": "Sender"}],
+                }},
+                "string": "￼",
+            },
+            "WFSerializationType": "WFTextTokenString",
+        },
     },
 }
 
@@ -45,7 +77,10 @@ workflow = {
     "WFWorkflowClientVersion": "2607.0.2",
     "WFWorkflowMinimumClientVersion": 900,
     "WFWorkflowMinimumClientVersionString": "900",
-    # A hash glyph on a dark tile.
+    # Shortcuts' own default glyph and colour. A file can name no app for its
+    # icon (Shortcuts ignores an image here, and glyph 61440, an app's
+    # icon, shows a placeholder until Shortcuts knows which app), so the
+    # guide has the owner choose StarHash's icon in Shortcuts by hand.
     "WFWorkflowIcon": {"WFWorkflowIconGlyphNumber": 59511, "WFWorkflowIconStartColor": 255},
     "WFWorkflowImportQuestions": [],
     "WFWorkflowTypes": [],
@@ -78,4 +113,4 @@ with tempfile.TemporaryDirectory() as folder:
     with open(unsigned, "wb") as f:
         plistlib.dump(workflow, f, fmt=plistlib.FMT_BINARY)
     subprocess.run(["shortcuts", "sign", "--mode", "anyone", "--input", unsigned, "--output", OUT], check=True)
-print(OUT)
+print(f"{OUT} ({BUNDLE_ID}, team {TEAM_ID})")

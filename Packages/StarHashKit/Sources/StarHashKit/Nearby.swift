@@ -11,6 +11,15 @@ import Foundation
 /// (`maximumAccuracy`), and a suggestion needs the person to be within the
 /// two fixes' uncertainty of a payment, never less than `minimumRadius`.
 public enum Nearby {
+    /// Whether a payment keeps where it was made: a merchant code always, a
+    /// number only when it is not one of the person's contacts, so paying
+    /// someone they know never records where they were. `isContact` is nil
+    /// when the contacts cannot be read: StarHash cannot tell, so a
+    /// number's place is not kept.
+    public static func remembersPlace(of recipient: Recipient, isContact: Bool?) -> Bool {
+        recipient.kind == .merchant || isContact == false
+    }
+
     /// A fix any worse than this cannot tell neighbouring tills apart.
     public static let maximumAccuracy: Double = 50
 
@@ -35,7 +44,7 @@ public enum Nearby {
         from transactions: [Transaction], latitude: Double, longitude: Double, accuracy: Double, limit: Int = 3
     ) -> [Suggestion] {
         guard accuracy >= 0, accuracy <= maximumAccuracy else { return [] }
-        var best: [String: Suggestion] = [:]
+        var best: [Recipient.Identity: Suggestion] = [:]
         for t in transactions where t.direction == .outgoing && t.status != .failed && t.counterparty.isPayable {
             // A place saved before its accuracy was kept never counts: no
             // fix was checked then, and paying a contact kept one too.
@@ -43,7 +52,7 @@ public enum Nearby {
                   placeAccuracy >= 0, placeAccuracy <= maximumAccuracy else { continue }
             let distance = Self.distance(latitude, longitude, place.latitude, place.longitude)
             guard distance <= max(minimumRadius, accuracy + placeAccuracy) else { continue }
-            let key = t.counterparty.kind.rawValue + t.counterparty.destination
+            let key = t.counterparty.identity
             if var found = best[key] {
                 found.visits += 1
                 found.distance = min(found.distance, distance)
@@ -75,5 +84,50 @@ public enum Nearby {
         let a = sin(dLat / 2) * sin(dLat / 2)
             + cos(lat1 * .pi / 180) * cos(lat2 * .pi / 180) * sin(dLon / 2) * sin(dLon / 2)
         return 2 * radius * asin(min(1, sqrt(a)))
+    }
+}
+
+/// Nearby suggestions passed over: each time the picker showed one and
+/// another was paid instead, that suggestion missed once more. After
+/// `limit` misses in a row it is no longer suggested; picking it puts it
+/// back to none, and so does paying it any other way (typed, from
+/// Contacts, a scanned code), which brings it back.
+public struct NearbyMisses: Codable, Equatable, Sendable {
+    /// Misses in a row, by the recipient's kind and number or code.
+    public private(set) var counts: [String: Int] = [:]
+
+    /// Five passed over in a row and it stops being suggested.
+    public static let limit = 5
+
+    public init() {}
+
+    /// Whether `recipient` has been passed over too often to suggest.
+    public func isRetired(_ recipient: Recipient) -> Bool {
+        (counts[Self.key(recipient)] ?? 0) >= Self.limit
+    }
+
+    /// The suggestions still worth showing, in their order.
+    public func filter(_ suggestions: [Recipient]) -> [Recipient] {
+        suggestions.filter { !isRetired($0) }
+    }
+
+    /// The picker showed `shown` and `chosen` was paid: every suggestion
+    /// passed over misses once more, and the one picked (if it was one)
+    /// starts again.
+    public mutating func record(shown: [Recipient], chosen: Recipient) {
+        let picked = Self.key(chosen)
+        for recipient in shown where Self.key(recipient) != picked {
+            counts[Self.key(recipient), default: 0] += 1
+        }
+        counts[picked] = nil
+    }
+
+    /// `recipient` was paid, however it was chosen: it starts again.
+    public mutating func paid(_ recipient: Recipient) {
+        counts[Self.key(recipient)] = nil
+    }
+
+    private static func key(_ recipient: Recipient) -> String {
+        "\(recipient.kind.rawValue):\(recipient.destination)"
     }
 }

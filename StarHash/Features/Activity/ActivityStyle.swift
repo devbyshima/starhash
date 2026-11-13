@@ -11,6 +11,25 @@ enum ActivityLayout {
     /// Buy's codes.
     static let cardRadius: CGFloat = 22
     static let cardSpacing: CGFloat = 10
+    /// A transaction's row, after the owner's reference: a 44pt tile 16pt
+    /// from the words, 8pt above and below, so rows sit 60pt apart.
+    static let tileSize: CGFloat = 44
+    static let tileGap: CGFloat = 16
+    static let rowPadding: CGFloat = 8
+    /// A long press on a pending row lifts it with its tile this far from
+    /// the card's edges, as Contacts lifts a contact.
+    static let rowPreviewInset: CGFloat = 9
+    /// A long press on a confirmed row lifts its page's top, after the
+    /// owner's reference: the room its bar takes on the page above the
+    /// tile, and the card's height, which cuts the details off.
+    static let previewTop: CGFloat = 66
+    static let previewHeight: CGFloat = 527
+    /// A month's heading: its room above, and below before the first row.
+    static let monthTop: CGFloat = 30
+    static let monthBottom: CGFloat = 0
+    /// A day's heading under its month: room above, a little below.
+    static let dayTop: CGFloat = 12
+    static let dayBottom: CGFloat = 4
 }
 
 /// The question before one transaction is deleted: the title and the
@@ -22,7 +41,7 @@ private struct DeleteTransactionDialog: ViewModifier {
     let asAlert: Bool
     let onDelete: (StarHashKit.Transaction) -> Void
 
-    @AppStorage(PreferenceKey.confirmDeletes) private var confirmDeletes = true
+    @AppStorage(Preferences.confirmDeletes) private var confirmDeletes: Bool
 
     private var isPresented: Binding<Bool> {
         Binding(get: { transaction != nil }, set: { if !$0 { transaction = nil } })
@@ -88,7 +107,7 @@ extension View {
         if #available(iOS 27.0, *) {
             swipeActions(edge: .trailing, allowsFullSwipe: true) {
                 Button(role: .destructive, action: onDelete) {
-                    Image(systemName: "trash")
+                    Image(symbol: "trash")
                 }
                 .tint(Color.starhashDestructive)
                 .accessibilityLabel("Delete")
@@ -110,25 +129,48 @@ extension View {
     }
 }
 
-/// The labels a transaction can carry. Stored in `Transaction.category` by
-/// raw value, so a label the app no longer lists still shows (as "Other"'s
-/// symbol and its own name).
-enum TransactionCategory: String, CaseIterable, Identifiable {
-    case restaurant, groceries, transport, bills, shopping, health, family, other
-
-    var id: Self { self }
-
-    var title: String { rawValue.capitalized }
+extension TransactionCategory {
+    /// The category's name, as Activity shows it.
+    var title: String {
+        switch self {
+        case .airtime: String(starhash: "Airtime")
+        case .bundles: String(starhash: "Bundles")
+        case .electricity: String(starhash: "Electricity")
+        case .water: String(starhash: "Water")
+        case .tv: String(starhash: "TV")
+        case .restaurant: String(starhash: "Restaurants")
+        case .groceries: String(starhash: "Groceries")
+        case .transport: String(starhash: "Transport")
+        case .bills: String(starhash: "Bills")
+        case .shopping: String(starhash: "Shopping")
+        case .health: String(starhash: "Health")
+        case .education: String(starhash: "Education")
+        case .family: String(starhash: "Family")
+        case .gifts: String(starhash: "Gifts")
+        case .savings: String(starhash: "Savings")
+        case .ownAccounts: String(starhash: "Your own accounts")
+        case .other: String(starhash: "Other")
+        }
+    }
 
     var symbol: String {
         switch self {
+        case .airtime: "phone.fill"
+        case .bundles: "antenna.radiowaves.left.and.right"
+        case .electricity: "bolt.fill"
+        case .water: "drop.fill"
+        case .tv: "tv.fill"
         case .restaurant: "fork.knife"
         case .groceries: "cart.fill"
         case .transport: "car.fill"
         case .bills: "doc.text.fill"
         case .shopping: "bag.fill"
         case .health: "heart.fill"
+        case .education: "graduationcap.fill"
         case .family: "person.2.fill"
+        case .gifts: "gift.fill"
+        case .savings: "banknote.fill"
+        case .ownAccounts: "arrow.left.arrow.right"
         case .other: "ellipsis.circle.fill"
         }
     }
@@ -141,37 +183,43 @@ extension StarHashKit.Transaction {
         direction == .outgoing ? "arrow.up.right" : "arrow.down.left"
     }
 
-    /// Red out, green in: the only two hues besides ink.
-    var activityArrowColor: Color {
-        direction == .outgoing ? .starhashDestructive : .starhashIncoming
+    /// The text colour both ways, the arrow telling them apart: red is kept
+    /// for what failed.
+    var activityArrowColor: AnyShapeStyle {
+        direction == .outgoing ? AnyShapeStyle(Color.starhashOutgoing) : AnyShapeStyle(Color.starhashIncoming)
     }
 
-    /// The amount's colour: primary text when money left, green when it
-    /// came in. Ink stays the only accent.
-    var activityAmountColor: Color {
+    /// The amount's colour: primary text when money left, the accent (the
+    /// same text colour) when it came in.
+    var activityAmountColor: SurfaceColor {
         direction == .outgoing ? .starhashPrimaryText : .starhashIncoming
     }
 
-    var activityCategory: TransactionCategory? {
-        category.flatMap(TransactionCategory.init(rawValue:))
+    var activityCategory: TransactionCategory? { knownCategory }
+
+    /// The category's name as a transaction's details give it: one of
+    /// StarHash's, else one an older version kept, else None.
+    var activityCategoryTitle: String {
+        activityCategory?.title ?? category?.capitalized ?? "None"
     }
 
     /// What VoiceOver reads for a row.
+    @MainActor
     var activityAccessibilityLabel: String {
         var parts = [
-            counterparty.displayName,
-            (direction == .outgoing ? "Sent " : "Received ") + Money.formatWithCurrency(amount),
-            date.formatted(date: .abbreviated, time: .shortened),
+            counterparty.shownName,
+            (isPurchase ? String(starhash: "Bought ") : direction == .outgoing ? String(starhash: "Sent ") : String(starhash: "Received ")) + Money.formatWithCurrency(amount),
+            date.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened, locale: .starhash)),
         ]
-        if status == .pending { parts.append("Pending") }
-        if status == .failed { parts.append("Failed") }
+        if status == .pending { parts.append(String(starhash: "Pending")) }
+        if status == .failed { parts.append(String(starhash: "Failed")) }
         return parts.joined(separator: ", ")
     }
 }
 
-/// The small capsule beside an unconfirmed transaction's name: Pending
-/// filled in the urgent orange, so it stands out from the row; Failed in
-/// red on grey.
+/// The small capsule beside an unconfirmed transaction's name, filled in
+/// its status colour so it stands out from the row: Pending yellow with
+/// near-black words, Failed red with white. A confirmed row has none.
 struct ActivityStatusBadge: View {
     let status: StarHashKit.Transaction.Status
 
@@ -180,10 +228,10 @@ struct ActivityStatusBadge: View {
             let isPending = status == .pending
             Text(isPending ? "Pending" : "Failed")
                 .starhashFont(12, weight: .bold, relativeTo: .caption)
-                .foregroundStyle(isPending ? Color.starhashOnUrgent : Color.starhashDestructive)
+                .foregroundStyle(isPending ? Color.starhashOnUrgent : Color.starhashOnDestructive)
                 .padding(.horizontal, 7)
                 .padding(.vertical, 2)
-                .background(isPending ? Color.starhashUrgent : Color.starhashCardRaised, in: Capsule())
+                .background(isPending ? Color.starhashUrgent : Color.starhashDestructiveButton, in: Capsule())
                 .lineLimit(1)
                 .fixedSize()
                 .accessibilityHidden(true)
@@ -192,17 +240,29 @@ struct ActivityStatusBadge: View {
 }
 
 extension ActivityPeriod {
-    /// The periods the control offers: a day, a week, a month and a year.
-    static let choices: [ActivityPeriod] = [.today, .week, .month, .year]
+    /// The periods the control offers: a week, a month and a year. A day
+    /// is too short to chart.
+    static let choices: [ActivityPeriod] = [.week, .month, .year]
 
-    /// The period control's label: a letter, as GO Club's D W M.
+    /// The Report's More menu: "Week", "Month", "Year".
+    var unitTitle: String {
+        switch self {
+        case .today: String(starhash: "Day")
+        case .week: String(starhash: "Week")
+        case .month: String(starhash: "Month")
+        case .year: String(starhash: "Year")
+        case .allTime: String(starhash: "All Time")
+        }
+    }
+
+    /// The period control's label: a letter, as GO Club's W M.
     var shortLabel: String {
         switch self {
-        case .today: "D"
-        case .week: "W"
-        case .month: "M"
-        case .year: "Y"
-        case .allTime: "A"
+        case .today: String(starhash: LocalizedStringResource("D", comment: "The period control's letter for a day"))
+        case .week: String(starhash: LocalizedStringResource("W", comment: "The period control's letter for a week"))
+        case .month: String(starhash: LocalizedStringResource("M", comment: "The period control's letter for a month"))
+        case .year: String(starhash: LocalizedStringResource("Y", comment: "The period control's letter for a year"))
+        case .allTime: String(starhash: LocalizedStringResource("A", comment: "The period control's letter for all time"))
         }
     }
 }

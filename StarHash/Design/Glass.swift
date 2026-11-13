@@ -30,12 +30,10 @@ extension View {
 }
 
 extension EnvironmentValues {
-    /// A tint for every glass shape on a page that sets one: Pay's blue
-    /// would otherwise turn the glass a pale cyan.
+    /// A tint for every glass shape on a page that sets one.
     @Entry var starhashGlassTint: Color?
-    /// On Pay's page, the blue in light mode, where the pages' greys turn
-    /// muddy: views that sit on both (a recipient's tile) switch to Pay's
-    /// text colours.
+    /// On Pay's page: views that sit on Pay and elsewhere (a recipient's
+    /// tile) take Pay's text colours there.
     @Entry var starhashOnPay = false
 }
 
@@ -47,13 +45,16 @@ private struct StarHashGlassModifier<S: Shape>: ViewModifier {
     @Environment(\.starhashGlassTint) private var pageTint
 
     func body(content: Content) -> some View {
-        // Every page is the blue in light mode, where untinted glass turns
-        // a pale cyan, so the deep-blue tint is the default.
+        // Clear unless a page or a caller tints it (Buy's call buttons).
         let tint: Color = tint ?? pageTint ?? .starhashGlassTint
+        let surface: StarHashSurface = .container
         if #available(iOS 26.0, *) {
-            content.glassEffect(Glass.regular.tint(tint).interactive(interactive), in: shape)
+            content
+                .environment(\.starhashSurface, surface)
+                .glassEffect(Glass.regular.tint(tint).interactive(interactive), in: shape)
         } else {
             content
+                .environment(\.starhashSurface, surface)
                 .background(tint, in: shape)
                 .background(.ultraThinMaterial, in: shape)
                 .overlay(shape.stroke(Color.starhashPrimaryText.opacity(0.10), lineWidth: 0.5))
@@ -118,27 +119,26 @@ extension View {
         }
     }
 
-    // MARK: Black glass
+    // MARK: Containers
 
-    /// A container, as the Total card is: in light mode **white glass**,
-    /// Liquid Glass over a solid `lightFill` (a white card, a sheet's pale
-    /// blue card), which gives it the glass's edge and soft shadow; in dark
-    /// **black glass**, the near black as Liquid Glass, a touch darker than
-    /// the page with a light rim. Every card, panel and field box goes
+    /// A container: a solid fill in `shape`, the owner's foreground
+    /// (white in light mode, #101010 in dark) unless a sheet asks for its
+    /// own. No glass: Liquid Glass stays on what floats over the page (the
+    /// tab bar, the header buttons, sheets, Buy's call buttons), and what
+    /// sits in the page is flat. Every card, panel and field box goes
     /// through this.
-    func starhashContainer(_ lightFill: Color, in shape: some Shape) -> some View {
-        modifier(ContainerSurface(lightFill: lightFill, shape: shape))
+    func starhashContainer(_ fill: Color, in shape: some Shape) -> some View {
+        starhashContainerSurface()
+            .background(fill, in: shape)
     }
 
     // MARK: Total card
 
-    /// The **Total card** surface, the recipient screen's Total: solid white
-    /// in light mode, the sheets' near-black glass in dark. Buy's codes and
-    /// pinned tiles wear it too, and so does Balance (`interactive`), which
-    /// Pay holds to the light look in dark mode as well.
-    func starhashTotalCard(in shape: some Shape, interactive: Bool = false) -> some View {
-        background(Color.sheetSolidFill, in: shape)
-            .starhashGlass(in: shape, interactive: interactive, tint: .sheetGlassTint)
+    /// The **Total card** surface, the recipient screen's Total: the
+    /// cards' solid foreground. Buy's codes and pinned tiles wear it too,
+    /// and so does Balance.
+    func starhashTotalCard(in shape: some Shape) -> some View {
+        starhashContainer(.starhashCard, in: shape)
     }
 
     // MARK: Soft Edge
@@ -167,23 +167,6 @@ extension View {
             self.safeAreaBar(edge: .top, spacing: 0, content: header)
         } else {
             self.safeAreaInset(edge: .top, spacing: 0, content: header)
-        }
-    }
-}
-
-private struct ContainerSurface<S: Shape>: ViewModifier {
-    let lightFill: Color
-    let shape: S
-
-    @Environment(\.colorScheme) private var colorScheme
-
-    func body(content: Content) -> some View {
-        if colorScheme == .dark {
-            content.starhashGlass(in: shape, tint: .blackGlassTint)
-        } else {
-            content
-                .background(lightFill, in: shape)
-                .starhashGlass(in: shape, tint: lightFill)
         }
     }
 }

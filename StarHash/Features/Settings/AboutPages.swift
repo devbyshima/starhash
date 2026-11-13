@@ -2,18 +2,18 @@ import StarHashKit
 import SwiftUI
 
 /// StarHash itself, one row away from Settings: What's New, the onboarding
-/// again, the developer's note and the source code, and in dev and beta
-/// builds the feature flags.
+/// again, the developer's note and the source code, and in the dev build
+/// the feature flags.
 struct AboutStarHashView: View {
     @AppStorage(PreferenceKey.hasOnboarded) private var hasOnboarded = true
-    @State private var showsDeveloperNote = false
+    @State private var showsDeveloperNote = SettingsLaunch.opensDeveloperNote
 
     var body: some View {
         SettingsScroll {
             SettingsCard {
                 SettingsLinkRow(page: .whatsNew, symbol: "sparkles", title: "What's New", caption: "What each version brought")
                 Button {
-                    UserDefaults.standard.set(0, forKey: PreferenceKey.onboardingStage)
+                    FirstRun.save(nil)
                     withAnimation(.smooth) { hasOnboarded = false }
                 } label: {
                     SettingsRow(symbol: "play.circle.fill", title: "Replay Onboarding", caption: "See the welcome screens again")
@@ -29,6 +29,7 @@ struct AboutStarHashView: View {
                     }
                 }
                 .buttonStyle(HighlightRowButtonStyle())
+                SettingsLinkRow(page: .licences, symbol: "doc.text.fill", title: "Licences", caption: "The font and code StarHash is built with, and their terms")
                 // Dev and TestFlight builds only, once there is a flag.
                 if FeatureFlags.showsPage {
                     SettingsLinkRow(page: .featureFlags, symbol: "flag.fill", title: "Feature Flags", caption: "Try what is not finished yet")

@@ -9,9 +9,10 @@ import SwiftUI
 struct PayView: View {
     @Environment(StarHashStore.self) private var store
     @Environment(AppRouter.self) private var router
-    @AppStorage(PreferenceKey.saveTransactions) private var saveTransactions = true
-    @AppStorage(PreferenceKey.nearbyLocation) private var nearbyLocation = false
-    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
+    @AppStorage(Preferences.saveTransactions) private var saveTransactions: Bool
+    @AppStorage(Preferences.nearbyLocation) private var nearbyLocation: Bool
+    @Environment(Owner.self) private var owner
+    private var wallet: Recipient.Network { owner.wallet }
 
     @State private var input = AmountInput()
     /// The recipient picker when it is showing.
@@ -19,6 +20,11 @@ struct PayView: View {
     /// Who to pay, from Pay Again on a transaction. Pay then dials them
     /// straight away instead of opening the picker.
     @State private var chosenRecipient: Recipient?
+    /// The photo a scanned code shares for `chosenRecipient`.
+    @State private var chosenPhotoID: UUID?
+    /// Whether `chosenRecipient` came from a code other than StarHash's,
+    /// which says nothing of who it is: shown as its number alone.
+    @State private var chosenIsBare = false
     /// A code the system would not dial (the simulator, an iPad), shown in
     /// an alert so it can be dialled by hand.
     @State private var undialledCode: String?
@@ -28,9 +34,9 @@ struct PayView: View {
     /// Which locating run is current, so a late answer from an older one
     /// is ignored.
     @State private var locatingRun = UUID()
-    /// The store's location wipe count when locating started: a fix that
-    /// arrives after a wipe (Nearby turned off, Delete All Data) is dropped.
-    @State private var locationsGeneration = 0
+    /// Taken when locating started: a fix that arrives after a wipe
+    /// (Nearby turned off, Delete All Data) is dropped by the store.
+    @State private var placeTicket: StarHashStore.PlaceTicket?
     /// That fix once it arrives, for the picker's Nearby section.
     @State private var nearbyFix: LocationFix?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -39,6 +45,8 @@ struct PayView: View {
     /// Pay tapped with nothing typed, which shakes the amount.
     @State private var zeroShakes = 0
     @State private var didApplyDebugLaunch = false
+    /// The QR scanner, over everything.
+    @State private var isScanning = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -66,8 +74,22 @@ struct PayView: View {
         } message: { code in
             Text("Dial \(code) on your phone to finish.")
         }
-        // Pay Again on a transaction, from the Activity tab.
+        // Pay Again on a transaction, from the Activity tab, or a
+        // StarHash code opened by the Camera.
         .onChange(of: router.payRequest?.id, initial: true) { takePayRequest() }
+        // The scanner, asked for by a widget or a link.
+        .onChange(of: router.scanRequest, initial: true) {
+            if router.takeScanRequest() {
+                path = []
+                isScanning = true
+            }
+        }
+        .fullScreenCover(isPresented: $isScanning) {
+            QRScannerView { request in
+                isScanning = false
+                take(request)
+            }
+        }
         .onChange(of: path) { _, path in
             // Back from the picker without paying: its fix is dropped. Not
             // when Pay Again just chose someone, whose fix is under way.
@@ -78,7 +100,11 @@ struct PayView: View {
             router.setHidesTabBar(!path.isEmpty, on: .pay)
         }
         .onAppear(perform: applyDebugLaunch)
-        .task { await PayShaders.prepare() }
+        .task {
+            await PayShaders.prepare()
+            // The confirmation sheets' wave, ahead of its first play.
+            await DistortionWave.prepare()
+        }
         #if DEBUG
         // -payShake: Pay tapped with nothing typed, three times from 1.5s,
         // about as far apart as in the reference, to record the shake.
@@ -95,12 +121,12 @@ struct PayView: View {
 
     private var keypadScreen: some View {
         VStack(spacing: 0) {
-            PageHeader(page: .pay) { EmptyView() } trailing: { WalletSwitcher() }
+            PageHeader(page: .pay) { EmptyView() } trailing: { ScanButton { isScanning = true } }
 
             Spacer(minLength: 12)
             PayAmountDisplay(amount: input.value, shakes: zeroShakes)
             if let chosenRecipient {
-                PayChosenRecipient(recipient: chosenRecipient) {
+                PayChosenRecipient(recipient: chosenRecipient, photoID: chosenPhotoID, isBare: chosenIsBare) {
                     withAnimation(.smooth(duration: 0.25)) { self.chosenRecipient = nil }
                 }
                 .padding(.top, 12)
@@ -108,10 +134,10 @@ struct PayView: View {
             }
             Spacer(minLength: 12)
 
-            // The amount sits midway between the top bar and the currency;
-            // the currency, keypad and buttons stack at the bottom, as in a
+            // The amount sits midway between the top bar and the wallet;
+            // the wallet, keypad and buttons stack at the bottom, as in a
             // payment app's keypad screen.
-            PayCurrencyPill(isEmpty: input.isZero)
+            WalletPill()
                 .padding(.bottom, 14)
 
             // Up to 332pt, four rows of about 83, so keys grow to thumb size
@@ -147,24 +173,20 @@ struct PayView: View {
             Button {
                 dial(USSD.balance(for: wallet))
             } label: {
-                Label("Balance", systemImage: "wallet.bifold")
-                    // At accessibility sizes the word alone, shrunk a little
-                    // rather than broken across two lines.
-                    .labelStyle(BalanceLabelStyle())
+                Text("Balance")
+                    // At accessibility sizes shrunk a little rather than
+                    // broken across two lines.
                     .starhashFont(18, weight: .semibold, relativeTo: .body)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
-                    .foregroundStyle(Color.payPrimaryText)
+                    .foregroundStyle(Color.starhashPrimaryText)
                     .padding(.horizontal, 12)
                     .frame(maxWidth: .infinity)
                     .frame(minHeight: StarHashMetrics.primaryButtonHeight)
                     .contentShape(Capsule())
-                    // The Total card's white.
-                    .starhashTotalCard(in: Capsule(), interactive: true)
+                    .modifier(BalanceSurface())
             }
             .buttonStyle(PressScaleButtonStyle())
-            // White with near-black words in dark mode too, as in light.
-            .environment(\.colorScheme, .light)
             .accessibilityHint("Dials \(USSD.balance(for: wallet))")
 
             // Never greyed out: with nothing typed it looks as always, and
@@ -223,7 +245,7 @@ struct PayView: View {
         locationTask = nil
         let run = UUID()
         locatingRun = run
-        locationsGeneration = store.locationsGeneration
+        placeTicket = store.placeTicket()
         #if DEBUG
         if let fix = DebugLaunch.nearbyFix {
             nearbyFix = fix
@@ -244,10 +266,28 @@ struct PayView: View {
     private func takePayRequest() {
         guard let request = router.takePayRequest() else { return }
         path = []
-        // Pay Again skips the picker: locate now, while StarHash is still in
+        // Pay Again, or StarHash's own link opened from the Camera: both
+        // know who they are paying.
+        take(PaymentRequest(recipient: request.recipient, amount: request.amount, photoID: request.photoID, isStarHashCode: true))
+    }
+
+    /// Who a scanned code (or Pay Again) says to pay: chosen under the
+    /// amount, with the amount typed in when the code asks for one, so Pay
+    /// dials them without the recipient screen.
+    private func take(_ request: PaymentRequest) {
+        // Skipping the picker: locate now, while StarHash is still in
         // front, so the fix is in hand when Pay is tapped.
         startLocating()
-        withAnimation(.smooth(duration: 0.25)) { chosenRecipient = request.recipient }
+        withAnimation(.smooth(duration: 0.25)) {
+            chosenRecipient = request.recipient
+            chosenPhotoID = request.photoID
+            chosenIsBare = !request.isStarHashCode
+            if let amount = request.amount { input = AmountInput(value: amount) }
+        }
+        if request.amount == nil {
+            let who = request.isStarHashCode ? request.recipient.shownName : request.recipient.formattedDestination
+            AccessibilityNotification.Announcement("Paying \(who). Type an amount.").post()
+        }
     }
 
     /// Records the payment (pending until its SMS), goes back to the keypad
@@ -258,12 +298,15 @@ struct PayView: View {
         let amount = input.value
         guard amount > 0, recipient.isPayable else { return }
         let pendingLocation = locationTask
-        let generation = locationsGeneration
+        let ticket = placeTicket
         locationTask = nil
 
+        // Paid, however it was chosen: a Nearby suggestion passed over
+        // before is suggested again.
+        NearbyMissesStore.paid(recipient)
         var recordedID: UUID?
         if saveTransactions {
-            recordedID = store.recordPayment(to: recipient, amount: amount, wallet: wallet, retryWindow: 5 * 60).id
+            recordedID = store.recordPayment(to: recipient, amount: amount, wallet: wallet).id
         }
         let code = USSD.payment(to: recipient, amount: amount, from: wallet)
         withAnimation(.smooth(duration: 0.25)) { chosenRecipient = nil }
@@ -275,34 +318,26 @@ struct PayView: View {
         }
 
         // The location goes on the payment once it arrives, never before
-        // dialling: its map, and what Nearby suggests from. Only for a
-        // merchant code or a number that is not one of the person's
-        // contacts: paying someone they know never records where they were.
-        if let pendingLocation, let recordedID {
+        // dialling: its map, and what Nearby suggests from, when
+        // `Nearby.remembersPlace` allows. The store drops it when Nearby
+        // was turned off, or everything erased, while it was coming.
+        if let pendingLocation, let recordedID, let ticket {
             Task {
-                guard let fix = await pendingLocation.value,
-                      await Self.remembersPlace(of: recipient),
-                      // Nearby could have been turned off, or everything
-                      // erased, while the fix was coming.
-                      StarHashPreferences.nearbyLocation,
-                      store.locationsGeneration == generation,
-                      var transaction = store.transaction(id: recordedID) else { return }
-                transaction.location = fix.coordinate
-                store.update(transaction)
+                guard let fix = await pendingLocation.value, Preferences.nearbyLocation.value() else { return }
+                let isContact = recipient.kind == .phone ? await Self.isContact(recipient) : nil
+                guard Nearby.remembersPlace(of: recipient, isContact: isContact) else { return }
+                store.attachPlace(fix.coordinate, to: recordedID, ticket: ticket)
             }
         }
     }
 
-    /// Whether a payment keeps where it was made: a merchant code always, a
-    /// number only when it is not in Contacts. A number needs the contacts
-    /// read first; when StarHash cannot read them it cannot tell, so the
-    /// place is not kept.
-    private static func remembersPlace(of recipient: Recipient) async -> Bool {
-        guard recipient.kind == .phone else { return true }
+    /// Whether a number is one of the person's contacts, read first; nil
+    /// when StarHash cannot read them, so cannot tell.
+    private static func isContact(_ recipient: Recipient) async -> Bool? {
         let contacts = PayContacts.shared
         await contacts.loadIfAllowed()
-        guard contacts.hasLoaded, contacts.access == .authorized else { return false }
-        return !contacts.isContact(recipient)
+        guard contacts.hasLoaded, contacts.access == .authorized else { return nil }
+        return contacts.isContact(recipient)
     }
 
     private func dial(_ code: String) {
@@ -324,20 +359,27 @@ struct PayView: View {
         if PayDebug.opensPicker {
             openPicker(query: PayDebug.query ?? "")
         }
+        if DebugLaunch.arguments.contains("-payScan") { isScanning = true }
         #endif
     }
 }
 
-/// The wallet icon and "Balance", or only the word at accessibility text
-/// sizes, where the button is half the screen's width.
-private struct BalanceLabelStyle: LabelStyle {
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+/// Balance's capsule: clear Liquid Glass with no tint, as the header
+/// buttons wear it (only sheets are tinted glass), lit by a press. Before
+/// iOS 26, the fallback material.
+private struct BalanceSurface: ViewModifier {
+    func body(content: Content) -> some View {
+        content.starhashGlass(in: Capsule(), interactive: true, tint: .clear)
+    }
+}
 
-    func makeBody(configuration: Configuration) -> some View {
-        HStack(spacing: 8) {
-            if !dynamicTypeSize.isAccessibilitySize { configuration.icon }
-            configuration.title
-        }
+/// The scanner's button at the top right of Pay, in the round glass the
+/// other header buttons wear.
+private struct ScanButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        SwapGlassButton(symbol: "qrcode", label: "Scan a QR code", action: action)
     }
 }
 
@@ -348,35 +390,53 @@ private enum PayRoute: Hashable {
 }
 
 /// The recipient Pay Again chose, under an empty amount: who the next
-/// payment goes to, with a way to drop them and pick someone else.
+/// payment goes to, with a way to drop them and pick someone else. One
+/// from a code other than StarHash's is its number or code alone, with no
+/// tile: the code says nothing more.
 private struct PayChosenRecipient: View {
     let recipient: Recipient
+    /// Their photo on StarHash's server, when their code shared one.
+    var photoID: UUID?
+    var isBare = false
     let onClear: () -> Void
 
-    @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
+    @State private var sharedPhoto: UIImage?
+
+    @AppStorage(Preferences.enableContacts) private var enableContacts: Bool
     private var contacts: PayContacts { .shared }
 
     var body: some View {
         HStack(spacing: 10) {
-            RecipientTile(
-                tile: .for(recipient, photoContactID: enableContacts ? contacts.photoContactID(for: recipient) : nil),
-                size: 28
-            )
-            Text("To \(recipient.displayName)")
+            // A photo saved in Contacts comes first; then the one their
+            // code shared; then the tile.
+            let contactPhoto = enableContacts ? contacts.photoContactID(for: recipient) : nil
+            if isBare {
+                EmptyView()
+            } else if contactPhoto == nil, let sharedPhoto {
+                Image(uiImage: sharedPhoto)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 28, height: 28)
+                    .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                    .accessibilityHidden(true)
+            } else {
+                RecipientTile(tile: .for(recipient, photoContactID: contactPhoto), size: 28)
+            }
+            Text("To \(isBare ? recipient.formattedDestination : recipient.shownName)")
                 .font(.starhash(.subheadline, weight: .semibold))
                 .foregroundStyle(Color.payPrimaryText)
                 .lineLimit(1)
             Button(action: onClear) {
-                Image(systemName: "xmark.circle.fill")
+                Image(symbol: "xmark.circle.fill")
                     .font(.starhash(.body))
                     .foregroundStyle(Color.paySecondaryText)
                     .frame(minWidth: 32, minHeight: 32)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.hapticPlain)
-            .accessibilityLabel("Remove \(recipient.displayName)")
+            .accessibilityLabel("Remove \(isBare ? recipient.formattedDestination : recipient.shownName)")
         }
-        .padding(.leading, 6)
+        .padding(.leading, isBare ? 14 : 6)
         .padding(.trailing, 4)
         .padding(.vertical, 4)
         .starhashGlass()
@@ -384,6 +444,11 @@ private struct PayChosenRecipient: View {
         // The photo, when the number or code is saved in Contacts.
         .task(id: enableContacts) {
             if enableContacts { await contacts.loadIfAllowed() }
+        }
+        // The photo their code shared, when it shared one.
+        .task(id: photoID) {
+            sharedPhoto = nil
+            if let photoID { sharedPhoto = await StarHashCloud.photo(photoID) }
         }
     }
 }

@@ -43,7 +43,7 @@ struct StarHashCircleGlyph: View {
     private var isClose: Bool { symbol == "xmark" }
 
     var body: some View {
-        Image(systemName: symbol)
+        Image(symbol: symbol)
             .font(.system(size: 17, weight: isClose ? .medium : .semibold))
             .starhashHeaderGlyphScale()
             .foregroundStyle(isClose ? Color.starhashCloseGlyph : Color.starhashPrimaryText)
@@ -65,7 +65,7 @@ struct StarHashCard<Content: View>: View {
 }
 
 /// The line between rows of a card, starting where the row text starts:
-/// the dotted `SheetDivider`, the app's one separator. With `overlapsRows`
+/// the solid `SheetDivider`, the app's one separator. With `overlapsRows`
 /// it is drawn across the boundary between the rows instead of adding its
 /// own height between them.
 struct StarHashRowSeparator: View {
@@ -112,7 +112,7 @@ struct StarHashCapsuleButtonStyle: ButtonStyle {
             .frame(minHeight: height)
             // A capsule at the design height; a rounded card, not a clipped
             // pill, when a large text size wraps the label.
-            .background(RoundedRectangle(cornerRadius: height / 2, style: .continuous).fill(Color.starhashInk))
+            .background(RoundedRectangle(cornerRadius: height / 2, style: .continuous).fill(.starhashAccentLit))
             .frame(minHeight: 44)
             .contentShape(Rectangle())
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
