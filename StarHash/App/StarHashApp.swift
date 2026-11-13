@@ -4,27 +4,24 @@ import SwiftUI
 @main
 struct StarHashApp: App {
     @Environment(\.scenePhase) private var scenePhase
+    /// For the icon's quick actions (`QuickActions`).
+    @UIApplicationDelegateAdaptor(StarHashAppDelegate.self) private var appDelegate
 
     private let store = AppEnvironment.store
     private let router = AppEnvironment.router
     private let shortcuts = AppEnvironment.shortcuts
 
     init() {
+        // The language chosen in StarHash, before anything is drawn.
+        AppLanguage.stored.apply()
         #if DEBUG
         if DebugLaunch.arguments.contains("-skipOnboarding") {
             UserDefaults.standard.set(true, forKey: PreferenceKey.hasOnboarded)
             // Seen too, so it does not cover the page a screenshot is after
             // (-note shows it anyway).
             UserDefaults.standard.set(true, forKey: PreferenceKey.hasSeenDeveloperNote)
-            // Onboarding asks for the wallet; skipping it needs one.
-            if (UserDefaults.standard.string(forKey: PreferenceKey.wallet) ?? "").isEmpty {
-                UserDefaults.standard.set(Recipient.Network.mtn.rawValue, forKey: PreferenceKey.wallet)
-            }
-        }
-        if let wallet = DebugLaunch.value(after: "-wallet") {
-            // "none" clears it, for onboarding as a fresh install sees it.
-            let network = Recipient.Network(rawValue: wallet)
-            UserDefaults.standard.set(network?.rawValue ?? "", forKey: PreferenceKey.wallet)
+            // And Show My Name's notice (-showMyNameNotice shows it anyway).
+            UserDefaults.standard.set(true, forKey: PreferenceKey.seenShowMyNameNotice)
         }
         // Not "-appearance": a launch argument named after a key overrides
         // that key's saved value for the whole run.
@@ -32,13 +29,54 @@ struct StarHashApp: App {
             UserDefaults.standard.set(appearance, forKey: PreferenceKey.appearance)
         }
         if DebugLaunch.arguments.contains("-nearbyHere") {
-            UserDefaults.standard.set(true, forKey: PreferenceKey.nearbyLocation)
+            UserDefaults.standard.set(true, forKey: Preferences.nearbyLocation.key)
+        }
+        let owner = AppEnvironment.owner
+        // -profile: a name and number, for the QR code's screens.
+        if DebugLaunch.arguments.contains("-profile") {
+            owner.setName("Shima Serein")
+            owner.setNumber("0788123456")
+        }
+        // -twoSIMs [airtel]: -profile's number and a second SIM, on MTN
+        // too or on Airtel, for the default SIM's screens.
+        if DebugLaunch.arguments.contains("-twoSIMs") {
+            owner.setNumber("0788123456")
+            owner.useTwoSIMs()
+            owner.setOtherNumber(DebugLaunch.value(after: "-twoSIMs") == "airtel" ? "0722123456" : "0791234567")
+        }
+        // Onboarding asks for the wallet; skipping it needs one. The wallet
+        // comes after the numbers, so it leads as it does at launch.
+        if DebugLaunch.arguments.contains("-skipOnboarding"), owner.chosenWallet == nil {
+            owner.choose(.mtn)
+        }
+        if let wallet = DebugLaunch.value(after: "-wallet") {
+            // "none" clears it, for onboarding as a fresh install sees it.
+            owner.choose(Recipient.Network(rawValue: wallet))
         }
         if DebugLaunch.arguments.contains("-resetOnboarding") {
             UserDefaults.standard.set(false, forKey: PreferenceKey.hasOnboarded)
         }
+        // -resetAutoVerify: auto-verify off, as on a fresh install.
+        if DebugLaunch.arguments.contains("-resetAutoVerify") {
+            AppEnvironment.autoVerify.turnOff()
+        }
+        // -receiveMessage <text>: the Process Carrier SMS action runs on it
+        // at launch, as the automation would, with auto-verify set up first
+        // and turned off again after when it was off before.
+        if let message = DebugLaunch.value(after: "-receiveMessage") {
+            let autoVerify = AppEnvironment.autoVerify
+            let wasOff = autoVerify.status() == .off
+            if wasOff {
+                autoVerify.receive(AutoVerificationSample.message, sender: nil)
+                autoVerify.finishSetUp()
+            }
+            Task { @MainActor in
+                _ = try? await ProcessCarrierSMSIntent(message: message, sender: DebugLaunch.value(after: "-sender")).perform()
+                if wasOff { autoVerify.turnOff() }
+            }
+        }
         #endif
-        Self.useSpaceGroteskInNavigationBars()
+        Self.useBrandTypeInNavigationBars()
         // Before launch finishes, so a tap that opened StarHash is heard.
         StarHashNotifications.shared.start()
         // Nearby's own file from before it was built from the payments:
@@ -48,13 +86,16 @@ struct StarHashApp: App {
 
     /// Navigation bar titles (Settings and its pages, a transaction) are
     /// UIKit's, outside SwiftUI's font environment: the page title's 21pt
-    /// bold, scaled for the text size at launch up to 28.
-    private static func useSpaceGroteskInNavigationBars() {
+    /// bold in Space Grotesk, scaled for the text size at launch up to 28.
+    private static func useBrandTypeInNavigationBars() {
         let bar = UINavigationBar.appearance()
         let title = UIFont.starhash(StarHashMetrics.pageTitleSize, weight: 700)
         bar.titleTextAttributes = [.font: UIFontMetrics(forTextStyle: .headline).scaledFont(for: title, maximumPointSize: 28)]
         bar.largeTitleTextAttributes = [.font: UIFont.starhash(34, weight: 700)]
     }
+
+    /// The language chosen in Settings; the app is drawn afresh in it.
+    @AppStorage(PreferenceKey.appLanguage) private var language = AppLanguage.system.rawValue
 
     var body: some Scene {
         WindowGroup {
@@ -63,11 +104,20 @@ struct StarHashApp: App {
                     // Text with no font of its own (list rows, fields) is in
                     // Space Grotesk too.
                     .font(.starhash(.body))
+                    // In the language chosen, with its dates and numbers, and
+                    // drawn afresh when it changes.
+                    .environment(\.locale, (AppLanguage(rawValue: language) ?? .system).locale)
+                    .id(language)
                     .environment(store)
+                    .environment(AppEnvironment.owner)
+                    .environment(AppEnvironment.autoVerify)
                     .environment(router)
                     .environment(shortcuts)
                     .tint(Color.starhashPrimaryText)
                     .onOpenURL { router.handle($0) }
+                    #if DEBUG
+                    .debugWidgetGallery()
+                    #endif
                     // A payment dialled, settled or deleted: its reminder
                     // and the summaries follow.
                     .onChange(of: store.transactions) {
@@ -77,21 +127,41 @@ struct StarHashApp: App {
                     .task(id: scenePhase == .active) {
                         while scenePhase == .active, !Task.isCancelled {
                             try? await Task.sleep(for: .seconds(60))
-                            PaymentExpiry.run()
+                            AppEnvironment.autoVerify.expireUnconfirmed()
                         }
                     }
             }
             // Settings' Appearance, the splash included.
             .onAppear { AppAppearance.apply(.stored) }
+            // Clair's renderer, when the Clair Mac app launched StarHash (debug builds only).
+            .screensHost()
         }
         .onChange(of: scenePhase, initial: true) { _, phase in
             // The Process Carrier SMS shortcut may have written while we
             // were in the background, and notifications may have been
             // turned on or off in the Settings app.
             if phase == .active {
+                // A quick action chosen on the icon, and the menu as it now
+                // stands (the wallet's balance code).
+                QuickActions.performPending()
+                QuickActions.update()
+                // Counted as in use, once a day, by a random id alone.
+                StarHashCloud.pingIfDue()
+                // The owner's listing, sent again when it is a week old.
+                StarHashCloud.syncDirectory(owner: AppEnvironment.owner)
                 store.reloadFromDisk()
-                PaymentExpiry.run()
+                AppEnvironment.autoVerify.reload()
+                AppEnvironment.autoVerify.expireUnconfirmed()
                 Task { await StarHashNotifications.shared.sync() }
+                // Categories for what came in while away, by the rules and
+                // then by the on-device model.
+                Task { await SmartCategories.run(on: store) }
+            }
+            if phase == .background {
+                // The Buy widget shows the codes as they are now, and the
+                // icon's menu dials the wallet chosen now.
+                StarHashWidgetData.publish(shortcuts: shortcuts)
+                QuickActions.update()
             }
             AppLock.shared.sceneChanged(to: phase)
         }

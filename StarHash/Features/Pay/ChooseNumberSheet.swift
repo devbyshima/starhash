@@ -71,14 +71,13 @@ struct RecipientNumberRow: View {
             HStack(spacing: 14) {
                 leading
                 Text(recipient.formattedDestination)
-                    .font(.sheet(16, .medium))
+                    .font(.starhashNumber(16, relativeTo: .body))
                     .foregroundStyle(Color.starhashPrimaryText)
-                    .monospacedDigit()
                 Spacer(minLength: 8)
                 Text(ChooseNumberSheet.network(of: recipient))
                     .font(.sheetBody)
                     .foregroundStyle(Color.sheetSecondaryText)
-                Image(systemName: "chevron.right")
+                Image(symbol: "chevron.right")
                     .font(.sheet(12, .semibold, relativeTo: .footnote))
                     .foregroundStyle(Color.sheetSecondaryText)
             }

@@ -11,6 +11,9 @@ public struct ParsedSMS: Hashable, Sendable {
     public var date: Date?
     public var reference: String?
     public var balanceAfter: Int?
+    /// What it was for, when the message or the name it was paid to says
+    /// (airtime, a bundle, electricity): a `TransactionCategory` raw value.
+    public var category: String?
 
     public init(
         wallet: Recipient.Network = .mtn,
@@ -20,7 +23,8 @@ public struct ParsedSMS: Hashable, Sendable {
         fee: Int? = nil,
         date: Date? = nil,
         reference: String? = nil,
-        balanceAfter: Int? = nil
+        balanceAfter: Int? = nil,
+        category: String? = nil
     ) {
         self.wallet = wallet
         self.direction = direction
@@ -30,6 +34,32 @@ public struct ParsedSMS: Hashable, Sendable {
         self.date = date
         self.reference = reference
         self.balanceAfter = balanceAfter
+        self.category = category
+    }
+
+    /// Bought rather than sent: airtime, a bundle, electricity, water, TV.
+    public var isPurchase: Bool {
+        direction == .outgoing && (category.flatMap(TransactionCategory.init(rawValue:))?.isPurchase ?? false)
+    }
+}
+
+/// What MoMoAdvance, MTN's overdraft, says it lent: "You have used 2100 RWF
+/// on FRI:11049834/MM with access fee 68 RWF on 2026-10-06 20:15:29 from
+/// MoMoAdvance." Not a movement of its own, since the payment's own
+/// message says what was sent; what it adds is the access fee, which is
+/// part of what that payment cost.
+public struct OverdraftUse: Hashable, Sendable {
+    /// What the overdraft covered: the payment and its fee, or the part of
+    /// them the balance could not.
+    public var amount: Int
+    public var accessFee: Int
+    /// The payment's moment, to the second as its own message gives it.
+    public var date: Date?
+
+    public init(amount: Int, accessFee: Int, date: Date? = nil) {
+        self.amount = amount
+        self.accessFee = accessFee
+        self.date = date
     }
 }
 
@@ -50,7 +80,27 @@ public struct ParsedSMS: Hashable, Sendable {
 /// in RWF, with the currency before the amount as Rwanda's messages write
 /// it. No Rwandan message has been published to check them against, so
 /// they are deliberately loose.
+/// What a wallet's message says, read once (`CarrierSMS.read`).
+public enum WalletMessage: Hashable, Sendable {
+    /// Money sent or received.
+    case transaction(ParsedSMS)
+    /// A payment that did not go through.
+    case failure(ParsedSMS)
+    /// MoMoAdvance paying for a payment.
+    case overdraft(OverdraftUse)
+}
+
 public enum CarrierSMS {
+    /// The three kinds of wallet message, tried in one order for every
+    /// reader (the automation and Verify). Nil for anything else: a bank's
+    /// text, a promotion, a look-alike that reads as none of them.
+    public static func read(_ text: String) -> WalletMessage? {
+        if let sms = parse(text) { return .transaction(sms) }
+        if let failure = parseFailure(text) { return .failure(failure) }
+        if let use = parseOverdraft(text) { return .overdraft(use) }
+        return nil
+    }
+
     /// Nil when the text is not a MoMo or Airtel Money transaction message.
     public static func parse(_ text: String) -> ParsedSMS? {
         let message = normalized(text)
@@ -69,16 +119,51 @@ public enum CarrierSMS {
             return nil
         }
         guard shape.amount > 0 else { return nil }
+        // What it was for: a purchase by the message's own words ("bought
+        // ... airtime"), anything else sent by the name it was paid to.
+        // Only a purchase reads the whole message: MoMo's transfers end
+        // with an advert for airtime and bundles. Money received has none.
+        var counterparty = shape.counterparty
+        var category: TransactionCategory? = if shape.isPurchase {
+            TransactionCategorizer.category(name: shape.counterparty.name, message: message)
+        } else if shape.direction == .outgoing {
+            TransactionCategorizer.category(name: shape.counterparty.name, kind: shape.counterparty.kind)
+        } else {
+            nil
+        }
+        // MoMo's virtual card is the owner's own money: topping it up and
+        // taking money back off it move it between their own accounts.
+        if wallet == .mtn, isVirtualCardMove(message) {
+            counterparty = Recipient(name: virtualCardName, destination: "", kind: .merchant)
+            category = .ownAccounts
+        } else if wallet == .mtn, counterparty.name?.lowercased().contains("rwandacell") == true {
+            // What MoMo paid MTN itself, by its company name: a bundle.
+            counterparty = Recipient(name: "MTN", destination: counterparty.destination, kind: .merchant)
+        }
         return ParsedSMS(
             wallet: wallet,
             direction: shape.direction,
-            counterparty: shape.counterparty,
+            counterparty: counterparty,
             amount: shape.amount,
             fee: fee(in: message),
             date: date(in: message),
             reference: reference(in: message),
-            balanceAfter: balance(in: message)
+            balanceAfter: balance(in: message),
+            category: category?.rawValue
         )
+    }
+
+    /// What the virtual card is called in Activity.
+    static let virtualCardName = "MTN Virtual Card"
+
+    /// A top-up of MoMo's virtual card ("A transaction of 2000 RWF by
+    /// MOBILE MONEY RWANDA Limited ... Message from debit receiver: Card top
+    /// up") or money taken back off it ("You have received 8000 RWF from
+    /// MOBILE MONEY RWANDA Limited ... Message from sender: Card offload").
+    /// Its cashback is income, not a move, and is left alone.
+    private static func isVirtualCardMove(_ message: String) -> Bool {
+        matches(#"(?i)mobile money rwanda"#, message)
+            && matches(#"(?i)message from (?:debit receiver|sender):\s*card (?:top ?up|offload)"#, message)
     }
 
     /// A payment that did not go through, as the wallet tells it: "Your
@@ -108,6 +193,20 @@ public enum CarrierSMS {
             date: date(in: message),
             reference: reference(in: message)
         )
+    }
+
+    /// MoMoAdvance paying for a payment the balance could not cover, and
+    /// what it charged for it. Nil for any other message, and for one
+    /// without an access fee, which would add nothing.
+    public static func parseOverdraft(_ text: String) -> OverdraftUse? {
+        let message = normalized(text)
+        let isOverdraft = matches(#"\bMoMoAdvance\b"#, message)
+            || (isMoMo(message) && matches(#"\boverdraft\b"#, message))
+        guard isOverdraft,
+              let m = captures(#"\bused\s+"# + amount + #".*?\baccess fee\s*(?:of|is|was)?\s*:?\s*"# + amount, message)
+        else { return nil }
+        let use = OverdraftUse(amount: money(m[0]), accessFee: money(m[1]), date: date(in: message))
+        return use.amount > 0 && use.accessFee > 0 ? use : nil
     }
 
     private static let failureWords = #"\b(failed|unsuccessful|insufficient|cancell?ed|declined)\b"#
@@ -159,6 +258,8 @@ public enum CarrierSMS {
         var direction: Transaction.Direction
         var counterparty: Recipient
         var amount: Int
+        /// Something bought (`purchaseShape`) rather than paid to someone.
+        var isPurchase = false
     }
 
     /// An amount as the carrier writes it ("5000", "15,000", "5000.00"),
@@ -169,7 +270,32 @@ public enum CarrierSMS {
     /// Transaction Id: ..."), which is no part of it.
     private static let tokenTail = #"(?:\s+with token\b.*?)?"#
 
+    /// Something bought with the wallet, in either wallet's wording: "You
+    /// have bought 1,000 RWF of airtime for 0788123456", "You have
+    /// purchased a Data Bundle of 500 RWF", "Cash Power token bought for
+    /// 5,000 RWF". What was bought stands as the counterparty, with no
+    /// number to pay again.
+    private static func purchaseShape(of message: String) -> Shape? {
+        let item: String
+        let value: String
+        if let m = captures(#"\b(?:bought|purchased)\s+"# + amount + #"\s+(?:of\s+|worth of\s+|for\s+)?(?:an?\s+)?([A-Za-z+][A-Za-z+ ]*?)(?=\s+(?:for|to|on|at|from|with)\b|[.,;]|$)"#, message) {
+            (value, item) = (m[0], m[1])
+        } else if let m = captures(#"\b(?:bought|purchased)\s+(?:an?\s+|your\s+)?([A-Za-z+][A-Za-z+ ]*?)\s+(?:of|worth|for)\s+"# + amount, message) {
+            (item, value) = (m[0], m[1])
+        } else if let m = captures(#"\b([A-Za-z+][A-Za-z+ ]*?)\s+(?:token\s+)?(?:bought|purchased)\s+(?:successfully\s+)?(?:for|of)\s+"# + amount, message) {
+            (item, value) = (m[0], m[1])
+        } else {
+            return nil
+        }
+        var name = displayName(item.replacingOccurrences(of: #"^(?:you have|you|your)\s+"#, with: "", options: [.regularExpression, .caseInsensitive]))
+        // "airtime" reads as "Airtime" in Activity.
+        if let lower = name, lower == lower.lowercased() { name = lower.capitalized }
+        return Shape(direction: .outgoing, counterparty: Recipient(name: name ?? "Purchase", destination: "", kind: .merchant), amount: money(value), isPurchase: true)
+    }
+
     private static func mtnShape(of message: String) -> Shape? {
+        if let bought = purchaseShape(of: message) { return bought }
+
         // "*165*S*5000 RWF transferred to John Doe (250788123456) from ..."
         if let m = captures(amount + #"\s+transferred to\s+(.+?)\s*\(([^)]*)\)"#, message) {
             return Shape(direction: .outgoing, counterparty: party(name: m[1], number: m[2]), amount: money(m[0]))
@@ -236,6 +362,7 @@ public enum CarrierSMS {
     private static let nameEnd = #"(?=\.\s|\.$|,|\s+(?:mobile app\s+)?charge\b|\s+fee\b|\s+bal\b|\s+balance\b|\s+in\b|\s+on\b|\s+date\b|$)"#
 
     private static func airtelShape(of message: String) -> Shape? {
+        if let bought = purchaseShape(of: message) { return bought }
         // "Sent to Jean Bosco in MTN . Amt RWF 2,000": to the other network,
         // which may leave the number out.
         if let m = captures(#"sent to\s+(.+?)\s+in\s+(?:MTN|Airtel)\b.*?\bamt\.?\s*:?\s*"# + amount, message) {

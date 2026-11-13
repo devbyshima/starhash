@@ -99,3 +99,44 @@ struct NearbyTests {
         #expect(suggestions([noPlace]).isEmpty)
     }
 }
+
+@Suite struct NearbyMissesTests {
+    let shop = Recipient(name: "Pili-Pili", destination: "020205", kind: .merchant)
+    let other = Recipient(name: "Simba", destination: "009911", kind: .merchant)
+    let friend = Recipient(name: "Ariane", destination: "0788123998", kind: .phone)
+
+    @Test func fivePassedOverInARowRetiresASuggestion() {
+        var misses = NearbyMisses()
+        for _ in 0..<4 { misses.record(shown: [shop], chosen: friend) }
+        #expect(misses.filter([shop, other]) == [shop, other])
+        misses.record(shown: [shop], chosen: friend)
+        #expect(misses.isRetired(shop))
+        #expect(misses.filter([shop, other]) == [other])
+    }
+
+    @Test func pickingItStartsAgain() {
+        var misses = NearbyMisses()
+        for _ in 0..<4 { misses.record(shown: [shop, other], chosen: friend) }
+        misses.record(shown: [shop, other], chosen: shop)
+        // Simba was passed over a fifth time; Pili-Pili was picked.
+        #expect(!misses.isRetired(shop))
+        #expect(misses.isRetired(other))
+        for _ in 0..<4 { misses.record(shown: [shop], chosen: friend) }
+        #expect(!misses.isRetired(shop))
+    }
+
+    @Test func payingItAnotherWayBringsItBack() {
+        var misses = NearbyMisses()
+        for _ in 0..<5 { misses.record(shown: [shop], chosen: friend) }
+        #expect(misses.isRetired(shop))
+        misses.paid(shop)
+        #expect(!misses.isRetired(shop))
+    }
+
+    @Test func survivesBeingSaved() throws {
+        var misses = NearbyMisses()
+        misses.record(shown: [shop], chosen: friend)
+        let decoded = try JSONDecoder().decode(NearbyMisses.self, from: JSONEncoder().encode(misses))
+        #expect(decoded == misses)
+    }
+}

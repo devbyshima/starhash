@@ -54,20 +54,26 @@ public struct USSDShortcut: Codable, Hashable, Identifiable, Sendable {
             symbol: "banknote.fill"
         ),
         USSDShortcut(
-            id: UUID(uuidString: "5E2A7C1E-0003-4000-8000-000000000003")!,
-            name: "Gwamon' Pack",
-            code: "*154*0#",
-            detail: "MTN's minutes and data, for 7 days",
-            symbol: "gift.fill"
-        ),
-        USSDShortcut(
             id: UUID(uuidString: "5E2A7C1E-0004-4000-8000-000000000004")!,
             name: "Airport parking",
             code: "*182*3*8#",
             detail: "Pay a Kigali airport parking ticket",
             symbol: "parkingsign"
         ),
+        USSDShortcut(
+            id: UUID(uuidString: "5E2A7C1E-0005-4000-8000-000000000005")!,
+            name: "MTN Virtual Card",
+            code: "*182*2*6#",
+            detail: "Top up, offload or see MoMo's virtual card",
+            symbol: "creditcard.fill"
+        ),
     ]
+
+    /// The defaults every list had before new ones were added, so a list
+    /// saved then gets each later one once, while one its owner deleted
+    /// stays deleted. The third, MTN's Gwamon' Pack (0003), is no longer a
+    /// default; a list that kept it keeps it.
+    static let firstDefaultIDs: Set<UUID> = Set((1...4).map { UUID(uuidString: "5E2A7C1E-000\($0)-4000-8000-00000000000\($0)")! })
 
     /// `input` as a code to dial, or nil if it is not one: spaces dropped,
     /// then a * or # first, a # last, and only digits, * and # between,
@@ -100,9 +106,26 @@ public final class USSDShortcutList {
         if let data = defaults.data(forKey: key),
            let saved = try? JSONDecoder().decode([USSDShortcut].self, from: data) {
             shortcuts = saved
+            addNewDefaults()
         } else {
             shortcuts = USSDShortcut.defaults
+            defaults.set(USSDShortcut.defaults.map(\.id.uuidString), forKey: seenKey)
         }
+    }
+
+    /// Where the defaults this list has already been given are noted.
+    private var seenKey: String { key + ".seenDefaults" }
+
+    /// A default added to StarHash after this list was saved joins it at
+    /// the end, once; one the owner has since deleted is not brought back.
+    private func addNewDefaults() {
+        let seen = (defaults.stringArray(forKey: seenKey)).map { Set($0.compactMap(UUID.init(uuidString:))) }
+            ?? USSDShortcut.firstDefaultIDs
+        let new = USSDShortcut.defaults.filter { !seen.contains($0.id) && !shortcuts.map(\.id).contains($0.id) }
+        defaults.set(USSDShortcut.defaults.map(\.id.uuidString), forKey: seenKey)
+        guard !new.isEmpty else { return }
+        shortcuts += new
+        save()
     }
 
     /// Adds a code at the end, with its symbol and an optional note. False,
@@ -181,6 +204,7 @@ public final class USSDShortcutList {
 
     /// Back to the defaults, forgetting every change (Delete All Data).
     public func reset() {
+        defaults.removeObject(forKey: seenKey)
         defaults.removeObject(forKey: key)
         shortcuts = USSDShortcut.defaults
     }

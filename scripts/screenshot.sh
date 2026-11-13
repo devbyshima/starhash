@@ -44,9 +44,9 @@ xcrun simctl ui "$UDID" appearance "$APPEARANCE"
 xcrun simctl status_bar "$UDID" override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 >/dev/null 2>&1
 
 APP="$DERIVED/Build/Products/Debug-iphonesimulator/StarHash.app"
-xcrun simctl terminate "$UDID" com.fulltimestudio.starhash 2>/dev/null
+xcrun simctl terminate "$UDID" com.devbyshima.starhash 2>/dev/null
 xcrun simctl install "$UDID" "$APP" || exit 1
-xcrun simctl launch "$UDID" com.fulltimestudio.starhash "$@" >/dev/null || exit 1
+xcrun simctl launch "$UDID" com.devbyshima.starhash "$@" >/dev/null || exit 1
 sleep "${WAIT:-3}"
 mkdir -p "screenshots/$APPEARANCE"
 xcrun simctl io "$UDID" screenshot "screenshots/$APPEARANCE/$NAME.png" >/dev/null 2>&1

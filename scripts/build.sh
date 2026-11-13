@@ -4,7 +4,7 @@
 #
 #   ./scripts/build.sh
 #   DERIVED=.build/mine ./scripts/build.sh   # a separate build folder, for parallel builds
-#   SCHEME="StarHash Beta" CONFIG=Beta ./scripts/build.sh   # the beta channel's build
+#   CONFIG=Release ./scripts/build.sh                        # the release build
 #   ./scripts/build.sh CODE_SIGNING_ALLOWED=NO               # anything after goes to xcodebuild
 set -uo pipefail
 

@@ -3,10 +3,9 @@ import SwiftUI
 
 extension FeatureFlag {
     /// Every flag in the app, as Feature Flags lists them. Add one here with
-    /// `rollout: .dev` when unfinished work is merged on `main`, move it to
-    /// `.beta` once testers should see it, and delete it with its checks once
-    /// it ships to everyone. A release branch is cut with whatever rollouts
-    /// main has, so check them before cutting one.
+    /// `rollout: .dev` when unfinished work is merged on `main`, and delete
+    /// it with its checks once it ships to everyone. A release branch is cut
+    /// with whatever rollouts main has, so check them before cutting one.
     ///
     ///     static let splitBill = FeatureFlag(
     ///         key: "splitBill", title: "Split a bill",
@@ -46,8 +45,8 @@ enum FeatureFlags {
         }
     }
 
-    /// Whether Feature Flags shows under About StarHash: dev and beta
-    /// builds, once there is a flag to show.
+    /// Whether Feature Flags shows under About StarHash: the dev build, once
+    /// there is a flag to show.
     static var showsPage: Bool {
         ReleaseChannel.current.allowsOverrides && !FeatureFlag.all.isEmpty
     }

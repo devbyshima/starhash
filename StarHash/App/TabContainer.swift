@@ -13,13 +13,16 @@ struct TabContainer: View {
 
     var body: some View {
         GeometryReader { proxy in
+            // 28pt above the screen's foot, as the reference's, a little
+            // into the home indicator's inset; phones without one get a
+            // margin of their own. Bars that take the tab bar's place (the
+            // recipient screen's Total) sit as far up.
+            let barBottom = proxy.safeAreaInsets.bottom > 0 ? TabBarMetrics.bottomGap - proxy.safeAreaInsets.bottom : 12
             pages
+                .environment(\.floatingBarBottom, barBottom)
                 .overlay(alignment: .bottom) {
                     StarHashTabBar()
-                        // 28pt above the screen's foot, as the reference's,
-                        // a little into the home indicator's inset; phones
-                        // without one get a margin of their own.
-                        .padding(.bottom, proxy.safeAreaInsets.bottom > 0 ? TabBarMetrics.bottomGap - proxy.safeAreaInsets.bottom : 12)
+                        .padding(.bottom, barBottom)
                         .offset(y: router.isTabBarHidden ? TabBarMetrics.height + proxy.safeAreaInsets.bottom + 24 : 0)
                         .opacity(router.isTabBarHidden ? 0 : 1)
                         .allowsHitTesting(!router.isTabBarHidden)

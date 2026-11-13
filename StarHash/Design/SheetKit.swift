@@ -4,16 +4,16 @@ import SwiftUI
 // Every bottom sheet in StarHash is built in Beam's sheet language, from
 // these pieces only: a centred large bold title with at most a glass
 // button on its right (no close button; a sheet is swiped away), solid
-// cards whose rows are split by dotted lines, small uppercase section
+// cards whose rows are split by solid hairlines, small uppercase section
 // labels, 50pt buttons, and Beam's type scale, all on clear Liquid Glass
-// with the grabber showing. The accent is StarHash's blue where Beam uses
-// its green.
+// with the grabber showing. The accent is the text colour: near black, or
+// near white in dark mode.
 
 // MARK: Type
 
 extension Font {
-    /// Beam's type scale, in Space Grotesk, for sheets: `size` at the
-    /// default text size, scaling like `style`.
+    /// Beam's type scale, in Space Grotesk, for sheets: `size` at the default
+    /// text size, scaling like `style`.
     static func sheet(_ size: CGFloat, _ weight: Font.Weight = .medium, relativeTo style: Font.TextStyle = .body) -> Font {
         .custom(starhashFamily, size: size, relativeTo: style).weight(weight)
     }
@@ -40,6 +40,8 @@ extension View {
     func sheetGlass(detents: Set<PresentationDetent> = [.medium, .large]) -> some View {
         if #available(iOS 26.0, *) {
             self
+                // White in light mode: its text is a container's.
+                .starhashContainerSurface()
                 .presentationBackground {
                     // Light: solid white. Dark: toward the page colour, where
                     // a lifted grey failed its grey text.
@@ -51,8 +53,33 @@ extension View {
                 .presentationDragIndicator(.visible)
         } else {
             self
+                .starhashContainerSurface()
                 .presentationBackground(Color.sheetGlassTint)
                 .presentationDetents(detents)
+                .presentationDragIndicator(.visible)
+        }
+    }
+
+    /// The same sheet, with the detent showing in `selection`: setting it
+    /// moves the sheet to that height on the system's own spring, where a
+    /// new set of detents would jump there.
+    @ViewBuilder
+    func sheetGlass(detents: Set<PresentationDetent>, selection: Binding<PresentationDetent>) -> some View {
+        if #available(iOS 26.0, *) {
+            self
+                .starhashContainerSurface()
+                .presentationBackground {
+                    Color.clear
+                        .glassEffect(.regular.tint(.sheetGlassTint), in: Rectangle())
+                        .ignoresSafeArea()
+                }
+                .presentationDetents(detents, selection: selection)
+                .presentationDragIndicator(.visible)
+        } else {
+            self
+                .starhashContainerSurface()
+                .presentationBackground(Color.sheetGlassTint)
+                .presentationDetents(detents, selection: selection)
                 .presentationDragIndicator(.visible)
         }
     }
@@ -85,7 +112,7 @@ struct SheetHeader<Trailing: View>: View {
 
     var body: some View {
         ZStack {
-            Text(title)
+            Text(catalog: title)
                 .font(.sheetLargeTitle)
                 .tracking(StarHashTracking.display(32))
                 .foregroundStyle(Color.sheetBrandText)
@@ -117,7 +144,7 @@ struct SheetGlassGlyph: View {
     let symbol: String
 
     var body: some View {
-        Image(systemName: symbol)
+        Image(symbol: symbol)
             .font(.title3)
             .foregroundStyle(Color.starhashPrimaryText)
             .frame(width: 32, height: 32)
@@ -129,20 +156,13 @@ struct SheetGlassGlyph: View {
 
 // MARK: Rows
 
-/// A dotted line between a card's rows.
+/// A solid hairline between a card's rows.
 struct SheetDivider: View {
     var body: some View {
-        GeometryReader { geometry in
-            Path { path in
-                path.move(to: CGPoint(x: 0, y: 0.5))
-                path.addLine(to: CGPoint(x: geometry.size.width, y: 0.5))
-            }
-            // GO Club's dashes: 3pt on, 3pt off.
-            .stroke(style: StrokeStyle(lineWidth: 1, lineCap: .butt, dash: [3, 3]))
-            .foregroundStyle(Color.sheetDivider)
-        }
-        .frame(height: 1)
-        .accessibilityHidden(true)
+        Rectangle()
+            .fill(Color.sheetDivider)
+            .frame(height: 1)
+            .accessibilityHidden(true)
     }
 }
 
@@ -153,7 +173,7 @@ struct SheetInfoRow<Trailing: View>: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(label)
+            Text(catalog: label)
                 .font(.sheetBody)
                 .foregroundStyle(Color.starhashPrimaryText)
             Spacer(minLength: 12)
@@ -175,7 +195,7 @@ struct SheetValueText: View {
     let text: String
 
     var body: some View {
-        Text(text)
+        Text(catalog: text)
             .font(.sheetBody)
             .foregroundStyle(Color.sheetSecondaryText)
             .lineLimit(1)
@@ -184,11 +204,11 @@ struct SheetValueText: View {
     }
 }
 
-/// A small uppercase label over a card.
+/// A small uppercase label over a card, in the quieter grey.
 struct SheetSectionLabel: View {
     let text: String
-    /// On a page rather than a sheet (the transaction page): the page's
-    /// grey, since the sheets' blue would not read on the blue page.
+    /// On a page rather than a sheet (the transaction page). The same grey
+    /// either way; kept so callers can say where they are.
     var onPage = false
 
     init(_ text: String, onPage: Bool = false) {
@@ -200,7 +220,7 @@ struct SheetSectionLabel: View {
         Text(text.uppercased())
             .font(.sheet(11, .semibold, relativeTo: .caption))
             .tracking(0.8)
-            .foregroundStyle(onPage ? Color.sheetSecondaryText : Color.sheetBrandText)
+            .foregroundStyle(Color.sheetSecondaryText)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 4)
             .accessibilityAddTraits(.isHeader)
@@ -210,12 +230,12 @@ struct SheetSectionLabel: View {
 /// A symbol in a softly tinted circle, leading a card's heading row.
 struct SheetIconCircle: View {
     let symbol: String
-    var tint: Color = .starhashPrimaryText
+    var tint: Color?
 
     var body: some View {
-        Image(systemName: symbol)
+        Image(symbol: symbol)
             .font(.sheetBody)
-            .foregroundStyle(tint)
+            .foregroundStyle(tint.map(AnyShapeStyle.init) ?? AnyShapeStyle(Color.starhashPrimaryText))
             .frame(width: 38, height: 38)
             .background(Circle().fill(Color.sheetChip))
             .accessibilityHidden(true)
@@ -225,10 +245,9 @@ struct SheetIconCircle: View {
 // MARK: Buttons
 
 /// A sheet's button, Beam's: 50pt, a 16pt semibold label, a gradient fill
-/// with no glow. `.sheetPrimary` is the accent, the
-/// blue with near-black text; `.sheetFilled` is the
-/// near-black (near-white in dark mode) fill for a choice that is not the
-/// accent.
+/// with no glow. `.sheetPrimary` is the accent, near
+/// black with white text (near white with near black in dark mode);
+/// `.sheetFilled` is the same fill, for a choice that is not the accent.
 struct SheetButtonStyle: ButtonStyle {
     enum Fill {
         case accent
@@ -236,8 +255,7 @@ struct SheetButtonStyle: ButtonStyle {
         /// Blood red with white words: every delete button in the app
         /// (`DeleteButton`), whatever page or sheet it is on.
         case destructive
-        /// Mark as Confirmed: white with the near black in light mode, the
-        /// money-in green with the near black in dark.
+        /// Mark as Confirmed: the accent with the page's colour on it.
         case confirm
     }
 
@@ -252,8 +270,8 @@ struct SheetButtonStyle: ButtonStyle {
 }
 
 /// Every delete button StarHash draws, one design: the blood red capsule
-/// with a bin and white words. Menus, swipes and confirmation alerts stay
-/// the system's own.
+/// with white words and no icon, as every button with words. Menus, swipes
+/// and confirmation alerts stay the system's own.
 struct DeleteButton: View {
     let title: String
     var fillsWidth = true
@@ -266,13 +284,8 @@ struct DeleteButton: View {
     }
 
     var body: some View {
-        // An icon and text rather than a Label, which a list would restyle.
         Button(role: .destructive, action: action) {
-            HStack(spacing: 8) {
-                Image(systemName: "trash")
-                    .accessibilityHidden(true)
-                Text(title)
-            }
+            Text(catalog: title)
         }
         .buttonStyle(SheetButtonStyle(fill: .destructive, fillsWidth: fillsWidth))
     }
@@ -284,18 +297,27 @@ private struct SheetButtonBody: View {
     let fillsWidth: Bool
 
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.self) private var environment
 
     private var colors: (fill: Color, label: Color) {
         switch fill {
         case .filled:
             return (.sheetFilledButton, .sheetFilledLabel)
         case .accent:
-            return (.starhashInk, .starhashOnInk)
+            return (Color.starhashInk.color(in: environment), Color.starhashOnInk.color(in: environment))
         case .destructive:
             return (.starhashDestructiveButton, .starhashOnDestructive)
         case .confirm:
             return (.confirmButton, .onConfirmButton)
         }
+    }
+
+    /// The accent's fills (Filled, the accent, Verify) are lit as every
+    /// primary button is; the red keeps its own gradient, and a disabled
+    /// button is flat.
+    private func surface(_ colors: (fill: Color, label: Color)) -> AnyShapeStyle {
+        guard isEnabled else { return AnyShapeStyle(Color.sheetChip) }
+        return fill == .destructive ? AnyShapeStyle(colors.fill.gradient) : AnyShapeStyle(.starhashAccentLit)
     }
 
     var body: some View {
@@ -307,7 +329,7 @@ private struct SheetButtonBody: View {
             .padding(.horizontal, fillsWidth ? 16 : 32)
             .frame(maxWidth: fillsWidth ? .infinity : nil)
             .frame(minHeight: 50)
-            .background((isEnabled ? colors.fill : Color.sheetChip).gradient, in: Capsule())
+            .background(surface(colors), in: Capsule())
             .contentShape(Capsule())
             .opacity(configuration.isPressed ? 0.9 : 1)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
@@ -323,15 +345,13 @@ extension ButtonStyle where Self == SheetButtonStyle {
     static var sheetConfirm: SheetButtonStyle { SheetButtonStyle(fill: .confirm) }
 }
 
-/// The quiet choice under a sheet's button: blue text on a sheet, the
-/// page's secondary text on the blue page ("Mark as Failed"), or red for a
-/// destructive one ("Turn Off").
+/// The quiet choice under a sheet's button: the accent's text colour ("Mark
+/// as Failed"), or red for a destructive one ("Turn Off").
 struct SheetTextButton: View {
     let title: String
     var role: ButtonRole?
-    /// Straight on the blue page (the transaction page) rather than a
-    /// white sheet: the red deepens to read on the blue, and other text is
-    /// the page's secondary text, since the sheet's blue would vanish there.
+    /// Straight on the page (the transaction page) rather than a sheet.
+    /// The same colours either way; kept so callers can say where they are.
     var onPage = false
     let action: () -> Void
 
@@ -344,13 +364,12 @@ struct SheetTextButton: View {
 
     var body: some View {
         Button(role: role, action: action) {
-            Text(title)
-                // Bold when destructive: the vivid red on a white sheet,
-                // the deeper one on the blue page.
+            Text(catalog: title)
+                // Bold when destructive.
                 .font(.sheet(14, role == .destructive ? .bold : .semibold, relativeTo: .subheadline))
                 .foregroundStyle(role == .destructive
-                    ? (onPage ? Color.starhashDestructiveOnPage : Color.starhashDestructive)
-                    : (onPage ? Color.sheetSecondaryText : Color.sheetBrandText))
+                    ? AnyShapeStyle(Color.starhashDestructive)
+                    : AnyShapeStyle(Color.starhashAccentText))
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .contentShape(Rectangle())
         }

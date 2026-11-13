@@ -2,45 +2,13 @@ import StarHashKit
 import SwiftUI
 import UserNotifications
 
-extension PreferenceKey {
-    /// The Notifications page's choices (`NotificationPlan.Settings`).
-    static let notifyPaymentReminders = "notifyPaymentReminders"
-    /// Minutes, one of `NotificationPlan.reminderDelays`.
-    static let paymentReminderDelay = "paymentReminderDelay"
-    static let notifyConfirmedPayments = "notifyConfirmedPayments"
-    static let notifyMoneyReceived = "notifyMoneyReceived"
-    static let notifyWeeklySummary = "notifyWeeklySummary"
-    /// A `Calendar` weekday, 1 for Sunday.
-    static let weeklySummaryDay = "weeklySummaryDay"
-    static let notifyMonthlySummary = "notifyMonthlySummary"
-    /// The hour both summaries come, 0 to 23.
-    static let summaryHour = "summaryHour"
-    static let notificationAmounts = "notificationAmounts"
-    static let notificationSound = "notificationSound"
-}
-
 extension StarHashPreferences {
-    /// The Notifications page's choices, with the defaults it shows, and
-    /// whether auto-verify fails unconfirmed payments.
+    /// The Notifications page's choices, and whether auto-verify fails
+    /// unconfirmed payments.
     @MainActor
     static var notifications: NotificationPlan.Settings {
-        let defaults = NotificationPlan.Settings()
-        let saved = UserDefaults.standard
-        return NotificationPlan.Settings(
-            paymentReminders: bool(PreferenceKey.notifyPaymentReminders, default: defaults.paymentReminders),
-            reminderDelay: saved.object(forKey: PreferenceKey.paymentReminderDelay) as? Int ?? defaults.reminderDelay,
-            confirmedPayments: bool(PreferenceKey.notifyConfirmedPayments, default: defaults.confirmedPayments),
-            moneyReceived: bool(PreferenceKey.notifyMoneyReceived, default: defaults.moneyReceived),
-            weeklySummary: bool(PreferenceKey.notifyWeeklySummary, default: defaults.weeklySummary),
-            weeklyDay: saved.object(forKey: PreferenceKey.weeklySummaryDay) as? Int ?? defaults.weeklyDay,
-            monthlySummary: bool(PreferenceKey.notifyMonthlySummary, default: defaults.monthlySummary),
-            summaryHour: saved.object(forKey: PreferenceKey.summaryHour) as? Int ?? defaults.summaryHour,
-            showsAmounts: bool(PreferenceKey.notificationAmounts, default: defaults.showsAmounts),
-            failsUnconfirmed: PaymentExpiry.isActive
-        )
+        .stored(failsUnconfirmed: AppEnvironment.autoVerify.status() == .active)
     }
-
-    static var notificationSound: Bool { bool(PreferenceKey.notificationSound, default: true) }
 }
 
 extension UNAuthorizationStatus {
@@ -69,29 +37,29 @@ final class StarHashNotifications {
 
     /// A reminder's buttons.
     enum Action {
-        static let confirm = "confirm"
+        static let verify = "verify"
         static let fail = "fail"
     }
 
     static let reminderCategory = "payment-reminder"
-    /// A payment auto-verify failed, with one button to say it went
+    /// A payment auto-verify failed, with one button to verify it went
     /// through after all.
     static let expiredCategory = "payment-expired"
 
     private init() {}
 
     /// At launch, before any notification can be answered: the delegate,
-    /// the reminder's two buttons and the failed payment's one. All ask
-    /// for Face ID or the passcode first, so a locked phone cannot settle
-    /// a payment.
+    /// the reminder's two buttons and the failed payment's one. Verify
+    /// opens StarHash, since its message is pasted there; Mark as Failed
+    /// asks for Face ID or the passcode first, so a locked phone cannot
+    /// settle a payment.
     func start() {
         center.delegate = responder
-        let confirm = UNNotificationAction(identifier: Action.confirm, title: "Mark as Confirmed", options: [.authenticationRequired])
+        let verify = UNNotificationAction(identifier: Action.verify, title: "Verify", options: [.foreground])
         let fail = UNNotificationAction(identifier: Action.fail, title: "Mark as Failed", options: [.authenticationRequired, .destructive])
-        let wentThrough = UNNotificationAction(identifier: Action.confirm, title: "It Went Through", options: [.authenticationRequired])
         center.setNotificationCategories([
-            UNNotificationCategory(identifier: Self.reminderCategory, actions: [confirm, fail], intentIdentifiers: []),
-            UNNotificationCategory(identifier: Self.expiredCategory, actions: [wentThrough], intentIdentifiers: []),
+            UNNotificationCategory(identifier: Self.reminderCategory, actions: [verify, fail], intentIdentifiers: []),
+            UNNotificationCategory(identifier: Self.expiredCategory, actions: [verify], intentIdentifiers: []),
         ])
     }
 
@@ -135,8 +103,11 @@ final class StarHashNotifications {
             return
         }
         let transactions = AppEnvironment.store.transactions
+        // Month names in the language StarHash speaks, not the iPhone's.
+        var calendar = Calendar.current
+        calendar.locale = .starhash
         let plan = NotificationPlan.scheduled(
-            for: transactions, settings: StarHashPreferences.notifications, now: .now, calendar: .current
+            for: transactions, settings: StarHashPreferences.notifications, now: .now, calendar: calendar
         )
         let planned = Set(plan.map(\.id))
         center.removePendingNotificationRequests(withIdentifiers: waiting.filter { !planned.contains($0) })
@@ -162,13 +133,12 @@ final class StarHashNotifications {
         center.removeDeliveredNotifications(withIdentifiers: settled)
     }
 
-    /// A carrier SMS was just applied to `transaction`, which stood as
-    /// `previous` before it (nil when the message added it): says so, when
-    /// the owner asked to hear of it.
-    func messageApplied(_ transaction: StarHashKit.Transaction, previous: StarHashKit.Transaction?) async {
-        guard let item = NotificationPlan.afterMessage(
-            applied: transaction, previous: previous, settings: StarHashPreferences.notifications
-        ), await authorizationStatus().allowsDelivery else { return }
+    /// Says what a message just did, when it is worth a word
+    /// (`NotificationPlan.after`): a scam warning whatever the
+    /// Notifications page says, the rest only when the owner asked.
+    func announce(_ outcome: AutoVerify.Outcome) async {
+        guard let item = NotificationPlan.after(outcome, settings: StarHashPreferences.notifications),
+              await authorizationStatus().allowsDelivery else { return }
         try? await center.add(request(for: item))
     }
 
@@ -178,25 +148,28 @@ final class StarHashNotifications {
         center.removeAllDeliveredNotifications()
     }
 
-    /// A tap opens what the notification is about: its transaction, or
-    /// Activity for a summary. The buttons settle the payment as its
-    /// details page would: a failed one can still be confirmed.
-    func answer(action: String, transactionID: UUID?) async {
+    /// A tap opens what the notification is about: its transaction,
+    /// Activity for a summary, or a scam warning's advice. Verify opens
+    /// the payment with its sheet, and Mark as Failed settles it as its
+    /// details page would.
+    func answer(action: String, transactionID: UUID?, kind: NotificationPlan.Item.Kind? = nil, body: String = "") async {
         let store = AppEnvironment.store
         switch action {
-        case Action.confirm, Action.fail:
+        case Action.verify:
+            guard let id = transactionID else { return }
+            store.reloadFromDisk()
+            AppEnvironment.router.verify(id)
+        case Action.fail:
             // StarHash may have woken in the background just for this.
             store.reloadFromDisk()
-            guard let id = transactionID, let transaction = store.transaction(id: id) else { return }
-            if action == Action.confirm, transaction.status != .confirmed {
-                store.update(transaction.confirmedByHand(wallet: StarHashPreferences.wallet))
-            } else if action == Action.fail, transaction.status == .pending {
-                store.update(transaction.markedFailed())
-            }
+            guard let id = transactionID else { return }
+            store.markFailed(id)
             await sync()
         case UNNotificationDefaultActionIdentifier:
-            if let id = transactionID, let url = URL(string: "starhash://transaction/\(id.uuidString)") {
-                AppEnvironment.router.handle(url)
+            if let id = transactionID {
+                AppEnvironment.router.handle(StarHashLink.transaction(id).url)
+            } else if kind == .scamWarning {
+                AppEnvironment.router.scamNotice = ScamNotice(message: body)
             } else {
                 AppEnvironment.router.show(.activity)
             }
@@ -209,12 +182,13 @@ final class StarHashNotifications {
         let content = UNMutableNotificationContent()
         content.title = item.title
         content.body = item.body
-        content.sound = StarHashPreferences.notificationSound ? .default : nil
+        content.sound = Preferences.notificationSound.value() ? .default : nil
         // Payments stack apart from the summaries.
         content.threadIdentifier = item.transactionID == nil ? "summaries" : "payments"
-        if let id = item.transactionID {
-            content.userInfo = ["transaction": id.uuidString]
-        }
+        var userInfo: [String: Any] = ["kind": item.kind.rawValue]
+        if let id = item.transactionID { userInfo["transaction"] = id.uuidString }
+        content.userInfo = userInfo
+        if item.kind == .scamWarning { content.threadIdentifier = "warnings" }
         switch item.kind {
         case .paymentReminder: content.categoryIdentifier = Self.reminderCategory
         case .paymentExpired: content.categoryIdentifier = Self.expiredCategory
@@ -236,22 +210,43 @@ final class StarHashNotifications {
     nonisolated static func transactionID(of userInfo: [AnyHashable: Any]) -> UUID? {
         (userInfo["transaction"] as? String).flatMap(UUID.init(uuidString:))
     }
+
+    nonisolated static func kind(of userInfo: [AnyHashable: Any]) -> NotificationPlan.Item.Kind? {
+        (userInfo["kind"] as? String).flatMap(NotificationPlan.Item.Kind.init(rawValue:))
+    }
 }
 
-/// iOS's side of the conversation, apart from the main actor: it shows
-/// StarHash's notifications while the app is open too, and hands a tap or
-/// a button to `StarHashNotifications`.
+/// iOS's side of the conversation: it shows StarHash's notifications while
+/// the app is open too, and hands a tap or a button to
+/// `StarHashNotifications`.
+///
+/// The completion-handler forms, each called back on the main thread. The
+/// async forms Swift offers ran off the main thread and handed iOS its
+/// completion from there, which UserNotifications asserts against: a tap
+/// that launched StarHash brought it down before it could open, so a
+/// notification seemed to open nothing.
 private final class NotificationResponder: NSObject, UNUserNotificationCenterDelegate, Sendable {
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
-        willPresent notification: UNNotification
-    ) async -> UNNotificationPresentationOptions {
-        [.banner, .list, .sound]
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping @Sendable (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .list, .sound])
     }
 
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping @Sendable () -> Void
+    ) {
         let action = response.actionIdentifier
-        let id = StarHashNotifications.transactionID(of: response.notification.request.content.userInfo)
-        await StarHashNotifications.shared.answer(action: action, transactionID: id)
+        let userInfo = response.notification.request.content.userInfo
+        let id = StarHashNotifications.transactionID(of: userInfo)
+        let kind = StarHashNotifications.kind(of: userInfo)
+        let body = response.notification.request.content.body
+        Task { @MainActor in
+            await StarHashNotifications.shared.answer(action: action, transactionID: id, kind: kind, body: body)
+            completionHandler()
+        }
     }
 }

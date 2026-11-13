@@ -4,7 +4,7 @@
 # $GITHUB_OUTPUT; exits non-zero when something does not match.
 #
 #   ./scripts/check_release.sh refs/heads/release/1.0
-#   ./scripts/check_release.sh refs/tags/v1.0.0-beta.1
+#   ./scripts/check_release.sh refs/tags/v1.0.0-rc.1
 #   ./scripts/check_release.sh            # the current branch or tag
 set -euo pipefail
 
@@ -43,26 +43,21 @@ fail() { echo "::error::$1" >&2; exit 1; }
 case "$ref" in
   refs/tags/*)
     tag="${ref#refs/tags/}"
-    [[ "$tag" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)(-(beta|rc)\.[0-9]+)?$ ]] \
-      || fail "tag $tag is not vMAJOR.MINOR.PATCH, -beta.N or -rc.N"
+    [[ "$tag" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)(-(rc)\.[0-9]+)?$ ]] \
+      || fail "tag $tag is not vMAJOR.MINOR.PATCH or -rc.N"
     tag_version="${BASH_REMATCH[1]}"
     stage="${BASH_REMATCH[3]:-final}"
     [ "$version" = "$tag_version" ] \
       || fail "tag $tag is for $tag_version, but project.yml says MARKETING_VERSION $version"
     grep -qE "^## \[$tag_version\]" <<<"$changelog" \
       || fail "CHANGELOG.md has no section for $tag_version"
-    case "$stage" in
-      beta)
-        channel=beta; configuration=Beta; scheme="StarHash Beta" ;;
-      rc|final)
-        # A release candidate is the App Store build, tried on TestFlight
-        # first, so a new MAJOR.MINOR must already say what it brings. A
-        # patch may add its own What's New, or not.
-        if [[ "$tag_version" == *.0 ]] && [ "$whats_new" != "$tag_version" ]; then
-          fail "What's New (ReleaseHistory.releases) starts at $whats_new, not $tag_version"
-        fi
-        channel=production; configuration=Release; scheme="StarHash" ;;
-    esac
+    # Every TestFlight upload is a release candidate, the release build
+    # that may go to the App Store as it is, so a new MAJOR.MINOR must
+    # already say what it brings. A patch may add its own What's New, or not.
+    if [[ "$tag_version" == *.0 ]] && [ "$whats_new" != "$tag_version" ]; then
+      fail "What's New (ReleaseHistory.releases) starts at $whats_new, not $tag_version"
+    fi
+    channel=production; configuration=Release; scheme="StarHash"
     if [ "$stage" = final ]; then
       grep -qE "^## \[$tag_version\] - [0-9]{4}-[0-9]{2}-[0-9]{2}$" <<<"$changelog" \
         || fail "CHANGELOG.md's $tag_version section has no release date"
@@ -73,7 +68,7 @@ case "$ref" in
     [[ "$line" =~ ^[0-9]+\.[0-9]+$ ]] || fail "release branch $line is not release/MAJOR.MINOR"
     [[ "$version" == "$line".* ]] \
       || fail "release/$line builds $line.x, but project.yml says MARKETING_VERSION $version"
-    channel=beta; configuration=Beta; scheme="StarHash Beta"
+    channel=production; configuration=Release; scheme="StarHash"
     ;;
   *)
     channel=dev; configuration=Debug; scheme="StarHash"

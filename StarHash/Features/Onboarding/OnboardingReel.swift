@@ -72,9 +72,9 @@ struct OnboardingReel: View {
     @ViewBuilder
     private func glyph(_ symbol: String) -> some View {
         let size = OnboardingMetrics.iconSize
-        let image = Image(systemName: symbol)
+        let image = Image(symbol: symbol)
             .font(.system(size: size - 20))
-            .foregroundStyle(tint.gradient)
+            .foregroundStyle(.starhashAccentLit)
             // One phase's symbol becomes the next instead of cutting to it.
             .contentTransition(.symbolEffect(.replace.downUp))
             .frame(width: size, height: size)
@@ -102,13 +102,13 @@ struct OnboardingReel: View {
 
     private func words(_ phase: Phase) -> some View {
         VStack(spacing: 12) {
-            Text(phase.title)
+            Text(catalog: phase.title)
                 .starhashFont(22, weight: .bold, relativeTo: .title2)
                 .foregroundStyle(Color.starhashPrimaryText)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .accessibilityAddTraits(.isHeader)
-            Text(phase.description)
+            Text(catalog: phase.description)
                 .font(.starhash(.callout))
                 .foregroundStyle(Color.starhashSecondaryText)
                 .lineLimit(2)

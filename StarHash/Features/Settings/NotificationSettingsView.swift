@@ -8,23 +8,20 @@ import UserNotifications
 /// reschedules what is waiting at once.
 struct NotificationSettingsView: View {
     @Environment(\.scenePhase) private var scenePhase
-    @Environment(StarHashStore.self) private var store
 
-    @AppStorage(PreferenceKey.notifyPaymentReminders) private var paymentReminders = true
-    @AppStorage(PreferenceKey.paymentReminderDelay) private var reminderDelay = NotificationPlan.defaultReminderDelay
-    @AppStorage(PreferenceKey.notifyConfirmedPayments) private var confirmedPayments = false
-    @AppStorage(PreferenceKey.notifyMoneyReceived) private var moneyReceived = false
-    @AppStorage(PreferenceKey.notifyWeeklySummary) private var weeklySummary = true
-    @AppStorage(PreferenceKey.weeklySummaryDay) private var weeklyDay = NotificationPlan.defaultWeeklyDay
-    @AppStorage(PreferenceKey.notifyMonthlySummary) private var monthlySummary = true
-    @AppStorage(PreferenceKey.summaryHour) private var summaryHour = NotificationPlan.defaultSummaryHour
-    @AppStorage(PreferenceKey.notificationAmounts) private var showsAmounts = true
-    @AppStorage(PreferenceKey.notificationSound) private var sound = true
-    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
-    @AppStorage(PreferenceKey.autoVerifySetUp) private var autoVerifySetUp = false
-    @AppStorage(PreferenceKey.lastVerifiedAt) private var lastVerifiedAt: Double = 0
-    @AppStorage(PreferenceKey.lastMessageAt) private var lastMessageAt: Double = 0
-    @AppStorage(PreferenceKey.autoVerifySince) private var autoVerifySince: Double = 0
+    @AppStorage(Preferences.paymentReminders) private var paymentReminders: Bool
+    @AppStorage(Preferences.reminderDelay) private var reminderDelay: Int
+    @AppStorage(Preferences.confirmedPayments) private var confirmedPayments: Bool
+    @AppStorage(Preferences.moneyReceived) private var moneyReceived: Bool
+    @AppStorage(Preferences.weeklySummary) private var weeklySummary: Bool
+    @AppStorage(Preferences.weeklySummaryDay) private var weeklyDay: Int
+    @AppStorage(Preferences.monthlySummary) private var monthlySummary: Bool
+    @AppStorage(Preferences.summaryHour) private var summaryHour: Int
+    @AppStorage(Preferences.showsAmounts) private var showsAmounts: Bool
+    @AppStorage(Preferences.notificationSound) private var sound: Bool
+    @Environment(Owner.self) private var owner
+    private var ownWallets: OwnerWallets { owner.wallets }
+    @Environment(AutoVerify.self) private var autoVerify
 
     /// What iOS last said, so the page opens as it will stay; nil until
     /// it has answered once.
@@ -42,7 +39,7 @@ struct NotificationSettingsView: View {
                     symbol: "bell.badge.fill",
                     title: "Payment reminders",
                     caption: failsUnconfirmed
-                        ? "When no \(wallet.messagesName) message confirms a payment within an hour"
+                        ? String(starhash: "When no \(ownWallets.messagesName) message confirms a payment within an hour")
                         : "When a payment you made is still pending",
                     isOn: $paymentReminders
                 )
@@ -61,7 +58,7 @@ struct NotificationSettingsView: View {
                     symbol: "checkmark.seal.fill",
                     title: "Confirmed payments",
                     caption: autoVerifyOn
-                        ? "When a \(wallet.messagesName) message confirms a payment"
+                        ? String(starhash: "When a \(ownWallets.messagesName) message confirms a payment")
                         : "Needs auto-verify, under Transactions",
                     isOn: $confirmedPayments
                 )
@@ -69,7 +66,7 @@ struct NotificationSettingsView: View {
                     symbol: "arrow.down.circle.fill",
                     title: "Money received",
                     caption: autoVerifyOn
-                        ? "When a \(wallet.messagesName) message brings money in"
+                        ? String(starhash: "When a \(ownWallets.messagesName) message brings money in")
                         : "Needs auto-verify, under Transactions",
                     isOn: $moneyReceived
                 )
@@ -159,20 +156,11 @@ struct NotificationSettingsView: View {
         )
     }
 
-    private var autoVerifyOn: Bool { autoVerifySetUp && lastVerifiedAt > 0 }
+    private var autoVerifyOn: Bool { autoVerify.status() != .off }
 
     /// Auto-verify fails a payment no message confirms within the hour, so
-    /// the reminder says that instead (`PaymentExpiry`). Read here from the
-    /// page's own values, so it follows them.
-    private var failsUnconfirmed: Bool {
-        autoVerifyOn
-            && StarHashPreferences.automationProven(lastMessageAt: lastMessageAt, since: autoVerifySince)
-            && !AutoVerify.looksBroken(
-                store.transactions,
-                lastMessageAt: Date(timeIntervalSince1970: lastMessageAt),
-                now: .now
-            )
-    }
+    /// the reminder says that instead (`AutoVerify.expireUnconfirmed`).
+    private var failsUnconfirmed: Bool { autoVerify.status() == .active }
 
     /// Above everything while iOS does not let StarHash notify: Turn On
     /// asks the first time, and after a refusal the Settings app is the
@@ -210,9 +198,9 @@ struct NotificationSettingsView: View {
 
     /// "10 minutes", "1 hour".
     private static func delayTitle(_ minutes: Int) -> String {
-        guard minutes >= 60 else { return "\(minutes) minutes" }
+        guard minutes >= 60 else { return String(starhash: "\(minutes) minutes") }
         let hours = minutes / 60
-        return hours == 1 ? "1 hour" : "\(hours) hours"
+        return hours == 1 ? String(starhash: "1 hour") : String(starhash: "\(hours) hours")
     }
 
     /// The week's days from the one the calendar starts on, as `Calendar`
@@ -223,12 +211,14 @@ struct NotificationSettingsView: View {
     }
 
     private static func weekdayTitle(_ day: Int) -> String {
-        Calendar.current.weekdaySymbols[day - 1]
+        var calendar = Calendar.current
+        calendar.locale = .starhash
+        return calendar.weekdaySymbols[day - 1]
     }
 
     /// "18:00" or "6 PM", as the iPhone writes the time.
     private static func hourTitle(_ hour: Int) -> String {
         let date = Calendar.current.date(bySettingHour: hour, minute: 0, second: 0, of: .now) ?? .now
-        return date.formatted(date: .omitted, time: .shortened)
+        return date.formatted(Date.FormatStyle(date: .omitted, time: .shortened, locale: .starhash))
     }
 }

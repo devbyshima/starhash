@@ -54,7 +54,7 @@ struct PageTitle: View {
     let text: String
 
     var body: some View {
-        Text(text)
+        Text(catalog: text)
             .font(.starhashPageTitle)
             .minimumScaleFactor(0.7)
             .foregroundStyle(Color.starhashPrimaryText)

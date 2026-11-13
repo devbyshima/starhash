@@ -1,33 +1,38 @@
 import SwiftUI
 
-// Shared look for every page in the Settings tab, after GO Club's: rounded
-// 26pt cards 10pt from the screen's edges (white glass in light mode, black
-// glass in dark), everything in them 20pt in, a section's grey title inside
-// its card at the top, and a dashed line across the card between every
-// row. Rows keep a symbol on a faint tile, a title and a small caption.
-// Sheets presented from Settings keep the sheet look instead.
+// Shared look for every page in the Settings tab: the outlined cards of a
+// transaction's details (a line round them and nothing filled), 16pt from
+// the screen's edges, everything in them 16pt in, a section's grey title
+// above its card, and a solid line across the card between every row. Rows are an icon in the accent
+// (`SettingsIconImage`) and a title. A row's description stays hidden
+// until its icon is tapped, and goes again at the next tap; a status line
+// (auto-verify waiting) always shows. Sheets presented from Settings keep
+// the sheet look instead.
 
 extension Color {
-    /// The light-mode fill under a settings card's glass: white.
+    /// A settings card's fill: the cards' foreground.
     static var settingsCard: Color { .starhashCard }
     /// The tile behind row symbols and the profile monogram: a visible grey
-    /// on a white card, a faint veil on a charcoal one.
-    static let settingsTile = Color(light: .brandNight.opacity(0.07), dark: .brandPaper.opacity(0.07))
+    /// on a white card, a faint veil on a near-black one.
+    static let settingsTile = Color(light: .brandInk.opacity(0.07), dark: .brandPaper.opacity(0.07))
     /// Behind every settings page: the app's page colour, so cards stand
     /// out the same way they do on Activity.
     static var settingsCanvas: Color { .starhashBackground }
-    /// The track of a switched-on toggle: the accent as a graphic, 3:1 on
-    /// a white card, with the white knob showing in either appearance.
+    /// The track of a switched-on toggle: the accent in light mode, a grey
+    /// in dark, so the white knob shows on it in either appearance.
     static let settingsToggleOn = Color.starhashSwitchOn
 }
 
 enum SettingsLayout {
-    /// How far everything in a card sits from its edges, GO Club's 20.
-    static let cardInset: CGFloat = 20
-    /// The cards' distance from the screen's edges.
-    static let screenMargin: CGFloat = 10
+    /// How far everything in a card sits from its edges, the same on
+    /// either side.
+    static let cardInset: CGFloat = 16
+    /// The cards' distance from the screen's edges, as on Activity.
+    static let screenMargin: CGFloat = 16
     /// The gap between one card and the next.
     static let cardSpacing: CGFloat = 12
+    /// A row's least height, the icon with room round it.
+    static let rowHeight: CGFloat = 52
 }
 
 /// A settings page: its cards down a scroll view, `spacing` apart, 10pt
@@ -48,17 +53,17 @@ struct SettingsScroll<Content: View>: View {
         .background(Color.settingsCanvas.ignoresSafeArea())
         .starhashReadableScrollContent(base: SettingsLayout.screenMargin)
         .contentMargins(.top, top, for: .scrollContent)
+        // A number pad has no return key; scrolling puts it away too.
+        .scrollDismissesKeyboard(.interactively)
         .starhashSoftEdge()
     }
 }
 
-/// A card of rows, as GO Club's: the section's grey title inside it at the
-/// top when it has one, and a dashed line right across it between each row
-/// and the next. The whole card is one container (`starhashContainer`),
-/// white glass in light mode and black glass in dark, so it is the same
-/// glass as every other card in the app; a slice behind each row could
-/// only imitate it. Each row keeps the card's 20pt inset itself
-/// (`settingsRowInset()`), so a pressed row tints right across.
+/// A card of rows: the section's grey title above it when it has one, a
+/// line round it as round a transaction's details, and a solid line right
+/// across it between each row and the next. Each row keeps the card's 16pt
+/// inset itself (`settingsRowInset()`), so a pressed row tints right
+/// across.
 struct SettingsCard<Content: View>: View {
     let title: String?
     let content: Content
@@ -69,11 +74,17 @@ struct SettingsCard<Content: View>: View {
     }
 
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: StarHashMetrics.cardRadius, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: StarHashMetrics.outlinedCardRadius, style: .continuous)
         VStack(alignment: .leading, spacing: 0) {
             if let title {
                 SettingsSectionTitle(title)
             }
+            card(shape)
+        }
+    }
+
+    private func card(_ shape: RoundedRectangle) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
             Group(subviews: content) { rows in
                 ForEach(rows) { row in
                     row.overlay(alignment: .top) {
@@ -90,7 +101,8 @@ struct SettingsCard<Content: View>: View {
         }
         // A pressed row's tint follows the card's corners.
         .clipShape(shape)
-        .starhashContainer(.settingsCard, in: shape)
+        .overlay(shape.strokeBorder(Color.starhashOutline, lineWidth: 1))
+        .starhashContainerSurface()
     }
 }
 
@@ -116,10 +128,11 @@ struct SettingsLinkRow: View {
     let symbol: String
     let title: String
     var caption: String?
+    var status: String?
 
     var body: some View {
         NavigationLink(value: page) {
-            SettingsRow(symbol: symbol, title: title, caption: caption) {
+            SettingsRow(symbol: symbol, title: title, caption: caption, status: status) {
                 SettingsChevron()
             }
         }
@@ -139,25 +152,34 @@ struct SettingsChoiceMenu<Value: Hashable>: View {
         Menu {
             Picker(title, selection: $selection) {
                 ForEach(choices, id: \.self) { choice in
-                    Text(label(choice)).tag(choice)
+                    Text(catalog: label(choice)).tag(choice)
                 }
             }
         } label: {
-            HStack(spacing: 6) {
-                Text(label(selection))
-                    .starhashFont(16, weight: .medium, relativeTo: .callout)
-                Image(systemName: "chevron.up.chevron.down")
-                    .font(.system(size: 13, weight: .semibold))
-            }
-            .foregroundStyle(Color.starhashPrimaryText)
-            .frame(minHeight: 44)
-            .contentShape(Rectangle())
+            SettingsMenuLabel(text: Text(catalog: label(selection)))
         }
         .menuOrder(.fixed)
         .buttonStyle(.hapticPlain)
         .sensoryFeedback(.selection, trigger: selection)
-        .accessibilityLabel(title)
+        .accessibilityLabel(LocalizedStringKey(title))
         .accessibilityValue(label(selection))
+    }
+}
+
+/// A menu's label at a row's end: the choice, and the up and down chevron.
+struct SettingsMenuLabel: View {
+    let text: Text
+
+    var body: some View {
+        HStack(spacing: 6) {
+            text
+                .starhashFont(16, weight: .medium, relativeTo: .callout)
+            Image(symbol: "chevron.up.chevron.down")
+                .font(.system(size: 13, weight: .semibold))
+        }
+        .foregroundStyle(Color.starhashPrimaryText)
+        .frame(minHeight: 44)
+        .contentShape(Rectangle())
     }
 }
 
@@ -167,116 +189,182 @@ struct SettingsChevron: View {
     var symbol = "chevron.right"
 
     var body: some View {
-        Image(systemName: symbol)
+        Image(symbol: symbol)
             .starhashFont(14, weight: .semibold, relativeTo: .footnote)
             .foregroundStyle(Color.starhashTertiaryText)
             .accessibilityHidden(true)
     }
 }
 
-/// An SF Symbol on the faint square tile the reference puts behind row
-/// icons. It grows with the text beside it, up to half as big again.
+/// A row's icon: StarHash's icon for the symbol in the accent
+/// (`SettingsIconImage`). It grows with the text beside
+/// it, up to half as big again.
 struct SettingsSymbol: View {
     let symbol: String
-    var size: CGFloat = 38
-    var pointSize: CGFloat = 17
+    var size: CGFloat = 36
 
     @ScaledMetric(relativeTo: .body) private var textScale: CGFloat = 1
 
     var body: some View {
-        let scale = min(textScale, 1.5)
-        Image(systemName: symbol)
-            .font(.system(size: pointSize * scale, weight: .medium))
-            .foregroundStyle(Color.starhashPrimaryText)
-            .frame(width: size * scale, height: size * scale)
-            .background(Color.settingsTile, in: RoundedRectangle(cornerRadius: size * scale * 0.3, style: .continuous))
+        SettingsIconImage(symbol: symbol, size: size * min(textScale, 1.5))
             .accessibilityHidden(true)
     }
 }
 
-/// Symbol, title, a small caption under it and whatever trails the row (a
-/// value, a badge, nothing before a `NavigationLink`'s chevron).
+/// A row's icon that shows its description, and hides it again: a tap on
+/// the icon alone, ahead of the row's own tap (a page to open, a switch),
+/// with a light tick. VoiceOver hears the description as the row's hint
+/// instead.
+private struct SettingsCaptionIcon: View {
+    let symbol: String
+    let hasCaption: Bool
+    @Binding var showsCaption: Bool
+
+    var body: some View {
+        if hasCaption {
+            SettingsSymbol(symbol: symbol)
+                .contentShape(Rectangle())
+                .highPriorityGesture(TapGesture().onEnded {
+                    TapHaptic.play()
+                    withAnimation(SettingsCaptionMotion.open) { showsCaption.toggle() }
+                })
+        } else {
+            SettingsSymbol(symbol: symbol)
+        }
+    }
+}
+
+/// How a description comes and goes. The row opens on a soft spring and
+/// the words settle into it from a blur a beat later, so they never sit on
+/// the row below while it is still making room; closing, they fade first
+/// and quickly, and the row closes behind them.
+@MainActor
+enum SettingsCaptionMotion {
+    static let open = Animation.spring(response: 0.42, dampingFraction: 0.9)
+
+    static var transition: AnyTransition {
+        .asymmetric(
+        insertion: AnyTransition(.blurReplace)
+            .combined(with: .offset(y: -4))
+            .animation(.smooth(duration: 0.34).delay(0.07)),
+        removal: AnyTransition.opacity
+            .combined(with: .offset(y: -2))
+            .animation(.smooth(duration: 0.14))
+        )
+    }
+}
+
+/// Icon, title, its description under it while shown and its status line
+/// when there is one, and whatever trails the row (a value, a badge,
+/// nothing before a `NavigationLink`'s chevron).
 struct SettingsRow<Trailing: View>: View {
     let symbol: String
     let title: String
+    /// What the row is for, hidden until its icon is tapped.
     var caption: String?
+    /// Something the row has to report, always shown.
+    var status: String?
+    /// The status line's colour, when it is a problem (red).
+    var statusColor: Color?
     @ViewBuilder var trailing: Trailing
+
+    @State private var showsCaption = false
 
     var body: some View {
         HStack(spacing: 12) {
-            SettingsSymbol(symbol: symbol)
-            SettingsRowText(title: title, caption: caption)
+            SettingsCaptionIcon(symbol: symbol, hasCaption: caption != nil, showsCaption: $showsCaption)
+            SettingsRowText(title: title, caption: caption, status: status, statusColor: statusColor, showsCaption: showsCaption)
             Spacer(minLength: 8)
             trailing
         }
-        .frame(minHeight: 68)
+        .frame(minHeight: SettingsLayout.rowHeight)
         .settingsRowInset()
         .contentShape(Rectangle())
+        .accessibilityHint(caption.map { Text(catalog: $0) } ?? Text(verbatim: ""))
     }
 }
 
 extension SettingsRow where Trailing == EmptyView {
-    init(symbol: String, title: String, caption: String? = nil) {
-        self.init(symbol: symbol, title: title, caption: caption) { EmptyView() }
+    init(symbol: String, title: String, caption: String? = nil, status: String? = nil) {
+        self.init(symbol: symbol, title: title, caption: caption, status: status) { EmptyView() }
     }
 }
 
 extension SettingsRow where Trailing == Text {
     /// A row with a grey value at its end ("On", "1.0.0").
-    init(symbol: String, title: String, caption: String? = nil, value: String) {
-        self.init(symbol: symbol, title: title, caption: caption) {
-            Text(value)
+    init(symbol: String, title: String, caption: String? = nil, status: String? = nil, value: String) {
+        self.init(symbol: symbol, title: title, caption: caption, status: status) {
+            Text(catalog: value)
                 .font(.starhash(.body))
                 .foregroundStyle(Color.starhashSecondaryText)
         }
     }
 }
 
-/// The row's title (16pt medium, as GO Club's) over its caption.
+/// The row's title (16pt medium, as GO Club's) over its status line and,
+/// while shown, its description.
 struct SettingsRowText: View {
     let title: String
     var caption: String?
+    var status: String?
+    /// The status line's colour when it is a status (amber waiting, red
+    /// failing); the quiet grey otherwise.
+    var statusColor: Color?
+    var showsCaption = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(title)
+            Text(catalog: title)
                 .starhashFont(16, weight: .medium, relativeTo: .callout)
                 .foregroundStyle(Color.starhashPrimaryText)
-            if let caption {
-                Text(caption)
-                    .starhashFont(13.5, weight: .medium, relativeTo: .footnote)
-                    .foregroundStyle(Color.starhashTertiaryText)
-                    .fixedSize(horizontal: false, vertical: true)
+            if let status {
+                line(status, style: statusColor.map(AnyShapeStyle.init) ?? AnyShapeStyle(Color.starhashTertiaryText))
+            }
+            if let caption, showsCaption {
+                line(caption)
+                    .transition(SettingsCaptionMotion.transition)
             }
         }
-        .padding(.vertical, 14)
+        .padding(.vertical, 11)
+    }
+
+    private func line(_ text: String, style: AnyShapeStyle = AnyShapeStyle(Color.starhashTertiaryText)) -> some View {
+        Text(catalog: text)
+            .starhashFont(13.5, weight: .medium, relativeTo: .footnote)
+            .foregroundStyle(style)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
-/// A row with a switch: symbol, title, caption, toggle. The whole row is
-/// the toggle's label, so VoiceOver reads it as one switch.
+/// A row with a switch: icon, title, toggle. The whole row is the toggle's
+/// label, so VoiceOver reads it as one switch; its icon shows and hides
+/// the description, as every row's does.
 struct SettingsToggleRow: View {
     let symbol: String
     let title: String
     var caption: String?
+    var status: String?
+    var statusColor: Color?
     @Binding var isOn: Bool
+
+    @State private var showsCaption = false
 
     var body: some View {
         Toggle(isOn: $isOn) {
             HStack(spacing: 12) {
-                SettingsSymbol(symbol: symbol)
-                SettingsRowText(title: title, caption: caption)
+                SettingsCaptionIcon(symbol: symbol, hasCaption: caption != nil, showsCaption: $showsCaption)
+                SettingsRowText(title: title, caption: caption, status: status, statusColor: statusColor, showsCaption: showsCaption)
             }
         }
         .tint(Color.settingsToggleOn)
-        .frame(minHeight: 68)
+        .frame(minHeight: SettingsLayout.rowHeight)
         .settingsRowInset()
+        .accessibilityHint(caption.map { Text(catalog: $0) } ?? Text(verbatim: ""))
     }
 }
 
-/// A section's title inside its card, as GO Club sets "App Settings": the
-/// card's first row, small, medium and grey, with no line under it
-/// (`SettingsCard` puts it there).
+/// A section's title above its card: small, medium and grey, in line with
+/// the rows' icons (`SettingsCard` puts it there).
 struct SettingsSectionTitle: View {
     let title: String
 
@@ -285,13 +373,11 @@ struct SettingsSectionTitle: View {
     }
 
     var body: some View {
-        Text(title)
+        Text(catalog: title)
             .starhashFont(14, weight: .medium, relativeTo: .subheadline)
-            .foregroundStyle(Color.starhashTertiaryText)
-            .padding(.top, 20)
-            .padding(.bottom, 2)
-            // A list row's least height, which the title was first set in.
-            .frame(minHeight: 44)
+            .foregroundStyle(Color.starhashSecondaryText)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
             .settingsRowInset()
             .accessibilityAddTraits(.isHeader)
     }
@@ -306,7 +392,7 @@ struct SettingsFootnote: View {
     }
 
     var body: some View {
-        Text(text)
+        Text(catalog: text)
             .starhashFont(13, relativeTo: .footnote)
             .lineSpacing(0.5)
             .foregroundStyle(Color.starhashCaptionText)

@@ -11,21 +11,36 @@ struct USSDShortcutTests {
         return defaults
     }
 
-    @Test func startsWithTheFourDefaults() {
+    @Test func startsWithTheDefaults() {
         let list = USSDShortcutList(defaults: freshDefaults())
-        #expect(list.shortcuts.map(\.code) == ["*182*7*1#", "*182*7*2#", "*154*0#", "*182*3*8#"])
+        #expect(list.shortcuts.map(\.code) == ["*182*7*1#", "*182*7*2#", "*182*3*8#", "*182*2*6#"])
+    }
+
+    @Test func aListSavedBeforeGetsNewDefaultsOnceAndKeepsDeletions() throws {
+        let defaults = freshDefaults()
+        // A list saved before the Virtual Card was a default, when Gwamon'
+        // Pack still was one, with Cash out deleted by its owner.
+        let gwamon = USSDShortcut(id: UUID(uuidString: "5E2A7C1E-0003-4000-8000-000000000003")!, name: "Gwamon' Pack", code: "*154*0#")
+        let old = [USSDShortcut.defaults[0], gwamon, USSDShortcut.defaults[2]]
+        defaults.set(try JSONEncoder().encode(old), forKey: "buyShortcuts")
+        let list = USSDShortcutList(defaults: defaults)
+        // Gwamon' Pack, no longer a default, stays where it was kept.
+        #expect(list.shortcuts.map(\.code) == ["*182*7*1#", "*154*0#", "*182*3*8#", "*182*2*6#"])
+        // Deleted again, it stays deleted.
+        list.remove(USSDShortcut.defaults[3].id)
+        #expect(!USSDShortcutList(defaults: defaults).shortcuts.map(\.code).contains("*182*2*6#"))
     }
 
     @Test func pinsAndRemembers() {
         let defaults = freshDefaults()
         let list = USSDShortcutList(defaults: defaults)
         #expect(list.pinned.isEmpty)
-        let gwamon = USSDShortcut.defaults[2].id
-        list.setPinned(gwamon, true)
-        #expect(list.pinned.map(\.id) == [gwamon])
+        let parking = USSDShortcut.defaults[2].id
+        list.setPinned(parking, true)
+        #expect(list.pinned.map(\.id) == [parking])
         #expect(list.unpinned.count == 3)
-        #expect(USSDShortcutList(defaults: defaults).pinned.map(\.id) == [gwamon])
-        list.setPinned(gwamon, false)
+        #expect(USSDShortcutList(defaults: defaults).pinned.map(\.id) == [parking])
+        list.setPinned(parking, false)
         #expect(list.pinned.isEmpty)
     }
 
@@ -46,7 +61,7 @@ struct USSDShortcutTests {
         let defaults = freshDefaults()
         let list = USSDShortcutList(defaults: defaults)
         let ids = list.shortcuts.map(\.id)
-        for id in ids { list.setPinned(id, true) }
+        for id in ids.prefix(4) { list.setPinned(id, true) }
 
         list.movePinned(ids[0], to: ids[2])
         #expect(list.pinned.map(\.id) == [ids[1], ids[2], ids[0], ids[3]])
@@ -65,7 +80,8 @@ struct USSDShortcutTests {
         let old = #"[{"id":"5E2A7C1E-0003-4000-8000-000000000003","name":"Gwamon","code":"*154*0#"}]"#
         defaults.set(Data(old.utf8), forKey: "buyShortcuts")
         let list = USSDShortcutList(defaults: defaults)
-        #expect(list.shortcuts.count == 1)
+        // The Virtual Card, a default added since, joins it.
+        #expect(list.shortcuts.map(\.code) == ["*154*0#", "*182*2*6#"])
         #expect(list.shortcuts.first?.isPinned == false)
     }
 

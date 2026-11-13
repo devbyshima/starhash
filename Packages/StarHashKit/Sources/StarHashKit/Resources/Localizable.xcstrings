@@ -1,0 +1,777 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    " Balance %@.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " Amafaranga asigaye ni %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " Solde %@."
+          }
+        }
+      }
+    },
+    "%@ %@.": {
+      "shouldTranslate": false
+    },
+    "%@ and %@ %@.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, kandi %@ %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ et %@ %@."
+          }
+        }
+      }
+    },
+    "%@ is still pending. Mark it as confirmed or failed.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: biracyategerejwe. Hitamo niba byemejwe cyangwa byanze."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ est encore en attente. Marquez-le comme confirmé ou échoué."
+          }
+        }
+      }
+    },
+    "%@ message": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ubutumwa bwa %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Message %@"
+          }
+        }
+      }
+    },
+    "%@ or %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ou %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ cyangwa %@"
+          }
+        }
+      }
+    },
+    "%@ sent you %@.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ yakoherereje %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ vous a envoyé %@."
+          }
+        }
+      }
+    },
+    "%@ sent you money.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ yakoherereje amafaranga."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ vous a envoyé de l'argent."
+          }
+        }
+      }
+    },
+    "%@ to %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kuri %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ à %@"
+          }
+        }
+      }
+    },
+    "%@ to %@ went through.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu bwa %1$@ kuri %2$@ bwagenze neza."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ à %@ est passé."
+          }
+        }
+      }
+    },
+    "%lld payments": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ubwishyu %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld paiements"
+          }
+        }
+      }
+    },
+    "1 payment": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ubwishyu 1"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 paiement"
+          }
+        }
+      }
+    },
+    "A message from %@ %@, but %@'s come from %@. Don't send any money back. Check your balance first.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubutumwa buvuye kuri %@ %@, ariko ubwa %@ buva kuri %@. Ntugire amafaranga usubiza. Banza urebe amafaranga asigaye."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un message de %@ %@, mais ceux de %@ viennent de %@. Ne renvoyez pas d'argent. Vérifiez d'abord votre solde."
+          }
+        }
+      }
+    },
+    "A message that %@ asks for money back. %@ never does. Check your balance before you send anything.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubutumwa %1$@ burasaba ko usubiza amafaranga. %2$@ ntijya ibisaba. Banza urebe amafaranga asigaye mbere yo kohereza ikintu cyose."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un message disant que %@ demande de l'argent en retour. %@ ne le fait jamais. Vérifiez votre solde avant d'envoyer quoi que ce soit."
+          }
+        }
+      }
+    },
+    "All Time": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igihe cyose"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depuis le début"
+          }
+        }
+      }
+    },
+    "Did your payment go through?": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu bwawe bwagenze neza?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre paiement est-il passé ?"
+          }
+        }
+      }
+    },
+    "Money received": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amafaranga yakiriwe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Argent reçu"
+          }
+        }
+      }
+    },
+    "No %@ confirmed %@ within an hour, so StarHash marked it failed.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mu isaha imwe, %1$@ ntibwemeje %2$@, bityo StarHash ibyita ko byanze."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun %@ n'a confirmé %@ dans l'heure, alors StarHash l'a marqué comme échoué."
+          }
+        }
+      }
+    },
+    "Payment confirmed": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu bwemejwe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paiement confirmé"
+          }
+        }
+      }
+    },
+    "Spent in total": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byakoreshejwe byose hamwe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dépensé au total"
+          }
+        }
+      }
+    },
+    "Spent this month": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byakoreshejwe uku kwezi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dépensé ce mois-ci"
+          }
+        }
+      }
+    },
+    "Spent this week": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byakoreshejwe iki cyumweru"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dépensé cette semaine"
+          }
+        }
+      }
+    },
+    "Spent this year": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byakoreshejwe uyu mwaka"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dépensé cette année"
+          }
+        }
+      }
+    },
+    "Spent today": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byakoreshejwe uyu munsi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dépensé aujourd'hui"
+          }
+        }
+      }
+    },
+    "This Month": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uku kwezi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce mois-ci"
+          }
+        }
+      }
+    },
+    "This Week": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iki cyumweru"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette semaine"
+          }
+        }
+      }
+    },
+    "This Year": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uyu mwaka"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette année"
+          }
+        }
+      }
+    },
+    "This may be a scam": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibi bishobora kuba ubutekamutwe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceci est peut-être une arnaque"
+          }
+        }
+      }
+    },
+    "Today": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uyu munsi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aujourd'hui"
+          }
+        }
+      }
+    },
+    "Yesterday": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ejo hashize"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hier"
+          }
+        }
+      }
+    },
+    "You %@ %@.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous %@ %@."
+          }
+        }
+      }
+    },
+    "You made %@ %@. Open StarHash to see where your money went.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wakoze %@ %@. Fungura StarHash urebe aho amafaranga yawe yagiye."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez fait %@ %@. Ouvrez StarHash pour voir où est allé votre argent."
+          }
+        }
+      }
+    },
+    "You received money %@. Open StarHash to see it.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wakiriye amafaranga %@. Fungura StarHash uyarebe."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez reçu de l'argent %@. Ouvrez StarHash pour le voir."
+          }
+        }
+      }
+    },
+    "You sent %@ in %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wohereje %@ (%@)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez envoyé %@ en %@"
+          }
+        }
+      }
+    },
+    "Your %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukwezi kwawe kwa %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre %@"
+          }
+        }
+      }
+    },
+    "Your payment didn't go through": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu bwawe ntibwakunze"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre paiement n'est pas passé"
+          }
+        }
+      }
+    },
+    "Your payment to %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu bwawe kuri %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre paiement à %@"
+          }
+        }
+      }
+    },
+    "Your payment to %@ went through.": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu bwawe kuri %@ bwagenze neza."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre paiement à %@ est passé."
+          }
+        }
+      }
+    },
+    "Your week": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icyumweru cyawe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre semaine"
+          }
+        }
+      }
+    },
+    "an unknown sender": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "uwohereje utazwi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "un expéditeur inconnu"
+          }
+        }
+      }
+    },
+    "balance %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "amafaranga asigaye %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "solde %@"
+          }
+        }
+      }
+    },
+    "fee %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ikiguzi %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "frais %@"
+          }
+        }
+      }
+    },
+    "in %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "muri %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "en %@"
+          }
+        }
+      }
+    },
+    "looks like %@'s": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "busa n'ubwa %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ressemble à celui de %@"
+          }
+        }
+      }
+    },
+    "message": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ubutumwa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "message"
+          }
+        }
+      }
+    },
+    "received %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "wakiriye %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "reçu %@"
+          }
+        }
+      }
+    },
+    "says you received %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "buvuga ko wakiriye %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "dit que vous avez reçu %@"
+          }
+        }
+      }
+    },
+    "this week": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iki cyumweru"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cette semaine"
+          }
+        }
+      }
+    },
+    "your payment to %@": {
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ubwishyu bwawe kuri %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "votre paiement à %@"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

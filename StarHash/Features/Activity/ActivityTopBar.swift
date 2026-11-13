@@ -1,29 +1,37 @@
 import StarHashKit
 import SwiftUI
 
-/// Activity's floating bar: GO Club's period control at the leading end
-/// (Day, Week, Month, Year, as D W M Y), and the search button on the
-/// right. Searching, a close button comes in on the left and the field
-/// from the right as the control goes out to the left.
+/// Activity's floating bar, as it was before the title, at the owner's ask:
+/// GO Club's period control at the leading end (Week, Month, Year, as
+/// W M Y), choosing the chart's period, and on the right the Report and
+/// search, each round. Searching, a close button comes in on the left and
+/// the field from the right as the control goes out to the left.
 struct ActivityTopBar: View {
     let period: ActivityPeriod
     let onPeriod: @MainActor (ActivityPeriod) -> Void
     let isSearching: Bool
     @Binding var searchText: String
     var searchFocused: FocusState<Bool>.Binding
+    let onReport: () -> Void
     let onSearch: () -> Void
     let onCloseSearch: () -> Void
 
     var body: some View {
         ZStack(alignment: .leading) {
             if !isSearching {
-                periodControl
-                    .transition(.offset(x: -36).combined(with: .opacity))
+                GlassSegmentedControl(
+                    options: ActivityPeriod.choices,
+                    selection: period,
+                    onSelect: onPeriod,
+                    label: \.shortLabel,
+                    accessibilityLabel: \.title
+                )
+                .transition(.offset(x: -36).combined(with: .opacity))
             }
             // One glass container, so the buttons and the search capsule
             // melt into one another as the search opens and closes.
-            StarHashGlassContainer(spacing: 10) {
-                HStack(spacing: 10) {
+            StarHashGlassContainer(spacing: 12) {
+                HStack(spacing: 12) {
                     if isSearching {
                         SwapGlassButton(symbol: "xmark", label: "Close search", action: onCloseSearch)
                             .transition(.opacity)
@@ -31,6 +39,8 @@ struct ActivityTopBar: View {
                             .transition(.offset(x: 80).combined(with: .opacity))
                     } else {
                         Spacer(minLength: 0)
+                        SwapGlassButton(symbol: "chart.pie.fill", label: "Report", action: onReport)
+                            .transition(.opacity)
                         SwapGlassButton(symbol: "magnifyingglass", label: "Search", action: onSearch)
                             .transition(.opacity)
                     }
@@ -48,7 +58,7 @@ struct ActivityTopBar: View {
     /// magnifier, the field and a clear button.
     private var searchField: some View {
         HStack(spacing: 10) {
-            Image(systemName: "magnifyingglass")
+            Image(symbol: "magnifyingglass")
                 .font(.title3)
                 .foregroundStyle(Color.sheetSecondaryText)
                 .accessibilityHidden(true)
@@ -62,7 +72,7 @@ struct ActivityTopBar: View {
                 Button {
                     searchText = ""
                 } label: {
-                    Image(systemName: "xmark.circle.fill")
+                    Image(symbol: "xmark.circle.fill")
                         .font(.title3)
                         .foregroundStyle(Color.sheetSecondaryText)
                         .frame(width: 28, height: 38)
@@ -78,15 +88,5 @@ struct ActivityTopBar: View {
         .frame(maxWidth: .infinity, minHeight: 44)
         // Clear, as the buttons it melts into.
         .starhashGlass(interactive: true, tint: .clear)
-    }
-
-    private var periodControl: some View {
-        GlassSegmentedControl(
-            options: ActivityPeriod.choices,
-            selection: period,
-            onSelect: onPeriod,
-            label: \.shortLabel,
-            accessibilityLabel: \.title
-        )
     }
 }

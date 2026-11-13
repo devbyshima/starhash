@@ -3,8 +3,8 @@ import SwiftUI
 
 /// Pay's amount: the number alone, very large and bold, the digits rolling
 /// as they change. Zero is drawn grey, so an empty amount reads as a
-/// placeholder rather than a value. The currency is its own pill, above
-/// the keypad (`PayCurrencyPill`).
+/// placeholder rather than a value. Rwanda has one currency, so it is not
+/// drawn; VoiceOver reads it with the amount.
 struct PayAmountDisplay: View {
     let amount: Int
     /// Bumped each time Pay is tapped with nothing typed: the amount shakes
@@ -20,8 +20,7 @@ struct PayAmountDisplay: View {
         // A copy the keyframes' closure can take with it.
         let reduceMotion = reduceMotion
         Text(Money.format(amount))
-            .starhashFont(96, weight: .bold, design: .rounded, relativeTo: .largeTitle, tracking: 0)
-            .monospacedDigit()
+            .font(.starhashNumber(96, weight: .bold, relativeTo: .largeTitle))
             .contentTransition(.numericText(value: Double(amount)))
             .foregroundStyle(amount == 0 ? Color.payPlaceholderText : Color.payPrimaryText)
             .lineLimit(1)
@@ -82,45 +81,7 @@ struct PayAmountDisplay: View {
     }
 }
 
-/// The currency in a soft pill just above the keypad, apart from the
-/// amount as a payment app shows it: Rwanda's flag while nothing is typed,
-/// "RWF" once there is an amount. Only one currency, so nothing to pick.
-struct PayCurrencyPill: View {
-    /// Nothing typed yet: the flag rather than the code.
-    let isEmpty: Bool
-
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    var body: some View {
-        ZStack {
-            if isEmpty {
-                Text("\u{1F1F7}\u{1F1FC}")
-                    .starhashFont(21, relativeTo: .subheadline)
-                    .transition(transition)
-            } else {
-                Text(Money.currency)
-                    .starhashFont(15, weight: .semibold, relativeTo: .subheadline)
-                    // Full strength: on the pill's wash the quieter tone
-                    // falls under 4.5:1.
-                    .foregroundStyle(Color.payPrimaryText)
-                    .transition(transition)
-            }
-        }
-        .padding(.horizontal, 16)
-        // One height for both, so the pill does not jump as it switches.
-        .frame(minWidth: 72, minHeight: 36)
-        .background(Color.payWash, in: Capsule())
-        .animation(.smooth(duration: 0.25), value: isEmpty)
-        // The amount already reads out with its currency.
-        .accessibilityHidden(true)
-    }
-
-    private var transition: AnyTransition {
-        reduceMotion ? .opacity : .scale(scale: 0.7).combined(with: .opacity)
-    }
-}
-
-/// The 3 by 4 number pad under the currency, across the full width: 1 to
+/// The 3 by 4 number pad under the wallet pill, across the full width: 1 to
 /// 9, then Clear (a muted "." while there is nothing to clear), 0 and
 /// delete ("<"). No keycaps, like a phone's dialler on a plain canvas.
 ///
@@ -150,7 +111,7 @@ struct PayKeypad: View {
                     ForEach(row, id: \.self) { digit in
                         key(.digit(digit)) {
                             Text(String(digit))
-                                .starhashFont(26, weight: .semibold, relativeTo: .title2)
+                                .font(.starhashNumber(26, weight: .semibold, relativeTo: .title2))
                         }
                         .accessibilityLabel(String(digit))
                     }
@@ -166,7 +127,7 @@ struct PayKeypad: View {
                             .starhashFont(17, weight: .medium, relativeTo: .body)
                     } else {
                         Text(".")
-                            .starhashFont(30, weight: .semibold, relativeTo: .title2)
+                            .font(.starhashNumber(30, weight: .semibold, relativeTo: .title2))
                             .foregroundStyle(Color.paySecondaryText)
                             // Up from the baseline to sit level with the digits.
                             .offset(y: -6)
@@ -177,11 +138,11 @@ struct PayKeypad: View {
                 .accessibilityHidden(!canClear)
                 key(.digit(0)) {
                     Text("0")
-                        .starhashFont(26, weight: .semibold, relativeTo: .title2)
+                        .font(.starhashNumber(26, weight: .semibold, relativeTo: .title2))
                 }
                 .accessibilityLabel("0")
                 key(.delete) {
-                    Image(systemName: "chevron.left")
+                    Image(symbol: "chevron.left")
                         .font(.system(size: 22, weight: .semibold))
                 }
                 .accessibilityLabel("Delete")

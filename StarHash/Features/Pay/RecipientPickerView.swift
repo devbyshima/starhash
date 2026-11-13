@@ -30,15 +30,15 @@ struct RecipientPickerView: View {
 
     @Environment(StarHashStore.self) private var store
     @Environment(\.dismiss) private var dismiss
-    @AppStorage(PreferenceKey.enableContacts) private var enableContacts = true
-    @AppStorage(PreferenceKey.saveRecents) private var saveRecents = true
-    @AppStorage(PreferenceKey.nearbyLocation) private var nearbyEnabled = false
+    @Environment(\.floatingBarBottom) private var floatingBarBottom
+    @AppStorage(Preferences.enableContacts) private var enableContacts: Bool
+    @AppStorage(Preferences.saveRecents) private var saveRecents: Bool
+    @AppStorage(Preferences.nearbyLocation) private var nearbyEnabled: Bool
     /// The fix the Nearby section is built from. Taken only until the
     /// list is first touched: a section appearing above rows a finger is
     /// already on would push the wrong one under it.
     @State private var shownNearbyFix: LocationFix?
     @State private var listTouched = false
-    @AppStorage(PreferenceKey.wallet) private var wallet: Recipient.Network = .mtn
 
     @State private var query: String
     /// The search field in the header, rather than the title.
@@ -62,6 +62,14 @@ struct RecipientPickerView: View {
     /// Where the list is scrolled; set only by `-payScroll` (DEBUG).
     @State private var scrollPosition = ScrollPosition()
     @FocusState private var searchFocused: Bool
+    /// The StarHash owner who lists the number typed, when one does.
+    @State private var listedOwner: ListedOwner?
+
+    struct ListedOwner {
+        let number: String
+        let entry: StarHashCloud.DirectoryEntry
+        var photo: UIImage?
+    }
 
     init(amount: Int, query: String = "", nearbyFix: LocationFix? = nil, onPay: @escaping (Recipient) -> Void) {
         self.amount = amount
@@ -83,8 +91,8 @@ struct RecipientPickerView: View {
                         ForEach(nearby, id: \.self) { recipient in
                             RecipientRow(
                                 tile: tile(for: recipient),
-                                title: recipient.displayName,
-                                subtitle: recipient.name == nil ? kindLabel(recipient) : recipient.formattedDestination,
+                                title: recipient.shownName,
+                                subtitle: recipient.shownName == recipient.formattedDestination ? kindLabel(recipient) : recipient.formattedDestination,
                                 matchColor: Color.pickerMatch
                             ) { choose(recipient) }
                         }
@@ -97,8 +105,8 @@ struct RecipientPickerView: View {
                         ForEach(recents, id: \.self) { recipient in
                             RecipientRow(
                                 tile: tile(for: recipient),
-                                title: recipient.displayName,
-                                subtitle: recipient.name == nil ? kindLabel(recipient) : recipient.formattedDestination,
+                                title: recipient.shownName,
+                                subtitle: recipient.shownName == recipient.formattedDestination ? kindLabel(recipient) : recipient.formattedDestination,
                                 match: search.nameQuery,
                                 matchColor: Color.pickerMatch,
                                 onLongPress: contact(for: recipient).map { found in { showDetails(for: found) } }
@@ -143,6 +151,8 @@ struct RecipientPickerView: View {
             scrolledUnder = offset
         }
         .onChange(of: query) { labelTops = [:] }
+        // Who lists the number typed, asked afresh as it changes.
+        .task(id: query) { await lookUpTypedNumber() }
         // Soft Edge under the header and into the total.
         .starhashSoftEdge()
         // Centred in what is left between the header and the total (or the
@@ -151,8 +161,7 @@ struct RecipientPickerView: View {
             if showsNoMatches {
                 EmptyStateView(
                     doodle: .matches,
-                    title: "No Matches",
-                    message: "Type a phone number or a merchant code to pay it directly."
+                    title: "No Matches"
                 )
                 .padding(.horizontal, StarHashMetrics.screenPadding)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -287,7 +296,7 @@ struct RecipientPickerView: View {
     /// a clear button.
     private var searchField: some View {
         HStack(spacing: 10) {
-            Image(systemName: "magnifyingglass")
+            Image(symbol: "magnifyingglass")
                 .font(.title3)
                 .foregroundStyle(Color.sheetSecondaryText)
                 .accessibilityHidden(true)
@@ -307,7 +316,7 @@ struct RecipientPickerView: View {
                 Button {
                     query = ""
                 } label: {
-                    Image(systemName: "xmark.circle.fill")
+                    Image(symbol: "xmark.circle.fill")
                         .font(.title3)
                         .foregroundStyle(Color.sheetSecondaryText)
                         .frame(width: 28, height: 38)
@@ -415,104 +424,87 @@ struct RecipientPickerView: View {
 
     // MARK: Picking
 
+    /// What the list shows for the search, each person or till once
+    /// (`RecipientList`), from what the owner's settings let it read.
+    private var list: RecipientList<PayContact> {
+        RecipientList(
+            query: query,
+            nearby: nearbySuggestions,
+            recents: saveRecents ? store.recentRecipients() : [],
+            namedPast: saveRecents ? store.recentRecipients(limit: 50).filter { $0.name != nil } : [],
+            contacts: enableContacts ? contacts.contacts : []
+        )
+    }
+
     private var search: RecipientSearch { RecipientSearch(query: query) }
+    private var nearby: [Recipient] { list.nearby }
+    private var recents: [Recipient] { list.recents }
+    private var matchingContacts: [PayContact] { list.contacts }
+    private var savedMatches: [Recipient] { list.savedMatches }
+    /// What the keyboard's Search key pays.
+    private var typedRecipient: Recipient? { list.typed }
 
-    /// Recent recipients matching the search, less the one already at the
-    /// top as an exact match. While searching, a recent number that belongs
-    /// to a contact with several numbers is left to the contact's row, which
-    /// offers all of them, so the person shows once.
-    private var recents: [Recipient] {
-        let found = matchingRecents
-        guard !search.isEmpty else { return found }
-        let multiNumber = matchingContactsUnfiltered.filter { $0.recipients.count > 1 }
-        return found.filter { recent in
-            !multiNumber.contains { contact in contact.recipients.contains { Self.same($0, recent) } }
-        }
-    }
-
-    /// Contacts matching the search, less any already at the top. While
-    /// searching, a contact with one number that Recent already shows is
-    /// left out, so the same person or till is not listed twice.
-    private var matchingContacts: [PayContact] {
-        let found = matchingContactsUnfiltered
-        guard !search.isEmpty else { return found }
-        let shown = matchingRecents
-        return found.filter { contact in
-            !(contact.recipients.count == 1 && shown.contains { Self.same($0, contact.recipients[0]) })
-        }
-    }
-
-    private var matchingRecents: [Recipient] {
-        guard saveRecents else { return [] }
-        let suggested = nearby
-        return store.recentRecipients().filter { recent in
-            search.matches(recent) && !isTyped(recent) && !suggested.contains { Self.same($0, recent) }
-        }
+    private var showsNoMatches: Bool {
+        list.findsNothing && contacts.access != .denied
     }
 
     /// Numbers and codes paid where the phone is now, nearest first, from
-    /// where the saved payments were made. Only before anything is typed: a
-    /// search is looking for someone in particular.
-    private var nearby: [Recipient] {
-        guard nearbyEnabled, search.isEmpty, let fix = shownNearbyFix else { return [] }
-        return Nearby.suggestions(
-            from: store.transactions, latitude: fix.latitude, longitude: fix.longitude, accuracy: fix.accuracy
+    /// where the saved payments were made, less any passed over five times
+    /// in a row (`NearbyMisses`).
+    private var nearbySuggestions: [Recipient] {
+        guard nearbyEnabled, let fix = shownNearbyFix else { return [] }
+        let found = Nearby.suggestions(
+            from: store.transactions, latitude: fix.latitude, longitude: fix.longitude, accuracy: fix.accuracy, limit: 8
         ).map(\.recipient)
-    }
-
-    private var matchingContactsUnfiltered: [PayContact] {
-        guard enableContacts else { return [] }
-        return contacts.contacts.filter { search.matches($0) && !$0.recipients.contains(where: isTyped) }
-    }
-
-    /// The same number or code, whatever name each side has saved it under.
-    private static func same(_ a: Recipient, _ b: Recipient) -> Bool {
-        a.kind == b.kind && a.destination == b.destination
-    }
-
-    /// Saved recipients (contacts, and past recipients with a name) whose
-    /// number or code is exactly the one typed. They take the top of the
-    /// list in place of the bare number, so a saved till or friend is paid
-    /// by name. One row per name.
-    private var savedMatches: [Recipient] {
-        guard search.typedRecipient != nil else { return [] }
-        let past = saveRecents ? store.recentRecipients(limit: 50).filter { $0.name != nil } : []
-        let saved = enableContacts ? contacts.contacts.flatMap(\.recipients) : []
-        var names = Set<String>()
-        return (saved + past).filter { isTyped($0) && names.insert(($0.name ?? "").lowercased()).inserted }
-    }
-
-    /// Whether `recipient` is the number or code in the search field.
-    private func isTyped(_ recipient: Recipient) -> Bool {
-        guard let typed = search.typedRecipient else { return false }
-        return recipient.kind == typed.kind && recipient.destination == typed.destination
-    }
-
-    private var showsNoMatches: Bool {
-        !search.isEmpty && search.typedRecipient == nil && recents.isEmpty && matchingContacts.isEmpty
-            && contacts.access != .denied
-    }
-
-    /// What the keyboard's Search key pays: the saved recipient the typed
-    /// number or code belongs to, or the number or code itself.
-    private var typedRecipient: Recipient? {
-        savedMatches.first ?? search.typedRecipient
+        return Array(NearbyMissesStore.filter(found).prefix(3))
     }
 
     // MARK: Sections
 
     /// The number or code being typed, when nothing saved has it: paid as
-    /// typed.
+    /// typed. A number a StarHash owner lists (Show My Name) shows the
+    /// name they gave where the carrier's would be, and their photo, or
+    /// their initials, in the silhouette's place.
     private func typedSection(_ typed: Recipient) -> some View {
-        Section {
+        let listed = listedOwner?.number == typed.destination ? listedOwner : nil
+        let tile: RecipientRow.Tile = if let photo = listed?.photo {
+            .image(photo)
+        } else if let name = listed?.entry.name {
+            .monogram(PayContact.initials(for: name))
+        } else {
+            typed.kind == .phone ? .shadow(seed: typed.destination) : .symbol("storefront")
+        }
+        return Section {
             RecipientRow(
-                tile: .symbol(typed.kind == .phone ? "phone" : "storefront"),
+                tile: tile,
                 title: typed.formattedDestination,
-                subtitle: kindLabel(typed),
+                subtitle: listed?.entry.name ?? kindLabel(typed),
                 matchColor: Color.pickerMatch
             ) { choose(typed) }
         } header: {
             sectionLabel(typed.kind == .phone ? "Number" : "Merchant code")
+        }
+        .animation(.smooth(duration: 0.25), value: listed?.entry)
+    }
+
+    /// Asks StarHash's server who lists the number typed, once it has
+    /// stayed put a moment, and then for their photo.
+    private func lookUpTypedNumber() async {
+        listedOwner = nil
+        guard let typed = search.typedRecipient, typed.kind == .phone, savedMatches.isEmpty,
+              StarHashCloud.isListable(typed.destination) else { return }
+        try? await Task.sleep(for: .milliseconds(300))
+        guard !Task.isCancelled, let entry = await StarHashCloud.entry(for: typed.destination), !Task.isCancelled else { return }
+        listedOwner = ListedOwner(number: typed.destination, entry: entry)
+        #if DEBUG
+        // -directoryPhoto: a photo on hand, with no server to fetch it from.
+        if DebugLaunch.arguments.contains("-directoryPhoto") {
+            listedOwner?.photo = UIImage(named: "DeveloperPhoto")
+            return
+        }
+        #endif
+        if let id = entry.photoID, let photo = await StarHashCloud.photo(id), !Task.isCancelled {
+            listedOwner?.photo = photo
         }
     }
 
@@ -541,7 +533,7 @@ struct RecipientPickerView: View {
         case .denied:
             Section {
                 ContactsAccessCard(
-                    message: "Allow StarHash to see your contacts to pay them by name. They stay on your iPhone."
+                    message: "Contacts are off"
                 )
                 .padding(.horizontal, 10)
             } header: {
@@ -568,7 +560,7 @@ struct RecipientPickerView: View {
                     }
                     if contacts.access == .limited && search.isEmpty {
                         ContactsAccessCard(
-                            message: "StarHash sees only the contacts you chose. You can share more in Settings."
+                            message: "Only some contacts are shared"
                         )
                         .padding(.horizontal, 10)
                     }
@@ -607,7 +599,6 @@ struct RecipientPickerView: View {
                 Text(Money.format(amount))
                     .font(PickerType.totalAmount)
                     .foregroundStyle(Color.starhashPrimaryText)
-                    .monospacedDigit()
                 Text(Money.currency)
                     .font(PickerType.totalCurrency)
                     .foregroundStyle(Color.sheetSecondaryText)
@@ -618,11 +609,15 @@ struct RecipientPickerView: View {
         .padding(.horizontal, 22)
         .padding(.vertical, 14)
         .frame(minHeight: 72)
-        // The sheets' colours: solid white in light mode, their near-black
-        // glass in dark.
-        .starhashTotalCard(in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        // Liquid Glass, as it floats over the list scrolling under it,
+        // lifted by a soft shadow so it parts from the pale page in light
+        // mode.
+        .starhashGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous), tint: .clear)
+        .shadow(color: .floatingShadow, radius: 18, y: 6)
         .padding(.horizontal, 16)
-        .padding(.bottom, 8)
+        // Level with the tab bar it takes the place of: its foot as far
+        // from the screen's.
+        .padding(.bottom, floatingBarBottom)
         .starhashReadableWidth()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Total \(Money.formatWithCurrency(amount))")
@@ -632,9 +627,9 @@ struct RecipientPickerView: View {
 
     /// "0788 123 456", "Merchant code 020205", or "3 phone numbers".
     private func contactSubtitle(_ contact: PayContact) -> String {
-        guard contact.recipients.count == 1 else { return "\(contact.recipients.count) phone numbers" }
+        guard contact.recipients.count == 1 else { return String(starhash: "\(contact.recipients.count) phone numbers") }
         let only = contact.recipients[0]
-        return only.kind == .merchant ? "Merchant code \(only.destination)" : only.formattedDestination
+        return only.kind == .merchant ? String(starhash: "Merchant code \(only.destination)") : only.formattedDestination
     }
 
     /// A storefront for merchants, initials for named people, a phone for
@@ -648,7 +643,7 @@ struct RecipientPickerView: View {
     /// fee the payment gets.
     private func kindLabel(_ recipient: Recipient) -> String {
         guard let network = recipient.network else { return "Merchant code" }
-        return "\(network.name) number"
+        return String(starhash: "\(network.name) number")
     }
 
     private func pick(_ contact: PayContact) {
@@ -686,12 +681,15 @@ struct RecipientPickerView: View {
     /// that is not in Contacts.
     private func contact(for recipient: Recipient) -> PayContact? {
         guard enableContacts else { return nil }
-        return contacts.contacts.first { $0.recipients.contains { Self.same($0, recipient) } }
+        return contacts.contacts.first { $0.recipients.contains { $0.identity == recipient.identity } }
     }
 
     private func choose(_ recipient: Recipient) {
         guard !hasPaid, recipient.isPayable else { return }
         hasPaid = true
+        // The Nearby suggestions showing were passed over, unless this is
+        // one of them.
+        NearbyMissesStore.record(shown: nearby, chosen: recipient)
         searchFocused = false
         onPay(recipient)
     }
@@ -730,7 +728,7 @@ private enum PickerType {
     /// The amount's size in the currency's weight, so the label reads with
     /// "RWF" and the number leads.
     static var totalLabel: Font { .sheet(34, totalCurrencyWeight, relativeTo: .title) }
-    static var totalAmount: Font { .sheet(34, .bold, relativeTo: .title) }
+    static var totalAmount: Font { .starhashNumber(34, weight: .bold, relativeTo: .title) }
     static var totalCurrency: Font { .sheet(20, totalCurrencyWeight, relativeTo: .title3) }
     private static let totalCurrencyWeight: Font.Weight = .semibold
 }
@@ -754,6 +752,12 @@ private struct PickerSkeletonRow: View {
         .padding(.horizontal, 22)
         .padding(.vertical, 8)
         .opacity(dims ? 0.45 : 1)
+        // The real rows' line, so the list keeps its rhythm as it loads.
+        .overlay(alignment: .bottom) {
+            SheetDivider()
+                .padding(.leading, 22 + 44 + 12)
+                .padding(.trailing, 22)
+        }
         .onAppear {
             guard !reduceMotion else { return }
             withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) { dims = true }
@@ -768,18 +772,25 @@ struct RecipientRow: View {
     indirect enum Tile {
         case monogram(String)
         case symbol(String)
+        /// A person known only by their number: a silhouette picked by it
+        /// (`ShadowAvatar`).
+        case shadow(seed: String)
         /// A contact's photo, showing `fallback` until it loads.
         case photo(contactID: String, fallback: Tile)
+        /// A photo already in hand: the one a StarHash owner listed with
+        /// their number.
+        case image(UIImage)
 
-        /// A storefront for merchants, initials for named people, a phone
-        /// for bare numbers; the photo of `photoContactID` over any of them.
+        /// A storefront for merchants, initials for named people, a
+        /// silhouette for bare numbers; the photo of `photoContactID` over
+        /// any of them.
         static func `for`(_ recipient: Recipient, photoContactID: String?) -> Tile {
             let plain: Tile = if recipient.kind == .merchant {
                 .symbol("storefront")
             } else if let name = recipient.name {
                 .monogram(PayContact.initials(for: name))
             } else {
-                .symbol("phone")
+                .shadow(seed: recipient.destination)
             }
             guard let photoContactID else { return plain }
             return .photo(contactID: photoContactID, fallback: plain)
@@ -791,7 +802,7 @@ struct RecipientRow: View {
     let subtitle: String
     /// Letters to mark in the title: what the search typed.
     var match: String = ""
-    var matchColor: Color = .starhashPrimaryText
+    var matchColor: SurfaceColor = Color.starhashPrimaryText
     /// A long press, for a row that is a saved contact: their details.
     var onLongPress: (() -> Void)?
     let action: () -> Void
@@ -802,13 +813,14 @@ struct RecipientRow: View {
     /// (the sheet it opens cancels it), once any tap from it has come.
     @State private var longPressed = false
     @State private var longPresses = 0
+    @Environment(\.self) private var environment
 
     /// The title with the first stretch the search matched coloured, the
     /// way the search matches: ignoring case and accents.
     private var styledTitle: AttributedString {
         var text = AttributedString(title)
         if !match.isEmpty, let range = text.range(of: match, options: [.caseInsensitive, .diacriticInsensitive]) {
-            text[range].foregroundColor = matchColor
+            text[range].foregroundColor = matchColor.color(in: environment)
             text[range].backgroundColor = .pickerMatchBackground
         }
         return text
@@ -827,7 +839,7 @@ struct RecipientRow: View {
                         .font(PickerType.rowName)
                         .foregroundStyle(Color.starhashPrimaryText)
                         .lineLimit(1)
-                    Text(subtitle)
+                    Text(catalog: subtitle)
                         .font(PickerType.rowDetail)
                         .foregroundStyle(Color.sheetSecondaryText)
                         .lineLimit(1)
@@ -837,6 +849,14 @@ struct RecipientRow: View {
             // Flat on the page, in line with the section labels.
             .padding(.horizontal, 22)
             .padding(.vertical, 8)
+            // A line under the row from where its words start to where the
+            // row's content ends: past the tile and its gap, in from the
+            // edge as far as the row is.
+            .overlay(alignment: .bottom) {
+                SheetDivider()
+                    .padding(.leading, 22 + 44 + 12)
+                    .padding(.trailing, 22)
+            }
             .contentShape(Rectangle())
             // On the label, inside the button: a gesture on the button
             // itself would rank below its tap and never be heard.
@@ -906,6 +926,14 @@ struct RecipientTile: View {
                 RecipientTile(tile: fallback, size: size, fill: fill)
             }
             .accessibilityHidden(true)
+        } else if case .image(let image) = tile {
+            // Cut as a contact's photo is.
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+                .frame(width: size, height: size)
+                .clipShape(RoundedRectangle(cornerRadius: size * 0.3, style: .continuous))
+                .accessibilityHidden(true)
         } else {
             plainTile
         }
@@ -914,25 +942,39 @@ struct RecipientTile: View {
     private var plainTile: some View {
         Group {
             switch tile {
+            case .monogram(let initials) where initials == "#":
+                // A name with no letters (a number saved as the name)
+                // has no initial: the StarHash mark stands in, at the
+                // initials' size and in their colour, where a "#" sat.
+                StarHashMarkShape()
+                    .fill(onPay ? AnyShapeStyle(Color.payPrimaryText) : AnyShapeStyle(Color.starhashPrimaryText))
+                    .frame(width: size * 0.46, height: size * 0.46)
             case .monogram(let initials):
                 Text(initials)
                     .font(.starhashFixed(size * 0.36, weight: .semibold))
-                    .foregroundStyle(onPay ? Color.payPrimaryText : Color.starhashPrimaryText)
+                    .foregroundStyle(onPay ? AnyShapeStyle(Color.payPrimaryText) : AnyShapeStyle(Color.starhashPrimaryText))
             case .symbol(let symbol):
-                Image(systemName: symbol)
+                Image(symbol: symbol)
                     .font(.system(size: size * 0.4))
-                    .foregroundStyle(onPay ? Color.paySecondaryText : Color.sheetSecondaryText)
-            case .photo:
+                    .foregroundStyle(onPay ? AnyShapeStyle(Color.paySecondaryText) : AnyShapeStyle(Color.sheetSecondaryText))
+            case .shadow(let seed):
+                // The bust fills the tile to its foot, cut by its corners.
+                ShadowAvatar(seed: seed)
+                    .foregroundStyle(onPay ? AnyShapeStyle(Color.paySecondaryText) : AnyShapeStyle(Color.sheetSecondaryText))
+                    .padding(.top, size * 0.14)
+                    .frame(width: size, height: size, alignment: .bottom)
+            case .photo, .image:
                 EmptyView()
             }
         }
         .frame(width: size, height: size)
-        .background(fill ?? (onPay ? Color.payWash : Color.starhashPrimaryText.opacity(0.1)), in: RoundedRectangle(cornerRadius: size * 0.25, style: .continuous))
+        .background(fill.map(AnyShapeStyle.init) ?? (onPay ? AnyShapeStyle(Color.payWash) : AnyShapeStyle(Color.starhashPrimaryText.opacity(0.1))), in: RoundedRectangle(cornerRadius: size * 0.25, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: size * 0.25, style: .continuous))
         .accessibilityHidden(true)
     }
 }
 
-/// Shown in place of contacts when access is off or limited: why, and a
+/// Shown in place of contacts when access is off or limited: which, and a
 /// way to the app's page in Settings, the only place it can be changed.
 private struct ContactsAccessCard: View {
     let message: String
@@ -941,12 +983,12 @@ private struct ContactsAccessCard: View {
         StarHashCard(fill: .starhashCard) {
             VStack(alignment: .leading, spacing: 12) {
                 Label {
-                    Text(message)
+                    Text(catalog: message)
                         .font(.starhash(.subheadline))
                         .foregroundStyle(Color.starhashSecondaryText)
                         .fixedSize(horizontal: false, vertical: true)
                 } icon: {
-                    Image(systemName: "person.crop.circle.badge.questionmark")
+                    Image(symbol: "person.crop.circle.badge.questionmark")
                         .foregroundStyle(Color.starhashPrimaryText)
                 }
                 Button("Open Settings") { USSDDialer.openSettings() }

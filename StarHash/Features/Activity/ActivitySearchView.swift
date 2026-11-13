@@ -11,8 +11,9 @@ struct ActivitySearchView: View {
     let results: [StarHashKit.Transaction]
     let text: String
     let onOpen: (StarHashKit.Transaction) -> Void
-    let onConfirm: (StarHashKit.Transaction) -> Void
+    let onVerify: (StarHashKit.Transaction) -> Void
     let onFail: (StarHashKit.Transaction) -> Void
+    let onPayAgain: (Recipient) -> Void
     let onDelete: (StarHashKit.Transaction) -> Void
     let onSwipeDelete: (StarHashKit.Transaction) -> Void
 
@@ -29,8 +30,7 @@ struct ActivitySearchView: View {
         if query.isEmpty {
             EmptyStateView(
                 doodle: .search,
-                title: "Search Transactions",
-                message: "Find a name, number, merchant code, amount or reference."
+                title: "Search Transactions"
             )
             .padding(.horizontal, 24)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -38,8 +38,7 @@ struct ActivitySearchView: View {
         } else if results.isEmpty {
             EmptyStateView(
                 doodle: .results,
-                title: "No Results",
-                message: "No transactions match \u{201C}\(query)\u{201D}."
+                title: "No Results"
             )
             .padding(.horizontal, 24)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -49,10 +48,10 @@ struct ActivitySearchView: View {
                 LazyVStack(spacing: 0) {
                     ActivityTransactionRows(
                         transactions: results,
-                        showsDate: true,
                         onOpen: onOpen,
-                        onConfirm: onConfirm,
+                        onVerify: onVerify,
                         onFail: onFail,
+                        onPayAgain: onPayAgain,
                         onDelete: onDelete,
                         onSwipeDelete: onSwipeDelete
                     )

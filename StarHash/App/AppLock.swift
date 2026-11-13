@@ -1,13 +1,7 @@
 import LocalAuthentication
+import StarHashKit
 import SwiftUI
 import UIKit
-
-extension PreferenceKey {
-    /// Whether StarHash asks for Face ID (or Touch ID, or the iPhone's
-    /// passcode) to open. Off until turned on in Settings, which asks for
-    /// it first, as turning it off does.
-    static let appLock = "appLock"
-}
 
 /// How this iPhone proves it is its owner: the biometry it has set up, or
 /// its passcode alone. Names the switch in Settings and the lock's button.
@@ -86,7 +80,7 @@ final class AppLock {
         #endif
     }
 
-    static var isOn: Bool { StarHashPreferences.bool(PreferenceKey.appLock, default: false) }
+    static var isOn: Bool { Preferences.appLock.value() }
 
     /// Follows the scene: covers the app as it goes, locks it if it was
     /// away long enough, and asks as it comes back.
@@ -180,18 +174,12 @@ private struct AppLockView: View {
                 .starhashFont(28, weight: .bold, relativeTo: .title)
                 .foregroundStyle(Color.starhashPrimaryText)
                 .accessibilityAddTraits(.isHeader)
-            Text("Unlock with \(unlock.name) to see your payments.")
-                .font(.starhash(.body))
-                .foregroundStyle(Color.starhashSecondaryText)
-                .multilineTextAlignment(.center)
-                .padding(.top, 10)
-                .padding(.horizontal, 32)
             Spacer()
             if lock.isLocked {
                 Button {
                     Task { await lock.unlock() }
                 } label: {
-                    Label("Unlock with \(unlock.name)", systemImage: unlock.symbol)
+                    Text("Unlock with \(unlock.name)")
                 }
                 .buttonStyle(.starhashPrimary)
                 .padding(.horizontal, StarHashMetrics.screenPadding)

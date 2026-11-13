@@ -1,15 +1,32 @@
 import StarHashKit
 import SwiftUI
 
-/// The one store and router the app, its views and its App Intents share.
+/// The one store, owner and router the app, its views and its App Intents
+/// share.
 @MainActor
 enum AppEnvironment {
     static let store: StarHashStore = {
+        let store: StarHashStore
         #if DEBUG
-        if DebugLaunch.inMemory { return DebugLaunch.seededStore() }
+        store = DebugLaunch.inMemory ? DebugLaunch.seededStore() : StarHashStore(fileURL: StarHashStore.defaultFileURL)
+        #else
+        store = StarHashStore(fileURL: StarHashStore.defaultFileURL)
         #endif
-        return StarHashStore(fileURL: StarHashStore.defaultFileURL)
+        store.ownAccounts = { owner.ownAccounts }
+        return store
     }()
+
+    /// The owner's name, SIMs and wallet. A change to their own numbers
+    /// files the transfers between them afresh.
+    static let owner: Owner = {
+        let owner = Owner(defaults: .standard)
+        owner.onOwnAccountsChange = { _ = store.refileOwnTransfers() }
+        return owner
+    }()
+
+    /// Auto-verify's state, over the same store: whether the SMS confirm
+    /// payments, and the expiry of those they do not.
+    static let autoVerify = AutoVerify(store: store)
 
     /// Buy's codes. Debug launches with -inMemory start from the defaults
     /// in a throwaway list.
@@ -68,7 +85,7 @@ enum AppTab: String, Hashable, CaseIterable, Identifiable {
         switch self {
         case .pay: "Pay"
         case .buy: "Buy"
-        case .activity: "Activity"
+        case .activity: "Transactions"
         case .settings: "Settings"
         }
     }
@@ -78,7 +95,7 @@ enum AppTab: String, Hashable, CaseIterable, Identifiable {
         switch self {
         case .pay: "number"
         case .buy: "bag.fill"
-        case .activity: "clock.fill"
+        case .activity: "receipt.fill"
         case .settings: "gearshape.fill"
         }
     }
@@ -122,14 +139,45 @@ final class AppRouter {
     }
     /// The transaction whose details page is open on Activity.
     var openTransactionID: UUID?
+    /// A scam warning's advice, over the app, from its notification.
+    var scamNotice: ScamNotice?
+    /// Pay's QR scanner, asked for from outside Pay (a widget, a link),
+    /// until Pay opens it. A new value each time.
+    private(set) var scanRequest: UUID?
+
+    /// Opens Pay with its QR scanner up.
+    func scan() {
+        show(.pay)
+        scanRequest = UUID()
+    }
+
+    func takeScanRequest() -> Bool {
+        defer { scanRequest = nil }
+        return scanRequest != nil
+    }
+    /// A payment whose page should open Verify's sheet, until it does.
+    var verifyTransactionID: UUID?
+
+    /// Opens a payment's page on Activity with Verify's sheet over it.
+    func verify(_ id: UUID) {
+        show(.activity)
+        openTransactionID = id
+        verifyTransactionID = id
+    }
+    #if DEBUG
+    /// `starhash://whatsnew?page=<n>` (DEBUG): What's New over the app at
+    /// that page, to look at it without an update.
+    var whatsNewPreviewPage: Int?
+    #endif
     /// Someone to pay, asked for outside the Pay tab (Pay Again on a
     /// transaction), until Pay takes it with `takePayRequest()`.
     private(set) var payRequest: PayRequest?
 
-    /// Switches to Pay with `recipient` chosen under the amount; Pay then
-    /// dials them once there is an amount.
-    func pay(_ recipient: Recipient) {
-        payRequest = PayRequest(recipient: recipient)
+    /// Switches to Pay with `recipient` chosen under the amount, and the
+    /// amount when one is asked for (a scanned code's); Pay then dials them
+    /// once there is an amount.
+    func pay(_ recipient: Recipient, amount: Int? = nil, photoID: UUID? = nil) {
+        payRequest = PayRequest(recipient: recipient, amount: amount, photoID: photoID)
         show(.pay)
     }
 
@@ -152,27 +200,39 @@ final class AppRouter {
 
     /// starhash://pay, starhash://buy, starhash://activity,
     /// starhash://settings, starhash://transaction/<uuid>. starhash://help,
-    /// from before Help moved into Settings, opens Settings.
+    /// from before Help moved into Settings, opens Settings. A StarHash QR
+    /// code's link, starhash://pay?to=<number or code>, chooses who to pay;
+    /// starhash://scan opens the scanner, and starhash://dial?code=<code>
+    /// (or a tel: link a widget hands over) dials a code. In DEBUG builds,
+    /// starhash://whatsnew?page=<n> shows What's New.
     func handle(_ url: URL) {
-        guard url.scheme == "starhash" else { return }
-        if url.host() == "help" {
-            show(.settings)
+        if url.scheme == "tel" {
+            Task { _ = await USSDDialer.open(url) }
             return
         }
-        if let tab = url.host().flatMap(AppTab.init(rawValue:)) {
-            show(tab)
-            return
-        }
-        switch url.host() {
-        case "shortcut":
-            let result = ShortcutCallback.Result(rawValue: url.lastPathComponent) ?? .error
+        guard let link = StarHashLink(url: url) else { return }
+        switch link {
+        case .page(let page):
+            if let tab = AppTab(rawValue: page.rawValue) { show(tab) }
+        case .payment(let request):
+            pay(request.recipient, amount: request.amount, photoID: request.photoID)
+        case .shortcutRan(let result):
             shortcutCallback = ShortcutCallback(result: result)
-        case "transaction":
-            if let id = UUID(uuidString: url.lastPathComponent) {
-                show(.activity)
-                openTransactionID = id
+        case .transaction(let id):
+            show(.activity)
+            openTransactionID = id
+        case .scan:
+            scan()
+        case .dial(let code):
+            if let tel = USSD.telURL(for: code) {
+                Task { _ = await USSDDialer.open(tel) }
             }
-        default: break
+        case .whatsNew(let page):
+            #if DEBUG
+            whatsNewPreviewPage = page
+            #else
+            _ = page
+            #endif
         }
     }
 }
@@ -182,16 +242,22 @@ final class AppRouter {
 struct PayRequest: Identifiable, Equatable {
     let id = UUID()
     let recipient: Recipient
+    /// The amount a scanned code asked for, typed in for them.
+    var amount: Int?
+    /// The owner's photo on StarHash's server, when their code shares it.
+    var photoID: UUID?
 }
 
-/// How a shortcut StarHash ran through x-callback-url finished.
-struct ShortcutCallback: Equatable {
-    enum Result: String {
-        case success
-        case error
-        case cancel
-    }
-
+/// A scam warning's advice, shown over the app from its notification.
+struct ScamNotice: Identifiable, Equatable {
     let id = UUID()
-    let result: Result
+    /// What the notification said.
+    let message: String
+}
+
+/// How a shortcut StarHash ran through x-callback-url finished. Its own
+/// id, so the same answer twice still reads as a new one.
+struct ShortcutCallback: Equatable {
+    let id = UUID()
+    let result: StarHashLink.ShortcutResult
 }
