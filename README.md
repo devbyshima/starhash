@@ -77,9 +77,9 @@ More in [Privacy](docs/privacy.md).
 
 | Pay | Transactions | Report |
 | :---: | :---: | :---: |
-| <img src="docs/images/pay.png" width="100%" alt="Pay: an amount of 5,000 on the keypad" /> | <img src="docs/images/activity.png" width="100%" alt="Transactions in dark mode: this week's spending chart and November's payments" /> | <img src="docs/images/report.png" width="100%" alt="Report: the month's summary sentence, total spent and categories" /> |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/pay-light.png" /><img src="docs/images/pay-dark.png" width="100%" alt="Pay: an amount of 5,000 on the keypad" /></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/activity-light.png" /><img src="docs/images/activity-dark.png" width="100%" alt="Transactions: this week's spending chart and November's payments" /></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/report-light.png" /><img src="docs/images/report-dark.png" width="100%" alt="Report: the month's summary sentence, total spent and categories" /></picture> |
 | **A payment** | **Buy** | **Payment types** |
-| <img src="docs/images/transaction.png" width="100%" alt="A confirmed merchant payment with its category, code and fee" /> | <img src="docs/images/buy.png" width="100%" alt="Buy in dark mode: two pinned codes as tiles, the rest with call buttons" /> | <img src="docs/images/report-types.png" width="100%" alt="Report in dark mode: payment types as orbs and the month's biggest day" /> |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/transaction-light.png" /><img src="docs/images/transaction-dark.png" width="100%" alt="A confirmed merchant payment with its category, code and fee" /></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/buy-light.png" /><img src="docs/images/buy-dark.png" width="100%" alt="Buy: two pinned codes as tiles, the rest with call buttons" /></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/report-types-light.png" /><img src="docs/images/report-types-dark.png" width="100%" alt="Report: payment types as orbs and the month's biggest day" /></picture> |
 
 <br>
 
