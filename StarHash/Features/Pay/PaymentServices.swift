@@ -1,26 +1,75 @@
 import CoreLocation
 import StarHashKit
+import SwiftUI
 import UIKit
 
-/// Hands a USSD code to the phone app. MoMo then asks for the PIN on the
-/// carrier's own screen; StarHash never sees it.
+/// Every code StarHash dials goes through here: a payment (through
+/// `Paying`), Buy's codes, Balance, and a code a widget or a link hands
+/// over. A code the system would not dial (the simulator, an iPad without
+/// calling) is kept in `undialledCode`, which Pay, the parts sheet and Buy
+/// show as one alert (`dialFailureAlert()`), so it can be dialled by hand.
 @MainActor
-enum USSDDialer {
-    /// False when the system would not open the tel: link: the simulator,
-    /// an iPad without calling, or a code the system refused.
-    static func dial(_ code: String) async -> Bool {
-        guard let url = USSD.telURL(for: code) else { return false }
-        return await open(url)
+@Observable
+final class Dialler {
+    /// The code the system last would not dial, until the alert is closed.
+    var undialledCode: String?
+
+    func dial(_ code: String) {
+        guard let url = USSD.telURL(for: code) else {
+            undialledCode = code
+            return
+        }
+        open(url, code: code)
     }
 
     /// A tel: link as it is, from a widget or a link.
-    static func open(_ url: URL) async -> Bool {
-        await UIApplication.shared.open(url, options: [:])
+    func open(_ url: URL, code: String? = nil) {
+        #if DEBUG
+        // -paySplitDialled: parts marked dialled for screenshots, with no
+        // call prompt or alert over them.
+        if DebugLaunch.dialsNothing { return }
+        #endif
+        Task {
+            if await !UIApplication.shared.open(url, options: [:]) {
+                undialledCode = code ?? Self.code(in: url)
+            }
+        }
     }
 
-    static func openSettings() {
-        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
-        UIApplication.shared.open(url)
+    /// The code in a tel: link, # and all.
+    private static func code(in url: URL) -> String {
+        let link = url.absoluteString
+        let code = link.hasPrefix("tel:") ? String(link.dropFirst(4)) : link
+        return code.removingPercentEncoding ?? code
+    }
+}
+
+extension View {
+    /// "Can't dial on this device", with the code and Copy Code, when the
+    /// system would not dial one. On Pay, the parts sheet and Buy: whichever
+    /// is in front shows it.
+    func dialFailureAlert() -> some View {
+        modifier(DialFailureAlert())
+    }
+}
+
+private struct DialFailureAlert: ViewModifier {
+    @Environment(Dialler.self) private var dialler
+
+    func body(content: Content) -> some View {
+        content.alert(
+            "Can't dial on this device",
+            isPresented: Binding(get: { dialler.undialledCode != nil }, set: { if !$0 { dialler.undialledCode = nil } }),
+            presenting: dialler.undialledCode
+        ) { code in
+            Button("Copy Code") {
+                UIPasteboard.general.string = code
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            }
+            Button("OK", role: .cancel) {}
+        } message: { code in
+            Text("Dial \(code) on your phone to finish.")
+        }
     }
 }
 
@@ -32,6 +81,13 @@ struct LocationFix: Equatable, Sendable {
 
     var coordinate: StarHashKit.Transaction.Coordinate {
         .init(latitude: latitude, longitude: longitude, accuracy: accuracy)
+    }
+}
+
+extension LocationFix {
+    /// `Paying`'s fix, for the recipient screen's Nearby section.
+    init(_ coordinate: StarHashKit.Transaction.Coordinate) {
+        self.init(latitude: coordinate.latitude, longitude: coordinate.longitude, accuracy: coordinate.accuracy ?? Nearby.maximumAccuracy)
     }
 }
 
@@ -91,6 +147,21 @@ enum PaymentLocation {
             if let first { return first }
             return await best.fix
         }
+    }
+}
+
+extension PaymentLocation {
+    /// `Paying`'s location: nothing without precise access, and in Debug
+    /// runs with -nearbyHere, Kigali Heights at once.
+    static func forPaying(_ usable: @escaping @MainActor (StarHashKit.Transaction.Coordinate) -> Void) async -> StarHashKit.Transaction.Coordinate? {
+        #if DEBUG
+        if let fix = DebugLaunch.nearbyFix {
+            usable(fix.coordinate)
+            return fix.coordinate
+        }
+        #endif
+        guard isAuthorized else { return nil }
+        return await current { fix in usable(fix.coordinate) }?.coordinate
     }
 }
 

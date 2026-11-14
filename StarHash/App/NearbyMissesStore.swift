@@ -7,16 +7,9 @@ import StarHashKit
 /// often a suggestion was passed over.
 @MainActor
 enum NearbyMissesStore {
-    private static let key = "nearbyMisses"
-
     private static var misses: NearbyMisses {
-        get {
-            UserDefaults.standard.data(forKey: key)
-                .flatMap { try? JSONDecoder().decode(NearbyMisses.self, from: $0) } ?? NearbyMisses()
-        }
-        set {
-            UserDefaults.standard.set(try? JSONEncoder().encode(newValue), forKey: key)
-        }
+        get { NearbyMisses.stored(in: .standard) }
+        set { newValue.save(in: .standard) }
     }
 
     /// The suggestions still worth showing.
@@ -30,8 +23,5 @@ enum NearbyMissesStore {
         misses.record(shown: shown, chosen: chosen)
     }
 
-    /// `recipient` was paid, however it was chosen.
-    static func paid(_ recipient: Recipient) {
-        misses.paid(recipient)
-    }
+    // A payment, however it was chosen, is noted by `Paying`.
 }

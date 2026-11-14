@@ -1,15 +1,6 @@
 import StarHashKit
 import SwiftUI
 
-/// A payment Pay sends in parts (`SplitPlan`), while its sheet is up. Its
-/// id is the split's, so every part it dials carries it.
-struct SplitPaymentRequest: Identifiable {
-    let id = UUID()
-    let recipient: Recipient
-    let plan: SplitPlan
-    let wallet: Recipient.Network
-}
-
 /// With Split Large Payments on, a payment that costs less in parts: the
 /// parts, what they cost against one payment, and a button that dials the
 /// next part. Each part is a call prompt and a PIN of its own, so the sheet
@@ -17,59 +8,45 @@ struct SplitPaymentRequest: Identifiable {
 /// confirmed or failed. Before the first part, the whole amount can still
 /// go as one payment. Once a part has gone, a swipe down no longer closes
 /// it: Stop Here does, so the remaining parts are never left by accident.
+///
+/// It only draws `Paying.split` and calls `Paying`'s verbs: which part is
+/// next, what dialling one records and when one can be dialled again are
+/// `Paying`'s. Pay stops the split when the sheet goes.
 struct SplitPaymentSheet: View {
-    let request: SplitPaymentRequest
-    /// Records part `split.part` as a pending payment when transactions
-    /// are kept, returning its id. The sheet dials it.
-    let recordPart: (_ amount: Int, _ split: StarHashKit.Transaction.Split) -> UUID?
-    /// Closes the sheet and sends the whole amount as one payment.
-    let sendWhole: () -> Void
-
+    @Environment(Paying.self) private var paying
     @Environment(StarHashStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @State private var height: CGFloat = 480
-    /// How many parts have been dialled, in order.
-    @State private var dialled = 0
-    /// Each dialled part's payment, by its index.
-    @State private var recorded: [Int: UUID] = [:]
-    /// A code the system would not dial (the simulator, an iPad), shown so
-    /// it can be dialled by hand. Pay's own alert cannot show over a sheet.
-    @State private var undialledCode: String?
+    /// The split as it last was, so the sheet keeps its content while it
+    /// slides away after Send as One Payment ends it.
+    @State private var shown: Paying.SplitPayment?
 
-    private var parts: [Int] { request.plan.parts }
-    private var allDialled: Bool { dialled == parts.count }
+    private var split: Paying.SplitPayment? { paying.split ?? shown }
 
     var body: some View {
         VStack(spacing: 0) {
-            SheetHeader(String(starhash: "Send in \(parts.count) parts"))
+            if let split {
+                SheetHeader(String(starhash: "Send in \(split.plan.parts.count) parts"))
 
-            VStack(spacing: 14) {
-                partsCard
-                feesCard
-                buttons
-                    .padding(.top, 4)
+                VStack(spacing: 14) {
+                    partsCard(split)
+                    feesCard(split)
+                    buttons(split)
+                        .padding(.top, 4)
+                }
+                .padding(.horizontal, 18)
+                .padding(.bottom, 24)
             }
-            .padding(.horizontal, 18)
-            .padding(.bottom, 24)
         }
         .sheetHeight($height)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .ignoresSafeArea(.container, edges: .bottom)
         .sheetGlass(detents: [.height(height - 4)])
-        .interactiveDismissDisabled(dialled > 0 && !allDialled)
-        .animation(.smooth(duration: 0.25), value: dialled)
-        .alert(
-            "Can't dial on this device",
-            isPresented: Binding(get: { undialledCode != nil }, set: { if !$0 { undialledCode = nil } }),
-            presenting: undialledCode
-        ) { code in
-            Button("Copy Code") {
-                UIPasteboard.general.string = code
-                UINotificationFeedbackGenerator().notificationOccurred(.success)
-            }
-            Button("OK", role: .cancel) {}
-        } message: { code in
-            Text("Dial \(code) on your phone to finish.")
+        .interactiveDismissDisabled((split?.dialled ?? 0) > 0 && split?.allDialled == false)
+        .animation(.smooth(duration: 0.25), value: split?.dialled)
+        .dialFailureAlert()
+        .onChange(of: paying.split, initial: true) { _, split in
+            if let split { shown = split }
         }
         #if DEBUG
         .onAppear(perform: applyDebugLaunch)
@@ -79,26 +56,26 @@ struct SplitPaymentSheet: View {
     // MARK: Cards
 
     /// Each part's amount, with how it went.
-    private var partsCard: some View {
+    private func partsCard(_ split: Paying.SplitPayment) -> some View {
         VStack(spacing: 0) {
-            ForEach(Array(parts.enumerated()), id: \.offset) { index, amount in
+            ForEach(Array(split.plan.parts.enumerated()), id: \.offset) { index, amount in
                 if index > 0 { SheetDivider() }
-                partRow(index, amount: amount)
+                partRow(index, amount: amount, isNext: index == split.dialled)
             }
         }
         .padding(.horizontal, 16)
         .sheetCard()
     }
 
-    private func partRow(_ index: Int, amount: Int) -> some View {
-        let status = status(of: index)
+    private func partRow(_ index: Int, amount: Int, isNext: Bool) -> some View {
+        let status = words(for: paying.status(ofPart: index))
         return HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Part \(index + 1)")
                     .font(.sheetBody)
                     .foregroundStyle(Color.starhashPrimaryText)
                 Text(verbatim: status.text)
-                    .font(.sheet(14, index == dialled ? .semibold : .medium, relativeTo: .subheadline))
+                    .font(.sheet(14, isNext ? .semibold : .medium, relativeTo: .subheadline))
                     .foregroundStyle(status.color)
                     .contentTransition(.opacity)
             }
@@ -119,11 +96,11 @@ struct SplitPaymentSheet: View {
     }
 
     /// What the parts cost together, and what one payment would.
-    private var feesCard: some View {
+    private func feesCard(_ split: Paying.SplitPayment) -> some View {
         VStack(spacing: 0) {
-            SheetInfoRow(String(starhash: "Fees in parts"), Money.formatWithCurrency(request.plan.fee))
+            SheetInfoRow(String(starhash: "Fees in parts"), Money.formatWithCurrency(split.plan.fee))
             SheetDivider()
-            SheetInfoRow(String(starhash: "Fee as one payment"), Money.formatWithCurrency(request.plan.feeAsOne))
+            SheetInfoRow(String(starhash: "Fee as one payment"), Money.formatWithCurrency(split.plan.feeAsOne))
         }
         .padding(.horizontal, 16)
         .sheetCard()
@@ -131,91 +108,56 @@ struct SplitPaymentSheet: View {
 
     // MARK: Buttons
 
-    private var buttons: some View {
+    private func buttons(_ split: Paying.SplitPayment) -> some View {
         VStack(spacing: 4) {
-            if allDialled {
+            if split.allDialled {
                 Button("Done") { dismiss() }
                     .buttonStyle(.sheetPrimary)
             } else {
-                Button(String(starhash: "Send Part \(dialled + 1)")) { send(dialled) }
+                Button(String(starhash: "Send Part \(split.dialled + 1)")) { paying.sendNextPart() }
                     .buttonStyle(.sheetPrimary)
             }
-            if dialled == 0 {
+            if split.dialled == 0 {
                 SheetTextButton("Send as One Payment") {
+                    // Dialled once the sheet has gone (`Paying`'s wait).
+                    paying.sendWhole()
                     dismiss()
-                    sendWhole()
                 }
-            } else if canDialAgain(dialled - 1) {
+            } else if paying.canDialPartAgain {
                 // A call cancelled at the system's prompt: the same part,
                 // the same pending payment.
-                SheetTextButton(String(starhash: "Dial Part \(dialled) Again")) { dial(dialled - 1) }
+                SheetTextButton(String(starhash: "Dial Part \(split.dialled) Again")) { paying.dialPartAgain() }
             }
-            if dialled > 0, !allDialled {
+            if split.dialled > 0, !split.allDialled {
                 SheetTextButton("Stop Here") { dismiss() }
             }
         }
     }
 
-    // MARK: Actions
-
-    /// Dials part `index` and moves on to the next.
-    private func send(_ index: Int) {
-        dial(index)
-        dialled = index + 1
-    }
-
-    /// Records part `index` (again, for a retry: the store keeps it one
-    /// payment) and dials it.
-    private func dial(_ index: Int) {
-        let amount = parts[index]
-        let split = StarHashKit.Transaction.Split(id: request.id, part: index + 1, count: parts.count, total: request.plan.amount)
-        if let id = recordPart(amount, split) { recorded[index] = id }
-        let code = USSD.payment(to: request.recipient, amount: amount, from: request.wallet)
-        Task {
-            if await !USSDDialer.dial(code) { undialledCode = code }
-        }
-    }
-
-    /// Only a part still waiting is dialled again: one its SMS confirmed
-    /// went through.
-    private func canDialAgain(_ index: Int) -> Bool {
-        guard let id = recorded[index] else { return true }
-        return store.transaction(id: id)?.status == .pending
-    }
-
     /// "Next", "Waiting for SMS", "Confirmed" or "Failed", in the app's
     /// language and the status's colour as Activity shows it.
-    private func status(of index: Int) -> (text: String, color: AnyShapeStyle) {
-        if index >= dialled {
-            return index == dialled
-                ? (String(starhash: "Next"), AnyShapeStyle(Color.sheetBrandText))
-                : (String(starhash: "Not sent yet"), AnyShapeStyle(Color.sheetSecondaryText))
-        }
-        guard let id = recorded[index], let payment = store.transaction(id: id) else {
-            return (String(starhash: "Part dialled"), AnyShapeStyle(Color.sheetSecondaryText))
-        }
-        switch payment.status {
-        case .pending: return (String(starhash: "Waiting for SMS"), AnyShapeStyle(Color.starhashUrgentText))
-        case .confirmed: return (String(starhash: "Confirmed"), AnyShapeStyle(Color.starhashConfirmedText))
-        case .failed: return (String(starhash: "Failed"), AnyShapeStyle(Color.starhashDestructive))
+    private func words(for status: Paying.PartStatus) -> (text: String, color: AnyShapeStyle) {
+        switch status {
+        case .next: (String(starhash: "Next"), AnyShapeStyle(Color.sheetBrandText))
+        case .notSent: (String(starhash: "Not sent yet"), AnyShapeStyle(Color.sheetSecondaryText))
+        case .dialled: (String(starhash: "Part dialled"), AnyShapeStyle(Color.sheetSecondaryText))
+        case .pending: (String(starhash: "Waiting for SMS"), AnyShapeStyle(Color.starhashUrgentText))
+        case .confirmed: (String(starhash: "Confirmed"), AnyShapeStyle(Color.starhashConfirmedText))
+        case .failed: (String(starhash: "Failed"), AnyShapeStyle(Color.starhashDestructive))
         }
     }
 
     // MARK: Debug
 
     #if DEBUG
-    /// -paySplitDialled <n>: the first n parts recorded as dialled, without
-    /// dialling, and -paySplitConfirmed the first of them confirmed, for
+    /// -paySplitDialled <n>: the first n parts sent, with nothing dialled
+    /// (`Dialler`), and -paySplitConfirmed the first of them confirmed, for
     /// screenshots of the sheet partway through.
     private func applyDebugLaunch() {
-        guard dialled == 0, let count = DebugLaunch.value(after: "-paySplitDialled").flatMap(Int.init) else { return }
-        for index in 0..<min(count, parts.count) {
-            let split = StarHashKit.Transaction.Split(id: request.id, part: index + 1, count: parts.count, total: request.plan.amount)
-            if let id = recordPart(parts[index], split) { recorded[index] = id }
-        }
-        dialled = min(count, parts.count)
-        if DebugLaunch.arguments.contains("-paySplitConfirmed"), let first = recorded[0] {
-            store.confirmByHand(first, fallback: request.wallet)
+        guard paying.split?.dialled == 0, let count = DebugLaunch.value(after: "-paySplitDialled").flatMap(Int.init) else { return }
+        for _ in 0..<count { paying.sendNextPart() }
+        if DebugLaunch.arguments.contains("-paySplitConfirmed"), let first = paying.split?.payments[0] {
+            store.confirmByHand(first, fallback: paying.split?.wallet ?? .mtn)
         }
     }
     #endif

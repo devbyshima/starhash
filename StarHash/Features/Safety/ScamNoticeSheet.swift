@@ -9,6 +9,7 @@ struct ScamNoticeSheet: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(Owner.self) private var owner
+    @Environment(Dialler.self) private var dialler
     private var wallet: Recipient.Network { owner.wallet }
     @State private var height: CGFloat = 0
 
@@ -45,7 +46,7 @@ struct ScamNoticeSheet: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             Button(String(starhash: "Check Balance")) {
-                Task { _ = await USSDDialer.dial(USSD.balance(for: wallet)) }
+                dialler.dial(USSD.balance(for: wallet))
                 dismiss()
             }
             .buttonStyle(.sheetPrimary)
