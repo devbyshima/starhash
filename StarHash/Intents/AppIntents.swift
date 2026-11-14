@@ -14,8 +14,10 @@ struct CheckBalanceIntent: AppIntent {
     @MainActor
     func perform() async throws -> some IntentResult {
         AppEnvironment.router.show(.pay)
-        if let wallet = AppEnvironment.owner.chosenWallet, let url = USSD.telURL(for: USSD.balance(for: wallet)) {
-            await UIApplication.shared.open(url)
+        // Through the app's dialler, so a code it cannot dial shows on Pay
+        // with the code to dial by hand.
+        if let wallet = AppEnvironment.owner.chosenWallet {
+            AppEnvironment.dialler.dial(USSD.balance(for: wallet))
         }
         return .result()
     }
