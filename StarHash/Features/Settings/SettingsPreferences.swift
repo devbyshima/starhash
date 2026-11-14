@@ -83,7 +83,7 @@ enum AppReset {
         ProfilePhoto.shared.remove()
         // What the server still has from this iPhone outlives the wipe, so
         // the owner's listing and photo are deleted from it after it.
-        StarHashCloud.keepingServerState {
+        AppEnvironment.serverSync.erase {
             if let domain = Bundle.main.bundleIdentifier {
                 UserDefaults.standard.removePersistentDomain(forName: domain)
             }
@@ -92,7 +92,6 @@ enum AppReset {
         // auto-verify's state.
         AppEnvironment.owner.reload()
         AppEnvironment.autoVerify.reload()
-        StarHashCloud.syncDirectory(owner: AppEnvironment.owner)
         try? FileManager.default.removeItem(at: URL.temporaryDirectory.appending(path: "Shortcut", directoryHint: .isDirectory))
         router.openTransactionID = nil
         router.show(.pay)

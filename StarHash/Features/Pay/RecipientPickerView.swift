@@ -492,7 +492,7 @@ struct RecipientPickerView: View {
     private func lookUpTypedNumber() async {
         listedOwner = nil
         guard let typed = search.typedRecipient, typed.kind == .phone, savedMatches.isEmpty,
-              StarHashCloud.isListable(typed.destination) else { return }
+              typed.isRwandanMobile else { return }
         try? await Task.sleep(for: .milliseconds(300))
         guard !Task.isCancelled, let entry = await StarHashCloud.entry(for: typed.destination), !Task.isCancelled else { return }
         listedOwner = ListedOwner(number: typed.destination, entry: entry)

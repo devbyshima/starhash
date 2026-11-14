@@ -40,6 +40,25 @@ enum AppEnvironment {
         isContact: { await PayContacts.shared.knowsContact($0) }
     )
 
+    /// What StarHash keeps on its server: the owner's photo, their Show My
+    /// Name listing and the daily count.
+    static let serverSync: ServerSync = {
+        #if targetEnvironment(simulator)
+        let isSimulator = true
+        #else
+        let isSimulator = false
+        #endif
+        return ServerSync(
+            server: StarHashCloud.Server(),
+            key: { await StarHashCloud.secretKey() },
+            owner: owner,
+            photo: { ProfilePhoto.shared.data },
+            hasPhoto: { ProfilePhoto.shared.image != nil },
+            version: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "",
+            isSimulator: isSimulator
+        )
+    }()
+
     /// Buy's codes. Debug launches with -inMemory start from the defaults
     /// in a throwaway list.
     static let shortcuts: USSDShortcutList = {

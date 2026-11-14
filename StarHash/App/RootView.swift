@@ -80,10 +80,10 @@ struct RootView: View {
         // The owner's listing follows their name, numbers, photo and Show My
         // Name, two seconds after the last change, so a name typed letter
         // by letter is sent once.
-        .task(id: StarHashCloud.directoryListing(owner: owner, showMyName: showMyName)?.state ?? "off") {
+        .task(id: "\(showMyName)|\(AppEnvironment.serverSync.listing?.state ?? "off")") {
             try? await Task.sleep(for: .seconds(2))
             guard !Task.isCancelled else { return }
-            StarHashCloud.syncDirectory(owner: owner)
+            AppEnvironment.serverSync.ownerChanged()
         }
         #if DEBUG
         .onChange(of: router.whatsNewPreviewPage) { _, page in

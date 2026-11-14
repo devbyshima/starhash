@@ -3,128 +3,59 @@ import Security
 import StarHashKit
 import UIKit
 
-/// StarHash's server (`server/` in the repo): the one thing kept off the
-/// iPhone. The owner's photo, whenever they have one, lives there under a
-/// random id their code carries, so whoever scans the code
-/// sees it; a secret key in the Keychain is needed to replace or delete it.
-/// With Show My Name on (the default), their numbers are listed with their
-/// name and that photo's id, so someone typing one of the numbers to pay
-/// it sees who it is; the server keeps each number only as a keyed hash.
-/// And once a day a random id, made on the first launch, says this copy of
-/// StarHash is in use, with its version, so the people using it can be
-/// counted. Nothing else is ever sent: no payment, no contact, no place.
+/// StarHash's server (`server/` in the repo), over HTTP. What StarHash
+/// sends it, and when, is `ServerSync`'s (StarHashKit): this is its adapter,
+/// `Server`, with the owner's secret key from the Keychain. The reads stay
+/// here, since no rule decides them: a scanned code's photo, and who lists
+/// a number typed to pay.
 @MainActor
 enum StarHashCloud {
     nonisolated static let baseURL = URL(string: "https://starhash.devbyshima.workers.dev")!
 
-    // MARK: The owner's photo
-
-    /// The id the owner's code carries for their photo, when they have one.
-    static var sharedPhotoID: UUID? {
-        guard ProfilePhoto.shared.image != nil else { return nil }
-        return photoID
-    }
-
-    /// The photo's id, made once.
-    private static var photoID: UUID {
-        if let saved = UserDefaults.standard.string(forKey: photoIDKey).flatMap(UUID.init(uuidString:)) { return saved }
-        let made = UUID()
-        UserDefaults.standard.set(made.uuidString, forKey: photoIDKey)
-        return made
-    }
-
-    private static let photoIDKey = "cloudPhotoID"
-    /// Set from a change until the server has taken it, so one that did
-    /// not reach it (offline, say) is sent again.
-    private static let photoUnsentKey = "cloudPhotoUnsent"
-    /// A photo's id whose delete the server has not confirmed, kept through
-    /// Delete All Data so the photo is still deleted after it.
-    private static let photoToDeleteKey = "cloudPhotoToDelete"
-
-    /// Counts the sends, so only the latest one's answer decides whether
-    /// the photo is still unsent.
-    private static var photoSends = 0
-
-    /// Uploads the owner's photo, or deletes it from the server when they
-    /// have none. Run whenever it changes; until the server has taken it,
-    /// it is sent again each time StarHash comes to the front
-    /// (`resendPhotoIfNeeded`).
-    static func syncPhoto() {
-        UserDefaults.standard.set(true, forKey: photoUnsentKey)
-        photoSends += 1
-        let send = photoSends
-        let id = photoID
-        let data = ProfilePhoto.shared.data
-        Task {
-            let answer = await Self.sendPhoto(data, id: id)
-            if data == nil, answer != .failed { forgetPhotoToDelete(id) }
-            guard send == photoSends else { return }
-            switch answer {
-            case .taken:
-                UserDefaults.standard.removeObject(forKey: photoUnsentKey)
-            case .notYours where data != nil:
-                // The id belongs to a key this iPhone does not have: one
-                // restored from a backup made before the key went into
-                // backups. A new id takes the photo, and the listing
-                // follows it.
-                UserDefaults.standard.removeObject(forKey: photoIDKey)
-                syncPhoto()
-                syncDirectory(owner: AppEnvironment.owner)
-            case .notYours:
-                // Nothing this iPhone can delete.
-                UserDefaults.standard.removeObject(forKey: photoUnsentKey)
-            case .failed:
-                break
+    /// What `ServerSync` sends, over HTTP.
+    struct Server: ServerSync.Server {
+        func sendPhoto(_ data: Data?, id: UUID, key: String) async -> ServerSync.PhotoAnswer {
+            var request = URLRequest(url: baseURL.appending(path: "v1/photos/\(id.uuidString.lowercased())"))
+            request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
+            if let data {
+                request.httpMethod = "PUT"
+                request.setValue("image/jpeg", forHTTPHeaderField: "Content-Type")
+                request.httpBody = data
+            } else {
+                request.httpMethod = "DELETE"
+            }
+            guard let (_, response) = try? await URLSession.shared.data(for: request),
+                  let status = (response as? HTTPURLResponse)?.statusCode else { return .failed }
+            switch status {
+            case 200: return .taken
+            case 403: return .notYours
+            default: return .failed
             }
         }
-    }
 
-    /// Sends again what the server has not taken: the owner's photo or its
-    /// removal, and a photo Delete All Data left to delete. Run each time
-    /// StarHash comes to the front.
-    static func resendPhotoIfNeeded() {
-        let defaults = UserDefaults.standard
-        if let id = defaults.string(forKey: photoToDeleteKey).flatMap(UUID.init(uuidString:)) {
-            Task {
-                if await Self.sendPhoto(nil, id: id) != .failed { forgetPhotoToDelete(id) }
+        func sendListing(_ listing: ServerSync.Listing?, key: String) async -> Bool {
+            var request = URLRequest(url: baseURL.appending(path: "v1/directory"))
+            request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
+            if let listing {
+                request.httpMethod = "PUT"
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                var body: [String: Any] = ["numbers": listing.numbers, "name": listing.name]
+                if let photo = listing.photo { body["photo"] = photo.uuidString.lowercased() }
+                request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+            } else {
+                request.httpMethod = "DELETE"
             }
+            guard let (_, response) = try? await URLSession.shared.data(for: request) else { return false }
+            return (response as? HTTPURLResponse)?.statusCode == 200
         }
-        if defaults.bool(forKey: photoUnsentKey) { syncPhoto() }
-    }
 
-    private static func forgetPhotoToDelete(_ id: UUID) {
-        guard UserDefaults.standard.string(forKey: photoToDeleteKey) == id.uuidString else { return }
-        UserDefaults.standard.removeObject(forKey: photoToDeleteKey)
-    }
-
-    /// What the server made of a photo sent or deleted.
-    private enum PhotoAnswer {
-        /// Saved, deleted, or already gone.
-        case taken
-        /// The id is held under another key.
-        case notYours
-        /// Not reached, or refused for another reason: try again later.
-        case failed
-    }
-
-    /// Puts `data` under `id`, or deletes what is there when it is nil.
-    nonisolated private static func sendPhoto(_ data: Data?, id: UUID) async -> PhotoAnswer {
-        guard let key = await photoKey() else { return .failed }
-        var request = URLRequest(url: baseURL.appending(path: "v1/photos/\(id.uuidString.lowercased())"))
-        request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
-        if let data {
-            request.httpMethod = "PUT"
-            request.setValue("image/jpeg", forHTTPHeaderField: "Content-Type")
-            request.httpBody = data
-        } else {
-            request.httpMethod = "DELETE"
-        }
-        guard let (_, response) = try? await URLSession.shared.data(for: request),
-              let status = (response as? HTTPURLResponse)?.statusCode else { return .failed }
-        switch status {
-        case 200: return .taken
-        case 403: return .notYours
-        default: return .failed
+        func ping(installID: String, version: String) async -> Bool {
+            var request = URLRequest(url: baseURL.appending(path: "v1/ping"))
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try? JSONSerialization.data(withJSONObject: ["id": installID, "version": version])
+            guard let (_, response) = try? await URLSession.shared.data(for: request) else { return false }
+            return (response as? HTTPURLResponse)?.statusCode == 200
         }
     }
 
@@ -153,123 +84,14 @@ enum StarHashCloud {
         var photoID: UUID?
     }
 
-    /// What the owner's listing should be now: their numbers, name and
-    /// photo, or nil when there is nothing to list (Show My Name off, no
-    /// number yet, or neither a name nor a photo to show).
-    static func directoryListing(owner: Owner, showMyName: Bool) -> DirectoryListing? {
-        let numbers = [owner.defaultSIM, owner.otherSIM].compactMap { $0?.destination }.filter(Self.isListable)
-        let name = owner.name.trimmingCharacters(in: .whitespacesAndNewlines)
-        let photo = sharedPhotoID
-        guard showMyName, !numbers.isEmpty, !name.isEmpty || photo != nil else { return nil }
-        return DirectoryListing(numbers: numbers, name: name, photo: photo)
-    }
-
-    struct DirectoryListing: Equatable, Sendable {
-        var numbers: [String]
-        var name: String
-        var photo: UUID?
-
-        /// One line that changes whenever the listing does.
-        var state: String { [numbers.joined(separator: ","), name, photo?.uuidString ?? ""].joined(separator: "|") }
-    }
-
-    /// Sends the owner's listing when it has changed, again once a week so
-    /// the server keeps it (it drops listings unseen for 45 days), or
-    /// clears it once there is none. A send that failed, offline say, is
-    /// made again next time. The Simulator never lists, so test owners
-    /// stay off the server, as they stay out of the count.
-    static func syncDirectory(owner: Owner) {
-        #if targetEnvironment(simulator)
-        return
-        #else
-        let listing = directoryListing(owner: owner, showMyName: Preferences.showMyName.value())
-        let state = listing?.state ?? Self.unlisted
-        let defaults = UserDefaults.standard
-        let sent = defaults.string(forKey: directoryStateKey)
-        let sentAt = defaults.double(forKey: directorySentAtKey)
-        let stale = Date.now.timeIntervalSince1970 - sentAt > 7 * 86400
-        // Never listed and nothing to list: nothing to clear either.
-        if sent == nil, listing == nil { return }
-        guard state != sent || (listing != nil && stale) else { return }
-        guard !syncingDirectory else {
-            directorySyncWaiting = true
-            return
-        }
-        syncingDirectory = true
-        Task {
-            let done = await Self.sendListing(listing)
-            if done {
-                defaults.set(state, forKey: directoryStateKey)
-                defaults.set(Date.now.timeIntervalSince1970, forKey: directorySentAtKey)
-            }
-            syncingDirectory = false
-            // A change made while that one was out.
-            if directorySyncWaiting {
-                directorySyncWaiting = false
-                syncDirectory(owner: owner)
-            }
-        }
-        #endif
-    }
-
-    /// Delete All Data: `erase` runs with what the server still needs from
-    /// this iPhone kept through it, so the owner's name, numbers and photo
-    /// are deleted there after it. What was last sent to the directory:
-    /// with the owner's numbers gone there is no listing, so the next sync
-    /// deletes theirs, and keeps trying until it has (with the record wiped
-    /// too, it took the owner for one never listed and left their name
-    /// there). And the photo, when the server has not yet confirmed its
-    /// delete: it is deleted again each time StarHash comes to the front
-    /// until it has, with the key the Keychain keeps through the wipe.
-    /// Run it after `ProfilePhoto.remove`.
-    static func keepingServerState(through erase: () -> Void) {
-        let defaults = UserDefaults.standard
-        let sent = defaults.string(forKey: directoryStateKey)
-        let photoUnsent = defaults.bool(forKey: photoUnsentKey) && ProfilePhoto.shared.data == nil
-        let photoToDelete = defaults.string(forKey: photoToDeleteKey)
-            ?? (photoUnsent ? defaults.string(forKey: photoIDKey) : nil)
-        erase()
-        if let sent { defaults.set(sent, forKey: directoryStateKey) }
-        if let photoToDelete { defaults.set(photoToDelete, forKey: photoToDeleteKey) }
-    }
-
-    /// Whether the server took it: a listing put, or none cleared.
-    nonisolated private static func sendListing(_ listing: DirectoryListing?) async -> Bool {
-        guard let key = await photoKey() else { return false }
-        var request = URLRequest(url: baseURL.appending(path: "v1/directory"))
-        request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
-        if let listing {
-            request.httpMethod = "PUT"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            var body: [String: Any] = ["numbers": listing.numbers, "name": listing.name]
-            if let photo = listing.photo { body["photo"] = photo.uuidString.lowercased() }
-            request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-        } else {
-            request.httpMethod = "DELETE"
-        }
-        guard let (_, response) = try? await URLSession.shared.data(for: request) else { return false }
-        return (response as? HTTPURLResponse)?.statusCode == 200
-    }
-
-    private static var syncingDirectory = false
-    private static var directorySyncWaiting = false
-    private static let unlisted = "off"
-    private static let directoryStateKey = "cloudDirectoryState"
-    private static let directorySentAtKey = "cloudDirectorySentAt"
-
-    /// A Rwandan mobile number, as the server lists them.
-    nonisolated static func isListable(_ number: String) -> Bool {
-        number.count == 10 && number.allSatisfy { $0.isASCII && $0.isNumber }
-            && ["072", "073", "078", "079"].contains(String(number.prefix(3)))
-    }
-
     /// Looked-up numbers, found or not, kept for the run.
     private static var entries: [String: DirectoryEntry?] = [:]
 
     /// The name and photo listed for `number`, or nil when no one lists it
-    /// or the server cannot be reached.
+    /// or the server cannot be reached. Only a Rwandan mobile number is
+    /// asked about, as only those are listed.
     static func entry(for number: String) async -> DirectoryEntry? {
-        guard isListable(number) else { return nil }
+        guard Recipient(destination: number, kind: .phone).isRwandanMobile else { return nil }
         #if DEBUG
         if let name = DebugLaunch.value(after: "-directoryName") {
             return DirectoryEntry(name: name)
@@ -295,72 +117,17 @@ enum StarHashCloud {
         return entry
     }
 
-    // MARK: Counting
-
-    /// Says this copy is in use, once on each day it comes to the front, by
-    /// Kigali's calendar as the server counts days (so someone using it
-    /// late one evening and early the next morning counts on both days).
-    /// The day is only marked once the server has counted it: a try that
-    /// failed, offline say, is made again the next time StarHash opens.
-    /// The Simulator never counts, so test runs stay out of the numbers.
-    static func pingIfDue(now: Date = .now) {
-        #if targetEnvironment(simulator)
-        return
-        #else
-        let day = Self.kigaliDay(of: now)
-        guard !pinging, UserDefaults.standard.string(forKey: lastPingDayKey) != day else { return }
-        pinging = true
-        let id = installID
-        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
-        Task {
-            let counted = await Self.sendPing(id: id, version: version)
-            pinging = false
-            if counted { UserDefaults.standard.set(day, forKey: lastPingDayKey) }
-        }
-        #endif
-    }
-
-    /// Whether the server counted the ping.
-    nonisolated private static func sendPing(id: String, version: String) async -> Bool {
-        var request = URLRequest(url: baseURL.appending(path: "v1/ping"))
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try? JSONSerialization.data(withJSONObject: ["id": id, "version": version])
-        guard let (_, response) = try? await URLSession.shared.data(for: request) else { return false }
-        return (response as? HTTPURLResponse)?.statusCode == 200
-    }
-
-    /// A ping on its way, so coming back to the front while it is out
-    /// sends no second one.
-    private static var pinging = false
-
-    /// "2026-11-08": the date in Kigali, as the server writes a day.
-    nonisolated static func kigaliDay(of date: Date) -> String {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(identifier: "Africa/Kigali") ?? TimeZone(secondsFromGMT: 2 * 3600)!
-        let parts = calendar.dateComponents([.year, .month, .day], from: date)
-        return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
-    }
-
-    private static let lastPingDayKey = "cloudLastPingDay"
-    private static let installIDKey = "cloudInstallID"
-
-    private static var installID: String {
-        if let saved = UserDefaults.standard.string(forKey: installIDKey) { return saved }
-        let made = UUID().uuidString.lowercased()
-        UserDefaults.standard.set(made, forKey: installIDKey)
-        return made
-    }
-
     // MARK: The key
 
     /// The owner's secret key, for their photo and their listing alike: 32
     /// random bytes, made once and kept in the Keychain. It goes into the
     /// iPhone's encrypted backups (never iCloud Keychain), so a new iPhone
     /// restored from one can still replace or delete the photo and the
-    /// listing the old one made. (Its Keychain account is still "photoKey",
-    /// from when the photo was all it was for.)
-    nonisolated private static func photoKey() async -> String? {
+    /// listing the old one made, and it outlives Delete All Data, so what
+    /// was left on the server can still be deleted after it. (Its Keychain
+    /// account is still "photoKey", from when the photo was all it was
+    /// for.)
+    nonisolated static func secretKey() async -> String? {
         let account = "photoKey"
         let item: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,

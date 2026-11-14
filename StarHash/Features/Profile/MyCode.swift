@@ -82,7 +82,7 @@ struct MyCodeShareButton: View {
     let recipient: Recipient
 
     var body: some View {
-        if let image = QRCodeImage.image(for: PaymentQR.link(for: recipient, photoID: StarHashCloud.sharedPhotoID).absoluteString) {
+        if let image = QRCodeImage.image(for: PaymentQR.link(for: recipient, photoID: AppEnvironment.serverSync.sharedPhotoID).absoluteString) {
             ShareLink(
                 item: Image(uiImage: image),
                 message: Text("Pay me with StarHash: \(recipient.formattedDestination)"),
@@ -107,7 +107,7 @@ struct MyCodeSheet: View {
         VStack(spacing: 18) {
             SheetHeader("My Code")
             if let recipient {
-                QRTreeView(text: PaymentQR.link(for: recipient, photoID: StarHashCloud.sharedPhotoID).absoluteString)
+                QRTreeView(text: PaymentQR.link(for: recipient, photoID: AppEnvironment.serverSync.sharedPhotoID).absoluteString)
                     .frame(maxWidth: 320)
                 MyCodeShareButton(recipient: recipient)
                     .buttonStyle(.sheetPrimary)

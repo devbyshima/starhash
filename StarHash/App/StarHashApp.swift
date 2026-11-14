@@ -151,12 +151,10 @@ struct StarHashApp: App {
                 // stands (the wallet's balance code).
                 QuickActions.performPending()
                 QuickActions.update()
-                // Counted as in use, once a day, by a random id alone.
-                StarHashCloud.pingIfDue()
-                // The owner's listing, sent again when it is a week old.
-                StarHashCloud.syncDirectory(owner: AppEnvironment.owner)
-                // A photo change the server has not taken yet.
-                StarHashCloud.resendPhotoIfNeeded()
+                // Counted as in use, once a day, by a random id alone; the
+                // owner's listing, sent again when it is a week old; and a
+                // photo change the server has not taken yet.
+                AppEnvironment.serverSync.wake()
                 store.reloadFromDisk()
                 AppEnvironment.autoVerify.reload()
                 AppEnvironment.autoVerify.expireUnconfirmed()
