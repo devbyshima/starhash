@@ -12,28 +12,31 @@ struct KeepSIMSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var height: CGFloat = 300
     @State private var kept: Recipient?
 
     var body: some View {
         Group {
             if let kept {
-                SheetOutcome(
-                    symbol: "checkmark",
-                    tint: .starhashConfirmed,
-                    label: String(starhash: "Kept"),
-                    title: kept.formattedDestination,
-                    detail: kept.network?.walletName,
-                    onDone: { dismiss() }
-                )
+                outcome(kept)
             } else {
                 question
             }
         }
-        .sheetHeight(kept == nil ? $height : .constant(height))
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .ignoresSafeArea(.container, edges: .bottom)
-        .sheetGlass(detents: [.height(height - 4)])
+        // Taller than the two rows, so the sheet opens at its height.
+        .outcomeSheet(settled: kept != nil) {
+            if let sim = sims.first { outcome(sim) }
+        }
+    }
+
+    private func outcome(_ sim: Recipient) -> some View {
+        SheetOutcome(
+            symbol: "checkmark",
+            tint: .starhashConfirmed,
+            label: String(starhash: "Kept"),
+            title: sim.formattedDestination,
+            detail: sim.network?.walletName,
+            onDone: { dismiss() }
+        )
     }
 
     private func keep(_ sim: Recipient) {

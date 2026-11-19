@@ -8,7 +8,9 @@ import SwiftUI
 /// (`DistortionWave.playOnSheet`, `iconCentre` from the top) as it comes
 /// (`reveal`). The sheet keeps the height it had, Done at its foot where
 /// the buttons were, at the owner's ask: nothing moves once the wave is
-/// over.
+/// over. So the sheet opens tall enough for both (`outcomeSheet`): an
+/// outcome taller than its question once overflowed the sheet, its icon
+/// pushed up under the grabber.
 struct SheetOutcome: View {
     let symbol: String
     /// The icon's circle: `starhashConfirmed` for something confirmed.
@@ -68,10 +70,13 @@ struct SheetOutcome: View {
                 .buttonStyle(.sheetPrimary)
         }
         .padding(.horizontal, 18)
-        .padding(.bottom, 28)
+        .padding(.bottom, Self.footMargin)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .accessibilityElement(children: .contain)
     }
+
+    /// The space under a sheet's last button, the question's as Done's.
+    static let footMargin: CGFloat = 28
 
     /// Turns a sheet into its outcome: `show` puts it in place under the
     /// sheet's wave in `tint`, felt as it starts. A fade under Reduce
@@ -95,5 +100,67 @@ struct SheetOutcome: View {
             withTransaction(transaction, show)
             UINotificationFeedbackGenerator().notificationOccurred(feel)
         }
+    }
+}
+
+extension View {
+    /// The sheet a question turns into its `SheetOutcome` in, applied to
+    /// the two (the question until `settled`, then the outcome). It opens
+    /// as tall as the taller of the question and `outcome`, the outcome
+    /// at its fullest, both measured off screen, so the outcome fits where
+    /// the question was: its icon where the wave opens, Done at the foot.
+    /// The question sits at the top, `SheetOutcome.footMargin` above the
+    /// sheet's bottom when it fills it; one shorter than its outcome keeps
+    /// its buttons at its foot with a `Spacer`, where Done comes.
+    func outcomeSheet<Outcome: View>(settled: Bool, @ViewBuilder outcome: () -> Outcome) -> some View {
+        modifier(OutcomeSheet(settled: settled, outcome: outcome()))
+    }
+}
+
+private struct OutcomeSheet<Outcome: View>: ViewModifier {
+    let settled: Bool
+    let outcome: Outcome
+
+    /// The question's height with its foot, and the outcome's.
+    @State private var questionHeight: CGFloat = 0
+    @State private var outcomeHeight: CGFloat = 0
+    /// The home indicator's inset, which iOS adds to a height detent.
+    @State private var bottomInset: CGFloat = 0
+    /// The detent, kept once it settles: as the outcome comes in, the
+    /// copy measured as the question is the outcome for a moment.
+    @State private var height: CGFloat = 400
+
+    func body(content: Content) -> some View {
+        content
+            .padding(.bottom, settled ? 0 : SheetOutcome.footMargin)
+            // No height of its own to offer: iOS grows a sheet whose
+            // content's ideal height comes within 8pt of it, which moved
+            // a tall outcome up as it came in.
+            .frame(maxWidth: .infinity, minHeight: 0, idealHeight: 0, maxHeight: .infinity, alignment: .top)
+            .background {
+                if !settled {
+                    ZStack(alignment: .top) {
+                        content
+                            .padding(.bottom, SheetOutcome.footMargin)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { questionHeight = $0 }
+                        outcome
+                            .fixedSize(horizontal: false, vertical: true)
+                            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { outcomeHeight = $0 }
+                    }
+                    .hidden()
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+                }
+            }
+            // Into the home indicator's inset: the content keeps its full
+            // height, and the detent leaves the inset out.
+            .ignoresSafeArea(.container, edges: .bottom)
+            // Read outside, where it is still there.
+            .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.bottom } action: { bottomInset = $0 }
+            .onChange(of: max(questionHeight, outcomeHeight) - bottomInset) { _, new in
+                if !settled, new > 0 { height = new }
+            }
+            .sheetGlass(detents: [.height(height)])
     }
 }

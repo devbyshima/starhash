@@ -12,7 +12,6 @@ struct TurnOffAutoVerifySheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var height: CGFloat = 480
     @State private var isOff = false
 
     private let losses: [(symbol: String, text: String)] = [
@@ -24,24 +23,22 @@ struct TurnOffAutoVerifySheet: View {
     var body: some View {
         Group {
             if isOff {
-                SheetOutcome(
-                    symbol: "xmark",
-                    tint: .waveFailed,
-                    label: String(starhash: "Turned off"),
-                    title: String(starhash: "Auto-verify"),
-                    onDone: { dismiss() }
-                )
+                outcome
             } else {
                 question
             }
         }
-        .sheetHeight(isOff ? .constant(height) : $height)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        // Into the home indicator's inset, which otherwise sat as an empty
-        // band under Turn Off. iOS adds that inset to the detent, so the
-        // detent leaves it out; the content keeps its full height.
-        .ignoresSafeArea(.container, edges: .bottom)
-        .sheetGlass(detents: [.height(height - 4)])
+        .outcomeSheet(settled: isOff) { outcome }
+    }
+
+    private var outcome: some View {
+        SheetOutcome(
+            symbol: "xmark",
+            tint: .waveFailed,
+            label: String(starhash: "Turned off"),
+            title: String(starhash: "Auto-verify"),
+            onDone: { dismiss() }
+        )
     }
 
     private var question: some View {
