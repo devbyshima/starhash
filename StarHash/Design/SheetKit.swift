@@ -242,6 +242,32 @@ struct SheetIconCircle: View {
     }
 }
 
+/// A card of short statements, each led by its icon circle: what turning
+/// auto-verify off stops, on its question and on its outcome.
+struct SheetIconRows: View {
+    let rows: [(symbol: String, text: String)]
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ForEach(Array(rows.enumerated()), id: \.offset) { index, row in
+                if index > 0 { SheetDivider().padding(.leading, 52) }
+                HStack(spacing: 14) {
+                    SheetIconCircle(symbol: row.symbol)
+                    Text(catalog: row.text)
+                        .font(.sheetBody)
+                        .foregroundStyle(Color.starhashPrimaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 0)
+                }
+                .padding(.vertical, 8)
+                .accessibilityElement(children: .combine)
+            }
+        }
+        .padding(.horizontal, 16)
+        .sheetCard()
+    }
+}
+
 // MARK: Buttons
 
 /// A sheet's button, Beam's: 50pt, a 16pt semibold label, a gradient fill

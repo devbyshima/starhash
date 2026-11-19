@@ -10352,6 +10352,22 @@
         }
       }
     },
+    "Turn it on again any time in Settings.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réactivez-la à tout moment dans Réglages."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wabifungura igihe icyo ari cyo cyose mu Igenamiterere."
+          }
+        }
+      }
+    },
     "Turned off": {
       "localizations": {
         "fr": {

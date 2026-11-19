@@ -19,30 +19,29 @@ struct SheetOutcome: View {
     let label: String
     /// "5,000 RWF".
     let title: String
-    /// "John Doe".
+    /// "John Doe", or a line on what to do next.
     var detail: String?
     var rows: [(label: String, value: String)] = []
+    /// Statements on their icons (`SheetIconRows`), under the rows.
+    var points: [(symbol: String, text: String)] = []
+    /// A figure ("5,000 RWF", a number) in the figures' face; words
+    /// ("Auto-verify") in the sheets' own.
+    var titleIsFigure = true
     let onDone: () -> Void
 
     /// The icon's middle, from the sheet's top edge.
     static let iconCentre: CGFloat = 60
-    private static let iconSize: CGFloat = 52
 
     var body: some View {
         VStack(spacing: 0) {
-            Image(symbol: symbol)
-                .font(.system(size: 22, weight: .bold))
-                .foregroundStyle(Color.waveGlyph)
-                .frame(width: Self.iconSize, height: Self.iconSize)
-                .background(tint, in: Circle())
-                .padding(.top, Self.iconCentre - Self.iconSize / 2)
-                .accessibilityHidden(true)
+            SheetOutcomeIcon(symbol: symbol, glyph: Color.waveGlyph, fill: tint)
             Text(catalog: label)
                 .font(.sheet(15, .semibold, relativeTo: .subheadline))
                 .foregroundStyle(Color.sheetSecondaryText)
                 .padding(.top, 12)
             Text(verbatim: title)
-                .font(.starhashNumber(34, weight: .bold, relativeTo: .title))
+                .font(titleIsFigure ? .starhashNumber(34, weight: .bold, relativeTo: .title) : .sheet(30, .bold, relativeTo: .title))
+                .tracking(titleIsFigure ? 0 : StarHashTracking.display(30))
                 .foregroundStyle(Color.sheetBrandText)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
@@ -51,7 +50,8 @@ struct SheetOutcome: View {
                 Text(verbatim: detail)
                     .font(.sheet(15, relativeTo: .subheadline))
                     .foregroundStyle(Color.sheetSecondaryText)
-                    .lineLimit(1)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
                     .padding(.top, 2)
             }
             if !rows.isEmpty {
@@ -64,6 +64,10 @@ struct SheetOutcome: View {
                 .padding(.horizontal, 16)
                 .sheetCard()
                 .padding(.top, 20)
+            }
+            if !points.isEmpty {
+                SheetIconRows(rows: points)
+                    .padding(.top, 20)
             }
             Spacer(minLength: 24)
             Button("Done", action: onDone)
@@ -100,6 +104,27 @@ struct SheetOutcome: View {
             withTransaction(transaction, show)
             UINotificationFeedbackGenerator().notificationOccurred(feel)
         }
+    }
+}
+
+/// An outcome's icon: `symbol` on a circle at `SheetOutcome.iconCentre`,
+/// where the wave opens. A question can wear one in the same place, so the
+/// wave turns its icon into the outcome's.
+struct SheetOutcomeIcon<Glyph: ShapeStyle>: View {
+    let symbol: String
+    let glyph: Glyph
+    let fill: Color
+
+    private var size: CGFloat { 52 }
+
+    var body: some View {
+        Image(symbol: symbol)
+            .font(.system(size: 22, weight: .bold))
+            .foregroundStyle(glyph)
+            .frame(width: size, height: size)
+            .background(fill, in: Circle())
+            .padding(.top, SheetOutcome.iconCentre - size / 2)
+            .accessibilityHidden(true)
     }
 }
 
