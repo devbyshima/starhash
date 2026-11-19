@@ -51,6 +51,7 @@ The first release: pay with MTN MoMo or Airtel Money without typing USSD codes, 
 
 ### Changed
 
+- Turn Off Auto-verify's sheet opens with auto-verify's icon, which the red light turns into Turned off's in the same place. Turned off keeps the card of what stops working, says how to turn it on again, and leaves no empty space above Done.
 - Buy no longer comes with Gwamon' Pack (*154*0#). A list you have changed keeps it until you delete it.
 - Dark mode's page is a deeper near black, #101010, on every screen, sheet, widget and drawing, and the launch screen.
 - What's New's videos show StarHash in the appearance you use, dark in dark mode and light in light mode, and auto-verify's setup shows Shortcuts as light or dark as the app, with StarHash's own icon on the shortcut.
