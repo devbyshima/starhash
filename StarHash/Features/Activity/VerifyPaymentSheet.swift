@@ -11,6 +11,8 @@ import UIKit
 /// Confirm Without Message under it for a message deleted or never sent.
 /// Once it settles the payment, the sheet's Distortion Wave turns it into
 /// what came of it (`SheetOutcome`): Confirmed in green, or Failed in red.
+/// Confirmed is the taller, with what the message filled in, so the sheet
+/// opens at its height and the buttons sit at the foot, where Done comes.
 struct VerifyPaymentSheet: View {
     let transactionID: UUID
 
@@ -18,7 +20,6 @@ struct VerifyPaymentSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var height: CGFloat = 520
     /// What the last paste said, when it settled nothing.
     @State private var note: Note?
     /// What came of it, once it is settled.
@@ -51,11 +52,9 @@ struct VerifyPaymentSheet: View {
         }
         // The sheet keeps its height as it turns into its outcome, so the
         // wave plays over one still shape.
-        .sheetHeight(outcome == nil ? $height : .constant(height))
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        // Into the home indicator's inset, as Turn Off Auto-verify's sheet.
-        .ignoresSafeArea(.container, edges: .bottom)
-        .sheetGlass(detents: [.height(height - 4)])
+        .outcomeSheet(settled: outcome != nil) {
+            if let transaction { fullestOutcome(transaction) }
+        }
         #if DEBUG
         // -verifyMessage <text>: pasted as the sheet opens, for screenshots.
         .task {
@@ -88,20 +87,23 @@ struct VerifyPaymentSheet: View {
                             .fixedSize(horizontal: false, vertical: true)
                             .transition(.opacity)
                     }
-
-                    VStack(spacing: 4) {
-                        Button("Paste Message") { paste() }
-                            .buttonStyle(.sheetPrimary)
-                        // The last resort: a message deleted, or one that
-                        // never came. The fee comes from the carriers' prices.
-                        SheetTextButton("Confirm Without Message") { confirmWithoutMessage(transaction) }
-                    }
-                    .padding(.top, 4)
                 }
                 .padding(.horizontal, 18)
-                .animation(.smooth(duration: 0.25), value: note)
+
+                // At the foot, where Done comes.
+                Spacer(minLength: 18)
+
+                VStack(spacing: 4) {
+                    Button("Paste Message") { paste() }
+                        .buttonStyle(.sheetPrimary)
+                    // The last resort: a message deleted, or one that
+                    // never came. The fee comes from the carriers' prices.
+                    SheetTextButton("Confirm Without Message") { confirmWithoutMessage(transaction) }
+                }
+                .padding(.horizontal, 18)
             }
         }
+        .animation(.smooth(duration: 0.25), value: note)
     }
 
     /// Confirmed, with what the message filled in, or Failed, with why.
@@ -113,13 +115,28 @@ struct VerifyPaymentSheet: View {
             if let balance = transaction.balanceAfter { rows.append((String(starhash: "Balance"), Money.formatWithCurrency(balance))) }
         }
         rows.append((transaction.counterparty.kind == .phone ? String(starhash: "Number") : String(starhash: "Merchant code"), transaction.counterparty.formattedDestination))
-        return SheetOutcome(
+        return outcomeView(outcome, transaction, rows: Array(rows.prefix(3)))
+    }
+
+    /// Confirmed with all three rows a message can fill in: the tallest
+    /// outcome, which the sheet is sized for before it is known.
+    private func fullestOutcome(_ transaction: StarHashKit.Transaction) -> some View {
+        // One line each, whatever the values.
+        outcomeView(.confirmed, transaction, rows: [
+            (String(starhash: "Fee"), Money.formatWithCurrency(0)),
+            (String(starhash: "Code"), "0"),
+            (String(starhash: "Balance"), Money.formatWithCurrency(0)),
+        ])
+    }
+
+    private func outcomeView(_ outcome: Outcome, _ transaction: StarHashKit.Transaction, rows: [(label: String, value: String)]) -> some View {
+        SheetOutcome(
             symbol: outcome == .confirmed ? "checkmark" : "xmark",
             tint: outcome.iconTint,
             label: outcome == .confirmed ? String(starhash: "Confirmed") : String(starhash: "Failed"),
             title: Money.formatWithCurrency(transaction.amount),
             detail: transaction.counterparty.displayName,
-            rows: Array(rows.prefix(3)),
+            rows: rows,
             onDone: { dismiss() }
         )
     }

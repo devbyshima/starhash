@@ -55,6 +55,7 @@ The first release: pay with MTN MoMo or Airtel Money without typing USSD codes, 
 
 ### Changed
 
+- Turn Off Auto-verify's sheet opens with auto-verify's icon, which the red light turns into Turned off's in the same place. Turned off keeps the card of what stops working, says how to turn it on again, and leaves no empty space above Done.
 - Buy no longer comes with Gwamon' Pack (*154*0#). A list you have changed keeps it until you delete it.
 - Dark mode's page is a deeper near black, #101010, on every screen, sheet, widget and drawing, and the launch screen.
 - What's New's videos show StarHash in the appearance you use, dark in dark mode and light in light mode, and auto-verify's setup shows Shortcuts as light or dark as the app, with StarHash's own icon on the shortcut.
@@ -102,6 +103,7 @@ The first release: pay with MTN MoMo or Airtel Money without typing USSD codes, 
 
 ### Fixed
 
+- Verify's Confirmed and Keep SIM's SIM kept now fit their sheet: the tick no longer sits under the grabber with the amount shrunk, and the sheet keeps one height from the question to Done.
 - A payment reminder no longer says StarHash marked a payment failed when it did not: for a payment dialled before auto-verify was set up, which never fails for want of a message, or after auto-verify is turned off. It asks whether the payment went through instead.
 - With Enable contacts off, StarHash no longer reads your contacts to decide whether to keep where you paid a number, and lets go of the ones it had read.
 - A change to your photo, or its removal, that did not reach StarHash's server (offline, say) is sent again the next time StarHash opens, Delete All Data included, so a removed photo is deleted there. An iPhone restored from a backup keeps the key that can change or delete it, and one restored before now gives the photo a new id rather than being refused.
