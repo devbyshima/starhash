@@ -437,13 +437,14 @@ struct ReportSentence: View {
 
     private func colour(_ tone: Tone) -> Color {
         switch tone {
-        case .primary: Color.starhashPrimaryText.color(in: environment)
-        case .secondary: Color.starhashSecondaryText.color(in: environment)
-        case .category: category.map(Color.reportCategoryText) ?? Color.starhashPrimaryText.color(in: environment)
+        case .primary: Color.starhashPrimaryText.color(scheme: colorScheme, surface: surface)
+        case .secondary: Color.starhashSecondaryText.color(scheme: colorScheme, surface: surface)
+        case .category: category.map(Color.reportCategoryText) ?? Color.starhashPrimaryText.color(scheme: colorScheme, surface: surface)
         }
     }
 
-    @Environment(\.self) private var environment
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.starhashSurface) private var surface
 }
 
 // MARK: Total Spent

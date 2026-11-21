@@ -15,12 +15,13 @@ struct SplashView: View {
     let onFinish: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.self) private var environment
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.starhashSurface) private var surface
     @State private var clock = SplashClock()
     @State private var leaving = false
 
     var body: some View {
-        let colour = Color.starhashMarkGlyph.color(in: environment)
+        let colour = Color.starhashMarkGlyph.color(scheme: colorScheme, surface: surface)
         TimelineView(.animation(paused: reduceMotion)) { timeline in
             let time = reduceMotion ? SplashMotion.still : clock.time(at: timeline.date)
             Canvas { context, size in

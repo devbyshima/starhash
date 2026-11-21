@@ -323,14 +323,15 @@ private struct SheetButtonBody: View {
     let fillsWidth: Bool
 
     @Environment(\.isEnabled) private var isEnabled
-    @Environment(\.self) private var environment
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.starhashSurface) private var surface
 
     private var colors: (fill: Color, label: Color) {
         switch fill {
         case .filled:
             return (.sheetFilledButton, .sheetFilledLabel)
         case .accent:
-            return (Color.starhashInk.color(in: environment), Color.starhashOnInk.color(in: environment))
+            return (Color.starhashInk.color(scheme: colorScheme, surface: surface), Color.starhashOnInk.color(scheme: colorScheme, surface: surface))
         case .destructive:
             return (.starhashDestructiveButton, .starhashOnDestructive)
         case .confirm:

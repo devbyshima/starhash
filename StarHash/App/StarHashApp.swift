@@ -124,15 +124,15 @@ struct StarHashApp: App {
                     #if DEBUG
                     .debugWidgetGallery()
                     #endif
-                    // A payment dialled, settled or deleted: its reminder
-                    // and the summaries follow.
-                    .onChange(of: store.transactions) {
-                        Task { await StarHashNotifications.shared.sync() }
-                    }
+                    .modifier(NotificationsFollowTransactions(store: store))
                     // A payment can pass its hour while StarHash is open.
+                    // Leaving the foreground cancels the sleep, and that
+                    // ends the loop rather than expiring payments once
+                    // more on the way out.
                     .task(id: scenePhase == .active) {
-                        while scenePhase == .active, !Task.isCancelled {
-                            try? await Task.sleep(for: .seconds(60))
+                        guard scenePhase == .active else { return }
+                        while true {
+                            do { try await Task.sleep(for: .seconds(60)) } catch { return }
                             AppEnvironment.autoVerify.expireUnconfirmed()
                         }
                     }
@@ -184,5 +184,20 @@ private extension UIFont {
             UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String): [wght: weight],
         ])
         return UIFont(descriptor: descriptor, size: size)
+    }
+}
+
+/// A payment dialled, settled or deleted: its reminder and the summaries
+/// follow. A modifier of its own, so reading the transactions to watch them
+/// ties this to them rather than the whole scene's content.
+private struct NotificationsFollowTransactions: ViewModifier {
+    /// Handed in: this sits outside the `.environment(store)` it would
+    /// otherwise read.
+    let store: StarHashStore
+
+    func body(content: Content) -> some View {
+        content.onChange(of: store.transactions) {
+            Task { await StarHashNotifications.shared.sync() }
+        }
     }
 }

@@ -88,7 +88,8 @@ struct ActivitySpendingChart: View {
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.self) private var environment
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.starhashSurface) private var surface
     /// The width of the bar area, measured once the chart is laid out.
     @State private var plotWidth: CGFloat = 0
     /// The bar under a pressing finger, if any.
@@ -118,7 +119,7 @@ struct ActivitySpendingChart: View {
                 // glow: inside the card a glow spilled past each bar's
                 // edges. The pressed bar keeps full strength; the rest
                 // step back.
-                .foregroundStyle(LinearGradient.starhashAccentLit(in: environment).opacity(isProminent(bucket) ? 1 : 0.4))
+                .foregroundStyle(LinearGradient.starhashAccentLit(scheme: colorScheme, surface: surface).opacity(isProminent(bucket) ? 1 : 0.4))
                 .clipShape(UnevenRoundedRectangle(topLeadingRadius: barRadius, topTrailingRadius: barRadius, style: .continuous))
                 .accessibilityLabel(ActivitySummary.spokenName(of: bucket, period: period, calendar: calendar, locale: .starhash))
                 .accessibilityValue(Money.formatWithCurrency(bucket.total))

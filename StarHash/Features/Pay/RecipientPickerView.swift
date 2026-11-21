@@ -813,14 +813,15 @@ struct RecipientRow: View {
     /// (the sheet it opens cancels it), once any tap from it has come.
     @State private var longPressed = false
     @State private var longPresses = 0
-    @Environment(\.self) private var environment
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.starhashSurface) private var surface
 
     /// The title with the first stretch the search matched coloured, the
     /// way the search matches: ignoring case and accents.
     private var styledTitle: AttributedString {
         var text = AttributedString(title)
         if !match.isEmpty, let range = text.range(of: match, options: [.caseInsensitive, .diacriticInsensitive]) {
-            text[range].foregroundColor = matchColor.color(in: environment)
+            text[range].foregroundColor = matchColor.color(scheme: colorScheme, surface: surface)
             text[range].backgroundColor = .pickerMatchBackground
         }
         return text

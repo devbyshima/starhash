@@ -81,9 +81,6 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.appLanguage) private var appLanguage = AppLanguage.system.rawValue
     @Environment(Owner.self) private var owner
     private var ownWallets: OwnerWallets { owner.wallets }
-    /// The other SIM's number as it is typed, until it is whole.
-    @State private var draftSecondNumber = ""
-    @FocusState private var editsSecondNumber: Bool
     /// Going back to one SIM with two numbers in: which one stays.
     @State private var choosesSIMToKeep = false
     @AppStorage(Preferences.enableContacts) private var enableContacts: Bool
@@ -95,7 +92,6 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.defaultPage) private var defaultPage = AppTab.pay.rawValue
     @AppStorage(PreferenceKey.appearance) private var appearance = AppAppearance.system
     @Environment(AutoVerify.self) private var autoVerify
-    @AppStorage(Preferences.appLock) private var appLock: Bool
 
     @State private var confirmsDeleteAll = false
     @State private var exportDocument: BackupDocument?
@@ -236,23 +232,8 @@ private struct SettingsRootList: View {
             // Asked for here until it is in; from then on it is part of the
             // profile (the card above shows it, Profile changes it).
             if owner.usesTwoSIMs, owner.otherSIM == nil {
-                // A number `Owner` refuses (the first SIM's typed again, a
-                // landline) is said so under the row, as on Profile.
-                SettingsRow(
-                    symbol: "simcard.fill",
-                    title: "Other SIM",
-                    status: owner.problem(withOtherNumber: draftSecondNumber)?.message,
-                    statusColor: .starhashDestructive
-                ) {
-                    TextField("07X XXX XXXX", text: $draftSecondNumber)
-                        .focused($editsSecondNumber)
-                        .keyboardType(.phonePad)
-                        .textContentType(.telephoneNumber)
-                        .multilineTextAlignment(.trailing)
-                        .font(.starhashNumber(16, relativeTo: .body))
-                        .frame(maxWidth: 150)
-                }
-                .transition(SettingsCaptionMotion.transition)
+                OtherSIMRow()
+                    .transition(SettingsCaptionMotion.transition)
             }
             // Once both numbers are in, in the Other SIM row's place.
             if ownWallets.hasTwoSIMs, let sim = ownWallets.defaultSIM {
@@ -281,17 +262,6 @@ private struct SettingsRootList: View {
             KeepSIMSheet(sims: [owner.defaultSIM, owner.otherSIM].compactMap { $0 }) { sim in
                 keepOnly(sim)
             }
-        }
-        .sensoryFeedback(.error, trigger: owner.problem(withOtherNumber: draftSecondNumber) != nil) { _, repeated in repeated }
-        .onChange(of: draftSecondNumber) { _, typed in
-            // The phone pad has no return key: a whole number is the end of
-            // it, so the keyboard goes once one is in, with its row. Emptying
-            // the field after it comes back here too, and `setOtherNumber`
-            // would take an empty field for the owner clearing the number
-            // and forget the one just kept.
-            guard !typed.isEmpty, owner.setOtherNumber(typed) else { return }
-            editsSecondNumber = false
-            draftSecondNumber = ""
         }
     }
 
@@ -446,7 +416,7 @@ private struct SettingsRootList: View {
 
     private var securityCard: some View {
     SettingsCard("Security") {
-        securityRow
+        AppLockRow()
         SettingsToggleRow(
             symbol: "exclamationmark.shield.fill",
             title: "Scam warnings",
@@ -530,37 +500,6 @@ private struct SettingsRootList: View {
             autoVerify.status() != .off
         } set: { isOn in
             if isOn { setUpAutoVerify() } else { confirmsAutoVerifyOff = true }
-        }
-    }
-
-    /// The app lock's switch, named for what this iPhone has (Face ID,
-    /// Touch ID, or its passcode alone). Without even a passcode there is
-    /// nothing to ask for, so it stays off and says why.
-    private var securityRow: some View {
-        let unlock = DeviceUnlock.current
-        let available = DeviceUnlock.isAvailable
-        return SettingsToggleRow(
-            symbol: unlock.symbol,
-            title: unlock == .passcode ? "Passcode Lock" : unlock.name,
-            caption: unlock == .passcode ? String(starhash: "Ask for your passcode to open StarHash") : String(starhash: "Ask for \(unlock.name) to open StarHash"),
-            status: available ? nil : String(starhash: "Set a passcode on this iPhone first"),
-            isOn: appLockBinding
-        )
-        .disabled(!available && !appLock)
-    }
-
-    /// Turning the lock on or off asks for Face ID first, so it is the
-    /// owner who changes it; the switch moves only once it is given.
-    private var appLockBinding: Binding<Bool> {
-        Binding {
-            appLock
-        } set: { isOn in
-            let name = DeviceUnlock.current.name
-            Task {
-                let reason = isOn ? String(starhash: "Turn on \(name) for StarHash.") : String(starhash: "Turn off \(name) for StarHash.")
-                guard await AppLock.authenticate(reason: reason) else { return }
-                withAnimation(.smooth) { appLock = isOn }
-            }
         }
     }
 
@@ -721,4 +660,94 @@ enum SettingsLinks {
     /// StarHash stays free, so this is only ever a link: the page and any
     /// payment are Ko-fi's, in the browser.
     static let koFi = URL(string: "https://ko-fi.com/devbyshima")!
+}
+
+/// The other SIM's number while it is asked for. Its own view, so the draft
+/// typed here runs this row again at each digit rather than every card on
+/// the page.
+private struct OtherSIMRow: View {
+    @Environment(Owner.self) private var owner
+    /// The number as it is typed, until it is whole.
+    @State private var draft = ""
+    @FocusState private var isEditing: Bool
+
+    var body: some View {
+        // A number `Owner` refuses (the first SIM's typed again, a landline)
+        // is said so under the row, as on Profile.
+        SettingsRow(
+            symbol: "simcard.fill",
+            title: "Other SIM",
+            status: owner.problem(withOtherNumber: draft)?.message,
+            statusColor: .starhashDestructive
+        ) {
+            TextField("07X XXX XXXX", text: $draft)
+                .focused($isEditing)
+                .keyboardType(.phonePad)
+                .textContentType(.telephoneNumber)
+                .multilineTextAlignment(.trailing)
+                .font(.starhashNumber(16, relativeTo: .body))
+                .frame(maxWidth: 150)
+        }
+        .sensoryFeedback(.error, trigger: owner.problem(withOtherNumber: draft) != nil) { _, repeated in repeated }
+        .onChange(of: draft) { _, typed in
+            // The phone pad has no return key: a whole number is the end of
+            // it, so the keyboard goes once one is in, with its row. Emptying
+            // the field after it comes back here too, and `setOtherNumber`
+            // would take an empty field for the owner clearing the number
+            // and forget the one just kept.
+            guard !typed.isEmpty, owner.setOtherNumber(typed) else { return }
+            isEditing = false
+            draft = ""
+        }
+    }
+}
+
+/// The app lock's switch, named for what this iPhone has (Face ID, Touch
+/// ID, or its passcode alone). Without even a passcode there is nothing to
+/// ask for, so it stays off and says why. What the iPhone has is read on
+/// appearing and on coming back to the app (a passcode set meanwhile in
+/// the Settings app), not on every pass of the page: each read makes two
+/// `LAContext`s.
+private struct AppLockRow: View {
+    @AppStorage(Preferences.appLock) private var appLock: Bool
+    @Environment(\.scenePhase) private var scenePhase
+    // Read in `onAppear`, before the row shows: an initial value here would
+    // be worked out again each time the page makes this row.
+    @State private var unlock = DeviceUnlock.passcode
+    @State private var available = true
+
+    var body: some View {
+        SettingsToggleRow(
+            symbol: unlock.symbol,
+            title: unlock == .passcode ? "Passcode Lock" : unlock.name,
+            caption: unlock == .passcode ? String(starhash: "Ask for your passcode to open StarHash") : String(starhash: "Ask for \(unlock.name) to open StarHash"),
+            status: available ? nil : String(starhash: "Set a passcode on this iPhone first"),
+            isOn: appLockBinding
+        )
+        .disabled(!available && !appLock)
+        .onAppear(perform: read)
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { read() }
+        }
+    }
+
+    private func read() {
+        unlock = DeviceUnlock.current
+        available = DeviceUnlock.isAvailable
+    }
+
+    /// Turning the lock on or off asks for Face ID first, so it is the
+    /// owner who changes it; the switch moves only once it is given.
+    private var appLockBinding: Binding<Bool> {
+        Binding {
+            appLock
+        } set: { isOn in
+            let name = unlock.name
+            Task {
+                let reason = isOn ? String(starhash: "Turn on \(name) for StarHash.") : String(starhash: "Turn off \(name) for StarHash.")
+                guard await AppLock.authenticate(reason: reason) else { return }
+                withAnimation(.smooth) { appLock = isOn }
+            }
+        }
+    }
 }
