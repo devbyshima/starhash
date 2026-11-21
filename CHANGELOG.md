@@ -99,6 +99,7 @@ The first release: pay with MTN MoMo or Airtel Money without typing USSD codes, 
 
 ### Fixed
 
+- In French and Kinyarwanda, the labels over cards and lists (This year, Location, Recent, Contacts, Saved and the others), Payments under a count, a transaction's status, a merchant code's name beside its number, and what VoiceOver says for the round header buttons, Profile's fields, the auto-verify guide's pictures and Pay's announcements are in your language rather than English. VoiceOver no longer offers Show contact details on rows that have none.
 - Verify's Confirmed and Keep SIM's SIM kept now fit their sheet: the tick no longer sits under the grabber with the amount shrunk, and the sheet keeps one height from the question to Done.
 - A payment reminder no longer says StarHash marked a payment failed when it did not: for a payment dialled before auto-verify was set up, which never fails for want of a message, or after auto-verify is turned off. It asks whether the payment went through instead.
 - With Enable contacts off, StarHash no longer reads your contacts to decide whether to keep where you paid a number, and lets go of the ones it had read.

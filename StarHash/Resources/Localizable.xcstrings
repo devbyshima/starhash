@@ -4503,6 +4503,22 @@
         }
       }
     },
+    "Paying %@. Type an amount.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paiement à %@. Tapez un montant."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wishyura %@. Andika umubare w'amafaranga."
+          }
+        }
+      }
+    },
     "Pay with StarHash": {
       "localizations": {
         "rw": {
