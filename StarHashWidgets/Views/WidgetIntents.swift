@@ -16,7 +16,12 @@ import StarHashKit
 struct OpenStarHashIntent: AppIntent {
     static let title: LocalizedStringResource = "Open StarHash"
     static let isDiscoverable = false
+    // iOS 26 reads `supportedModes`, earlier iOS the flag: in the app's
+    // foreground, where `perform()` hands the link to the router. Drop the
+    // flag once StarHash needs iOS 26.
     static let openAppWhenRun = true
+    @available(iOS 26.0, *)
+    static var supportedModes: IntentModes { .foreground }
 
     @Parameter(title: "Link") var link: String
 
@@ -40,6 +45,8 @@ struct OpenScannerIntent: AppIntent {
     static let title: LocalizedStringResource = "Scan to Pay"
     static let isDiscoverable = false
     static let openAppWhenRun = true
+    @available(iOS 26.0, *)
+    static var supportedModes: IntentModes { .foreground }
 
     @MainActor
     func perform() async throws -> some IntentResult {
