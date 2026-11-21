@@ -99,6 +99,7 @@ The first release: pay with MTN MoMo or Airtel Money without typing USSD codes, 
 
 ### Fixed
 
+- Process Carrier SMS is no longer offered to Siri, in Spotlight or on the Action button, where it only asked for a message's text: it is the auto-verify shortcut's action, and stays one in Shortcuts.
 - Siri understands StarHash's phrases in French: "Payer avec StarHash", "Voir mon solde dans StarHash" and the others. Before, an iPhone set to French had only the English ones.
 - Verify's Confirmed and Keep SIM's SIM kept now fit their sheet: the tick no longer sits under the grabber with the amount shrunk, and the sheet keeps one height from the question to Done.
 - A payment reminder no longer says StarHash marked a payment failed when it did not: for a payment dialled before auto-verify was set up, which never fails for want of a message, or after auto-verify is turned off. It asks whether the payment went through instead.
