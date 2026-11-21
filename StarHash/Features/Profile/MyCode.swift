@@ -82,14 +82,29 @@ struct MyCodeShareButton: View {
     let recipient: Recipient
 
     var body: some View {
-        if let image = QRCodeImage.image(for: PaymentQR.link(for: recipient, photoID: AppEnvironment.serverSync.sharedPhotoID).absoluteString) {
-            ShareLink(
-                item: Image(uiImage: image),
-                message: Text("Pay me with StarHash: \(recipient.formattedDestination)"),
-                preview: SharePreview("My StarHash code", image: Image(uiImage: image))
-            ) {
-                Text("Share Code")
+        // The picture is drawn when Share is tapped, from the code as it is
+        // then, rather than at every letter of the name (1024 pixels each).
+        let code = CodePicture(text: PaymentQR.link(for: recipient, photoID: AppEnvironment.serverSync.sharedPhotoID).absoluteString)
+        ShareLink(
+            item: code,
+            message: Text("Pay me with StarHash: \(recipient.formattedDestination)"),
+            preview: SharePreview("My StarHash code", image: code)
+        ) {
+            Text("Share Code")
+        }
+    }
+}
+
+/// The owner's code as a PNG (`QRCodeImage`), drawn only once it is shared.
+private struct CodePicture: Transferable {
+    let text: String
+
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(exportedContentType: .png) { picture in
+            guard let data = QRCodeImage.image(for: picture.text)?.pngData() else {
+                throw CocoaError(.fileWriteUnknown)
             }
+            return data
         }
     }
 }
