@@ -26,7 +26,7 @@
 		<string>com.apple.widgetkit-extension</string>
 	</dict>
 	<key>StarHashAppGroup</key>
-	<string>$(STARHASH_APP_GROUP)</string>
+	<string>$(STARHASH_APP_GROUP_ID_$(STARHASH_APP_GROUPS))</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>SpaceGrotesk.ttf</string>

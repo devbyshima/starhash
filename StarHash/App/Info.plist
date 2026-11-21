@@ -54,7 +54,7 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>StarHash notes where you pay, to suggest who you paid when you are back there and to show each payment on a map. It stays on your iPhone.</string>
 	<key>StarHashAppGroup</key>
-	<string>$(STARHASH_APP_GROUP)</string>
+	<string>$(STARHASH_APP_GROUP_ID_$(STARHASH_APP_GROUPS))</string>
 	<key>StarHashChannel</key>
 	<string>$(STARHASH_CHANNEL)</string>
 	<key>UIAppFonts</key>

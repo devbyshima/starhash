@@ -42,6 +42,12 @@ settings:
     STARHASH_APP_ENTITLEMENTS_NO: ""
     STARHASH_WIDGET_ENTITLEMENTS_YES: StarHashWidgets/StarHashWidgets.entitlements
     STARHASH_WIDGET_ENTITLEMENTS_NO: ""
+    # The id both Info.plists carry (StarHashAppGroup), empty without the
+    # group so the app and the widgets see none: with the id but no
+    # entitlement, each wrote and read a store of its own, and the app
+    # reloaded every widget for nothing each time it left the screen.
+    STARHASH_APP_GROUP_ID_YES: $(STARHASH_APP_GROUP)
+    STARHASH_APP_GROUP_ID_NO: ""
   # The channel the app reads from Info.plist (`ReleaseChannel.current`),
   # which decides where each feature flag starts.
   configs:
@@ -109,7 +115,7 @@ targets:
         # Metal (the QR tree's SceneKit view), so Game Mode leaves it be.
         LSSupportsGameMode: false
         StarHashChannel: $(STARHASH_CHANNEL)
-        StarHashAppGroup: $(STARHASH_APP_GROUP)
+        StarHashAppGroup: $(STARHASH_APP_GROUP_ID_$(STARHASH_APP_GROUPS))
         UIAppFonts: [SpaceGrotesk.ttf]
         NSContactsUsageDescription: StarHash shows your contacts so you can pick who to pay. They stay on your iPhone.
         NSLocationWhenInUseUsageDescription: StarHash notes where you pay, to suggest who you paid when you are back there and to show each payment on a map. It stays on your iPhone.
@@ -160,4 +166,4 @@ targets:
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
         UIAppFonts: [SpaceGrotesk.ttf]
-        StarHashAppGroup: $(STARHASH_APP_GROUP)
+        StarHashAppGroup: $(STARHASH_APP_GROUP_ID_$(STARHASH_APP_GROUPS))
