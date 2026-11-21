@@ -1,3 +1,4 @@
+import AppIntents
 import StarHashKit
 import SwiftUI
 
@@ -151,7 +152,12 @@ struct PayView: View {
             // The system asks before it calls, so Balance needs no prompt
             // of its own.
             Button {
-                dialler.dial(USSD.balance(for: wallet))
+                dialler.dial(USSD.balance(for: wallet)) {
+                    // Check Balance, as if run from Siri, so Siri Suggestions
+                    // and Spotlight learn when the owner checks: App Intents
+                    // only donates what the system runs, never a tap here.
+                    Task { try? await IntentDonationManager.shared.donate(intent: CheckBalanceIntent()) }
+                }
             } label: {
                 Text("Balance")
                     // At accessibility sizes shrunk a little rather than

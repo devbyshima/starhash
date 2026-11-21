@@ -14,23 +14,27 @@ final class Dialler {
     /// The code the system last would not dial, until the alert is closed.
     var undialledCode: String?
 
-    func dial(_ code: String) {
+    /// `onDialled` runs once the system has taken the code, never when it
+    /// would not.
+    func dial(_ code: String, onDialled: (@MainActor () -> Void)? = nil) {
         guard let url = USSD.telURL(for: code) else {
             undialledCode = code
             return
         }
-        open(url, code: code)
+        open(url, code: code, onDialled: onDialled)
     }
 
     /// A tel: link as it is, from a widget or a link.
-    func open(_ url: URL, code: String? = nil) {
+    func open(_ url: URL, code: String? = nil, onDialled: (@MainActor () -> Void)? = nil) {
         #if DEBUG
         // -paySplitDialled: parts marked dialled for screenshots, with no
         // call prompt or alert over them.
         if DebugLaunch.dialsNothing { return }
         #endif
         Task {
-            if await !UIApplication.shared.open(url, options: [:]) {
+            if await UIApplication.shared.open(url, options: [:]) {
+                onDialled?()
+            } else {
                 undialledCode = code ?? Self.code(in: url)
             }
         }
