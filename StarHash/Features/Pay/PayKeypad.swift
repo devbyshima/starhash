@@ -164,8 +164,15 @@ struct PayKeypad: View {
             label()
                 // The flash is the accent a little faded, as in the reference.
                 .foregroundStyle(tintedKey == key ? AnyShapeStyle(Color.payKeypadFlash.opacity(0.75)) : AnyShapeStyle(Color.payPrimaryText))
+                // A digit too tall for a short key steps down rather than
+                // pushing Pay's buttons under the tab bar.
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .frame(minHeight: 64)
+                // 44, the smallest a tap target goes: on a short screen at
+                // large text sizes the keys give up their height before
+                // Balance and Pay can reach the tab bar.
+                .frame(minHeight: 44)
                 .contentShape(Rectangle())
         }
         .buttonStyle(KeypadKeyStyle())

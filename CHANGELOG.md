@@ -99,6 +99,7 @@ The first release: pay with MTN MoMo or Airtel Money without typing USSD codes, 
 
 ### Fixed
 
+- The tab bar no longer sits over Pay's Balance and Pay buttons: on iPhones with a Home button the pages now leave room for the bar where it actually sits, and at large text sizes on a short screen the keypad's keys get shorter rather than pushing the buttons under it.
 - Verify's Confirmed and Keep SIM's SIM kept now fit their sheet: the tick no longer sits under the grabber with the amount shrunk, and the sheet keeps one height from the question to Done.
 - A payment reminder no longer says StarHash marked a payment failed when it did not: for a payment dialled before auto-verify was set up, which never fails for want of a message, or after auto-verify is turned off. It asks whether the payment went through instead.
 - With Enable contacts off, StarHash no longer reads your contacts to decide whether to keep where you paid a number, and lets go of the ones it had read.

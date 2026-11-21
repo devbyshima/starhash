@@ -244,9 +244,15 @@ enum TabBarMetrics {
     }
     static let bottomGap: CGFloat = 28
     static let compactScale: CGFloat = 0.8
-    /// What a page keeps clear at its foot for the bar: its height above
-    /// the safe area's foot (it sits a little into it) and a gap.
-    static let clearance: CGFloat = height - 6 + 12
+    /// What a page keeps clear at its foot for the bar: from the safe
+    /// area's foot to the bar's top edge, and a gap. `barBottom` is where
+    /// the bar's foot sits from the safe area's (`floatingBarBottom`): 6pt
+    /// into it over a home indicator, 12pt above it on a phone with a home
+    /// button, whose bar so stands 18pt higher. A fixed figure for the
+    /// first left that phone's bar over Pay's Balance and Pay buttons.
+    static func clearance(barBottom: CGFloat) -> CGFloat {
+        barBottom + height + 12
+    }
 }
 
 /// The bar's three places, left to right. Pay's holds Buy too: the button
@@ -286,24 +292,43 @@ extension View {
     /// Room at the foot of a page's first screen for the tab bar floating
     /// over it. A scroll view scrolls on under the bar.
     func starhashTabBarClearance() -> some View {
-        safeAreaInset(edge: .bottom, spacing: 0) {
-            Color.clear.frame(height: TabBarMetrics.clearance)
-        }
+        modifier(TabBarClearance())
     }
 
     /// Centres an empty state in the space the page has for it: from under
-    /// its header (or the status bar) to the tab bar's top edge, which
-    /// stands `height - 6` above the safe area's foot, so it sits in the
-    /// middle of what shows rather than of a frame running behind the bar.
+    /// its header (or the status bar) to the tab bar's top edge, so it sits
+    /// in the middle of what shows rather than of a frame running behind
+    /// the bar.
     func starhashCentredOverTabBar() -> some View {
-        frame(maxWidth: .infinity, maxHeight: .infinity)
-            .padding(.bottom, TabBarMetrics.height - 6)
+        modifier(CentredOverTabBar())
     }
 
     /// Shrinks the tab bar while this scroll view scrolls down, and brings
     /// it back on the way up or at the top, as the reference's does.
     func starhashTabBarFollowsScroll() -> some View {
         modifier(TabBarScrollTracking())
+    }
+}
+
+/// The bar's room at a page's foot, from where the bar actually sits.
+private struct TabBarClearance: ViewModifier {
+    @Environment(\.floatingBarBottom) private var barBottom
+
+    func body(content: Content) -> some View {
+        content.safeAreaInset(edge: .bottom, spacing: 0) {
+            Color.clear.frame(height: TabBarMetrics.clearance(barBottom: barBottom))
+        }
+    }
+}
+
+/// The space over the bar's top edge, from where the bar actually sits.
+private struct CentredOverTabBar: ViewModifier {
+    @Environment(\.floatingBarBottom) private var barBottom
+
+    func body(content: Content) -> some View {
+        content
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding(.bottom, TabBarMetrics.height + barBottom)
     }
 }
 
