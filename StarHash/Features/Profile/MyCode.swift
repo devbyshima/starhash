@@ -284,11 +284,13 @@ struct ProfileFields: View {
                     .frame(width: 22)
                     .accessibilityHidden(true)
             }
-            TextField(label, text: text, prompt: Text(catalog: prompt).foregroundStyle(Color.starhashTertiaryText))
-                .starhashFont(17, weight: .medium, relativeTo: .body)
-                .foregroundStyle(Color.starhashPrimaryText)
-                .multilineTextAlignment(centred ? .center : .leading)
-                .accessibilityLabel(label)
+            TextField(text: text, prompt: Text(catalog: prompt).foregroundStyle(Color.starhashTertiaryText)) {
+                Text(catalog: label)
+            }
+            .starhashFont(17, weight: .medium, relativeTo: .body)
+            .foregroundStyle(Color.starhashPrimaryText)
+            .multilineTextAlignment(centred ? .center : .leading)
+            .accessibilityLabel(Text(catalog: label))
         }
         // Two numbers side by side share the width, so each keeps a
         // little less to either side.

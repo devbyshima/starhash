@@ -651,7 +651,8 @@ struct RecipientPickerView: View {
     /// "MTN number", "Airtel number" or "Merchant code": which code and
     /// fee the payment gets.
     private func kindLabel(_ recipient: Recipient) -> String {
-        guard let network = recipient.network else { return "Merchant code" }
+        // Translated here, since the saved section joins it to the number.
+        guard let network = recipient.network else { return String(starhash: "Merchant code") }
         return String(starhash: "\(network.name) number")
     }
 
@@ -712,7 +713,8 @@ private struct PickerBand: View {
     let title: String
 
     var body: some View {
-        Text(title.uppercased())
+        Text(catalog: title)
+            .textCase(.uppercase)
             .font(PickerType.section)
             .tracking(1)
             .foregroundStyle(Color.sheetSecondaryText)
@@ -891,7 +893,13 @@ struct RecipientRow: View {
         .buttonStyle(HighlightRowButtonStyle(pressHaptic: false))
         .sensoryFeedback(.impact(weight: .medium), trigger: longPresses)
         .accessibilityElement(children: .combine)
-        .accessibilityAction(named: "Show contact details") { onLongPress?() }
+        // Only on rows a long press opens, so VoiceOver isn't offered an
+        // action that does nothing (Nearby, typed and unsaved rows).
+        .accessibilityActions {
+            if let onLongPress {
+                Button("Show contact details", action: onLongPress)
+            }
+        }
     }
 }
 

@@ -27,7 +27,7 @@ struct SwapGlassButton: View {
             .starhashCircleButton()
         }
         .buttonStyle(HapticPlainButtonStyle(weight: pressHaptic ? .light : nil))
-        .accessibilityLabel(label)
+        .accessibilityLabel(Text(catalog: label))
     }
 }
 

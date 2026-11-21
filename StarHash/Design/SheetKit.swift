@@ -217,7 +217,11 @@ struct SheetSectionLabel: View {
     }
 
     var body: some View {
-        Text(text.uppercased())
+        // From the catalog, then uppercased as drawn: a `String` handed to
+        // `Text` is shown verbatim and would stay English in French and
+        // Kinyarwanda.
+        Text(catalog: text)
+            .textCase(.uppercase)
             .font(.sheet(11, .semibold, relativeTo: .caption))
             .tracking(0.8)
             .foregroundStyle(Color.sheetSecondaryText)

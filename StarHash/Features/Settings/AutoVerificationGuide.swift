@@ -488,7 +488,7 @@ private struct GuidePhoneScreenshot: View {
             .clipShape(phone.screenShape)
             .guidePhoneBody(phone)
             .accessibilityElement()
-            .accessibilityLabel(label)
+            .accessibilityLabel(Text(catalog: label))
             .accessibilityAddTraits(.isImage)
     }
 }
@@ -565,7 +565,7 @@ private struct GuideAutomationPhone: View {
         .guidePhoneBody(phone)
         .animation(.spring(duration: 0.4, bounce: 0.3), value: isVerified)
         .accessibilityElement()
-        .accessibilityLabel(label)
+        .accessibilityLabel(Text(catalog: label))
         .accessibilityAddTraits(.isImage)
     }
 }

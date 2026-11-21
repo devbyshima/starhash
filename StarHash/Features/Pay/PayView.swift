@@ -210,7 +210,8 @@ struct PayView: View {
     private func next() {
         guard !input.isZero else {
             zeroShakes += 1
-            AccessibilityNotification.Announcement("Type an amount first").post()
+            // An announcement takes a plain `String`, so it is looked up here.
+            AccessibilityNotification.Announcement(String(starhash: "Type an amount first")).post()
             return
         }
         if let chosenRecipient {
@@ -249,7 +250,7 @@ struct PayView: View {
         }
         if request.amount == nil {
             let who = request.isStarHashCode ? request.recipient.shownName : request.recipient.formattedDestination
-            AccessibilityNotification.Announcement("Paying \(who). Type an amount.").post()
+            AccessibilityNotification.Announcement(String(starhash: "Paying \(who). Type an amount.")).post()
         }
     }
 

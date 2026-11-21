@@ -541,6 +541,70 @@
         }
       }
     },
+    "Couldn't Save the File": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d'enregistrer le fichier"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ntibyashobotse kubika dosiye"
+          }
+        }
+      }
+    },
+    "Nothing was saved. Try again, or choose another place.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien n'a été enregistré. Réessayez, ou choisissez un autre emplacement."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta kintu cyabitswe. Ongera ugerageze, cyangwa uhitemo ahandi."
+          }
+        }
+      }
+    },
+    "Added your profile. Nothing already here was changed.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre profil a été ajouté. Rien de ce qui était déjà là n'a changé."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hongewemo umwirondoro wawe. Nta kintu cyari gisanzwe hano cyahinduwe."
+          }
+        }
+      }
+    },
+    "Your profile was added too.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre profil a aussi été ajouté."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umwirondoro wawe nawo wongewemo."
+          }
+        }
+      }
+    },
     "Airtime": {
       "localizations": {
         "rw": {
@@ -4499,6 +4563,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ishyura umuntu"
+          }
+        }
+      }
+    },
+    "Paying %@. Type an amount.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paiement à %@. Tapez un montant."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wishyura %@. Andika umubare w'amafaranga."
           }
         }
       }

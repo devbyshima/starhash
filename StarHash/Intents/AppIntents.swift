@@ -42,7 +42,11 @@ struct OpenPayIntent: AppIntent {
     }
 }
 
-/// Siri phrases and Spotlight entries for StarHash's actions.
+/// Siri phrases and Spotlight entries for StarHash's actions. Their French
+/// is in `Resources/AppShortcuts.xcstrings`, keyed by each phrase with
+/// `${applicationName}` for the app's name (Localizable.xcstrings doesn't
+/// reach them); a new phrase needs its French there too. Siri has no
+/// Kinyarwanda, so there is none.
 struct StarHashShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
@@ -63,13 +67,10 @@ struct StarHashShortcuts: AppShortcutsProvider {
             shortTitle: "Check Balance",
             systemImageName: "banknote"
         )
-        AppShortcut(
-            intent: ProcessCarrierSMSIntent(),
-            phrases: [
-                "Process carrier SMS in \(.applicationName)",
-            ],
-            shortTitle: "Process Carrier SMS",
-            systemImageName: "checkmark.message"
-        )
+        // Not Process Carrier SMS: it is the auto-verify shortcut's action,
+        // fed each message by the automation. Offered to Siri, Spotlight
+        // and the Action button it only asked for an SMS's text with a
+        // bare prompt. It stays an action in Shortcuts, which the shared
+        // shortcut and a by-hand one use.
     }
 }

@@ -35,6 +35,12 @@ public struct StarHashBackup: Codable, Sendable {
         self.profile = profile
     }
 
+    /// The two fields every version keeps, read before the rest.
+    private struct Header: Decodable {
+        var format: String
+        var version: Int
+    }
+
     public enum ReadError: Error, Equatable {
         /// Not JSON, or not StarHash's.
         case notABackup
@@ -54,9 +60,13 @@ public struct StarHashBackup: Codable, Sendable {
     public static func decode(_ data: Data) throws(ReadError) -> StarHashBackup {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        if let backup = try? decoder.decode(StarHashBackup.self, from: data) {
-            guard backup.format == format else { throw .notABackup }
-            guard backup.version <= currentVersion else { throw .tooNew }
+        // The format and version first, on their own: a newer file can hold
+        // what this StarHash can't decode (a new kind of transaction), and
+        // it should still be told apart from a file that isn't a backup.
+        if let header = try? decoder.decode(Header.self, from: data) {
+            guard header.format == format else { throw .notABackup }
+            guard header.version <= currentVersion else { throw .tooNew }
+            guard let backup = try? decoder.decode(StarHashBackup.self, from: data) else { throw .notABackup }
             return backup
         }
         if let transactions = try? decoder.decode([Transaction].self, from: data) {
