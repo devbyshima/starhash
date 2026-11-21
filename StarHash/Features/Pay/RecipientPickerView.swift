@@ -52,13 +52,15 @@ struct RecipientPickerView: View {
     /// The height of the bar's section label, which a section's own label
     /// takes over from as it reaches the bar.
     @State private var barLabelHeight: CGFloat = 0
-    /// Where each later section's own label sits on screen, so the bar can
-    /// tell which ones have scrolled up into it.
-    @State private var labelTops: [String: CGFloat] = [:]
+    /// The later sections whose own labels have scrolled up into the bar.
+    /// Changed only as a label crosses into or out of it, never per frame:
+    /// a position written on every scroll frame ran the whole picker again
+    /// on every frame.
+    @State private var labelsInBar: Set<String> = []
 
-    /// How far the list has scrolled under the bar (capped at 24), so the
-    /// bar's label stays on the first section while the list is at rest.
-    @State private var scrolledUnder: CGFloat = 0
+    /// Whether the list has scrolled under the bar at all, so the bar's
+    /// label stays on the first section while the list is at rest.
+    @State private var isScrolledUnder = false
     /// Where the list is scrolled; set only by `-payScroll` (DEBUG).
     @State private var scrollPosition = ScrollPosition()
     @FocusState private var searchFocused: Bool
@@ -79,16 +81,20 @@ struct RecipientPickerView: View {
     }
 
     var body: some View {
+        // Made once a pass: each read of `list` reads every contact and
+        // recent payment again.
+        let list = list
+        let titles = sectionTitles(in: list)
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
-                if !savedMatches.isEmpty {
-                    savedSection
+                if !list.savedMatches.isEmpty {
+                    savedSection(list.savedMatches, first: titles.first)
                 } else if let typed = search.typedRecipient {
-                    typedSection(typed)
+                    typedSection(typed, first: titles.first)
                 }
-                if !nearby.isEmpty {
+                if !list.nearby.isEmpty {
                     Section {
-                        ForEach(nearby, id: \.self) { recipient in
+                        ForEach(list.nearby, id: \.self) { recipient in
                             RecipientRow(
                                 tile: tile(for: recipient),
                                 title: recipient.shownName,
@@ -97,12 +103,12 @@ struct RecipientPickerView: View {
                             ) { choose(recipient) }
                         }
                     } header: {
-                        sectionLabel("Nearby")
+                        sectionLabel("Nearby", first: titles.first)
                     }
                 }
-                if !recents.isEmpty {
+                if !list.recents.isEmpty {
                     Section {
-                        ForEach(recents, id: \.self) { recipient in
+                        ForEach(list.recents, id: \.self) { recipient in
                             RecipientRow(
                                 tile: tile(for: recipient),
                                 title: recipient.shownName,
@@ -113,10 +119,10 @@ struct RecipientPickerView: View {
                             ) { choose(recipient) }
                         }
                     } header: {
-                        sectionLabel("Recent")
+                        sectionLabel("Recent", first: titles.first)
                     }
                 }
-                if enableContacts { contactsSection }
+                if enableContacts { contactsSection(list.contacts, first: titles.first) }
             }
             .padding(.bottom, 12)
             .starhashReadableWidth()
@@ -145,12 +151,14 @@ struct RecipientPickerView: View {
             }
         }
         .scrollPosition($scrollPosition)
-        .onScrollGeometryChange(for: CGFloat.self) { geometry in
-            min(max(geometry.contentOffset.y + geometry.contentInsets.top, 0), 24)
-        } action: { _, offset in
-            scrolledUnder = offset
+        // At rest the list reads a hair off the top (4e-14), so not "more
+        // than zero".
+        .onScrollGeometryChange(for: Bool.self) { geometry in
+            geometry.contentOffset.y + geometry.contentInsets.top > 0.5
+        } action: { _, scrolled in
+            isScrolledUnder = scrolled
         }
-        .onChange(of: query) { labelTops = [:] }
+        .onChange(of: query) { labelsInBar = [] }
         // Who lists the number typed, asked afresh as it changes.
         .task(id: query) { await lookUpTypedNumber() }
         // Soft Edge under the header and into the total.
@@ -158,7 +166,7 @@ struct RecipientPickerView: View {
         // Centred in what is left between the header and the total (or the
         // keyboard), since it is laid out inside their insets.
         .overlay {
-            if showsNoMatches {
+            if showsNoMatches(list) {
                 EmptyStateView(
                     doodle: .matches,
                     title: "No Matches"
@@ -171,7 +179,7 @@ struct RecipientPickerView: View {
         .starhashSoftEdgeHeader {
             VStack(spacing: 0) {
                 header
-                barLabel
+                barLabel(titles)
             }
         }
         // Above the keyboard while it is up, above the home indicator after.
@@ -222,7 +230,7 @@ struct RecipientPickerView: View {
         .task {
             guard let seconds = PayDebug.picksAfter else { return }
             try? await Task.sleep(for: .seconds(seconds))
-            if let recipient = recents.first { choose(recipient) }
+            if let recipient = list.recents.first { choose(recipient) }
         }
         // -payBrowse: the header with the title, the search closed.
         .onAppear {
@@ -310,7 +318,8 @@ struct RecipientPickerView: View {
                 .autocorrectionDisabled()
                 .submitLabel(.search)
                 .onSubmit {
-                    if let typed = typedRecipient { choose(typed) }
+                    // What the keyboard's Search key pays.
+                    if let typed = list.typed { choose(typed) }
                 }
             if !query.isEmpty {
                 Button {
@@ -352,15 +361,15 @@ struct RecipientPickerView: View {
     /// carries the first one's, and each later one takes over the bar as its
     /// own label scrolls up into it, so the label of the section under the
     /// bar is always the one showing, as a pinned header would be.
-    private var sectionTitles: [String] {
+    private func sectionTitles(in list: RecipientList<PayContact>) -> [String] {
         var titles: [String] = []
-        if !savedMatches.isEmpty {
+        if !list.savedMatches.isEmpty {
             titles.append("Saved")
         } else if let typed = search.typedRecipient {
             titles.append(typed.kind == .phone ? "Number" : "Merchant code")
         }
-        if !nearby.isEmpty { titles.append("Nearby") }
-        if !recents.isEmpty { titles.append("Recent") }
+        if !list.nearby.isEmpty { titles.append("Nearby") }
+        if !list.recents.isEmpty { titles.append("Recent") }
         if enableContacts {
             switch contacts.access {
             case .denied:
@@ -368,7 +377,7 @@ struct RecipientPickerView: View {
             case .notDetermined:
                 if !contacts.hasLoaded { titles.append("Contacts") }
             case .authorized, .limited:
-                if !contacts.hasLoaded || !matchingContacts.isEmpty || contacts.access == .limited {
+                if !contacts.hasLoaded || !list.contacts.isEmpty || contacts.access == .limited {
                     titles.append("Contacts")
                 }
             }
@@ -378,21 +387,17 @@ struct RecipientPickerView: View {
 
     /// The label the bar shows: the last section whose own label has reached
     /// it, or the first section's.
-    private var currentSection: String? {
-        let titles = sectionTitles
-        // At rest nothing has scrolled up into the bar. Not "more than zero":
-        // a list at rest reads a hair off it (4e-14).
-        guard scrolledUnder > 0.5 else { return titles.first }
-        // A label's position is measured from the top of the list, just
-        // under the bar, so it has reached the bar's own label once it is
-        // that label's height above that line.
-        return titles.last(where: { (labelTops[$0] ?? .infinity) <= -barLabelHeight + 1 }) ?? titles.first
+    private func currentSection(of titles: [String]) -> String? {
+        // At rest nothing has scrolled up into the bar.
+        guard isScrolledUnder else { return titles.first }
+        return titles.last(where: labelsInBar.contains) ?? titles.first
     }
 
     /// The section label in the header bar, under the buttons, inside the
     /// soft edge so rows passing beneath it blur away.
-    private var barLabel: some View {
-        ZStack(alignment: .leading) {
+    private func barLabel(_ titles: [String]) -> some View {
+        let currentSection = currentSection(of: titles)
+        return ZStack(alignment: .leading) {
             // Holds the height when there is no section to name.
             PickerBand(title: " ").hidden()
             if let currentSection {
@@ -413,11 +418,19 @@ struct RecipientPickerView: View {
     /// bar instead; each later one scrolls up until it meets the bar's, and
     /// the bar takes it over from there.
     @ViewBuilder
-    private func sectionLabel(_ title: String) -> some View {
-        if title != sectionTitles.first {
+    private func sectionLabel(_ title: String, first: String?) -> some View {
+        if title != first {
+            // A label's position is measured from the top of the list, just
+            // under the bar, so it has reached the bar's own label once it
+            // is that label's height above that line.
+            let reachesBar = -barLabelHeight + 1
             PickerBand(title: title)
-                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .scrollView).minY } action: { top in
-                    labelTops[title] = top
+                // Watched as yes or no, so the action runs only at the
+                // crossing.
+                .onGeometryChange(for: Bool.self) { proxy in
+                    proxy.frame(in: .scrollView).minY <= reachesBar
+                } action: { inBar in
+                    if inBar { labelsInBar.insert(title) } else { labelsInBar.remove(title) }
                 }
         }
     }
@@ -425,7 +438,9 @@ struct RecipientPickerView: View {
     // MARK: Picking
 
     /// What the list shows for the search, each person or till once
-    /// (`RecipientList`), from what the owner's settings let it read.
+    /// (`RecipientList`), from what the owner's settings let it read. It
+    /// reads every contact and recent payment, so `body` makes it once and
+    /// hands it down; event handlers (a tap, the Search key) make their own.
     private var list: RecipientList<PayContact> {
         RecipientList(
             query: query,
@@ -437,14 +452,8 @@ struct RecipientPickerView: View {
     }
 
     private var search: RecipientSearch { RecipientSearch(query: query) }
-    private var nearby: [Recipient] { list.nearby }
-    private var recents: [Recipient] { list.recents }
-    private var matchingContacts: [PayContact] { list.contacts }
-    private var savedMatches: [Recipient] { list.savedMatches }
-    /// What the keyboard's Search key pays.
-    private var typedRecipient: Recipient? { list.typed }
 
-    private var showsNoMatches: Bool {
+    private func showsNoMatches(_ list: RecipientList<PayContact>) -> Bool {
         list.findsNothing && contacts.access != .denied
     }
 
@@ -465,7 +474,7 @@ struct RecipientPickerView: View {
     /// typed. A number a StarHash owner lists (Show My Name) shows the
     /// name they gave where the carrier's would be, and their photo, or
     /// their initials, in the silhouette's place.
-    private func typedSection(_ typed: Recipient) -> some View {
+    private func typedSection(_ typed: Recipient, first: String?) -> some View {
         let listed = listedOwner?.number == typed.destination ? listedOwner : nil
         let tile: RecipientRow.Tile = if let photo = listed?.photo {
             .image(photo)
@@ -482,7 +491,7 @@ struct RecipientPickerView: View {
                 matchColor: Color.pickerMatch
             ) { choose(typed) }
         } header: {
-            sectionLabel(typed.kind == .phone ? "Number" : "Merchant code")
+            sectionLabel(typed.kind == .phone ? "Number" : "Merchant code", first: first)
         }
         .animation(.smooth(duration: 0.25), value: listed?.entry)
     }
@@ -491,7 +500,7 @@ struct RecipientPickerView: View {
     /// stayed put a moment, and then for their photo.
     private func lookUpTypedNumber() async {
         listedOwner = nil
-        guard let typed = search.typedRecipient, typed.kind == .phone, savedMatches.isEmpty,
+        guard let typed = search.typedRecipient, typed.kind == .phone, list.savedMatches.isEmpty,
               typed.isRwandanMobile else { return }
         try? await Task.sleep(for: .milliseconds(300))
         guard !Task.isCancelled, let entry = await StarHashCloud.entry(for: typed.destination), !Task.isCancelled else { return }
@@ -511,7 +520,7 @@ struct RecipientPickerView: View {
     /// The saved recipients the typed number or code belongs to, by name.
     /// A contact with several numbers is paid on the one typed, with no
     /// need to choose.
-    private var savedSection: some View {
+    private func savedSection(_ savedMatches: [Recipient], first: String?) -> some View {
         Section {
             ForEach(savedMatches, id: \.self) { recipient in
                 RecipientRow(
@@ -523,12 +532,12 @@ struct RecipientPickerView: View {
                 ) { choose(recipient) }
             }
         } header: {
-            sectionLabel("Saved")
+            sectionLabel("Saved", first: first)
         }
     }
 
     @ViewBuilder
-    private var contactsSection: some View {
+    private func contactsSection(_ matchingContacts: [PayContact], first: String?) -> some View {
         switch contacts.access {
         case .denied:
             Section {
@@ -537,13 +546,13 @@ struct RecipientPickerView: View {
                 )
                 .padding(.horizontal, 10)
             } header: {
-                sectionLabel("Contacts")
+                sectionLabel("Contacts", first: first)
             }
         case .notDetermined:
-            if !contacts.hasLoaded { loadingSection }
+            if !contacts.hasLoaded { loadingSection(first: first) }
         case .authorized, .limited:
             if !contacts.hasLoaded {
-                loadingSection
+                loadingSection(first: first)
             } else if !matchingContacts.isEmpty || contacts.access == .limited {
                 Section {
                     ForEach(matchingContacts) { contact in
@@ -565,18 +574,18 @@ struct RecipientPickerView: View {
                         .padding(.horizontal, 10)
                     }
                 } header: {
-                    sectionLabel("Contacts")
+                    sectionLabel("Contacts", first: first)
                 }
             }
         }
     }
 
     /// Placeholder rows, pulsing, while the contacts are read.
-    private var loadingSection: some View {
+    private func loadingSection(first: String?) -> some View {
         Section {
             ForEach(0..<4, id: \.self) { _ in PickerSkeletonRow() }
         } header: {
-            sectionLabel("Contacts")
+            sectionLabel("Contacts", first: first)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Loading contacts")
@@ -689,7 +698,7 @@ struct RecipientPickerView: View {
         hasPaid = true
         // The Nearby suggestions showing were passed over, unless this is
         // one of them.
-        NearbyMissesStore.record(shown: nearby, chosen: recipient)
+        NearbyMissesStore.record(shown: list.nearby, chosen: recipient)
         searchFocused = false
         onPay(recipient)
     }
