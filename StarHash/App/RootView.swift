@@ -77,14 +77,7 @@ struct RootView: View {
         .sheet(isPresented: showMyNameNoticePresented) {
             ShowMyNameNoticeSheet()
         }
-        // The owner's listing follows their name, numbers, photo and Show My
-        // Name, two seconds after the last change, so a name typed letter
-        // by letter is sent once.
-        .task(id: "\(showMyName)|\(AppEnvironment.serverSync.listing?.state ?? "off")") {
-            try? await Task.sleep(for: .seconds(2))
-            guard !Task.isCancelled else { return }
-            AppEnvironment.serverSync.ownerChanged()
-        }
+        .modifier(OwnerListingSync())
         #if DEBUG
         .onChange(of: router.whatsNewPreviewPage) { _, page in
             guard let page else { return }
@@ -175,5 +168,22 @@ struct RootView: View {
         guard FirstRun.reviewNoteMayCome(firstRun) else { return }
         ReviewNote.startClockIfNeeded()
         if ReviewNote.isDue() { showsReviewNote = true }
+    }
+}
+
+/// The owner's listing follows their name, numbers, photo and Show My Name,
+/// two seconds after the last change, so a name typed letter by letter is
+/// sent once. A modifier of its own: read in RootView's body, the listing
+/// ran the whole root (its sheets and first-run checks) again at every
+/// letter of the name.
+private struct OwnerListingSync: ViewModifier {
+    @AppStorage(Preferences.showMyName) private var showMyName: Bool
+
+    func body(content: Content) -> some View {
+        content.task(id: "\(showMyName)|\(AppEnvironment.serverSync.listing?.state ?? "off")") {
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled else { return }
+            AppEnvironment.serverSync.ownerChanged()
+        }
     }
 }

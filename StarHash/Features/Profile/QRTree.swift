@@ -46,6 +46,15 @@ struct QRTreeView: View {
         .onTapGesture(perform: toggle)
         .sensoryFeedback(.impact(weight: .medium), trigger: showsCode)
         .task(id: Build(text: text, dark: colorScheme == .dark)) {
+            // The code carries the owner's name, so typing it changes the
+            // code at every letter, and each build (the code, then a column
+            // per module) runs on the main thread and starts the turn again.
+            // The first build is at once; a new one waits for the typing to
+            // pause, the task cancelled by the next letter.
+            if scene != nil {
+                try? await Task.sleep(for: .milliseconds(350))
+                guard !Task.isCancelled else { return }
+            }
             scene = QRTreeScene(text: text, dark: colorScheme == .dark)
         }
         .accessibilityElement()
