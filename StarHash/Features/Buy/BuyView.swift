@@ -849,8 +849,10 @@ private struct ShortcutEditor: View {
     @State private var symbol: String
     /// The content's height, so the sheet opens as tall as what it shows.
     @State private var height: CGFloat = 420
-    /// The grid of symbols, shown once the big symbol is tapped.
-    @State private var choosesSymbol = false
+    /// The grid of symbols, shown once the big symbol is tapped. No initial
+    /// value here: the `@State` macro keeps it over the one `init` sets, so
+    /// `-buySymbols` opened with the grid closed.
+    @State private var choosesSymbol: Bool
     @State private var asksDelete = false
     @AppStorage(Preferences.confirmDeletes) private var confirmDeletes: Bool
     @FocusState private var focused: Field?
@@ -867,6 +869,8 @@ private struct ShortcutEditor: View {
         _symbol = State(initialValue: draft.symbol)
         #if DEBUG
         _choosesSymbol = State(initialValue: DebugLaunch.arguments.contains("-buySymbols"))
+        #else
+        _choosesSymbol = State(initialValue: false)
         #endif
     }
 
