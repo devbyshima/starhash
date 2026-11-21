@@ -34,7 +34,11 @@ struct OpenPayIntent: AppIntent {
     }
 }
 
-/// Siri phrases and Spotlight entries for StarHash's actions.
+/// Siri phrases and Spotlight entries for StarHash's actions. Their French
+/// is in `Resources/AppShortcuts.xcstrings`, keyed by each phrase with
+/// `${applicationName}` for the app's name (Localizable.xcstrings doesn't
+/// reach them); a new phrase needs its French there too. Siri has no
+/// Kinyarwanda, so there is none.
 struct StarHashShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(

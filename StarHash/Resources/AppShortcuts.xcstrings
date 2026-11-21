@@ -1,0 +1,56 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Pay with ${applicationName}": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payer avec ${applicationName}"
+          }
+        }
+      }
+    },
+    "Pay someone with ${applicationName}": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payer quelqu'un avec ${applicationName}"
+          }
+        }
+      }
+    },
+    "Check my balance in ${applicationName}": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voir mon solde dans ${applicationName}"
+          }
+        }
+      }
+    },
+    "Check my wallet balance with ${applicationName}": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voir le solde de mon portefeuille avec ${applicationName}"
+          }
+        }
+      }
+    },
+    "Process carrier SMS in ${applicationName}": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traiter le SMS de l'opérateur dans ${applicationName}"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
