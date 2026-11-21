@@ -12,7 +12,12 @@ struct ProcessCarrierSMSIntent: AppIntent {
         "Reads an MTN MoMo or Airtel Money message and logs the transaction in StarHash. Other messages are ignored.",
         categoryName: "Transactions"
     )
+    // Never opens the app: iOS 26 reads `supportedModes`, earlier iOS the
+    // flag. The name and parameters stay as they are, since the shared
+    // shortcut runs this intent by them.
     static let openAppWhenRun = false
+    @available(iOS 26.0, *)
+    static var supportedModes: IntentModes { .background }
 
     @Parameter(
         title: "Message",
