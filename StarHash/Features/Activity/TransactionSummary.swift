@@ -103,7 +103,7 @@ struct TransactionDetailCards<CategoryRow: View>: View {
         case .pending: AnyShapeStyle(Color.starhashUrgentText)
         case .failed: AnyShapeStyle(Color.starhashDestructive)
         }
-        return Text(statusTitle(status))
+        return Text(catalog: statusTitle(status))
             .starhashFont(17, relativeTo: .body)
             .foregroundStyle(color)
     }
