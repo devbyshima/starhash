@@ -40,16 +40,6 @@
           }
         }
       }
-    },
-    "Process carrier SMS in ${applicationName}": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Traiter le SMS de l'opérateur dans ${applicationName}"
-          }
-        }
-      }
     }
   },
   "version": "1.0"
