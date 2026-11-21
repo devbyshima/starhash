@@ -99,7 +99,7 @@ private struct SettingsRootList: View {
     @State private var confirmsDeleteAll = false
     @State private var exportDocument: BackupDocument?
     @State private var isImporting = false
-    @State private var importOutcome: DataTransfer.Outcome?
+    @State private var transferOutcome: DataTransfer.Outcome?
     @State private var confirmsAutoVerifyOff = SettingsLaunch.confirmsAutoVerifyOff
     @State private var locationRefused = false
 
@@ -155,16 +155,26 @@ private struct SettingsRootList: View {
             contentType: .json,
             defaultFilename: StarHashBackup.fileName()
         ) { result in
-            if case .success = result { UINotificationFeedbackGenerator().notificationOccurred(.success) }
+            switch result {
+            case .success:
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            case .failure(let error):
+                guard !DataTransfer.wasCancelled(error) else { return }
+                showTransferOutcome(.notSaved)
+            }
         }
         .fileImporter(isPresented: $isImporting, allowedContentTypes: [.json]) { result in
-            guard case .success(let url) = result else { return }
-            withAnimation(.smooth) {
-                importOutcome = DataTransfer.importFile(at: url, store: store, shortcuts: shortcuts)
+            switch result {
+            case .success(let url):
+                showTransferOutcome(withAnimation(.smooth) {
+                    DataTransfer.importFile(at: url, store: store, shortcuts: shortcuts)
+                })
+            case .failure(let error):
+                guard !DataTransfer.wasCancelled(error) else { return }
+                showTransferOutcome(.unreadable)
             }
-            UINotificationFeedbackGenerator().notificationOccurred(.success)
         }
-        .alert(item: $importOutcome) { outcome in
+        .alert(item: $transferOutcome) { outcome in
             Alert(title: Text(outcome.title), message: Text(outcome.message), dismissButton: .default(Text("OK")))
         }
         .alert("Are you sure you want to delete all data?", isPresented: $confirmsDeleteAll) {
@@ -491,7 +501,18 @@ private struct SettingsRootList: View {
     /// Export: the file is made now, then the system's save sheet asks
     /// where it goes.
     private func export() {
-        exportDocument = try? DataTransfer.export(store: store, shortcuts: shortcuts)
+        do {
+            exportDocument = try DataTransfer.export(store: store, shortcuts: shortcuts)
+        } catch {
+            showTransferOutcome(.notSaved)
+        }
+    }
+
+    /// Export's or Import's alert, with the haptic that matches it: an
+    /// error one when nothing was saved or imported.
+    private func showTransferOutcome(_ outcome: DataTransfer.Outcome) {
+        transferOutcome = outcome
+        UINotificationFeedbackGenerator().notificationOccurred(outcome.failed ? .error : .success)
     }
 
     /// Auto-verify's state when it needs a word: on but still waiting for

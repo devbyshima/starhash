@@ -29,7 +29,7 @@ struct StarHashCircleButton: View {
             StarHashCircleGlyph(symbol: symbol)
         }
         .buttonStyle(.hapticPlain)
-        .accessibilityLabel(label)
+        .accessibilityLabel(Text(catalog: label))
         // A checkmark glyph would otherwise make VoiceOver say "selected".
         .accessibilityRemoveTraits(.isSelected)
     }
