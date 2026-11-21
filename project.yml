@@ -81,7 +81,9 @@ targets:
     sources:
       - path: StarHash
       # The Buy widget's view, for the widget gallery in Debug builds
-      # (-widgetGallery); each file is empty outside DEBUG.
+      # (-widgetGallery); each file is empty outside DEBUG, except
+      # WidgetIntents.swift: the widgets' taps run their intents in the
+      # app, so it needs them in every build.
       - path: StarHashWidgets/Views
     dependencies:
       - package: StarHashKit
