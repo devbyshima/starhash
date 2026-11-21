@@ -3,9 +3,12 @@ import Testing
 @testable import StarHashKit
 
 /// ServerSync, through its interface only: a server in memory, a fixed key,
-/// settings of its own and the time handed in.
+/// settings of its own and the time handed in. `settle()` waits for every
+/// task to end, so a task that never does would hang the run: the limit
+/// fails it instead.
 @MainActor
-@Suite struct ServerSyncTests {
+@Suite(.timeLimit(.minutes(1)))
+struct ServerSyncTests {
     /// StarHash's server in memory: what it was sent, and how it answers.
     @MainActor
     final class FakeServer: ServerSync.Server {
@@ -41,16 +44,13 @@ import Testing
 
     @MainActor
     final class Rig {
-        let suite = "ServerSyncTests-\(UUID().uuidString)"
-        let defaults: UserDefaults
+        let defaults = TestDefaults("ServerSyncTests")
         let server = FakeServer()
         let owner: Owner
         let photo = PhotoBox()
         let sync: ServerSync
 
         init(listed: Bool = true, isSimulator: Bool = false) {
-            defaults = UserDefaults(suiteName: suite)!
-            defaults.removePersistentDomain(forName: suite)
             owner = Owner(defaults: defaults)
             if listed {
                 owner.setName("Shima Serein")
@@ -65,7 +65,7 @@ import Testing
 
         /// Delete All Data's wipe of the settings and the owner.
         func wipe() {
-            defaults.removePersistentDomain(forName: suite)
+            defaults.removePersistentDomain(forName: defaults.suiteName)
             owner.reload()
         }
     }
@@ -108,7 +108,7 @@ import Testing
         rig.photo.data = jpeg
         rig.sync.photoChanged()
         await rig.sync.settle()
-        #expect(rig.server.photos.count == 2)
+        try #require(rig.server.photos.count == 2)
         let first = rig.server.photos[0].id, second = rig.server.photos[1].id
         #expect(first != second)
         #expect(rig.sync.sharedPhotoID == second)
@@ -123,8 +123,9 @@ import Testing
         rig.photo.data = nil
         rig.sync.photoChanged()
         await rig.sync.settle()
+        let first = try #require(rig.server.photos.first)
         let last = try #require(rig.server.photos.last)
-        #expect(last.data == nil && last.id == rig.server.photos[0].id)
+        #expect(last.data == nil && last.id == first.id)
         #expect(rig.sync.sharedPhotoID == nil)
     }
 
@@ -136,7 +137,7 @@ import Testing
         await rig.sync.settle()
         rig.sync.ownerChanged(at: noon)
         await rig.sync.settle()
-        #expect(rig.server.listings.count == 1)
+        try #require(rig.server.listings.count == 1)
         let listing = try #require(rig.server.listings[0])
         #expect(listing.numbers == ["0788123456"] && listing.name == "Shima Serein" && listing.photo == nil)
         rig.owner.setName("Shima")
@@ -157,7 +158,7 @@ import Testing
         #expect(rig.server.listings.count == 2)
     }
 
-    @Test func showMyNameOffClearsTheListing() async {
+    @Test func showMyNameOffClearsTheListing() async throws {
         let rig = Rig()
         rig.sync.ownerChanged(at: noon)
         await rig.sync.settle()
@@ -165,7 +166,8 @@ import Testing
         rig.sync.ownerChanged(at: noon)
         await rig.sync.settle()
         #expect(rig.server.listings.count == 2)
-        #expect(rig.server.listings.last! == nil)
+        let last = try #require(rig.server.listings.last)
+        #expect(last == nil)
     }
 
     @Test func nothingIsSentForAnOwnerNeverListed() async {
@@ -221,7 +223,8 @@ import Testing
         rig.sync.erase { rig.wipe() }
         await rig.sync.settle()
         #expect(rig.server.photos.contains { $0.data == nil && $0.id == photoID })
-        #expect(rig.server.listings.last! == nil)
+        let last = try #require(rig.server.listings.last)
+        #expect(last == nil)
     }
 
     @Test func eraseDoesNotNeedThePhotoRemovedFirst() async throws {

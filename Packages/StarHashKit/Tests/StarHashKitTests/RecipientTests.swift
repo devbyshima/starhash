@@ -18,37 +18,57 @@ import Testing
         #expect(r?.destination == "020205")
     }
 
-    @Test func networkComesFromThePrefix() {
-        #expect(Recipient(input: "0781234567")?.network == .mtn)
-        #expect(Recipient(input: "0791234567")?.network == .mtn)
-        #expect(Recipient(input: "0722497291")?.network == .airtel)
-        #expect(Recipient(input: "+250 733 123 456")?.network == .airtel)
-        #expect(Recipient(input: "020205")?.network == nil)
+    /// A merchant code has no network, so the input must read first: nil
+    /// from a failed read would pass for it.
+    @Test(arguments: [
+        ("0781234567", Recipient.Network.mtn),
+        ("0791234567", .mtn),
+        ("0722497291", .airtel),
+        ("+250 733 123 456", .airtel),
+        ("020205", nil),
+    ] as [(String, Recipient.Network?)])
+    func networkComesFromThePrefix(input: String, network: Recipient.Network?) throws {
+        let recipient = try #require(Recipient(input: input))
+        #expect(recipient.network == network)
     }
 
     @Test func noDigitsIsNil() {
         #expect(Recipient(input: "abc") == nil)
     }
 
-    @Test func ussdCodesFromMTN() {
-        #expect(USSD.payment(to: Recipient(input: "0781234567")!, amount: 5000, from: .mtn) == "*182*1*1*0781234567*5000#")
-        #expect(USSD.payment(to: Recipient(input: "020205")!, amount: 15000, from: .mtn) == "*182*8*1*020205*15000#")
-        #expect(USSD.payment(to: Recipient(input: "0722497291")!, amount: 5000, from: .mtn) == "*182*1*2*0722497291*5000#")
-        #expect(USSD.payment(to: Recipient(input: "+250 731 234 567")!, amount: 700, from: .mtn) == "*182*1*2*0731234567*700#")
-        #expect(USSD.payment(to: Recipient(input: "0791234567")!, amount: 700, from: .mtn) == "*182*1*1*0791234567*700#")
+    @Test(arguments: [
+        ("0781234567", 5000, "*182*1*1*0781234567*5000#"),
+        ("020205", 15000, "*182*8*1*020205*15000#"),
+        ("0722497291", 5000, "*182*1*2*0722497291*5000#"),
+        ("+250 731 234 567", 700, "*182*1*2*0731234567*700#"),
+        ("0791234567", 700, "*182*1*1*0791234567*700#"),
+    ])
+    func ussdCodesFromMTN(input: String, amount: Int, code: String) throws {
+        let recipient = try #require(Recipient(input: input))
+        #expect(USSD.payment(to: recipient, amount: amount, from: .mtn) == code)
+    }
+
+    @Test func mtnCodesDialAsTelURLs() throws {
         #expect(USSD.telURL(for: USSD.balance(for: .mtn))?.absoluteString == "tel:*182*6*1%23")
-        let send = USSD.payment(to: Recipient(input: "+250 781 234 567")!, amount: 5000, from: .mtn)
+        let send = USSD.payment(to: try #require(Recipient(input: "+250 781 234 567")), amount: 5000, from: .mtn)
         #expect(USSD.telURL(for: send)?.absoluteString == "tel:*182*1*1*0781234567*5000%23")
     }
 
     /// Airtel Money mirrors MTN's menu: its own network is 1, 1 and MTN is
     /// the other network, 1, 2.
-    @Test func ussdCodesFromAirtel() {
-        #expect(USSD.payment(to: Recipient(input: "0722497291")!, amount: 5000, from: .airtel) == "*182*1*1*0722497291*5000#")
-        #expect(USSD.payment(to: Recipient(input: "0731234567")!, amount: 700, from: .airtel) == "*182*1*1*0731234567*700#")
-        #expect(USSD.payment(to: Recipient(input: "0781234567")!, amount: 5000, from: .airtel) == "*182*1*2*0781234567*5000#")
-        #expect(USSD.payment(to: Recipient(input: "0791234567")!, amount: 700, from: .airtel) == "*182*1*2*0791234567*700#")
-        #expect(USSD.payment(to: Recipient(input: "020205")!, amount: 15000, from: .airtel) == "*182*8*1*020205*15000#")
+    @Test(arguments: [
+        ("0722497291", 5000, "*182*1*1*0722497291*5000#"),
+        ("0731234567", 700, "*182*1*1*0731234567*700#"),
+        ("0781234567", 5000, "*182*1*2*0781234567*5000#"),
+        ("0791234567", 700, "*182*1*2*0791234567*700#"),
+        ("020205", 15000, "*182*8*1*020205*15000#"),
+    ])
+    func ussdCodesFromAirtel(input: String, amount: Int, code: String) throws {
+        let recipient = try #require(Recipient(input: input))
+        #expect(USSD.payment(to: recipient, amount: amount, from: .airtel) == code)
+    }
+
+    @Test func airtelsBalanceDialsAsATelURL() {
         #expect(USSD.telURL(for: USSD.balance(for: .airtel))?.absoluteString == "tel:*182%23")
     }
 

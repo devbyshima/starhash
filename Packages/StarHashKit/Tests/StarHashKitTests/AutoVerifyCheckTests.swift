@@ -10,10 +10,7 @@ struct AutoVerifyCheckTests {
     static let now = Date(timeIntervalSince1970: 1_790_000_000)
 
     static func autoVerify() -> AutoVerify {
-        let name = "AutoVerifyCheckTests-\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: name)!
-        defaults.removePersistentDomain(forName: name)
-        return AutoVerify(store: StarHashStore(fileURL: nil), defaults: defaults, now: now)
+        AutoVerify(store: StarHashStore(fileURL: nil), defaults: TestDefaults("AutoVerifyCheckTests"), now: now)
     }
 
     @Test func theSampleArrivingFinishesTheSetupAndWaitsForAMessage() {

@@ -31,8 +31,10 @@ struct TransactionFileTests {
         let store = StarHashStore(file: file)
         #expect(store.transactions.isEmpty)
 
-        guard case .added = store.apply(Self.sent()) else { Issue.record("not added while sealed"); return }
+        let applied = store.apply(Self.sent())
+        try #require(applied.added != nil, "not added while sealed: \(applied)")
         #expect(file.saved == [payment])
+        #expect(file.writesWhileSealed == 0)
 
         file.isSealed = false
         store.reloadFromDisk()
@@ -76,11 +78,14 @@ struct TransactionFileTests {
         #expect(store.transaction(id: payment.id)?.failureReason == .message)
     }
 
+    /// The file drops a write while sealed, as the phone does, so what it
+    /// holds cannot show the store tried: the count of tries can.
     @Test func nothingIsWrittenWhileSealed() {
         let file = MemoryTransactionFile(saved: [Self.pending()])
         file.isSealed = true
         let store = StarHashStore(file: file)
         store.recordPayment(to: Self.john, amount: 700, date: Self.noon.addingTimeInterval(3600))
+        #expect(file.writesWhileSealed == 0)
         #expect(file.saved?.count == 1)
     }
 

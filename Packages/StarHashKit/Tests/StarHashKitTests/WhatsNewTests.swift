@@ -65,11 +65,15 @@ struct WhatsNewTests {
         #expect(announced("1.2.1", lastRun: "1.0.0") == "1.2.0")
     }
 
-    @Test func versionsCompareAsNumbers() {
+    @Test func versionsCompareAsNumbers() throws {
         let history = [release("1.10.0", announced: true), release("1.9.0", announced: true)]
         #expect(WhatsNew.release(toAnnounce: "1.10.0", lastRun: "1.9.0", hasUsedApp: true, in: history)?.version == "1.10.0")
-        #expect(AppVersion("1.10.0")! > AppVersion("1.9.0")!)
-        #expect(AppVersion("1.2") == AppVersion("1.2.0"))
+        let ten = try #require(AppVersion("1.10.0"))
+        let nine = try #require(AppVersion("1.9.0"))
+        #expect(ten > nine)
+        // Read first, or two versions that fail to read would be equal.
+        let short = try #require(AppVersion("1.2"))
+        #expect(short == AppVersion("1.2.0"))
     }
 
     @Test func somethingThatIsNotAVersionShowsNothing() {

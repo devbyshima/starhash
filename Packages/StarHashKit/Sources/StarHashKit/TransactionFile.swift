@@ -91,6 +91,9 @@ public final class MemoryTransactionFile: TransactionFile {
     public var isDamaged = false
     /// Damaged files moved aside, in order.
     public private(set) var setAsideCopies: [[Transaction]?] = []
+    /// Writes tried while sealed. They are dropped, as the phone would
+    /// drop them, so only this count shows that one was made.
+    public private(set) var writesWhileSealed = 0
 
     public init(saved: [Transaction]? = nil) {
         self.saved = saved
@@ -103,7 +106,10 @@ public final class MemoryTransactionFile: TransactionFile {
     }
 
     public func write(_ transactions: [Transaction]) {
-        guard !isSealed else { return }
+        guard !isSealed else {
+            writesWhileSealed += 1
+            return
+        }
         saved = transactions
         isDamaged = false
     }

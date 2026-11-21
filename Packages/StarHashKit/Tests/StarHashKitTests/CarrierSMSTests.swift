@@ -24,13 +24,12 @@ import Testing
         #expect(sms.category == TransactionCategory.bundles.rawValue)
     }
 
-    @Test func voiceAndDataPacksFromMTN() throws {
-        for payee in ["Voice Pack MTN", "Data Bundle MTN"] {
-            let sms = try #require(CarrierSMS.parse(
-                "*164*S*Y'ello, A transaction of 3000 RWF by \(payee) on your MOMO account was successfully completed at 2024-12-17 13:03:40. Message from debit receiver: . Your new balance:5572 RWF. Fee was 0 RWF. Financial Transaction Id: 10000000003. External Transaction Id: 10000000004.*EN#"
-            ))
-            #expect(sms.category == TransactionCategory.bundles.rawValue, "\(payee)")
-        }
+    @Test(arguments: ["Voice Pack MTN", "Data Bundle MTN"])
+    func voiceAndDataPacksFromMTN(payee: String) throws {
+        let sms = try #require(CarrierSMS.parse(
+            "*164*S*Y'ello, A transaction of 3000 RWF by \(payee) on your MOMO account was successfully completed at 2024-12-17 13:03:40. Message from debit receiver: . Your new balance:5572 RWF. Fee was 0 RWF. Financial Transaction Id: 10000000003. External Transaction Id: 10000000004.*EN#"
+        ))
+        #expect(sms.category == TransactionCategory.bundles.rawValue)
     }
 
     @Test func airtimeThroughMoMo() throws {

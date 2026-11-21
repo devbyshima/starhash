@@ -3,9 +3,12 @@ import Testing
 @testable import StarHashKit
 
 /// Paying, through its interface only: an in-memory store, a dialler that
-/// writes down what it was asked to dial, a fixed place, and no wait.
+/// writes down what it was asked to dial, a fixed place, and no wait. Some
+/// tests wait for the place to be found, so a fix that never comes would
+/// hang the run: the limit fails it instead.
 @MainActor
-@Suite struct PayingTests {
+@Suite(.timeLimit(.minutes(1)))
+struct PayingTests {
     private let mtnNumber = Recipient(name: "John Doe", destination: "0788123456", kind: .phone)
     private let merchant = Recipient(name: "Pili-Pili", destination: "020205", kind: .merchant)
     private let kigaliHeights = Transaction.Coordinate(latitude: -1.9536, longitude: 30.0927, accuracy: 8)
@@ -20,7 +23,7 @@ import Testing
     @MainActor
     private final class Rig {
         let store = StarHashStore(fileURL: nil)
-        let defaults: UserDefaults
+        let defaults = TestDefaults("PayingTests")
         let paying: Paying
         private let log = DialLog()
         var dialled: [String] { log.codes }
@@ -29,9 +32,6 @@ import Testing
             splitLargePayments: Bool = false, saveTransactions: Bool = true, nearby: Bool = false,
             fix: Transaction.Coordinate? = nil, isContact: Bool? = false
         ) {
-            let name = "PayingTests-\(UUID().uuidString)"
-            defaults = UserDefaults(suiteName: name)!
-            defaults.removePersistentDomain(forName: name)
             defaults.set(splitLargePayments, forKey: Preferences.splitLargePayments.key)
             defaults.set(saveTransactions, forKey: Preferences.saveTransactions.key)
             defaults.set(nearby, forKey: Preferences.nearbyLocation.key)
@@ -202,20 +202,22 @@ import Testing
         #expect(rig.store.transactions.first?.location == kigaliHeights)
     }
 
-    @Test func aSavedContactsPlaceIsNotKept() async {
+    @Test func aSavedContactsPlaceIsNotKept() async throws {
         let rig = Rig(nearby: true, fix: kigaliHeights, isContact: true)
         rig.paying.prepare()
         rig.paying.pay(5_000, to: mtnNumber)
         await rig.paying.placing?.value
-        #expect(rig.store.transactions.first?.location == nil)
+        let payment = try #require(rig.store.transactions.first)
+        #expect(payment.location == nil)
     }
 
-    @Test func withNearbyOffNoPlaceIsFound() async {
+    @Test func withNearbyOffNoPlaceIsFound() async throws {
         let rig = Rig(nearby: false, fix: kigaliHeights)
         rig.paying.prepare()
         rig.paying.pay(5_000, to: merchant)
         #expect(rig.paying.placing == nil)
-        #expect(rig.store.transactions.first?.location == nil)
+        let payment = try #require(rig.store.transactions.first)
+        #expect(payment.location == nil)
     }
 
     @Test func everyPartTakesThePlace() async throws {

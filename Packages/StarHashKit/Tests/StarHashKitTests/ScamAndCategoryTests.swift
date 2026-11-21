@@ -169,10 +169,7 @@ import Testing
     }
 
     @Test @MainActor func shortcutsMergeByCode() {
-        let name = "BackupTests.\(UUID())"
-        let defaults = UserDefaults(suiteName: name)!
-        defer { defaults.removePersistentDomain(forName: name) }
-        let list = USSDShortcutList(defaults: defaults)
+        let list = USSDShortcutList(defaults: TestDefaults("BackupTests"))
         let added = list.merge(USSDShortcut.defaults + [USSDShortcut(name: "Water", code: "*182*3*1#", isPinned: true)])
         #expect(added == 1)
         #expect(list.shortcuts.last?.name == "Water")

@@ -9,7 +9,17 @@ import Foundation
 public enum StarHashLanguage {
     /// Set on the main actor at launch and whenever the choice changes,
     /// read wherever a string is written out.
-    nonisolated(unsafe) public static var locale: Locale = .autoupdatingCurrent
+    public static var locale: Locale {
+        get { pinned ?? chosen }
+        set { chosen = newValue }
+    }
+
+    nonisolated(unsafe) private static var chosen: Locale = .autoupdatingCurrent
+
+    /// A language for one task and the tasks it starts, over the chosen
+    /// one. Only the tests set it: they run side by side, so setting
+    /// `locale` for one would change it under all the others.
+    @TaskLocal static var pinned: Locale?
 }
 
 extension String {

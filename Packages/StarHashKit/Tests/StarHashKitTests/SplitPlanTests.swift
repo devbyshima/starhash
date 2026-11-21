@@ -60,12 +60,11 @@ struct SplitPlanTests {
         #expect(SplitPlan.cheapest(sending: 0, to: mtnNumber, from: .mtn) == nil)
     }
 
-    @Test func noPlanHasMorePartsThanTheCap() {
-        for amount in stride(from: 150_001, through: 10_000_000, by: 7_919) {
-            let plan = SplitPlan.cheapest(sending: amount, to: mtnNumber, from: .mtn)
-            #expect((plan?.parts.count ?? 0) <= SplitPlan.maximumParts)
-            #expect(plan.map { $0.amount == amount } ?? true)
-        }
+    @Test(arguments: Array(stride(from: 150_001, through: 10_000_000, by: 7_919)))
+    func noPlanHasMorePartsThanTheCap(amount: Int) {
+        let plan = SplitPlan.cheapest(sending: amount, to: mtnNumber, from: .mtn)
+        #expect((plan?.parts.count ?? 0) <= SplitPlan.maximumParts)
+        #expect(plan.map { $0.amount == amount } ?? true)
     }
 
     // MARK: The parts in the store

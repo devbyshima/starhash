@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import StarHashKit
 
-@Suite("Auto-verify failures")
+@Suite("Auto-verify failures", .english)
 @MainActor
 struct AutoVerifyTests {
     static let now = Date(timeIntervalSince1970: 1_790_000_000)
@@ -60,7 +60,7 @@ struct AutoVerifyTests {
         let store = Self.store(Self.payment(2_000, minutesAgo: 2))
         let sms = try #require(CarrierSMS.parseFailure("*165*S*Your transfer of 5000 RWF to Aline (250788123456) failed. Insufficient balance."))
         #expect(store.applyFailure(sms, receivedAt: Self.now) == nil)
-        #expect(store.transactions.count == 1)
+        try #require(store.transactions.count == 1)
         #expect(store.transactions[0].status == .pending)
     }
 
@@ -90,7 +90,7 @@ struct AutoVerifyTests {
         let sms = try #require(CarrierSMS.parse("*165*S*5000 RWF transferred to Aline (250788123456) from 1234567. Fee was: 100 RWF. New balance: 12000 RWF."))
         let applied = store.apply(sms, receivedAt: Self.now).transaction
         #expect(applied.id == old.id)
-        #expect(store.transactions.count == 1)
+        try #require(store.transactions.count == 1)
         #expect(store.transactions[0].status == .confirmed)
         #expect(store.transactions[0].failureReason == nil)
     }

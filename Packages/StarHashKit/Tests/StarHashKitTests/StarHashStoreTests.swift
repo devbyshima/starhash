@@ -78,7 +78,7 @@ import Testing
 
     /// The shop's sign can say one thing and its code be registered under
     /// another: the message's name is the code's from then on.
-    @Test func aMerchantTakesTheNameItsCodeIsRegisteredUnder() {
+    @Test func aMerchantTakesTheNameItsCodeIsRegisteredUnder() throws {
         let store = StarHashStore(fileURL: nil)
         store.recordPayment(to: Recipient(name: "Java House", destination: "020205", kind: .merchant), amount: 15_000, date: noon)
         store.apply(ParsedSMS(
@@ -86,7 +86,8 @@ import Testing
             counterparty: Recipient(name: "Pili-Pili Invest", destination: "020205", kind: .merchant),
             amount: 15_000, fee: 0, date: noon.addingTimeInterval(30), reference: "1203948571"
         ))
-        #expect(store.transactions[0].counterparty.name == "Pili-Pili Invest")
+        let payment = try #require(store.transactions.first)
+        #expect(payment.counterparty.name == "Pili-Pili Invest")
         #expect(store.recentRecipients().first?.name == "Pili-Pili Invest")
     }
 
@@ -112,13 +113,14 @@ import Testing
         #expect(store.transaction(id: unnamed.id)?.counterparty.name == "Kigali Heights Gym")
     }
 
-    @Test func aPersonKeepsTheNameTheyWerePaidUnder() {
+    @Test func aPersonKeepsTheNameTheyWerePaidUnder() throws {
         let store = StarHashStore(fileURL: nil)
         store.recordPayment(to: john, amount: 5_000, date: noon)
         var message = sentSMS(amount: 5_000, at: noon.addingTimeInterval(30))
         message.counterparty.name = "Jean Mugisha"
         store.apply(message)
-        #expect(store.transactions[0].counterparty.name == "John Doe")
+        let payment = try #require(store.transactions.first)
+        #expect(payment.counterparty.name == "John Doe")
     }
 
     /// A fix that arrives after Nearby was turned off, or everything was
@@ -191,20 +193,23 @@ import Testing
         #expect(!store.fillCategory(.restaurant, for: open.id))
     }
 
-    @Test func theFeeComesOnlyFromTheSMS() {
+    @Test func theFeeComesOnlyFromTheSMS() throws {
         let store = StarHashStore(fileURL: nil)
         store.recordPayment(to: john, amount: 5_000, date: noon)
-        #expect(store.transactions[0].fee == nil)
+        let pending = try #require(store.transactions.first)
+        #expect(pending.fee == nil)
         store.apply(sentSMS(amount: 5_000, at: noon.addingTimeInterval(30)))
-        #expect(store.transactions[0].fee == 100)
-        #expect(store.transactions[0].status == .confirmed)
+        let confirmed = try #require(store.transactions.first)
+        #expect(confirmed.fee == 100)
+        #expect(confirmed.status == .confirmed)
 
         let silent = StarHashStore(fileURL: nil)
         silent.recordPayment(to: john, amount: 5_000, date: noon)
         var noFee = sentSMS(amount: 5_000, at: noon.addingTimeInterval(30))
         noFee.fee = nil
         silent.apply(noFee)
-        #expect(silent.transactions[0].fee == nil)
+        let unpriced = try #require(silent.transactions.first)
+        #expect(unpriced.fee == nil)
     }
 
     /// Only a payment still pending is taken for a retry: one settled
@@ -248,10 +253,11 @@ import Testing
         #expect(StarHashStore(fileURL: url).transactions.count == 1)
     }
 
-    @Test func clearLocationsRemovesEveryCoordinate() {
+    @Test func clearLocationsRemovesEveryCoordinate() throws {
         let store = StarHashStore(fileURL: nil)
         let paid = store.recordPayment(to: john, amount: 700, date: noon)
-        store.attachPlace(.init(latitude: -1.95, longitude: 30.09), to: paid.id, ticket: store.placeTicket())
+        // A place that never landed would leave nothing to clear.
+        try #require(store.attachPlace(.init(latitude: -1.95, longitude: 30.09), to: paid.id, ticket: store.placeTicket()))
         store.clearLocations()
         #expect(store.transactions.allSatisfy { $0.location == nil })
     }
@@ -427,7 +433,7 @@ import Testing
         let store = StarHashStore(fileURL: nil)
         let payment = store.recordPayment(to: john, amount: 5_000, date: noon, wallet: .mtn)
         let result = store.verify(payment.id, withMessage: transferText(at: noon.addingTimeInterval(30)))
-        guard case .confirmed(let confirmed) = result else { Issue.record("\(String(describing: result))"); return }
+        let confirmed = try #require(result?.confirmed, "\(String(describing: result))")
         #expect(confirmed.id == payment.id)
         #expect(confirmed.status == .confirmed)
         #expect(confirmed.fee == 100)
@@ -441,7 +447,7 @@ import Testing
         let other = store.verify(payment.id, withMessage: transferText(amount: 7_000, at: noon.addingTimeInterval(30)))
         #expect(other == .anotherPayment(amount: 7_000, counterparty: Recipient(input: "0788123456", name: "John Doe")))
         let lastWeek = store.verify(payment.id, withMessage: transferText(at: noon.addingTimeInterval(-7 * 86_400)))
-        guard case .anotherPayment = lastWeek else { Issue.record("\(String(describing: lastWeek))"); return }
+        try #require(lastWeek?.isAnotherPayment == true, "\(String(describing: lastWeek))")
         #expect(store.transactions.map(\.status) == [.pending])
     }
 
@@ -456,7 +462,7 @@ import Testing
         #expect(store.transactions.count == 2)
 
         let result = store.verify(payment.id, withMessage: text)
-        guard case .confirmed = result else { Issue.record("\(String(describing: result))"); return }
+        try #require(result?.confirmed != nil, "\(String(describing: result))")
         #expect(store.transactions.count == 1)
         #expect(store.transactions.first?.id == payment.id)
         #expect(store.transactions.first?.status == .confirmed)
@@ -471,7 +477,7 @@ import Testing
         #expect(store.transaction(id: first.id)?.status == .confirmed)
 
         let result = store.verify(second.id, withMessage: text)
-        guard case .confirmedAnother(let other) = result else { Issue.record("\(String(describing: result))"); return }
+        let other = try #require(result?.confirmedAnother, "\(String(describing: result))")
         #expect(other.id == first.id)
         #expect(store.transaction(id: second.id)?.status == .pending)
     }
@@ -481,7 +487,7 @@ import Testing
         let payment = store.recordPayment(to: john, amount: 5_000, date: noon, wallet: .mtn)
         let text = "Your transfer of 5000 RWF to John DOE (250788123456) has failed at \(kigaliText(noon.addingTimeInterval(30))). Message: . Financial Transaction Id: 30557484114.}."
         let result = store.verify(payment.id, withMessage: text)
-        guard case .failed(let failed) = result else { Issue.record("\(String(describing: result))"); return }
+        let failed = try #require(result?.failed, "\(String(describing: result))")
         #expect(failed.status == .failed)
         #expect(failed.failureReason == .message)
     }
@@ -491,13 +497,12 @@ import Testing
         let payment = store.recordPayment(to: john, amount: 5_000, date: noon, wallet: .mtn)
         let text = "You have used 5100 RWF on FRI:12345678/MM with access fee 68 RWF on \(kigaliText(noon.addingTimeInterval(30))) from MoMoAdvance. Your available overdraft balance is 7019 RWF."
         let result = store.verify(payment.id, withMessage: text)
-        guard case .overdraft(let paid) = result else { Issue.record("\(String(describing: result))"); return }
+        let paid = try #require(result?.overdraft, "\(String(describing: result))")
         #expect(paid.status == .pending)
         #expect(paid.accessFee == 68)
 
-        guard case .confirmed(let confirmed) = store.verify(payment.id, withMessage: transferText(at: noon.addingTimeInterval(30))) else {
-            Issue.record("not confirmed"); return
-        }
+        let verified = store.verify(payment.id, withMessage: transferText(at: noon.addingTimeInterval(30)))
+        let confirmed = try #require(verified?.confirmed, "\(String(describing: verified))")
         #expect(confirmed.fee == 168)
     }
 

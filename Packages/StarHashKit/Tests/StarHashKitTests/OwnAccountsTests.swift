@@ -4,7 +4,11 @@ import Testing
 
 @MainActor
 @Suite struct OwnAccountsTests {
-    let own = OwnAccounts(numbers: ["0788 123 456", "0722 000 515"], name: "Shima Byiringiro")!
+    let own: OwnAccounts
+
+    init() throws {
+        own = try #require(OwnAccounts(numbers: ["0788 123 456", "0722 000 515"], name: "Shima Byiringiro"))
+    }
 
     @Test func sentToTheOtherSIMIsMatchedByItsFullNumber() {
         #expect(own.owns(Recipient(name: "Shima", destination: "0722000515", kind: .phone)))
@@ -48,7 +52,7 @@ import Testing
         #expect(store.transactions.first?.isOwnTransfer == true)
     }
 
-    @Test func aNumberNoLongerOwnLeavesOwnAccounts() {
+    @Test func aNumberNoLongerOwnLeavesOwnAccounts() throws {
         // Back to one SIM: the other number is someone else's again.
         let store = StarHashStore(fileURL: nil)
         store.ownAccounts = { own }
@@ -56,7 +60,8 @@ import Testing
         #expect(store.transactions.first?.isOwnTransfer == true)
         store.ownAccounts = { nil }
         #expect(store.refileOwnTransfers() == 1)
-        #expect(store.transactions.first?.category == nil)
+        let refiled = try #require(store.transactions.first)
+        #expect(refiled.category == nil)
         #expect(store.refileOwnTransfers() == 0)
     }
 

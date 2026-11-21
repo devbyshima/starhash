@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import StarHashKit
 
-@Suite("Owner's wallets")
+@Suite("Owner's wallets", .english)
 struct OwnerWalletsTests {
     @Test func twoCarriersGiveBothWallets() {
         let wallets = OwnerWallets(numbers: ["0788 123 456", "0722 123 456"], chosen: .mtn)
@@ -52,8 +52,13 @@ struct OwnerWalletsTests {
 
 @Suite("A number's carrier")
 struct NumberCarrierTests {
-    private let mtn = Recipient.ownNumber("0788123456")!
-    private let airtel = Recipient.ownNumber("0722123456")!
+    private let mtn: Recipient
+    private let airtel: Recipient
+
+    init() throws {
+        mtn = try #require(Recipient.ownNumber("0788123456"))
+        airtel = try #require(Recipient.ownNumber("0722123456"))
+    }
 
     @Test func aScannedNumbersCarrierPicksTheCode() throws {
         // A friend's StarHash code for an Airtel number, and one for MTN.

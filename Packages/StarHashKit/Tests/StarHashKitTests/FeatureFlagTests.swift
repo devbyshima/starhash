@@ -28,10 +28,9 @@ struct FeatureFlagTests {
         #expect(flag(.everywhere).isOn(in: .production, override: false))
     }
 
-    @Test func noSwitchMeansTheRollout() {
-        for channel in ReleaseChannel.allCases {
-            #expect(flag(.dev).isOn(in: channel, override: nil) == flag(.dev).isOnByDefault(in: channel))
-        }
+    @Test(arguments: ReleaseChannel.allCases)
+    func noSwitchMeansTheRollout(channel: ReleaseChannel) {
+        #expect(flag(.dev).isOn(in: channel, override: nil) == flag(.dev).isOnByDefault(in: channel))
     }
 
     @Test func theChannelComesFromInfoPlist() {
