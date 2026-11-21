@@ -39,9 +39,12 @@ struct BuyView: View {
     /// place, as on the Home Screen, until Done.
     @State private var arranging = false
     /// The pinned code under the finger while arranging, where the finger
-    /// is in the grid, and where on the tile it took hold.
+    /// is in the grid, and where on the tile it took hold. The point is in
+    /// an observable of its own that only the lifted tile reads, so
+    /// following the finger moves that tile alone: as this page's state,
+    /// every frame of a drag ran the whole page again.
     @State private var dragID: USSDShortcut.ID?
-    @State private var dragPoint: CGPoint = .zero
+    @State private var drag = PinnedDrag()
     @State private var grabOffset: CGSize = .zero
     @State private var gridWidth: CGFloat = 360
     /// The width of a code's row, for its long-press preview.
@@ -278,12 +281,7 @@ struct BuyView: View {
     private func draggedTile(in pinned: [USSDShortcut]) -> some View {
         if let dragID, let shortcut = pinned.first(where: { $0.id == dragID }) {
             let size = PinnedLayout(spacing: 10).frames(count: pinned.count, width: gridWidth).first?.size ?? .zero
-            PinnedTileFace(shortcut: shortcut)
-                .frame(width: size.width, height: size.height)
-                .scaleEffect(1.07)
-                .shadow(color: .black.opacity(0.18), radius: 14, y: 8)
-                .position(x: dragPoint.x - grabOffset.width, y: dragPoint.y - grabOffset.height)
-                .allowsHitTesting(false)
+            LiftedPinnedTile(shortcut: shortcut, size: size, drag: drag, grabOffset: grabOffset)
         }
     }
 
@@ -299,7 +297,7 @@ struct BuyView: View {
         }
         let home = CGPoint(x: frames[index].midX + grabOffset.width, y: frames[index].midY + grabOffset.height)
         withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
-            dragPoint = home
+            drag.point = home
         } completion: {
             // The lifted copy and the tile in its place swap in one frame,
             // with no fade between them.
@@ -322,12 +320,12 @@ struct BuyView: View {
                 if dragID == nil {
                     let frame = frames[index]
                     grabOffset = CGSize(width: value.startLocation.x - frame.midX, height: value.startLocation.y - frame.midY)
-                    dragPoint = value.location
+                    drag.point = value.location
                     dragID = shortcut.id
                     TapHaptic.play(.medium)
                     return
                 }
-                dragPoint = value.location
+                drag.point = value.location
                 let centre = CGPoint(x: value.location.x - grabOffset.width, y: value.location.y - grabOffset.height)
                 let nearest = frames.indices.min { a, b in
                     hypot(frames[a].midX - centre.x, frames[a].midY - centre.y)
@@ -1121,5 +1119,29 @@ extension View {
         onDelete: @escaping () -> Void
     ) -> some View {
         modifier(DeleteCodeDialog(isPresented: isPresented, asAlert: asAlert, onDelete: onDelete))
+    }
+}
+
+/// Where the finger is in the pinned grid while a tile is dragged.
+@MainActor @Observable
+final class PinnedDrag {
+    var point: CGPoint = .zero
+}
+
+/// The tile under the finger, lifted a little, over the grid: the only
+/// view that reads where the finger is.
+private struct LiftedPinnedTile: View {
+    let shortcut: USSDShortcut
+    let size: CGSize
+    let drag: PinnedDrag
+    let grabOffset: CGSize
+
+    var body: some View {
+        PinnedTileFace(shortcut: shortcut)
+            .frame(width: size.width, height: size.height)
+            .scaleEffect(1.07)
+            .shadow(color: .black.opacity(0.18), radius: 14, y: 8)
+            .position(x: drag.point.x - grabOffset.width, y: drag.point.y - grabOffset.height)
+            .allowsHitTesting(false)
     }
 }
