@@ -27,16 +27,17 @@ private struct PrimaryButtonBody: View {
     let glows: Bool
 
     @Environment(\.isEnabled) private var isEnabled
-    @Environment(\.self) private var environment
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.starhashSurface) private var pageSurface
 
     private var fill: Color {
-        guard isEnabled else { return onPay ? .payWash : Color.starhashPrimaryText.color(in: environment).opacity(0.1) }
-        return onPay ? .payButtonFill : Color.starhashInk.color(in: environment)
+        guard isEnabled else { return onPay ? .payWash : Color.starhashPrimaryText.color(scheme: colorScheme, surface: pageSurface).opacity(0.1) }
+        return onPay ? .payButtonFill : Color.starhashInk.color(scheme: colorScheme, surface: pageSurface)
     }
 
     private var label: Color {
-        guard isEnabled else { return onPay ? .paySecondaryText : Color.starhashSecondaryText.color(in: environment) }
-        return onPay ? .payButtonLabel : Color.starhashOnInk.color(in: environment)
+        guard isEnabled else { return onPay ? .paySecondaryText : Color.starhashSecondaryText.color(scheme: colorScheme, surface: pageSurface) }
+        return onPay ? .payButtonLabel : Color.starhashOnInk.color(scheme: colorScheme, surface: pageSurface)
     }
 
     /// The accent lit from above, the same in either appearance; flat when

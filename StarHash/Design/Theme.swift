@@ -443,8 +443,15 @@ struct SurfaceColor: ShapeStyle, Hashable {
 
     /// The colour for `environment`'s appearance and surface.
     func color(in environment: EnvironmentValues) -> Color {
-        if environment.colorScheme == .dark { return dark }
-        return environment.starhashSurface == .container ? container : page
+        color(scheme: environment.colorScheme, surface: environment.starhashSurface)
+    }
+
+    /// The colour for an appearance and surface, for a view that reads just
+    /// those two: one reading `@Environment(\.self)` runs again for any
+    /// change to the environment above it.
+    func color(scheme: ColorScheme, surface: StarHashSurface) -> Color {
+        if scheme == .dark { return dark }
+        return surface == .container ? container : page
     }
 
     /// The colour inside a container, for the places that are always one
@@ -474,8 +481,12 @@ extension LinearGradient {
     /// `AccentLitStyle` resolved, where a gradient itself is needed (the
     /// chart's bars).
     static func starhashAccentLit(in environment: EnvironmentValues) -> LinearGradient {
+        starhashAccentLit(scheme: environment.colorScheme, surface: environment.starhashSurface)
+    }
+
+    static func starhashAccentLit(scheme: ColorScheme, surface: StarHashSurface) -> LinearGradient {
         LinearGradient(
-            colors: [Color.accentLitTop.color(in: environment), Color.accentLitFoot.color(in: environment)],
+            colors: [Color.accentLitTop.color(scheme: scheme, surface: surface), Color.accentLitFoot.color(scheme: scheme, surface: surface)],
             startPoint: .top,
             endPoint: .bottom
         )

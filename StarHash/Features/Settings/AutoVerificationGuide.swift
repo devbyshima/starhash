@@ -661,7 +661,6 @@ private struct GuideStepList: View {
 /// tap, glass once it has been done.
 private struct GuideButtonStyle: ButtonStyle {
     var prominent: Bool
-    @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         if prominent {
