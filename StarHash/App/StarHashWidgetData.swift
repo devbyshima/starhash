@@ -5,8 +5,9 @@ import WidgetKit
 /// Hands the widgets what they show (`WidgetSnapshot`), through the App
 /// Group the app and its widget extension share. App Groups need a paid
 /// developer team, so a build signed by a free one has none
-/// (`STARHASH_APP_GROUP` empty in project.yml): then nothing is shared and
-/// the widgets show Buy's default codes.
+/// (`STARHASH_APP_GROUPS: NO` in project.yml, which leaves Info.plist's id
+/// empty): then nothing is shared or reloaded, and the widgets show Buy's
+/// default codes.
 @MainActor
 enum StarHashWidgetData {
     /// The App Group's id from Info.plist, nil when the build has none.
