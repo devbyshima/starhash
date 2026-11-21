@@ -8,6 +8,14 @@ options:
   # English, French and Kinyarwanda (Localizable.xcstrings in the app, the
   # widgets and StarHashKit), chosen in StarHash's own Settings.
   knownRegions: [en, fr, rw, Base]
+  # StarHashKit, a Swift package, builds an arm64e slice only when the
+  # project's workspace settings say so, and the generated .xcodeproj is
+  # not committed: without this the app's arm64e slice (Enhanced Security,
+  # below) would link a package without pointer authentication.
+  postGenCommand: >-
+    mkdir -p StarHash.xcodeproj/project.xcworkspace/xcshareddata &&
+    plutil -create xml1 StarHash.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings &&
+    plutil -insert iOSPackagesShouldBuildARM64e -bool YES StarHash.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
 
 # Two builds (RELEASING.md): Debug, the dev build run from Xcode, and
 # Release, the build that goes to TestFlight and the App Store.
@@ -32,10 +40,23 @@ settings:
     SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY: YES
     LOCALIZATION_PREFERS_STRING_CATALOGS: YES
     SWIFT_EMIT_LOC_STRINGS: YES
-    # The widgets read the app's data through an App Group, which only a
-    # paid Apple Developer Program team can sign: a free personal team's
-    # build fails with one. NO leaves the group out (the widgets then show
-    # Buy's default codes and no spending); YES signs both targets with it.
+    # Enhanced Security: pointer authentication (an arm64e slice beside
+    # arm64 on device; the simulator keeps arm64 alone) and the compiler's
+    # hardening. Its runtime half is the hardened-process entitlements in
+    # StarHash.entitlements, signed only with STARHASH_APP_GROUPS: YES
+    # (below). The protections apply from iOS 26; older iOS runs arm64.
+    ENABLE_ENHANCED_SECURITY: YES
+    # With the package built for arm64e (postGenCommand), Xcode builds it
+    # for the Apple silicon simulator alone, so the app and widgets drop
+    # the Intel simulator slice too or they can't import it.
+    EXCLUDED_ARCHS[sdk=iphonesimulator*]: x86_64
+    # The widgets read the app's data through an App Group, and Enhanced
+    # Security's runtime half is the hardened-process entitlements: only a
+    # paid Apple Developer Program team can sign either, and a free
+    # personal team's build fails with them. NO leaves both out (the
+    # widgets then show Buy's default codes and no spending, and the app
+    # has pointer authentication alone); YES signs the app with both and
+    # the widgets with the group.
     STARHASH_APP_GROUPS: NO
     STARHASH_APP_GROUP: group.com.devbyshima.starhash
     STARHASH_APP_ENTITLEMENTS_YES: StarHash/App/StarHash.entitlements
