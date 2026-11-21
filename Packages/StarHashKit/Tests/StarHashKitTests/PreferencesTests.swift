@@ -5,10 +5,7 @@ import Testing
 @Suite("Preferences")
 struct PreferencesTests {
     static func defaults() -> UserDefaults {
-        let name = "PreferencesTests-\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: name)!
-        defaults.removePersistentDomain(forName: name)
-        return defaults
+        TestDefaults("PreferencesTests")
     }
 
     @Test func untouchedEverythingIsOnButNearbyAndTheLock() {

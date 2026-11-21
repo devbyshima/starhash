@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import StarHashKit
 
-@Suite("ActivitySummary")
+@Suite("ActivitySummary", .english)
 struct ActivitySummaryTests {
     /// A Gregorian calendar in Kigali with weeks starting on Monday.
     static let calendar: Calendar = {

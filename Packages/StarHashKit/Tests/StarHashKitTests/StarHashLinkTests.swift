@@ -21,7 +21,8 @@ struct StarHashLinkTests {
     @Test func aQRCodesLinkChoosesWhoToPay() throws {
         let aline = Recipient(name: "Aline", destination: "0788123456", kind: .phone)
         let url = PaymentQR.link(for: aline, amount: 5_000)
-        guard case .payment(let request) = StarHashLink(url: url) else { Issue.record("not a payment"); return }
+        let link = StarHashLink(url: url)
+        let request = try #require(link?.payment, "not a payment: \(String(describing: link))")
         #expect(request.recipient.destination == "0788123456")
         #expect(request.amount == 5_000)
     }

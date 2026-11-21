@@ -5,10 +5,7 @@ import Testing
 @MainActor
 struct USSDShortcutTests {
     private func freshDefaults() -> UserDefaults {
-        let name = "USSDShortcutTests-\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: name)!
-        defaults.removePersistentDomain(forName: name)
-        return defaults
+        TestDefaults("USSDShortcutTests")
     }
 
     @Test func startsWithTheDefaults() {
@@ -44,11 +41,11 @@ struct USSDShortcutTests {
         #expect(list.pinned.isEmpty)
     }
 
-    @Test func pinsEightAtMost() {
+    @Test func pinsEightAtMost() throws {
         let list = USSDShortcutList(defaults: freshDefaults())
         for index in 0..<6 { list.add(name: "Code \(index)", code: "*\(100 + index)#") }
         let ids = list.shortcuts.map(\.id)
-        #expect(ids.count == 10)
+        try #require(ids.count == 10)
         for id in ids.prefix(8) { #expect(list.setPinned(id, true)) }
         #expect(!list.canPin)
         #expect(!list.setPinned(ids[8], true))
@@ -57,10 +54,11 @@ struct USSDShortcutTests {
         #expect(list.setPinned(ids[8], true))
     }
 
-    @Test func reordersPinnedAndRemembers() {
+    @Test func reordersPinnedAndRemembers() throws {
         let defaults = freshDefaults()
         let list = USSDShortcutList(defaults: defaults)
         let ids = list.shortcuts.map(\.id)
+        try #require(ids.count == 4)
         for id in ids.prefix(4) { list.setPinned(id, true) }
 
         list.movePinned(ids[0], to: ids[2])
@@ -95,13 +93,13 @@ struct USSDShortcutTests {
         #expect(USSDShortcut.code(from: "*1٢3#") == nil)
     }
 
-    @Test func addsEditsAndRemovesAndRemembers() {
+    @Test func addsEditsAndRemovesAndRemembers() throws {
         let defaults = freshDefaults()
         let list = USSDShortcutList(defaults: defaults)
         #expect(list.add(name: "  Airtime ", code: "*182*2*1#"))
         #expect(!list.add(name: "", code: "*182*2*1#"))
         #expect(!list.add(name: "Nope", code: "182"))
-        let added = list.shortcuts.last!
+        let added = try #require(list.shortcuts.last)
         #expect(added.name == "Airtime")
 
         #expect(added.detail == nil && added.symbol == nil)

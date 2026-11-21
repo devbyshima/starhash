@@ -5,14 +5,16 @@ import Testing
 @MainActor
 @Suite("The owner")
 struct OwnerTests {
-    private let mtn = Recipient.ownNumber("0788123456")!
-    private let airtel = Recipient.ownNumber("0722123456")!
+    private let mtn: Recipient
+    private let airtel: Recipient
 
-    private func freshDefaults() -> UserDefaults {
-        let name = "OwnerTests-\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: name)!
-        defaults.removePersistentDomain(forName: name)
-        return defaults
+    init() throws {
+        mtn = try #require(Recipient.ownNumber("0788123456"))
+        airtel = try #require(Recipient.ownNumber("0722123456"))
+    }
+
+    private func freshDefaults() -> TestDefaults {
+        TestDefaults("OwnerTests")
     }
 
     /// An owner with two SIMs, both numbers in, paying from `wallet`.
@@ -114,10 +116,10 @@ struct OwnerTests {
         #expect(owner.wallets.hasTwoSIMs)
     }
 
-    @Test func choosingTheOtherSIMTradesTheNumbers() {
+    @Test func choosingTheOtherSIMTradesTheNumbers() throws {
         let defaults = freshDefaults()
         let owner = twoSIMs("0788123456", "0722123456", wallet: .mtn, defaults: defaults)
-        let airtelWallet = owner.wallets.wallets.first { $0.network == .airtel }!
+        let airtelWallet = try #require(owner.wallets.wallets.first { $0.network == .airtel })
         owner.choose(airtelWallet)
         #expect(owner.defaultSIM == airtel)
         #expect(owner.otherSIM == mtn)
@@ -129,9 +131,9 @@ struct OwnerTests {
         #expect(owner.defaultSIM == airtel)
     }
 
-    @Test func twoSIMsOnOneCarrierKeepTheWallet() {
+    @Test func twoSIMsOnOneCarrierKeepTheWallet() throws {
         let owner = twoSIMs("0788123456", "0791234567", wallet: .mtn)
-        owner.choose(owner.wallets.wallets.first { $0.sim?.destination == "0791234567" }!)
+        owner.choose(try #require(owner.wallets.wallets.first { $0.sim?.destination == "0791234567" }))
         #expect(owner.defaultSIM?.destination == "0791234567")
         #expect(owner.otherSIM == mtn)
         #expect(owner.wallet == .mtn)
@@ -214,7 +216,7 @@ struct OwnerTests {
         #expect(owner.wallet == .mtn)
     }
 
-    @Test func theStoreHearsOnceForEachChangeToOwnAccounts() {
+    @Test func theStoreHearsOnceForEachChangeToOwnAccounts() throws {
         let owner = Owner(defaults: freshDefaults())
         var heard = 0
         owner.onOwnAccountsChange = { heard += 1 }
@@ -232,7 +234,7 @@ struct OwnerTests {
         owner.setName("Shima Serein")
         #expect(heard == 3)
         // Trading the default SIM keeps the same two numbers.
-        owner.choose(owner.wallets.wallets.first { $0.network == .airtel }!)
+        owner.choose(try #require(owner.wallets.wallets.first { $0.network == .airtel }))
         #expect(heard == 3)
         owner.useOneSIM(keeping: mtn)
         #expect(heard == 4)
@@ -258,13 +260,12 @@ struct OwnerTests {
     }
 
     @Test func deleteAllDataIsReadAgain() {
-        let name = "OwnerTests-\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: name)!
+        let defaults = freshDefaults()
         let owner = twoSIMs("0788123456", "0722123456", wallet: .mtn, defaults: defaults)
         owner.setName("Shima")
         var heard = 0
         owner.onOwnAccountsChange = { heard += 1 }
-        defaults.removePersistentDomain(forName: name)
+        defaults.removePersistentDomain(forName: defaults.suiteName)
         owner.reload()
         #expect(owner.name.isEmpty)
         #expect(owner.defaultSIM == nil)

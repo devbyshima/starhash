@@ -12,10 +12,7 @@ struct AutoVerifyStatusTests {
     static let aline = Recipient(name: "Aline", destination: "0788123456", kind: .phone)
 
     static func defaults() -> UserDefaults {
-        let name = "AutoVerifyStatusTests-\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: name)!
-        defaults.removePersistentDomain(forName: name)
-        return defaults
+        TestDefaults("AutoVerifyStatusTests")
     }
 
     static func payment(minutesAgo: Double, at now: Date = now) -> Transaction {

@@ -16,10 +16,7 @@ struct AutoVerifyReceiveTests {
     static let bankText = "Equity Bank: You have received RWF 50,000 from JOHN DOE on 02-10-2026. Ref: FT2627512345. Bal: RWF 210,500."
 
     static func defaults() -> UserDefaults {
-        let name = "AutoVerifyReceiveTests-\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: name)!
-        defaults.removePersistentDomain(forName: name)
-        return defaults
+        TestDefaults("AutoVerifyReceiveTests")
     }
 
     static func payment(minutesAgo: Double, amount: Int = 5_000, to recipient: Recipient = aline, at now: Date = now) -> Transaction {
@@ -54,18 +51,18 @@ struct AutoVerifyReceiveTests {
         #expect(autoVerify.status(at: Self.now) == .off)
     }
 
-    @Test func offIgnoresEveryMessage() {
+    @Test func offIgnoresEveryMessage() throws {
         let (autoVerify, store) = Self.autoVerify([Self.payment(minutesAgo: 2)], setUp: false)
         #expect(autoVerify.receive(Self.sent, sender: "M-Money", at: Self.now) == .ignored)
-        #expect(store.transactions[0].status == .pending)
+        let payment = try #require(store.transactions.first)
+        #expect(payment.status == .pending)
     }
 
     @Test func aMessageConfirmsThePaymentItIsFor() throws {
         let payment = Self.payment(minutesAgo: 2)
         let (autoVerify, store) = Self.autoVerify([payment])
-        guard case .confirmed(let confirmed, let wasFailed) = autoVerify.receive(Self.sent, sender: "M-Money", at: Self.now) else {
-            Issue.record("not confirmed"); return
-        }
+        let outcome = autoVerify.receive(Self.sent, sender: "M-Money", at: Self.now)
+        let (confirmed, wasFailed) = try #require(outcome.confirmed, "\(outcome)")
         #expect(confirmed.id == payment.id)
         #expect(!wasFailed)
         #expect(store.transaction(id: payment.id)?.fee == 100)
@@ -76,36 +73,32 @@ struct AutoVerifyReceiveTests {
         let (autoVerify, store) = Self.autoVerify([payment])
         autoVerify.expireUnconfirmed(now: Self.now)
         #expect(store.transaction(id: payment.id)?.status == .failed)
-        guard case .confirmed(_, let wasFailed) = autoVerify.receive(Self.sent, sender: "M-Money", at: Self.now) else {
-            Issue.record("not confirmed"); return
-        }
-        #expect(wasFailed)
+        let outcome = autoVerify.receive(Self.sent, sender: "M-Money", at: Self.now)
+        let confirmed = try #require(outcome.confirmed, "\(outcome)")
+        #expect(confirmed.wasFailed)
         #expect(store.transaction(id: payment.id)?.status == .confirmed)
     }
 
-    @Test func moneyReceivedIsAddedOnceAndOnlyOnce() {
+    @Test func moneyReceivedIsAddedOnceAndOnlyOnce() throws {
         let (autoVerify, store) = Self.autoVerify()
-        guard case .added(let added) = autoVerify.receive(Self.received, sender: "M-Money", at: Self.now) else {
-            Issue.record("not added"); return
-        }
+        let outcome = autoVerify.receive(Self.received, sender: "M-Money", at: Self.now)
+        let added = try #require(outcome.added, "\(outcome)")
         #expect(added.direction == .incoming)
         #expect(autoVerify.receive(Self.received, sender: "M-Money", at: Self.now) == .alreadyApplied(added))
         #expect(store.transactions.count == 1)
     }
 
-    @Test func aLookAlikeIsHeldBackUnlessWarningsAreOff() {
+    @Test func aLookAlikeIsHeldBackUnlessWarningsAreOff() throws {
         let defaults = Self.defaults()
         let (autoVerify, store) = Self.autoVerify(defaults: defaults)
-        guard case .scam(let warning) = autoVerify.receive(Self.received, sender: "+250 788 555 123", at: Self.now) else {
-            Issue.record("not held back"); return
-        }
+        let warned = autoVerify.receive(Self.received, sender: "+250 788 555 123", at: Self.now)
+        let warning = try #require(warned.scam, "not held back: \(warned)")
         #expect(warning.reason == .unofficialSender)
         #expect(store.transactions.isEmpty)
 
         defaults.set(false, forKey: Preferences.scamWarnings.key)
-        guard case .added = autoVerify.receive(Self.received, sender: "+250 788 555 123", at: Self.now) else {
-            Issue.record("not logged with warnings off"); return
-        }
+        let logged = autoVerify.receive(Self.received, sender: "+250 788 555 123", at: Self.now)
+        #expect(logged.added != nil, "not logged with warnings off: \(logged)")
     }
 
     @Test func withTransactionsNotKeptEveryMessageIsIgnored() {
@@ -132,9 +125,8 @@ struct AutoVerifyReceiveTests {
         let serein = Recipient(name: "Serein", destination: "0788335935", kind: .phone)
         let payment = Self.payment(minutesAgo: 1, amount: 10_000, to: serein, at: date)
         let (autoVerify, store) = Self.autoVerify([payment])
-        guard case .failed(let failed) = autoVerify.receive(Self.failed, sender: "M-Money", at: date) else {
-            Issue.record("not failed"); return
-        }
+        let outcome = autoVerify.receive(Self.failed, sender: "M-Money", at: date)
+        let failed = try #require(outcome.failed, "\(outcome)")
         #expect(failed.failureReason == .message)
         #expect(store.transaction(id: payment.id)?.status == .failed)
 

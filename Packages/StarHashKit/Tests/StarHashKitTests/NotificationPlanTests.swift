@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import StarHashKit
 
-@Suite("NotificationPlan")
+@Suite("NotificationPlan", .english)
 struct NotificationPlanTests {
     /// A Gregorian calendar in Kigali.
     static let calendar: Calendar = {

@@ -5,10 +5,7 @@ import Testing
 @Suite("First run")
 struct FirstRunTests {
     static func defaults() -> UserDefaults {
-        let name = "FirstRunTests-\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: name)!
-        defaults.removePersistentDomain(forName: name)
-        return defaults
+        TestDefaults("FirstRunTests")
     }
 
     static let settled = FirstRun.State(hasOnboarded: true, hasWallet: true, hasSeenWelcomeNote: true)
