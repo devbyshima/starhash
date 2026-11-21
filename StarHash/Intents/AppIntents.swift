@@ -59,13 +59,10 @@ struct StarHashShortcuts: AppShortcutsProvider {
             shortTitle: "Check Balance",
             systemImageName: "banknote"
         )
-        AppShortcut(
-            intent: ProcessCarrierSMSIntent(),
-            phrases: [
-                "Process carrier SMS in \(.applicationName)",
-            ],
-            shortTitle: "Process Carrier SMS",
-            systemImageName: "checkmark.message"
-        )
+        // Not Process Carrier SMS: it is the auto-verify shortcut's action,
+        // fed each message by the automation. Offered to Siri, Spotlight
+        // and the Action button it only asked for an SMS's text with a
+        // bare prompt. It stays an action in Shortcuts, which the shared
+        // shortcut and a by-hand one use.
     }
 }
