@@ -8,8 +8,12 @@ import UIKit
 struct CheckBalanceIntent: AppIntent {
     static let title: LocalizedStringResource = "Check Wallet Balance"
     static let description = IntentDescription("Dials your MTN MoMo or Airtel Money balance code.")
-    /// The dialer can only be opened from the foreground.
+    /// The dialer can only be opened from the foreground. iOS 26 reads
+    /// `supportedModes`; before it, the flag. Drop the flag once StarHash
+    /// needs iOS 26.
     static let openAppWhenRun = true
+    @available(iOS 26.0, *)
+    static var supportedModes: IntentModes { .foreground }
 
     @MainActor
     func perform() async throws -> some IntentResult {
@@ -28,6 +32,8 @@ struct OpenPayIntent: AppIntent {
     static let title: LocalizedStringResource = "Pay with StarHash"
     static let description = IntentDescription("Opens StarHash's keypad to pay someone.")
     static let openAppWhenRun = true
+    @available(iOS 26.0, *)
+    static var supportedModes: IntentModes { .foreground }
 
     @MainActor
     func perform() async throws -> some IntentResult {
