@@ -34,6 +34,10 @@ struct ActivityView: View {
     @State private var searchText = ""
     @FocusState private var searchFocused: Bool
 
+    /// The months, days, totals and chart worked out for what shows, kept
+    /// until the transactions, the period or the moment change.
+    @State private var listCache = ActivityListCache()
+
     @State private var transactionToDelete: StarHashKit.Transaction?
     @State private var transactionToVerify: StarHashKit.Transaction?
     @State private var feedbackCount = 0
@@ -138,38 +142,43 @@ struct ActivityView: View {
     }
 
     private var listScreen: some View {
-        let sections = ActivitySummary.groupedByMonth(store.transactions, calendar: calendar)
-        let inPeriod = ActivitySummary.transactions(store.transactions, in: period, now: now, calendar: calendar)
+        let list = listCache.list(for: store.transactions, period: period, now: now, calendar: calendar)
         return ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
                 ActivitySummaryCard(
                     period: period,
-                    totals: ActivitySummary.totals(of: inPeriod),
-                    buckets: ActivitySummary.buckets(for: inPeriod, period: period, now: now, calendar: calendar),
+                    totals: list.totals,
+                    buckets: list.buckets,
                     calendar: calendar
                 )
                 .padding(.top, ActivityLayout.contentTop)
-                ForEach(sections) { section in
-                    monthHeader(section)
-                    // Each day of the month under its own heading.
-                    ForEach(ActivitySummary.groupedByDay(section.transactions, calendar: calendar)) { day in
-                        dayHeader(day)
-                        ActivityTransactionRows(
-                            transactions: day.transactions,
-                            onOpen: open,
-                            onVerify: verify,
-                            onFail: markFailed,
-                            onPayAgain: payAgain,
-                            onDelete: requestDelete,
-                            onSwipeDelete: swipeDelete,
-                            showsDate: false
-                        )
+                // One view per item, a month's heading or a day with its own
+                // heading, so the lazy stack can count its rows without
+                // building every month's.
+                ForEach(list.items) { item in
+                    switch item.kind {
+                    case .month(let section):
+                        monthHeader(section)
+                    case .day(let day):
+                        VStack(alignment: .leading, spacing: 0) {
+                            dayHeader(day)
+                            ActivityTransactionRows(
+                                transactions: day.transactions,
+                                onOpen: open,
+                                onVerify: verify,
+                                onFail: markFailed,
+                                onPayAgain: payAgain,
+                                onDelete: requestDelete,
+                                onSwipeDelete: swipeDelete,
+                                showsDate: false
+                            )
+                        }
                     }
                 }
             }
             .padding(.horizontal, StarHashMetrics.screenPadding)
             .padding(.bottom, StarHashMetrics.screenPadding)
-            .animation(.smooth(duration: 0.3), value: store.transactions.map(\.id))
+            .animation(.smooth(duration: 0.3), value: list.ids)
         }
         .scrollIndicators(.hidden)
         .starhashSoftEdge()
@@ -351,5 +360,63 @@ enum ActivityRoute: Hashable {
 
     var transactionID: UUID? {
         if case .transaction(let id) = self { id } else { nil }
+    }
+}
+
+/// Activity's list for one set of transactions, period and moment: the
+/// months with their days, and the period's totals and chart. Worked out
+/// once and kept until one of those changes, since the page runs again for
+/// much that changes none of them (a haptic, a dialog, a transaction opened
+/// and closed), and each time it grouped and sorted the whole history.
+@MainActor
+final class ActivityListCache {
+    struct List {
+        enum Kind {
+            case month(ActivitySummary.DaySection)
+            case day(ActivitySummary.DaySection)
+        }
+
+        struct Item: Identifiable {
+            let id: String
+            let kind: Kind
+        }
+
+        let items: [Item]
+        let totals: ActivitySummary.Totals
+        let buckets: [ActivitySummary.Bucket]
+        /// What the list animates on: every transaction's id, in order.
+        let ids: [StarHashKit.Transaction.ID]
+    }
+
+    private struct Key: Equatable {
+        let transactions: [StarHashKit.Transaction]
+        let period: ActivityPeriod
+        let now: Date
+        let calendar: Calendar
+    }
+
+    private var key: Key?
+    private var cached: List?
+
+    func list(for transactions: [StarHashKit.Transaction], period: ActivityPeriod, now: Date, calendar: Calendar) -> List {
+        let key = Key(transactions: transactions, period: period, now: now, calendar: calendar)
+        if let cached, key == self.key { return cached }
+        var items: [List.Item] = []
+        for month in ActivitySummary.groupedByMonth(transactions, calendar: calendar) {
+            items.append(List.Item(id: "month \(month.day.timeIntervalSinceReferenceDate)", kind: .month(month)))
+            for day in ActivitySummary.groupedByDay(month.transactions, calendar: calendar) {
+                items.append(List.Item(id: "day \(day.day.timeIntervalSinceReferenceDate)", kind: .day(day)))
+            }
+        }
+        let inPeriod = ActivitySummary.transactions(transactions, in: period, now: now, calendar: calendar)
+        let list = List(
+            items: items,
+            totals: ActivitySummary.totals(of: inPeriod),
+            buckets: ActivitySummary.buckets(for: inPeriod, period: period, now: now, calendar: calendar),
+            ids: transactions.map(\.id)
+        )
+        self.key = key
+        cached = list
+        return list
     }
 }
