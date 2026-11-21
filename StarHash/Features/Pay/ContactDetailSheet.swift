@@ -111,7 +111,7 @@ struct ContactDetailSheet: View {
                 .foregroundStyle(Color.starhashPrimaryText)
             Spacer(minLength: 8)
             if let detail = detail(for: recipient) {
-                Text(detail)
+                Text(catalog: detail)
                     .font(.sheetBody)
                     .foregroundStyle(Color.sheetSecondaryText)
             }
@@ -180,7 +180,8 @@ struct ContactDetailSheet: View {
                 .foregroundStyle(Color.starhashPrimaryText)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
-            Text(label.uppercased())
+            Text(catalog: label)
+                .textCase(.uppercase)
                 .font(.sheetCaption2)
                 .tracking(0.6)
                 .foregroundStyle(Color.sheetSecondaryText)

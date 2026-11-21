@@ -139,6 +139,25 @@ import Testing
         #expect(throws: StarHashBackup.ReadError.tooNew) { try StarHashBackup.decode(try newer.encoded()) }
     }
 
+    /// A newer file this StarHash can't fully decode (here a status it
+    /// doesn't know) is still too new, not "not a backup".
+    @Test func newerFileWithWhatThisVersionCantRead() throws {
+        let t = Transaction(direction: .outgoing, counterparty: Recipient(destination: "020205", kind: .merchant), amount: 100, date: Date(timeIntervalSince1970: 1_700_000_000), status: .confirmed, source: .app)
+        var json = try #require(try JSONSerialization.jsonObject(with: StarHashBackup(transactions: [t]).encoded()) as? [String: Any])
+        var transactions = try #require(json["transactions"] as? [[String: Any]])
+        try #require(transactions.count == 1)
+        transactions[0]["status"] = "refunded"
+        json["transactions"] = transactions
+        json["version"] = StarHashBackup.currentVersion + 1
+        let data = try JSONSerialization.data(withJSONObject: json)
+        #expect(throws: StarHashBackup.ReadError.tooNew) { try StarHashBackup.decode(data) }
+
+        // The same body at today's version can't be read, so it isn't a backup.
+        json["version"] = StarHashBackup.currentVersion
+        let current = try JSONSerialization.data(withJSONObject: json)
+        #expect(throws: StarHashBackup.ReadError.notABackup) { try StarHashBackup.decode(current) }
+    }
+
     @Test @MainActor func mergeAddsOnlyWhatIsMissing() {
         let store = StarHashStore(fileURL: nil)
         let a = Transaction(direction: .outgoing, counterparty: Recipient(destination: "020205", kind: .merchant), amount: 100, date: .now, status: .confirmed, source: .app, reference: "R1")

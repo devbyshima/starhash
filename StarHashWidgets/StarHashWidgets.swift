@@ -56,17 +56,6 @@ struct ScanToPayControl: ControlWidget {
     }
 }
 
-/// Opens StarHash on its scanner.
-struct OpenScannerIntent: AppIntent {
-    static let title: LocalizedStringResource = "Scan to Pay"
-    static let isDiscoverable = false
-    static let openAppWhenRun = true
-
-    func perform() async throws -> some IntentResult & OpensIntent {
-        .result(opensIntent: OpenURLIntent(URL(string: "starhash://scan")!))
-    }
-}
-
 #Preview(as: .systemMedium) {
     BuyCodesWidget()
 } timeline: {
