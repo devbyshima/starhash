@@ -11,6 +11,12 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 - Checking your balance with Pay's Balance button now teaches Siri Suggestions and Spotlight when you check it, so they can suggest Check Balance at the times you usually do.
 - Split large payments, a new setting under Pay & Buy, off until you turn it on. A MoMo to MoMo payment that costs less in parts is then sent as a few smaller ones: 300,000 as two of 150,000 costs 500 in fees rather than 1,500. Pay shows the parts and what they cost against one payment, and dials one part at a time, each with its own PIN, showing whether each is waiting for its SMS or confirmed; the whole amount can still go as one payment. Each part is its own transaction, marked Part 1 of 2 in Transactions, with the whole payment on its page.
 
+### Changed
+
+- Choosing who to pay scrolls smoothly with a large address book: the list is worked out once per change rather than about twenty times, and no longer redrawn on every frame of a scroll.
+- Typing your name on Profile no longer redraws your QR code at every letter, which restarted the tree's turn each time: it is drawn again once you pause, and the picture you share is made only when you tap Share Code.
+- Transactions, Settings and Buy do less work as you use them: Transactions no longer regroups your whole history each time you open and close a payment, typing the other SIM's number no longer redraws all of Settings at each digit, and dragging a pinned code moves just that tile rather than redrawing all of Buy.
+
 ## [1.0.0] - Unreleased
 
 The first release: pay with MTN MoMo or Airtel Money without typing USSD codes, and keep every payment in one place.
