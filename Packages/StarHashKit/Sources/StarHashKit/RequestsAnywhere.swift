@@ -17,6 +17,10 @@ import Foundation
 /// is that it waits until it expires. While StarHash cannot read Contacts
 /// it cannot tell, so requests wait on the server, unread, until it can.
 ///
+/// A request asked of someone nearby goes this way too, under the id it
+/// went nearby with (`carry`), so it is one request on both iPhones
+/// whichever way reaches them first.
+///
 /// Requests still settle from the transactions alone
 /// (`MoneyRequests.settle`); nothing here marks one paid.
 @MainActor
@@ -201,14 +205,35 @@ public final class RequestsAnywhere {
         case .sent:
             defaults.set(true, forKey: Key.used)
             let named = person.name == nil ? Recipient(name: listed.name, destination: person.destination, kind: .phone) : person
-            return .success(requests.ask(
+            let request = requests.ask(
                 named, id: ask.id, photoID: listed.photoID, amount: ask.amount, note: ask.note, at: now, key: theirs
-            ))
+            )
+            // One sent nearby may have ended while it went: the server
+            // hears at once.
+            if request.status != .waiting { await report() }
+            return .success(requests.request(id: request.id) ?? request)
         case .notOnStarHash: return .failure(.notOnStarHash)
         case .alreadyAsked: return .failure(.alreadyAsked)
         case .tooMany: return .failure(.tooMany)
         case .notListed: return .failure(.notListed)
         case .failed: return .failure(.failed)
+        }
+    }
+
+    /// A request just sent to someone nearby (`ask`, to `person`, whose
+    /// phone handed over their number) goes through the server too, under
+    /// the same id, when that number is listed with a key. So it still
+    /// reaches them if People Nearby's message did not, and their decline
+    /// or the owner's cancel still travels once one of them has walked
+    /// away. When it cannot (not listed, the pair's limit, no server), it
+    /// stays a request between people nearby, as before.
+    @discardableResult
+    public func carry(_ ask: MoneyRequest.Message.Ask, to person: Recipient, at now: Date = .now) async
+        -> Result<MoneyRequest, AskFailure> {
+        switch await server.lookUp(person.destination) {
+        case .listed(let listed): await self.ask(ask, to: person, listed: listed, at: now)
+        case .notListed: .failure(.notOnStarHash)
+        case .failed: .failure(.failed)
         }
     }
 
@@ -268,7 +293,10 @@ public final class RequestsAnywhere {
                 requests.theyCancelled(asked.id, at: now)
                 continue
             }
-            guard requests.request(id: asked.id) == nil else { continue }
+            if let kept = requests.request(id: asked.id) {
+                await keyFor(kept, from: asked, with: own, secret: secret)
+                continue
+            }
             switch await take(asked, with: own) {
             case .taken(let ask, let theirs):
                 if let request = requests.receive(ask, at: asked.createdAt ?? now, key: theirs) {
@@ -289,6 +317,25 @@ public final class RequestsAnywhere {
             if let declined = requests.request(id: id) { news.declined.append(declined) }
         }
         return news
+    }
+
+    /// The server's copy of a request that came from someone nearby first
+    /// (`carry` on the asker's iPhone): already shown, so not again, but
+    /// its key kept, so the owner's decline can follow through the server
+    /// once the asker has walked away. It passes the same checks as any
+    /// (sealed by the key the asker's number is listed under, from the
+    /// owner's Contacts) and must say what the nearby one said; otherwise
+    /// it is dropped there, and the nearby one stays as it came.
+    private func keyFor(_ kept: MoneyRequest, from asked: Inbox.Asked, with own: RequestSeal.PrivateKey, secret: String) async {
+        guard kept.direction == .received, kept.key == nil else { return }
+        switch await take(asked, with: own) {
+        case .taken(let ask, let theirs) where ask.number == kept.person.destination && ask.amount == kept.amount:
+            requests.carried(kept.id, key: theirs)
+        case .taken, .drop:
+            _ = await server.close(id: asked.id, key: secret)
+        case .later:
+            break
+        }
     }
 
     private enum Taking {

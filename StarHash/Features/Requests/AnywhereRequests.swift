@@ -34,16 +34,16 @@ enum AnywhereRequests {
         if announce { await StarHashNotifications.shared.announce(news) }
     }
 
-    /// The owner declined: the asker hears, over People Nearby's connection
-    /// or through the server, whichever it came by.
+    /// The owner declined: the asker hears over People Nearby's connection
+    /// while it is open, and through the server whenever it carried the
+    /// request.
     static func decline(_ request: MoneyRequest) {
-        guard request.isAnywhere else { return AppEnvironment.nearbyRequests.decline(request) }
-        AppEnvironment.requests.decline(request.id)
-        Task { await AppEnvironment.requestsAnywhere.report() }
+        AppEnvironment.nearbyRequests.decline(request)
     }
 
     /// The owner took back a request they sent: through the server, the
-    /// other's card goes too.
+    /// other's card goes too. One sent nearby whose server copy is still on
+    /// its way is closed there once it lands (`RequestsAnywhere.carry`).
     static func cancel(_ request: MoneyRequest) {
         AppEnvironment.requests.cancel(request.id)
         guard request.isAnywhere else { return }

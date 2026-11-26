@@ -53,7 +53,7 @@ enum AppEnvironment {
     }()
 
     /// How requests travel between people nearby.
-    static let nearbyRequests = NearbyRequests(requests: requests, nearby: peopleNearby)
+    static let nearbyRequests = NearbyRequests(requests: requests, nearby: peopleNearby, anywhere: requestsAnywhere)
 
     /// How requests travel to anyone on StarHash, through the server,
     /// sealed. Only someone in the owner's Contacts can ask them.
