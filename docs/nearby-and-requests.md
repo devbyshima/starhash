@@ -147,6 +147,12 @@ APNs from the Worker, so a request arrives with StarHash closed.
 
 A phone in People Nearby proves, with its directory key, that it owns the entry for the number it hands over.
 
+## Decided in Phase 2 (2026-11-26)
+
+- While People Nearby is on, **Request takes Balance's place** beside Pay. Settings, Pay & Buy, **Beside Pay** puts Balance back.
+- **No button twice on a screen, and no keypad where nothing is typed.** The request card on Pay has no buttons: a tap opens the request, whose sheet has one Pay and one Decline (or, for one the owner sent, Mark as Paid and Cancel Request). Paying a request dials its amount straight from that sheet.
+- The Requests page opens from a row at the top of Transactions, which also shows when there are no transactions yet.
+
 ## Decided (2026-11-26)
 
 1. **Visibility** is off until the owner says yes, asked once.

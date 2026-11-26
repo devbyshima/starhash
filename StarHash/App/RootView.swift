@@ -85,6 +85,7 @@ struct RootView: View {
         }
         .modifier(OwnerListingSync())
         .modifier(PeopleNearbySync())
+        .modifier(RequestsSync())
         #if DEBUG
         .onChange(of: router.whatsNewPreviewPage) { _, page in
             guard let page else { return }

@@ -14,7 +14,13 @@ struct PayView: View {
     @Environment(Dialler.self) private var dialler
     @Environment(Owner.self) private var owner
     @Environment(PeopleNearbyService.self) private var peopleNearby
+    @Environment(MoneyRequests.self) private var requests
     @FeatureFlagged(.peopleNearby) private var peopleNearbyOn
+    @AppStorage(Preferences.requestBesidePay) private var requestBesidePay: Bool
+    /// Request's sheet: who nearby to ask for the amount typed.
+    @State private var isRequesting = false
+    /// A request asked of the owner, open to pay or decline.
+    @State private var answering: MoneyRequest?
     private var wallet: Recipient.Network { owner.wallet }
 
     @State private var input = AmountInput()
@@ -68,6 +74,10 @@ struct PayView: View {
         .sheet(isPresented: $showsSplit, onDismiss: { paying.stop() }) {
             SplitPaymentSheet()
         }
+        .sheet(isPresented: $isRequesting) {
+            RequestSheet(amount: input.value)
+        }
+        .sheet(item: $answering) { RequestAnswerSheet(request: $0) }
         .fullScreenCover(isPresented: $isScanning) {
             QRScannerView { request in
                 isScanning = false
@@ -114,6 +124,14 @@ struct PayView: View {
                 }
                 .padding(.top, 12)
                 .transition(.scale(scale: 0.9).combined(with: .opacity))
+            } else if peopleNearbyOn, let request = requests.waitingForOwner.first {
+                // Someone asked the owner to pay: in the chosen recipient's
+                // place until it is answered.
+                RequestCard(request: request, others: requests.waitingForOwner.count - 1) {
+                    answering = request
+                }
+                .padding(.top, 12)
+                .transition(.scale(scale: 0.95).combined(with: .opacity))
             } else if peopleNearbyOn, !peopleNearby.found.people.isEmpty {
                 // StarHash users close by, in the chosen recipient's place:
                 // a tap chooses one.
@@ -157,6 +175,58 @@ struct PayView: View {
 
     private var buttons: some View {
         HStack(spacing: 12) {
+            if peopleNearbyOn && requestBesidePay {
+                requestButton
+            } else {
+                balanceButton
+            }
+
+            // Never greyed out: with nothing typed it looks as always, and
+            // a tap shakes the amount, as in the reference. It then beats
+            // twice like a heartbeat, on purpose: the press, then the
+            // shake's own softer tap on its widest swing (PayAmountDisplay).
+            Button("Pay") { next() }
+                .buttonStyle(.starhashPrimaryOnPay)
+                // Held, as in the reference: light streaming through the
+                // button, with nothing drawn under the finger.
+                .overlay {
+                    if !reduceMotion { PayPressOverlay(isPressed: payHeld) }
+                }
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 0).updating($payHeld) { _, held, _ in
+                        held = true
+                    }
+                )
+        }
+    }
+
+    /// Request, in Balance's place while People Nearby is on (Settings,
+    /// Beside Pay, can put Balance back). With nothing typed it shakes the
+    /// amount, as Pay does.
+    private var requestButton: some View {
+        Button {
+            guard !input.isZero else {
+                zeroShakes += 1
+                AccessibilityNotification.Announcement(String(starhash: "Type an amount first")).post()
+                return
+            }
+            isRequesting = true
+        } label: {
+            Text("Request")
+                .starhashFont(18, weight: .semibold, relativeTo: .body)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .foregroundStyle(Color.starhashPrimaryText)
+                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity)
+                .frame(minHeight: StarHashMetrics.primaryButtonHeight)
+                .contentShape(Capsule())
+                .modifier(BalanceSurface())
+        }
+        .buttonStyle(PressScaleButtonStyle())
+    }
+
+    private var balanceButton: some View {
             // The system asks before it calls, so Balance needs no prompt
             // of its own.
             Button {
@@ -182,24 +252,6 @@ struct PayView: View {
             }
             .buttonStyle(PressScaleButtonStyle())
             .accessibilityHint("Dials \(USSD.balance(for: wallet))")
-
-            // Never greyed out: with nothing typed it looks as always, and
-            // a tap shakes the amount, as in the reference. It then beats
-            // twice like a heartbeat, on purpose: the press, then the
-            // shake's own softer tap on its widest swing (PayAmountDisplay).
-            Button("Pay") { next() }
-                .buttonStyle(.starhashPrimaryOnPay)
-                // Held, as in the reference: light streaming through the
-                // button, with nothing drawn under the finger.
-                .overlay {
-                    if !reduceMotion { PayPressOverlay(isPressed: payHeld) }
-                }
-                .simultaneousGesture(
-                    DragGesture(minimumDistance: 0).updating($payHeld) { _, held, _ in
-                        held = true
-                    }
-                )
-        }
     }
 
     // MARK: Actions
