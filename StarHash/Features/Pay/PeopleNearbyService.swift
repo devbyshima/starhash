@@ -31,6 +31,27 @@ final class PeopleNearbyService {
         var announcement: PeopleNearby.Announcement?
         /// The number handed to a phone that taps the owner.
         var handoff: PeopleNearby.Handoff?
+        /// Holding out a request to be tapped (`TapToRequest`): offered to
+        /// everyone nearby, with or without the owner's name.
+        var offersTap = false
+    }
+
+    /// What happens on Tap to Request's connections, for
+    /// `TapToRequestService`, which measures the taps.
+    enum TapEvent: Sendable {
+        /// A phone nearby holds out a request to be tapped.
+        case offered(String)
+        /// It no longer does, or left.
+        case withdrawn(String)
+        /// A tap connection opened with it, either way: `ranging` when it
+        /// is touch to pay's, measuring the distance to someone chosen.
+        case connected(String, ranging: Bool)
+        /// That connection closed, or never opened.
+        case ended(String)
+        /// What it sent over the tap connection.
+        case message(String, Data)
+        /// People Nearby stopped: every tap connection is gone.
+        case stopped
     }
 
     @ObservationIgnored private var setup = Setup()
@@ -42,6 +63,8 @@ final class PeopleNearbyService {
     /// What another phone sends over a tap's connection beyond the number
     /// (a request, an answer to one), with the phone it came from.
     @ObservationIgnored var onMessage: ((_ from: String, Data) -> Void)?
+    /// What happens on Tap to Request's connections.
+    @ObservationIgnored var onTap: ((TapEvent) -> Void)?
 
     func apply(_ next: Setup) {
         #if DEBUG
@@ -52,17 +75,18 @@ final class PeopleNearbyService {
         #endif
         guard next != setup else { return }
         setup = next
-        guard next.browses || next.announcement != nil else {
+        guard next.browses || next.announcement != nil || next.offersTap else {
             transport?.stop()
             transport = nil
             forgetEveryone()
+            onTap?(.stopped)
             return
         }
         let transport = transport ?? NearbyTransport { [weak self] event in
             Task { @MainActor in self?.handle(event) }
         }
         self.transport = transport
-        transport.update(browses: next.browses, announcement: next.announcement, handoff: next.handoff)
+        transport.update(browses: next.browses, announcement: next.announcement, handoff: next.handoff, offersTap: next.offersTap)
         if !next.browses { forgetEveryone() }
     }
 
@@ -107,6 +131,32 @@ final class PeopleNearbyService {
         transport?.close(id)
     }
 
+    // MARK: Tap to Request
+
+    /// Opens a tap connection to `id`, a phone holding out a request, or
+    /// with `ranging` one whose owner lets people see them and was chosen
+    /// to pay (touch to pay). It comes back as `.connected`, or `.ended`
+    /// when it doesn't open.
+    func connectTap(_ id: String, ranging: Bool = false) {
+        guard let transport else {
+            onTap?(.ended(id))
+            return
+        }
+        transport.connectTap(id, ranging: ranging)
+    }
+
+    /// Sends `data` over the tap connection with `id`. False when there is
+    /// none any more.
+    @discardableResult
+    func sendTap(_ data: Data, to id: String) -> Bool {
+        transport?.sendTap(data, to: id) ?? false
+    }
+
+    /// Closes the tap connection with `id`.
+    func endTap(_ id: String) {
+        transport?.endTap(id)
+    }
+
     private func handle(_ event: NearbyTransport.Event) {
         switch event {
         case .found(let id, let announcement):
@@ -120,6 +170,17 @@ final class PeopleNearbyService {
             finish(id, with: nil)
         case .message(let id, let data):
             onMessage?(id, data)
+        case .offer(let id):
+            guard setup.browses else { return }
+            onTap?(.offered(id))
+        case .offerEnded(let id):
+            onTap?(.withdrawn(id))
+        case .tapConnected(let id, let ranging):
+            onTap?(.connected(id, ranging: ranging))
+        case .tapEnded(let id):
+            onTap?(.ended(id))
+        case .tapMessage(let id, let data):
+            onTap?(.message(id, data))
         }
     }
 
@@ -158,6 +219,14 @@ private final class NearbyTransport: NSObject, @unchecked Sendable {
         case unreachable(id: String)
         /// Anything else `id`'s phone sent over an open connection.
         case message(id: String, Data)
+        /// `id`'s phone holds out a request to be tapped, or stopped.
+        case offer(id: String)
+        case offerEnded(id: String)
+        /// A tap connection with `id` opened, or closed (or never opened).
+        case tapConnected(id: String, ranging: Bool)
+        case tapEnded(id: String)
+        /// What `id`'s phone sent over a tap connection.
+        case tapMessage(id: String, Data)
     }
 
     private let me = MCPeerID(displayName: UUID().uuidString)
@@ -168,6 +237,17 @@ private final class NearbyTransport: NSObject, @unchecked Sendable {
     private var advertiser: MCNearbyServiceAdvertiser?
     private var announcement: PeopleNearby.Announcement?
     private var handoff: PeopleNearby.Handoff?
+    /// Holding out a request to be tapped.
+    private var offersTap = false
+    /// What the advertiser announces: the owner's name, the offer, or both.
+    private var advertisedInfo: [String: String]?
+    /// Phones found holding out a request, by their run's name.
+    private var offering: Set<String> = []
+    /// Tap connections, by the other phone's run name: ones this phone
+    /// opened to a request held out, and ones opened to its own.
+    private var tapping: [String: (session: MCSession, peer: MCPeerID)] = [:]
+    /// Those of them that are touch to pay's, measuring for a payment.
+    private var ranging: Set<String> = []
     /// Everyone found, by their run's name.
     private var peers: [String: MCPeerID] = [:]
     /// A tap's session, by the tapped phone's name, until its number comes.
@@ -191,11 +271,12 @@ private final class NearbyTransport: NSObject, @unchecked Sendable {
         return body()
     }
 
-    func update(browses: Bool, announcement: PeopleNearby.Announcement?, handoff: PeopleNearby.Handoff?) {
-        let (startBrowser, stopBrowser, startAdvertiser, stopAdvertiser) = locked {
+    func update(browses: Bool, announcement: PeopleNearby.Announcement?, handoff: PeopleNearby.Handoff?, offersTap: Bool) {
+        let (startBrowser, stopBrowser, startAdvertiser, stopAdvertiser, withdrawn) = locked {
             self.handoff = handoff
             var startBrowser: MCNearbyServiceBrowser?
             var stopBrowser: MCNearbyServiceBrowser?
+            var withdrawn: [String] = []
             if browses, browser == nil {
                 let made = MCNearbyServiceBrowser(peer: me, serviceType: PeopleNearby.serviceType)
                 made.delegate = self
@@ -205,35 +286,52 @@ private final class NearbyTransport: NSObject, @unchecked Sendable {
                 stopBrowser = browser
                 self.browser = nil
                 peers.removeAll()
+                withdrawn = Array(offering)
+                offering.removeAll()
             }
-            // A new name or photo is a new announcement: the old one stops.
+            // What the owner announces: their name while they may be seen,
+            // and the offer while they hold out a request. A new name, photo
+            // or offer is a new announcement: the old one stops.
+            var info = announcement?.discoveryInfo
+            if offersTap { info = TapToRequest.Offer.discoveryInfo(adding: info) }
             var startAdvertiser: MCNearbyServiceAdvertiser?
             var stopAdvertiser: MCNearbyServiceAdvertiser?
-            if announcement != self.announcement {
+            if info != advertisedInfo {
                 stopAdvertiser = advertiser
                 advertiser = nil
-                if let announcement {
-                    let made = MCNearbyServiceAdvertiser(peer: me, discoveryInfo: announcement.discoveryInfo, serviceType: PeopleNearby.serviceType)
+                if let info {
+                    let made = MCNearbyServiceAdvertiser(peer: me, discoveryInfo: info, serviceType: PeopleNearby.serviceType)
                     made.delegate = self
                     advertiser = made
                     startAdvertiser = made
                 }
-                self.announcement = announcement
+                advertisedInfo = info
             }
-            return (startBrowser, stopBrowser, startAdvertiser, stopAdvertiser)
+            self.announcement = announcement
+            self.offersTap = offersTap
+            return (startBrowser, stopBrowser, startAdvertiser, stopAdvertiser, withdrawn)
         }
         stopBrowser?.stopBrowsingForPeers()
         stopAdvertiser?.stopAdvertisingPeer()
         startBrowser?.startBrowsingForPeers()
         startAdvertiser?.startAdvertisingPeer()
+        for id in withdrawn { onEvent(.offerEnded(id: id)) }
     }
 
     func stop() {
         let (browser, advertiser, sessions) = locked {
-            let taken = (self.browser, self.advertiser, Array(reaching.values) + serving + talking.values.map(\.session))
+            let taken = (
+                self.browser, self.advertiser,
+                Array(reaching.values) + serving + talking.values.map(\.session) + tapping.values.map(\.session)
+            )
             self.browser = nil
             self.advertiser = nil
             announcement = nil
+            advertisedInfo = nil
+            offersTap = false
+            offering.removeAll()
+            tapping.removeAll()
+            ranging.removeAll()
             peers.removeAll()
             reaching.removeAll()
             outgoing.removeAll()
@@ -268,29 +366,83 @@ private final class NearbyTransport: NSObject, @unchecked Sendable {
     }
 
     /// Sends `data` to `id` over whichever session is open with it: one a
-    /// request kept open, or one it opened by tapping the owner.
+    /// request kept open, one it opened by tapping the owner, or a tap
+    /// connection a request came over.
     func send(_ data: Data, to id: String) -> Bool {
-        guard let open = locked({ talking[id] ?? servingPeers[id] }) else { return false }
+        guard let open = locked({ talking[id] ?? servingPeers[id] ?? tapping[id] }) else { return false }
         return (try? open.session.send(data, toPeers: [open.peer], with: .reliable)) != nil
     }
 
     func close(_ id: String) {
         locked { talking.removeValue(forKey: id) }?.session.disconnect()
     }
+
+    // MARK: Tap to Request
+
+    /// Opens a tap connection to `id`: one found holding out a request, or
+    /// with `isRanging` one found at all, chosen to pay by touch. A session
+    /// of its own, encrypted, asked for with a context of its own so the
+    /// other phone tells it from a People Nearby tap.
+    func connectTap(_ id: String, ranging isRanging: Bool) {
+        let (browser, peer, session) = locked { () -> (MCNearbyServiceBrowser?, MCPeerID?, MCSession?) in
+            guard let browser, let peer = peers[id], isRanging || offering.contains(id), tapping[id] == nil else { return (nil, nil, nil) }
+            let session = MCSession(peer: me, securityIdentity: nil, encryptionPreference: .required)
+            session.delegate = self
+            tapping[id] = (session, peer)
+            if isRanging { ranging.insert(id) }
+            return (browser, peer, session)
+        }
+        guard let browser, let peer, let session else {
+            onEvent(.tapEnded(id: id))
+            return
+        }
+        let context = isRanging ? TapToRequest.rangeContext : TapToRequest.inviteContext
+        browser.invitePeer(peer, to: session, withContext: context, timeout: 10)
+    }
+
+    func sendTap(_ data: Data, to id: String) -> Bool {
+        guard let open = locked({ tapping[id] }) else { return false }
+        return (try? open.session.send(data, toPeers: [open.peer], with: .reliable)) != nil
+    }
+
+    func endTap(_ id: String) {
+        locked { () -> (session: MCSession, peer: MCPeerID)? in
+            ranging.remove(id)
+            return tapping.removeValue(forKey: id)
+        }?.session.disconnect()
+    }
 }
 
 extension NearbyTransport: MCNearbyServiceBrowserDelegate {
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String: String]?) {
         let id = peerID.displayName
-        guard id != me.displayName, let announcement = PeopleNearby.Announcement(discoveryInfo: info) else { return }
-        locked { peers[id] = peerID }
-        onEvent(.found(id: id, announcement))
+        let announcement = PeopleNearby.Announcement(discoveryInfo: info)
+        let offers = TapToRequest.Offer.isOffered(info)
+        guard id != me.displayName, announcement != nil || offers else { return }
+        // True when it now offers to be tapped, false when it stopped.
+        let change = locked { () -> Bool? in
+            peers[id] = peerID
+            if offers { return offering.insert(id).inserted ? true : nil }
+            return offering.remove(id) != nil ? false : nil
+        }
+        // A phone holding out a request with its owner out of sight shows
+        // no face: an announcement that lost its name drops it.
+        if let announcement { onEvent(.found(id: id, announcement)) } else { onEvent(.lost(id: id)) }
+        switch change {
+        case true?: onEvent(.offer(id: id))
+        case false?: onEvent(.offerEnded(id: id))
+        case nil: break
+        }
     }
 
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
         let id = peerID.displayName
-        locked { _ = peers.removeValue(forKey: id) }
+        let wasOffering = locked { () -> Bool in
+            peers.removeValue(forKey: id)
+            return offering.remove(id) != nil
+        }
         onEvent(.lost(id: id))
+        if wasOffering { onEvent(.offerEnded(id: id)) }
     }
 
     func browser(_ browser: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: any Error) {
@@ -306,6 +458,26 @@ extension NearbyTransport: MCNearbyServiceAdvertiserDelegate {
         _ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID,
         withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void
     ) {
+        // A phone tapping a request the owner holds out: let in while they
+        // do, a few at a time. Or one that chose to pay the owner by touch:
+        // let in while the owner lets people see them, which is their yes,
+        // as it is to a tap asking their number. Either gets no number,
+        // only the measuring.
+        if context == TapToRequest.inviteContext || context == TapToRequest.rangeContext {
+            let id = peerID.displayName
+            let isRanging = context == TapToRequest.rangeContext
+            let session = locked { () -> MCSession? in
+                guard isRanging ? announcement != nil : offersTap,
+                      tapping[id] == nil, tapping.count < TapToRequest.maximumPeers else { return nil }
+                let session = MCSession(peer: me, securityIdentity: nil, encryptionPreference: .required)
+                session.delegate = self
+                tapping[id] = (session, peerID)
+                if isRanging { ranging.insert(id) }
+                return session
+            }
+            invitationHandler(session != nil, session)
+            return
+        }
         let session = locked { () -> MCSession? in
             guard handoff != nil, announcement != nil else { return nil }
             let session = MCSession(peer: me, securityIdentity: nil, encryptionPreference: .required)
@@ -322,6 +494,25 @@ extension NearbyTransport: MCNearbyServiceAdvertiserDelegate {
 extension NearbyTransport: MCSessionDelegate {
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
         let id = peerID.displayName
+        if locked({ tapping[id]?.session === session }) {
+            switch state {
+            case .connected:
+                onEvent(.tapConnected(id: id, ranging: locked { ranging.contains(id) }))
+            case .notConnected:
+                let ended = locked { () -> Bool in
+                    guard tapping[id]?.session === session else { return false }
+                    tapping[id] = nil
+                    ranging.remove(id)
+                    return true
+                }
+                if ended { onEvent(.tapEnded(id: id)) }
+            case .connecting:
+                break
+            @unknown default:
+                break
+            }
+            return
+        }
         switch state {
         case .connected:
             // The owner's side: hand the number over, once.
@@ -355,6 +546,10 @@ extension NearbyTransport: MCSessionDelegate {
 
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
         let id = peerID.displayName
+        if locked({ tapping[id]?.session === session }) {
+            onEvent(.tapMessage(id: id, data))
+            return
+        }
         // A tap's first answer is the number; then its request goes, and the
         // session stays for the reply. Anything else is a message.
         let (isHandoff, message) = locked { () -> (Bool, Data?) in

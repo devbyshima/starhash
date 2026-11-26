@@ -135,6 +135,13 @@ public struct MoneyRequest: Codable, Hashable, Identifiable, Sendable {
         return nil
     }
 
+    /// The request the owner sent that `transactionID` finished paying,
+    /// among `requests` once settled, or nil: the money received that it
+    /// was, said as the request.
+    public static func sent(paidBy transactionID: UUID, in requests: [MoneyRequest]) -> MoneyRequest? {
+        requests.first { $0.direction == .sent && $0.status == .paid && $0.transactionIDs?.last == transactionID }
+    }
+
     /// Whether `transaction` pays this request on its own.
     public func isPaid(by transaction: Transaction) -> Bool {
         payment(in: [transaction]) != nil
@@ -178,6 +185,29 @@ public struct MoneyRequest: Codable, Hashable, Identifiable, Sendable {
         case ask(Ask)
         /// The person asked declined.
         case declined(id: UUID)
+        /// The person asked tapped Pay on a request that came by a tap
+        /// (`TapToRequest`): who is paying, which the asker's phone did not
+        /// know, so its request settles from their SMS.
+        case paying(Payer)
+
+        public struct Payer: Hashable, Sendable {
+            /// The request being paid.
+            public var id: UUID
+            public var name: String?
+            /// The payer's own number: where the money comes from.
+            public var number: String
+
+            public init(id: UUID, name: String?, number: String) {
+                self.id = id
+                self.name = name.flatMap(PeopleNearby.Announcement.clean)
+                self.number = number
+            }
+
+            /// Who pays, as the asker's request keeps them.
+            public var person: Recipient {
+                Recipient(name: name, destination: number, kind: .phone)
+            }
+        }
 
         public struct Ask: Hashable, Sendable {
             public var id: UUID
@@ -204,6 +234,8 @@ public struct MoneyRequest: Codable, Hashable, Identifiable, Sendable {
                 Body(v: 1, kind: "ask", id: ask.id, name: ask.name, number: ask.number, photo: ask.photoID, amount: ask.amount, note: ask.note)
             case .declined(let id):
                 Body(v: 1, kind: "declined", id: id)
+            case .paying(let payer):
+                Body(v: 1, kind: "paying", id: payer.id, name: payer.name, number: payer.number)
             }
             return (try? JSONEncoder().encode(body)) ?? Data()
         }
@@ -221,6 +253,9 @@ public struct MoneyRequest: Codable, Hashable, Identifiable, Sendable {
                 self = .ask(Ask(id: body.id, name: name, number: number.destination, photoID: body.photo, amount: amount, note: body.note))
             case "declined":
                 self = .declined(id: body.id)
+            case "paying":
+                guard let number = body.number.flatMap({ Recipient(input: $0) }), number.isRwandanMobile else { return nil }
+                self = .paying(Payer(id: body.id, name: body.name, number: number.destination))
             default:
                 return nil
             }
