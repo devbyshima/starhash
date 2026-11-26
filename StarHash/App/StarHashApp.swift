@@ -117,6 +117,7 @@ struct StarHashApp: App {
                     .environment(AppEnvironment.autoVerify)
                     .environment(AppEnvironment.paying)
                     .environment(AppEnvironment.dialler)
+                    .environment(AppEnvironment.peopleNearby)
                     .environment(router)
                     .environment(shortcuts)
                     .tint(Color.starhashPrimaryText)

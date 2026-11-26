@@ -33,7 +33,7 @@ Foundation and Observation only, a `public` interface, iOS 18 and macOS 15, test
 - **Settings' choices:** `Preferences` (every switch and notification choice, under its key with its one default) and `NotificationPlan.Settings.stored`.
 - **The first run:** `FirstRun` (onboarding's screens, the one left saved by name, and the sheets that open after it, one at a time, in order).
 - **Reading the history:** `ActivitySummary` (totals, the chart's buckets, day and month groups, search), `SpendingReport` (the Report page: comparison with the period before and with the usual, the summary's insight, categories, top payments, payment types, each day spent on and the key days), `TransactionCategory` and `TransactionCategorizer`.
-- **Everything else:** `NotificationPlan` (what each local notification says and when), `Nearby` (and `remembersPlace`: a shop's place always, a number's only when it is no contact), `StarHashBackup` and `OwnerProfile`, `WidgetSnapshot`, `FeatureFlag` and `ReleaseChannel`, `ReleaseHistory` and `WhatsNew`, `StarHashLanguage` with `String(starhash:)` and `String(kit:)`.
+- **Everything else:** `NotificationPlan` (what each local notification says and when), `Nearby` (and `remembersPlace`: a shop's place always, a number's only when it is no contact), `PeopleNearby` (what phones close by announce and hand over, and who is found, behind the `peopleNearby` flag), `StarHashBackup` and `OwnerProfile`, `WidgetSnapshot`, `FeatureFlag` and `ReleaseChannel`, `ReleaseHistory` and `WhatsNew`, `StarHashLanguage` with `String(starhash:)` and `String(kit:)`.
 
 ### The App [SWIFTUI]
 
@@ -45,7 +45,7 @@ The lifecycle and the wiring. `AppEnvironment` holds the single `StarHashStore`,
 
 One folder per part of the app:
 
-- **Pay:** `PayView` and its keypad, `RecipientPickerView` (contacts, recents, Nearby, a typed number), `QRScannerView`, `SplitPaymentSheet`, `PaymentServices` (`Dialler` and its alert, `PaymentLocation`).
+- **Pay:** `PayView` and its keypad, `RecipientPickerView` (contacts, recents, People Nearby, Nearby, a typed number), `PeopleNearbyService` (MultipeerConnectivity, in front only) with `PeopleNearbyViews` (Pay's row of faces, the intro sheet, `PeopleNearbySync`), `QRScannerView`, `SplitPaymentSheet`, `PaymentServices` (`Dialler` and its alert, `PaymentLocation`).
 - **Activity** (the Transactions tab): `ActivityView` (the period control, `ActivitySummaryCard`'s chart, every transaction by month), `TransactionDetailPage`, `VerifyPaymentSheet`, and the Report: `ReportPage`, `ReportCards` (the summary sentence, the cards, the Payment Types orbs, the By Day calendar and `ReportFlowLayout`, which sets the sentences word by word), `ReportExport` (the PDF) and `ReportGallery` (Debug only: every sentence length, in every language).
 - **Buy**, **Profile** (the owner's photo, numbers and `QRTreeView`), **Settings** (`SettingsView`, `AutoVerificationGuide`, `NotificationSettingsView`, `LicencesView`), **Onboarding**, **Safety** and **WhatsNew**.
 
@@ -116,6 +116,7 @@ Things the code relies on that are easy to break:
 - **The owner's** name, numbers and wallet go through `Owner`, never `UserDefaults` or `@AppStorage` directly.
 - **Settings' choices** each have one default, in `Preferences`: views read them with `@AppStorage(Preferences.x)`, everything else with `Preferences.x.value()`, and neither writes a default of its own.
 - **Delete All Data** keeps what the server still has from this iPhone through the wipe (`ServerSync.erase(through:)`, whatever runs before or after it): the listing last sent, cleared at once, and any photo ever given an id, deleted on each `wake` until the server confirms, so the owner's listing and photo are deleted from the server after it. The Keychain key that can delete them survives the wipe and goes into the iPhone's encrypted backups.
+- **People Nearby** runs only while StarHash is in front, the flag is on and the intro's Continue was tapped, so iOS asks for the local network after StarHash's own screen. A phone announces a name and a photo's id, never the number; the number goes only to a phone that taps it, over an encrypted session. Being seen is off until the owner says yes (`Preferences.peopleNearbyVisible`).
 - **Contacts** are read only while Enable contacts is on: `PayContacts` checks it itself, and lets go of what it read when it is turned off.
 - **Text** built at run time goes through `String(starhash:)` (`String(kit:)` in the package), never `String(localized:)`, so the language chosen in Settings applies at once. There are three catalogs: the app's, the package's and the widgets'.
 - **The shortcut contract:** `ProcessCarrierSMSIntent`'s name and parameters, the bundle id and the team are written into the shared shortcut, and the app builds with `ENABLE_DEBUG_DYLIB: NO`, or Shortcuts cannot run the action. The iCloud link is a copy of the shortcut as it was shared: after making the file again, share a new link.

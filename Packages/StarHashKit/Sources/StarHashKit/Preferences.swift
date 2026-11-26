@@ -20,8 +20,8 @@ public struct Preference<Value: Sendable>: Sendable {
 }
 
 /// Every choice in Settings: everything on, every notification included,
-/// except Nearby (it needs location permission first), the Face ID lock
-/// and splitting large payments. The keys are the ones StarHash has always kept them under.
+/// except Nearby (it needs location permission first), the Face ID lock,
+/// splitting large payments and being seen by People Nearby. The keys are the ones StarHash has always kept them under.
 public enum Preferences {
     // MARK: Transactions and paying
 
@@ -49,6 +49,10 @@ public enum Preferences {
     /// Whether people who type the owner's number in StarHash see their
     /// name and photo.
     public static let showMyName = Preference("showMyName", default: true)
+    /// Whether StarHash users near the owner see them on Pay while
+    /// StarHash is open (`PeopleNearby`). Off until the owner says yes:
+    /// it shows their face to strangers.
+    public static let peopleNearbyVisible = Preference("peopleNearbyVisible", default: false)
 
     // MARK: Notifications
 

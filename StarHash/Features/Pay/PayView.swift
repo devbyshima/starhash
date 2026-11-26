@@ -13,6 +13,8 @@ struct PayView: View {
     @Environment(Paying.self) private var paying
     @Environment(Dialler.self) private var dialler
     @Environment(Owner.self) private var owner
+    @Environment(PeopleNearbyService.self) private var peopleNearby
+    @FeatureFlagged(.peopleNearby) private var peopleNearbyOn
     private var wallet: Recipient.Network { owner.wallet }
 
     @State private var input = AmountInput()
@@ -112,6 +114,12 @@ struct PayView: View {
                 }
                 .padding(.top, 12)
                 .transition(.scale(scale: 0.9).combined(with: .opacity))
+            } else if peopleNearbyOn, !peopleNearby.found.people.isEmpty {
+                // StarHash users close by, in the chosen recipient's place:
+                // a tap chooses one.
+                PeopleNearbyRow { take($0) }
+                    .padding(.top, 16)
+                    .transition(.opacity)
             }
             Spacer(minLength: 12)
 

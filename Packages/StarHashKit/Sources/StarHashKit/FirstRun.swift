@@ -63,6 +63,9 @@ public enum FirstRun {
         case whatsNew
         /// Once, for owners set up before Show My Name came.
         case showMyNameNotice
+        /// Once, when People Nearby comes: what it is, before iOS asks for
+        /// the local network, then whether people nearby may see the owner.
+        case peopleNearbyIntro
         /// Two weeks after the first setup, the note asking for a rating.
         case reviewNote
     }
@@ -78,11 +81,13 @@ public enum FirstRun {
         public var forcesWelcomeNote: Bool
         public var whatsNewPending: Bool
         public var showMyNameNoticeDue: Bool
+        public var peopleNearbyIntroDue: Bool
         public var reviewNoteDue: Bool
 
         public init(
             hasOnboarded: Bool, hasWallet: Bool, hasSeenWelcomeNote: Bool, forcesWelcomeNote: Bool = false,
-            whatsNewPending: Bool = false, showMyNameNoticeDue: Bool = false, reviewNoteDue: Bool = false
+            whatsNewPending: Bool = false, showMyNameNoticeDue: Bool = false, peopleNearbyIntroDue: Bool = false,
+            reviewNoteDue: Bool = false
         ) {
             self.hasOnboarded = hasOnboarded
             self.hasWallet = hasWallet
@@ -90,6 +95,7 @@ public enum FirstRun {
             self.forcesWelcomeNote = forcesWelcomeNote
             self.whatsNewPending = whatsNewPending
             self.showMyNameNoticeDue = showMyNameNoticeDue
+            self.peopleNearbyIntroDue = peopleNearbyIntroDue
             self.reviewNoteDue = reviewNoteDue
         }
     }
@@ -102,6 +108,7 @@ public enum FirstRun {
         if !state.hasSeenWelcomeNote { return .welcomeNote }
         if state.whatsNewPending { return .whatsNew }
         if state.showMyNameNoticeDue { return .showMyNameNotice }
+        if state.peopleNearbyIntroDue { return .peopleNearbyIntro }
         if state.reviewNoteDue { return .reviewNote }
         return nil
     }
