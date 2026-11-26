@@ -16,6 +16,8 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 - Choosing who to pay scrolls smoothly with a large address book: the list is worked out once per change rather than about twenty times, and no longer redrawn on every frame of a scroll.
 - Typing your name on Profile no longer redraws your QR code at every letter, which restarted the tree's turn each time: it is drawn again once you pause, and the picture you share is made only when you tap Share Code.
 - Transactions, Settings and Buy do less work as you use them: Transactions no longer regroups your whole history each time you open and close a payment, typing the other SIM's number no longer redraws all of Settings at each digit, and dragging a pinned code moves just that tile rather than redrawing all of Buy.
+- When you pay someone again or scan their code, the top of Pay says who you are paying, their photo over "Pay Ariane", with a close button that goes back to paying anyone, where a small label sat under the amount.
+- The notes on which SIM dials and on your name on StarHash are redrawn as a picture, a short bold title and one button, under a small title at the top.
 
 ## [1.0.0] - Unreleased
 

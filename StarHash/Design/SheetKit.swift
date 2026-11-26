@@ -7,7 +7,8 @@ import SwiftUI
 // cards whose rows are split by solid hairlines, small uppercase section
 // labels, 50pt buttons, and Beam's type scale, all on clear Liquid Glass
 // with the grabber showing. The accent is the text colour: near black, or
-// near white in dark mode.
+// near white in dark mode. Sheets that explain one thing are hero sheets
+// instead (HeroSheet.swift): a small caption and a close button on top.
 
 // MARK: Type
 
@@ -35,9 +36,10 @@ extension Font {
 extension View {
     /// A bottom sheet on clear Liquid Glass (the page behind shows through,
     /// refracted, at every height), with the grabber and `detents`. Before
-    /// iOS 26, a material.
+    /// iOS 26, a material. A hero sheet hides the grabber: its close button
+    /// says how to leave.
     @ViewBuilder
-    func sheetGlass(detents: Set<PresentationDetent> = [.medium, .large]) -> some View {
+    func sheetGlass(detents: Set<PresentationDetent> = [.medium, .large], dragIndicator: Visibility = .visible) -> some View {
         if #available(iOS 26.0, *) {
             self
                 // White in light mode: its text is a container's.
@@ -50,13 +52,13 @@ extension View {
                         .ignoresSafeArea()
                 }
                 .presentationDetents(detents)
-                .presentationDragIndicator(.visible)
+                .presentationDragIndicator(dragIndicator)
         } else {
             self
                 .starhashContainerSurface()
                 .presentationBackground(Color.sheetGlassTint)
                 .presentationDetents(detents)
-                .presentationDragIndicator(.visible)
+                .presentationDragIndicator(dragIndicator)
         }
     }
 
