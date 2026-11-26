@@ -292,6 +292,38 @@
         }
       }
     },
+    "Request for %@ from %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demande de %1$@ par %2$@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubusabe bwa %1$@ buvuye kuri %2$@"
+          }
+        }
+      }
+    },
+    "Request from %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demande de %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubusabe buvuye kuri %@"
+          }
+        }
+      }
+    },
     "Spent in total": {
       "localizations": {
         "rw": {

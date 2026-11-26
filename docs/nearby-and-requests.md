@@ -94,7 +94,7 @@ Without auto-verify, the asker marks it Paid by hand. The matching rules live in
   - `POST /v1/requests/<id>/answer`, for paid or declined, sealed to the asker.
   - `DELETE /v1/requests/<id>`, when the asker cancels.
 - **Limits:** 20 requests a day per key, one waiting request per pair of people, and a size cap. The nightly cron deletes expired requests along with lapsed directory entries.
-- **Getting them:** the app checks when it opens and through Background App Refresh, then shows a local notification. A real push arrives only with the paid team (Phase 5), and the push never carries the amount.
+- **Getting them:** the app checks when it opens and through Background App Refresh, then shows a local notification. A real push arrives only with the paid team (Phase 5, behind `STARHASH_PUSH`), and the push never carries the amount.
 - **The privacy policy** (`LegalPages.swift`, [privacy.md](privacy.md)) gains a line on what the server holds for a request and for how long.
 
 ## Tap to Request
@@ -169,11 +169,23 @@ The directory's keys, sealing, the `requests` table and its endpoints, Backgroun
 
 ### Phase 5: push notifications (paid team)
 
-APNs from the Worker, so a request arrives with StarHash closed.
+APNs from the Worker, so a request arrives with StarHash closed. Built behind `STARHASH_PUSH` (2026-11-26), off until the paid team has an APNs key. **Done when**, on two iPhones with the switch on and the Worker's APNs secrets set:
+- a request to an iPhone with StarHash closed shows "Request for 1,500 RWF from Jean Bosco" within seconds,
+- the push shows who asks and how much only once the iPhone has opened it (sealed on the way, so the server and Apple see none of it), and "New request" for anyone not in Contacts,
+- with StarHash in front, no banner: the request's card shows,
+- turning off Show My Name or request notifications, or Delete All Data, stops the pushes.
 
 ### Phase 6 (optional): a Verified mark
 
 A phone in People Nearby proves, with its directory key, that it owns the entry for the number it hands over.
+
+## Decided in Phase 5 (2026-11-26)
+
+- **A project switch, `STARHASH_PUSH`,** like `STARHASH_APP_GROUPS`, default `NO`: a free team cannot sign `aps-environment`. With `NO` the app has no entitlement, never registers, and removes a token an earlier build sent. The two switches pick one of four entitlements files.
+- **The push carries the request sealed, and is trusted for nothing.** The owner asked for "Request for … from …" on the push itself (2026-11-26), so the plan's "the push never carries the amount" now reads: never readably. The push says "New request" (a `loc-key` the app's catalog translates, in the iPhone's own language, since the server cannot know StarHash's) and carries the request exactly as sealed on the asker's iPhone, with the asker's public key; `mutable-content` hands it to a Notification Service Extension (`StarHashPushService`), which opens it with the owner's request key from the app's Keychain and shows "Request for 1,500 RWF from Jean Bosco" (the name saved in Contacts, the note under it; only who asks when amounts are hidden) when it passes the app's own checks (`PushedRequest`); anything else stays "New request". Woken by `content-available`, StarHash does what Background App Refresh does (`AnywhereRequests.refresh`), quietly as the push made the sound, says nothing of the request the push shows, and replaces the push with its own notification only where the extension could not open it. In front, the push is not shown and the card appears. A tap opens that request. The extension reads the key through the app's own Keychain access group (no App Group, a switch of its own), and the app shares the choices it follows there too (language, Show amounts, Enable contacts, the server).
+- **The token goes with the listing's key** (`ServerSync`, `PUT /v1/push`), only once the server has the listing with the key requests are sealed to, and only while Requests is on under Settings, Notifications: a push for someone who turned that off would show "New request" anyway. Sent again weekly, as the listing, replaced when iOS gives a new one, removed with Show My Name off, request notifications off, Delete All Data (`erase(through:)`) and a build without push. The server deletes a key's tokens with its listing, or when it is listed without a key, and a token APNs answers 410 for.
+- **Sandbox or production** comes from the build's provisioning profile (`PushToken.isSandbox`): a development profile's `aps-environment`, or none in TestFlight and the App Store. The server keeps it with the token and sends to that APNs.
+- **Only a request pushes.** A decline goes back to the asker as before (on opening, Background App Refresh); pushing answers too is a later choice.
 
 ## Decided in Phase 3 (2026-11-26)
 

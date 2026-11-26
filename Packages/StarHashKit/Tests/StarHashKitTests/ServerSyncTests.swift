@@ -16,9 +16,13 @@ struct ServerSyncTests {
         var photoAnswers: [ServerSync.PhotoAnswer] = []
         var takesListings = true
         var countsPings = true
+        var takesPush = true
         private(set) var photos: [(data: Data?, id: UUID)] = []
         private(set) var listings: [ServerSync.Listing?] = []
         private(set) var pings: [String] = []
+        /// Push tokens tied ("+token", "+token-replacing") and untied
+        /// ("-token"), in order.
+        private(set) var push: [String] = []
 
         func sendPhoto(_ data: Data?, id: UUID, key: String) async -> ServerSync.PhotoAnswer {
             photos.append((data, id))
@@ -33,6 +37,16 @@ struct ServerSyncTests {
         func ping(installID: String, version: String) async -> Bool {
             pings.append(installID)
             return countsPings
+        }
+
+        func registerPush(_ token: PushToken, replacing: String?, key: String) async -> Bool {
+            push.append("+" + token.hex + (replacing.map { "-" + $0 } ?? ""))
+            return takesPush
+        }
+
+        func removePush(_ hex: String, key: String) async -> Bool {
+            push.append("-" + hex)
+            return takesPush
         }
     }
 
@@ -59,7 +73,7 @@ struct ServerSyncTests {
         /// The public key requests are sealed to, while the owner takes them.
         let publicKey = KeyBox()
 
-        init(listed: Bool = true, isSimulator: Bool = false) {
+        init(listed: Bool = true, isSimulator: Bool = false, push: Bool = false) {
             owner = Owner(defaults: defaults)
             if listed {
                 owner.setName("Shima Serein")
@@ -68,7 +82,8 @@ struct ServerSyncTests {
             let photo = photo, publicKey = publicKey
             sync = ServerSync(
                 server: server, key: { "key" }, owner: owner, photo: { photo.data }, hasPhoto: { photo.data != nil },
-                publicKey: { publicKey.key }, defaults: defaults, version: "1.1.0", isSimulator: isSimulator
+                publicKey: { publicKey.key }, defaults: defaults, version: "1.1.0", isSimulator: isSimulator,
+                pushEnabled: push
             )
         }
 
@@ -282,6 +297,209 @@ struct ServerSyncTests {
         rig.sync.wake(at: noon)
         await rig.sync.settle()
         #expect(rig.server.photos.count == afterErase + 1)
+    }
+
+    // MARK: Push
+
+    private let token = PushToken(hex: "ab01", sandbox: false)
+    private let newToken = PushToken(hex: "cd02", sandbox: false)
+
+    @Test func theTokenIsOnTheServerOnlyWhileTheOwnerTakesRequestsAndWantsWordOfThem() {
+        let week = 7 * 86_400.0
+        func step(
+            _ token: PushToken?, _ listing: ServerSync.ListingForPush, notifies: Bool = true,
+            sent: PushToken? = nil, sentAt: Date? = nil, now: Date? = nil
+        ) -> ServerSync.PushStep {
+            ServerSync.pushStep(
+                token: token, listing: listing, notifies: notifies, sent: sent, sentAt: sentAt ?? noon, now: now ?? noon
+            )
+        }
+        #expect(step(token, .takesRequests) == .register(token, replacing: nil))
+        #expect(step(token, .takesRequests, sent: token) == .keep)
+        // A week on, it goes again so the server never lets it lapse.
+        #expect(step(token, .takesRequests, sent: token, now: noon.addingTimeInterval(week - 60)) == .keep)
+        #expect(step(token, .takesRequests, sent: token, now: noon.addingTimeInterval(week + 60)) == .register(token, replacing: nil))
+        // A new token replaces the old one there.
+        #expect(step(newToken, .takesRequests, sent: token) == .register(newToken, replacing: "ab01"))
+        // The same token, from the other service.
+        let sandboxed = PushToken(hex: "ab01", sandbox: true)
+        #expect(step(sandboxed, .takesRequests, sent: token) == .register(sandboxed, replacing: nil))
+        // A listing on its way: the token waits for it, whatever was sent.
+        #expect(step(token, .onItsWay) == .keep)
+        #expect(step(nil, .onItsWay, sent: token) == .keep)
+        // No push in this build, no listing, or no word of requests wanted:
+        // what was sent goes, and nothing is sent when nothing was.
+        #expect(step(nil, .takesRequests, sent: token) == .remove("ab01"))
+        #expect(step(token, .notTaking, sent: token) == .remove("ab01"))
+        #expect(step(token, .takesRequests, notifies: false, sent: token) == .remove("ab01"))
+        #expect(step(nil, .notTaking) == .keep)
+        #expect(step(token, .takesRequests, notifies: false) == .keep)
+    }
+
+    /// A rig listed with the key requests are sealed to, in a build with push.
+    private func pushRig() -> Rig {
+        let rig = Rig(push: true)
+        rig.publicKey.key = RequestSeal.publicKey(of: RequestSeal.makeKey())
+        return rig
+    }
+
+    @Test func theTokenGoesOnceTheServerHasTheListing() async {
+        let rig = pushRig()
+        rig.server.takesListings = false
+        rig.sync.pushTokenReceived(token, at: noon)
+        rig.sync.ownerChanged(at: noon)
+        await rig.sync.settle()
+        // The server takes a token only from a key it lists.
+        #expect(rig.server.push.isEmpty)
+        rig.server.takesListings = true
+        rig.sync.wake(at: noon)
+        await rig.sync.settle()
+        #expect(rig.server.listings.count == 2 && rig.server.push == ["+ab01"])
+        // Sent once.
+        rig.sync.wake(at: noon)
+        rig.sync.pushTokenReceived(token, at: noon)
+        await rig.sync.settle()
+        #expect(rig.server.push == ["+ab01"])
+    }
+
+    @Test func aTokenThatComesAfterTheListingGoesStraightAway() async {
+        let rig = pushRig()
+        rig.sync.ownerChanged(at: noon)
+        await rig.sync.settle()
+        #expect(rig.server.push.isEmpty)
+        rig.sync.pushTokenReceived(token, at: noon)
+        await rig.sync.settle()
+        #expect(rig.server.push == ["+ab01"])
+        rig.sync.pushTokenReceived(newToken, at: noon)
+        await rig.sync.settle()
+        #expect(rig.server.push == ["+ab01", "+cd02-ab01"])
+    }
+
+    @Test func noTokenGoesWithoutRequestsFromAnywhere() async {
+        let rig = Rig(push: true)
+        rig.sync.pushTokenReceived(token, at: noon)
+        rig.sync.ownerChanged(at: noon)
+        await rig.sync.settle()
+        #expect(rig.server.listings.count == 1 && rig.server.push.isEmpty)
+    }
+
+    @Test func noTokenGoesFromABuildWithoutPush() async {
+        let rig = Rig()
+        rig.publicKey.key = RequestSeal.publicKey(of: RequestSeal.makeKey())
+        rig.sync.pushTokenReceived(token, at: noon)
+        rig.sync.ownerChanged(at: noon)
+        await rig.sync.settle()
+        #expect(rig.server.push.isEmpty)
+    }
+
+    @Test func aBuildWithoutPushRemovesTheTokenAnEarlierOneSent() async {
+        let pushed = pushRig()
+        pushed.sync.pushTokenReceived(token, at: noon)
+        pushed.sync.ownerChanged(at: noon)
+        await pushed.sync.settle()
+        #expect(pushed.server.push == ["+ab01"])
+        // The next build, with the switch off, on the same settings.
+        let server = FakeServer()
+        let owner = Owner(defaults: pushed.defaults)
+        let key = pushed.publicKey.key
+        let next = ServerSync(
+            server: server, key: { "key" }, owner: owner, photo: { nil }, hasPhoto: { false }, publicKey: { key },
+            defaults: pushed.defaults, version: "1.1.1", isSimulator: false
+        )
+        next.wake(at: noon)
+        await next.settle()
+        #expect(server.push == ["-ab01"])
+        next.wake(at: noon)
+        await next.settle()
+        #expect(server.push == ["-ab01"])
+    }
+
+    @Test func showMyNameOffRemovesTheToken() async {
+        let rig = pushRig()
+        rig.sync.pushTokenReceived(token, at: noon)
+        rig.sync.ownerChanged(at: noon)
+        await rig.sync.settle()
+        rig.defaults.set(false, forKey: Preferences.showMyName.key)
+        rig.sync.ownerChanged(at: noon)
+        await rig.sync.settle()
+        #expect(rig.server.push == ["+ab01", "-ab01"])
+        // Back on: it goes again with the listing.
+        rig.defaults.set(true, forKey: Preferences.showMyName.key)
+        rig.sync.ownerChanged(at: noon)
+        await rig.sync.settle()
+        #expect(rig.server.push == ["+ab01", "-ab01", "+ab01"])
+    }
+
+    @Test func requestNotificationsOffRemovesTheToken() async {
+        let rig = pushRig()
+        rig.sync.pushTokenReceived(token, at: noon)
+        rig.sync.ownerChanged(at: noon)
+        await rig.sync.settle()
+        rig.defaults.set(false, forKey: Preferences.requestNotifications.key)
+        rig.sync.requestNotificationsChanged(at: noon)
+        await rig.sync.settle()
+        #expect(rig.server.push == ["+ab01", "-ab01"])
+        rig.defaults.set(true, forKey: Preferences.requestNotifications.key)
+        rig.sync.requestNotificationsChanged(at: noon)
+        await rig.sync.settle()
+        #expect(rig.server.push == ["+ab01", "-ab01", "+ab01"])
+    }
+
+    @Test func aTokenRemovalTheServerDidNotTakeGoesAgain() async {
+        let rig = pushRig()
+        rig.sync.pushTokenReceived(token, at: noon)
+        rig.sync.ownerChanged(at: noon)
+        await rig.sync.settle()
+        rig.server.takesPush = false
+        rig.defaults.set(false, forKey: Preferences.showMyName.key)
+        rig.sync.ownerChanged(at: noon)
+        await rig.sync.settle()
+        rig.server.takesPush = true
+        rig.sync.wake(at: noon)
+        await rig.sync.settle()
+        rig.sync.wake(at: noon)
+        await rig.sync.settle()
+        #expect(rig.server.push == ["+ab01", "-ab01", "-ab01"])
+    }
+
+    @Test func theTokenGoesAgainAfterAWeek() async {
+        let rig = pushRig()
+        rig.sync.pushTokenReceived(token, at: noon)
+        rig.sync.ownerChanged(at: noon)
+        await rig.sync.settle()
+        rig.sync.wake(at: noon.addingTimeInterval(6 * 86_400))
+        await rig.sync.settle()
+        #expect(rig.server.push == ["+ab01"])
+        rig.sync.wake(at: noon.addingTimeInterval(8 * 86_400))
+        await rig.sync.settle()
+        #expect(rig.server.listings.count == 2 && rig.server.push == ["+ab01", "+ab01"])
+    }
+
+    @Test func eraseRemovesTheTokenAndKeepsItForTheNextListing() async {
+        let rig = pushRig()
+        rig.sync.pushTokenReceived(token, at: noon)
+        rig.sync.ownerChanged(at: noon)
+        await rig.sync.settle()
+        rig.sync.erase { rig.wipe() }
+        await rig.sync.settle()
+        #expect(rig.server.push == ["+ab01", "-ab01"])
+        let last = rig.server.listings.last
+        #expect(last == .some(nil))
+        // Set up again: the token iOS gave this run goes with the new listing.
+        rig.owner.setName("Shima")
+        _ = rig.owner.setNumber("0788123456")
+        rig.sync.ownerChanged(at: noon)
+        await rig.sync.settle()
+        #expect(rig.server.push == ["+ab01", "-ab01", "+ab01"])
+    }
+
+    @Test func theSimulatorNeverSendsAToken() async {
+        let rig = Rig(isSimulator: true, push: true)
+        rig.publicKey.key = RequestSeal.publicKey(of: RequestSeal.makeKey())
+        rig.sync.pushTokenReceived(token, at: noon)
+        rig.sync.wake(at: noon)
+        await rig.sync.settle()
+        #expect(rig.server.push.isEmpty)
     }
 
     // MARK: The daily count

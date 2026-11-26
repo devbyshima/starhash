@@ -71,7 +71,8 @@ enum AppEnvironment {
 
     /// What StarHash keeps on its server: the owner's photo, their Show My
     /// Name listing (with the key requests are sealed to, while they take
-    /// them) and the daily count.
+    /// them), the daily count, and in a build with push the token a request
+    /// wakes StarHash by.
     static let serverSync: ServerSync = {
         #if targetEnvironment(simulator)
         // A Worker run on the Mac (`-server`) may list Simulator owners:
@@ -91,7 +92,8 @@ enum AppEnvironment {
                 return RequestSeal.publicKey(of: key)
             },
             version: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "",
-            isSimulator: isSimulator
+            isSimulator: isSimulator,
+            pushEnabled: StarHashPush.isOn
         )
     }()
 

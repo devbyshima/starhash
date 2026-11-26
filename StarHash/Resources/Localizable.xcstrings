@@ -717,6 +717,24 @@
         }
       }
     },
+    "New request": {
+      "comment": "The server's push when someone asks the owner for money (server/src/push.ts sends it as loc-key; iOS looks it up here). Never says who or how much.",
+      "extractionState": "manual",
+      "localizations": {
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubusabe bushya"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nouvelle demande"
+          }
+        }
+      }
+    },
     "No Requests": {
       "localizations": {
         "fr": {
@@ -11648,18 +11666,18 @@
         }
       }
     },
-    "Only if you allow them, which StarHash asks once as you set it up. It makes its reminders and summaries on your iPhone from the transactions it already keeps, and word of a request for money from the ones it fetches; nothing is pushed to it from a server. Choose on its Notifications page what they tell you of, and whether they show amounts on your Lock Screen.": {
+    "Only if you allow them, which StarHash asks once as you set it up. It makes its reminders and summaries on your iPhone from the transactions it already keeps, and word of a request for money from the ones it fetches; a request a server pushes to it arrives sealed, and is opened only on your iPhone. Choose on its Notifications page what they tell you of, and whether they show amounts on your Lock Screen.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Seulement si vous les autorisez, ce que StarHash demande une fois lors de la configuration. Il crée ses rappels et résumés sur votre iPhone à partir des transactions qu'il garde déjà, et vous signale une demande d'argent parmi celles qu'il récupère ; rien ne lui est poussé par un serveur. Choisissez sur sa page Notifications ce qu'elles vous signalent, et si elles montrent les montants sur l'écran verrouillé."
+            "value": "Seulement si vous les autorisez, ce que StarHash demande une fois lors de la configuration. Il crée ses rappels et résumés sur votre iPhone à partir des transactions qu'il garde déjà, et vous signale une demande d'argent parmi celles qu'il récupère ; une demande qu'un serveur lui envoie arrive scellée, et n'est ouverte que sur votre iPhone. Choisissez sur sa page Notifications ce qu'elles vous signalent, et si elles montrent les montants sur l'écran verrouillé."
           }
         },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gusa iyo ubyemeye, kandi StarHash ibikubaza rimwe gusa igihe uyitunganya. Ikora ibyibutsa n'incamake byayo kuri iPhone yawe, ikoresheje ibikorwa isanzwe ibika, ikanakumenyesha ubusabe bw'amafaranga mu bwo izana; nta kintu na kimwe seriveri iyisunikira. Ku rupapuro rwayo rwa Imenyesha, hitamo ibyo ikumenyesha, kandi uhitemo niba yerekana amafaranga kuri Lock Screen yawe."
+            "value": "Gusa iyo ubyemeye, kandi StarHash ibikubaza rimwe gusa igihe uyitunganya. Ikora ibyibutsa n'incamake byayo kuri iPhone yawe, ikoresheje ibikorwa isanzwe ibika, ikanakumenyesha ubusabe bw'amafaranga mu bwo izana; ubusabe seriveri iyoherereza buza bufungiye, bugafungurirwa kuri iPhone yawe gusa. Ku rupapuro rwayo rwa Imenyesha, hitamo ibyo ikumenyesha, kandi uhitemo niba yerekana amafaranga kuri Lock Screen yawe."
           }
         }
       }
@@ -11776,18 +11794,18 @@
         }
       }
     },
-    "When you ask someone who isn't near you for money, or they ask you, the request passes through StarHash's server. What it says (who asks, the number the money goes to, how much and what for) is sealed on the asker's iPhone so that only the other person's iPhone can open it, and a decline goes back sealed the same way: the server cannot read either. It keeps only which listed number asked which, and when, for the request's seven days, and deletes that the night after. Cancelling a request wipes what was sealed at once, and so does a request from someone who is not in your contacts, which StarHash never shows you. Requests need Show my name on, and your listing then also carries the public half of a key your iPhone makes, which requests to you are sealed to. Requests between people standing near each other go from iPhone to iPhone, and never reach the server. Holding your iPhone to someone else's to ask for money, or to be asked, measures how far apart the two are with Nearby Interaction, between those two iPhones only, and shows that request even from someone who is not in your contacts; your number goes to the person asking only when you tap Pay.": {
+    "When you ask someone who isn't near you for money, or they ask you, the request passes through StarHash's server. What it says (who asks, the number the money goes to, how much and what for) is sealed on the asker's iPhone so that only the other person's iPhone can open it, and a decline goes back sealed the same way: the server cannot read either. It keeps only which listed number asked which, and when, for the request's seven days, and deletes that the night after. Cancelling a request wipes what was sealed at once, and so does a request from someone who is not in your contacts, which StarHash never shows you. Requests need Show my name on, and your listing then also carries the public half of a key your iPhone makes, which requests to you are sealed to. When someone asks you, the server can also have Apple's push service wake StarHash with the request still sealed, so neither the server nor Apple can read it: your iPhone opens it to show who asks and for how much, only when they are in your contacts. For that, your iPhone gives the server the token Apple's service made for it, kept with your listing and deleted with it, or when you turn off notifications of requests or use Delete All Data. Requests between people standing near each other go from iPhone to iPhone, and never reach the server. Holding your iPhone to someone else's to ask for money, or to be asked, measures how far apart the two are with Nearby Interaction, between those two iPhones only, and shows that request even from someone who is not in your contacts; your number goes to the person asking only when you tap Pay.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Quand vous demandez de l'argent à quelqu'un qui n'est pas près de vous, ou qu'il vous en demande, la demande passe par le serveur de StarHash. Ce qu'elle dit (qui demande, le numéro où va l'argent, combien et pour quoi) est scellé sur l'iPhone de celui qui demande, pour que seul l'iPhone de l'autre puisse l'ouvrir, et un refus revient scellé de la même façon : le serveur ne peut lire ni l'un ni l'autre. Il ne garde que quel numéro inscrit a fait une demande à quel autre, et quand, pendant les sept jours de la demande, et le supprime la nuit suivante. Annuler une demande efface aussitôt ce qui était scellé, comme pour une demande de quelqu'un qui n'est pas dans vos contacts, que StarHash ne vous montre jamais. Les demandes nécessitent qu'Afficher mon nom soit activé ; votre inscription porte alors aussi la moitié publique d'une clé que crée votre iPhone, à laquelle sont scellées les demandes qui vous sont faites. Les demandes entre personnes proches l'une de l'autre vont d'un iPhone à l'autre et n'atteignent jamais le serveur. Approcher votre iPhone de celui de quelqu'un pour demander de l'argent, ou pour qu'on vous en demande, mesure la distance entre les deux avec Interactions à proximité, entre ces deux iPhone seulement, et affiche cette demande même si elle vient de quelqu'un qui n'est pas dans vos contacts ; votre numéro ne va à la personne qui demande que lorsque vous touchez Payer."
+            "value": "Quand vous demandez de l'argent à quelqu'un qui n'est pas près de vous, ou qu'il vous en demande, la demande passe par le serveur de StarHash. Ce qu'elle dit (qui demande, le numéro où va l'argent, combien et pour quoi) est scellé sur l'iPhone de celui qui demande, pour que seul l'iPhone de l'autre puisse l'ouvrir, et un refus revient scellé de la même façon : le serveur ne peut lire ni l'un ni l'autre. Il ne garde que quel numéro inscrit a fait une demande à quel autre, et quand, pendant les sept jours de la demande, et le supprime la nuit suivante. Annuler une demande efface aussitôt ce qui était scellé, comme pour une demande de quelqu'un qui n'est pas dans vos contacts, que StarHash ne vous montre jamais. Les demandes nécessitent qu'Afficher mon nom soit activé ; votre inscription porte alors aussi la moitié publique d'une clé que crée votre iPhone, à laquelle sont scellées les demandes qui vous sont faites. Quand quelqu'un vous fait une demande, le serveur peut aussi faire réveiller StarHash par le service de notifications d'Apple, avec la demande toujours scellée, que ni le serveur ni Apple ne peuvent lire : votre iPhone l'ouvre pour afficher qui demande et combien, seulement si cette personne est dans vos contacts. Pour cela, votre iPhone donne au serveur le jeton que le service d'Apple a créé pour lui, gardé avec votre inscription et supprimé avec elle, ou quand vous désactivez les notifications de demandes ou utilisez Supprimer toutes les données. Les demandes entre personnes proches l'une de l'autre vont d'un iPhone à l'autre et n'atteignent jamais le serveur. Approcher votre iPhone de celui de quelqu'un pour demander de l'argent, ou pour qu'on vous en demande, mesure la distance entre les deux avec Interactions à proximité, entre ces deux iPhone seulement, et affiche cette demande même si elle vient de quelqu'un qui n'est pas dans vos contacts ; votre numéro ne va à la personne qui demande que lorsque vous touchez Payer."
           }
         },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Iyo usabye amafaranga umuntu utari hafi yawe, cyangwa we akayagusaba, ubusabe bunyura kuri seriveri ya StarHash. Ibyo buvuga (usaba, nimero amafaranga ajyaho, angahe n'icyo agenewe) bifungirwa kuri iPhone y'usaba ku buryo iPhone y'undi muntu yonyine ari yo ishobora kubifungura, kandi kwanga bigaruka bifungiwe kimwe: seriveri ntishobora gusoma na kimwe muri byo. Ibika gusa nimero yanditswe yasabye indi, n'igihe, mu minsi irindwi y'ubusabe, hanyuma ikabisiba mu ijoro rikurikira. Guhagarika ubusabe bisiba ako kanya ibyari bifungiwe, kimwe n'ubusabe buvuye ku muntu utari mu bo muvugana, StarHash itajya ikwereka. Ubusabe busaba ko Erekana izina ryanjye iba ifunguye, kandi icyo gihe ibyo wanditse binatwara igice rusange cy'urufunguzo iPhone yawe ikora, ari rwo ubusabe bukugenewe bufungirwaho. Ubusabe hagati y'abantu begeranye buva kuri iPhone imwe bujya ku yindi, kandi ntibugera kuri seriveri. Kwegereza iPhone yawe iy'undi muntu ngo usabe amafaranga, cyangwa bayagusabe, bipima intera iri hagati yazo hakoreshejwe Nearby Interaction, hagati y'izo iPhone ebyiri gusa, kandi bikwereka ubwo busabe kabone n'iyo buturutse ku muntu utari muri contacts zawe; nimero yawe igera ku ukwaka ari uko ukanze Ishyura gusa."
+            "value": "Iyo usabye amafaranga umuntu utari hafi yawe, cyangwa we akayagusaba, ubusabe bunyura kuri seriveri ya StarHash. Ibyo buvuga (usaba, nimero amafaranga ajyaho, angahe n'icyo agenewe) bifungirwa kuri iPhone y'usaba ku buryo iPhone y'undi muntu yonyine ari yo ishobora kubifungura, kandi kwanga bigaruka bifungiwe kimwe: seriveri ntishobora gusoma na kimwe muri byo. Ibika gusa nimero yanditswe yasabye indi, n'igihe, mu minsi irindwi y'ubusabe, hanyuma ikabisiba mu ijoro rikurikira. Guhagarika ubusabe bisiba ako kanya ibyari bifungiwe, kimwe n'ubusabe buvuye ku muntu utari mu bo muvugana, StarHash itajya ikwereka. Ubusabe busaba ko Erekana izina ryanjye iba ifunguye, kandi icyo gihe ibyo wanditse binatwara igice rusange cy'urufunguzo iPhone yawe ikora, ari rwo ubusabe bukugenewe bufungirwaho. Iyo hari ugusabye, seriveri ishobora no gusaba serivisi ya Apple yohereza imenyesha gukangura StarHash, ubusabe bukiri bufungiye, ku buryo seriveri cyangwa Apple bidashobora kubusoma: iPhone yawe ni yo ibufungura ikerekana usaba n'amafaranga angahe, ari uko gusa ari mu bo muvugana. Kubera ibyo, iPhone yawe iha seriveri ikimenyetso serivisi ya Apple yayikoreye, kibikwa hamwe n'ibyo wanditse kandi kigasibwa hamwe na byo, cyangwa igihe uzimije imenyesha ry'ubusabe cyangwa ukoresheje Siba amakuru yose. Ubusabe hagati y'abantu begeranye buva kuri iPhone imwe bujya ku yindi, kandi ntibugera kuri seriveri. Kwegereza iPhone yawe iy'undi muntu ngo usabe amafaranga, cyangwa bayagusabe, bipima intera iri hagati yazo hakoreshejwe Nearby Interaction, hagati y'izo iPhone ebyiri gusa, kandi bikwereka ubwo busabe kabone n'iyo buturutse ku muntu utari muri contacts zawe; nimero yawe igera ku ukwaka ari uko ukanze Ishyura gusa."
           }
         }
       }
