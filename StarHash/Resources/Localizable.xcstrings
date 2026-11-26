@@ -33,6 +33,22 @@
         }
       }
     },
+    "%@ asks for\n%@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ demande\n%@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ arakwaka\n%@"
+          }
+        }
+      }
+    },
     "%@ is nearby": {
       "localizations": {
         "fr": {
@@ -45,6 +61,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ ari hafi"
+          }
+        }
+      }
+    },
+    "%@ is\nnearby": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ est\nà proximité"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ari\nhafi"
           }
         }
       }

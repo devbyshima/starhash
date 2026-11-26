@@ -397,7 +397,7 @@ private struct RequestAnywhereSection: View {
 }
 
 /// The requests waiting for the owner, in Pay's pill (`PayPill`, on Liquid
-/// Glass) ahead of anyone nearby: "JEAN ASKS FOR 5,000 RWF" by their face,
+/// Glass) ahead of anyone nearby: "JEAN ASKS FOR / 5,000 RWF" by their face,
 /// turning through them while there are several. No buttons of its own:
 /// Pay is already on the page. A tap opens the request's sheet, where it is
 /// paid or declined, whatever way it came (nearby, the server, a touch).
@@ -407,9 +407,8 @@ struct RequestPill: View {
 
     var body: some View {
         PayPill(items: requests, onTap: onOpen) { request in
-            HStack(spacing: 8) {
-                RequestTile(request: request, size: 24)
-                PayPillText(text: Text("\(request.person.firstName) asks for \(Money.formatWithCurrency(request.amount))"))
+            PayPillLabel(text: Text("\(request.person.firstName) asks for\n\(Money.formatWithCurrency(request.amount))")) {
+                RequestTile(request: request, size: PayPillMetrics.face)
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(Text("\(request.person.shownName) asks for \(Money.formatWithCurrency(request.amount))"))
