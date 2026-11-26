@@ -33,6 +33,22 @@
         }
       }
     },
+    "%@ is nearby": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ est à proximité"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ari hafi"
+          }
+        }
+      }
+    },
     "%@ number": {
       "localizations": {
         "rw": {
@@ -493,6 +509,22 @@
         }
       }
     },
+    "Bring Phones Together": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rapprochez les téléphones"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Egeranya telefoni"
+          }
+        }
+      }
+    },
     "Cancel Request": {
       "localizations": {
         "fr": {
@@ -637,6 +669,22 @@
         }
       }
     },
+    "Hold the top of your iPhone near the top of %@'s to pay %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approchez le haut de votre iPhone du haut de celui de %1$@ pour payer %2$@."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Egereza hejuru ya iPhone yawe hejuru ya telefoni ya %1$@ kugira ngo wishyure %2$@."
+          }
+        }
+      }
+    },
     "Let Them See Me": {
       "localizations": {
         "fr": {
@@ -681,6 +729,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wemera ko bakubona?"
+          }
+        }
+      }
+    },
+    "Looking for people nearby": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recherche de personnes à proximité"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turashakisha abantu bari hafi"
           }
         }
       }
@@ -765,6 +829,38 @@
         }
       }
     },
+    "Pay Who's Close By": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payez qui est tout près"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ishyura uri hafi yawe"
+          }
+        }
+      }
+    },
+    "Pay Without Touching": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payer sans rapprocher"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ishyura udahuje telefoni"
+          }
+        }
+      }
+    },
     "People Nearby": {
       "localizations": {
         "fr": {
@@ -845,34 +941,50 @@
         }
       }
     },
-    "StarHash users near you show up on Pay while StarHash is open": {
+    "Shows everyone nearby": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les utilisateurs de StarHash près de vous apparaissent sur Payer tant que StarHash est ouvert"
+            "value": "Affiche toutes les personnes à proximité"
           }
         },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Abakoresha StarHash bari hafi yawe bagaragara kuri Ishyura igihe StarHash ifunguye"
+            "value": "Yerekana abantu bose bari hafi"
           }
         }
       }
     },
-    "Tap one to pay them, with no QR code": {
+    "StarHash users near you show up at the top of Pay while StarHash is open. Tap one to pay them, with no QR code.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Touchez-en un pour le payer, sans code QR"
+            "value": "Les utilisateurs de StarHash près de vous apparaissent en haut de Payer tant que StarHash est ouvert. Touchez-en un pour le payer, sans code QR."
           }
         },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kanda kuri umwe umwishyure, nta kode ya QR"
+            "value": "Abakoresha StarHash bari hafi yawe bagaragara hejuru kuri Ishyura igihe StarHash ifunguye. Kanda kuri umwe umwishyure, nta kode ya QR."
+          }
+        }
+      }
+    },
+    "Tap someone to pay them": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touchez quelqu'un pour le payer"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kanda ku muntu umwishyure"
           }
         }
       }
@@ -1181,34 +1293,34 @@
         }
       }
     },
-    "Your name and photo show on their Pay while StarHash is open": {
+    "You asked %@ for %@": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Votre nom et votre photo apparaissent sur leur écran Payer tant que StarHash est ouvert"
+            "value": "Vous avez demandé %2$@ à %1$@"
           }
         },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Izina ryawe n'ifoto yawe bigaragara kuri Ishyura yabo igihe StarHash ifunguye"
+            "value": "Wasabye %1$@ %2$@"
           }
         }
       }
     },
-    "Only someone who taps you gets your number": {
+    "Your name and photo show on their Pay while StarHash is open. Only someone who taps you gets your number.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Seule la personne qui vous touche reçoit votre numéro"
+            "value": "Votre nom et votre photo apparaissent sur leur écran Payer tant que StarHash est ouvert. Seule la personne qui vous touche reçoit votre numéro."
           }
         },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ukanze kuri wowe wenyine ni we ubona nimero yawe"
+            "value": "Izina ryawe n'ifoto yawe bigaragara kuri Ishyura yabo igihe StarHash ifunguye. Ukanze kuri wowe wenyine ni we ubona nimero yawe."
           }
         }
       }

@@ -356,54 +356,32 @@ private struct RequestAnywhereSection: View {
     }
 }
 
-/// A request waiting for the owner, on Pay in the chosen recipient's
-/// place: who asks, how much and what for, with Decline and Pay. Pay
-/// chooses them with the amount typed in, as a scanned code does; the
-/// owner still taps Pay. A tap on the card opens Requests.
-struct RequestCard: View {
-    let request: MoneyRequest
-    /// More waiting behind this one.
-    let others: Int
-    let onOpen: () -> Void
+/// The requests waiting for the owner, in Pay's pill (`PayPill`, on Liquid
+/// Glass) ahead of anyone nearby: "JEAN ASKS FOR 5,000 RWF" by their face,
+/// turning through them while there are several. No buttons of its own:
+/// Pay is already on the page. A tap opens the request's sheet, where it is
+/// paid or declined, whatever way it came (nearby, the server, a touch).
+struct RequestPill: View {
+    let requests: [MoneyRequest]
+    let onOpen: (MoneyRequest) -> Void
 
     var body: some View {
-        // No buttons of its own: Pay is already on the page. A tap opens
-        // the request, where it is paid or declined.
-        Button(action: onOpen) {
-            HStack(spacing: 10) {
-                RequestTile(request: request, size: 40, fill: .sheetChip)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("\(request.person.shownName) asks for \(Money.formatWithCurrency(request.amount))")
-                        .font(.starhash(.subheadline, weight: .semibold))
-                        .foregroundStyle(Color.payPrimaryText)
-                        .lineLimit(1)
-                    if let detail {
-                        Text(verbatim: detail)
-                            .font(.starhash(.caption))
-                            .foregroundStyle(Color.paySecondaryText)
-                            .lineLimit(1)
-                    }
-                }
-                Spacer(minLength: 0)
-                Image(symbol: "chevron.right")
-                    .font(.starhash(.footnote, weight: .semibold))
-                    .foregroundStyle(Color.paySecondaryText)
+        PayPill(items: requests, onTap: onOpen) { request in
+            HStack(spacing: 8) {
+                RequestTile(request: request, size: 24)
+                PayPillText(text: Text("\(request.person.firstName) asks for \(Money.formatWithCurrency(request.amount))"))
             }
-            .padding(.leading, 12)
-            .padding(.trailing, 16)
-            .padding(.vertical, 10)
-            .starhashContainer(.starhashCard, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-            .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text("\(request.person.shownName) asks for \(Money.formatWithCurrency(request.amount))"))
         }
-        .buttonStyle(.hapticPlain)
-        .padding(.horizontal, StarHashMetrics.screenPadding)
     }
+}
 
-    /// "Lunch · 2 more waiting".
-    private var detail: String? {
-        let others = others > 0 ? String(starhash: "\(others) more waiting") : nil
-        let line = [request.note, others].compactMap { $0 }.joined(separator: " · ")
-        return line.isEmpty ? nil : line
+extension Recipient {
+    /// The first word of the name shown, for Pay's pill.
+    @MainActor
+    var firstName: String {
+        shownName.split(separator: " ").first.map(String.init) ?? shownName
     }
 }
 
@@ -416,62 +394,44 @@ struct RequestAnswerSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(MoneyRequests.self) private var requests
     @Environment(Paying.self) private var paying
-    @State private var height: CGFloat = 400
     @State private var showsSplit = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            SheetHeader(Money.formatWithCurrency(request.amount))
-
-            VStack(spacing: 24) {
-                HStack(spacing: 14) {
-                    RequestTile(request: request, size: 52)
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(verbatim: request.person.shownName)
-                            .font(.sheetBody)
-                            .foregroundStyle(Color.starhashPrimaryText)
-                            .lineLimit(1)
-                        Text(verbatim: line)
-                            .font(.sheet(14, .medium, relativeTo: .subheadline))
-                            .foregroundStyle(Color.sheetSecondaryText)
-                            .lineLimit(2)
-                    }
-                    Spacer(minLength: 0)
+        HeroSheet(
+            caption: String(starhash: "Request"),
+            title: title,
+            onClose: { dismiss() }
+        ) {
+            TileHero { RequestTile(request: request, size: 84) }
+        } content: {
+            Text(verbatim: line)
+                .font(.sheetCallout)
+                .foregroundStyle(Color.sheetSecondaryText)
+                .multilineTextAlignment(.center)
+                .lineLimit(3)
+                .frame(maxWidth: .infinity)
+                .padding(.top, -12)
+        } actions: {
+            switch request.direction {
+            case .received:
+                Button("Pay") { pay() }
+                    .buttonStyle(.sheetPrimary)
+                SheetTextButton("Decline") {
+                    AnywhereRequests.decline(request)
+                    dismiss()
                 }
-                .padding(16)
-                .sheetCard()
-                .accessibilityElement(children: .combine)
-
-                VStack(spacing: 6) {
-                    switch request.direction {
-                    case .received:
-                        Button("Pay") { pay() }
-                            .buttonStyle(.sheetPrimary)
-                        SheetTextButton("Decline") {
-                            AnywhereRequests.decline(request)
-                            dismiss()
-                        }
-                    case .sent:
-                        Button("Mark as Paid") {
-                            requests.markPaid(request.id)
-                            dismiss()
-                        }
-                        .buttonStyle(.sheetPrimary)
-                        SheetTextButton("Cancel Request", role: .destructive) {
-                            AnywhereRequests.cancel(request)
-                            dismiss()
-                        }
-                    }
+            case .sent:
+                Button("Mark as Paid") {
+                    requests.markPaid(request.id)
+                    dismiss()
+                }
+                .buttonStyle(.sheetPrimary)
+                SheetTextButton("Cancel Request", role: .destructive) {
+                    AnywhereRequests.cancel(request)
+                    dismiss()
                 }
             }
-            .padding(.top, 16)
-            .padding(.horizontal, 18)
-            .padding(.bottom, 16)
         }
-        .sheetHeight($height)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .ignoresSafeArea(.container, edges: .bottom)
-        .sheetGlass(detents: [.height(height - 4)])
         // Locating starts now, so the payment's place is in hand at Pay.
         .onAppear { if request.direction == .received { paying.prepare() } }
         .sheet(isPresented: $showsSplit, onDismiss: {
@@ -484,11 +444,19 @@ struct RequestAnswerSheet: View {
         // page under it (Pay, Requests) shows one the system would not dial.
     }
 
-    /// "Asks you · Lunch · 26 Nov", or "You asked · ...".
+    /// "Ariane asks for 5,000 RWF", or "You asked Ariane for 5,000 RWF".
+    private var title: String {
+        let name = request.person.shownName
+        let amount = Money.formatWithCurrency(request.amount)
+        return request.direction == .received
+            ? String(starhash: "\(name) asks for \(amount)")
+            : String(starhash: "You asked \(name) for \(amount)")
+    }
+
+    /// "Lunch · 26 Nov": the note, when there is one, and the day.
     private var line: String {
-        let who = request.direction == .received ? String(starhash: "Asks you") : String(starhash: "You asked")
         let date = request.createdAt.formatted(.dateTime.day().month(.abbreviated).locale(.starhash))
-        return [who, request.note, date].compactMap { $0 }.joined(separator: " · ")
+        return [request.note, date].compactMap { $0 }.joined(separator: " · ")
     }
 
     /// Dials the request as Pay would: recorded, then the call prompt. In

@@ -44,6 +44,13 @@ struct PayView: View {
     @State private var isScanning = false
     /// The parts' sheet, for a payment `Paying` holds in parts.
     @State private var showsSplit = false
+    /// People Nearby, everyone close by on its rings, from the pill.
+    @State private var showsNearby = false
+    /// The person nearby `chosenRecipient` is, when chosen on People
+    /// Nearby: Pay then asks to bring the phones together.
+    @State private var chosenNearby: PeopleNearby.Person?
+    /// Bring Phones Together, for `chosenNearby`.
+    @State private var bringsPhonesTogether = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -86,6 +93,19 @@ struct PayView: View {
             path = []
             answering = request
         }
+        .fullScreenCover(isPresented: $showsNearby) {
+            PeopleNearbyRadar { request, person in
+                take(request)
+                chosenNearby = person
+            }
+        }
+        .sheet(isPresented: $bringsPhonesTogether) {
+            if let chosenRecipient, let chosenNearby {
+                BringPhonesTogetherSheet(person: chosenNearby, recipient: chosenRecipient, amount: input.value) {
+                    pay(chosenRecipient)
+                }
+            }
+        }
         .fullScreenCover(isPresented: $isScanning) {
             QRScannerView { request in
                 isScanning = false
@@ -99,6 +119,11 @@ struct PayView: View {
                 paying.forgetPlace()
             }
             router.setHidesTabBar(!path.isEmpty, on: .pay)
+        }
+        // Whoever replaces or clears the keypad's person, they are no
+        // longer the one chosen nearby.
+        .onChange(of: chosenRecipient == nil) { _, cleared in
+            if cleared { chosenNearby = nil }
         }
         .onAppear(perform: applyDebugLaunch)
         .task {
@@ -122,31 +147,10 @@ struct PayView: View {
 
     private var keypadScreen: some View {
         VStack(spacing: 0) {
-            PageHeader(page: .pay) { EmptyView() } trailing: { ScanButton { isScanning = true } }
+            header
 
             Spacer(minLength: 12)
             PayAmountDisplay(amount: input.value, shakes: zeroShakes)
-            if let chosenRecipient {
-                PayChosenRecipient(recipient: chosenRecipient, photoID: chosenPhotoID, isBare: chosenIsBare) {
-                    withAnimation(.smooth(duration: 0.25)) { self.chosenRecipient = nil }
-                }
-                .padding(.top, 12)
-                .transition(.scale(scale: 0.9).combined(with: .opacity))
-            } else if peopleNearbyOn, let request = requests.waitingForOwner.first {
-                // Someone asked the owner to pay: in the chosen recipient's
-                // place until it is answered.
-                RequestCard(request: request, others: requests.waitingForOwner.count - 1) {
-                    answering = request
-                }
-                .padding(.top, 12)
-                .transition(.scale(scale: 0.95).combined(with: .opacity))
-            } else if peopleNearbyOn, !peopleNearby.found.people.isEmpty {
-                // StarHash users close by, in the chosen recipient's place:
-                // a tap chooses one.
-                PeopleNearbyRow { take($0) }
-                    .padding(.top, 16)
-                    .transition(.opacity)
-            }
             Spacer(minLength: 12)
 
             // The amount sits midway between the top bar and the wallet;
@@ -180,6 +184,51 @@ struct PayView: View {
     }
 
     // MARK: Pieces
+
+    /// The bar over the keypad, after the owner's reference. Everyone's
+    /// keypad: Buy on the left, the scanner on the right, and in the middle
+    /// Pay's pill: a request waiting for the owner, a tap on which opens it,
+    /// or else someone nearby, a tap on which makes the keypad theirs.
+    /// Someone's keypad (chosen by the pill, a scanned code or Pay Again):
+    /// their face over "Pay Ariane" in the middle and a close button on the
+    /// left that makes it everyone's again.
+    private var header: some View {
+        PageBar {
+            ZStack {
+                if let chosenRecipient {
+                    StarHashCircleButton("xmark", label: String(starhash: "Remove \(chosenName(chosenRecipient))")) {
+                        withAnimation(.smooth(duration: 0.35)) { self.chosenRecipient = nil }
+                    }
+                    .transition(.blurReplace)
+                } else {
+                    PayBuySwitcher(page: .pay)
+                        .transition(.blurReplace)
+                }
+            }
+        } center: {
+            ZStack {
+                if let chosenRecipient {
+                    PayRecipientHeading(recipient: chosenRecipient, photoID: chosenPhotoID, isBare: chosenIsBare)
+                        .transition(.blurReplace.combined(with: .scale(0.85, anchor: .top)))
+                } else if peopleNearbyOn, !requests.waitingForOwner.isEmpty {
+                    // Someone asked the owner to pay: ahead of anyone
+                    // nearby, until it is answered.
+                    RequestPill(requests: requests.waitingForOwner) { answering = $0 }
+                        .transition(.blurReplace)
+                } else if peopleNearbyOn, !peopleNearby.found.people.isEmpty {
+                    PeopleNearbyPill { showsNearby = true }
+                        .transition(.blurReplace)
+                }
+            }
+        } trailing: {
+            ScanButton { isScanning = true }
+        }
+    }
+
+    /// Who the keypad is for, as its heading and close button name them.
+    private func chosenName(_ recipient: Recipient) -> String {
+        chosenIsBare ? recipient.formattedDestination : recipient.shownName
+    }
 
     private var buttons: some View {
         HStack(spacing: 12) {
@@ -283,7 +332,14 @@ struct PayView: View {
             return
         }
         if let chosenRecipient {
-            pay(chosenRecipient)
+            // Someone chosen nearby, on an iPhone that can tell how near:
+            // the payment goes as the phones touch.
+            if chosenNearby != nil, HoldNear.shared.isAvailable {
+                paying.prepare()
+                bringsPhonesTogether = true
+            } else {
+                pay(chosenRecipient)
+            }
         } else {
             openPicker()
         }
@@ -310,7 +366,8 @@ struct PayView: View {
         // Skipping the picker: locate now, while StarHash is still in
         // front, so the fix is in hand when Pay is tapped.
         paying.prepare()
-        withAnimation(.smooth(duration: 0.25)) {
+        chosenNearby = nil
+        withAnimation(.smooth(duration: 0.4)) {
             chosenRecipient = request.recipient
             chosenPhotoID = request.photoID
             chosenIsBare = !request.isStarHashCode
@@ -352,6 +409,22 @@ struct PayView: View {
             openPicker(query: PayDebug.query ?? "")
         }
         if DebugLaunch.arguments.contains("-payScan") { isScanning = true }
+        // -payTap <seconds>: Pay tapped after this long (with -peopleNearbyPick
+        // and -holdNear, Bring Phones Together).
+        if let delay = DebugLaunch.value(after: "-payTap").flatMap(Double.init) {
+            Task {
+                try? await Task.sleep(for: .seconds(delay))
+                next()
+            }
+        }
+        // -requestAnswer: with -requests, the sheet of the request waiting
+        // for the owner, as its card or notification opens it.
+        if DebugLaunch.arguments.contains("-requestAnswer") {
+            Task {
+                try? await Task.sleep(for: .seconds(1))
+                answering = requests.waitingForOwner.first
+            }
+        }
         // -paySplit: Split large payments on (StarHashApp) and Pay tapped
         // on the chosen recipient, for the parts' sheet (with an amount
         // that saves).
@@ -390,58 +463,46 @@ private enum PayRoute: Hashable {
     case recipients(query: String)
 }
 
-/// The recipient Pay Again chose, under an empty amount: who the next
-/// payment goes to, with a way to drop them and pick someone else. One
-/// from a code other than StarHash's is its number or code alone, with no
-/// tile: the code says nothing more.
-private struct PayChosenRecipient: View {
+/// Whose keypad it is, at the top of Pay, after the owner's reference: their
+/// face over "Pay Ariane". A photo saved in Contacts comes first, then the
+/// one their code or their phone shared, then their tile. One from a code
+/// other than StarHash's is its number or code alone, with no face: the
+/// code says nothing more.
+private struct PayRecipientHeading: View {
     let recipient: Recipient
     /// Their photo on StarHash's server, when their code shared one.
     var photoID: UUID?
     var isBare = false
-    let onClear: () -> Void
 
     @State private var sharedPhoto: UIImage?
 
     @AppStorage(Preferences.enableContacts) private var enableContacts: Bool
     private var contacts: PayContacts { .shared }
 
+    private static let face: CGFloat = 40
+
     var body: some View {
-        HStack(spacing: 10) {
-            // A photo saved in Contacts comes first; then the one their
-            // code shared; then the tile.
+        VStack(spacing: 6) {
             let contactPhoto = enableContacts ? contacts.photoContactID(for: recipient) : nil
-            if isBare {
-                EmptyView()
-            } else if contactPhoto == nil, let sharedPhoto {
-                Image(uiImage: sharedPhoto)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 28, height: 28)
-                    .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
-                    .accessibilityHidden(true)
-            } else {
-                RecipientTile(tile: .for(recipient, photoContactID: contactPhoto), size: 28)
+            if !isBare {
+                Group {
+                    if contactPhoto == nil, let sharedPhoto {
+                        RecipientTile(tile: .image(sharedPhoto), size: Self.face)
+                    } else {
+                        RecipientTile(tile: .for(recipient, photoContactID: contactPhoto), size: Self.face)
+                    }
+                }
+                .frame(height: 44)
             }
-            Text("To \(isBare ? recipient.formattedDestination : recipient.shownName)")
+            Text("Pay \(isBare ? recipient.formattedDestination : recipient.shownName)")
                 .font(.starhash(.subheadline, weight: .semibold))
                 .foregroundStyle(Color.payPrimaryText)
                 .lineLimit(1)
-            Button(action: onClear) {
-                Image(symbol: "xmark.circle.fill")
-                    .font(.starhash(.body))
-                    .foregroundStyle(Color.paySecondaryText)
-                    .frame(minWidth: 32, minHeight: 32)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.hapticPlain)
-            .accessibilityLabel("Remove \(isBare ? recipient.formattedDestination : recipient.shownName)")
+                .minimumScaleFactor(0.8)
+                .frame(minHeight: isBare ? 44 : nil)
         }
-        .padding(.leading, isBare ? 14 : 6)
-        .padding(.trailing, 4)
-        .padding(.vertical, 4)
-        .starhashGlass()
-        .padding(.horizontal, StarHashMetrics.screenPadding)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
         // The photo, when the number or code is saved in Contacts.
         .task(id: enableContacts) {
             if enableContacts { await contacts.loadIfAllowed() }

@@ -13,7 +13,6 @@ struct VoiceLineHintSheet: View {
     var sharesCarrier = false
 
     @Environment(\.dismiss) private var dismiss
-    @State private var height: CGFloat = 420
 
     private var steps: [(symbol: String, text: String)] {
         let sim = wallet.sim?.formattedDestination ?? wallet.network.name
@@ -32,38 +31,30 @@ struct VoiceLineHintSheet: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            SheetHeader(title)
-
-            VStack(spacing: 14) {
-                VStack(spacing: 0) {
-                    ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
-                        if index > 0 { SheetDivider().padding(.leading, 52) }
-                        HStack(spacing: 14) {
-                            SheetIconCircle(symbol: step.symbol)
-                            Text(verbatim: step.text)
-                                .font(.sheetBody)
-                                .foregroundStyle(Color.starhashPrimaryText)
-                                .fixedSize(horizontal: false, vertical: true)
-                            Spacer(minLength: 0)
-                        }
-                        .padding(.vertical, 8)
-                        .accessibilityElement(children: .combine)
+        // Got It is the only way out, so no close button beside it.
+        HeroSheet(caption: String(starhash: "Your SIMs"), title: title) {
+            SymbolHero(symbol: "simcard.fill")
+        } content: {
+            VStack(spacing: 0) {
+                ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
+                    if index > 0 { SheetDivider().padding(.leading, 52) }
+                    HStack(spacing: 14) {
+                        SheetIconCircle(symbol: step.symbol)
+                        Text(verbatim: step.text)
+                            .font(.sheetBody)
+                            .foregroundStyle(Color.starhashPrimaryText)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 0)
                     }
+                    .padding(.vertical, 8)
+                    .accessibilityElement(children: .combine)
                 }
-                .padding(.horizontal, 16)
-                .sheetCard()
-
-                Button("Got It") { dismiss() }
-                    .buttonStyle(.sheetPrimary)
-                    .padding(.top, 4)
             }
-            .padding(.horizontal, 18)
-            .padding(.bottom, 24)
+            .padding(.horizontal, 16)
+            .sheetCard()
+        } actions: {
+            Button("Got It") { dismiss() }
+                .buttonStyle(.sheetPrimary)
         }
-        .sheetHeight($height)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .ignoresSafeArea(.container, edges: .bottom)
-        .sheetGlass(detents: [.height(height - 4)])
     }
 }

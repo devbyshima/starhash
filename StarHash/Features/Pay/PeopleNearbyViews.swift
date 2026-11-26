@@ -1,80 +1,33 @@
 import StarHashKit
 import SwiftUI
 
-/// People Nearby on Pay: the faces of StarHash users close by, under the
-/// amount while no one is chosen. A tap asks their phone for its number
-/// and chooses them as a scanned StarHash code does, so Pay dials them
-/// once there is an amount.
-struct PeopleNearbyRow: View {
+/// People Nearby on Pay, after the owner's reference: Pay's pill (`PayPill`),
+/// "ARIANE IS NEARBY" by their photo, turning through everyone close by. A
+/// tap opens People Nearby (`PeopleNearbyRadar`), everyone close by on its
+/// rings, where a tap on one chooses them.
+struct PeopleNearbyPill: View {
     @Environment(PeopleNearbyService.self) private var nearby
-    let onChoose: (PaymentRequest) -> Void
-
-    @State private var unreachable: PeopleNearby.Person?
+    let onOpen: () -> Void
 
     var body: some View {
-        let row = nearby.found.row
-        // Centred while they fit; a row to scroll once they don't.
-        ViewThatFits(in: .horizontal) {
-            faces(row)
-                .padding(.horizontal, StarHashMetrics.screenPadding)
-            ScrollView(.horizontal, showsIndicators: false) {
-                faces(row)
-                    .padding(.horizontal, StarHashMetrics.screenPadding)
+        PayPill(items: nearby.found.row, onTap: { _ in onOpen() }) { person in
+            HStack(spacing: 8) {
+                PeopleNearbyTile(person: person, size: 24)
+                PayPillText(text: Text("\(person.firstName) is nearby"))
             }
-            .scrollClipDisabled()
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text("\(person.name) is nearby"))
+            .accessibilityHint(Text("Shows everyone nearby"))
         }
-        .animation(.smooth(duration: 0.3), value: row.map(\.id))
-        .unreachableAlert($unreachable)
-    }
-
-    private func faces(_ row: [PeopleNearby.Person]) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            ForEach(row) { person in
-                PeopleNearbyFace(person: person, isReaching: nearby.reaching == person.id) {
-                    reach(person)
-                }
-                .transition(.scale(scale: 0.6).combined(with: .opacity))
-            }
+        #if DEBUG
+        // -peopleNearbyRadar: People Nearby opened from the pill, for
+        // screenshots (with -peopleNearbyPick, someone on it tapped).
+        .task {
+            guard DebugLaunch.arguments.contains("-peopleNearbyRadar") || DebugLaunch.arguments.contains("-peopleNearbyPick") else { return }
+            try? await Task.sleep(for: .seconds(1.5))
+            onOpen()
         }
-    }
-
-    private func reach(_ person: PeopleNearby.Person) {
-        Task {
-            if let recipient = await nearby.reach(person) {
-                onChoose(PaymentRequest(recipient: recipient, photoID: person.photoID, isStarHashCode: true))
-            } else {
-                unreachable = person
-            }
-        }
-    }
-}
-
-/// One face in Pay's row: their photo, or their initials, with their first
-/// name under it. Dimmed, with a spinner, while a tap reaches them.
-private struct PeopleNearbyFace: View {
-    let person: PeopleNearby.Person
-    let isReaching: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 6) {
-                PeopleNearbyTile(person: person, size: 48)
-                    .opacity(isReaching ? 0.4 : 1)
-                    .overlay {
-                        if isReaching { ProgressView().tint(Color.payPrimaryText) }
-                    }
-                Text(verbatim: person.firstName)
-                    .font(.starhash(.caption, weight: .semibold))
-                    .foregroundStyle(Color.payPrimaryText)
-                    .lineLimit(1)
-                    .frame(maxWidth: 64)
-            }
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.hapticPlain)
-        .disabled(isReaching)
-        .accessibilityLabel(Text("Pay \(person.name)"))
+        #endif
     }
 }
 
@@ -169,16 +122,17 @@ struct PeopleNearbySync: ViewModifier {
     }
 }
 
-/// Shown once when People Nearby comes, in two steps. First what it is,
-/// with one button, Continue, after which iOS asks for the local network
-/// (a screen before a system prompt has only Continue). Then whether people
-/// nearby may see the owner, which is StarHash's own question.
+/// Shown once when People Nearby comes, in two steps, as a hero sheet over
+/// two phones nodding together. First what it is, with one button,
+/// Continue, after which iOS asks for the local network (a screen before a
+/// system prompt has only Continue, and no way out). Then whether people
+/// nearby may see the owner, which is StarHash's own question: Let Them
+/// See Me, or the close button for not now.
 struct PeopleNearbyIntroSheet: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage(PreferenceKey.peopleNearbyIntroSeen) private var introSeen = false
     @AppStorage(PreferenceKey.peopleNearbyAsked) private var asked = false
     @AppStorage(Preferences.peopleNearbyVisible) private var visible: Bool
-    @State private var height: CGFloat = 400
     @State private var asksToBeSeen: Bool
 
     init() {
@@ -189,73 +143,40 @@ struct PeopleNearbyIntroSheet: View {
         _asksToBeSeen = State(initialValue: startsOnQuestion)
     }
 
-    private var points: [(symbol: String, text: String)] {
-        if asksToBeSeen {
-            [
-                ("eye.fill", String(starhash: "Your name and photo show on their Pay while StarHash is open")),
-                ("lock.fill", String(starhash: "Only someone who taps you gets your number")),
-                ("gearshape.fill", String(starhash: "Change it any time in Settings, under Your SIMs")),
-            ]
-        } else {
-            [
-                ("person.2.fill", String(starhash: "StarHash users near you show up on Pay while StarHash is open")),
-                ("qrcode", String(starhash: "Tap one to pay them, with no QR code")),
-            ]
-        }
-    }
-
     var body: some View {
-        VStack(spacing: 0) {
-            // One line at the sheet's title size, in every language.
-            SheetHeader(asksToBeSeen ? String(starhash: "Let them see you?") : String(starhash: "People Nearby"))
-
-            VStack(spacing: 24) {
-                VStack(spacing: 0) {
-                    ForEach(Array(points.enumerated()), id: \.offset) { index, point in
-                        if index > 0 { SheetDivider().padding(.leading, 54) }
-                        HStack(spacing: 16) {
-                            SheetIconCircle(symbol: point.symbol)
-                            Text(verbatim: point.text)
-                                .font(.sheetBody)
-                                .lineSpacing(2)
-                                .foregroundStyle(Color.starhashPrimaryText)
-                                .fixedSize(horizontal: false, vertical: true)
-                            Spacer(minLength: 0)
-                        }
-                        .padding(.vertical, 14)
-                        .accessibilityElement(children: .combine)
-                    }
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 4)
-                .sheetCard()
-                .id(asksToBeSeen)
-                .transition(.opacity)
-
-                if asksToBeSeen {
-                    VStack(spacing: 6) {
-                        Button("Let Them See Me") { answer(visible: true) }
-                            .buttonStyle(.sheetPrimary)
-                        SheetTextButton("Not Now") { answer(visible: false) }
-                    }
-                } else {
-                    // Looking for people starts here, and iOS asks for the
-                    // local network over the sheet.
-                    Button("Continue") {
-                        introSeen = true
-                        withAnimation(.smooth(duration: 0.3)) { asksToBeSeen = true }
-                    }
-                    .buttonStyle(.sheetPrimary)
-                }
+        HeroSheet(
+            caption: String(starhash: "People Nearby"),
+            title: asksToBeSeen ? String(starhash: "Let them see you?") : String(starhash: "Pay Who's Close By"),
+            message: asksToBeSeen
+                ? String(starhash: "Your name and photo show on their Pay while StarHash is open. Only someone who taps you gets your number.")
+                : String(starhash: "StarHash users near you show up at the top of Pay while StarHash is open. Tap one to pay them, with no QR code."),
+            onClose: asksToBeSeen ? { answer(visible: false) } : nil,
+            closeLabel: "Not Now"
+        ) {
+            PhonesNodHero()
+        } content: {
+            if asksToBeSeen {
+                Text("Change it any time in Settings, under Your SIMs")
+                    .font(.sheetFootnote)
+                    .foregroundStyle(Color.sheetSecondaryText)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    .transition(.opacity)
             }
-            .padding(.top, 16)
-            .padding(.horizontal, 18)
-            .padding(.bottom, 16)
+        } actions: {
+            if asksToBeSeen {
+                Button("Let Them See Me") { answer(visible: true) }
+                    .buttonStyle(.sheetPrimary)
+            } else {
+                // Looking for people starts here, and iOS asks for the
+                // local network over the sheet.
+                Button("Continue") {
+                    introSeen = true
+                    withAnimation(.smooth(duration: 0.35)) { asksToBeSeen = true }
+                }
+                .buttonStyle(.sheetPrimary)
+            }
         }
-        .sheetHeight($height)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .ignoresSafeArea(.container, edges: .bottom)
-        .sheetGlass(detents: [.height(height - 4)])
         // Only an answer closes it: the question comes after iOS's prompt.
         .interactiveDismissDisabled()
     }

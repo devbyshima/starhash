@@ -12,15 +12,36 @@ struct PageHeader<Center: View, Trailing: View>: View {
     @ViewBuilder var trailing: Trailing
 
     var body: some View {
-        HStack(spacing: 8) {
+        PageBar {
             PayBuySwitcher(page: page)
-            Spacer(minLength: 0)
+        } center: {
+            center
+        } trailing: {
             trailing
         }
-        .frame(minHeight: 44)
-        .overlay {
+    }
+}
+
+/// `PageHeader`'s bar with any button on the left: Pay's close button
+/// while the keypad is someone's. The centre sits level with the side
+/// buttons and may hang below them (a face over "Pay Ariane"), the bar
+/// growing to hold it.
+struct PageBar<Leading: View, Center: View, Trailing: View>: View {
+    @ViewBuilder var leading: Leading
+    @ViewBuilder var center: Center
+    @ViewBuilder var trailing: Trailing
+
+    var body: some View {
+        ZStack(alignment: .top) {
+            HStack(spacing: 8) {
+                leading
+                Spacer(minLength: 0)
+                trailing
+            }
+            .frame(minHeight: 44)
             center
                 .lineLimit(1)
+                .frame(minHeight: 44)
                 .padding(.horizontal, 44 + 12)
         }
         .padding(.horizontal, StarHashMetrics.screenPadding)
