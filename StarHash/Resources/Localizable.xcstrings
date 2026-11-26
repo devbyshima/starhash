@@ -477,18 +477,18 @@
         }
       }
     },
-    "Let people near you see you?": {
+    "Let them see you?": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Laisser les personnes proches vous voir ?"
+            "value": "Vous rendre visible ?"
           }
         },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wemerera abantu bari hafi yawe kukubona?"
+            "value": "Wemera ko bakubona?"
           }
         }
       }
@@ -813,18 +813,18 @@
         }
       }
     },
-    "Your number goes only to someone who taps you, to pay you": {
+    "Only someone who taps you gets your number": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Votre numéro ne va qu'à la personne qui vous touche, pour vous payer"
+            "value": "Seule la personne qui vous touche reçoit votre numéro"
           }
         },
         "rw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nimero yawe ijya gusa ku muntu ukanze kuri wowe, kugira ngo akwishyure"
+            "value": "Ukanze kuri wowe wenyine ni we ubona nimero yawe"
           }
         }
       }

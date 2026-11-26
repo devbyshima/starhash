@@ -389,7 +389,15 @@ private struct PayChosenRecipient: View {
         // The photo their code shared, when it shared one.
         .task(id: photoID) {
             sharedPhoto = nil
-            if let photoID { sharedPhoto = await StarHashCloud.photo(photoID) }
+            guard let photoID else { return }
+            #if DEBUG
+            // -peopleNearby: the sample's photo, with no server to fetch it from.
+            if let sample = PeopleNearbyDebug.photo(for: photoID) {
+                sharedPhoto = sample
+                return
+            }
+            #endif
+            sharedPhoto = await StarHashCloud.photo(photoID)
         }
     }
 }

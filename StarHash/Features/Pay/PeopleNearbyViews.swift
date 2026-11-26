@@ -155,7 +155,10 @@ struct PeopleNearbySync: ViewModifier {
         #if DEBUG
         if PeopleNearbyDebug.samples != nil { introPast = true }
         #endif
-        let browses = isOn && hasOnboarded && introPast && scenePhase == .active
+        // Inactive is still in front: a system alert (Contacts, the local
+        // network) or Control Center over StarHash. Stopping then would
+        // make every face drop off and come back. Background is gone.
+        let browses = isOn && hasOnboarded && introPast && scenePhase != .background
         // Read for the redraw: a photo added or removed changes what is
         // announced.
         let photo = ProfilePhoto.shared.image != nil ? AppEnvironment.serverSync.sharedPhotoID : nil
@@ -190,7 +193,7 @@ struct PeopleNearbyIntroSheet: View {
         if asksToBeSeen {
             [
                 ("eye.fill", String(starhash: "Your name and photo show on their Pay while StarHash is open")),
-                ("lock.fill", String(starhash: "Your number goes only to someone who taps you, to pay you")),
+                ("lock.fill", String(starhash: "Only someone who taps you gets your number")),
                 ("gearshape.fill", String(starhash: "Change it any time in Settings, under Your SIMs")),
             ]
         } else {
@@ -203,7 +206,8 @@ struct PeopleNearbyIntroSheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            SheetHeader(asksToBeSeen ? String(starhash: "Let people near you see you?") : String(starhash: "People Nearby"))
+            // One line at the sheet's title size, in every language.
+            SheetHeader(asksToBeSeen ? String(starhash: "Let them see you?") : String(starhash: "People Nearby"))
 
             VStack(spacing: 24) {
                 VStack(spacing: 0) {
