@@ -118,6 +118,9 @@ Set your own `DEVELOPMENT_TEAM` and bundle id in `project.yml`, then run the **S
 - [ ] **App Store** release
 - [ ] **Airtel Money** codes and messages checked on a real SIM
 - [ ] **Widgets** that read your own codes (needs a paid developer team)
+- [ ] **People Nearby**: StarHash users close by show up on Pay while the app is open, and a tap pays them ([plan](docs/nearby-and-requests.md))
+- [ ] **Requests** to someone nearby or anywhere, with Pay or Decline, and **Split the Bill** ([plan](docs/nearby-and-requests.md))
+- [ ] **Web pay**: a QR code that opens StarHash when it's installed, and a payment page in the browser when it isn't ([plan](docs/web-pay.md))
 
 <br>
 
