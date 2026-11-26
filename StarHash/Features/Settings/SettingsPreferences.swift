@@ -76,6 +76,7 @@ enum StarHashPreferences {
 enum AppReset {
     static func eraseEverything(store: StarHashStore, router: AppRouter) {
         store.eraseAll()
+        AppEnvironment.requests.removeAll()
         StarHashNotifications.shared.removeAll()
         AppEnvironment.shortcuts.reset()
         SmartCategories.reset()

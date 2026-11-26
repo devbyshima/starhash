@@ -43,6 +43,18 @@ enum AppEnvironment {
     /// StarHash users close by, found while StarHash is in front.
     static let peopleNearby = PeopleNearbyService()
 
+    /// Every request the owner sent or received. Debug launches with
+    /// -inMemory keep them in memory (`-requests` seeds samples).
+    static let requests: MoneyRequests = {
+        #if DEBUG
+        if DebugLaunch.inMemory { return RequestsDebug.seeded() }
+        #endif
+        return MoneyRequests(fileURL: MoneyRequests.standardURL)
+    }()
+
+    /// How requests travel between people nearby.
+    static let nearbyRequests = NearbyRequests(requests: requests, nearby: peopleNearby)
+
     /// What StarHash keeps on its server: the owner's photo, their Show My
     /// Name listing and the daily count.
     static let serverSync: ServerSync = {

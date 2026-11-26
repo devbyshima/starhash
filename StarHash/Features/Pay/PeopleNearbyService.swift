@@ -39,6 +39,10 @@ final class PeopleNearbyService {
     /// timeout never ends a later tap on the same person.
     @ObservationIgnored private var waiting: [String: (token: UUID, continuation: CheckedContinuation<PeopleNearby.Handoff?, Never>)] = [:]
 
+    /// What another phone sends over a tap's connection beyond the number
+    /// (a request, an answer to one), with the phone it came from.
+    @ObservationIgnored var onMessage: ((_ from: String, Data) -> Void)?
+
     func apply(_ next: Setup) {
         #if DEBUG
         if PeopleNearbyDebug.samples != nil {
@@ -64,25 +68,43 @@ final class PeopleNearbyService {
 
     /// Asks `person`'s phone for their number, and who to pay once it
     /// comes. Nil when it doesn't: they moved away, locked their phone or
-    /// stopped being seen.
-    func reach(_ person: PeopleNearby.Person) async -> Recipient? {
+    /// stopped being seen. With a `message` (a request), it goes to them
+    /// once the number is in, and the connection stays open for their
+    /// answer until `close`.
+    func reach(_ person: PeopleNearby.Person, sending message: Data? = nil) async -> Recipient? {
         guard reaching == nil else { return nil }
         reaching = person.id
         defer { reaching = nil }
         #if DEBUG
-        if PeopleNearbyDebug.samples != nil { return await PeopleNearbyDebug.reach(person) }
+        if PeopleNearbyDebug.samples != nil {
+            let recipient = await PeopleNearbyDebug.reach(person)
+            if recipient != nil, let message { PeopleNearbyDebug.answer(message, from: person.id) { self.onMessage?($0, $1) } }
+            return recipient
+        }
         #endif
         guard let transport else { return nil }
         let token = UUID()
         let handoff = await withCheckedContinuation { continuation in
             waiting[person.id] = (token, continuation)
-            transport.reach(person.id)
+            transport.reach(person.id, sending: message)
             Task {
                 try? await Task.sleep(for: PeopleNearby.reachTimeout)
                 if waiting[person.id]?.token == token { finish(person.id, with: nil) }
             }
         }
         return handoff.map(person.recipient)
+    }
+
+    /// Sends `data` to the phone `id` over the connection open between
+    /// them: an answer to its request. False when there is none any more.
+    @discardableResult
+    func send(_ data: Data, to id: String) -> Bool {
+        transport?.send(data, to: id) ?? false
+    }
+
+    /// Ends the connection a request kept open to `id`.
+    func close(_ id: String) {
+        transport?.close(id)
     }
 
     private func handle(_ event: NearbyTransport.Event) {
@@ -96,6 +118,8 @@ final class PeopleNearbyService {
             finish(id, with: handoff)
         case .unreachable(let id):
             finish(id, with: nil)
+        case .message(let id, let data):
+            onMessage?(id, data)
         }
     }
 
@@ -132,6 +156,8 @@ private final class NearbyTransport: NSObject, @unchecked Sendable {
         case handoff(id: String, PeopleNearby.Handoff)
         /// A tap on `id` that will get no number.
         case unreachable(id: String)
+        /// Anything else `id`'s phone sent over an open connection.
+        case message(id: String, Data)
     }
 
     private let me = MCPeerID(displayName: UUID().uuidString)
@@ -144,10 +170,16 @@ private final class NearbyTransport: NSObject, @unchecked Sendable {
     private var handoff: PeopleNearby.Handoff?
     /// Everyone found, by their run's name.
     private var peers: [String: MCPeerID] = [:]
-    /// A tap's session, by the tapped phone's name.
+    /// A tap's session, by the tapped phone's name, until its number comes.
     private var reaching: [String: MCSession] = [:]
+    /// What a tap sends once the number is in (a request).
+    private var outgoing: [String: Data] = [:]
+    /// Sessions kept open after the number came, for an answer.
+    private var talking: [String: (session: MCSession, peer: MCPeerID)] = [:]
     /// Sessions opened by phones that tapped the owner, until they leave.
     private var serving: [MCSession] = []
+    /// The phones that tapped the owner, by their run's name, to answer.
+    private var servingPeers: [String: (session: MCSession, peer: MCPeerID)] = [:]
 
     init(onEvent: @escaping @Sendable (Event) -> Void) {
         self.onEvent = onEvent
@@ -198,13 +230,16 @@ private final class NearbyTransport: NSObject, @unchecked Sendable {
 
     func stop() {
         let (browser, advertiser, sessions) = locked {
-            let taken = (self.browser, self.advertiser, Array(reaching.values) + serving)
+            let taken = (self.browser, self.advertiser, Array(reaching.values) + serving + talking.values.map(\.session))
             self.browser = nil
             self.advertiser = nil
             announcement = nil
             peers.removeAll()
             reaching.removeAll()
+            outgoing.removeAll()
+            talking.removeAll()
             serving.removeAll()
+            servingPeers.removeAll()
             return taken
         }
         browser?.stopBrowsingForPeers()
@@ -213,11 +248,13 @@ private final class NearbyTransport: NSObject, @unchecked Sendable {
     }
 
     /// Asks the phone found as `id` for its number, over a session of its
-    /// own, encrypted.
-    func reach(_ id: String) {
+    /// own, encrypted, and sends `message` once the number is in.
+    func reach(_ id: String, sending message: Data?) {
         let (browser, peer, session) = locked { () -> (MCNearbyServiceBrowser?, MCPeerID?, MCSession?) in
             guard let browser, let peer = peers[id] else { return (nil, nil, nil) }
             reaching[id]?.disconnect()
+            talking.removeValue(forKey: id)?.session.disconnect()
+            outgoing[id] = message
             let session = MCSession(peer: me, securityIdentity: nil, encryptionPreference: .required)
             session.delegate = self
             reaching[id] = session
@@ -228,6 +265,17 @@ private final class NearbyTransport: NSObject, @unchecked Sendable {
             return
         }
         browser.invitePeer(peer, to: session, withContext: nil, timeout: 10)
+    }
+
+    /// Sends `data` to `id` over whichever session is open with it: one a
+    /// request kept open, or one it opened by tapping the owner.
+    func send(_ data: Data, to id: String) -> Bool {
+        guard let open = locked({ talking[id] ?? servingPeers[id] }) else { return false }
+        return (try? open.session.send(data, toPeers: [open.peer], with: .reliable)) != nil
+    }
+
+    func close(_ id: String) {
+        locked { talking.removeValue(forKey: id) }?.session.disconnect()
     }
 }
 
@@ -277,14 +325,23 @@ extension NearbyTransport: MCSessionDelegate {
         switch state {
         case .connected:
             // The owner's side: hand the number over, once.
-            let data = locked { serving.contains(session) ? handoff?.data : nil }
+            let data = locked { () -> Data? in
+                guard serving.contains(session) else { return nil }
+                servingPeers[id] = (session, peerID)
+                return handoff?.data
+            }
             if let data { try? session.send(data, toPeers: [peerID], with: .reliable) }
         case .notConnected:
             let (wasReaching, wasServing) = locked { () -> (Bool, Bool) in
                 let wasReaching = reaching[id] === session
-                if wasReaching { reaching[id] = nil }
+                if wasReaching {
+                    reaching[id] = nil
+                    outgoing[id] = nil
+                }
+                if talking[id]?.session === session { talking[id] = nil }
                 let wasServing = serving.contains(session)
                 serving.removeAll { $0 === session }
+                if servingPeers[id]?.session === session { servingPeers[id] = nil }
                 return (wasReaching, wasServing)
             }
             if wasReaching { onEvent(.unreachable(id: id)) }
@@ -298,18 +355,31 @@ extension NearbyTransport: MCSessionDelegate {
 
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
         let id = peerID.displayName
-        let isOurs = locked { () -> Bool in
-            guard reaching[id] === session else { return false }
+        // A tap's first answer is the number; then its request goes, and the
+        // session stays for the reply. Anything else is a message.
+        let (isHandoff, message) = locked { () -> (Bool, Data?) in
+            guard reaching[id] === session else { return (false, nil) }
             reaching[id] = nil
-            return true
+            let message = outgoing.removeValue(forKey: id)
+            if message != nil { talking[id] = (session, peerID) }
+            return (true, message)
         }
-        guard isOurs else { return }
-        if let handoff = PeopleNearby.Handoff(data: data) {
-            onEvent(.handoff(id: id, handoff))
-        } else {
+        guard isHandoff else {
+            onEvent(.message(id: id, data))
+            return
+        }
+        guard let handoff = PeopleNearby.Handoff(data: data) else {
             onEvent(.unreachable(id: id))
+            session.disconnect()
+            return
         }
-        session.disconnect()
+        if let message {
+            // The number came: the request follows on the same session.
+            try? session.send(message, toPeers: [peerID], with: .reliable)
+        } else {
+            session.disconnect()
+        }
+        onEvent(.handoff(id: id, handoff))
     }
 
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {}
@@ -358,6 +428,17 @@ enum PeopleNearbyDebug {
               let index = person.id.split(separator: "-").last.flatMap({ Int($0) }),
               let handoff = PeopleNearby.Handoff(number: Recipient(input: people[index].1)) else { return nil }
         return person.recipient(handoff)
+    }
+
+    /// `-peopleNearbyDeclines`: a request to a sample is declined after two
+    /// seconds, as its phone would answer.
+    static func answer(_ message: Data, from id: String, deliver: @escaping @MainActor (String, Data) -> Void) {
+        guard DebugLaunch.arguments.contains("-peopleNearbyDeclines"),
+              case .ask(let ask) = MoneyRequest.Message(data: message) else { return }
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(2))
+            deliver(id, MoneyRequest.Message.declined(id: ask.id).data)
+        }
     }
 
     static func photo(for id: UUID) -> UIImage? {

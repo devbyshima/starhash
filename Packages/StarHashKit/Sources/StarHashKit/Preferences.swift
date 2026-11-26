@@ -39,6 +39,9 @@ public enum Preferences {
     /// in fees together (`SplitPlan`). Off until the owner turns it on: it
     /// means a PIN for every part.
     public static let splitLargePayments = Preference("splitLargePayments", default: false)
+    /// Whether the button beside Pay is Request rather than Balance, while
+    /// People Nearby is on. Request, unless the owner chose Balance.
+    public static let requestBesidePay = Preference("requestBesidePay", default: true)
 
     // MARK: Security
 

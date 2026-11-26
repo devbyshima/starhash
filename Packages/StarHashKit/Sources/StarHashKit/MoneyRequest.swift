@@ -1,0 +1,319 @@
+import Foundation
+import Observation
+
+/// A request for money between two StarHash users: one the owner sent
+/// (asking someone to pay them) or one they received (someone asking them
+/// to pay). Phase 2 sends them to people nearby (`PeopleNearby`); both
+/// phones keep the request under the same id, so an answer finds it.
+///
+/// A request never dials anything. The person asked pays through Pay as
+/// they would anyone, and the request settles from the transactions
+/// themselves (`MoneyRequests.settle`), never from what a phone says.
+public struct MoneyRequest: Codable, Hashable, Identifiable, Sendable {
+    public enum Direction: String, Codable, Sendable {
+        /// The owner asked someone to pay them.
+        case sent
+        /// Someone asked the owner to pay them.
+        case received
+    }
+
+    public enum Status: String, Codable, Sendable {
+        case waiting, paid, declined, cancelled, expired
+    }
+
+    /// How long a request waits before it expires.
+    public static let lifetime: TimeInterval = 7 * 86_400
+
+    /// The longest note a request carries.
+    public static let maximumNoteLength = 60
+
+    public var id: UUID
+    public var direction: Direction
+    /// The other person: who the owner asked, or who asks them. A phone
+    /// number, under their name.
+    public var person: Recipient
+    /// Their photo on StarHash's server, when they have one.
+    public var photoID: UUID?
+    /// Whole RWF.
+    public var amount: Int
+    public var note: String?
+    public var createdAt: Date
+    public var status: Status
+    /// When it was paid, declined or cancelled.
+    public var settledAt: Date?
+    /// The transaction that paid it.
+    public var transactionID: UUID?
+
+    public init(
+        id: UUID = UUID(), direction: Direction, person: Recipient, photoID: UUID? = nil, amount: Int,
+        note: String? = nil, createdAt: Date, status: Status = .waiting
+    ) {
+        self.id = id
+        self.direction = direction
+        self.person = person
+        self.photoID = photoID
+        self.amount = amount
+        self.note = Self.clean(note)
+        self.createdAt = createdAt
+        self.status = status
+    }
+
+    public var expiresAt: Date { createdAt.addingTimeInterval(Self.lifetime) }
+
+    /// A note trimmed and cut to its length, or nil when nothing is left.
+    static func clean(_ note: String?) -> String? {
+        guard let trimmed = note?.trimmingCharacters(in: .whitespacesAndNewlines), !trimmed.isEmpty else { return nil }
+        return String(trimmed.prefix(maximumNoteLength))
+    }
+
+    // MARK: What paid it
+
+    /// Whether `transaction` pays this request. A request the owner sent is
+    /// paid by money received: the same amount, after it was made and
+    /// before it expired, from the person asked. Money received shows the
+    /// sender's number masked to its last digits, or only their name, so
+    /// those are matched as far as they go. One the owner received is paid
+    /// by money they sent to that number.
+    public func isPaid(by transaction: Transaction) -> Bool {
+        guard transaction.status != .failed, transaction.amount == amount,
+              transaction.date >= createdAt.addingTimeInterval(-60), transaction.date <= expiresAt else { return false }
+        switch direction {
+        case .sent:
+            guard transaction.direction == .incoming, transaction.counterparty.kind == .phone else { return false }
+            return Self.sender(transaction.counterparty, is: person)
+        case .received:
+            return transaction.direction == .outgoing && transaction.counterparty.destination == person.destination
+        }
+    }
+
+    /// Whether a sender read from an SMS is `person`: the whole number when
+    /// it shows one, its last digits when masked, or a word of the name
+    /// when it shows no number at all (Airtel's "from Jean Bosco").
+    static func sender(_ sender: Recipient, is person: Recipient) -> Bool {
+        let digits = sender.destination.filter(\.isASCIIDigit)
+        if digits.count >= 10 { return digits == person.destination }
+        if digits.count >= 3 { return person.destination.hasSuffix(digits) }
+        guard let shown = sender.name, let name = person.name else { return false }
+        return !words(shown).isDisjoint(with: words(name))
+    }
+
+    private static func words(_ name: String) -> Set<String> {
+        let folded = name.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
+        return Set(folded.split(whereSeparator: { !$0.isLetter }).map(String.init).filter { $0.count >= 3 })
+    }
+
+    // MARK: Between phones
+
+    /// What one phone says to another about a request.
+    public enum Message: Hashable, Sendable {
+        /// Pay me: who asks, how much and what for.
+        case ask(Ask)
+        /// The person asked declined.
+        case declined(id: UUID)
+
+        public struct Ask: Hashable, Sendable {
+            public var id: UUID
+            public var name: String
+            /// The asker's own number: where the money goes.
+            public var number: String
+            public var photoID: UUID?
+            public var amount: Int
+            public var note: String?
+
+            public init(id: UUID, name: String, number: String, photoID: UUID?, amount: Int, note: String?) {
+                self.id = id
+                self.name = name
+                self.number = number
+                self.photoID = photoID
+                self.amount = amount
+                self.note = MoneyRequest.clean(note)
+            }
+        }
+
+        public var data: Data {
+            let body: Body = switch self {
+            case .ask(let ask):
+                Body(v: 1, kind: "ask", id: ask.id, name: ask.name, number: ask.number, photo: ask.photoID, amount: ask.amount, note: ask.note)
+            case .declined(let id):
+                Body(v: 1, kind: "declined", id: id)
+            }
+            return (try? JSONEncoder().encode(body)) ?? Data()
+        }
+
+        /// One received, or nil for anything StarHash would not act on: a
+        /// number that is no Rwandan mobile number, an amount it could not
+        /// pay, another version.
+        public init?(data: Data) {
+            guard let body = try? JSONDecoder().decode(Body.self, from: data), body.v == 1 else { return nil }
+            switch body.kind {
+            case "ask":
+                guard let number = body.number.flatMap({ Recipient(input: $0) }), number.isRwandanMobile,
+                      let amount = body.amount, amount > 0, amount <= Money.maximumAmount,
+                      let name = body.name.flatMap(PeopleNearby.Announcement.clean) else { return nil }
+                self = .ask(Ask(id: body.id, name: name, number: number.destination, photoID: body.photo, amount: amount, note: body.note))
+            case "declined":
+                self = .declined(id: body.id)
+            default:
+                return nil
+            }
+        }
+
+        private struct Body: Codable {
+            var v: Int
+            var kind: String
+            var id: UUID
+            var name: String?
+            var number: String?
+            var photo: UUID?
+            var amount: Int?
+            var note: String?
+        }
+    }
+}
+
+/// Every request the owner sent or received, newest first, in one JSON file
+/// beside the transactions (or in memory, for tests and previews).
+@MainActor
+@Observable
+public final class MoneyRequests {
+    public private(set) var requests: [MoneyRequest] = []
+
+    @ObservationIgnored private let fileURL: URL?
+
+    public init(fileURL: URL?) {
+        self.fileURL = fileURL
+        reload()
+    }
+
+    /// Requests in StarHash's Application Support folder.
+    public static var standardURL: URL {
+        let folder = URL.applicationSupportDirectory.appending(path: "StarHash", directoryHint: .isDirectory)
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        return folder.appending(path: "requests.json")
+    }
+
+    // MARK: Reading
+
+    /// Requests the owner was sent and has yet to answer, newest first.
+    public var waitingForOwner: [MoneyRequest] {
+        requests.filter { $0.direction == .received && $0.status == .waiting }
+    }
+
+    public func request(id: UUID) -> MoneyRequest? {
+        requests.first { $0.id == id }
+    }
+
+    // MARK: Changing
+
+    /// The owner asked `person` for `amount`.
+    @discardableResult
+    public func ask(
+        _ person: Recipient, id: UUID = UUID(), photoID: UUID?, amount: Int, note: String?, at now: Date = .now
+    ) -> MoneyRequest {
+        let request = MoneyRequest(id: id, direction: .sent, person: person, photoID: photoID, amount: amount, note: note, createdAt: now)
+        insert(request)
+        return request
+    }
+
+    /// Someone asked the owner. Nil when that request is already here.
+    @discardableResult
+    public func receive(_ ask: MoneyRequest.Message.Ask, at now: Date = .now) -> MoneyRequest? {
+        guard request(id: ask.id) == nil else { return nil }
+        let person = Recipient(name: ask.name, destination: ask.number, kind: .phone)
+        let request = MoneyRequest(
+            id: ask.id, direction: .received, person: person, photoID: ask.photoID, amount: ask.amount, note: ask.note, createdAt: now
+        )
+        insert(request)
+        return request
+    }
+
+    /// The owner declined a request they were sent.
+    public func decline(_ id: UUID, at now: Date = .now) {
+        settle(id, as: .declined, direction: .received, at: now)
+    }
+
+    /// The owner took back a request they sent.
+    public func cancel(_ id: UUID, at now: Date = .now) {
+        settle(id, as: .cancelled, direction: .sent, at: now)
+    }
+
+    /// The person asked declined a request the owner sent.
+    public func theyDeclined(_ id: UUID, at now: Date = .now) {
+        settle(id, as: .declined, direction: .sent, at: now)
+    }
+
+    /// Paid, by the owner's word: the money came some way StarHash did not
+    /// see (no auto-verify, cash).
+    public func markPaid(_ id: UUID, at now: Date = .now) {
+        guard let index = requests.firstIndex(where: { $0.id == id }), requests[index].status == .waiting else { return }
+        requests[index].status = .paid
+        requests[index].settledAt = now
+        save()
+    }
+
+    /// Requests settle from the transactions: one still waiting is paid by
+    /// the first transaction that pays it and no other request took, oldest
+    /// request first; one paid by a transaction that has since failed or
+    /// gone waits again; and one past its week expires.
+    public func settle(with transactions: [Transaction], at now: Date = .now) {
+        var changed = false
+        let byID = Dictionary(transactions.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        for index in requests.indices where requests[index].status == .paid {
+            guard let id = requests[index].transactionID else { continue }
+            if byID[id].map({ $0.status == .failed }) ?? true {
+                requests[index].status = .waiting
+                requests[index].transactionID = nil
+                requests[index].settledAt = nil
+                changed = true
+            }
+        }
+        var taken = Set(requests.compactMap(\.transactionID))
+        // Oldest first, so the first request asked is the first paid.
+        for index in requests.indices.reversed() where requests[index].status == .waiting {
+            if let paying = transactions.last(where: { !taken.contains($0.id) && requests[index].isPaid(by: $0) }) {
+                requests[index].status = .paid
+                requests[index].transactionID = paying.id
+                requests[index].settledAt = paying.date
+                taken.insert(paying.id)
+                changed = true
+            } else if now > requests[index].expiresAt {
+                requests[index].status = .expired
+                requests[index].settledAt = requests[index].expiresAt
+                changed = true
+            }
+        }
+        if changed { save() }
+    }
+
+    /// Everything, gone: Delete All Data.
+    public func removeAll() {
+        requests.removeAll()
+        save()
+    }
+
+    // MARK: The file
+
+    public func reload() {
+        guard let fileURL, let data = try? Data(contentsOf: fileURL),
+              let read = try? JSONDecoder().decode([MoneyRequest].self, from: data) else { return }
+        requests = read.sorted { $0.createdAt > $1.createdAt }
+    }
+
+    private func insert(_ request: MoneyRequest) {
+        requests.insert(request, at: 0)
+        save()
+    }
+
+    private func settle(_ id: UUID, as status: MoneyRequest.Status, direction: MoneyRequest.Direction, at now: Date) {
+        guard let index = requests.firstIndex(where: { $0.id == id }),
+              requests[index].direction == direction, requests[index].status == .waiting else { return }
+        requests[index].status = status
+        requests[index].settledAt = now
+        save()
+    }
+
+    private func save() {
+        guard let fileURL, let data = try? JSONEncoder().encode(requests) else { return }
+        try? data.write(to: fileURL, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+    }
+}

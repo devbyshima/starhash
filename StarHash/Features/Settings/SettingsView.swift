@@ -93,6 +93,7 @@ private struct SettingsRootList: View {
     @AppStorage(PreferenceKey.peopleNearbyAsked) private var peopleNearbyAsked = false
     @AppStorage(Preferences.confirmDeletes) private var confirmDeletes: Bool
     @AppStorage(Preferences.splitLargePayments) private var splitLargePayments: Bool
+    @AppStorage(Preferences.requestBesidePay) private var requestBesidePay: Bool
     @AppStorage(PreferenceKey.defaultPage) private var defaultPage = AppTab.pay.rawValue
     @AppStorage(PreferenceKey.appearance) private var appearance = AppAppearance.system
     @Environment(AutoVerify.self) private var autoVerify
@@ -409,6 +410,19 @@ private struct SettingsRootList: View {
                 selection: $defaultPage,
                 choices: [AppTab.pay.rawValue, AppTab.buy.rawValue]
             ) { $0 == AppTab.buy.rawValue ? AppTab.buy.title : AppTab.pay.title }
+        }
+        // Request takes Balance's place while People Nearby is on; the
+        // owner can put Balance back.
+        if peopleNearbyOn {
+            SettingsRow(
+                symbol: "arrow.left.arrow.right",
+                title: "Beside Pay",
+                caption: "The button beside Pay: Request, to ask people nearby for money, or Balance"
+            ) {
+                SettingsChoiceMenu(title: "Beside Pay", selection: $requestBesidePay, choices: [true, false]) {
+                    $0 ? String(starhash: "Request") : String(starhash: "Balance")
+                }
+            }
         }
         SettingsToggleRow(
             symbol: "banknote.fill",

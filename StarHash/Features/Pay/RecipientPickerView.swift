@@ -790,7 +790,7 @@ private struct PickerBand: View {
 /// every page sets it, a 17pt search and row names, 14pt detail under
 /// them, the section labels, and the total with "Total:" as large as the
 /// amount in the weight of its "RWF".
-private enum PickerType {
+enum PickerType {
     static var title: Font { .starhashPageTitle }
     static var search: Font { .sheet(17, relativeTo: .body) }
     static var section: Font { .sheet(15, .bold, relativeTo: .subheadline) }

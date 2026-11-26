@@ -17,6 +17,22 @@
         }
       }
     },
+    "%@ asks for %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ demande %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ arakwaka %@"
+          }
+        }
+      }
+    },
     "%@ number": {
       "localizations": {
         "rw": {
@@ -119,6 +135,22 @@
         }
       }
     },
+    "%lld more waiting": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld autres en attente"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izindi %lld zitegereje"
+          }
+        }
+      }
+    },
     "%lld payments": {
       "localizations": {
         "rw": {
@@ -163,6 +195,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld transactions"
+          }
+        }
+      }
+    },
+    "%lld waiting": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld en attente"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld zitegereje"
           }
         }
       }
@@ -381,6 +429,102 @@
         }
       }
     },
+    "Asked %@ for %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$@ demandés à %1$@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wasabye %1$@ %2$@"
+          }
+        }
+      }
+    },
+    "Asked of you": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demandées à vous"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubusabe kuri wowe"
+          }
+        }
+      }
+    },
+    "Asks you": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous demande"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arakwaka"
+          }
+        }
+      }
+    },
+    "Beside Pay": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À côté de Payer"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iruhande rwa Ishyura"
+          }
+        }
+      }
+    },
+    "Cancel Request": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annuler la demande"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hagarika ubusabe"
+          }
+        }
+      }
+    },
+    "Cancelled": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annulée"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byahagaritswe"
+          }
+        }
+      }
+    },
     "Change it any time in Settings, under Your SIMs": {
       "localizations": {
         "fr": {
@@ -445,6 +589,54 @@
         }
       }
     },
+    "Decline": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refuser"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anga"
+          }
+        }
+      }
+    },
+    "Declined": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refusée"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byanzwe"
+          }
+        }
+      }
+    },
+    "Expired": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expirée"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byarangiye igihe"
+          }
+        }
+      }
+    },
     "Let Them See Me": {
       "localizations": {
         "fr": {
@@ -493,6 +685,54 @@
         }
       }
     },
+    "Mark as Paid": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marquer comme payée"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byishyuwe"
+          }
+        }
+      }
+    },
+    "No Requests": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune demande"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta busabe"
+          }
+        }
+      }
+    },
+    "No one nearby has StarHash open": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personne à proximité n'a StarHash ouvert"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta muntu uri hafi ufunguye StarHash"
+          }
+        }
+      }
+    },
     "On StarHash": {
       "localizations": {
         "fr": {
@@ -509,6 +749,22 @@
         }
       }
     },
+    "Paid": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payée"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byishyuwe"
+          }
+        }
+      }
+    },
     "People Nearby": {
       "localizations": {
         "fr": {
@@ -521,6 +777,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Abantu bari hafi"
+          }
+        }
+      }
+    },
+    "Request": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demander"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saba"
+          }
+        }
+      }
+    },
+    "Request %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demander %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saba %@"
+          }
+        }
+      }
+    },
+    "Request %@ from %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demander %@ à %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saba %@ kuri %@"
+          }
+        }
+      }
+    },
+    "Requests": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demandes"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubusabe"
           }
         }
       }
@@ -553,6 +873,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kanda kuri umwe umwishyure, nta kode ya QR"
+          }
+        }
+      }
+    },
+    "The button beside Pay: Request, to ask people nearby for money, or Balance": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le bouton à côté de Payer : Demander, pour demander de l'argent aux personnes proches, ou Solde"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buto iri iruhande rwa Ishyura: Saba, kugira ngo usabe amafaranga abantu bari hafi, cyangwa Reba asigaye"
           }
         }
       }
@@ -781,6 +1117,38 @@
         }
       }
     },
+    "Waiting": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En attente"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitegerejwe"
+          }
+        }
+      }
+    },
+    "What for? (optional)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pour quoi ? (facultatif)"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ni iby'iki? (si ngombwa)"
+          }
+        }
+      }
+    },
     "While StarHash is open, StarHash users near you see your name and photo, and a tap pays you": {
       "localizations": {
         "fr": {
@@ -793,6 +1161,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Igihe StarHash ifunguye, abakoresha StarHash bari hafi yawe babona izina ryawe n'ifoto yawe, kandi bakwishyura bakanze rimwe"
+          }
+        }
+      }
+    },
+    "You asked": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vos demandes"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibyo wasabye"
           }
         }
       }

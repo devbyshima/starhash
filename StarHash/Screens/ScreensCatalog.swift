@@ -264,6 +264,7 @@ private extension View {
             .environment(AppEnvironment.dialler)
             // Nobody nearby: nothing starts it here.
             .environment(AppEnvironment.peopleNearby)
+            .environment(AppEnvironment.requests)
             .environment(AppRouter())
             .environment(ScreensSample.shortcuts)
             .tint(Color.starhashPrimaryText)

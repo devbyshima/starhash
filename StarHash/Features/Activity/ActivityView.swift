@@ -25,6 +25,8 @@ struct ActivityView: View {
     @AppStorage(Preferences.enableContacts) private var enableContacts: Bool
     @AppStorage(Preferences.confirmDeletes) private var confirmDeletes: Bool
     @State private var now = Date.now
+    @Environment(MoneyRequests.self) private var requests
+    @FeatureFlagged(.peopleNearby) private var peopleNearbyOn
     /// The chart's period, from the bar's control.
     @State private var period: ActivityPeriod = .week
     /// Report or Profile, when one is pushed.
@@ -83,6 +85,9 @@ struct ActivityView: View {
                     // Its title and period control sit up beside the back
                     // button, so it brings its own.
                     ReportPage()
+                case .requests:
+                    RequestsPage()
+                        .starhashBackButton()
                 }
             }
         }
@@ -139,12 +144,25 @@ struct ActivityView: View {
         )
         .padding(.horizontal, StarHashMetrics.screenPadding)
         .starhashCentredOverTabBar()
+        // Requests come before any transaction can: their row stays the
+        // way to them.
+        .overlay(alignment: .top) {
+            if peopleNearbyOn, !requests.requests.isEmpty {
+                RequestsLinkRow { page = .requests }
+                    .padding(.horizontal, StarHashMetrics.screenPadding)
+                    .padding(.top, ActivityLayout.contentTop)
+            }
+        }
     }
 
     private var listScreen: some View {
         let list = listCache.list(for: store.transactions, period: period, now: now, calendar: calendar)
         return ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
+                if peopleNearbyOn, !requests.requests.isEmpty {
+                    RequestsLinkRow { page = .requests }
+                        .padding(.top, ActivityLayout.contentTop)
+                }
                 ActivitySummaryCard(
                     period: period,
                     totals: list.totals,
@@ -357,6 +375,7 @@ struct ActivityView: View {
 enum ActivityRoute: Hashable {
     case transaction(UUID)
     case report
+    case requests
 
     var transactionID: UUID? {
         if case .transaction(let id) = self { id } else { nil }
