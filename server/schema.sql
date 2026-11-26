@@ -91,3 +91,21 @@ CREATE TABLE IF NOT EXISTS requests (
 );
 CREATE INDEX IF NOT EXISTS requests_to ON requests (to_key_hash);
 CREATE INDEX IF NOT EXISTS requests_from ON requests (from_key_hash, created_at);
+
+-- One row per iPhone whose StarHash can be woken by a push (a build with
+-- STARHASH_PUSH, from a paid Apple team) while its owner takes requests
+-- from anywhere: the hash of their key (the directory's key_hash), the
+-- token APNs gave that copy of StarHash, and whether it is for APNs's
+-- sandbox (a build Xcode signed for development). A push to it says only
+-- "New request", nothing from the request. A few rows per key at most (one
+-- key restored onto a new iPhone); deleted with the listing, when it is
+-- listed without requests, when APNs says the token is gone, and each
+-- night once not sent again for 45 days.
+CREATE TABLE IF NOT EXISTS push_tokens (
+  key_hash TEXT NOT NULL,
+  token TEXT NOT NULL,
+  sandbox INTEGER NOT NULL,
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY (key_hash, token)
+) WITHOUT ROWID;
+CREATE INDEX IF NOT EXISTS push_tokens_by_token ON push_tokens (token);

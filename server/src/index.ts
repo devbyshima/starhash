@@ -20,12 +20,19 @@
 // The asker's own number is checked against what their key lists, then
 // dropped; the iPhone asked checks it again against the seal.
 //
+// Push (push.ts): an iPhone listed with requests on, in a build that has
+// push, sends its APNs token under the same key, and a request to it then
+// wakes StarHash there with a push that says only "New request". The
+// token goes with the listing, and lapses with it.
+//
 // Installs: once each day it is used the app sends a random id it made on
 // its first launch and its version, so the number of people using StarHash
 // can be counted, in all (installs) and each day (active_days, by Kigali's
 // date). Nothing else: no transactions.
 
-export interface Env {
+import { MAX_TOKENS_PER_KEY, notifyRequest, type PushEnv, TOKEN } from "./push";
+
+export interface Env extends PushEnv {
   DB: D1Database;
   /// The directory's numbers are hashed with it. Set with
   /// `npx wrangler secret put DIRECTORY_SECRET`; without it the directory
@@ -64,7 +71,7 @@ const BASE64 = /^[A-Za-z0-9+/]+={0,2}$/;
 const ENTRY_LIFETIME_DAYS = 45;
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const photo = url.pathname.match(/^\/v1\/photos\/([^/]+)$/);
     if (photo) {
@@ -101,11 +108,21 @@ export default {
     if (url.pathname === "/v1/requests") {
       switch (request.method) {
         case "POST":
-          return sendRequest(request, env);
+          return sendRequest(request, env, ctx);
         case "GET":
           return getRequests(request, env);
         case "DELETE":
           return eraseRequests(request, env);
+        default:
+          return text(405, "Method not allowed");
+      }
+    }
+    if (url.pathname === "/v1/push") {
+      switch (request.method) {
+        case "PUT":
+          return putPushToken(request, env);
+        case "DELETE":
+          return deletePushToken(request, env);
         default:
           return text(405, "Method not allowed");
       }
@@ -123,14 +140,15 @@ export default {
   },
 
   /// Each night (the cron in wrangler.toml): the directory's lapsed
-  /// entries and keys are deleted, not only left out of lookups, and so
-  /// are requests past their week.
+  /// entries, keys and push tokens are deleted, not only left out of
+  /// lookups, and so are requests past their week.
   async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
     const now = new Date();
     const lapsed = lapsedBefore(now);
     await env.DB.batch([
       env.DB.prepare("DELETE FROM directory WHERE updated_at <= ?1").bind(lapsed),
       env.DB.prepare("DELETE FROM directory_keys WHERE updated_at <= ?1").bind(lapsed),
+      env.DB.prepare("DELETE FROM push_tokens WHERE updated_at <= ?1").bind(lapsed),
       env.DB.prepare("DELETE FROM requests WHERE expires_at <= ?1").bind(now.toISOString()),
     ]);
   },
@@ -188,11 +206,14 @@ async function putEntry(request: Request, env: Env): Promise<Response> {
            ON CONFLICT(key_hash) DO UPDATE SET public_key = ?2, updated_at = ?3`,
         ).bind(keyHash, publicKey, now)
       : env.DB.prepare("DELETE FROM directory_keys WHERE key_hash = ?1").bind(keyHash),
+    // A push only ever says a request came: no requests, no pushes.
+    ...(publicKey ? [] : [env.DB.prepare("DELETE FROM push_tokens WHERE key_hash = ?1").bind(keyHash)]),
   ]);
   return text(200, "Saved");
 }
 
-/// Show My Name turned off, or the owner's numbers gone.
+/// Show My Name turned off, or the owner's numbers gone: their push
+/// tokens go too.
 async function deleteEntry(request: Request, env: Env): Promise<Response> {
   const key = bearer(request);
   if (!key) return text(401, "A key is needed");
@@ -200,6 +221,7 @@ async function deleteEntry(request: Request, env: Env): Promise<Response> {
   await env.DB.batch([
     env.DB.prepare("DELETE FROM directory WHERE key_hash = ?1").bind(keyHash),
     env.DB.prepare("DELETE FROM directory_keys WHERE key_hash = ?1").bind(keyHash),
+    env.DB.prepare("DELETE FROM push_tokens WHERE key_hash = ?1").bind(keyHash),
   ]);
   return text(200, "Deleted");
 }
@@ -243,8 +265,10 @@ async function listed(hash: string, env: Env) {
 /// Asks the owner of `to` for money: `sealed` is who asks, how much and
 /// what for, sealed on the asker's iPhone to `to`'s public key. `from` is
 /// the asker's own number, checked against what their key lists, so
-/// nobody asks in another's name, and then forgotten.
-async function sendRequest(request: Request, env: Env): Promise<Response> {
+/// nobody asks in another's name, and then forgotten. Once it is stored,
+/// the iPhones of the person asked are told (`notifyRequest`), after the
+/// answer.
+async function sendRequest(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   const key = bearer(request);
   if (!key) return text(401, "A key is needed");
   const secret = env.DIRECTORY_SECRET;
@@ -289,6 +313,7 @@ async function sendRequest(request: Request, env: Env): Promise<Response> {
     .bind(id, toHash, keyHash, asker.public_key, sealed, nowISO, expires, dayAgo, MAX_REQUESTS_A_DAY, asked.key_hash)
     .run();
   if (result.meta.changes === 1) {
+    ctx.waitUntil(notifyRequest(asked.key_hash, expires, lapsed, env));
     return json(200, { id, created_at: nowISO, expires_at: expires });
   }
   const sent = await env.DB.prepare("SELECT COUNT(*) AS n FROM requests WHERE from_key_hash = ?1 AND created_at > ?2")
@@ -383,6 +408,60 @@ async function eraseRequests(request: Request, env: Env): Promise<Response> {
     ),
   ]);
   return text(200, "Erased");
+}
+
+// MARK: Push tokens
+
+/// Ties this iPhone's APNs token to the owner's key, so a request to the
+/// numbers it lists wakes StarHash there (`notifyRequest`), in place of
+/// `replaces`, the token it had before. Only from a key listed with
+/// requests on: there is nothing else to wake it for. `sandbox` says which
+/// APNs the token is for (a build Xcode signed for development).
+async function putPushToken(request: Request, env: Env): Promise<Response> {
+  const key = bearer(request);
+  if (!key) return text(401, "A key is needed");
+  const body = await smallJSON<{ token?: unknown; sandbox?: unknown; replaces?: unknown }>(request);
+  if (!body) return text(400, "Bad request");
+  const token = typeof body.token === "string" ? body.token.toLowerCase() : "";
+  const replaces = body.replaces === undefined || body.replaces === null ? null : String(body.replaces).toLowerCase();
+  if (!TOKEN.test(token) || typeof body.sandbox !== "boolean" || (replaces !== null && !TOKEN.test(replaces))) {
+    return text(400, "Bad request");
+  }
+  const keyHash = await sha256(key);
+  const now = new Date();
+  const takes = await env.DB.prepare("SELECT 1 AS yes FROM directory_keys WHERE key_hash = ?1 AND updated_at > ?2")
+    .bind(keyHash, lapsedBefore(now))
+    .first();
+  if (!takes) return text(404, "Not listed");
+  await env.DB.batch([
+    ...(replaces ? [env.DB.prepare("DELETE FROM push_tokens WHERE key_hash = ?1 AND token = ?2").bind(keyHash, replaces)] : []),
+    env.DB.prepare(
+      `INSERT INTO push_tokens (key_hash, token, sandbox, updated_at) VALUES (?1, ?2, ?3, ?4)
+       ON CONFLICT(key_hash, token) DO UPDATE SET sandbox = ?3, updated_at = ?4`,
+    ).bind(keyHash, token, body.sandbox ? 1 : 0, now.toISOString()),
+    env.DB.prepare(
+      `DELETE FROM push_tokens WHERE key_hash = ?1 AND token NOT IN
+       (SELECT token FROM push_tokens WHERE key_hash = ?1 ORDER BY updated_at DESC LIMIT ?2)`,
+    ).bind(keyHash, MAX_TOKENS_PER_KEY),
+  ]);
+  return text(200, "Saved");
+}
+
+/// Unties `token` from the owner's key (Show My Name or word of requests
+/// turned off, Delete All Data, a build without push), or every token
+/// under it when the body names none.
+async function deletePushToken(request: Request, env: Env): Promise<Response> {
+  const key = bearer(request);
+  if (!key) return text(401, "A key is needed");
+  const body = await smallJSON<{ token?: unknown }>(request);
+  const token = body?.token === undefined ? null : String(body.token).toLowerCase();
+  if (token !== null && !TOKEN.test(token)) return text(400, "Bad request");
+  const keyHash = await sha256(key);
+  await (token
+    ? env.DB.prepare("DELETE FROM push_tokens WHERE key_hash = ?1 AND token = ?2").bind(keyHash, token)
+    : env.DB.prepare("DELETE FROM push_tokens WHERE key_hash = ?1").bind(keyHash)
+  ).run();
+  return text(200, "Deleted");
 }
 
 /// Whether request `id` was made to `keyHash`.

@@ -75,6 +75,27 @@ enum StarHashCloud {
             guard let (_, response) = try? await URLSession.shared.data(for: request) else { return false }
             return (response as? HTTPURLResponse)?.statusCode == 200
         }
+
+        func registerPush(_ token: PushToken, replacing: String?, key: String) async -> Bool {
+            var body: [String: Any] = ["token": token.hex, "sandbox": token.sandbox]
+            if let replacing { body["replaces"] = replacing }
+            return await sendPush("PUT", body: body, key: key)
+        }
+
+        func removePush(_ hex: String, key: String) async -> Bool {
+            await sendPush("DELETE", body: ["token": hex], key: key)
+        }
+
+        /// The token in a body, never in a URL.
+        private func sendPush(_ method: String, body: [String: Any], key: String) async -> Bool {
+            var request = URLRequest(url: baseURL.appending(path: "v1/push"))
+            request.httpMethod = method
+            request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+            guard let (_, response) = try? await URLSession.shared.data(for: request) else { return false }
+            return (response as? HTTPURLResponse)?.statusCode == 200
+        }
     }
 
     // MARK: A scanned code's photo

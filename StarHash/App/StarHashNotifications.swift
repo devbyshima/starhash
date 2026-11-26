@@ -143,14 +143,21 @@ final class StarHashNotifications {
     }
 
     /// Word of requests the server brought while StarHash was away: one
-    /// asked of the owner, or one of theirs declined.
-    func announce(_ news: RequestsAnywhere.News) async {
+    /// asked of the owner, or one of theirs declined. `quietly` after a
+    /// push, which made the sound already.
+    func announce(_ news: RequestsAnywhere.News, quietly: Bool = false) async {
         guard !news.isEmpty, await authorizationStatus().allowsDelivery else { return }
         let settings = StarHashPreferences.notifications
         let items = news.received.compactMap { NotificationPlan.requestReceived($0, name: $0.person.shownName, settings: settings) }
             + news.declined.compactMap { NotificationPlan.requestDeclined($0, name: $0.person.shownName, settings: settings) }
         for item in items {
-            try? await center.add(request(for: item))
+            let request = request(for: item)
+            if quietly, let content = request.content.mutableCopy() as? UNMutableNotificationContent {
+                content.sound = nil
+                try? await center.add(UNNotificationRequest(identifier: request.identifier, content: content, trigger: request.trigger))
+            } else {
+                try? await center.add(request)
+            }
         }
     }
 
@@ -161,11 +168,13 @@ final class StarHashNotifications {
     }
 
     /// A tap opens what the notification is about: its transaction,
-    /// Activity for a summary, or a scam warning's advice. Verify opens
+    /// Activity for a summary, a scam warning's advice, or for the server's
+    /// push the request it said came. Verify opens
     /// the payment with its sheet, and Mark as Failed settles it as its
     /// details page would.
     func answer(
-        action: String, transactionID: UUID?, requestID: UUID? = nil, kind: NotificationPlan.Item.Kind? = nil, body: String = ""
+        action: String, transactionID: UUID?, requestID: UUID? = nil, kind: NotificationPlan.Item.Kind? = nil, body: String = "",
+        isPush: Bool = false
     ) async {
         let store = AppEnvironment.store
         switch action {
@@ -180,7 +189,9 @@ final class StarHashNotifications {
             store.markFailed(id)
             await sync()
         case UNNotificationDefaultActionIdentifier:
-            if let id = requestID {
+            if isPush {
+                await StarHashPush.opened()
+            } else if let id = requestID {
                 AppEnvironment.requests.reload()
                 AppEnvironment.router.openRequest(id)
             } else if let id = transactionID {
@@ -242,8 +253,8 @@ final class StarHashNotifications {
 }
 
 /// iOS's side of the conversation: it shows StarHash's notifications while
-/// the app is open too, and hands a tap or a button to
-/// `StarHashNotifications`.
+/// the app is open too (the server's push excepted: the request's card
+/// shows instead), and hands a tap or a button to `StarHashNotifications`.
 ///
 /// The completion-handler forms, each called back on the main thread. The
 /// async forms Swift offers ran off the main thread and handed iOS its
@@ -256,7 +267,7 @@ private final class NotificationResponder: NSObject, UNUserNotificationCenterDel
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping @Sendable (UNNotificationPresentationOptions) -> Void
     ) {
-        completionHandler([.banner, .list, .sound])
+        completionHandler(StarHashPush.isPush(notification) ? [] : [.banner, .list, .sound])
     }
 
     func userNotificationCenter(
@@ -270,8 +281,11 @@ private final class NotificationResponder: NSObject, UNUserNotificationCenterDel
         let requestID = StarHashNotifications.requestID(of: userInfo)
         let kind = StarHashNotifications.kind(of: userInfo)
         let body = response.notification.request.content.body
+        let isPush = StarHashPush.isPush(response.notification)
         Task { @MainActor in
-            await StarHashNotifications.shared.answer(action: action, transactionID: id, requestID: requestID, kind: kind, body: body)
+            await StarHashNotifications.shared.answer(
+                action: action, transactionID: id, requestID: requestID, kind: kind, body: body, isPush: isPush
+            )
             completionHandler()
         }
     }

@@ -8,9 +8,10 @@ import SwiftUI
 /// answers on their way back. What a request says, who may ask, and how
 /// the server hears how it ended are StarHashKit's `RequestsAnywhere`.
 ///
-/// No push: that needs the paid Apple team. A request reaches the owner the
+/// Without push (a free team's build), a request reaches the owner the
 /// next time StarHash opens, or when iOS next gives it a moment in the
-/// background.
+/// background. With it (`StarHashPush`), the server's push wakes StarHash
+/// to do the same at once.
 @MainActor
 enum AnywhereRequests {
     /// Background App Refresh's task, as Info.plist permits it.
@@ -27,11 +28,14 @@ enum AnywhereRequests {
     /// Takes in what waits on the server, and tells it what it has to
     /// hear. With `announce`, a notification for each request asked of the
     /// owner and each of theirs declined: StarHash was away, so nothing on
-    /// screen would show them.
-    static func sync(announce: Bool) async {
-        guard isOn else { return }
+    /// screen would show them; `quietly`, with no sound, when a push has
+    /// just made one.
+    @discardableResult
+    static func sync(announce: Bool, quietly: Bool = false) async -> RequestsAnywhere.News {
+        guard isOn else { return .init() }
         let news = await AppEnvironment.requestsAnywhere.sync()
-        if announce { await StarHashNotifications.shared.announce(news) }
+        if announce { await StarHashNotifications.shared.announce(news, quietly: quietly) }
+        return news
     }
 
     /// The owner declined: the asker hears over People Nearby's connection
@@ -59,16 +63,18 @@ enum AnywhereRequests {
         try? BGTaskScheduler.shared.submit(request)
     }
 
-    /// Background App Refresh: the requests settled from what the SMS
-    /// brought meanwhile, then the server's, with word of what came; then
-    /// the next refresh asked for.
-    static func refresh() async {
+    /// Background App Refresh, and a push while StarHash is away: the
+    /// requests settled from what the SMS brought meanwhile, then the
+    /// server's, with word of what came; then the next refresh asked for.
+    @discardableResult
+    static func refresh(quietly: Bool = false) async -> RequestsAnywhere.News {
         let store = AppEnvironment.store
         store.reloadFromDisk()
         AppEnvironment.requests.reload()
         AppEnvironment.requests.settle(with: store.transactions)
-        await sync(announce: true)
+        let news = await sync(announce: true, quietly: quietly)
         scheduleRefresh()
+        return news
     }
 }
 
@@ -103,7 +109,11 @@ struct RequestsSync: ViewModifier {
                 case .active:
                     requests.reload()
                     requests.settle(with: store.transactions)
-                    Task { await AnywhereRequests.sync(announce: false) }
+                    Task {
+                        await AnywhereRequests.sync(announce: false)
+                        // Open, StarHash shows what a push was about.
+                        await StarHashPush.clearDelivered()
+                    }
                 case .background:
                     AnywhereRequests.scheduleRefresh()
                 default:

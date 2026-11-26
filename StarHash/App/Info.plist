@@ -68,6 +68,8 @@
 	<string>$(STARHASH_APP_GROUP_ID_$(STARHASH_APP_GROUPS))</string>
 	<key>StarHashChannel</key>
 	<string>$(STARHASH_CHANNEL)</string>
+	<key>StarHashPush</key>
+	<string>$(STARHASH_PUSH)</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>SpaceGrotesk.ttf</string>
@@ -75,6 +77,7 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
+		<string>$(STARHASH_PUSH_BACKGROUND_MODE_$(STARHASH_PUSH))</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict>

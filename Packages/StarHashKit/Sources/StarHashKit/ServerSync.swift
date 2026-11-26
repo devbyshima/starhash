@@ -4,14 +4,16 @@ import Foundation
 /// photo, under a random id their QR code carries; their Show My Name
 /// listing (their numbers with their name, that photo's id, and the public
 /// key requests to them are sealed to); and the daily count, a random id
-/// once each Kigali day StarHash is used. Requests go their own way
-/// (`RequestsAnywhere`), sealed. Nothing else ever goes: no payment, no
-/// contact, no place.
+/// once each Kigali day StarHash is used; and, in a build with push
+/// (`STARHASH_PUSH`), the token APNs gave this iPhone, tied to the
+/// listing's key while the owner takes requests from anywhere, so a
+/// request wakes StarHash. Requests go their own way (`RequestsAnywhere`),
+/// sealed. Nothing else ever goes: no payment, no contact, no place.
 ///
 /// Every send that does not reach the server, offline say, is made again:
 /// the photo on the next `wake` until the server takes it, the listing
-/// until the server has what the owner shows, and the day until it is
-/// counted. Delete All Data keeps what the server still holds through the
+/// and the push token until the server has what the owner shows, and the
+/// day until it is counted. Delete All Data keeps what the server still holds through the
 /// wipe (`erase(through:)`) and deletes it there after.
 ///
 /// The server and the secret key that proves the owner's photo and listing
@@ -40,6 +42,13 @@ public final class ServerSync {
         /// Counts this copy of StarHash as used today: whether the server
         /// counted it.
         func ping(installID: String, version: String) async -> Bool
+        /// Ties `token` to the key, so a request to the numbers it lists
+        /// wakes this iPhone, in place of `replacing`, the token sent
+        /// before: whether the server took it. It takes one only from a key
+        /// listed with requests on.
+        func registerPush(_ token: PushToken, replacing: String?, key: String) async -> Bool
+        /// Unties the token `hex` from the key: whether the server took it.
+        func removePush(_ hex: String, key: String) async -> Bool
     }
 
     /// The owner's secret key, made once: nil when it cannot be read or
@@ -92,12 +101,17 @@ public final class ServerSync {
         static let listingSentAt = "cloudDirectorySentAt"
         static let lastPingDay = "cloudLastPingDay"
         static let installID = "cloudInstallID"
+        /// The token APNs gave this iPhone (`PushToken.state`).
+        static let pushToken = "cloudPushToken"
+        /// The token the server has, and when it took it.
+        static let pushSent = "cloudPushSent"
+        static let pushSentAt = "cloudPushSentAt"
     }
 
     /// What was last sent when the owner has no listing.
     static let unlisted = "off"
-    /// The server drops a listing unseen for 45 days: it is sent again
-    /// after a week.
+    /// The server drops a listing, and a push token, unseen for 45 days:
+    /// each is sent again after a week.
     static let listingRefresh: TimeInterval = 7 * 86_400
 
     private let server: any Server
@@ -108,6 +122,10 @@ public final class ServerSync {
     private let publicKey: PublicKeySource
     private let defaults: UserDefaults
     private let version: String
+    /// Whether this build may have push (`STARHASH_PUSH`, which only a
+    /// paid team can sign): without it no token is sent, and one an
+    /// earlier build sent is removed.
+    private let pushEnabled: Bool
     /// The Simulator never lists the owner or counts the day, so test
     /// owners stay off the server and test runs out of the numbers. The
     /// photo goes, as a scanned code needs it.
@@ -122,6 +140,14 @@ public final class ServerSync {
     /// A ping on its way, so coming back to the front while it is out
     /// sends no second one.
     private var pinging = false
+    /// A token sent or removed on its way, and the moment of a change made
+    /// meanwhile, worked out again after it.
+    private var pushSending = false
+    private var pushWaiting: Date?
+    /// The token APNs gave, kept in memory too: it is the iPhone's, not the
+    /// owner's, so Delete All Data's wipe of the settings leaves it here,
+    /// and it goes with the owner's listing once they list again.
+    private var pushToken: PushToken?
     /// Every send on its way, so tests can wait for them (`settle`).
     private var running: [UUID: Task<Void, Never>] = [:]
 
@@ -134,7 +160,8 @@ public final class ServerSync {
         publicKey: @escaping PublicKeySource = { nil },
         defaults: UserDefaults = .standard,
         version: String,
-        isSimulator: Bool
+        isSimulator: Bool,
+        pushEnabled: Bool = false
     ) {
         self.server = server
         self.key = key
@@ -145,6 +172,7 @@ public final class ServerSync {
         self.defaults = defaults
         self.version = version
         self.isSimulator = isSimulator
+        self.pushEnabled = pushEnabled
     }
 
     // MARK: The owner's photo
@@ -235,14 +263,18 @@ public final class ServerSync {
         sendListing(listing, at: now)
     }
 
+    /// The push token follows: once the server has the listing as it
+    /// stands, or straight away when nothing is to be sent.
     private func sendListing(_ listing: Listing?, at now: Date) {
         guard !isSimulator else { return }
         let state = listing?.state ?? Self.unlisted
         let sent = defaults.string(forKey: Key.listingState)
         let stale = now.timeIntervalSince1970 - defaults.double(forKey: Key.listingSentAt) > Self.listingRefresh
         // Never listed and nothing to list: nothing to clear either.
-        if sent == nil, listing == nil { return }
-        guard state != sent || (listing != nil && stale) else { return }
+        guard sent != nil || listing != nil, state != sent || (listing != nil && stale) else {
+            syncPush(at: now)
+            return
+        }
         guard !listingSending else {
             listingWaiting = true
             return
@@ -263,6 +295,119 @@ public final class ServerSync {
             if listingWaiting {
                 listingWaiting = false
                 ownerChanged()
+            } else {
+                syncPush(at: now)
+            }
+        }
+    }
+
+    // MARK: Push
+
+    /// What to do about the push token on the server (`pushStep`).
+    public enum PushStep: Equatable, Sendable {
+        /// The server has what it should.
+        case keep
+        /// Tie the token to the owner's key, in place of the token sent
+        /// before, when it was another.
+        case register(PushToken, replacing: String?)
+        /// Untie the token sent before.
+        case remove(String)
+    }
+
+    /// The owner's listing, as far as a push to them goes.
+    public enum ListingForPush: Sendable {
+        /// The server lists them, as they stand now, with the key requests
+        /// to them are sealed to.
+        case takesRequests
+        /// A listing the server does not have yet is on its way, or failed
+        /// to reach it: the token waits, as the server takes one only from
+        /// a key it lists.
+        case onItsWay
+        /// Nothing listed, or listed without taking requests: nothing to
+        /// wake StarHash for.
+        case notTaking
+    }
+
+    /// The rule: the token is on the server only while the owner takes
+    /// requests from anywhere (Show My Name on, with its key), wants word
+    /// of them (Settings, Notifications, Requests) and has a build with
+    /// push; then it is sent again each week, as the listing is, so it
+    /// never lapses there. Otherwise the one sent before is removed.
+    public static func pushStep(
+        token: PushToken?, listing: ListingForPush, notifies: Bool, sent: PushToken?, sentAt: Date, now: Date
+    ) -> PushStep {
+        let wanted: PushToken?
+        switch listing {
+        case .onItsWay: return .keep
+        case .notTaking: wanted = nil
+        case .takesRequests: wanted = notifies ? token : nil
+        }
+        guard let wanted else { return sent.map { .remove($0.hex) } ?? .keep }
+        if wanted == sent, now.timeIntervalSince(sentAt) <= listingRefresh { return .keep }
+        return .register(wanted, replacing: sent.flatMap { $0.hex == wanted.hex ? nil : $0.hex })
+    }
+
+    /// iOS gave StarHash its token (at each launch, in a build with push):
+    /// it goes to the server when the owner takes requests, replacing the
+    /// one before when it changed.
+    public func pushTokenReceived(_ token: PushToken, at now: Date = .now) {
+        pushToken = token
+        defaults.set(token.state, forKey: Key.pushToken)
+        syncPush(at: now)
+    }
+
+    /// The owner chose whether to hear of requests (Settings,
+    /// Notifications): the token goes, or comes back.
+    public func requestNotificationsChanged(at now: Date = .now) {
+        syncPush(at: now)
+    }
+
+    private var currentPushToken: PushToken? {
+        guard pushEnabled else { return nil }
+        return pushToken ?? defaults.string(forKey: Key.pushToken).flatMap(PushToken.init(state:))
+    }
+
+    private var listingForPush: ListingForPush {
+        guard let listing, listing.key != nil else { return .notTaking }
+        return defaults.string(forKey: Key.listingState) == listing.state ? .takesRequests : .onItsWay
+    }
+
+    private func syncPush(at now: Date) {
+        guard !isSimulator else { return }
+        guard !pushSending else {
+            pushWaiting = now
+            return
+        }
+        let step = Self.pushStep(
+            token: currentPushToken,
+            listing: listingForPush,
+            notifies: Preferences.requestNotifications.value(in: defaults),
+            sent: defaults.string(forKey: Key.pushSent).flatMap(PushToken.init(state:)),
+            sentAt: Date(timeIntervalSince1970: defaults.double(forKey: Key.pushSentAt)),
+            now: now
+        )
+        guard step != .keep else { return }
+        pushSending = true
+        start { [self] in
+            let key = await key()
+            switch step {
+            case .register(let token, let replacing):
+                if let key, await server.registerPush(token, replacing: replacing, key: key) {
+                    defaults.set(token.state, forKey: Key.pushSent)
+                    defaults.set(now.timeIntervalSince1970, forKey: Key.pushSentAt)
+                }
+            case .remove(let hex):
+                if let key, await server.removePush(hex, key: key) {
+                    defaults.removeObject(forKey: Key.pushSent)
+                    defaults.removeObject(forKey: Key.pushSentAt)
+                }
+            case .keep:
+                break
+            }
+            pushSending = false
+            if let waiting = pushWaiting {
+                pushWaiting = nil
+                syncPush(at: waiting)
             }
         }
     }
@@ -318,14 +463,20 @@ public final class ServerSync {
     /// still hold from this iPhone is kept through it and deleted there
     /// after. A photo ever given an id, which `wake` deletes until the
     /// server confirms, with the key the Keychain keeps through the wipe;
-    /// and the listing last sent, which is cleared now (with the record
-    /// wiped too, the owner would pass for one never listed and their name
-    /// would stay there). What else runs before or after it does not
-    /// matter: it decides from its own record, not the photo or the owner.
+    /// the listing last sent, which is cleared now (with the record wiped
+    /// too, the owner would pass for one never listed and their name would
+    /// stay there); and the push token, removed now for the same reason.
+    /// What else runs before or after it does not matter: it decides from
+    /// its own record, not the photo or the owner.
     public func erase(through wipe: () -> Void) {
         let sent = defaults.string(forKey: Key.listingState)
         let photoToDelete = defaults.string(forKey: Key.photoToDelete) ?? defaults.string(forKey: Key.photoID)
+        let pushSent = defaults.string(forKey: Key.pushSent)
         wipe()
+        if let pushSent {
+            defaults.set(pushSent, forKey: Key.pushSent)
+            syncPush(at: .now)
+        }
         if let photoToDelete {
             defaults.set(photoToDelete, forKey: Key.photoToDelete)
             deleteLeftoverPhoto()

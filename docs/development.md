@@ -19,6 +19,8 @@ The Xcode project is generated from `project.yml` and is not committed.
 ### Widgets and the App Group
 
 The Buy widget (`StarHashWidgets/`) reads Buy's codes from the app through an App Group, which only a paid Apple Developer Program team can sign. With `STARHASH_APP_GROUPS: NO` in `project.yml` the build carries no entitlements and the widget shows StarHash's default codes. On a paid team, set it to `YES` (and `STARHASH_APP_GROUP` to a group your team owns): both targets are then signed with the group and the widget shows your own codes.
+
+Push notifications for requests from anywhere need a paid team too: `STARHASH_PUSH: NO` (the default) leaves `aps-environment` out and the app never registers. With `YES`, the app is signed for push and sends its token to the server, which pushes only once it has an APNs key (`APNS_KEY`, `APNS_KEY_ID`, `APNS_TEAM_ID`, see `server/wrangler.toml`).
 2. Generate the project and open it:
    ```bash
    xcodegen generate

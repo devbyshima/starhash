@@ -203,12 +203,19 @@ private struct OwnerListingSync: ViewModifier {
     /// turn on or off: it carries their key only while they are on.
     @FeatureFlagged(.peopleNearby) private var peopleNearbyOn
     @FeatureFlagged(.requestsAnywhere) private var anywhereOn
+    /// Word of requests (Settings, Notifications): the push token goes from
+    /// the server with it, and comes back.
+    @AppStorage(Preferences.requestNotifications) private var requestNotifications: Bool
 
     func body(content: Content) -> some View {
-        content.task(id: "\(showMyName)|\(peopleNearbyOn)|\(anywhereOn)|\(AppEnvironment.serverSync.listing?.state ?? "off")") {
-            try? await Task.sleep(for: .seconds(2))
-            guard !Task.isCancelled else { return }
-            AppEnvironment.serverSync.ownerChanged()
-        }
+        content
+            .task(id: "\(showMyName)|\(peopleNearbyOn)|\(anywhereOn)|\(AppEnvironment.serverSync.listing?.state ?? "off")") {
+                try? await Task.sleep(for: .seconds(2))
+                guard !Task.isCancelled else { return }
+                AppEnvironment.serverSync.ownerChanged()
+            }
+            .onChange(of: requestNotifications) {
+                AppEnvironment.serverSync.requestNotificationsChanged()
+            }
     }
 }

@@ -43,8 +43,8 @@ settings:
     # Enhanced Security: pointer authentication (an arm64e slice beside
     # arm64 on device; the simulator keeps arm64 alone) and the compiler's
     # hardening. Its runtime half is the hardened-process entitlements in
-    # StarHash.entitlements, signed only with STARHASH_APP_GROUPS: YES
-    # (below). The protections apply from iOS 26; older iOS runs arm64.
+    # StarHash.entitlements (StarHashPush.entitlements with push), signed
+    # only with STARHASH_APP_GROUPS: YES (below). The protections apply from iOS 26; older iOS runs arm64.
     ENABLE_ENHANCED_SECURITY: YES
     # With the package built for arm64e (postGenCommand), Xcode builds it
     # for the Apple silicon simulator alone, so the app and widgets drop
@@ -59,8 +59,24 @@ settings:
     # the widgets with the group.
     STARHASH_APP_GROUPS: NO
     STARHASH_APP_GROUP: group.com.devbyshima.starhash
-    STARHASH_APP_ENTITLEMENTS_YES: StarHash/App/StarHash.entitlements
-    STARHASH_APP_ENTITLEMENTS_NO: ""
+    # Push notifications for requests from anywhere (the server's APNs
+    # pushes, docs/nearby-and-requests.md), which only a paid team can sign
+    # too. NO leaves the aps-environment entitlement out and the app never
+    # registers for remote notifications: requests come when StarHash opens
+    # and through Background App Refresh. YES signs the app with it, adds
+    # the remote-notification background mode, and the app sends its token
+    # to the server while the owner takes requests (`ServerSync`).
+    STARHASH_PUSH: NO
+    # The app's entitlements, one file for each way the two switches can
+    # stand.
+    STARHASH_APP_ENTITLEMENTS_YES_PUSH_NO: StarHash/App/StarHash.entitlements
+    STARHASH_APP_ENTITLEMENTS_YES_PUSH_YES: StarHash/App/StarHashPush.entitlements
+    STARHASH_APP_ENTITLEMENTS_NO_PUSH_YES: StarHash/App/PushOnly.entitlements
+    STARHASH_APP_ENTITLEMENTS_NO_PUSH_NO: ""
+    # The background mode push adds. Without push it names Background App
+    # Refresh's again, so the list holds fetch alone as before.
+    STARHASH_PUSH_BACKGROUND_MODE_YES: remote-notification
+    STARHASH_PUSH_BACKGROUND_MODE_NO: fetch
     STARHASH_WIDGET_ENTITLEMENTS_YES: StarHashWidgets/StarHashWidgets.entitlements
     STARHASH_WIDGET_ENTITLEMENTS_NO: ""
     # The id both Info.plists carry (StarHashAppGroup), empty without the
@@ -112,7 +128,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.devbyshima.starhash
-        CODE_SIGN_ENTITLEMENTS: $(STARHASH_APP_ENTITLEMENTS_$(STARHASH_APP_GROUPS))
+        CODE_SIGN_ENTITLEMENTS: $(STARHASH_APP_ENTITLEMENTS_$(STARHASH_APP_GROUPS)_PUSH_$(STARHASH_PUSH))
         TARGETED_DEVICE_FAMILY: "1"
         ENABLE_PREVIEWS: YES
         # One binary in Debug too. With the debug dylib, a device build's
@@ -139,6 +155,8 @@ targets:
         LSSupportsGameMode: false
         StarHashChannel: $(STARHASH_CHANNEL)
         StarHashAppGroup: $(STARHASH_APP_GROUP_ID_$(STARHASH_APP_GROUPS))
+        # Whether this build has push (`StarHashPush.isOn`).
+        StarHashPush: $(STARHASH_PUSH)
         UIAppFonts: [SpaceGrotesk.ttf]
         NSContactsUsageDescription: StarHash shows your contacts so you can pick who to pay. They stay on your iPhone.
         NSLocationWhenInUseUsageDescription: StarHash notes where you pay, to suggest who you paid when you are back there and to show each payment on a map. It stays on your iPhone.
@@ -152,7 +170,7 @@ targets:
         # Requests through the server are fetched in the background now and
         # then (`AnywhereRequests.refresh`): Background App Refresh, which
         # needs no entitlement, so free-team builds keep signing.
-        UIBackgroundModes: [fetch]
+        UIBackgroundModes: [fetch, $(STARHASH_PUSH_BACKGROUND_MODE_$(STARHASH_PUSH))]
         BGTaskSchedulerPermittedIdentifiers: [com.devbyshima.starhash.requests]
         CFBundleURLTypes:
           - CFBundleURLName: com.devbyshima.starhash
