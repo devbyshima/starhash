@@ -13,6 +13,13 @@
 // (the photo's) is needed to change or clear their entry. An entry not
 // sent again for 45 days is deleted each night.
 //
+// Requests: an owner asks another StarHash user for money, wherever they
+// are. Both need a directory entry with a public key. The asker's iPhone
+// seals who asks, how much and what for to the other's public key (HPKE),
+// so the server keeps only who asked whom and when, for the request's week.
+// The asker's own number is checked against what their key lists, then
+// dropped; the iPhone asked checks it again against the seal.
+//
 // Installs: once each day it is used the app sends a random id it made on
 // its first launch and its version, so the number of people using StarHash
 // can be counted, in all (installs) and each day (active_days, by Kigali's
@@ -38,6 +45,17 @@ const NUMBER = /^07[2389]\d{7}$/;
 /// An owner has one SIM or two.
 const MAX_NUMBERS = 2;
 const MAX_NAME = 60;
+
+/// A request waits this long, and is deleted the night after.
+const REQUEST_LIFETIME_DAYS = 7;
+/// Requests one key may send in any 24 hours.
+const MAX_REQUESTS_A_DAY = 20;
+/// A sealed request or answer, in base64: what StarHash seals is a few
+/// hundred bytes (a name and a note of 60 characters at most).
+const MAX_SEALED = 2048;
+/// The public half of a Curve25519 key, 32 bytes in base64.
+const PUBLIC_KEY = /^[A-Za-z0-9+/]{43}=$/;
+const BASE64 = /^[A-Za-z0-9+/]+={0,2}$/;
 
 /// An entry the app has not sent again in this long is left out of
 /// lookups and deleted that night (`scheduled`): the app sends it each
@@ -80,13 +98,41 @@ export default {
     if (url.pathname === "/v1/directory/lookup" && request.method === "POST") {
       return lookUp(request, env);
     }
+    if (url.pathname === "/v1/requests") {
+      switch (request.method) {
+        case "POST":
+          return sendRequest(request, env);
+        case "GET":
+          return getRequests(request, env);
+        case "DELETE":
+          return eraseRequests(request, env);
+        default:
+          return text(405, "Method not allowed");
+      }
+    }
+    const one = url.pathname.match(/^\/v1\/requests\/([^/]+)(\/answer)?$/);
+    if (one) {
+      const id = one[1].toLowerCase();
+      if (!UUID.test(id)) return text(404, "Not found");
+      if (one[2]) {
+        return request.method === "POST" ? answerRequest(id, request, env) : text(405, "Method not allowed");
+      }
+      return request.method === "DELETE" ? closeRequest(id, request, env) : text(405, "Method not allowed");
+    }
     return text(404, "Not found");
   },
 
   /// Each night (the cron in wrangler.toml): the directory's lapsed
-  /// entries are deleted, not only left out of lookups.
+  /// entries and keys are deleted, not only left out of lookups, and so
+  /// are requests past their week.
   async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
-    await env.DB.prepare("DELETE FROM directory WHERE updated_at <= ?1").bind(lapsedBefore(new Date())).run();
+    const now = new Date();
+    const lapsed = lapsedBefore(now);
+    await env.DB.batch([
+      env.DB.prepare("DELETE FROM directory WHERE updated_at <= ?1").bind(lapsed),
+      env.DB.prepare("DELETE FROM directory_keys WHERE updated_at <= ?1").bind(lapsed),
+      env.DB.prepare("DELETE FROM requests WHERE expires_at <= ?1").bind(now.toISOString()),
+    ]);
   },
 } satisfies ExportedHandler<Env>;
 
@@ -105,12 +151,17 @@ async function putEntry(request: Request, env: Env): Promise<Response> {
   if (!key) return text(401, "A key is needed");
   const secret = env.DIRECTORY_SECRET;
   if (!secret) return text(503, "Not set up");
-  let body: { numbers?: unknown; name?: unknown; photo?: unknown };
+  let body: { numbers?: unknown; name?: unknown; photo?: unknown; key?: unknown };
   try {
     body = await request.json();
   } catch {
     return text(400, "Bad request");
   }
+  // The public key requests are sealed to, from an iPhone that takes them.
+  if (body.key !== undefined && body.key !== null && (typeof body.key !== "string" || !PUBLIC_KEY.test(body.key))) {
+    return text(400, "Bad request");
+  }
+  const publicKey = typeof body.key === "string" ? body.key : null;
   const given = Array.isArray(body.numbers) ? body.numbers : [];
   const numbers = [...new Set(given.filter((n): n is string => typeof n === "string" && NUMBER.test(n)))];
   if (numbers.length === 0 || numbers.length > MAX_NUMBERS || numbers.length !== given.length) {
@@ -131,6 +182,12 @@ async function putEntry(request: Request, env: Env): Promise<Response> {
         "INSERT INTO directory (number_hash, key_hash, name, photo_id, updated_at) VALUES (?1, ?2, ?3, ?4, ?5)",
       ).bind(hash, keyHash, name, photo, now),
     ),
+    publicKey
+      ? env.DB.prepare(
+          `INSERT INTO directory_keys (key_hash, public_key, updated_at) VALUES (?1, ?2, ?3)
+           ON CONFLICT(key_hash) DO UPDATE SET public_key = ?2, updated_at = ?3`,
+        ).bind(keyHash, publicKey, now)
+      : env.DB.prepare("DELETE FROM directory_keys WHERE key_hash = ?1").bind(keyHash),
   ]);
   return text(200, "Saved");
 }
@@ -139,11 +196,16 @@ async function putEntry(request: Request, env: Env): Promise<Response> {
 async function deleteEntry(request: Request, env: Env): Promise<Response> {
   const key = bearer(request);
   if (!key) return text(401, "A key is needed");
-  await env.DB.prepare("DELETE FROM directory WHERE key_hash = ?1").bind(await sha256(key)).run();
+  const keyHash = await sha256(key);
+  await env.DB.batch([
+    env.DB.prepare("DELETE FROM directory WHERE key_hash = ?1").bind(keyHash),
+    env.DB.prepare("DELETE FROM directory_keys WHERE key_hash = ?1").bind(keyHash),
+  ]);
   return text(200, "Deleted");
 }
 
-/// The name and photo listed for a number, or 404.
+/// The name and photo listed for a number, and the public key requests to
+/// it are sealed to when its iPhone takes them, or 404.
 async function lookUp(request: Request, env: Env): Promise<Response> {
   const secret = env.DIRECTORY_SECRET;
   if (!secret) return text(404, "Not found");
@@ -155,19 +217,194 @@ async function lookUp(request: Request, env: Env): Promise<Response> {
   }
   const number = typeof body.number === "string" ? body.number : "";
   if (!NUMBER.test(number)) return text(400, "Bad request");
-  const since = lapsedBefore(new Date());
-  const { results } = await env.DB.prepare(
-    "SELECT name, photo_id FROM directory WHERE number_hash = ?1 AND updated_at > ?2 LIMIT 2",
-  )
-    .bind(await numberHash(number, secret), since)
-    .all<{ name: string; photo_id: string | null }>();
-  // Two iPhones listing one number: the server cannot tell which holds
-  // the SIM, so it shows neither rather than maybe the wrong one.
-  if (results.length !== 1) return text(404, "Not found");
-  const entry = results[0];
-  return new Response(JSON.stringify({ name: entry.name || null, photo: entry.photo_id }), {
+  const entry = await listed(await numberHash(number, secret), env);
+  if (!entry) return text(404, "Not found");
+  return new Response(JSON.stringify({ name: entry.name || null, photo: entry.photo_id, key: entry.public_key }), {
     headers: { "Content-Type": "application/json", "Cache-Control": "private, max-age=300" },
   });
+}
+
+/// The one live entry for a number, or null. Two iPhones listing one
+/// number: the server cannot tell which holds the SIM, so it shows
+/// neither rather than maybe the wrong one, and takes no request for it.
+async function listed(hash: string, env: Env) {
+  const { results } = await env.DB.prepare(
+    `SELECT d.name, d.photo_id, d.key_hash, k.public_key FROM directory d
+     LEFT JOIN directory_keys k ON k.key_hash = d.key_hash
+     WHERE d.number_hash = ?1 AND d.updated_at > ?2 LIMIT 2`,
+  )
+    .bind(hash, lapsedBefore(new Date()))
+    .all<{ name: string; photo_id: string | null; key_hash: string; public_key: string | null }>();
+  return results.length === 1 ? results[0] : null;
+}
+
+// MARK: Requests
+
+/// Asks the owner of `to` for money: `sealed` is who asks, how much and
+/// what for, sealed on the asker's iPhone to `to`'s public key. `from` is
+/// the asker's own number, checked against what their key lists, so
+/// nobody asks in another's name, and then forgotten.
+async function sendRequest(request: Request, env: Env): Promise<Response> {
+  const key = bearer(request);
+  if (!key) return text(401, "A key is needed");
+  const secret = env.DIRECTORY_SECRET;
+  if (!secret) return text(503, "Not set up");
+  const body = await smallJSON<{ id?: unknown; to?: unknown; from?: unknown; sealed?: unknown }>(request);
+  if (!body) return text(400, "Bad request");
+  const id = typeof body.id === "string" ? body.id.toLowerCase() : "";
+  const to = typeof body.to === "string" ? body.to : "";
+  const from = typeof body.from === "string" ? body.from : "";
+  const sealed = typeof body.sealed === "string" ? body.sealed : "";
+  if (!UUID.test(id) || !NUMBER.test(to) || !NUMBER.test(from) || !isSealed(sealed)) return text(400, "Bad request");
+
+  const keyHash = await sha256(key);
+  const now = new Date();
+  const lapsed = lapsedBefore(now);
+  const [fromHash, toHash] = await Promise.all([numberHash(from, secret), numberHash(to, secret)]);
+  const asker = await env.DB.prepare(
+    `SELECT k.public_key FROM directory d JOIN directory_keys k ON k.key_hash = d.key_hash
+     WHERE d.number_hash = ?1 AND d.key_hash = ?2 AND d.updated_at > ?3`,
+  )
+    .bind(fromHash, keyHash, lapsed)
+    .first<{ public_key: string }>();
+  // Only a number this key lists, with requests on, may ask.
+  if (!asker) return text(403, "Not your number");
+  const asked = await listed(toHash, env);
+  if (!asked || !asked.public_key) return text(404, "Not on StarHash");
+  if (asked.key_hash === keyHash) return text(400, "Your own number");
+
+  const dayAgo = new Date(now.getTime() - 86400 * 1000).toISOString();
+  const nowISO = now.toISOString();
+  const expires = new Date(now.getTime() + REQUEST_LIFETIME_DAYS * 86400 * 1000).toISOString();
+  // The limits and the insert in one statement, so two sent at once
+  // cannot both slip under them.
+  const result = await env.DB.prepare(
+    `INSERT INTO requests (id, to_hash, to_key_hash, from_key_hash, from_public_key, sealed, state, created_at, expires_at)
+     SELECT ?1, ?2, ?10, ?3, ?4, ?5, 'waiting', ?6, ?7
+     WHERE (SELECT COUNT(*) FROM requests WHERE from_key_hash = ?3 AND created_at > ?8) < ?9
+       AND NOT EXISTS (SELECT 1 FROM requests WHERE from_key_hash = ?3 AND to_hash = ?2
+                       AND state IN ('waiting', 'dropped') AND expires_at > ?6)
+     ON CONFLICT(id) DO NOTHING`,
+  )
+    .bind(id, toHash, keyHash, asker.public_key, sealed, nowISO, expires, dayAgo, MAX_REQUESTS_A_DAY, asked.key_hash)
+    .run();
+  if (result.meta.changes === 1) {
+    return json(200, { id, created_at: nowISO, expires_at: expires });
+  }
+  const sent = await env.DB.prepare("SELECT COUNT(*) AS n FROM requests WHERE from_key_hash = ?1 AND created_at > ?2")
+    .bind(keyHash, dayAgo)
+    .first<{ n: number }>();
+  if ((sent?.n ?? 0) >= MAX_REQUESTS_A_DAY) return text(429, "Too many today");
+  // One waiting already, or this id taken.
+  return text(409, "Already asked");
+}
+
+/// What waits for the caller: requests to a number their key listed when
+/// it was asked (sealed, with the asker's public key; or only the id once
+/// the asker closed it, so the card goes), and answers to the requests they
+/// sent.
+async function getRequests(request: Request, env: Env): Promise<Response> {
+  const key = bearer(request);
+  if (!key) return text(401, "A key is needed");
+  const keyHash = await sha256(key);
+  const now = new Date();
+  const [asked, answers] = await env.DB.batch<Record<string, string>>([
+    env.DB.prepare(
+      `SELECT id, sealed, from_public_key, state, created_at FROM requests
+       WHERE to_key_hash = ?1 AND state IN ('waiting', 'closed') AND expires_at > ?2
+       ORDER BY created_at LIMIT 100`,
+    ).bind(keyHash, now.toISOString()),
+    env.DB.prepare(
+      `SELECT id, answer FROM requests WHERE from_key_hash = ?1 AND state = 'answered' AND expires_at > ?2
+       ORDER BY created_at LIMIT 100`,
+    ).bind(keyHash, now.toISOString()),
+  ]);
+  return json(200, {
+    asked: asked.results.map((row) =>
+      row.state === "closed"
+        ? { id: row.id, closed: true }
+        : { id: row.id, sealed: row.sealed, key: row.from_public_key, created_at: row.created_at },
+    ),
+    answers: answers.results.map((row) => ({ id: row.id, answer: row.answer })),
+  });
+}
+
+/// The person asked answers (declines), sealed to the asker: only a
+/// request to them, still waiting.
+async function answerRequest(id: string, request: Request, env: Env): Promise<Response> {
+  const key = bearer(request);
+  if (!key) return text(401, "A key is needed");
+  const body = await smallJSON<{ sealed?: unknown }>(request);
+  const sealed = typeof body?.sealed === "string" ? body.sealed : "";
+  if (!isSealed(sealed)) return text(400, "Bad request");
+  const keyHash = await sha256(key);
+  const now = new Date();
+  const result = await env.DB.prepare(
+    `UPDATE requests SET state = 'answered', answer = ?1, sealed = NULL
+     WHERE id = ?2 AND state = 'waiting' AND expires_at > ?3 AND to_key_hash = ?4`,
+  )
+    .bind(sealed, id, now.toISOString(), keyHash)
+    .run();
+  if (result.meta.changes === 1) return text(200, "Answered");
+  return (await isAskedOf(id, keyHash, env)) ? text(409, "Not waiting") : text(404, "Not found");
+}
+
+/// The asker closes their request (cancelled, or paid): it goes from the
+/// other's iPhone, and the pair may ask again. The person asked drops one
+/// from someone they don't know: it is wiped without a word to the asker,
+/// for whom it waits until it expires.
+async function closeRequest(id: string, request: Request, env: Env): Promise<Response> {
+  const key = bearer(request);
+  if (!key) return text(401, "A key is needed");
+  const keyHash = await sha256(key);
+  const closed = await env.DB.prepare(
+    "UPDATE requests SET state = 'closed', sealed = NULL, answer = NULL WHERE id = ?1 AND from_key_hash = ?2",
+  )
+    .bind(id, keyHash)
+    .run();
+  if (closed.meta.changes === 1) return text(200, "Closed");
+  if (!(await isAskedOf(id, keyHash, env))) return text(404, "Not found");
+  await env.DB.prepare("UPDATE requests SET state = 'dropped', sealed = NULL WHERE id = ?1 AND state = 'waiting'")
+    .bind(id)
+    .run();
+  return text(200, "Dropped");
+}
+
+/// Delete All Data: every request the caller sent is closed, and every one
+/// waiting for them dropped, their sealed parts wiped.
+async function eraseRequests(request: Request, env: Env): Promise<Response> {
+  const key = bearer(request);
+  if (!key) return text(401, "A key is needed");
+  const keyHash = await sha256(key);
+  await env.DB.batch([
+    env.DB.prepare("UPDATE requests SET state = 'closed', sealed = NULL, answer = NULL WHERE from_key_hash = ?1").bind(keyHash),
+    env.DB.prepare("UPDATE requests SET state = 'dropped', sealed = NULL WHERE state = 'waiting' AND to_key_hash = ?1").bind(
+      keyHash,
+    ),
+  ]);
+  return text(200, "Erased");
+}
+
+/// Whether request `id` was made to `keyHash`.
+async function isAskedOf(id: string, keyHash: string, env: Env): Promise<boolean> {
+  const row = await env.DB.prepare("SELECT 1 AS yes FROM requests WHERE id = ?1 AND to_key_hash = ?2").bind(id, keyHash).first();
+  return row !== null;
+}
+
+function isSealed(value: string): boolean {
+  return value.length >= 64 && value.length <= MAX_SEALED && BASE64.test(value);
+}
+
+/// A JSON body of a few kilobytes at most, or null.
+async function smallJSON<T>(request: Request): Promise<T | null> {
+  const body = await request.text();
+  if (body.length > 4 * MAX_SEALED) return null;
+  try {
+    const parsed = JSON.parse(body);
+    return parsed && typeof parsed === "object" ? (parsed as T) : null;
+  } catch {
+    return null;
+  }
 }
 
 /// The number as the directory keeps it: an HMAC under the Worker's
@@ -269,6 +506,13 @@ async function sha256(value: string): Promise<string> {
 
 function hex(bytes: ArrayBuffer): string {
   return [...new Uint8Array(bytes)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function json(status: number, body: unknown): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+  });
 }
 
 function text(status: number, body: string): Response {
