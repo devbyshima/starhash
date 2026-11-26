@@ -2,18 +2,18 @@ import StarHashKit
 import SwiftUI
 
 /// People Nearby on Pay, after the owner's reference: Pay's pill (`PayPill`),
-/// "ARIANE IS NEARBY" by their photo, turning through everyone close by. A
-/// tap opens People Nearby (`PeopleNearbyRadar`), everyone close by on its
-/// rings, where a tap on one chooses them.
+/// "ARIANE IS / NEARBY" by their photo with the nearby mark on it, turning
+/// through everyone close by. A tap opens People Nearby
+/// (`PeopleNearbyRadar`), everyone close by on its rings, where a tap on one
+/// chooses them.
 struct PeopleNearbyPill: View {
     @Environment(PeopleNearbyService.self) private var nearby
     let onOpen: () -> Void
 
     var body: some View {
         PayPill(items: nearby.found.row, onTap: { _ in onOpen() }) { person in
-            HStack(spacing: 8) {
-                PeopleNearbyTile(person: person, size: 24)
-                PayPillText(text: Text("\(person.firstName) is nearby"))
+            PayPillLabel(text: Text("\(person.firstName) is\nnearby"), showsNearby: true) {
+                PeopleNearbyTile(person: person, size: PayPillMetrics.face)
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(Text("\(person.name) is nearby"))
