@@ -190,7 +190,7 @@ final class StarHashNotifications {
             await sync()
         case UNNotificationDefaultActionIdentifier:
             if isPush {
-                await StarHashPush.opened()
+                await StarHashPush.opened(request: requestID)
             } else if let id = requestID {
                 AppEnvironment.requests.reload()
                 AppEnvironment.router.openRequest(id)

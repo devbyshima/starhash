@@ -206,6 +206,10 @@ private struct OwnerListingSync: ViewModifier {
     /// Word of requests (Settings, Notifications): the push token goes from
     /// the server with it, and comes back.
     @AppStorage(Preferences.requestNotifications) private var requestNotifications: Bool
+    /// What a pushed request's notification follows (`StarHashPush.shareSettings`).
+    @AppStorage(Preferences.showsAmounts) private var showsAmounts: Bool
+    @AppStorage(Preferences.enableContacts) private var enableContacts: Bool
+    @AppStorage(PreferenceKey.appLanguage) private var language = AppLanguage.system.rawValue
 
     func body(content: Content) -> some View {
         content
@@ -216,6 +220,9 @@ private struct OwnerListingSync: ViewModifier {
             }
             .onChange(of: requestNotifications) {
                 AppEnvironment.serverSync.requestNotificationsChanged()
+            }
+            .onChange(of: "\(showsAmounts)|\(enableContacts)|\(language)") {
+                StarHashPush.shareSettings()
             }
     }
 }

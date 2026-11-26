@@ -29,12 +29,16 @@ enum AnywhereRequests {
     /// hear. With `announce`, a notification for each request asked of the
     /// owner and each of theirs declined: StarHash was away, so nothing on
     /// screen would show them; `quietly`, with no sound, when a push has
-    /// just made one.
+    /// just made one, and never of `skipping`, the request a push shows.
     @discardableResult
-    static func sync(announce: Bool, quietly: Bool = false) async -> RequestsAnywhere.News {
+    static func sync(announce: Bool, quietly: Bool = false, skipping: UUID? = nil) async -> RequestsAnywhere.News {
         guard isOn else { return .init() }
         let news = await AppEnvironment.requestsAnywhere.sync()
-        if announce { await StarHashNotifications.shared.announce(news, quietly: quietly) }
+        if announce {
+            var told = news
+            told.received.removeAll { $0.id == skipping }
+            await StarHashNotifications.shared.announce(told, quietly: quietly)
+        }
         return news
     }
 
@@ -67,12 +71,12 @@ enum AnywhereRequests {
     /// requests settled from what the SMS brought meanwhile, then the
     /// server's, with word of what came; then the next refresh asked for.
     @discardableResult
-    static func refresh(quietly: Bool = false) async -> RequestsAnywhere.News {
+    static func refresh(quietly: Bool = false, skipping: UUID? = nil) async -> RequestsAnywhere.News {
         let store = AppEnvironment.store
         store.reloadFromDisk()
         AppEnvironment.requests.reload()
         AppEnvironment.requests.settle(with: store.transactions)
-        let news = await sync(announce: true, quietly: quietly)
+        let news = await sync(announce: true, quietly: quietly, skipping: skipping)
         scheduleRefresh()
         return news
     }
@@ -112,7 +116,7 @@ struct RequestsSync: ViewModifier {
                     Task {
                         await AnywhereRequests.sync(announce: false)
                         // Open, StarHash shows what a push was about.
-                        await StarHashPush.clearDelivered()
+                        await StarHashPush.clearUnopened()
                     }
                 case .background:
                     AnywhereRequests.scheduleRefresh()

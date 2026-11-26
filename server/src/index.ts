@@ -22,8 +22,9 @@
 //
 // Push (push.ts): an iPhone listed with requests on, in a build that has
 // push, sends its APNs token under the same key, and a request to it then
-// wakes StarHash there with a push that says only "New request". The
-// token goes with the listing, and lapses with it.
+// wakes StarHash there with a push that carries the request still sealed,
+// for the iPhone to open. The token goes with the listing, and lapses with
+// it.
 //
 // Installs: once each day it is used the app sends a random id it made on
 // its first launch and its version, so the number of people using StarHash
@@ -313,7 +314,7 @@ async function sendRequest(request: Request, env: Env, ctx: ExecutionContext): P
     .bind(id, toHash, keyHash, asker.public_key, sealed, nowISO, expires, dayAgo, MAX_REQUESTS_A_DAY, asked.key_hash)
     .run();
   if (result.meta.changes === 1) {
-    ctx.waitUntil(notifyRequest(asked.key_hash, expires, lapsed, env));
+    ctx.waitUntil(notifyRequest(asked.key_hash, { id, sealed, key: asker.public_key }, expires, lapsed, env));
     return json(200, { id, created_at: nowISO, expires_at: expires });
   }
   const sent = await env.DB.prepare("SELECT COUNT(*) AS n FROM requests WHERE from_key_hash = ?1 AND created_at > ?2")

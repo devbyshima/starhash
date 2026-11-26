@@ -1,9 +1,12 @@
 // Push: a request to an owner whose iPhone sent its APNs token (a build
 // with STARHASH_PUSH, which needs a paid Apple team) wakes StarHash there.
-// The push says only "New request": no amount, no name, no number, nothing
-// from the request, which the server cannot read anyway. StarHash, woken
-// by `content-available`, fetches what waits and says itself who asks and
-// for how much, as it does after Background App Refresh.
+// The push says "New request" and carries the request still sealed, as the
+// server keeps it, with the asker's public key: neither the server nor
+// Apple can read it. On the iPhone, StarHash's Notification Service
+// Extension (`mutable-content`) opens it and, when the asker is someone the
+// owner knows, shows who asks and for how much instead; StarHash itself,
+// woken by `content-available`, fetches what waits as it does after
+// Background App Refresh.
 //
 // Sent only when the Worker has the three secrets of an APNs key (the .p8
 // file's text, its id, the team's id): without them nothing is sent, and
@@ -34,13 +37,33 @@ export const TOKEN = /^[0-9a-f]{64,200}$/;
 /// backup): the oldest tokens past this go.
 export const MAX_TOKENS_PER_KEY = 3;
 
-/// What every push says. "New request" is a key in the app's string
-/// catalog, so iOS shows it in English, French or Kinyarwanda, and the
-/// words themselves when it finds none. One collapse id and one thread, so
-/// several requests show as one notification, beside StarHash's own.
-export const PAYLOAD = JSON.stringify({
-  aps: { alert: { "loc-key": "New request" }, sound: "default", "content-available": 1, "thread-id": "requests" },
-});
+/// APNs takes 4 KB of payload at most.
+const MAX_PAYLOAD = 4096;
+
+/// A request as the push carries it: as the server keeps it.
+export interface SealedRequest {
+  id: string;
+  sealed: string;
+  /// The asker's public key, which sealed it.
+  key: string;
+}
+
+/// What the push for `request` says. "New request" is a key in the app's
+/// string catalog, so iOS shows it in English, French or Kinyarwanda (and
+/// the words themselves when it finds none) whenever the iPhone does not
+/// open the request. In the requests thread, beside StarHash's own.
+export function payload(request: SealedRequest): string {
+  return JSON.stringify({
+    aps: {
+      alert: { "loc-key": "New request" },
+      sound: "default",
+      "content-available": 1,
+      "mutable-content": 1,
+      "thread-id": "requests",
+    },
+    sealed: { id: request.id, sealed: request.sealed, key: request.key },
+  });
+}
 
 /// The token APNs is shown with each push: made again after 50 minutes, as
 /// APNs refuses one older than an hour and one made more often than every
@@ -52,11 +75,21 @@ export function canPush(env: PushEnv): boolean {
   return Boolean(env.APNS_KEY && env.APNS_KEY_ID && env.APNS_TEAM_ID);
 }
 
-/// Tells every iPhone that listed `keyHash` with a token that a request
+/// Tells every iPhone that listed `keyHash` with a token that `request`
 /// came, until `expires`, the request's own end. Never throws: a push that
 /// fails leaves the request to be found when StarHash next opens.
-export async function notifyRequest(keyHash: string, expires: string, lapsed: string, env: PushEnv): Promise<void> {
+export async function notifyRequest(
+  keyHash: string,
+  request: SealedRequest,
+  expires: string,
+  lapsed: string,
+  env: PushEnv,
+): Promise<void> {
   if (!canPush(env)) return;
+  const body = payload(request);
+  // A seal is 2 KB at most, so this never happens; if it did, APNs would
+  // refuse the push whole.
+  if (new TextEncoder().encode(body).length > MAX_PAYLOAD) return;
   try {
     const { results } = await env.DB.prepare(
       `SELECT token, sandbox FROM push_tokens WHERE key_hash = ?1 AND updated_at > ?2
@@ -68,13 +101,21 @@ export async function notifyRequest(keyHash: string, expires: string, lapsed: st
     const jwt = await providerToken(env);
     if (!jwt) return;
     const expiration = String(Math.floor(Date.parse(expires) / 1000));
-    await Promise.all(results.map((row) => push(row.token, row.sandbox === 1, jwt, expiration, env)));
+    await Promise.all(results.map((row) => push(row.token, row.sandbox === 1, jwt, expiration, request.id, body, env)));
   } catch (error) {
     console.error("push failed", error);
   }
 }
 
-async function push(token: string, sandbox: boolean, jwt: string, expiration: string, env: PushEnv): Promise<void> {
+async function push(
+  token: string,
+  sandbox: boolean,
+  jwt: string,
+  expiration: string,
+  id: string,
+  body: string,
+  env: PushEnv,
+): Promise<void> {
   const base = sandbox ? (env.APNS_SANDBOX_URL ?? SANDBOX) : (env.APNS_URL ?? PRODUCTION);
   let response: Response;
   try {
@@ -86,10 +127,10 @@ async function push(token: string, sandbox: boolean, jwt: string, expiration: st
         "apns-push-type": "alert",
         "apns-priority": "10",
         "apns-expiration": expiration,
-        "apns-collapse-id": "requests",
+        "apns-collapse-id": id,
         "content-type": "application/json",
       },
-      body: PAYLOAD,
+      body,
     });
   } catch (error) {
     console.error("APNs not reached", error);

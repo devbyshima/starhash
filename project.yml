@@ -77,6 +77,10 @@ settings:
     # Refresh's again, so the list holds fetch alone as before.
     STARHASH_PUSH_BACKGROUND_MODE_YES: remote-notification
     STARHASH_PUSH_BACKGROUND_MODE_NO: fetch
+    # The Notification Service Extension reads the app's Keychain (its
+    # request key) through the app's own access group: with push only.
+    STARHASH_PUSH_SERVICE_ENTITLEMENTS_YES: StarHashPushService/StarHashPushService.entitlements
+    STARHASH_PUSH_SERVICE_ENTITLEMENTS_NO: ""
     STARHASH_WIDGET_ENTITLEMENTS_YES: StarHashWidgets/StarHashWidgets.entitlements
     STARHASH_WIDGET_ENTITLEMENTS_NO: ""
     # The id both Info.plists carry (StarHashAppGroup), empty without the
@@ -122,9 +126,13 @@ targets:
       # WidgetIntents.swift: the widgets' taps run their intents in the
       # app, so it needs them in every build.
       - path: StarHashWidgets/Views
+      # What the push extension reads from the app's Keychain, which the
+      # app writes.
+      - path: StarHashPushService/PushKeychain.swift
     dependencies:
       - package: StarHashKit
       - target: StarHashWidgets
+      - target: StarHashPushService
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.devbyshima.starhash
@@ -175,6 +183,34 @@ targets:
         CFBundleURLTypes:
           - CFBundleURLName: com.devbyshima.starhash
             CFBundleURLSchemes: [starhash]
+
+  # Opens a request the server pushed, still sealed, so its notification
+  # says who asks and for how much (NotificationService.swift). In every
+  # build, but it runs only for a push, which comes only with
+  # STARHASH_PUSH: YES, and only then is it signed to read the app's
+  # Keychain. PushKeychain.swift is compiled into the app too.
+  StarHashPushService:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: StarHashPushService
+    dependencies:
+      - package: StarHashKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.devbyshima.starhash.push
+        CODE_SIGN_ENTITLEMENTS: $(STARHASH_PUSH_SERVICE_ENTITLEMENTS_$(STARHASH_PUSH))
+        TARGETED_DEVICE_FAMILY: "1"
+        SKIP_INSTALL: YES
+    info:
+      path: StarHashPushService/Info.plist
+      properties:
+        CFBundleDisplayName: StarHash
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.usernotifications.service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).NotificationService
 
   # Buy's codes on the Home Screen, and Scan to Pay in Control Center.
   # Shares the app's colours (Theme.swift), icons (Icons.swift and

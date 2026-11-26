@@ -153,6 +153,8 @@ struct StarHashApp: App {
                 // owner's listing, sent again when it is a week old; and a
                 // photo change the server has not taken yet.
                 AppEnvironment.serverSync.wake()
+                // What a pushed request's notification follows.
+                StarHashPush.shareSettings()
                 store.reloadFromDisk()
                 AppEnvironment.autoVerify.reload()
                 AppEnvironment.autoVerify.expireUnconfirmed()

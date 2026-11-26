@@ -7,10 +7,12 @@ import UserNotifications
 /// at each launch, as Apple asks, and hands the token iOS gives to
 /// `ServerSync`, which keeps it on the server under the listing's key while
 /// the owner takes requests. A request sent through the server then pushes
-/// "New request" and nothing more; StarHash, woken by it, trusts none of
-/// it and does what Background App Refresh does: it fetches what waits and
-/// says itself who asks, and for how much. Without push in the build,
-/// nothing registers, and a token an earlier build sent is removed.
+/// "New request" with the request still sealed: StarHash's Notification
+/// Service Extension (`StarHashPushService`) opens it, from what the app
+/// shares through its Keychain (`PushKeychain`), to say who asks and for
+/// how much. StarHash, woken by the push, trusts none of it and does what
+/// Background App Refresh does: it fetches what waits. Without push in the
+/// build, nothing registers, and a token an earlier build sent is removed.
 @MainActor
 enum StarHashPush {
     /// Whether this build has push, as project.yml says in Info.plist.
@@ -43,31 +45,58 @@ enum StarHashPush {
         #endif
     }
 
-    /// A push came. In front, the request's card shows once it is fetched,
-    /// so nothing is said (`willPresent` shows the push not at all).
-    /// Away, the requests are fetched as Background App Refresh fetches
-    /// them, with word of each, quietly, as the push made the sound; then
-    /// the push's own "New request" goes, as StarHash's notification says
-    /// more.
-    static func receivedPush() async {
+    /// A push came, for request `pushed`. In front, the request's card
+    /// shows once it is fetched, so nothing is said (`willPresent` shows the
+    /// push not at all). Away, the requests are fetched as Background App
+    /// Refresh fetches them, with word of each, quietly, as the push made
+    /// the sound; but not of `pushed`, which the push itself shows, opened
+    /// by the extension. Only where the extension could not open it, so the
+    /// push says just "New request", and StarHash took it in, does
+    /// StarHash's own notification take the push's place.
+    static func receivedPush(for pushed: UUID?) async {
         if UIApplication.shared.applicationState == .active {
             await AnywhereRequests.sync(announce: false)
             return
         }
-        let news = await AnywhereRequests.refresh(quietly: true)
-        if !news.received.isEmpty { await clearDelivered() }
+        let news = await AnywhereRequests.refresh(quietly: true, skipping: pushed)
+        guard let pushed, let request = news.received.first(where: { $0.id == pushed }) else { return }
+        let unopened = await deliveredPushes().filter { notification in
+            let userInfo = notification.request.content.userInfo
+            return userInfo["request"] == nil && PushedRequest.Sealed(userInfo: userInfo)?.id == pushed
+        }
+        guard !unopened.isEmpty else { return }
+        await StarHashNotifications.shared.announce(.init(received: [request]), quietly: true)
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: unopened.map(\.request.identifier))
     }
 
-    /// The owner tapped "New request": the request opens on Pay once it is
-    /// fetched, the newest when there are several; Pay, when there is none.
-    static func opened() async {
+    /// The owner tapped the push: its request opens on Pay once it is
+    /// fetched (`request`, when the extension opened it), else the newest
+    /// waiting; Pay, when none is.
+    static func opened(request: UUID?) async {
         AppEnvironment.requests.reload()
         await AnywhereRequests.sync(announce: false)
-        if let newest = AppEnvironment.requests.waitingForOwner.max(by: { $0.createdAt < $1.createdAt }) {
+        let waiting = AppEnvironment.requests.waitingForOwner
+        if let id = request, waiting.contains(where: { $0.id == id }) {
+            AppEnvironment.router.openRequest(id)
+        } else if let newest = waiting.max(by: { $0.createdAt < $1.createdAt }) {
             AppEnvironment.router.openRequest(newest.id)
         } else {
             AppEnvironment.router.show(.pay)
         }
+    }
+
+    /// What the extension needs of the app's choices, through the Keychain:
+    /// the language chosen in StarHash, whether amounts show on the Lock
+    /// Screen, whether Contacts may be read, and the server. Written as
+    /// StarHash comes and goes, and as one of them changes.
+    static func shareSettings() {
+        guard isOn else { return }
+        PushKeychain.write(.init(
+            language: StarHashLanguage.locale.identifier,
+            showsAmounts: Preferences.showsAmounts.value(),
+            contacts: Preferences.enableContacts.value(),
+            server: StarHashCloud.baseURL
+        ))
     }
 
     /// Whether a notification came from StarHash's server, rather than
@@ -76,13 +105,19 @@ enum StarHashPush {
         notification.request.trigger is UNPushNotificationTrigger
     }
 
-    /// The pushes still showing go once StarHash has what they were about:
-    /// its own notifications, or its cards, say more.
-    static func clearDelivered() async {
+    /// Pushes that say only "New request" go once StarHash is open: its
+    /// cards say more. One the extension opened stays, as StarHash's own
+    /// notification of a request would.
+    static func clearUnopened() async {
         guard isOn else { return }
-        let center = UNUserNotificationCenter.current()
-        let pushes = await center.deliveredNotifications().filter(isPush).map(\.request.identifier)
-        if !pushes.isEmpty { center.removeDeliveredNotifications(withIdentifiers: pushes) }
+        let unopened = await deliveredPushes().filter { $0.request.content.userInfo["request"] == nil }
+        if !unopened.isEmpty {
+            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: unopened.map(\.request.identifier))
+        }
+    }
+
+    private static func deliveredPushes() async -> [UNNotification] {
+        await UNUserNotificationCenter.current().deliveredNotifications().filter(isPush)
     }
 }
 
@@ -108,8 +143,9 @@ extension StarHashAppDelegate {
         didReceiveRemoteNotification userInfo: [AnyHashable: Any],
         fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
     ) {
+        let pushed = PushedRequest.Sealed(userInfo: userInfo)?.id
         Task { @MainActor in
-            await StarHashPush.receivedPush()
+            await StarHashPush.receivedPush(for: pushed)
             completionHandler(.newData)
         }
     }

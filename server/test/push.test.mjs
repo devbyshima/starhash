@@ -1,8 +1,8 @@
 // Push, with APNs stood in for by a server here that checks what it is
 // sent (the JWT's signature included): tokens tied to a listed key, a
-// request waking the iPhones of the person asked with a push that says
-// nothing of it, tokens going with the listing, and nothing pushed without
-// the APNs secrets. Two Workers run locally (`wrangler dev`), each with a
+// request waking the iPhones of the person asked with a push that carries
+// it only as sealed, tokens going with the listing, and nothing pushed
+// without the APNs secrets. Two Workers run locally (`wrangler dev`), each with a
 // D1 of its own: one with the secrets, one without. `npm test` from
 // server/. Nothing here reaches the live Worker or APNs.
 
@@ -150,10 +150,10 @@ async function list(server, person, name = "Someone") {
 const register = (server, person, hex, extra = {}) =>
   server.call("PUT", "/v1/push", { key: person.key, body: { token: hex, sandbox: false, ...extra } });
 
-const ask = (server, from, to) =>
+const ask = (server, from, to, sealed = randomBytes(160).toString("base64")) =>
   server.call("POST", "/v1/requests", {
     key: from.key,
-    body: { id: randomUUID(), to: to.number, from: from.number, sealed: randomBytes(160).toString("base64") },
+    body: { id: randomUUID(), to: to.number, from: from.number, sealed },
   });
 
 function base64url(text) {
@@ -233,7 +233,7 @@ describe("tokens", () => {
 });
 
 describe("pushes", () => {
-  test("a request wakes every iPhone of the person asked, with a push that says nothing of it", async () => {
+  test("a request wakes every iPhone of the person asked, with a push that carries it only as sealed", async () => {
     const asker = owner("0788400001");
     const asked = owner("0788400002");
     await list(pushing, asker, "Ariane Uwase");
@@ -246,7 +246,8 @@ describe("pushes", () => {
     await register(pushing, asker, askersPhone);
     const before = pushesFrom("pushing").length;
 
-    const sent = await ask(pushing, asker, asked);
+    const sealed = randomBytes(300).toString("base64");
+    const sent = await ask(pushing, asker, asked, sealed);
     assert.equal(sent.status, 200);
     const received = (await waitForPushes("pushing", before + 2)).slice(before);
     assert.equal(received.length, 2);
@@ -259,14 +260,22 @@ describe("pushes", () => {
       assert.equal(push.headers["apns-topic"], "com.devbyshima.starhash");
       assert.equal(push.headers["apns-push-type"], "alert");
       assert.equal(push.headers["apns-priority"], "10");
-      assert.equal(push.headers["apns-collapse-id"], "requests");
+      assert.equal(push.headers["apns-collapse-id"], sent.body.id);
       assert.equal(push.headers["apns-expiration"], String(Math.floor(Date.parse(sent.body.expires_at) / 1000)));
-      // "New request", in the iPhone's language, and nothing else: no
-      // amount, no name, no number.
+      // "New request", in the iPhone's language, and the request exactly
+      // as sealed on the asker's iPhone, with the key that sealed it:
+      // nothing the server or Apple can read.
       assert.deepEqual(JSON.parse(push.body), {
-        aps: { alert: { "loc-key": "New request" }, sound: "default", "content-available": 1, "thread-id": "requests" },
+        aps: {
+          alert: { "loc-key": "New request" },
+          sound: "default",
+          "content-available": 1,
+          "mutable-content": 1,
+          "thread-id": "requests",
+        },
+        sealed: { id: sent.body.id, sealed, key: asker.publicKey },
       });
-      for (const secret of [asker.number, asked.number, "Ariane", "Bosco", sent.body.id]) {
+      for (const secret of [asker.number, asked.number, "Ariane", "Bosco"]) {
         assert.ok(!push.body.includes(secret) && !JSON.stringify(push.headers).includes(secret));
       }
 
