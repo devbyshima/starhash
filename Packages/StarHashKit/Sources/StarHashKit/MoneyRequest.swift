@@ -41,8 +41,9 @@ public struct MoneyRequest: Codable, Hashable, Identifiable, Sendable {
     public var status: Status
     /// When it was paid, declined or cancelled.
     public var settledAt: Date?
-    /// The transaction that paid it.
-    public var transactionID: UUID?
+    /// The transactions that paid it: one, or each part of one paid in
+    /// parts. Nil when marked paid by hand, or not paid.
+    public var transactionIDs: [UUID]?
 
     public init(
         id: UUID = UUID(), direction: Direction, person: Recipient, photoID: UUID? = nil, amount: Int,
@@ -68,15 +69,54 @@ public struct MoneyRequest: Codable, Hashable, Identifiable, Sendable {
 
     // MARK: What paid it
 
-    /// Whether `transaction` pays this request. A request the owner sent is
-    /// paid by money received: the same amount, after it was made and
-    /// before it expired, from the person asked. Money received shows the
-    /// sender's number masked to its last digits, or only their name, so
-    /// those are matched as far as they go. One the owner received is paid
-    /// by money they sent to that number.
+    /// How long before the request a payment may be dated and still pay
+    /// it: the carrier's clock is not the phone's, and Airtel dates to the
+    /// minute.
+    static let clockGrace: TimeInterval = 5 * 60
+
+    /// The transactions among `transactions` (newest first, as the store
+    /// keeps them) that pay this request, leaving out those in `taken`
+    /// (other requests' payments); nil when none does.
+    ///
+    /// A request the owner sent is paid by money received from the person
+    /// asked; one they received by money they sent to that number. Either
+    /// way, after it was made (give or take the carrier's clock) and before
+    /// it expired, and not failed. One payment of the amount pays it, the
+    /// oldest first. So does a payment in parts: every part of one the
+    /// owner split (Split Large Payments), or payments received from that
+    /// person that add up to the amount exactly, oldest first.
+    public func payment(in transactions: [Transaction], excluding taken: Set<UUID> = []) -> [UUID]? {
+        let candidates = transactions.reversed().filter { !taken.contains($0.id) && counts($0) }
+        if let one = candidates.first(where: { $0.amount == amount }) { return [one.id] }
+        switch direction {
+        case .received:
+            let parts = Dictionary(grouping: candidates.filter { $0.split?.total == amount }) { $0.split!.id }
+            for (_, group) in parts.sorted(by: { $0.value[0].date < $1.value[0].date }) where group.count == group[0].split?.count {
+                return group.map(\.id)
+            }
+        case .sent:
+            var sum = 0
+            var ids: [UUID] = []
+            for transaction in candidates {
+                sum += transaction.amount
+                ids.append(transaction.id)
+                if sum == amount { return ids }
+                if sum > amount { break }
+            }
+        }
+        return nil
+    }
+
+    /// Whether `transaction` pays this request on its own.
     public func isPaid(by transaction: Transaction) -> Bool {
-        guard transaction.status != .failed, transaction.amount == amount,
-              transaction.date >= createdAt.addingTimeInterval(-60), transaction.date <= expiresAt else { return false }
+        payment(in: [transaction]) != nil
+    }
+
+    /// Whether `transaction` could pay this request, in whole or in part:
+    /// who, which way, when, and not failed.
+    private func counts(_ transaction: Transaction) -> Bool {
+        guard transaction.status != .failed,
+              transaction.date >= createdAt.addingTimeInterval(-Self.clockGrace), transaction.date <= expiresAt else { return false }
         switch direction {
         case .sent:
             guard transaction.direction == .incoming, transaction.counterparty.kind == .phone else { return false }
@@ -252,29 +292,29 @@ public final class MoneyRequests {
     }
 
     /// Requests settle from the transactions: one still waiting is paid by
-    /// the first transaction that pays it and no other request took, oldest
-    /// request first; one paid by a transaction that has since failed or
-    /// gone waits again; and one past its week expires.
+    /// the first payment that pays it and no other request took, oldest
+    /// request first; one whose payment has since failed or gone (any part
+    /// of it) waits again; and one past its week expires.
     public func settle(with transactions: [Transaction], at now: Date = .now) {
         var changed = false
         let byID = Dictionary(transactions.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         for index in requests.indices where requests[index].status == .paid {
-            guard let id = requests[index].transactionID else { continue }
-            if byID[id].map({ $0.status == .failed }) ?? true {
+            guard let ids = requests[index].transactionIDs else { continue }
+            if ids.contains(where: { byID[$0].map { $0.status == .failed } ?? true }) {
                 requests[index].status = .waiting
-                requests[index].transactionID = nil
+                requests[index].transactionIDs = nil
                 requests[index].settledAt = nil
                 changed = true
             }
         }
-        var taken = Set(requests.compactMap(\.transactionID))
+        var taken = Set(requests.flatMap { $0.transactionIDs ?? [] })
         // Oldest first, so the first request asked is the first paid.
         for index in requests.indices.reversed() where requests[index].status == .waiting {
-            if let paying = transactions.last(where: { !taken.contains($0.id) && requests[index].isPaid(by: $0) }) {
+            if let paying = requests[index].payment(in: transactions, excluding: taken) {
                 requests[index].status = .paid
-                requests[index].transactionID = paying.id
-                requests[index].settledAt = paying.date
-                taken.insert(paying.id)
+                requests[index].transactionIDs = paying
+                requests[index].settledAt = paying.compactMap { byID[$0]?.date }.max()
+                taken.formUnion(paying)
                 changed = true
             } else if now > requests[index].expiresAt {
                 requests[index].status = .expired

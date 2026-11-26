@@ -68,16 +68,7 @@ struct StarHashApp: App {
         // at launch, as the automation would, with auto-verify set up first
         // and turned off again after when it was off before.
         if let message = DebugLaunch.value(after: "-receiveMessage") {
-            let autoVerify = AppEnvironment.autoVerify
-            let wasOff = autoVerify.status() == .off
-            if wasOff {
-                autoVerify.receive(AutoVerificationSample.message, sender: nil)
-                autoVerify.finishSetUp()
-            }
-            Task { @MainActor in
-                _ = try? await ProcessCarrierSMSIntent(message: message, sender: DebugLaunch.value(after: "-sender")).perform()
-                if wasOff { autoVerify.turnOff() }
-            }
+            DebugSMS.receive(message, sender: DebugLaunch.value(after: "-sender"))
         }
         #endif
         Self.useBrandTypeInNavigationBars()
@@ -203,3 +194,26 @@ private struct NotificationsFollowTransactions: ViewModifier {
         }
     }
 }
+
+#if DEBUG
+/// A carrier SMS handed to the Process Carrier SMS action as the
+/// automation would, with auto-verify set up first and turned off again
+/// after when it was off: `-receiveMessage <text>` at launch, or
+/// `starhash://sms?text=<text>&sender=<name>` while StarHash runs
+/// (`xcrun simctl openurl`), to follow a payment through its messages.
+@MainActor
+enum DebugSMS {
+    static func receive(_ message: String, sender: String?) {
+        let autoVerify = AppEnvironment.autoVerify
+        let wasOff = autoVerify.status() == .off
+        if wasOff {
+            autoVerify.receive(AutoVerificationSample.message, sender: nil)
+            autoVerify.finishSetUp()
+        }
+        Task { @MainActor in
+            _ = try? await ProcessCarrierSMSIntent(message: message, sender: sender).perform()
+            if wasOff { autoVerify.turnOff() }
+        }
+    }
+}
+#endif

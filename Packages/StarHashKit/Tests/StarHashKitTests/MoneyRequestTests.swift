@@ -54,7 +54,7 @@ struct MoneyRequestTests {
         let paying = Self.received(from: Recipient(name: "Ariane UWASE", destination: "456", kind: .phone))
         requests.settle(with: [paying], at: Self.start.addingTimeInterval(700))
         #expect(requests.request(id: request.id)?.status == .paid)
-        #expect(requests.request(id: request.id)?.transactionID == paying.id)
+        #expect(requests.request(id: request.id)?.transactionIDs == [paying.id])
     }
 
     @Test func onlyTheRightPersonAmountAndTimePayIt() {
@@ -86,7 +86,7 @@ struct MoneyRequestTests {
         #expect(requests.request(id: second.id)?.status == .waiting)
         let two = Self.received(from: sender, after: 1_200)
         requests.settle(with: [two, one])
-        #expect(requests.request(id: second.id)?.transactionID == two.id)
+        #expect(requests.request(id: second.id)?.transactionIDs == [two.id])
     }
 
     // MARK: What pays a request the owner received

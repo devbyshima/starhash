@@ -252,6 +252,14 @@ final class AppRouter {
     /// (or a tel: link a widget hands over) dials a code. In DEBUG builds,
     /// starhash://whatsnew?page=<n> shows What's New.
     func handle(_ url: URL) {
+        #if DEBUG
+        if url.scheme == "starhash", url.host() == "sms",
+           let query = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems,
+           let text = query.first(where: { $0.name == "text" })?.value {
+            DebugSMS.receive(text, sender: query.first { $0.name == "sender" }?.value)
+            return
+        }
+        #endif
         if url.scheme == "tel" {
             AppEnvironment.dialler.open(url)
             return
