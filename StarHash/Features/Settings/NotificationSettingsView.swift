@@ -77,7 +77,7 @@ struct NotificationSettingsView: View {
                     SettingsToggleRow(
                         symbol: "arrow.left.arrow.right",
                         title: "Requests",
-                        caption: "When someone asks you for money, or declines what you asked",
+                        caption: "When someone asks you for money, or pays or declines what you asked",
                         isOn: $requestNotifications
                     )
                 }

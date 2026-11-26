@@ -72,7 +72,6 @@ struct BringPhonesTogetherSheet: View {
         HeroSheet(
             caption: String(starhash: "Pay \(recipient.shownName)"),
             title: String(starhash: "Bring Phones Together"),
-            message: String(starhash: "Hold the top of your iPhone near the top of \(person.firstName)'s to pay \(Money.formatWithCurrency(amount))."),
             onClose: { dismiss() }
         ) {
             PhonesNodHero(progress: holdNear.progress ?? 0, story: .touchToPay)

@@ -136,9 +136,17 @@ final class StarHashNotifications {
     /// Says what a message just did, when it is worth a word
     /// (`NotificationPlan.after`): a scam warning whatever the
     /// Notifications page says, the rest only when the owner asked.
+    /// Money received that finished paying a request the owner sent
+    /// (Tap to Request's, or any) is said as the request: Request paid.
     func announce(_ outcome: AutoVerify.Outcome) async {
-        guard let item = NotificationPlan.after(outcome, settings: StarHashPreferences.notifications),
-              await authorizationStatus().allowsDelivery else { return }
+        let settings = StarHashPreferences.notifications
+        var item = NotificationPlan.after(outcome, settings: settings)
+        if case .added(let transaction) = outcome,
+           let paid = MoneyRequest.sent(paidBy: transaction.id, in: AppEnvironment.requests.requests),
+           let said = NotificationPlan.requestPaid(paid, name: paid.person.shownName, settings: settings) {
+            item = said
+        }
+        guard let item, await authorizationStatus().allowsDelivery else { return }
         try? await center.add(request(for: item))
     }
 
@@ -256,7 +264,20 @@ private final class NotificationResponder: NSObject, UNUserNotificationCenterDel
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping @Sendable (UNNotificationPresentationOptions) -> Void
     ) {
-        completionHandler([.banner, .list, .sound])
+        let userInfo = notification.request.content.userInfo
+        guard StarHashNotifications.kind(of: userInfo) == .requestPaid, let id = StarHashNotifications.requestID(of: userInfo) else {
+            completionHandler([.banner, .list, .sound])
+            return
+        }
+        // Hold Near already shows that request landing as Paid: no banner
+        // over it, only the list.
+        Task { @MainActor in
+            if case .paying(let held, _)? = AppEnvironment.tapToRequest.hold, held == id {
+                completionHandler([.list])
+            } else {
+                completionHandler([.banner, .list, .sound])
+            }
+        }
     }
 
     func userNotificationCenter(

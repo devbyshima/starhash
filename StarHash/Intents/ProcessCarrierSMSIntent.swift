@@ -53,6 +53,12 @@ struct ProcessCarrierSMSIntent: AppIntent {
     @MainActor
     func perform() async throws -> some IntentResult {
         let outcome = AppEnvironment.autoVerify.receive(message, sender: sender)
+        if outcome.reachedTransactions {
+            // A request this message paid is paid at once, here in the
+            // background too, and its notification says so.
+            AppEnvironment.requests.reload()
+            AppEnvironment.requests.settle(with: AppEnvironment.store.transactions)
+        }
         await StarHashNotifications.shared.announce(outcome)
         if outcome.reachedTransactions { await StarHashNotifications.shared.sync() }
         return .result()

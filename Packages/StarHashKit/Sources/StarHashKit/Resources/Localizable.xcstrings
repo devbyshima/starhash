@@ -867,6 +867,102 @@
           }
         }
       }
+    },
+    "Request paid": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demande payée"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubusabe bwishyuwe"
+          }
+        }
+      }
+    },
+    "%@ paid your request for %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ a payé votre demande de %2$@."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ yishyuye ubusabe bwawe bwa %2$@."
+          }
+        }
+      }
+    },
+    "%@ paid your request.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ a payé votre demande."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ yishyuye ubusabe bwawe."
+          }
+        }
+      }
+    },
+    "%lld cm": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld cm"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld cm"
+          }
+        }
+      }
+    },
+    "%lld m": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld m"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld m"
+          }
+        }
+      }
+    },
+    "%@ m": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ m"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ m"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

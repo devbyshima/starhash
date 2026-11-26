@@ -65,12 +65,38 @@ final class NearbyRequests {
     /// carried the request too.
     func decline(_ request: MoneyRequest) {
         requests.decline(request.id)
+        tapped.remove(request.id)
         if let peer = peers.removeValue(forKey: request.id) {
             nearby.send(MoneyRequest.Message.declined(id: request.id).data, to: peer)
         }
         guard AnywhereRequests.isOn else { return }
         // Its key comes with the server's copy, which a sync fetches.
         Task { await AnywhereRequests.sync(announce: false) }
+    }
+
+    // MARK: Tap to Request
+
+    /// Requests that came by a tap in this run, whose asker hears who pays.
+    private var tapped: Set<UUID> = []
+
+    /// A request that came by a tap (`TapToRequestService`): taken on this
+    /// iPhone's own measurement of the two held together, so from anyone,
+    /// not only Contacts. Nil when it is already here.
+    func receiveTapped(_ ask: MoneyRequest.Message.Ask, from peer: String) -> MoneyRequest? {
+        guard let request = requests.receive(ask) else { return nil }
+        peers[ask.id] = peer
+        tapped.insert(ask.id)
+        return request
+    }
+
+    /// The owner tapped Pay on `request`. When it came by a tap, the
+    /// asker's phone hears who is paying, which it did not know, so its
+    /// request settles from their SMS: the owner's number goes now, and
+    /// not before.
+    func willPay(_ request: MoneyRequest, owner: Owner) {
+        guard tapped.remove(request.id) != nil, let peer = peers[request.id], let number = owner.defaultSIM else { return }
+        let payer = MoneyRequest.Message.Payer(id: request.id, name: owner.name, number: number.destination)
+        nearby.send(MoneyRequest.Message.paying(payer).data, to: peer)
     }
 
     private func handle(_ data: Data, from peer: String) async {
@@ -95,7 +121,9 @@ final class NearbyRequests {
             if requests.request(id: id)?.isAnywhere == true {
                 Task { [anywhere] in await anywhere.report() }
             }
-        case nil:
+        case .paying, nil:
+            // Who pays comes only over a tap's connection
+            // (`TapToRequestService`).
             break
         }
     }

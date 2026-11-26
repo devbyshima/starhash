@@ -320,6 +320,12 @@ extension Color {
     /// The tick or cross on that circle.
     static let waveGlyph = Color.white
 
+    // MARK: People Nearby's sonar
+
+    /// The radar's dots (`RadarSonar`): the text colour, a little quieter,
+    /// as a screen's phosphor.
+    static let radarSonar = Color(light: Color.brandInk.opacity(0.55), dark: Color.brandPaper.opacity(0.6))
+
     // MARK: Report
 
     /// The white of a category's icon on its colour.

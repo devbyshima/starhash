@@ -80,7 +80,7 @@ extension View {
 /// Keeps `PeopleNearbyService` in step with the app: looking for people
 /// while StarHash is in front, the feature on and its intro past, and
 /// being seen too when the owner said yes and has a name and a number to
-/// be paid at.
+/// be paid at, or while they hold out a request to be tapped.
 struct PeopleNearbySync: ViewModifier {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(Owner.self) private var owner
@@ -118,7 +118,11 @@ struct PeopleNearbySync: ViewModifier {
         let announcement = browses && visible
             ? PeopleNearby.Announcement(name: owner.name, photoID: photo, number: owner.defaultSIM)
             : nil
-        return PeopleNearbyService.Setup(browses: browses, announcement: announcement, handoff: PeopleNearby.Handoff(number: owner.defaultSIM))
+        // Holding out a request to be tapped, while StarHash is in front.
+        let offersTap = AppEnvironment.tapToRequest.offersTap && scenePhase != .background
+        return PeopleNearbyService.Setup(
+            browses: browses, announcement: announcement, handoff: PeopleNearby.Handoff(number: owner.defaultSIM), offersTap: offersTap
+        )
     }
 }
 
@@ -146,23 +150,11 @@ struct PeopleNearbyIntroSheet: View {
     var body: some View {
         HeroSheet(
             caption: String(starhash: "People Nearby"),
-            title: asksToBeSeen ? String(starhash: "Let them see you?") : String(starhash: "Pay Who's Close By"),
-            message: asksToBeSeen
-                ? String(starhash: "Your name and photo show on their Pay while StarHash is open. Only someone who taps you gets your number.")
-                : String(starhash: "StarHash users near you show up at the top of Pay while StarHash is open. Tap one to pay them, with no QR code."),
+            title: asksToBeSeen ? String(starhash: "Let People Nearby See You?") : String(starhash: "Pay Who's Close By"),
             onClose: asksToBeSeen ? { answer(visible: false) } : nil,
             closeLabel: "Not Now"
         ) {
             PhonesNodHero()
-        } content: {
-            if asksToBeSeen {
-                Text("Change it any time in Settings, under Your SIMs")
-                    .font(.sheetFootnote)
-                    .foregroundStyle(Color.sheetSecondaryText)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity)
-                    .transition(.opacity)
-            }
         } actions: {
             if asksToBeSeen {
                 Button("Let Them See Me") { answer(visible: true) }

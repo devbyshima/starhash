@@ -39,6 +39,53 @@ struct MoneyRequestTests {
         #expect(MoneyRequest.Message(data: data(#"{"v":1,"kind":"paid","id":"\#(id)"}"#)) == nil)
     }
 
+    /// The payer's number reaches the asker only as they tap Pay on a
+    /// request that came by a tap.
+    @Test func whoIsPayingReadsBackAsItWasSent() {
+        let payer = MoneyRequest.Message.Payer(id: UUID(), name: "  Grace Mutoni ", number: "0789000103")
+        #expect(payer.name == "Grace Mutoni")
+        #expect(MoneyRequest.Message(data: MoneyRequest.Message.paying(payer).data) == .paying(payer))
+        #expect(payer.person == Recipient(name: "Grace Mutoni", destination: "0789000103", kind: .phone))
+        // With no name, the number alone.
+        let unnamed = MoneyRequest.Message.Payer(id: UUID(), name: " ", number: "0789000103")
+        #expect(unnamed.name == nil)
+        #expect(MoneyRequest.Message(data: MoneyRequest.Message.paying(unnamed).data) == .paying(unnamed))
+    }
+
+    /// The SMS that pays a request the owner sent is said as the request:
+    /// Request paid, not Money received. In parts, only the last part
+    /// finishes paying it.
+    @Test func moneyThatPaysARequestIsSaidAsTheRequest() throws {
+        let requests = MoneyRequests(fileURL: nil)
+        let asked = requests.ask(Self.ariane, photoID: nil, amount: 5_000, note: nil, at: Self.start)
+        let first = Self.received(from: Self.ariane, amount: 3_000, after: 60)
+        let second = Self.received(from: Self.ariane, amount: 2_000, after: 120)
+        requests.settle(with: [first], at: Self.start.addingTimeInterval(90))
+        #expect(MoneyRequest.sent(paidBy: first.id, in: requests.requests) == nil)
+        requests.settle(with: [second, first], at: Self.start.addingTimeInterval(150))
+        let paid = try #require(MoneyRequest.sent(paidBy: second.id, in: requests.requests))
+        #expect(paid.id == asked.id)
+        #expect(MoneyRequest.sent(paidBy: first.id, in: requests.requests) == nil)
+
+        let item = try #require(NotificationPlan.requestPaid(paid, name: "Ariane Uwase", settings: .init()))
+        #expect(item.kind == .requestPaid && item.requestID == asked.id && item.transactionID == nil)
+        #expect(item.body.contains("Ariane Uwase") && item.body.contains("5,000"))
+        let hidden = try #require(NotificationPlan.requestPaid(paid, name: "Ariane", settings: .init(showsAmounts: false)))
+        #expect(!hidden.body.contains("5,000"))
+        #expect(NotificationPlan.requestPaid(paid, name: "Ariane", settings: .init(requests: false)) == nil)
+        // Only one the owner sent, and only once paid.
+        #expect(NotificationPlan.requestPaid(asked, name: "Ariane", settings: .init()) == nil)
+    }
+
+    @Test func whoIsPayingIsOnlyARwandanMobileNumber() throws {
+        func data(_ json: String) -> Data { Data(json.utf8) }
+        let id = UUID()
+        #expect(MoneyRequest.Message(data: data(#"{"v":1,"kind":"paying","id":"\#(id)","number":"020205"}"#)) == nil)
+        #expect(MoneyRequest.Message(data: data(#"{"v":1,"kind":"paying","id":"\#(id)"}"#)) == nil)
+        let international = try #require(MoneyRequest.Message(data: data(#"{"v":1,"kind":"paying","id":"\#(id)","number":"+250788123456"}"#)))
+        #expect(international == .paying(.init(id: id, name: nil, number: "0788123456")))
+    }
+
     @Test func aNoteIsTrimmedAndCut() {
         let long = MoneyRequest.Message.Ask(id: UUID(), name: "A", number: "0788123456", photoID: nil, amount: 1, note: " \(String(repeating: "x", count: 90)) ")
         #expect(long.note?.count == MoneyRequest.maximumNoteLength)

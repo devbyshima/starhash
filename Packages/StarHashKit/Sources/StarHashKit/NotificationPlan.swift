@@ -78,6 +78,9 @@ public enum NotificationPlan {
             case requestReceived
             /// Someone declined what the owner asked.
             case requestDeclined
+            /// Someone paid what the owner asked: the SMS that paid it, said
+            /// as the request rather than as money received.
+            case requestPaid
         }
 
         /// The same for the same reminder or summary every time it is
@@ -259,6 +262,20 @@ public enum NotificationPlan {
         return Item(
             id: "request-declined.\(request.id.uuidString)", kind: .requestDeclined, date: nil,
             title: String(kit: "Request declined"), body: body, transactionID: nil, requestID: request.id
+        )
+    }
+
+    /// Word that `name` paid what the owner asked, said in place of
+    /// Money received for the SMS that paid it (`MoneyRequest.sent(paidBy:in:)`).
+    /// With amounts hidden, who paid and nothing more.
+    public static func requestPaid(_ request: MoneyRequest, name: String, settings: Settings) -> Item? {
+        guard settings.requests, request.direction == .sent, request.status == .paid else { return nil }
+        let body = settings.showsAmounts
+            ? String(kit: "\(name) paid your request for \(Money.formatWithCurrency(request.amount)).")
+            : String(kit: "\(name) paid your request.")
+        return Item(
+            id: "request-paid.\(request.id.uuidString)", kind: .requestPaid, date: nil,
+            title: String(kit: "Request paid"), body: body, transactionID: nil, requestID: request.id
         )
     }
 

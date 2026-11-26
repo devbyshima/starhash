@@ -21,6 +21,10 @@ struct PayView: View {
     @State private var isRequesting = false
     /// A request asked of the owner, open to pay or decline.
     @State private var answering: MoneyRequest?
+    /// Hold Near's sheet, once Request's has gone.
+    @State private var holdingNear: HoldNearRequest?
+    /// Hold Near chosen on Request's sheet, opened as it goes.
+    @State private var pendingHoldNear: HoldNearRequest?
     private var wallet: Recipient.Network { owner.wallet }
 
     @State private var input = AmountInput()
@@ -46,6 +50,8 @@ struct PayView: View {
     @State private var showsSplit = false
     /// People Nearby, everyone close by on its rings, from the pill.
     @State private var showsNearby = false
+    /// The one person nearby, when the pill's tap could not reach them.
+    @State private var unreachableNearby: PeopleNearby.Person?
     /// The person nearby `chosenRecipient` is, when chosen on People
     /// Nearby: Pay then asks to bring the phones together.
     @State private var chosenNearby: PeopleNearby.Person?
@@ -81,9 +87,16 @@ struct PayView: View {
         .sheet(isPresented: $showsSplit, onDismiss: { paying.stop() }) {
             SplitPaymentSheet()
         }
-        .sheet(isPresented: $isRequesting) {
-            RequestSheet(amount: input.value)
+        .sheet(isPresented: $isRequesting, onDismiss: {
+            holdingNear = pendingHoldNear
+            pendingHoldNear = nil
+        }) {
+            RequestSheet(amount: input.value) { note in
+                pendingHoldNear = HoldNearRequest(amount: input.value, note: note)
+                isRequesting = false
+            }
         }
+        .sheet(item: $holdingNear) { HoldNearSheet(amount: $0.amount, note: $0.note) }
         .sheet(item: $answering) { RequestAnswerSheet(request: $0) }
         // A request's notification, tapped: its sheet, while it still waits.
         .onChange(of: router.answerRequestID, initial: true) { _, id in
@@ -93,6 +106,7 @@ struct PayView: View {
             path = []
             answering = request
         }
+        .unreachableAlert($unreachableNearby)
         .fullScreenCover(isPresented: $showsNearby) {
             PeopleNearbyRadar { request, person in
                 take(request)
@@ -216,7 +230,7 @@ struct PayView: View {
                     RequestPill(requests: requests.waitingForOwner) { answering = $0 }
                         .transition(.blurReplace)
                 } else if peopleNearbyOn, !peopleNearby.found.people.isEmpty {
-                    PeopleNearbyPill { showsNearby = true }
+                    PeopleNearbyPill { openNearby() }
                         .transition(.blurReplace)
                 }
             }
@@ -359,6 +373,25 @@ struct PayView: View {
         take(PaymentRequest(recipient: request.recipient, amount: request.amount, photoID: request.photoID, isStarHashCode: true))
     }
 
+    /// The pill, tapped: People Nearby, or with only one person nearby,
+    /// straight to them, as a tap on them there would, with nobody else to
+    /// choose from.
+    private func openNearby() {
+        let people = peopleNearby.found.people
+        guard people.count == 1, let person = people.first else {
+            showsNearby = true
+            return
+        }
+        Task {
+            if let recipient = await peopleNearby.reach(person) {
+                take(PaymentRequest(recipient: recipient, photoID: person.photoID, isStarHashCode: true))
+                chosenNearby = person
+            } else {
+                unreachableNearby = person
+            }
+        }
+    }
+
     /// Who a scanned code (or Pay Again) says to pay: chosen under the
     /// amount, with the amount typed in when the code asks for one, so Pay
     /// dials them without the recipient screen.
@@ -425,6 +458,16 @@ struct PayView: View {
                 answering = requests.waitingForOwner.first
             }
         }
+        // -payRequest: Request's sheet; -tapRequest [state]: Hold Near's,
+        // over Pay, after a moment, as -paySplit does: a sheet the root
+        // opens at launch would otherwise take its place.
+        if DebugLaunch.arguments.contains("-payRequest") { isRequesting = true }
+        if TapToRequestDebug.opensHoldNear {
+            Task {
+                try? await Task.sleep(for: .seconds(1))
+                holdingNear = HoldNearRequest(amount: PayDebug.amount ?? 5_000, note: DebugLaunch.value(after: "-tapRequestNote"))
+            }
+        }
         // -paySplit: Split large payments on (StarHashApp) and Pay tapped
         // on the chosen recipient, for the parts' sheet (with an amount
         // that saves).
@@ -455,6 +498,13 @@ private struct ScanButton: View {
     var body: some View {
         SwapGlassButton(symbol: "qrcode", label: "Scan a QR code", action: action)
     }
+}
+
+/// A request held out with Hold Near: the amount typed and the note.
+private struct HoldNearRequest: Identifiable {
+    let id = UUID()
+    let amount: Int
+    let note: String?
 }
 
 /// The screens Pay pushes.
