@@ -50,6 +50,28 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 /// Airtel's 072 and 073.
 const NUMBER = /^07[2389]\d{7}$/;
 
+/// A number however it is written, "+250 788 123 456", "250788123456",
+/// "00250788123456", "0788-123-456" or Airtel's "788123456", as the
+/// directory keeps it, "0788123456", or null when it is not a Rwandan
+/// mobile number. Every number the Worker takes goes through it before it
+/// is hashed, so one number written two ways is one number.
+function localNumber(given: unknown): string | null {
+  if (typeof given !== "string" || given.length > 32) return null;
+  let digits = given.replace(/[\s\-().]/g, "");
+  if (digits.startsWith("+")) digits = digits.slice(1);
+  if (!/^\d+$/.test(digits)) return null;
+  if (digits.startsWith("00250") && digits.length === 14) digits = "0" + digits.slice(5);
+  else if (digits.startsWith("250") && digits.length === 12) digits = "0" + digits.slice(3);
+  else if (digits.startsWith("7") && digits.length === 9) digits = "0" + digits;
+  return NUMBER.test(digits) ? digits : null;
+}
+
+/// Numbers one lookup may ask about at once: a Request sheet checks the
+/// owner's contacts in batches of this many.
+const MAX_LOOKUP = 500;
+/// D1 binds at most 100 values a query; the rest of a batch goes in more.
+const LOOKUP_CHUNK = 90;
+
 /// An owner has one SIM or two.
 const MAX_NUMBERS = 2;
 const MAX_NAME = 60;
@@ -182,8 +204,9 @@ async function putEntry(request: Request, env: Env): Promise<Response> {
   }
   const publicKey = typeof body.key === "string" ? body.key : null;
   const given = Array.isArray(body.numbers) ? body.numbers : [];
-  const numbers = [...new Set(given.filter((n): n is string => typeof n === "string" && NUMBER.test(n)))];
-  if (numbers.length === 0 || numbers.length > MAX_NUMBERS || numbers.length !== given.length) {
+  const local = given.map(localNumber);
+  const numbers = [...new Set(local.filter((n): n is string => n !== null))];
+  if (numbers.length === 0 || numbers.length > MAX_NUMBERS || local.includes(null)) {
     return text(400, "Bad request");
   }
   const name = typeof body.name === "string" ? body.name.trim().slice(0, MAX_NAME) : "";
@@ -228,22 +251,62 @@ async function deleteEntry(request: Request, env: Env): Promise<Response> {
 }
 
 /// The name and photo listed for a number, and the public key requests to
-/// it are sealed to when its iPhone takes them, or 404.
+/// it are sealed to when its iPhone takes them, or 404. Given `numbers`
+/// instead, which of them are listed (`listedAmong`).
 async function lookUp(request: Request, env: Env): Promise<Response> {
   const secret = env.DIRECTORY_SECRET;
   if (!secret) return text(404, "Not found");
-  let body: { number?: unknown };
+  let body: { number?: unknown; numbers?: unknown };
   try {
     body = await request.json();
   } catch {
     return text(400, "Bad request");
   }
-  const number = typeof body.number === "string" ? body.number : "";
-  if (!NUMBER.test(number)) return text(400, "Bad request");
+  if (body.numbers !== undefined) return listedAmong(body.numbers, secret, env);
+  const number = localNumber(body.number);
+  if (!number) return text(400, "Bad request");
   const entry = await listed(await numberHash(number, secret), env);
   if (!entry) return text(404, "Not found");
   return new Response(JSON.stringify({ name: entry.name || null, photo: entry.photo_id, key: entry.public_key }), {
     headers: { "Content-Type": "application/json", "Cache-Control": "private, max-age=300" },
+  });
+}
+
+/// Which of `given` the directory lists, each as it was sent, and nothing
+/// else: no name, photo or key, which a tap on one still looks up alone.
+/// For the Request sheet, which shows the owner's contacts on StarHash
+/// first. Numbers that are not Rwandan mobile numbers are left out; the
+/// numbers are hashed to compare and kept nowhere.
+async function listedAmong(given: unknown, secret: string, env: Env): Promise<Response> {
+  if (!Array.isArray(given) || given.length > MAX_LOOKUP) return text(400, "Bad request");
+  // The local form of each, and every way it was sent.
+  const sent = new Map<string, string[]>();
+  for (const raw of given) {
+    const number = localNumber(raw);
+    if (!number || typeof raw !== "string") continue;
+    sent.set(number, [...(sent.get(number) ?? []), raw]);
+  }
+  const numbers = [...sent.keys()];
+  const hashes = await Promise.all(numbers.map((number) => numberHash(number, secret)));
+  const byHash = new Map(hashes.map((hash, i) => [hash, numbers[i]]));
+  const lapsed = lapsedBefore(new Date());
+  const listedNumbers: string[] = [];
+  for (let start = 0; start < hashes.length; start += LOOKUP_CHUNK) {
+    const chunk = hashes.slice(start, start + LOOKUP_CHUNK);
+    const marks = chunk.map((_, i) => `?${i + 2}`).join(", ");
+    const { results } = await env.DB.prepare(
+      `SELECT number_hash FROM directory WHERE updated_at > ?1 AND number_hash IN (${marks})
+       GROUP BY number_hash HAVING COUNT(*) = 1`,
+    )
+      .bind(lapsed, ...chunk)
+      .all<{ number_hash: string }>();
+    for (const row of results) {
+      const number = byHash.get(row.number_hash);
+      if (number) listedNumbers.push(...(sent.get(number) ?? []));
+    }
+  }
+  return new Response(JSON.stringify({ listed: listedNumbers }), {
+    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
 }
 
@@ -277,10 +340,10 @@ async function sendRequest(request: Request, env: Env, ctx: ExecutionContext): P
   const body = await smallJSON<{ id?: unknown; to?: unknown; from?: unknown; sealed?: unknown }>(request);
   if (!body) return text(400, "Bad request");
   const id = typeof body.id === "string" ? body.id.toLowerCase() : "";
-  const to = typeof body.to === "string" ? body.to : "";
-  const from = typeof body.from === "string" ? body.from : "";
+  const to = localNumber(body.to);
+  const from = localNumber(body.from);
   const sealed = typeof body.sealed === "string" ? body.sealed : "";
-  if (!UUID.test(id) || !NUMBER.test(to) || !NUMBER.test(from) || !isSealed(sealed)) return text(400, "Bad request");
+  if (!UUID.test(id) || !to || !from || !isSealed(sealed)) return text(400, "Bad request");
 
   const keyHash = await sha256(key);
   const now = new Date();
