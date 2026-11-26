@@ -47,3 +47,47 @@ CREATE TABLE IF NOT EXISTS photos (
   data BLOB NOT NULL,
   updated_at TEXT NOT NULL
 );
+
+-- One row per owner listed under Show My Name whose iPhone takes requests
+-- from anywhere: the hash of their key (the directory's key_hash) and the
+-- public half of a Curve25519 key their iPhone made, sent with the
+-- listing. A request is sealed to it on the asker's iPhone, so the server
+-- never reads one. A table of its own rather than a column on directory:
+-- schema.sql is run again whole after each change, and SQLite cannot add a
+-- column only when it is missing. Deleted with the listing, and each night
+-- once not sent again for 45 days.
+CREATE TABLE IF NOT EXISTS directory_keys (
+  key_hash TEXT PRIMARY KEY,
+  public_key TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+) WITHOUT ROWID;
+
+-- One row per request for money sent through the server: the id both
+-- iPhones keep it under, the number asked (as the directory's HMAC) and the
+-- hash of the key it was listed under then (only that key reads, answers or
+-- drops it, though another may list the number later), the hash of the
+-- asker's key and their public key, and what the asker's
+-- iPhone sealed to the other's public key (who asks, how much, what for),
+-- which the server cannot open. An answer (a decline) is sealed to the
+-- asker the same way. Cancelled or dropped, the sealed part is wiped at
+-- once; the row, only who asked whom and when, stays until its week is up
+-- so the limits hold, and the Worker deletes it that night.
+--
+-- state: waiting; answered (the answer waits for the asker); closed (the
+-- asker cancelled it, or it was paid); dropped (the person asked does not
+-- know the asker, and the asker is never told, so for the asker's limits
+-- it still waits).
+CREATE TABLE IF NOT EXISTS requests (
+  id TEXT PRIMARY KEY,
+  to_hash TEXT NOT NULL,
+  to_key_hash TEXT NOT NULL,
+  from_key_hash TEXT NOT NULL,
+  from_public_key TEXT NOT NULL,
+  sealed TEXT,
+  answer TEXT,
+  state TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  expires_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS requests_to ON requests (to_key_hash);
+CREATE INDEX IF NOT EXISTS requests_from ON requests (from_key_hash, created_at);

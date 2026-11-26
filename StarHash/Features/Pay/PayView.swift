@@ -78,6 +78,14 @@ struct PayView: View {
             RequestSheet(amount: input.value)
         }
         .sheet(item: $answering) { RequestAnswerSheet(request: $0) }
+        // A request's notification, tapped: its sheet, while it still waits.
+        .onChange(of: router.answerRequestID, initial: true) { _, id in
+            guard let id else { return }
+            router.answerRequestID = nil
+            guard let request = requests.request(id: id), request.status == .waiting else { return }
+            path = []
+            answering = request
+        }
         .fullScreenCover(isPresented: $isScanning) {
             QRScannerView { request in
                 isScanning = false

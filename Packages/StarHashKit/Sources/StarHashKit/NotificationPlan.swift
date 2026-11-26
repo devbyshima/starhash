@@ -24,6 +24,8 @@ public enum NotificationPlan {
         /// Off keeps amounts and balances off the Lock Screen: the
         /// notifications say what happened, not how much.
         public var showsAmounts: Bool
+        /// Someone asks the owner for money, or declines what they asked.
+        public var requests: Bool
         /// While auto-verify is Active, the moment it was set up: a payment
         /// dialled since then that no message confirms within the hour
         /// fails on its own (`Transaction.failsUnconfirmed`), so its
@@ -42,6 +44,7 @@ public enum NotificationPlan {
             monthlySummary: Bool = true,
             summaryHour: Int = NotificationPlan.defaultSummaryHour,
             showsAmounts: Bool = true,
+            requests: Bool = true,
             failsUnconfirmedSince: Date? = nil
         ) {
             self.paymentReminders = paymentReminders
@@ -53,6 +56,7 @@ public enum NotificationPlan {
             self.monthlySummary = monthlySummary
             self.summaryHour = summaryHour
             self.showsAmounts = showsAmounts
+            self.requests = requests
             self.failsUnconfirmedSince = failsUnconfirmedSince
         }
     }
@@ -70,6 +74,10 @@ public enum NotificationPlan {
             case monthlySummary
             /// A message that looks like the wallet's but may be a scam.
             case scamWarning
+            /// Someone asked the owner for money.
+            case requestReceived
+            /// Someone declined what the owner asked.
+            case requestDeclined
         }
 
         /// The same for the same reminder or summary every time it is
@@ -82,14 +90,17 @@ public enum NotificationPlan {
         public let body: String
         /// The transaction it is about, which tapping it opens.
         public let transactionID: UUID?
+        /// The request it is about, which tapping it opens.
+        public let requestID: UUID?
 
-        public init(id: String, kind: Kind, date: Date?, title: String, body: String, transactionID: UUID?) {
+        public init(id: String, kind: Kind, date: Date?, title: String, body: String, transactionID: UUID?, requestID: UUID? = nil) {
             self.id = id
             self.kind = kind
             self.date = date
             self.title = title
             self.body = body
             self.transactionID = transactionID
+            self.requestID = requestID
         }
     }
 
@@ -219,6 +230,35 @@ public enum NotificationPlan {
         return Item(
             id: "money-received.\(transaction.id.uuidString)", kind: .moneyReceived, date: nil,
             title: String(kit: "Money received"), body: body, transactionID: transaction.id
+        )
+    }
+
+    // MARK: Requests
+
+    /// Word that `name` asked the owner for money, with the note: the
+    /// request reached StarHash while it was closed or out of sight. With
+    /// amounts hidden, who asks and nothing more.
+    public static func requestReceived(_ request: MoneyRequest, name: String, settings: Settings) -> Item? {
+        guard settings.requests, request.direction == .received, request.status == .waiting else { return nil }
+        var body = settings.showsAmounts
+            ? String(kit: "\(name) asks you for \(Money.formatWithCurrency(request.amount)).")
+            : String(kit: "\(name) asks you for money.")
+        if settings.showsAmounts, let note = request.note { body += " " + note }
+        return Item(
+            id: "request-received.\(request.id.uuidString)", kind: .requestReceived, date: nil,
+            title: String(kit: "Money requested"), body: body, transactionID: nil, requestID: request.id
+        )
+    }
+
+    /// Word that `name` declined what the owner asked.
+    public static func requestDeclined(_ request: MoneyRequest, name: String, settings: Settings) -> Item? {
+        guard settings.requests, request.direction == .sent, request.status == .declined else { return nil }
+        let body = settings.showsAmounts
+            ? String(kit: "\(name) declined your request for \(Money.formatWithCurrency(request.amount)).")
+            : String(kit: "\(name) declined your request.")
+        return Item(
+            id: "request-declined.\(request.id.uuidString)", kind: .requestDeclined, date: nil,
+            title: String(kit: "Request declined"), body: body, transactionID: nil, requestID: request.id
         )
     }
 

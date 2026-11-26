@@ -19,6 +19,9 @@ struct NotificationSettingsView: View {
     @AppStorage(Preferences.summaryHour) private var summaryHour: Int
     @AppStorage(Preferences.showsAmounts) private var showsAmounts: Bool
     @AppStorage(Preferences.notificationSound) private var sound: Bool
+    @AppStorage(Preferences.requestNotifications) private var requestNotifications: Bool
+    @FeatureFlagged(.peopleNearby) private var peopleNearbyOn
+    @FeatureFlagged(.requestsAnywhere) private var anywhereOn
     @Environment(Owner.self) private var owner
     private var ownWallets: OwnerWallets { owner.wallets }
     @Environment(AutoVerify.self) private var autoVerify
@@ -70,6 +73,14 @@ struct NotificationSettingsView: View {
                         : "Needs auto-verify, under Transactions",
                     isOn: $moneyReceived
                 )
+                if peopleNearbyOn && anywhereOn {
+                    SettingsToggleRow(
+                        symbol: "arrow.left.arrow.right",
+                        title: "Requests",
+                        caption: "When someone asks you for money, or declines what you asked",
+                        isOn: $requestNotifications
+                    )
+                }
             }
 
             SettingsCard("Summaries") {
@@ -152,7 +163,7 @@ struct NotificationSettingsView: View {
             confirmedPayments: confirmedPayments, moneyReceived: moneyReceived,
             weeklySummary: weeklySummary, weeklyDay: weeklyDay,
             monthlySummary: monthlySummary, summaryHour: summaryHour,
-            showsAmounts: showsAmounts
+            showsAmounts: showsAmounts, requests: requestNotifications
         )
     }
 

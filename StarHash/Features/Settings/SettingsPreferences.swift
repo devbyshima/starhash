@@ -83,10 +83,13 @@ enum AppReset {
         StarHashWidgetData.erase()
         ProfilePhoto.shared.remove()
         // What the server still has from this iPhone outlives the wipe, so
-        // the owner's listing and photo are deleted from it after it.
-        AppEnvironment.serverSync.erase {
-            if let domain = Bundle.main.bundleIdentifier {
-                UserDefaults.standard.removePersistentDomain(forName: domain)
+        // the owner's listing and photo are deleted from it after it, and
+        // their requests there closed or dropped.
+        AppEnvironment.requestsAnywhere.erase {
+            AppEnvironment.serverSync.erase {
+                if let domain = Bundle.main.bundleIdentifier {
+                    UserDefaults.standard.removePersistentDomain(forName: domain)
+                }
             }
         }
         // The owner's name, SIMs and wallet went with the rest, and

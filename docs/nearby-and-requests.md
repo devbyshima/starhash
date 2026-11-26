@@ -1,6 +1,6 @@
 # People Nearby, Requests and Split the Bill
 
-A plan, not built yet (2026-11-26).
+A plan, built through Phase 3 behind the `peopleNearby` and `requestsAnywhere` flags (2026-11-26).
 
 ## What's in it
 
@@ -146,6 +146,20 @@ APNs from the Worker, so a request arrives with StarHash closed.
 ### Phase 6 (optional): a Verified mark
 
 A phone in People Nearby proves, with its directory key, that it owns the entry for the number it hands over.
+
+## Decided in Phase 3 (2026-11-26)
+
+- **Its own flag**, `requestsAnywhere`, on top of `peopleNearby` (which brings Request to Pay), so People Nearby and nearby requests can ship without the server's part.
+- **The public key is a table, `directory_keys`, not a column.** `schema.sql` is run again whole after each change, and SQLite cannot add a column only when it is missing. One row per owner key, written with the listing (`key` in `PUT /v1/directory`, sent only while the flags are on), deleted with it, and lapsing with it after 45 days. Lookups return it as `key`.
+- **The iPhone asked checks the asker's number too.** The server's check that `from` is the asker's own number cannot see into the seal, so the seal is authenticated by the asker's key (HPKE's auth mode) and the iPhone asked looks the sealed number up: it must be listed under the key that sealed the request, or the request is dropped. The server keeps the asker's public key on the request for that.
+- **An answer is only a decline.** A request settles from the transactions alone, so the payer's iPhone never reports Paid. Instead the asker's iPhone closes on the server every request of theirs that no longer waits (paid, cancelled, declined or expired), which wipes what was sealed and frees the two of them to ask each other again, and the iPhone asked sees it closed (Cancelled, unless it was already paid there).
+- **`DELETE /v1/requests/<id>` is the asker's close and the asked's drop.** A drop (someone not in Contacts) wipes the sealed part but keeps the row waiting for the asker, so all they see is that it expires, and they cannot ask again meanwhile. `DELETE /v1/requests` is Delete All Data's: every request sent closed, every one waiting dropped.
+- **A request belongs to the key the number was listed under when it was asked** (`to_key_hash`), not to the number: listing a number needs no proof of the SIM, so whoever lists it later cannot read, answer or drop what was asked before.
+- **Rows stay to the end of the week** (who asked whom and when, nothing sealed once closed) so the limits hold: 20 sent in any 24 hours per key, closed ones included, and one waiting per pair.
+- **While Contacts cannot be read**, requests wait on the server unread rather than being dropped, and the Requests page says why.
+- **Notifications only from Background App Refresh.** Opening StarHash shows the card, so a banner then would say the same thing twice. The Notifications page has a Requests switch.
+- **Not built yet:** a nearby request going through the server when the other person walks away before answering.
+- **Trying it on two Simulators:** `npm run dev` in `server/` (with `--var DIRECTORY_SECRET:<anything>` and `--persist-to` a folder that `wrangler d1 execute starhash --local --file schema.sql` set up), then launch each with `-server http://127.0.0.1:8787` and its own `-profileName` and `-profileNumber`: a Worker on the Mac lets the Simulator list its owner. `starhash://refresh` runs what Background App Refresh does.
 
 ## Decided in Phase 2 (2026-11-26)
 

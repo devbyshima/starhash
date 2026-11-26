@@ -135,6 +135,11 @@ struct StarHashApp: App {
             // Clair's renderer, when the Clair Mac app launched StarHash (debug builds only).
             .screensHost()
         }
+        // Requests through the server, fetched while StarHash is away, with
+        // a notification for each (`AnywhereRequests`).
+        .backgroundTask(.appRefresh(AnywhereRequests.refreshTask)) {
+            await AnywhereRequests.refresh()
+        }
         .onChange(of: scenePhase, initial: true) { _, phase in
             // The Process Carrier SMS shortcut may have written while we
             // were in the background, and notifications may have been

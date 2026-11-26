@@ -142,8 +142,8 @@ extension LegalDocument {
     static let privacyPolicy = LegalDocument(
         title: "Privacy Policy",
         symbol: "lock.fill",
-        effective: "2026-11-08",
-        summary: "StarHash has no account and no tracking. Your payments stay on your iPhone. Only your photo, your name and numbers (so people paying you see who you are, unless you turn that off) and an anonymous count of who uses StarHash reach its server.",
+        effective: "2026-11-26",
+        summary: "StarHash has no account and no tracking. Your payments stay on your iPhone. Only your photo, your name and numbers (so people paying you see who you are, unless you turn that off), requests for money sealed so the server cannot read them, and an anonymous count of who uses StarHash reach its server.",
         sections: [
             .init(
                 title: "What StarHash keeps",
@@ -152,6 +152,10 @@ extension LegalDocument {
             .init(
                 title: "StarHash's server",
                 text: "Three things reach it. Your profile photo, if you add one: it is kept under a random id that your QR code carries, so people who scan your code see it; only your iPhone holds the key that can change or delete it, and removing your photo deletes it. Your name with your numbers, unless you turn off Show my name in Settings, so people who type one of your numbers in StarHash see your name and photo: each number is kept only as a code made with a secret key the server holds, never as the number itself, and turning Show my name off, or removing your numbers, deletes them there. And once a day, a random id made when StarHash was installed, with its version, so the number of people using StarHash can be counted. Nothing else is sent: no payment, no contact, no location."
+            ),
+            .init(
+                title: "Requests for money",
+                text: "When you ask someone who isn't near you for money, or they ask you, the request passes through StarHash's server. What it says (who asks, the number the money goes to, how much and what for) is sealed on the asker's iPhone so that only the other person's iPhone can open it, and a decline goes back sealed the same way: the server cannot read either. It keeps only which listed number asked which, and when, for the request's seven days, and deletes that the night after. Cancelling a request wipes what was sealed at once, and so does a request from someone who is not in your contacts, which StarHash never shows you. Requests need Show my name on, and your listing then also carries the public half of a key your iPhone makes, which requests to you are sealed to. Requests between people standing near each other go from iPhone to iPhone, and never reach the server."
             ),
             .init(
                 title: "Contacts",
@@ -167,7 +171,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "Notifications",
-                text: "Only if you allow them, which StarHash asks once as you set it up. It makes its reminders and summaries on your iPhone from the transactions it already keeps; nothing is sent to it from a server. Choose on its Notifications page what they tell you of, and whether they show amounts on your Lock Screen."
+                text: "Only if you allow them, which StarHash asks once as you set it up. It makes its reminders and summaries on your iPhone from the transactions it already keeps, and word of a request for money from the ones it fetches; nothing is pushed to it from a server. Choose on its Notifications page what they tell you of, and whether they show amounts on your Lock Screen."
             ),
             .init(
                 title: "Face ID",
@@ -175,7 +179,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "What StarHash shares",
-                text: "Your name and photo, with people who type your number in StarHash, while Show my name is on. Nothing else beyond StarHash's own server above. It has no advertising and no third-party code that collects data. Request a Feature and the source code open GitHub in your browser, and Support on Ko-fi opens Ko-fi, each under its own privacy policy. Every code you dial goes through your phone and your provider, under theirs."
+                text: "Your name and photo, with people who type your number in StarHash, while Show my name is on, and your name, number and photo, with the person you ask for money. Nothing else beyond StarHash's own server above. It has no advertising and no third-party code that collects data. Request a Feature and the source code open GitHub in your browser, and Support on Ko-fi opens Ko-fi, each under its own privacy policy. Every code you dial goes through your phone and your provider, under theirs."
             ),
             .init(
                 title: "Backups",
@@ -183,7 +187,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "Your choices",
-                text: "In Settings you can stop StarHash saving transactions, using contacts, remembering recent recipients, Nearby, auto-verify, Show my name and each of its notifications at any time. You can delete any transaction, or erase everything with Delete All Data. Deleting the app removes it all from your iPhone; your name and numbers stay on StarHash's server until they lapse 45 days later, so turn off Show my name first to remove them at once."
+                text: "In Settings you can stop StarHash saving transactions, using contacts, remembering recent recipients, Nearby, auto-verify, Show my name and each of its notifications at any time. You can delete any transaction, cancel any request you sent, or erase everything with Delete All Data, which also cancels your requests on the server. Deleting the app removes it all from your iPhone; your name and numbers stay on StarHash's server until they lapse 45 days later, so turn off Show my name first to remove them at once."
             ),
             .init(
                 title: "Children",

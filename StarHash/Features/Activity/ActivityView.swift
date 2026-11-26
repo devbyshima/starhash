@@ -96,6 +96,13 @@ struct ActivityView: View {
         }
         // A link to a transaction that is not there (deleted, or from
         // another phone) opens nothing, and is forgotten.
+        // A request's notification, for one no longer waiting on the owner.
+        .onChange(of: router.opensRequests, initial: true) { _, opens in
+            guard opens else { return }
+            router.opensRequests = false
+            router.openTransactionID = nil
+            page = .requests
+        }
         .onChange(of: router.openTransactionID, initial: true) { _, id in
             if let id, store.transaction(id: id) == nil { router.openTransactionID = nil }
         }

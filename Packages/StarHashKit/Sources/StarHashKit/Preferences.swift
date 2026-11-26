@@ -72,6 +72,8 @@ public enum Preferences {
     public static let summaryHour = Preference("summaryHour", default: NotificationPlan.defaultSummaryHour)
     public static let showsAmounts = Preference("notificationAmounts", default: true)
     public static let notificationSound = Preference("notificationSound", default: true)
+    /// Someone asks the owner for money, or declines what they asked.
+    public static let requestNotifications = Preference("notifyRequests", default: true)
 }
 
 extension NotificationPlan.Settings {
@@ -89,6 +91,7 @@ extension NotificationPlan.Settings {
             monthlySummary: Preferences.monthlySummary.value(in: defaults),
             summaryHour: Preferences.summaryHour.value(in: defaults),
             showsAmounts: Preferences.showsAmounts.value(in: defaults),
+            requests: Preferences.requestNotifications.value(in: defaults),
             failsUnconfirmedSince: failsUnconfirmedSince
         )
     }
