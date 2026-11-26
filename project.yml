@@ -44,7 +44,8 @@ settings:
     # arm64 on device; the simulator keeps arm64 alone) and the compiler's
     # hardening. Its runtime half is the hardened-process entitlements in
     # StarHash.entitlements (StarHashPush.entitlements with push), signed
-    # only with STARHASH_APP_GROUPS: YES (below). The protections apply from iOS 26; older iOS runs arm64.
+    # only with STARHASH_APP_GROUPS: YES (below). The protections apply
+    # from iOS 26; older iOS runs arm64.
     ENABLE_ENHANCED_SECURITY: YES
     # With the package built for arm64e (postGenCommand), Xcode builds it
     # for the Apple silicon simulator alone, so the app and widgets drop
@@ -174,6 +175,9 @@ targets:
         # Bluetooth and Wi-Fi (MultipeerConnectivity, `PeopleNearby.serviceType`).
         NSLocalNetworkUsageDescription: StarHash finds StarHash users near you so you can pay them with a tap, and lets them find you when you allow it in Settings.
         NSBonjourServices: [_starhash-near._tcp, _starhash-near._udp]
+        # Tap to Request, Bring Phones Together and People Nearby's radar:
+        # how far other iPhones are, and which way (`TapToRequestService`).
+        NSNearbyInteractionUsageDescription: StarHash measures how far other iPhones with StarHash open are, to show people nearby where they are, and so holding yours to theirs asks them for money or pays them. It stays between the iPhones.
         LSApplicationQueriesSchemes: [tel]
         # Requests through the server are fetched in the background now and
         # then (`AnywhereRequests.refresh`): Background App Refresh, which

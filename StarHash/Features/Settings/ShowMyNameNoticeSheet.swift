@@ -14,20 +14,13 @@ struct ShowMyNameNoticeSheet: View {
         // Got It and Turn Off are its two answers, so no close button.
         HeroSheet(
             caption: String(starhash: "Your SIMs"),
-            title: String(starhash: "Your name on StarHash"),
-            message: String(starhash: "People who type your number in StarHash see your name and photo")
+            title: String(starhash: "Payers See Your Name")
         ) {
             if let photo = profile.image {
                 TileHero { RecipientTile(tile: .image(photo), size: 84) }
             } else {
                 SymbolHero(symbol: "eye.fill")
             }
-        } content: {
-            Text("Turn it off any time in Settings, under Your SIMs")
-                .font(.sheetFootnote)
-                .foregroundStyle(Color.sheetSecondaryText)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity)
         } actions: {
             Button("Got It") { dismiss() }
                 .buttonStyle(.sheetPrimary)

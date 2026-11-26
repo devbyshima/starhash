@@ -1,11 +1,12 @@
 # People Nearby, Requests and Split the Bill
 
-A plan, built through Phase 3 behind the `peopleNearby` and `requestsAnywhere` flags (2026-11-26).
+A plan, built through Phase 3 behind the `peopleNearby` and `requestsAnywhere` flags (2026-11-26), with Tap to Request behind `tapToRequest`.
 
 ## What's in it
 
 - **People Nearby.** While StarHash is open, StarHash users close by appear on Pay. Tap one and pay them, with no QR code.
 - **Requests.** Ask one StarHash user for money, whether they're next to you or anywhere else. They get a card with Pay and Decline.
+- **Tap to Request.** Hold your iPhone to theirs, as a card reader takes a tap, and their iPhone asks them to pay.
 - **Split the Bill.** Ask several people for their share of one amount, and see who has paid.
 
 Not in it: a request shown to everyone nearby, request links, and people without StarHash. Those wait for [web pay](web-pay.md).
@@ -95,6 +96,33 @@ Without auto-verify, the asker marks it Paid by hand. The matching rules live in
 - **Limits:** 20 requests a day per key, one waiting request per pair of people, and a size cap. The nightly cron deletes expired requests along with lapsed directory entries.
 - **Getting them:** the app checks when it opens and through Background App Refresh, then shows a local notification. A real push arrives only with the paid team (Phase 5, behind `STARHASH_PUSH`), and the push never carries the amount.
 - **The privacy policy** (`LegalPages.swift`, [privacy.md](privacy.md)) gains a line on what the server holds for a request and for how long.
+
+## Tap to Request
+
+After the owner's reference: a shop's phone showing the amount, and the customer's iPhone held to it asks them to pay.
+
+**Asking.** Type the amount on Pay, tap **Request**, then **Hold Near Their iPhone**, at the top of the sheet on an iPhone with ultra wideband (iPhone 11 and later, not the SE or the 16e). Hold Near is a hero sheet facing the person paying: the two phones nodding together (`PhonesNodHero`, `.request`) follow the distance to the nearest iPhone (`TapToRequestService.holdProgress`, 0 at 1m to 1 at 15cm), under Bring Phones Together and the amount. **Show Code** puts the owner's code with the amount in the phones' place, for an iPhone that can't measure. The sheet keeps the screen awake.
+
+**How a tap works.** While the sheet is open, the owner's phone adds an offer (`t`) to what People Nearby announces, beside their name when they let people see them, or alone (with no name, so no face) when they don't. A phone with StarHash open and People Nearby on that finds the offer opens a tap connection to it (Multipeer, encryption required, its own invitation context), four at most at once. The two trade Nearby Interaction tokens and measure how far apart they are. When the phone asked measures two readings in a row within 15cm (`TapToRequest.Detector`), it says `touched`; the first to say so gets the request, and the owner's phone stops offering.
+
+**Being asked.** The request shows only if this iPhone measured the touch itself, in the 5 seconds before it came, so a phone can't claim a tap that never happened. Then it shows from anyone, not only Contacts: the two were held together. Pay opens with its answer sheet, as a request's notification opens it. Nothing dials by itself.
+
+**Paying.** Pay on the answer sheet first tells the asker who is paying (`MoneyRequest.Message.paying`: the name and default SIM's number), then dials. That is the first the asker hears of the payer's number, and only then does the asker keep the request, which settles from their SMS as any other. Hold Near follows: Sent to Their iPhone, then Ariane Is Paying with a card of who and which number (Status: Waiting), then **Paid**.
+
+**Paid.** The same sheet turned, not a new one, and the same height, so nothing jumps: the phones blur away as a green disc lands where they met, its tick draws, and a ring bends the hero and the amount outward from it as a drop does water (`PaidRipple`); green light opens behind it with glints as the tick lands, and settles to a faint halo (`PaidBloom`); a sheen crosses the disc (`PaidDiscSheen`). The title turns to Paid at the instant the disc lands, with the haptic; the amount pops; the card's last row turns from Waiting to the time. A tap on the disc squishes it and sends a smaller ring out. Under Reduce Motion it appears at its end.
+- The ripple runs over the hero and the amount, never the whole sheet: a layer effect cannot draw the sheet's Liquid Glass close button, and over it the moment stalled.
+- It stays on from the start, still until the money lands (its time long past): turned on at that moment, its layer was built then, and the moment stalled.
+- The bloom is drawn once, unseen, as the sheet opens, so its first frame never holds up the moment.
+
+**Touch to pay.** Bring Phones Together (`BringPhonesTogetherSheet`) measures through the same service, through `HoldNear.shared`: `isAvailable` on an iPhone that can measure with the flag on; `start` opens a ranging connection (`TapToRequest.rangeContext`) to the person chosen, whose phone lets it in because they let people see them, as for a tap asking their number, and measures too; `progress` follows the distance but stays below 1 (`TapToRequest.approach`) until the `Detector` counts a touch, so one close reading never dials. The sheet plays the haptic and dials; the service sends nothing.
+
+**Permission.** iOS asks for Nearby Interactions the first time two iPhones measure, on each side. Refused, Hold Near says so with Open Settings; the iPhone asked just takes no taps.
+
+**Where people are.** While People Nearby's radar is open, the same service measures everyone on it (`TapToRequestService.locate`, a ranging connection to each, a few at a time; their phones let it in as they let people see them). Each face sits at its distance, closer to the middle and bigger the nearer they are (square-rooted to 10m, `RadarPlacement.reach`), and at its bearing from the iPhone, straight up the screen where it points. Pointing at someone, within 12°, rings them in the accent, ticks, and the line at the foot says how far they are ("Ariane is 80 cm away"). The direction is Nearby Interaction's from ultra wideband alone, never the camera (the owner's ask), so only iPhone 11 to 13 give one; on later iPhones a face sits at its true distance on its orbit's angle. It only tells left from right in front of the iPhone. Anyone not measured yet keeps a slow orbit. `-radarLocations` places sample people with no radio.
+
+**Notifications.** A tap and a touch happen with both iPhones in front, so neither needs one. What does: the SMS that pays a request the owner sent (a tap's, or any) is said as the request, **Request paid** ("Ariane paid your request for 17,250 RWF"), in place of Money received. The SMS shortcut settles requests before it speaks (`ProcessCarrierSMSIntent`), so it works in the background; the banner stays away while Hold Near is already showing that request land as Paid. It follows the Requests switch on the Notifications page. Push waits for the paid team (Phase 5).
+
+**Try it.** `-tapSupported` shows Hold Near on the Simulator; `-tapRequest [state]` opens its sheet over Pay (with `-payAmount`) in each state, `landing` to watch Paid come; `-nodProgress` sweeps the phones. (`-holdNear` is Bring Phones Together's simulated distance.) A real tap needs two iPhones with ultra wideband.
 
 ## Split the Bill
 

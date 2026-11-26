@@ -557,22 +557,6 @@
         }
       }
     },
-    "Change it any time in Settings, under Your SIMs": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modifiez-le à tout moment dans Réglages, sous Vos SIM"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wabihindura igihe icyo ari cyo cyose mu Igenamiterere, munsi ya SIM zawe"
-          }
-        }
-      }
-    },
     "Change your wallet, or set Two SIMs in Settings.": {
       "localizations": {
         "rw": {
@@ -669,22 +653,6 @@
         }
       }
     },
-    "Hold the top of your iPhone near the top of %@'s to pay %@.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Approchez le haut de votre iPhone du haut de celui de %1$@ pour payer %2$@."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Egereza hejuru ya iPhone yawe hejuru ya telefoni ya %1$@ kugira ngo wishyure %2$@."
-          }
-        }
-      }
-    },
     "Let Them See Me": {
       "localizations": {
         "fr": {
@@ -713,22 +681,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Emerera abantu bari hafi kukubona"
-          }
-        }
-      }
-    },
-    "Let them see you?": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vous rendre visible ?"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wemera ko bakubona?"
           }
         }
       }
@@ -971,38 +923,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yerekana abantu bose bari hafi"
-          }
-        }
-      }
-    },
-    "StarHash users near you show up at the top of Pay while StarHash is open. Tap one to pay them, with no QR code.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les utilisateurs de StarHash près de vous apparaissent en haut de Payer tant que StarHash est ouvert. Touchez-en un pour le payer, sans code QR."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abakoresha StarHash bari hafi yawe bagaragara hejuru kuri Ishyura igihe StarHash ifunguye. Kanda kuri umwe umwishyure, nta kode ya QR."
-          }
-        }
-      }
-    },
-    "Tap someone to pay them": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Touchez quelqu'un pour le payer"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kanda ku muntu umwishyure"
           }
         }
       }
@@ -1323,22 +1243,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wasabye %1$@ %2$@"
-          }
-        }
-      }
-    },
-    "Your name and photo show on their Pay while StarHash is open. Only someone who taps you gets your number.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Votre nom et votre photo apparaissent sur leur écran Payer tant que StarHash est ouvert. Seule la personne qui vous touche reçoit votre numéro."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Izina ryawe n'ifoto yawe bigaragara kuri Ishyura yabo igihe StarHash ifunguye. Ukanze kuri wowe wenyine ni we ubona nimero yawe."
           }
         }
       }
@@ -9490,38 +9394,6 @@
         }
       }
     },
-    "Turn it off any time in Settings, under Your SIMs": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Désactivez-le à tout moment dans Réglages, sous Vos SIM"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wabizimya igihe icyo ari cyo cyose mu Igenamiterere, munsi ya SIM zawe"
-          }
-        }
-      }
-    },
-    "Your name on StarHash": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Votre nom sur StarHash"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Izina ryawe kuri StarHash"
-          }
-        }
-      }
-    },
     "It goes in your own QR code, and people\nwho pay it with StarHash see your name.": {
       "localizations": {
         "fr": {
@@ -11762,22 +11634,6 @@
         }
       }
     },
-    "When someone asks you for money, or declines what you asked": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quand quelqu'un vous demande de l'argent, ou refuse votre demande"
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Iyo umuntu agusabye amafaranga, cyangwa yanze ibyo wasabye"
-          }
-        }
-      }
-    },
     "Requests for money": {
       "localizations": {
         "fr": {
@@ -11790,22 +11646,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ubusabe bw'amafaranga"
-          }
-        }
-      }
-    },
-    "When you ask someone who isn't near you for money, or they ask you, the request passes through StarHash's server. What it says (who asks, the number the money goes to, how much and what for) is sealed on the asker's iPhone so that only the other person's iPhone can open it, and a decline goes back sealed the same way: the server cannot read either. It keeps only which listed number asked which, and when, for the request's seven days, and deletes that the night after. Cancelling a request wipes what was sealed at once, and so does a request from someone who is not in your contacts, which StarHash never shows you. Requests need Show my name on, and your listing then also carries the public half of a key your iPhone makes, which requests to you are sealed to. When someone asks you, the server can also have Apple's push service wake StarHash with the request still sealed, so neither the server nor Apple can read it: your iPhone opens it to show who asks and for how much, only when they are in your contacts. For that, your iPhone gives the server the token Apple's service made for it, kept with your listing and deleted with it, or when you turn off notifications of requests or use Delete All Data. Requests between people standing near each other go from iPhone to iPhone, and never reach the server.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quand vous demandez de l'argent à quelqu'un qui n'est pas près de vous, ou qu'il vous en demande, la demande passe par le serveur de StarHash. Ce qu'elle dit (qui demande, le numéro où va l'argent, combien et pour quoi) est scellé sur l'iPhone de celui qui demande, pour que seul l'iPhone de l'autre puisse l'ouvrir, et un refus revient scellé de la même façon : le serveur ne peut lire ni l'un ni l'autre. Il ne garde que quel numéro inscrit a fait une demande à quel autre, et quand, pendant les sept jours de la demande, et le supprime la nuit suivante. Annuler une demande efface aussitôt ce qui était scellé, comme pour une demande de quelqu'un qui n'est pas dans vos contacts, que StarHash ne vous montre jamais. Les demandes nécessitent qu'Afficher mon nom soit activé ; votre inscription porte alors aussi la moitié publique d'une clé que crée votre iPhone, à laquelle sont scellées les demandes qui vous sont faites. Quand quelqu'un vous fait une demande, le serveur peut aussi faire réveiller StarHash par le service de notifications d'Apple, avec la demande toujours scellée, que ni le serveur ni Apple ne peuvent lire : votre iPhone l'ouvre pour afficher qui demande et combien, seulement si cette personne est dans vos contacts. Pour cela, votre iPhone donne au serveur le jeton que le service d'Apple a créé pour lui, gardé avec votre inscription et supprimé avec elle, ou quand vous désactivez les notifications de demandes ou utilisez Supprimer toutes les données. Les demandes entre personnes proches l'une de l'autre vont d'un iPhone à l'autre et n'atteignent jamais le serveur."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Iyo usabye amafaranga umuntu utari hafi yawe, cyangwa we akayagusaba, ubusabe bunyura kuri seriveri ya StarHash. Ibyo buvuga (usaba, nimero amafaranga ajyaho, angahe n'icyo agenewe) bifungirwa kuri iPhone y'usaba ku buryo iPhone y'undi muntu yonyine ari yo ishobora kubifungura, kandi kwanga bigaruka bifungiwe kimwe: seriveri ntishobora gusoma na kimwe muri byo. Ibika gusa nimero yanditswe yasabye indi, n'igihe, mu minsi irindwi y'ubusabe, hanyuma ikabisiba mu ijoro rikurikira. Guhagarika ubusabe bisiba ako kanya ibyari bifungiwe, kimwe n'ubusabe buvuye ku muntu utari mu bo muvugana, StarHash itajya ikwereka. Ubusabe busaba ko Erekana izina ryanjye iba ifunguye, kandi icyo gihe ibyo wanditse binatwara igice rusange cy'urufunguzo iPhone yawe ikora, ari rwo ubusabe bukugenewe bufungirwaho. Iyo hari ugusabye, seriveri ishobora no gusaba serivisi ya Apple yohereza imenyesha gukangura StarHash, ubusabe bukiri bufungiye, ku buryo seriveri cyangwa Apple bidashobora kubusoma: iPhone yawe ni yo ibufungura ikerekana usaba n'amafaranga angahe, ari uko gusa ari mu bo muvugana. Kubera ibyo, iPhone yawe iha seriveri ikimenyetso serivisi ya Apple yayikoreye, kibikwa hamwe n'ibyo wanditse kandi kigasibwa hamwe na byo, cyangwa igihe uzimije imenyesha ry'ubusabe cyangwa ukoresheje Siba amakuru yose. Ubusabe hagati y'abantu begeranye buva kuri iPhone imwe bujya ku yindi, kandi ntibugera kuri seriveri."
           }
         }
       }
@@ -11870,6 +11710,294 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mu Igenamiterere, igihe icyo ari cyo cyose ushobora kubuza StarHash kubika ibikorwa, gukoresha abo muvugana no kwibuka abo wishyuye vuba, ndetse ukazimya Hafi aha, Kugenzura byikora, Erekana izina ryanjye na buri menyesha yayo. Ushobora gusiba igikorwa icyo ari cyo cyose, guhagarika ubusabe ubwo ari bwo bwose wohereje, cyangwa ugasiba byose ukoresheje Siba amakuru yose, binahagarika ubusabe bwawe kuri seriveri. Gusiba porogaramu bikuraho byose kuri iPhone yawe; izina ryawe na nimero zawe biguma kuri seriveri ya StarHash kugeza bishaje nyuma y'iminsi 45, bityo banza uzimye Erekana izina ryanjye kugira ngo bivanweho ako kanya."
+          }
+        }
+      }
+    },
+    "Ask Again": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redemander"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongera usabe"
+          }
+        }
+      }
+    },
+    "Hide Code": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Masquer le code"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hisha kode"
+          }
+        }
+      }
+    },
+    "Show Code": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher le code"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erekana kode"
+          }
+        }
+      }
+    },
+    "Hold Near Their iPhone": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approcher de son iPhone"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Egereza iPhone ye"
+          }
+        }
+      }
+    },
+    "Shows the request for someone to hold their iPhone to": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Affiche la demande, pour qu'on y approche son iPhone"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yerekana ubusabe kugira ngo umuntu ayegereze iPhone ye"
+          }
+        }
+      }
+    },
+    "When you ask someone who isn't near you for money, or they ask you, the request passes through StarHash's server. What it says (who asks, the number the money goes to, how much and what for) is sealed on the asker's iPhone so that only the other person's iPhone can open it, and a decline goes back sealed the same way: the server cannot read either. It keeps only which listed number asked which, and when, for the request's seven days, and deletes that the night after. Cancelling a request wipes what was sealed at once, and so does a request from someone who is not in your contacts, which StarHash never shows you. Requests need Show my name on, and your listing then also carries the public half of a key your iPhone makes, which requests to you are sealed to. When someone asks you, the server can also have Apple's push service wake StarHash with the request still sealed, so neither the server nor Apple can read it: your iPhone opens it to show who asks and for how much, only when they are in your contacts. For that, your iPhone gives the server the token Apple's service made for it, kept with your listing and deleted with it, or when you turn off notifications of requests or use Delete All Data. Requests between people standing near each other go from iPhone to iPhone, and never reach the server. Holding your iPhone to someone else's to ask for money, or to be asked, measures how far apart the two are with Nearby Interaction, between those two iPhones only, and shows that request even from someone who is not in your contacts; your number goes to the person asking only when you tap Pay.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quand vous demandez de l'argent à quelqu'un qui n'est pas près de vous, ou qu'il vous en demande, la demande passe par le serveur de StarHash. Ce qu'elle dit (qui demande, le numéro où va l'argent, combien et pour quoi) est scellé sur l'iPhone de celui qui demande, pour que seul l'iPhone de l'autre puisse l'ouvrir, et un refus revient scellé de la même façon : le serveur ne peut lire ni l'un ni l'autre. Il ne garde que quel numéro inscrit a fait une demande à quel autre, et quand, pendant les sept jours de la demande, et le supprime la nuit suivante. Annuler une demande efface aussitôt ce qui était scellé, comme pour une demande de quelqu'un qui n'est pas dans vos contacts, que StarHash ne vous montre jamais. Les demandes nécessitent qu'Afficher mon nom soit activé ; votre inscription porte alors aussi la moitié publique d'une clé que crée votre iPhone, à laquelle sont scellées les demandes qui vous sont faites. Quand quelqu'un vous fait une demande, le serveur peut aussi faire réveiller StarHash par le service de notifications d'Apple, avec la demande toujours scellée, que ni le serveur ni Apple ne peuvent lire : votre iPhone l'ouvre pour afficher qui demande et combien, seulement si cette personne est dans vos contacts. Pour cela, votre iPhone donne au serveur le jeton que le service d'Apple a créé pour lui, gardé avec votre inscription et supprimé avec elle, ou quand vous désactivez les notifications de demandes ou utilisez Supprimer toutes les données. Les demandes entre personnes proches l'une de l'autre vont d'un iPhone à l'autre et n'atteignent jamais le serveur. Approcher votre iPhone de celui de quelqu'un pour demander de l'argent, ou pour qu'on vous en demande, mesure la distance entre les deux avec Interactions à proximité, entre ces deux iPhone seulement, et affiche cette demande même si elle vient de quelqu'un qui n'est pas dans vos contacts ; votre numéro ne va à la personne qui demande que lorsque vous touchez Payer."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iyo usabye amafaranga umuntu utari hafi yawe, cyangwa we akayagusaba, ubusabe bunyura kuri seriveri ya StarHash. Ibyo buvuga (usaba, nimero amafaranga ajyaho, angahe n'icyo agenewe) bifungirwa kuri iPhone y'usaba ku buryo iPhone y'undi muntu yonyine ari yo ishobora kubifungura, kandi kwanga bigaruka bifungiwe kimwe: seriveri ntishobora gusoma na kimwe muri byo. Ibika gusa nimero yanditswe yasabye indi, n'igihe, mu minsi irindwi y'ubusabe, hanyuma ikabisiba mu ijoro rikurikira. Guhagarika ubusabe bisiba ako kanya ibyari bifungiwe, kimwe n'ubusabe buvuye ku muntu utari mu bo muvugana, StarHash itajya ikwereka. Ubusabe busaba ko Erekana izina ryanjye iba ifunguye, kandi icyo gihe ibyo wanditse binatwara igice rusange cy'urufunguzo iPhone yawe ikora, ari rwo ubusabe bukugenewe bufungirwaho. Iyo hari ugusabye, seriveri ishobora no gusaba serivisi ya Apple yohereza imenyesha gukangura StarHash, ubusabe bukiri bufungiye, ku buryo seriveri cyangwa Apple bidashobora kubusoma: iPhone yawe ni yo ibufungura ikerekana usaba n'amafaranga angahe, ari uko gusa ari mu bo muvugana. Kubera ibyo, iPhone yawe iha seriveri ikimenyetso serivisi ya Apple yayikoreye, kibikwa hamwe n'ibyo wanditse kandi kigasibwa hamwe na byo, cyangwa igihe uzimije imenyesha ry'ubusabe cyangwa ukoresheje Siba amakuru yose. Ubusabe hagati y'abantu begeranye buva kuri iPhone imwe bujya ku yindi, kandi ntibugera kuri seriveri. Kwegereza iPhone yawe iy'undi muntu ngo usabe amafaranga, cyangwa bayagusabe, bipima intera iri hagati yazo hakoreshejwe Nearby Interaction, hagati y'izo iPhone ebyiri gusa, kandi bikwereka ubwo busabe kabone n'iyo buturutse ku muntu utari muri contacts zawe; nimero yawe igera ku ukwaka ari uko ukanze Ishyura gusa."
+          }
+        }
+      }
+    },
+    "From": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uwishyuye"
+          }
+        }
+      }
+    },
+    "Paid %@ by %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ payés par %2$@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$@ yishyuye %1$@"
+          }
+        }
+      }
+    },
+    "Sent to Their iPhone": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoyée sur son iPhone"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byoherejwe kuri iPhone ye"
+          }
+        }
+      }
+    },
+    "%@ Is Paying": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ paie"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ arimo kwishyura"
+          }
+        }
+      }
+    },
+    "They're Paying": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paiement en cours"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arimo kwishyura"
+          }
+        }
+      }
+    },
+    "They Declined": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demande refusée"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yabyanze"
+          }
+        }
+      }
+    },
+    "Nearby Interactions Is Off": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interactions à proximité désactivées"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nearby Interactions irafunze"
+          }
+        }
+      }
+    },
+    "Payers See Your Name": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceux qui vous paient voient votre nom"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abakwishyura babona izina ryawe"
+          }
+        }
+      }
+    },
+    "Let People Nearby See You?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Être visible des personnes à proximité ?"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reka abantu bari hafi bakubone?"
+          }
+        }
+      }
+    },
+    "Tap someone to pay them": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touchez quelqu'un pour le payer"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kanda ku muntu umwishyure"
+          }
+        }
+      }
+    },
+    "When someone asks you for money, or pays or declines what you asked": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quand quelqu'un vous demande de l'argent, ou paie ou refuse votre demande"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iyo umuntu agusabye amafaranga, cyangwa yishyuye cyangwa yanze ibyo wasabye"
+          }
+        }
+      }
+    },
+    "%@ is %@ away": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ est à %2$@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ ari kuri %2$@"
           }
         }
       }

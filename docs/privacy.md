@@ -38,6 +38,8 @@ StarHash talks to one server of its own, `starhash.devbyshima.workers.dev` (`Sta
 
 Nothing else is sent: no payment, no location, no contacts, and nothing of a request the server or a push could read. There are no analytics or advertising packages. Beyond that, the only things that reach beyond the app are system ones you start:
 
+Tap to Request never reaches the server either: holding two iPhones together measures how far apart they are with Nearby Interaction, between those two iPhones only, over People Nearby's encrypted connection, and the phone asking hears your number only when you tap Pay on its request.
+
 - dialling a code through the iPhone's call prompt;
 - opening GitHub in your browser (Request a Feature, the developer's note, the source code), Ko-fi (Support on Ko-fi, and Buy Shima a coffee in the developer's note), or the shared shortcut in Shortcuts;
 - Apple's own rating prompt;

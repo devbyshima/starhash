@@ -55,6 +55,10 @@ enum AppEnvironment {
     /// How requests travel between people nearby.
     static let nearbyRequests = NearbyRequests(requests: requests, nearby: peopleNearby, anywhere: requestsAnywhere)
 
+    /// Requests by a tap: holding the iPhone to another's, measured with
+    /// Nearby Interaction over People Nearby's connections.
+    static let tapToRequest = TapToRequestService(nearby: peopleNearby, requests: requests, nearbyRequests: nearbyRequests)
+
     /// How requests travel to anyone on StarHash, through the server,
     /// sealed. Only someone in the owner's Contacts can ask them.
     static let requestsAnywhere = RequestsAnywhere(

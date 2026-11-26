@@ -64,6 +64,8 @@
 	<string>StarHash finds StarHash users near you so you can pay them with a tap, and lets them find you when you allow it in Settings.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>StarHash notes where you pay, to suggest who you paid when you are back there and to show each payment on a map. It stays on your iPhone.</string>
+	<key>NSNearbyInteractionUsageDescription</key>
+	<string>StarHash measures how far other iPhones with StarHash open are, to show people nearby where they are, and so holding yours to theirs asks them for money or pays them. It stays between the iPhones.</string>
 	<key>StarHashAppGroup</key>
 	<string>$(STARHASH_APP_GROUP_ID_$(STARHASH_APP_GROUPS))</string>
 	<key>StarHashChannel</key>

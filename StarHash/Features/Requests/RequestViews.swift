@@ -2,17 +2,21 @@ import StarHashKit
 import SwiftUI
 
 /// Request on Pay: the amount typed, then who to ask, with a note if the
-/// owner wants one: people nearby first, then (with requests anywhere on)
+/// owner wants one: Hold Near first (with Tap to Request on, on an iPhone
+/// that can measure), then people nearby, then (with requests anywhere on)
 /// contacts and typed numbers, each checked with the directory as it is
 /// tapped, never the whole list. A tap sends it; someone not on StarHash
 /// gets Share Message instead.
 struct RequestSheet: View {
     let amount: Int
+    /// Hold Near chosen, with the note typed: Pay opens its sheet.
+    var onHoldNear: (String?) -> Void = { _ in }
 
     @Environment(\.dismiss) private var dismiss
     @Environment(PeopleNearbyService.self) private var nearby
     @Environment(Owner.self) private var owner
     @FeatureFlagged(.requestsAnywhere) private var anywhereOn
+    @FeatureFlagged(.tapToRequest) private var tapOn
     @AppStorage(Preferences.showMyName) private var showMyName: Bool
     @State private var note = ""
     @State private var unreachable: PeopleNearby.Person?
@@ -39,6 +43,9 @@ struct RequestSheet: View {
                     if let missing = NearbyRequests.missing(in: owner) {
                         RequestNotice(text: missing)
                     } else {
+                        if tapOn && TapToRequestService.isSupported {
+                            holdNearRow
+                        }
                         // With requests anywhere, an empty nearby says
                         // nothing: the contacts below are the way.
                         if !anywhere || !nearby.found.people.isEmpty {
@@ -60,6 +67,39 @@ struct RequestSheet: View {
         .sheetGlass(detents: [.medium, .large])
         .unreachableAlert($unreachable)
         .sensoryFeedback(.success, trigger: sentCount)
+    }
+
+    /// Hold Near: the request held out for the next iPhone held to this
+    /// one, on a sheet of its own.
+    private var holdNearRow: some View {
+        Button {
+            noteFocused = false
+            let typed = note.trimmingCharacters(in: .whitespacesAndNewlines)
+            onHoldNear(typed.isEmpty ? nil : typed)
+        } label: {
+            HStack(spacing: 12) {
+                SheetIconCircle(symbol: "antenna.radiowaves.left.and.right")
+                    .frame(width: 44, height: 44)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Hold Near Their iPhone")
+                        .font(PickerType.rowName)
+                        .foregroundStyle(Color.starhashPrimaryText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                Spacer(minLength: 8)
+                Image(symbol: "chevron.right")
+                    .font(.starhash(.footnote, weight: .semibold))
+                    .foregroundStyle(Color.sheetSecondaryText)
+                    .accessibilityHidden(true)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.hapticPlain)
+        .sheetCard()
+        .accessibilityHint(Text("Shows the request for someone to hold their iPhone to"))
     }
 
     /// Requests through the server: both flags, as the Request button
@@ -403,14 +443,6 @@ struct RequestAnswerSheet: View {
             onClose: { dismiss() }
         ) {
             TileHero { RequestTile(request: request, size: 84) }
-        } content: {
-            Text(verbatim: line)
-                .font(.sheetCallout)
-                .foregroundStyle(Color.sheetSecondaryText)
-                .multilineTextAlignment(.center)
-                .lineLimit(3)
-                .frame(maxWidth: .infinity)
-                .padding(.top, -12)
         } actions: {
             switch request.direction {
             case .received:
@@ -453,16 +485,14 @@ struct RequestAnswerSheet: View {
             : String(starhash: "You asked \(name) for \(amount)")
     }
 
-    /// "Lunch · 26 Nov": the note, when there is one, and the day.
-    private var line: String {
-        let date = request.createdAt.formatted(.dateTime.day().month(.abbreviated).locale(.starhash))
-        return [request.note, date].compactMap { $0 }.joined(separator: " · ")
-    }
-
     /// Dials the request as Pay would: recorded, then the call prompt. In
-    /// parts, when Split Large Payments says that costs less.
+    /// parts, when Split Large Payments says that costs less. One that came
+    /// by a tap first tells the asker who is paying, before the call prompt
+    /// takes StarHash from the front.
     private func pay() {
-        switch paying.pay(request.amount, to: request.person) {
+        let outcome = paying.pay(request.amount, to: request.person)
+        if outcome != .refused { AppEnvironment.nearbyRequests.willPay(request, owner: AppEnvironment.owner) }
+        switch outcome {
         case .dialled: dismiss()
         case .split: showsSplit = true
         case .refused: break
