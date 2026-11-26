@@ -150,6 +150,9 @@ extension Color {
     /// Money coming in and a confirmed payment: the accent, the text
     /// colour. The arrow's direction tells it from money going out.
     static let starhashIncoming = SurfaceColor(light: .brandInk, dark: .brandPaper)
+    /// Money received in Transactions' list: the confirmed green, deep on
+    /// white and bright on #101010.
+    static let starhashReceivedAmount = SurfaceColor(light: .brandGreenDeep, dark: .brandGreen)
     /// Drawn on `starhashIncoming` as a fill (the verified tick): the
     /// page's colour.
     static let starhashOnIncoming = SurfaceColor(light: .brandWhite, dark: .brandNight)

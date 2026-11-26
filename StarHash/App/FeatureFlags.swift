@@ -18,7 +18,7 @@ extension FeatureFlag {
     static let peopleNearby = FeatureFlag(
         key: "peopleNearby", title: "People Nearby",
         detail: "StarHash users close by show up on Pay, and a tap pays them",
-        rollout: .dev
+        rollout: .everywhere
     )
 
     /// Requests to StarHash users anywhere, through the server, sealed
@@ -27,7 +27,7 @@ extension FeatureFlag {
     static let requestsAnywhere = FeatureFlag(
         key: "requestsAnywhere", title: "Requests Anywhere",
         detail: "Ask StarHash users who aren't nearby, through StarHash's server",
-        rollout: .dev
+        rollout: .everywhere
     )
 
     /// Asking for money by holding the iPhone to another (`TapToRequest`).
@@ -35,7 +35,7 @@ extension FeatureFlag {
     static let tapToRequest = FeatureFlag(
         key: "tapToRequest", title: "Tap to Request",
         detail: "Ask for money by holding your iPhone to theirs",
-        rollout: .dev
+        rollout: .everywhere
     )
 }
 

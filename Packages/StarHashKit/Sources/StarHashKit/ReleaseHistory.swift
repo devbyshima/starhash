@@ -76,6 +76,53 @@ public enum ReleaseHistory {
     /// an `announcement` for a new MAJOR.MINOR (RELEASING.md).
     public static let releases: [Release] = [
         Release(
+            version: "1.1.0",
+            date: "2026-11-27",
+            summary: "Pay and ask the StarHash users around you, ask anyone on StarHash for money, and pay less in fees on large payments.",
+            highlights: [
+                .init(symbol: "person.2.fill", title: "People Nearby",
+                      detail: "StarHash users close by show up at the top of Pay. Tap one and pay them, without asking for their number. Only people you let see you find you."),
+                .init(symbol: "arrow.down.circle.fill", title: "Ask for money",
+                      detail: "Type an amount, tap Request and pick someone nearby or anyone on StarHash. They pay or decline in a tap, and the request is marked paid when the money comes in."),
+                .init(symbol: "antenna.radiowaves.left.and.right", title: "Bring Phones Together",
+                      detail: "Hold your iPhone to theirs to ask them for money, or to pay them, with StarHash open on both."),
+                .init(symbol: "lock.fill", title: "Sealed requests",
+                      detail: "A request to someone who isn't near you goes through StarHash's server sealed, so only their iPhone can read it."),
+                .init(symbol: "chart.pie.fill", title: "Split large payments",
+                      detail: "Turn it on under Pay & Buy, and a large MoMo payment is sent in parts when that costs less in fees."),
+                .init(symbol: "sparkles", title: "Siri Suggestions",
+                      detail: "Siri and Spotlight learn when you check your balance, and suggest it at those times."),
+                .init(symbol: "receipt.fill", title: "Numbers as your messages show them",
+                      detail: "Money from a number your wallet's message hides shows it in Transactions with +2507 or 07 in front, as +2507*****998."),
+            ],
+            announcement: .init(
+                highlights: [
+                    .init(symbol: "person.2.fill", title: "People Nearby",
+                          detail: "Pay StarHash users close by with a tap."),
+                    .init(symbol: "arrow.down.circle.fill", title: "Ask for money",
+                          detail: "Ask anyone on StarHash, near or far."),
+                    .init(symbol: "antenna.radiowaves.left.and.right", title: "Bring Phones Together",
+                          detail: "Hold your iPhone to theirs to ask or pay."),
+                    .init(symbol: "chart.pie.fill", title: "Split large payments",
+                          detail: "Pay less in fees on large MoMo payments."),
+                ],
+                pages: [
+                    .init(symbol: "person.2.fill", title: "People Nearby",
+                          detail: "StarHash users close by show up at the top of Pay. Tap one, type the amount, and pay without their number.",
+                          video: "WhatsNewPeopleNearby"),
+                    .init(symbol: "arrow.down.circle.fill", title: "Ask for money",
+                          detail: "Type an amount, tap Request and pick who to ask. They pay or decline in a tap, nearby or far.",
+                          video: "WhatsNewRequests"),
+                    .init(symbol: "antenna.radiowaves.left.and.right", title: "Bring Phones Together",
+                          detail: "Hold your iPhone to theirs, with StarHash open on both, to ask them for money or to pay them.",
+                          video: "WhatsNewBringPhonesTogether"),
+                    .init(symbol: "chart.pie.fill", title: "Split large payments",
+                          detail: "Turn it on under Pay & Buy, and a large MoMo payment goes in parts when that costs less in fees.",
+                          video: "WhatsNewSplitPayments"),
+                ]
+            )
+        ),
+        Release(
             version: "1.0.0",
             date: "2026-11-13",
             summary: "The first release of StarHash: pay with MTN MoMo or Airtel Money without typing USSD codes, and keep every payment in one place.",

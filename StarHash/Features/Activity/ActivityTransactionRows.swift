@@ -203,16 +203,17 @@ struct ActivityTransactionRow: View {
         return parts.joined(separator: " \u{00B7} ")
     }
 
-    /// The direction arrow (the text colour either way, as on the
-    /// details page), then the amount, struck through when it failed.
+    /// The direction arrow, then the amount, struck through when it
+    /// failed: the text colour for money sent, green for money received,
+    /// grey once it failed (`activityListColor`).
     private var amount: some View {
         HStack(alignment: .firstTextBaseline, spacing: 4) {
             Image(symbol: transaction.activityArrowSymbol)
                 .starhashFont(13, weight: .bold, relativeTo: .footnote)
-                .foregroundStyle(transaction.activityArrowColor)
+                .foregroundStyle(transaction.activityListColor)
             Text(Money.format(transaction.amount))
                 .font(.starhashNumber(17, relativeTo: .body))
-                .foregroundStyle(transaction.activityAmountColor)
+                .foregroundStyle(transaction.activityListColor)
                 .strikethrough(transaction.status == .failed)
         }
         .lineLimit(1)

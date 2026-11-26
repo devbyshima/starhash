@@ -420,7 +420,11 @@ public enum CarrierSMS {
         if digits.count >= 10, let recipient = Recipient(input: digits, name: name) {
             return recipient
         }
-        return Recipient(name: name, destination: digits, kind: .phone)
+        // Masked: how long it was, so it shows with "+2507" or "07" in
+        // front, as the number it hides.
+        let shown = number.filter { $0 == "*" || ($0.isASCII && $0.isNumber) }
+        let maskedLength = shown.contains("*") && !digits.isEmpty ? shown.count : nil
+        return Recipient(name: name, destination: digits, kind: .phone, maskedLength: maskedLength)
     }
 
     /// "PILI-PILI INVEST 020205": a merchant name, then its MoMo Pay code

@@ -140,6 +140,180 @@ extension SheetHeader where Trailing == EmptyView {
     }
 }
 
+/// A sheet that scrolls, its title collapsing after the owner's reference
+/// (Apple Pay's sheet). At rest the title is `SheetHeader`'s, the same size
+/// in the same place, at the top of the scroll. As it scrolls up, the title
+/// blurs and fades as it goes, and once it has all but gone, it comes back
+/// small at the top, sharpening out of a blur, in a bar that what scrolls
+/// on runs under through the system's soft scroll edge, a progressive blur
+/// with no tint (iOS 26; before it, a fade of the sheet's material).
+/// Scrolling back down plays it backwards. Every part follows the scroll,
+/// so a drag half way leaves it half way.
+struct CollapsingSheetScroll<Content: View>: View {
+    let title: String
+    /// The small title's two lines, as the reference sets them: a grey
+    /// caption over the main line in bold ("Request" over "5,000 RWF").
+    /// Without them, the big title again, small.
+    let smallCaption: String?
+    let smallTitle: String?
+    let content: Content
+
+    /// How far the scroll has moved from its top.
+    @State private var offset: CGFloat = 0
+    /// The big title's height, with its padding.
+    @State private var titleHeight: CGFloat = 66
+
+    init(title: String, smallCaption: String? = nil, smallTitle: String? = nil, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.smallCaption = smallCaption
+        self.smallTitle = smallTitle
+        self.content = content()
+    }
+
+    /// The bar the small title sits in, and the blur under it.
+    private static var barHeight: CGFloat { 60 }
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                bigTitle
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { titleHeight = max($0, 1) }
+                content
+            }
+        }
+        .onScrollGeometryChange(for: CGFloat.self) { geometry in
+            geometry.contentOffset.y + geometry.contentInsets.top
+        } action: { _, now in
+            offset = now
+        }
+        .starhashSoftEdge()
+        // Over the scroll, taking no room, so the big title sits where
+        // `SheetHeader`'s does; at rest there is nothing in it.
+        .overlay(alignment: .top) { smallTitleBar }
+        // Solid, as What's New and the notes are: through clear glass the
+        // blur under the bar would take in the page behind the sheet and
+        // lighten; on the sheet's own fill it blurs only what scrolls.
+        .background(Color.noteSheetBackground.ignoresSafeArea())
+        .starhashContainerSurface()
+    }
+
+    /// 0 at rest to 1 once the big title has scrolled away.
+    private var gone: CGFloat { Self.clamp(offset / titleHeight) }
+
+    /// The small title: nothing until the big one is two thirds gone, all
+    /// of it a little after it has.
+    private var small: CGFloat { Self.clamp((offset - titleHeight * 0.66) / (titleHeight * 0.5)) }
+
+    /// The blur under the bar: in as the big title starts under it, full
+    /// by the time the small title arrives, so nothing sharp is ever
+    /// behind the small title.
+    private var backdrop: CGFloat { Self.clamp((offset - titleHeight * 0.25) / (titleHeight * 0.55)) }
+
+    /// Clamped to 0...1 and eased in and out (smoothstep), so each fade
+    /// starts and settles softly rather than at a constant rate.
+    private static func clamp(_ value: CGFloat) -> CGFloat {
+        let x = min(max(value, 0), 1)
+        return x * x * (3 - 2 * x)
+    }
+
+    /// `SheetHeader`'s title, laid out as it lays it out.
+    private var bigTitle: some View {
+        Text(catalog: title)
+            .font(.sheetLargeTitle)
+            .tracking(StarHashTracking.display(32))
+            .foregroundStyle(Color.sheetBrandText)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .padding(.horizontal, 52)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 20)
+            .padding(.top, 18)
+            .padding(.bottom, 8)
+            .opacity(1 - gone)
+            .blur(radius: gone * 8)
+            .accessibilityAddTraits(.isHeader)
+    }
+
+    /// The title, small, at the top once the big one has gone, over a fade
+    /// of the sheet's material that the scroll runs under, blurring into it
+    /// as the Soft Edge does under a bar.
+    private var smallTitleBar: some View {
+        VStack(spacing: 1) {
+            if let smallCaption {
+                Text(catalog: smallCaption)
+                    .font(.sheetFootnote)
+                    .foregroundStyle(Color.sheetSecondaryText)
+            }
+            Text(catalog: smallTitle ?? title)
+                .font(.sheet(16, .bold, relativeTo: .headline))
+                .foregroundStyle(Color.sheetBrandText)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
+        .padding(.horizontal, 60)
+        .opacity(small)
+        .blur(radius: (1 - small) * 6)
+        .offset(y: (1 - small) * 4)
+        .frame(maxWidth: .infinity)
+        .frame(height: Self.barHeight)
+        .background(alignment: .top) { progressiveBlur }
+        .allowsHitTesting(false)
+        // VoiceOver reads the big title, which stays in the scroll.
+        .accessibilityHidden(true)
+    }
+
+    /// What scrolls under the bar blurs more the higher it goes, and is
+    /// otherwise left as it is, no tint and no veil: two clear blurs, the
+    /// stronger held to the top, each fading out downwards.
+    private var progressiveBlur: some View {
+        ZStack {
+            ClearBlur()
+                .mask(Self.fade(solidTo: 0.35, clearAt: 1))
+            ClearBlur()
+                .mask(Self.fade(solidTo: 0.2, clearAt: 0.6))
+        }
+        .frame(height: Self.barHeight + 28)
+        .padding(.top, -12)
+        .opacity(backdrop)
+    }
+
+    private static func fade(solidTo solid: CGFloat, clearAt clear: CGFloat) -> LinearGradient {
+        LinearGradient(stops: [
+            .init(color: .black, location: 0),
+            .init(color: .black, location: solid),
+            .init(color: .clear, location: clear),
+        ], startPoint: .top, endPoint: .bottom)
+    }
+}
+
+/// A blur and nothing else: the system's blur view with the layers that
+/// tint it hidden, and its backdrop left with only its Gaussian blur (no
+/// saturation or brightness of its own), so what is behind is blurred and
+/// keeps its own colours, as if through clear frosted glass.
+struct ClearBlur: UIViewRepresentable {
+    func makeUIView(context: Context) -> UIVisualEffectView {
+        let view = ClearBlurView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
+        view.isUserInteractionEnabled = false
+        return view
+    }
+
+    func updateUIView(_ view: UIVisualEffectView, context: Context) {}
+
+    private final class ClearBlurView: UIVisualEffectView {
+        override func layoutSubviews() {
+            super.layoutSubviews()
+            // The first subview is the backdrop that blurs; the rest tint.
+            for tint in subviews.dropFirst() { tint.isHidden = true }
+            // The backdrop's filters, by name: keep the blur, drop the
+            // saturation and brightness that colour it.
+            if let backdrop = subviews.first, let filters = backdrop.layer.filters {
+                let blurOnly = filters.filter { ($0 as AnyObject).value(forKey: "name") as? String == "gaussianBlur" }
+                if blurOnly.count != filters.count, !blurOnly.isEmpty { backdrop.layer.filters = blurOnly }
+            }
+        }
+    }
+}
+
 /// The round glass button in a sheet's header, the label of a menu or a
 /// button: a `.title3` glyph in a 32pt frame, Beam's.
 struct SheetGlassGlyph: View {

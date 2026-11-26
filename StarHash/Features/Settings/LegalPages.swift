@@ -142,8 +142,8 @@ extension LegalDocument {
     static let privacyPolicy = LegalDocument(
         title: "Privacy Policy",
         symbol: "lock.fill",
-        effective: "2026-11-26",
-        summary: "StarHash has no account and no tracking. Your payments stay on your iPhone. Only your photo, your name and numbers (so people paying you see who you are, unless you turn that off), requests for money sealed so the server cannot read them, and an anonymous count of who uses StarHash reach its server.",
+        effective: "2026-11-27",
+        summary: "StarHash has no account and no tracking. Your payments stay on your iPhone. Only your photo, your name and numbers (so people paying you see who you are, unless you turn that off), requests for money sealed so the server cannot read them, and an anonymous count of who uses StarHash reach its server. Your contacts' numbers are checked there as you ask for money, to show who is on StarHash, and never kept.",
         sections: [
             .init(
                 title: "What StarHash keeps",
@@ -151,7 +151,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "StarHash's server",
-                text: "Three things reach it. Your profile photo, if you add one: it is kept under a random id that your QR code carries, so people who scan your code see it; only your iPhone holds the key that can change or delete it, and removing your photo deletes it. Your name with your numbers, unless you turn off Show my name in Settings, so people who type one of your numbers in StarHash see your name and photo: each number is kept only as a code made with a secret key the server holds, never as the number itself, and turning Show my name off, or removing your numbers, deletes them there. And once a day, a random id made when StarHash was installed, with its version, so the number of people using StarHash can be counted. Nothing else is sent: no payment, no contact, no location."
+                text: "Three things reach it. Your profile photo, if you add one: it is kept under a random id that your QR code carries, so people who scan your code see it; only your iPhone holds the key that can change or delete it, and removing your photo deletes it. Your name with your numbers, unless you turn off Show my name in Settings, so people who type one of your numbers in StarHash see your name and photo: each number is kept only as a code made with a secret key the server holds, never as the number itself, and turning Show my name off, or removing your numbers, deletes them there. And once a day, a random id made when StarHash was installed, with its version, so the number of people using StarHash can be counted. Nothing else is kept: no payment, no contact, no location. Your contacts' numbers are only checked as Request opens (below), never kept."
             ),
             .init(
                 title: "Requests for money",
@@ -159,7 +159,7 @@ extension LegalDocument {
             ),
             .init(
                 title: "Contacts",
-                text: "With your permission, StarHash reads your contacts to show who you can pay and to put names and photos on your payments. They are read on your iPhone only and never copied off it."
+                text: "With your permission, StarHash reads your contacts to show who you can pay and to put names and photos on your payments. They are read on your iPhone. When you open Request, their phone numbers are sent to StarHash's server only to find out which of them are on StarHash, so those come first: it answers with nothing else and keeps none of them. Otherwise they are never copied off your iPhone."
             ),
             .init(
                 title: "Location",

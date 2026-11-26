@@ -174,6 +174,47 @@ enum StarHashCloud {
         case failed
     }
 
+    /// The most numbers the server checks in one go.
+    private static let listedBatch = 500
+
+    /// Which of `numbers` the directory lists, asked in one go (500 at a
+    /// time) as Request opens, so the owner's contacts on StarHash come
+    /// first. Only Rwandan mobile numbers are sent, in the request's body,
+    /// and the server answers with nothing but which are listed and keeps
+    /// nothing of the question. Numbers already looked up this run are
+    /// answered from what was heard. Nil when the server cannot be reached.
+    static func listed(among numbers: [String]) async -> Set<String>? {
+        #if DEBUG
+        // -directoryListed <n1,n2,...>: these listed, every other not, with
+        // no server (the Simulator's contacts and screenshots).
+        if let given = DebugLaunch.value(after: "-directoryListed") {
+            return Set(given.split(separator: ",").map(String.init)).intersection(numbers)
+        }
+        #endif
+        var listed: Set<String> = []
+        var unknown: [String] = []
+        for number in Set(numbers) where Recipient(destination: number, kind: .phone).isRwandanMobile {
+            switch entries[number] {
+            case .some(.some): listed.insert(number)
+            case .some(.none): continue
+            case .none: unknown.append(number)
+            }
+        }
+        for start in stride(from: 0, to: unknown.count, by: listedBatch) {
+            let batch = Array(unknown[start..<min(start + listedBatch, unknown.count)])
+            var request = URLRequest(url: baseURL.appending(path: "v1/directory/lookup"))
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try? JSONSerialization.data(withJSONObject: ["numbers": batch])
+            guard let (data, response) = try? await URLSession.shared.data(for: request),
+                  (response as? HTTPURLResponse)?.statusCode == 200,
+                  let found = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let answer = found["listed"] as? [String] else { return nil }
+            listed.formUnion(answer)
+        }
+        return listed
+    }
+
     // MARK: Requests
 
     /// What `RequestsAnywhere` asks of the server, over HTTP. The number

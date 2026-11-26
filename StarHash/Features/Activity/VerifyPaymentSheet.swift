@@ -111,7 +111,7 @@ struct VerifyPaymentSheet: View {
         var rows: [(label: String, value: String)] = []
         if outcome == .confirmed {
             if let fee = transaction.fee { rows.append((String(starhash: "Fee"), Money.formatWithCurrency(fee))) }
-            if let reference = transaction.reference { rows.append((String(starhash: "Code"), reference)) }
+            if let reference = transaction.reference { rows.append((String(starhash: "Transaction ID"), reference)) }
             if let balance = transaction.balanceAfter { rows.append((String(starhash: "Balance"), Money.formatWithCurrency(balance))) }
         }
         rows.append((transaction.counterparty.kind == .phone ? String(starhash: "Number") : String(starhash: "Merchant code"), transaction.counterparty.formattedDestination))
@@ -124,7 +124,7 @@ struct VerifyPaymentSheet: View {
         // One line each, whatever the values.
         outcomeView(.confirmed, transaction, rows: [
             (String(starhash: "Fee"), Money.formatWithCurrency(0)),
-            (String(starhash: "Code"), "0"),
+            (String(starhash: "Transaction ID"), "0"),
             (String(starhash: "Balance"), Money.formatWithCurrency(0)),
         ])
     }

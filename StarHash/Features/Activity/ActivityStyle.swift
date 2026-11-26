@@ -189,6 +189,15 @@ extension StarHashKit.Transaction {
         direction == .outgoing ? AnyShapeStyle(Color.starhashOutgoing) : AnyShapeStyle(Color.starhashIncoming)
     }
 
+    /// Transactions' list, its arrow and amount: the text colour for money
+    /// sent (red is kept for what failed), green for money received, and
+    /// grey once a payment failed, as no money moved (its amount is struck
+    /// through too).
+    var activityListColor: SurfaceColor {
+        if status == .failed { return Color.starhashSecondaryText }
+        return direction == .outgoing ? Color.starhashPrimaryText : Color.starhashReceivedAmount
+    }
+
     /// The amount's colour: primary text when money left, the accent (the
     /// same text colour) when it came in.
     var activityAmountColor: SurfaceColor {

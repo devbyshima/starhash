@@ -16,13 +16,15 @@ import SwiftUI
 /// (PaidEffects.metal). The amount pops as the disc lands, and who paid
 /// comes in under it. A tap on the disc plays a small part of it again.
 ///
-/// Show Code puts the owner's code with the amount in the phones' place,
-/// for an iPhone that can't measure or doesn't have StarHash open.
+/// Use Code Instead puts the owner's code with the amount in the phones'
+/// place, for an iPhone that can't measure or doesn't have StarHash open,
+/// and Tap Instead brings the phones back.
 struct HoldNearSheet: View {
     let amount: Int
     let note: String?
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(Owner.self) private var owner
     @Environment(MoneyRequests.self) private var requests
@@ -143,7 +145,6 @@ struct HoldNearSheet: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 180, height: 180)
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .transition(.opacity)
             } else {
                 PhonesNodHero(progress: nod, story: .request)
@@ -270,18 +271,21 @@ struct HoldNearSheet: View {
                 SheetTextButton("Done") { dismiss() }
             case .waiting, nil:
                 if code != nil {
-                    SheetTextButton(showsCode ? "Hide Code" : "Show Code") { showsCode.toggle() }
+                    SheetTextButton(showsCode ? "Tap Instead" : "Use Code Instead") { showsCode.toggle() }
                 }
             }
         }
     }
 
-    /// The owner's code with the amount, as Profile's carries their number.
+    /// The owner's code with the amount, as Profile's carries their number,
+    /// drawn for the sheet's appearance.
     private var code: UIImage? {
         guard let number = owner.defaultSIM else { return nil }
         let photo = ProfilePhoto.shared.image != nil ? AppEnvironment.serverSync.sharedPhotoID : nil
         let recipient = Recipient(name: owner.name, destination: number.destination, kind: .phone)
-        return QRCodeImage.image(for: PaymentQR.link(for: recipient, amount: amount, photoID: photo).absoluteString, side: 540)
+        // Straight on the sheet in either appearance, with nothing behind
+        // it: near black in light mode, white in dark mode.
+        return QRCodeImage.image(for: PaymentQR.link(for: recipient, amount: amount, photoID: photo).absoluteString, side: 540, clear: true, onDark: colorScheme == .dark)
     }
 
     /// The request they are paying: kept as they tapped Pay.

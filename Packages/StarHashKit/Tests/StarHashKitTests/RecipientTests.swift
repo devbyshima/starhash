@@ -89,6 +89,27 @@ import Testing
         #expect(Recipient(name: "Bank deposit", destination: "", kind: .merchant).isPayable == false)
     }
 
+    @Test func maskedSendersShowPlus2507OrZeroSeven() {
+        let masked = Recipient(name: "Ariane", destination: "998", kind: .phone, maskedLength: 12)
+        #expect(masked.isMasked)
+        #expect(masked.formattedDestination == "+2507*****998")
+        #expect(Recipient(name: "Ariane", destination: "998", kind: .phone, maskedLength: 10).formattedDestination == "07*****998")
+        // Saved before the length was kept: MTN's 12 characters.
+        #expect(Recipient(name: "Ariane", destination: "998", kind: .phone).formattedDestination == "+2507*****998")
+        // Full numbers, codes and senders with no number stay as they were.
+        #expect(Recipient(input: "0788123998")?.formattedDestination == "0788 123 998")
+        #expect(Recipient(input: "020205")?.formattedDestination == "020205")
+        #expect(Recipient(input: "020205")?.isMasked == false)
+        #expect(Recipient(name: "Bank deposit", destination: "", kind: .phone).formattedDestination == "")
+    }
+
+    @Test func aMaskedSenderKeepsItsLengthFromTheSMS() throws {
+        let sms = try #require(CarrierSMS.parse("You have received 35000 RWF from Ariane ISHIMWE (*********998) on your mobile money account at 2024-10-20 10:04:11. Message from sender: . Your new balance:47000 RWF. Financial Transaction Id: 1203940012."))
+        #expect(sms.counterparty.destination == "998")
+        #expect(sms.counterparty.maskedLength == 12)
+        #expect(sms.counterparty.formattedDestination == "+2507*****998")
+    }
+
     @Test func money() {
         #expect(Money.format(1072780) == "1,072,780")
         #expect(Money.format(700) == "700")
