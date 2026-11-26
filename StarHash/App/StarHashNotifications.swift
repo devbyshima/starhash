@@ -142,6 +142,18 @@ final class StarHashNotifications {
         try? await center.add(request(for: item))
     }
 
+    /// Word of requests the server brought while StarHash was away: one
+    /// asked of the owner, or one of theirs declined.
+    func announce(_ news: RequestsAnywhere.News) async {
+        guard !news.isEmpty, await authorizationStatus().allowsDelivery else { return }
+        let settings = StarHashPreferences.notifications
+        let items = news.received.compactMap { NotificationPlan.requestReceived($0, name: $0.person.shownName, settings: settings) }
+            + news.declined.compactMap { NotificationPlan.requestDeclined($0, name: $0.person.shownName, settings: settings) }
+        for item in items {
+            try? await center.add(request(for: item))
+        }
+    }
+
     /// Delete All Data: nothing left waiting or showing.
     func removeAll() {
         center.removeAllPendingNotificationRequests()
@@ -152,7 +164,9 @@ final class StarHashNotifications {
     /// Activity for a summary, or a scam warning's advice. Verify opens
     /// the payment with its sheet, and Mark as Failed settles it as its
     /// details page would.
-    func answer(action: String, transactionID: UUID?, kind: NotificationPlan.Item.Kind? = nil, body: String = "") async {
+    func answer(
+        action: String, transactionID: UUID?, requestID: UUID? = nil, kind: NotificationPlan.Item.Kind? = nil, body: String = ""
+    ) async {
         let store = AppEnvironment.store
         switch action {
         case Action.verify:
@@ -166,7 +180,10 @@ final class StarHashNotifications {
             store.markFailed(id)
             await sync()
         case UNNotificationDefaultActionIdentifier:
-            if let id = transactionID {
+            if let id = requestID {
+                AppEnvironment.requests.reload()
+                AppEnvironment.router.openRequest(id)
+            } else if let id = transactionID {
                 AppEnvironment.router.handle(StarHashLink.transaction(id).url)
             } else if kind == .scamWarning {
                 AppEnvironment.router.scamNotice = ScamNotice(message: body)
@@ -187,6 +204,10 @@ final class StarHashNotifications {
         content.threadIdentifier = item.transactionID == nil ? "summaries" : "payments"
         var userInfo: [String: Any] = ["kind": item.kind.rawValue]
         if let id = item.transactionID { userInfo["transaction"] = id.uuidString }
+        if let id = item.requestID {
+            userInfo["request"] = id.uuidString
+            content.threadIdentifier = "requests"
+        }
         content.userInfo = userInfo
         if item.kind == .scamWarning { content.threadIdentifier = "warnings" }
         switch item.kind {
@@ -209,6 +230,10 @@ final class StarHashNotifications {
 
     nonisolated static func transactionID(of userInfo: [AnyHashable: Any]) -> UUID? {
         (userInfo["transaction"] as? String).flatMap(UUID.init(uuidString:))
+    }
+
+    nonisolated static func requestID(of userInfo: [AnyHashable: Any]) -> UUID? {
+        (userInfo["request"] as? String).flatMap(UUID.init(uuidString:))
     }
 
     nonisolated static func kind(of userInfo: [AnyHashable: Any]) -> NotificationPlan.Item.Kind? {
@@ -242,10 +267,11 @@ private final class NotificationResponder: NSObject, UNUserNotificationCenterDel
         let action = response.actionIdentifier
         let userInfo = response.notification.request.content.userInfo
         let id = StarHashNotifications.transactionID(of: userInfo)
+        let requestID = StarHashNotifications.requestID(of: userInfo)
         let kind = StarHashNotifications.kind(of: userInfo)
         let body = response.notification.request.content.body
         Task { @MainActor in
-            await StarHashNotifications.shared.answer(action: action, transactionID: id, kind: kind, body: body)
+            await StarHashNotifications.shared.answer(action: action, transactionID: id, requestID: requestID, kind: kind, body: body)
             completionHandler()
         }
     }

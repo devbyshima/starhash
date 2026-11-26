@@ -3,8 +3,9 @@ import Observation
 
 /// A request for money between two StarHash users: one the owner sent
 /// (asking someone to pay them) or one they received (someone asking them
-/// to pay). Phase 2 sends them to people nearby (`PeopleNearby`); both
-/// phones keep the request under the same id, so an answer finds it.
+/// to pay). They travel to people nearby (`PeopleNearby`), or to anyone on
+/// StarHash through its server, sealed (`RequestsAnywhere`); both phones
+/// keep the request under the same id, so an answer finds it.
 ///
 /// A request never dials anything. The person asked pays through Pay as
 /// they would anyone, and the request settles from the transactions
@@ -44,10 +45,18 @@ public struct MoneyRequest: Codable, Hashable, Identifiable, Sendable {
     /// The transactions that paid it: one, or each part of one paid in
     /// parts. Nil when marked paid by hand, or not paid.
     public var transactionIDs: [UUID]?
+    /// The other person's public key, when it travelled through StarHash's
+    /// server: an answer is sealed to it. Nil for one between people
+    /// nearby.
+    public var key: String?
+    /// Whether the server has been told how it ended: a decline sent, or
+    /// one the owner sent closed there (cancelled, paid, declined or
+    /// expired), which frees the two of them to ask again.
+    public internal(set) var reported: Bool?
 
     public init(
         id: UUID = UUID(), direction: Direction, person: Recipient, photoID: UUID? = nil, amount: Int,
-        note: String? = nil, createdAt: Date, status: Status = .waiting
+        note: String? = nil, createdAt: Date, status: Status = .waiting, key: String? = nil
     ) {
         self.id = id
         self.direction = direction
@@ -57,9 +66,24 @@ public struct MoneyRequest: Codable, Hashable, Identifiable, Sendable {
         self.note = Self.clean(note)
         self.createdAt = createdAt
         self.status = status
+        self.key = key
     }
 
     public var expiresAt: Date { createdAt.addingTimeInterval(Self.lifetime) }
+
+    /// Whether it travelled through StarHash's server, not between people
+    /// nearby.
+    public var isAnywhere: Bool { key != nil }
+
+    /// Whether the server still has to hear how it ended: a decline the
+    /// owner made, or the end of one they sent.
+    var needsReport: Bool {
+        guard isAnywhere, reported != true else { return false }
+        return switch direction {
+        case .sent: status != .waiting
+        case .received: status == .declined
+        }
+    }
 
     /// A note trimmed and cut to its length, or nil when nothing is left.
     static func clean(_ note: String?) -> String? {
@@ -245,26 +269,49 @@ public final class MoneyRequests {
 
     // MARK: Changing
 
-    /// The owner asked `person` for `amount`.
+    /// The owner asked `person` for `amount`. `key` is theirs when it went
+    /// through the server.
     @discardableResult
     public func ask(
-        _ person: Recipient, id: UUID = UUID(), photoID: UUID?, amount: Int, note: String?, at now: Date = .now
+        _ person: Recipient, id: UUID = UUID(), photoID: UUID?, amount: Int, note: String?, at now: Date = .now, key: String? = nil
     ) -> MoneyRequest {
-        let request = MoneyRequest(id: id, direction: .sent, person: person, photoID: photoID, amount: amount, note: note, createdAt: now)
+        let request = MoneyRequest(
+            id: id, direction: .sent, person: person, photoID: photoID, amount: amount, note: note, createdAt: now, key: key
+        )
         insert(request)
         return request
     }
 
-    /// Someone asked the owner. Nil when that request is already here.
+    /// Someone asked the owner: through the server when `key`, the asker's,
+    /// is given. Nil when that request is already here.
     @discardableResult
-    public func receive(_ ask: MoneyRequest.Message.Ask, at now: Date = .now) -> MoneyRequest? {
+    public func receive(_ ask: MoneyRequest.Message.Ask, at now: Date = .now, key: String? = nil) -> MoneyRequest? {
         guard request(id: ask.id) == nil else { return nil }
         let person = Recipient(name: ask.name, destination: ask.number, kind: .phone)
         let request = MoneyRequest(
-            id: ask.id, direction: .received, person: person, photoID: ask.photoID, amount: ask.amount, note: ask.note, createdAt: now
+            id: ask.id, direction: .received, person: person, photoID: ask.photoID, amount: ask.amount, note: ask.note,
+            createdAt: now, key: key
         )
         insert(request)
         return request
+    }
+
+    /// The asker took back a request the owner was sent (or was paid some
+    /// way StarHash did not see): it no longer waits.
+    public func theyCancelled(_ id: UUID, at now: Date = .now) {
+        settle(id, as: .cancelled, direction: .received, at: now)
+    }
+
+    /// Requests whose end the server has yet to hear, oldest first.
+    var unreported: [MoneyRequest] {
+        requests.reversed().filter(\.needsReport)
+    }
+
+    /// The server heard how it ended.
+    func markReported(_ id: UUID) {
+        guard let index = requests.firstIndex(where: { $0.id == id }), requests[index].reported != true else { return }
+        requests[index].reported = true
+        save()
     }
 
     /// The owner declined a request they were sent.

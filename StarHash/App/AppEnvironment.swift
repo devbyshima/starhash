@@ -55,11 +55,24 @@ enum AppEnvironment {
     /// How requests travel between people nearby.
     static let nearbyRequests = NearbyRequests(requests: requests, nearby: peopleNearby)
 
+    /// How requests travel to anyone on StarHash, through the server,
+    /// sealed. Only someone in the owner's Contacts can ask them.
+    static let requestsAnywhere = RequestsAnywhere(
+        requests: requests,
+        server: StarHashCloud.RequestServer(),
+        key: { await StarHashCloud.secretKey() },
+        privateKey: { StarHashCloud.requestKey() },
+        mayAsk: { await NearbyRequests.mayAsk($0) }
+    )
+
     /// What StarHash keeps on its server: the owner's photo, their Show My
-    /// Name listing and the daily count.
+    /// Name listing (with the key requests are sealed to, while they take
+    /// them) and the daily count.
     static let serverSync: ServerSync = {
         #if targetEnvironment(simulator)
-        let isSimulator = true
+        // A Worker run on the Mac (`-server`) may list Simulator owners:
+        // two Simulators then ask each other.
+        let isSimulator = !StarHashCloud.isLocal
         #else
         let isSimulator = false
         #endif
@@ -69,6 +82,10 @@ enum AppEnvironment {
             owner: owner,
             photo: { ProfilePhoto.shared.data },
             hasPhoto: { ProfilePhoto.shared.image != nil },
+            publicKey: {
+                guard FeatureFlags.requestsAnywhere, let key = StarHashCloud.requestKey() else { return nil }
+                return RequestSeal.publicKey(of: key)
+            },
             version: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "",
             isSimulator: isSimulator
         )
@@ -203,6 +220,24 @@ final class AppRouter {
     }
     /// A payment whose page should open Verify's sheet, until it does.
     var verifyTransactionID: UUID?
+    /// A request asked of the owner to open on Pay, from its notification,
+    /// until Pay opens it.
+    var answerRequestID: UUID?
+    /// Requests, under Transactions, to open, until Transactions does.
+    var opensRequests = false
+
+    /// A request from its notification: one waiting for the owner opens
+    /// on Pay to be paid or declined; any other, on the Requests page.
+    func openRequest(_ id: UUID) {
+        let request = AppEnvironment.requests.request(id: id)
+        if let request, request.direction == .received, request.status == .waiting {
+            show(.pay)
+            answerRequestID = id
+        } else {
+            show(.activity)
+            opensRequests = true
+        }
+    }
 
     /// Opens a payment's page on Activity with Verify's sheet over it.
     func verify(_ id: UUID) {
@@ -257,6 +292,12 @@ final class AppRouter {
            let query = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems,
            let text = query.first(where: { $0.name == "text" })?.value {
             DebugSMS.receive(text, sender: query.first { $0.name == "sender" }?.value)
+            return
+        }
+        // starhash://refresh: what Background App Refresh does, with its
+        // notifications, to see them without waiting for iOS.
+        if url.scheme == "starhash", url.host() == "refresh" {
+            Task { await AnywhereRequests.refresh() }
             return
         }
         #endif

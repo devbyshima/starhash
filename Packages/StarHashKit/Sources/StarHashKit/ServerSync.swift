@@ -2,9 +2,11 @@ import Foundation
 
 /// What StarHash keeps on its server, and when it sends it: the owner's
 /// photo, under a random id their QR code carries; their Show My Name
-/// listing (their numbers with their name and that photo's id); and the
-/// daily count, a random id once each Kigali day StarHash is used. Nothing
-/// else ever goes: no payment, no contact, no place.
+/// listing (their numbers with their name, that photo's id, and the public
+/// key requests to them are sealed to); and the daily count, a random id
+/// once each Kigali day StarHash is used. Requests go their own way
+/// (`RequestsAnywhere`), sealed. Nothing else ever goes: no payment, no
+/// contact, no place.
 ///
 /// Every send that does not reach the server, offline say, is made again:
 /// the photo on the next `wake` until the server takes it, the listing
@@ -49,20 +51,32 @@ public final class ServerSync {
     /// code and listing ask, often, while it is drawn.
     public typealias HasPhoto = @MainActor () -> Bool
 
+    /// The public key requests to the owner are sealed to, while they take
+    /// requests from anywhere; nil otherwise.
+    public typealias PublicKeySource = @MainActor () -> String?
+
     /// What the owner's Show My Name listing holds.
     public struct Listing: Equatable, Sendable {
         public var numbers: [String]
         public var name: String
         public var photo: UUID?
+        /// The public key requests to them are sealed to
+        /// (`RequestsAnywhere`), when they take them.
+        public var key: String?
 
-        public init(numbers: [String], name: String, photo: UUID?) {
+        public init(numbers: [String], name: String, photo: UUID?, key: String? = nil) {
             self.numbers = numbers
             self.name = name
             self.photo = photo
+            self.key = key
         }
 
-        /// One line that changes whenever the listing does.
-        public var state: String { [numbers.joined(separator: ","), name, photo?.uuidString ?? ""].joined(separator: "|") }
+        /// One line that changes whenever the listing does. Without a key
+        /// it reads as it did before keys, so an update sends nothing new.
+        public var state: String {
+            let parts = [numbers.joined(separator: ","), name, photo?.uuidString ?? ""] + (key.map { [$0] } ?? [])
+            return parts.joined(separator: "|")
+        }
     }
 
     /// The keys StarHash has always kept these under, so an update picks up
@@ -91,6 +105,7 @@ public final class ServerSync {
     private let owner: Owner
     private let photo: PhotoSource
     private let hasPhoto: HasPhoto
+    private let publicKey: PublicKeySource
     private let defaults: UserDefaults
     private let version: String
     /// The Simulator never lists the owner or counts the day, so test
@@ -116,6 +131,7 @@ public final class ServerSync {
         owner: Owner,
         photo: @escaping PhotoSource,
         hasPhoto: @escaping HasPhoto,
+        publicKey: @escaping PublicKeySource = { nil },
         defaults: UserDefaults = .standard,
         version: String,
         isSimulator: Bool
@@ -125,6 +141,7 @@ public final class ServerSync {
         self.owner = owner
         self.photo = photo
         self.hasPhoto = hasPhoto
+        self.publicKey = publicKey
         self.defaults = defaults
         self.version = version
         self.isSimulator = isSimulator
@@ -200,14 +217,15 @@ public final class ServerSync {
     // MARK: Show My Name
 
     /// What the owner's listing should be now: their Rwandan mobile
-    /// numbers, name and photo, or nil when there is nothing to list (Show
-    /// My Name off, no number yet, or neither a name nor a photo to show).
+    /// numbers, name and photo, and the key requests to them are sealed to
+    /// while they take them, or nil when there is nothing to list (Show My
+    /// Name off, no number yet, or neither a name nor a photo to show).
     public var listing: Listing? {
         let numbers = [owner.defaultSIM, owner.otherSIM].compactMap { $0 }.filter(\.isRwandanMobile).map(\.destination)
         let name = owner.name.trimmingCharacters(in: .whitespacesAndNewlines)
         let photo = sharedPhotoID
         guard Preferences.showMyName.value(in: defaults), !numbers.isEmpty, !name.isEmpty || photo != nil else { return nil }
-        return Listing(numbers: numbers, name: name, photo: photo)
+        return Listing(numbers: numbers, name: name, photo: photo, key: publicKey())
     }
 
     /// The owner's name, numbers, photo or Show My Name changed: the

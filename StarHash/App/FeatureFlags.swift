@@ -12,12 +12,21 @@ extension FeatureFlag {
     ///         detail: "Pay part of a total to each of several people",
     ///         rollout: .dev
     ///     )
-    static let all: [FeatureFlag] = [.peopleNearby]
+    static let all: [FeatureFlag] = [.peopleNearby, .requestsAnywhere]
 
     /// StarHash users close by on Pay, paid with a tap (`PeopleNearby`).
     static let peopleNearby = FeatureFlag(
         key: "peopleNearby", title: "People Nearby",
         detail: "StarHash users close by show up on Pay, and a tap pays them",
+        rollout: .dev
+    )
+
+    /// Requests to StarHash users anywhere, through the server, sealed
+    /// (`RequestsAnywhere`). Only with People Nearby on too, which brings
+    /// Request to Pay.
+    static let requestsAnywhere = FeatureFlag(
+        key: "requestsAnywhere", title: "Requests Anywhere",
+        detail: "Ask StarHash users who aren't nearby, through StarHash's server",
         rollout: .dev
     )
 }
@@ -34,6 +43,12 @@ enum FeatureFlags {
     /// A flag's state outside a view, read afresh each time.
     static func isOn(_ flag: FeatureFlag) -> Bool {
         flag.isOn(in: .current, override: override(for: flag))
+    }
+
+    /// Requests through the server: both flags, since Request on Pay comes
+    /// with People Nearby.
+    static var requestsAnywhere: Bool {
+        isOn(.peopleNearby) && isOn(.requestsAnywhere)
     }
 
     /// This device's switch for the flag, nil if never touched. A Debug

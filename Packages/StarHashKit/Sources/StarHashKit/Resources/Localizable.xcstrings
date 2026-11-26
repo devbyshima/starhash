@@ -771,6 +771,102 @@
           }
         }
       }
+    },
+    "%@ asks you for %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ vous demande %2$@."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ arakwaka %2$@."
+          }
+        }
+      }
+    },
+    "%@ asks you for money.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ vous demande de l'argent."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ arakwaka amafaranga."
+          }
+        }
+      }
+    },
+    "Money requested": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demande d'argent"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubusabe bw'amafaranga"
+          }
+        }
+      }
+    },
+    "%@ declined your request for %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ a refusé votre demande de %2$@."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ yanze ubusabe bwawe bwa %2$@."
+          }
+        }
+      }
+    },
+    "%@ declined your request.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ a refusé votre demande."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ yanze ubusabe bwawe."
+          }
+        }
+      }
+    },
+    "Request declined": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demande refusée"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubusabe bwanzwe"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

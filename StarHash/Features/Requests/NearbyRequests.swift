@@ -58,7 +58,7 @@ final class NearbyRequests {
         switch MoneyRequest.Message(data: data) {
         case .ask(let ask):
             let asker = Recipient(name: ask.name, destination: ask.number, kind: .phone)
-            guard await Self.mayAsk(asker) else { return }
+            guard await Self.mayAsk(asker) == true else { return }
             if requests.receive(ask) != nil { peers[ask.id] = peer }
         case .declined(let id):
             requests.theyDeclined(id)
@@ -70,35 +70,12 @@ final class NearbyRequests {
     }
 
     /// Only someone in the owner's Contacts. With Contacts off or not
-    /// allowed, StarHash can't tell, so nobody.
-    private static func mayAsk(_ asker: Recipient) async -> Bool {
+    /// allowed, StarHash can't tell (nil), so nobody.
+    static func mayAsk(_ asker: Recipient) async -> Bool? {
         #if DEBUG
         if DebugLaunch.arguments.contains("-requestsFromAnyone") { return true }
         #endif
-        return await PayContacts.shared.knowsContact(asker) == true
-    }
-}
-
-/// Requests settle from the transactions (`MoneyRequests.settle`): each
-/// time they change, and each time StarHash comes to the front, when a
-/// week may have passed.
-struct RequestsSync: ViewModifier {
-    @Environment(StarHashStore.self) private var store
-    @Environment(MoneyRequests.self) private var requests
-    @Environment(\.scenePhase) private var scenePhase
-
-    func body(content: Content) -> some View {
-        content
-            // Listening for requests from people nearby starts with the app.
-            .onAppear { _ = AppEnvironment.nearbyRequests }
-            .onChange(of: store.transactions, initial: true) { _, transactions in
-                requests.settle(with: transactions)
-            }
-            .onChange(of: scenePhase) { _, phase in
-                guard phase == .active else { return }
-                requests.reload()
-                requests.settle(with: store.transactions)
-            }
+        return await PayContacts.shared.knowsContact(asker)
     }
 }
 

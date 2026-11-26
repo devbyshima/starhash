@@ -42,6 +42,12 @@ struct ServerSyncTests {
         var data: Data?
     }
 
+    /// The owner's public key for requests, while they take them.
+    @MainActor
+    final class KeyBox {
+        var key: String?
+    }
+
     @MainActor
     final class Rig {
         let defaults = TestDefaults("ServerSyncTests")
@@ -50,16 +56,19 @@ struct ServerSyncTests {
         let photo = PhotoBox()
         let sync: ServerSync
 
+        /// The public key requests are sealed to, while the owner takes them.
+        let publicKey = KeyBox()
+
         init(listed: Bool = true, isSimulator: Bool = false) {
             owner = Owner(defaults: defaults)
             if listed {
                 owner.setName("Shima Serein")
                 _ = owner.setNumber("0788123456")
             }
-            let photo = photo
+            let photo = photo, publicKey = publicKey
             sync = ServerSync(
                 server: server, key: { "key" }, owner: owner, photo: { photo.data }, hasPhoto: { photo.data != nil },
-                defaults: defaults, version: "1.1.0", isSimulator: isSimulator
+                publicKey: { publicKey.key }, defaults: defaults, version: "1.1.0", isSimulator: isSimulator
             )
         }
 
@@ -144,6 +153,24 @@ struct ServerSyncTests {
         rig.sync.ownerChanged(at: noon)
         await rig.sync.settle()
         #expect(rig.server.listings.last??.name == "Shima")
+    }
+
+    @Test func theListingCarriesTheKeyRequestsAreSealedTo() async throws {
+        let rig = Rig()
+        rig.sync.ownerChanged(at: noon)
+        await rig.sync.settle()
+        // Without one it reads as it always did, so an update sends nothing.
+        #expect(rig.sync.listing?.state == "0788123456|Shima Serein|")
+        rig.publicKey.key = RequestSeal.publicKey(of: RequestSeal.makeKey())
+        rig.sync.ownerChanged(at: noon)
+        await rig.sync.settle()
+        try #require(rig.server.listings.count == 2)
+        #expect(rig.server.listings[1]?.key == rig.publicKey.key)
+        // Requests off again: the key goes from the listing.
+        rig.publicKey.key = nil
+        rig.sync.ownerChanged(at: noon)
+        await rig.sync.settle()
+        #expect(rig.server.listings.count == 3 && rig.server.listings[2]?.key == nil)
     }
 
     @Test func theListingGoesAgainAfterAWeek() async {

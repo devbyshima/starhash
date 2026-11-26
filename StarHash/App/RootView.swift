@@ -199,9 +199,13 @@ struct RootView: View {
 /// letter of the name.
 private struct OwnerListingSync: ViewModifier {
     @AppStorage(Preferences.showMyName) private var showMyName: Bool
+    /// Read so the listing is worked out again as requests from anywhere
+    /// turn on or off: it carries their key only while they are on.
+    @FeatureFlagged(.peopleNearby) private var peopleNearbyOn
+    @FeatureFlagged(.requestsAnywhere) private var anywhereOn
 
     func body(content: Content) -> some View {
-        content.task(id: "\(showMyName)|\(AppEnvironment.serverSync.listing?.state ?? "off")") {
+        content.task(id: "\(showMyName)|\(peopleNearbyOn)|\(anywhereOn)|\(AppEnvironment.serverSync.listing?.state ?? "off")") {
             try? await Task.sleep(for: .seconds(2))
             guard !Task.isCancelled else { return }
             AppEnvironment.serverSync.ownerChanged()

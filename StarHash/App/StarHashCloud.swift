@@ -5,12 +5,29 @@ import UIKit
 
 /// StarHash's server (`server/` in the repo), over HTTP. What StarHash
 /// sends it, and when, is `ServerSync`'s (StarHashKit): this is its adapter,
-/// `Server`, with the owner's secret key from the Keychain. The reads stay
-/// here, since no rule decides them: a scanned code's photo, and who lists
-/// a number typed to pay.
+/// `Server`, with the owner's secret key from the Keychain; requests are
+/// `RequestsAnywhere`'s, through `RequestServer`, with the key they are
+/// sealed to. The reads stay here, since no rule decides them: a scanned
+/// code's photo, and who lists a number typed to pay.
 @MainActor
 enum StarHashCloud {
-    nonisolated static let baseURL = URL(string: "https://starhash.devbyshima.workers.dev")!
+    nonisolated static let liveURL = URL(string: "https://starhash.devbyshima.workers.dev")!
+
+    /// The live Worker, or in a Debug run `-server <url>`, a Worker run on
+    /// the Mac (`npm run dev` in server/), for two Simulators to send each
+    /// other requests through.
+    nonisolated static let baseURL: URL = {
+        #if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        if let flag = arguments.firstIndex(of: "-server"), flag + 1 < arguments.count,
+           let url = URL(string: arguments[flag + 1]) { return url }
+        #endif
+        return liveURL
+    }()
+
+    /// Whether this run talks to the Worker on the Mac, which the Simulator
+    /// may list owners on: none of them reach the live one.
+    nonisolated static var isLocal: Bool { baseURL != liveURL }
 
     /// What `ServerSync` sends, over HTTP.
     struct Server: ServerSync.Server {
@@ -41,6 +58,7 @@ enum StarHashCloud {
                 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
                 var body: [String: Any] = ["numbers": listing.numbers, "name": listing.name]
                 if let photo = listing.photo { body["photo"] = photo.uuidString.lowercased() }
+                if let key = listing.key { body["key"] = key }
                 request.httpBody = try? JSONSerialization.data(withJSONObject: body)
             } else {
                 request.httpMethod = "DELETE"
@@ -77,11 +95,12 @@ enum StarHashCloud {
 
     // MARK: Show My Name
 
-    /// What the server lists for a number: the name its owner gave, and
-    /// their photo's id.
+    /// What the server lists for a number: the name its owner gave, their
+    /// photo's id, and the public key requests to them are sealed to.
     struct DirectoryEntry: Equatable, Sendable {
         var name: String?
         var photoID: UUID?
+        var publicKey: String?
     }
 
     /// Looked-up numbers, found or not, kept for the run.
@@ -91,31 +110,158 @@ enum StarHashCloud {
     /// or the server cannot be reached. Only a Rwandan mobile number is
     /// asked about, as only those are listed.
     static func entry(for number: String) async -> DirectoryEntry? {
-        guard Recipient(destination: number, kind: .phone).isRwandanMobile else { return nil }
+        if case .listed(let entry) = await lookUp(number) { return entry }
+        return nil
+    }
+
+    /// Who lists `number`, telling a number no one lists from a server not
+    /// reached, which a request must not take for the same. `fresh` asks
+    /// the server whatever this run already heard: a request trusts the key
+    /// a number is listed under now, and someone may have joined since.
+    static func lookUp(_ number: String, fresh: Bool = false) async -> Found {
+        guard Recipient(destination: number, kind: .phone).isRwandanMobile else { return .notListed }
         #if DEBUG
         if let name = DebugLaunch.value(after: "-directoryName") {
-            return DirectoryEntry(name: name)
+            return .listed(DirectoryEntry(name: name))
         }
         #endif
-        if let kept = entries[number] { return kept }
+        if !fresh, let kept = entries[number] { return kept.map(Found.listed) ?? .notListed }
         var request = URLRequest(url: baseURL.appending(path: "v1/directory/lookup"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try? JSONSerialization.data(withJSONObject: ["number": number])
         guard let (data, response) = try? await URLSession.shared.data(for: request),
-              let status = (response as? HTTPURLResponse)?.statusCode else { return nil }
+              let status = (response as? HTTPURLResponse)?.statusCode else { return .failed }
         guard status == 200,
               let found = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            if status == 404 { entries[number] = .some(nil) }
-            return nil
+            guard status == 404 else { return .failed }
+            entries[number] = .some(nil)
+            return .notListed
         }
         let entry = DirectoryEntry(
             name: (found["name"] as? String).flatMap { $0.isEmpty ? nil : $0 },
-            photoID: (found["photo"] as? String).flatMap(UUID.init(uuidString:))
+            photoID: (found["photo"] as? String).flatMap(UUID.init(uuidString:)),
+            publicKey: (found["key"] as? String).flatMap { RequestSeal.isPublicKey($0) ? $0 : nil }
         )
         entries[number] = entry
-        return entry
+        return .listed(entry)
     }
+
+    enum Found: Equatable, Sendable {
+        case listed(DirectoryEntry)
+        case notListed
+        case failed
+    }
+
+    // MARK: Requests
+
+    /// What `RequestsAnywhere` asks of the server, over HTTP. The number
+    /// asked travels in a body, never in a URL.
+    struct RequestServer: RequestsAnywhere.Server {
+        func lookUp(_ number: String) async -> RequestsAnywhere.LookUp {
+            switch await StarHashCloud.lookUp(number, fresh: true) {
+            case .listed(let entry): .listed(.init(name: entry.name, photoID: entry.photoID, key: entry.publicKey))
+            case .notListed: .notListed
+            case .failed: .failed
+            }
+        }
+
+        func send(id: UUID, to number: String, from own: String, sealed: String, key: String) async -> RequestsAnywhere.SendAnswer {
+            let body: [String: Any] = ["id": id.uuidString.lowercased(), "to": number, "from": own, "sealed": sealed]
+            guard let (_, status) = await call("POST", "v1/requests", key: key, body: body) else { return .failed }
+            return switch status {
+            case 200: .sent
+            case 404: .notOnStarHash
+            case 409: .alreadyAsked
+            case 429: .tooMany
+            case 403: .notListed
+            default: .failed
+            }
+        }
+
+        func inbox(key: String) async -> RequestsAnywhere.Inbox? {
+            guard let (data, status) = await call("GET", "v1/requests", key: key), status == 200,
+                  let found = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
+            let asked = (found["asked"] as? [[String: Any]] ?? []).compactMap { row -> RequestsAnywhere.Inbox.Asked? in
+                guard let id = (row["id"] as? String).flatMap(UUID.init(uuidString:)) else { return nil }
+                let created = (row["created_at"] as? String).flatMap(Self.date)
+                return .init(id: id, sealed: row["sealed"] as? String, key: row["key"] as? String, createdAt: created)
+            }
+            let answers = (found["answers"] as? [[String: Any]] ?? []).compactMap { row -> RequestsAnywhere.Inbox.Answer? in
+                guard let id = (row["id"] as? String).flatMap(UUID.init(uuidString:)), let sealed = row["answer"] as? String else { return nil }
+                return .init(id: id, sealed: sealed)
+            }
+            return .init(asked: asked, answers: answers)
+        }
+
+        func answer(id: UUID, sealed: String, key: String) async -> Bool {
+            guard let (_, status) = await call("POST", "v1/requests/\(id.uuidString.lowercased())/answer", key: key, body: ["sealed": sealed])
+            else { return false }
+            // Gone, or no longer waiting: nothing left to answer.
+            return [200, 404, 409].contains(status)
+        }
+
+        func close(id: UUID, key: String) async -> Bool {
+            guard let (_, status) = await call("DELETE", "v1/requests/\(id.uuidString.lowercased())", key: key) else { return false }
+            return status == 200 || status == 404
+        }
+
+        func erase(key: String) async -> Bool {
+            await call("DELETE", "v1/requests", key: key)?.status == 200
+        }
+
+        /// "2026-11-26T15:04:05.123Z", as the Worker writes a moment.
+        private static func date(_ text: String) -> Date? {
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            return formatter.date(from: text)
+        }
+
+        private func call(_ method: String, _ path: String, key: String, body: [String: Any]? = nil) async -> (data: Data, status: Int)? {
+            var request = URLRequest(url: baseURL.appending(path: path))
+            request.httpMethod = method
+            request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
+            if let body {
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+            }
+            guard let (data, response) = try? await URLSession.shared.data(for: request),
+                  let status = (response as? HTTPURLResponse)?.statusCode else { return nil }
+            return (data, status)
+        }
+    }
+
+    /// The key requests to the owner are sealed to: a Curve25519 key made
+    /// once and kept in the Keychain, as the secret key is (into the
+    /// iPhone's encrypted backups, never iCloud Keychain), so a restored
+    /// iPhone still opens what was sealed to the old one. Only its public
+    /// half leaves the iPhone, with the listing.
+    static func requestKey() -> RequestSeal.PrivateKey? {
+        if let kept = requestKeyKept { return kept }
+        let item: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: "StarHashCloud",
+            kSecAttrAccount as String: "requestKey",
+        ]
+        var query = item
+        query[kSecReturnData as String] = true
+        var found: CFTypeRef?
+        if SecItemCopyMatching(query as CFDictionary, &found) == errSecSuccess,
+           let data = found as? Data, let key = RequestSeal.privateKey(raw: data) {
+            requestKeyKept = key
+            return key
+        }
+        let key = RequestSeal.makeKey()
+        var add = item
+        add[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
+        add[kSecValueData as String] = key.rawRepresentation
+        guard SecItemAdd(add as CFDictionary, nil) == errSecSuccess else { return nil }
+        requestKeyKept = key
+        return key
+    }
+
+    /// Read once a run: the listing asks for its public half often.
+    private static var requestKeyKept: RequestSeal.PrivateKey?
 
     // MARK: The key
 

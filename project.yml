@@ -149,6 +149,11 @@ targets:
         NSLocalNetworkUsageDescription: StarHash finds StarHash users near you so you can pay them with a tap, and lets them find you when you allow it in Settings.
         NSBonjourServices: [_starhash-near._tcp, _starhash-near._udp]
         LSApplicationQueriesSchemes: [tel]
+        # Requests through the server are fetched in the background now and
+        # then (`AnywhereRequests.refresh`): Background App Refresh, which
+        # needs no entitlement, so free-team builds keep signing.
+        UIBackgroundModes: [fetch]
+        BGTaskSchedulerPermittedIdentifiers: [com.devbyshima.starhash.requests]
         CFBundleURLTypes:
           - CFBundleURLName: com.devbyshima.starhash
             CFBundleURLSchemes: [starhash]
