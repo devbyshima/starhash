@@ -25,6 +25,9 @@ struct RootView: View {
     @AppStorage(Preferences.showMyName) private var showMyName: Bool
     @AppStorage(PreferenceKey.seenShowMyNameNotice) private var seenShowMyNameNotice = false
     @State private var forcesShowMyNameNotice = ShowMyNameNoticeSheet.forcedAtLaunch
+    @FeatureFlagged(.peopleNearby) private var peopleNearbyOn
+    @AppStorage(PreferenceKey.peopleNearbyAsked) private var peopleNearbyAsked = false
+    @State private var forcesPeopleNearbyIntro = PeopleNearbyIntroSheet.forcedAtLaunch
     /// The tabs have been on screen a moment. The notes and sheets that open
     /// on their own wait for it: opened in the same instant the tabs take
     /// onboarding's place, the welcome note was just there, with no slide.
@@ -77,7 +80,11 @@ struct RootView: View {
         .sheet(isPresented: showMyNameNoticePresented) {
             ShowMyNameNoticeSheet()
         }
+        .sheet(isPresented: peopleNearbyIntroPresented) {
+            PeopleNearbyIntroSheet()
+        }
         .modifier(OwnerListingSync())
+        .modifier(PeopleNearbySync())
         #if DEBUG
         .onChange(of: router.whatsNewPreviewPage) { _, page in
             guard let page else { return }
@@ -111,6 +118,8 @@ struct RootView: View {
             whatsNewPending: whatsNew != nil,
             // Once, for owners set up before Show My Name came, while it is on.
             showMyNameNoticeDue: forcesShowMyNameNotice || (!seenShowMyNameNotice && showMyName && owner.defaultSIM != nil),
+            // Once, when People Nearby comes.
+            peopleNearbyIntroDue: forcesPeopleNearbyIntro || (peopleNearbyOn && !peopleNearbyAsked && !PeopleNearbyIntroSheet.skippedAtLaunch),
             reviewNoteDue: showsReviewNote
         )
     }
@@ -151,6 +160,17 @@ struct RootView: View {
                 guard !presented else { return }
                 seenShowMyNameNotice = true
                 forcesShowMyNameNotice = false
+            }
+        )
+    }
+
+    /// Closed only by an answer, which marks it asked.
+    private var peopleNearbyIntroPresented: Binding<Bool> {
+        Binding(
+            get: { shows(.peopleNearbyIntro) },
+            set: { presented in
+                guard !presented else { return }
+                forcesPeopleNearbyIntro = false
             }
         )
     }

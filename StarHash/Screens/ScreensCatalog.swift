@@ -262,6 +262,8 @@ private extension View {
             .environment(ScreensSample.autoVerify)
             .environment(ScreensSample.paying)
             .environment(AppEnvironment.dialler)
+            // Nobody nearby: nothing starts it here.
+            .environment(AppEnvironment.peopleNearby)
             .environment(AppRouter())
             .environment(ScreensSample.shortcuts)
             .tint(Color.starhashPrimaryText)

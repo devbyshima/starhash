@@ -14,6 +14,11 @@ enum PreferenceKey {
     /// The marketing version that last launched, so What's New shows once
     /// after an update (`WhatsNewLaunch`).
     static let lastRunVersion = "lastRunVersion"
+    /// Continue on People Nearby's intro: from then on StarHash looks for
+    /// people nearby, and iOS has asked for the local network.
+    static let peopleNearbyIntroSeen = "peopleNearbyIntroSeen"
+    /// People Nearby's intro answered, so it never opens again.
+    static let peopleNearbyAsked = "peopleNearbyAsked"
 }
 
 extension AppStorage {

@@ -349,6 +349,54 @@
         }
       }
     },
+    "Add your name and number in Profile first": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajoutez d'abord votre nom et votre numéro dans Profil"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Banza ushyire izina ryawe na nimero yawe mu Mwirondoro"
+          }
+        }
+      }
+    },
+    "Ask them to keep StarHash open, then try again.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demandez-lui de garder StarHash ouvert, puis réessayez."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Musabe gusiga StarHash ifunguye, hanyuma wongere ugerageze."
+          }
+        }
+      }
+    },
+    "Change it any time in Settings, under Your SIMs": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifiez-le à tout moment dans Réglages, sous Vos SIM"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wabihindura igihe icyo ari cyo cyose mu Igenamiterere, munsi ya SIM zawe"
+          }
+        }
+      }
+    },
     "Change your wallet, or set Two SIMs in Settings.": {
       "localizations": {
         "rw": {
@@ -361,6 +409,150 @@
           "stringUnit": {
             "state": "translated",
             "value": "Changez de portefeuille, ou choisissez Deux SIM dans Réglages."
+          }
+        }
+      }
+    },
+    "Connecting": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connexion"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Birimo guhuza"
+          }
+        }
+      }
+    },
+    "Couldn't reach %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de joindre %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ntitwabashije kugera kuri %@"
+          }
+        }
+      }
+    },
+    "Let Them See Me": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Me rendre visible"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reka bambone"
+          }
+        }
+      }
+    },
+    "Let people near you see you": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laisser les personnes proches vous voir"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emerera abantu bari hafi kukubona"
+          }
+        }
+      }
+    },
+    "Let people near you see you?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laisser les personnes proches vous voir ?"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wemerera abantu bari hafi yawe kukubona?"
+          }
+        }
+      }
+    },
+    "On StarHash": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sur StarHash"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Akoresha StarHash"
+          }
+        }
+      }
+    },
+    "People Nearby": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personnes à proximité"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abantu bari hafi"
+          }
+        }
+      }
+    },
+    "StarHash users near you show up on Pay while StarHash is open": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les utilisateurs de StarHash près de vous apparaissent sur Payer tant que StarHash est ouvert"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abakoresha StarHash bari hafi yawe bagaragara kuri Ishyura igihe StarHash ifunguye"
+          }
+        }
+      }
+    },
+    "Tap one to pay them, with no QR code": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touchez-en un pour le payer, sans code QR"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kanda kuri umwe umwishyure, nta kode ya QR"
           }
         }
       }
@@ -585,6 +777,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hongewemo umwirondoro wawe. Nta kintu cyari gisanzwe hano cyahinduwe."
+          }
+        }
+      }
+    },
+    "While StarHash is open, StarHash users near you see your name and photo, and a tap pays you": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tant que StarHash est ouvert, les utilisateurs de StarHash près de vous voient votre nom et votre photo, et vous paient d'une touche"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igihe StarHash ifunguye, abakoresha StarHash bari hafi yawe babona izina ryawe n'ifoto yawe, kandi bakwishyura bakanze rimwe"
+          }
+        }
+      }
+    },
+    "Your name and photo show on their Pay while StarHash is open": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre nom et votre photo apparaissent sur leur écran Payer tant que StarHash est ouvert"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izina ryawe n'ifoto yawe bigaragara kuri Ishyura yabo igihe StarHash ifunguye"
+          }
+        }
+      }
+    },
+    "Your number goes only to someone who taps you, to pay you": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre numéro ne va qu'à la personne qui vous touche, pour vous payer"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimero yawe ijya gusa ku muntu ukanze kuri wowe, kugira ngo akwishyure"
           }
         }
       }

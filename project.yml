@@ -144,6 +144,10 @@ targets:
         NSLocationWhenInUseUsageDescription: StarHash notes where you pay, to suggest who you paid when you are back there and to show each payment on a map. It stays on your iPhone.
         NSCameraUsageDescription: StarHash uses the camera to scan a QR code, to see who to pay, and to take your profile photo when you ask. Nothing else is recorded or kept.
         NSFaceIDUsageDescription: StarHash asks for Face ID to open, when you turn it on in Settings, so only you see your payments.
+        # People Nearby: phones with StarHash open find each other over
+        # Bluetooth and Wi-Fi (MultipeerConnectivity, `PeopleNearby.serviceType`).
+        NSLocalNetworkUsageDescription: StarHash finds StarHash users near you so you can pay them with a tap, and lets them find you when you allow it in Settings.
+        NSBonjourServices: [_starhash-near._tcp, _starhash-near._udp]
         LSApplicationQueriesSchemes: [tel]
         CFBundleURLTypes:
           - CFBundleURLName: com.devbyshima.starhash

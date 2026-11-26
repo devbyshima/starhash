@@ -55,7 +55,7 @@ struct FirstRunTests {
     @Test func theSheetsComeInOrder() {
         var state = FirstRun.State(
             hasOnboarded: true, hasWallet: true, hasSeenWelcomeNote: false,
-            whatsNewPending: true, showMyNameNoticeDue: true, reviewNoteDue: true
+            whatsNewPending: true, showMyNameNoticeDue: true, peopleNearbyIntroDue: true, reviewNoteDue: true
         )
         #expect(FirstRun.next(state) == .welcomeNote)
         state.hasSeenWelcomeNote = true
@@ -63,6 +63,8 @@ struct FirstRunTests {
         state.whatsNewPending = false
         #expect(FirstRun.next(state) == .showMyNameNotice)
         state.showMyNameNoticeDue = false
+        #expect(FirstRun.next(state) == .peopleNearbyIntro)
+        state.peopleNearbyIntroDue = false
         #expect(FirstRun.next(state) == .reviewNote)
         state.reviewNoteDue = false
         #expect(FirstRun.next(state) == nil)
@@ -83,6 +85,9 @@ struct FirstRunTests {
         var news = Self.settled
         news.whatsNewPending = true
         #expect(!FirstRun.reviewNoteMayCome(news))
+        var intro = Self.settled
+        intro.peopleNearbyIntroDue = true
+        #expect(!FirstRun.reviewNoteMayCome(intro))
         var fresh = Self.settled
         fresh.hasOnboarded = false
         #expect(!FirstRun.reviewNoteMayCome(fresh))

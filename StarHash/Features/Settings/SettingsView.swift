@@ -87,6 +87,10 @@ private struct SettingsRootList: View {
     @AppStorage(Preferences.nearbyLocation) private var nearbyLocation: Bool
     @AppStorage(Preferences.saveRecents) private var saveRecents: Bool
     @AppStorage(Preferences.showMyName) private var showMyName: Bool
+    @FeatureFlagged(.peopleNearby) private var peopleNearbyOn
+    @AppStorage(Preferences.peopleNearbyVisible) private var peopleNearbyVisible: Bool
+    @AppStorage(PreferenceKey.peopleNearbyIntroSeen) private var peopleNearbyIntroSeen = false
+    @AppStorage(PreferenceKey.peopleNearbyAsked) private var peopleNearbyAsked = false
     @AppStorage(Preferences.confirmDeletes) private var confirmDeletes: Bool
     @AppStorage(Preferences.splitLargePayments) private var splitLargePayments: Bool
     @AppStorage(PreferenceKey.defaultPage) private var defaultPage = AppTab.pay.rawValue
@@ -267,12 +271,39 @@ private struct SettingsRootList: View {
                 caption: "People who type your number in StarHash see your name and photo",
                 isOn: $showMyName
             )
+            if peopleNearbyOn {
+                SettingsToggleRow(
+                    symbol: "person.2.fill",
+                    title: "Let people near you see you",
+                    caption: "While StarHash is open, StarHash users near you see your name and photo, and a tap pays you",
+                    // Seen only with a name to show and a number to pay.
+                    status: peopleNearbyVisible && PeopleNearby.Announcement(name: owner.name, photoID: nil, number: owner.defaultSIM) == nil
+                        ? "Add your name and number in Profile first" : nil,
+                    isOn: peopleNearbyVisibleBinding
+                )
+            }
         }
         .sheet(isPresented: $choosesSIMToKeep) {
             KeepSIMSheet(sims: [owner.defaultSIM, owner.otherSIM].compactMap { $0 }) { sim in
                 keepOnly(sim)
             }
         }
+    }
+
+    /// Turned on here before People Nearby's intro was answered, it answers
+    /// it: StarHash starts looking for people nearby, and iOS asks for the
+    /// local network.
+    private var peopleNearbyVisibleBinding: Binding<Bool> {
+        Binding(
+            get: { peopleNearbyVisible },
+            set: { visible in
+                peopleNearbyVisible = visible
+                if visible {
+                    peopleNearbyIntroSeen = true
+                    peopleNearbyAsked = true
+                }
+            }
+        )
     }
 
     /// Which of the SIM card's rows show: Other SIM while its number is

@@ -40,6 +40,9 @@ enum AppEnvironment {
         isContact: { await PayContacts.shared.knowsContact($0) }
     )
 
+    /// StarHash users close by, found while StarHash is in front.
+    static let peopleNearby = PeopleNearbyService()
+
     /// What StarHash keeps on its server: the owner's photo, their Show My
     /// Name listing and the daily count.
     static let serverSync: ServerSync = {

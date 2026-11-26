@@ -66,6 +66,12 @@ struct RecipientPickerView: View {
     @FocusState private var searchFocused: Bool
     /// The StarHash owner who lists the number typed, when one does.
     @State private var listedOwner: ListedOwner?
+    @Environment(PeopleNearbyService.self) private var peopleNearby
+    @FeatureFlagged(.peopleNearby) private var peopleNearbyOn
+    /// The photos people nearby announced, as they come from the server.
+    @State private var nearbyPhotos: [UUID: UIImage] = [:]
+    /// A tap on someone nearby that got no number.
+    @State private var unreachable: PeopleNearby.Person?
 
     struct ListedOwner {
         let number: String
@@ -91,6 +97,23 @@ struct RecipientPickerView: View {
                     savedSection(list.savedMatches, first: titles.first)
                 } else if let typed = search.typedRecipient {
                     typedSection(typed, first: titles.first)
+                }
+                let people = nearbyPeople
+                if !people.isEmpty {
+                    Section {
+                        ForEach(people) { person in
+                            RecipientRow(
+                                tile: person.photoID.flatMap { nearbyPhotos[$0] }.map { .image($0) }
+                                    ?? .monogram(PayContact.initials(for: person.name)),
+                                title: person.name,
+                                subtitle: peopleNearby.reaching == person.id ? "Connecting" : "On StarHash",
+                                match: search.nameQuery,
+                                matchColor: Color.pickerMatch
+                            ) { reach(person) }
+                        }
+                    } header: {
+                        sectionLabel("People Nearby", first: titles.first)
+                    }
                 }
                 if !list.nearby.isEmpty {
                     Section {
@@ -161,6 +184,8 @@ struct RecipientPickerView: View {
         .onChange(of: query) { labelsInBar = [] }
         // Who lists the number typed, asked afresh as it changes.
         .task(id: query) { await lookUpTypedNumber() }
+        .task(id: peopleNearby.found.people.compactMap(\.photoID)) { await loadNearbyPhotos() }
+        .unreachableAlert($unreachable)
         // Soft Edge under the header and into the total.
         .starhashSoftEdge()
         // Centred in what is left between the header and the total (or the
@@ -368,6 +393,7 @@ struct RecipientPickerView: View {
         } else if let typed = search.typedRecipient {
             titles.append(typed.kind == .phone ? "Number" : "Merchant code")
         }
+        if !nearbyPeople.isEmpty { titles.append("People Nearby") }
         if !list.nearby.isEmpty { titles.append("Nearby") }
         if !list.recents.isEmpty { titles.append("Recent") }
         if enableContacts {
@@ -454,7 +480,7 @@ struct RecipientPickerView: View {
     private var search: RecipientSearch { RecipientSearch(query: query) }
 
     private func showsNoMatches(_ list: RecipientList<PayContact>) -> Bool {
-        list.findsNothing && contacts.access != .denied
+        list.findsNothing && contacts.access != .denied && nearbyPeople.isEmpty
     }
 
     /// Numbers and codes paid where the phone is now, nearest first, from
@@ -692,6 +718,40 @@ struct RecipientPickerView: View {
     private func contact(for recipient: Recipient) -> PayContact? {
         guard enableContacts else { return nil }
         return contacts.contacts.first { $0.recipients.contains { $0.identity == recipient.identity } }
+    }
+
+    /// StarHash users close by whose names match what is typed, or all of
+    /// them with nothing typed.
+    private var nearbyPeople: [PeopleNearby.Person] {
+        guard peopleNearbyOn else { return [] }
+        let typed = search.nameQuery
+        return peopleNearby.found.people.filter { typed.isEmpty || $0.name.localizedStandardContains(typed) }
+    }
+
+    /// Their photos, fetched once each.
+    private func loadNearbyPhotos() async {
+        for id in peopleNearby.found.people.compactMap(\.photoID) where nearbyPhotos[id] == nil {
+            #if DEBUG
+            if let sample = PeopleNearbyDebug.photo(for: id) {
+                nearbyPhotos[id] = sample
+                continue
+            }
+            #endif
+            if let photo = await StarHashCloud.photo(id) { nearbyPhotos[id] = photo }
+        }
+    }
+
+    /// Someone nearby, tapped: their phone hands over the number, then they
+    /// are paid as any row is.
+    private func reach(_ person: PeopleNearby.Person) {
+        guard !hasPaid else { return }
+        Task {
+            if let recipient = await peopleNearby.reach(person) {
+                choose(recipient)
+            } else {
+                unreachable = person
+            }
+        }
     }
 
     private func choose(_ recipient: Recipient) {

@@ -12,7 +12,14 @@ extension FeatureFlag {
     ///         detail: "Pay part of a total to each of several people",
     ///         rollout: .dev
     ///     )
-    static let all: [FeatureFlag] = []
+    static let all: [FeatureFlag] = [.peopleNearby]
+
+    /// StarHash users close by on Pay, paid with a tap (`PeopleNearby`).
+    static let peopleNearby = FeatureFlag(
+        key: "peopleNearby", title: "People Nearby",
+        detail: "StarHash users close by show up on Pay, and a tap pays them",
+        rollout: .dev
+    )
 }
 
 extension ReleaseChannel {
