@@ -4,8 +4,11 @@ import Observation
 /// A request for money between two StarHash users: one the owner sent
 /// (asking someone to pay them) or one they received (someone asking them
 /// to pay). They travel to people nearby (`PeopleNearby`), or to anyone on
-/// StarHash through its server, sealed (`RequestsAnywhere`); both phones
-/// keep the request under the same id, so an answer finds it.
+/// StarHash through its server, sealed (`RequestsAnywhere`). One asked
+/// nearby goes through the server too when it can (`RequestsAnywhere.carry`),
+/// in case the other walks away before answering. Both phones keep the
+/// request under the same id, so it is one request whichever way it came
+/// first, and an answer finds it.
 ///
 /// A request never dials anything. The person asked pays through Pay as
 /// they would anyone, and the request settles from the transactions
@@ -46,8 +49,8 @@ public struct MoneyRequest: Codable, Hashable, Identifiable, Sendable {
     /// parts. Nil when marked paid by hand, or not paid.
     public var transactionIDs: [UUID]?
     /// The other person's public key, when it travelled through StarHash's
-    /// server: an answer is sealed to it. Nil for one between people
-    /// nearby.
+    /// server (on its own, or beside People Nearby's connection): an answer
+    /// is sealed to it. Nil for one only between people nearby.
     public var key: String?
     /// Whether the server has been told how it ended: a decline sent, or
     /// one the owner sent closed there (cancelled, paid, declined or
@@ -71,8 +74,9 @@ public struct MoneyRequest: Codable, Hashable, Identifiable, Sendable {
 
     public var expiresAt: Date { createdAt.addingTimeInterval(Self.lifetime) }
 
-    /// Whether it travelled through StarHash's server, not between people
-    /// nearby.
+    /// Whether it travelled through StarHash's server, so its answer or its
+    /// end can too: one asked of anyone, or one asked nearby that the
+    /// server carried as well.
     public var isAnywhere: Bool { key != nil }
 
     /// Whether the server still has to hear how it ended: a decline the
@@ -270,11 +274,17 @@ public final class MoneyRequests {
     // MARK: Changing
 
     /// The owner asked `person` for `amount`. `key` is theirs when it went
-    /// through the server.
+    /// through the server. Asked again under an id already kept (a request
+    /// sent nearby that then went through the server too), it stays one
+    /// request, which takes the key.
     @discardableResult
     public func ask(
         _ person: Recipient, id: UUID = UUID(), photoID: UUID?, amount: Int, note: String?, at now: Date = .now, key: String? = nil
     ) -> MoneyRequest {
+        if let kept = request(id: id) {
+            if let key, kept.direction == .sent { carried(id, key: key) }
+            return request(id: id) ?? kept
+        }
         let request = MoneyRequest(
             id: id, direction: .sent, person: person, photoID: photoID, amount: amount, note: note, createdAt: now, key: key
         )
@@ -300,6 +310,15 @@ public final class MoneyRequests {
     /// way StarHash did not see): it no longer waits.
     public func theyCancelled(_ id: UUID, at now: Date = .now) {
         settle(id, as: .cancelled, direction: .received, at: now)
+    }
+
+    /// A request that came between people nearby went through the server
+    /// too: `key` is the other person's, so an answer or its end can follow
+    /// it there once they have walked away. A key it has already stays.
+    func carried(_ id: UUID, key: String) {
+        guard let index = requests.firstIndex(where: { $0.id == id }), requests[index].key == nil else { return }
+        requests[index].key = key
+        save()
     }
 
     /// Requests whose end the server has yet to hear, oldest first.

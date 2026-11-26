@@ -158,6 +158,29 @@ struct RequestsAnywhereTests {
             let ask = MoneyRequest.Message.Ask(id: UUID(), name: name, number: number, photoID: nil, amount: amount, note: note)
             return await anywhere.ask(ask, to: Recipient(destination: other.number, kind: .phone), listed: listed, at: server.world.now)
         }
+
+        /// Asks `other` nearby, as `NearbyRequests` does once their phone
+        /// handed over its number: kept here, on its way to them over
+        /// People Nearby's connection (`hear`), and not yet through the
+        /// server (`carry`).
+        func askNearby(_ other: Phone, amount: Int = 5_000, note: String? = "Lunch") -> MoneyRequest.Message.Ask {
+            let ask = MoneyRequest.Message.Ask(id: UUID(), name: name, number: number, photoID: nil, amount: amount, note: note)
+            let them = Recipient(name: other.name, destination: other.number, kind: .phone)
+            requests.ask(them, id: ask.id, photoID: nil, amount: amount, note: note, at: server.world.now)
+            return ask
+        }
+
+        /// The server copy of a request asked nearby.
+        @discardableResult
+        func carry(_ ask: MoneyRequest.Message.Ask, to other: Phone) async -> Result<MoneyRequest, RequestsAnywhere.AskFailure> {
+            await anywhere.carry(ask, to: Recipient(name: other.name, destination: other.number, kind: .phone), at: server.world.now)
+        }
+
+        /// A request nearby arrives over People Nearby's connection.
+        @discardableResult
+        func hear(_ ask: MoneyRequest.Message.Ask) -> MoneyRequest? {
+            requests.receive(ask, at: server.world.now)
+        }
     }
 
     let world = World()
@@ -269,6 +292,181 @@ struct RequestsAnywhereTests {
         await jean.anywhere.sync()
         #expect(world.rows[sent.id]?.state == "closed")
         #expect(try await jean.ask(shima).get().status == .waiting)
+    }
+
+    // MARK: Asked nearby, carried by the server too
+
+    @Test func nearbyFirstThenTheServerIsOneRequestWhoseDeclineStillTravels() async throws {
+        let jean = Phone("Jean Bosco", "0788000102", in: world)
+        let shima = Phone("Shima Serein", "0788123456", in: world)
+        shima.knows(jean)
+        let ask = jean.askNearby(shima)
+        let heard = try #require(shima.hear(ask))
+        #expect(!heard.isAnywhere)
+        let carried = try await jean.carry(ask, to: shima).get()
+        // One request on the asker's iPhone, under the id it went nearby
+        // with, now holding the other's key.
+        #expect(jean.requests.requests.count == 1)
+        #expect(carried.id == ask.id && carried.person.name == "Shima Serein" && carried.status == .waiting)
+        #expect(carried.key == world.directory[shima.number]?.key)
+        #expect(world.rows[ask.id]?.state == "waiting")
+
+        // Jean walks away; Shima declines, and the connection is gone, so
+        // only the server can carry it.
+        shima.requests.decline(ask.id)
+        await shima.anywhere.report()
+        #expect(world.rows[ask.id]?.state == "waiting")
+        // The sync shows nothing new: the server's copy is the one already
+        // shown, whose key it keeps, and the decline goes with it.
+        #expect(await shima.anywhere.sync().isEmpty)
+        #expect(shima.requests.requests.count == 1)
+        let kept = try #require(shima.requests.request(id: ask.id))
+        #expect(kept.status == .declined && kept.key == world.directory[jean.number]?.key && kept.reported == true)
+        #expect(world.rows[ask.id]?.state == "answered")
+
+        let news = await jean.anywhere.sync()
+        #expect(news.declined.map(\.id) == [ask.id] && news.received.isEmpty)
+        #expect(jean.requests.request(id: ask.id)?.status == .declined)
+        #expect(world.rows[ask.id]?.state == "closed")
+        #expect(jean.requests.requests.count == 1 && shima.requests.requests.count == 1)
+    }
+
+    @Test func theServerFirstThenNearbyIsStillOneRequest() async throws {
+        let jean = Phone("Jean Bosco", "0788000102", in: world)
+        let shima = Phone("Shima Serein", "0788123456", in: world)
+        shima.knows(jean)
+        let ask = jean.askNearby(shima)
+        _ = try await jean.carry(ask, to: shima).get()
+        // People Nearby's message was missed, or is late: the server's copy
+        // comes first, as any request from anywhere.
+        let news = await shima.anywhere.sync()
+        #expect(news.received.map(\.id) == [ask.id])
+        let received = try #require(shima.requests.request(id: ask.id))
+        #expect(received.isAnywhere && received.amount == 5_000 && received.person.destination == jean.number)
+        // The nearby message then arriving is not a second request, and
+        // takes nothing from the first.
+        #expect(shima.hear(ask) == nil)
+        #expect(shima.requests.requests.count == 1 && shima.requests.waitingForOwner.map(\.id) == [ask.id])
+        #expect(shima.requests.request(id: ask.id)?.key == received.key)
+        #expect(await shima.anywhere.sync().isEmpty)
+
+        // On the asker's iPhone too, the server's answer and the nearby one
+        // under one id are one request, whichever is kept first.
+        let other = MoneyRequests(fileURL: nil)
+        let them = Recipient(name: "Shima Serein", destination: shima.number, kind: .phone)
+        let id = UUID()
+        other.ask(them, id: id, photoID: nil, amount: 2_000, note: nil, at: world.now, key: "theirs")
+        let again = other.ask(them, id: id, photoID: nil, amount: 2_000, note: nil, at: world.now)
+        #expect(other.requests.count == 1 && again.key == "theirs")
+    }
+
+    @Test func paidOnceSettlesOnceOnBothIPhones() async throws {
+        let jean = Phone("Jean Bosco", "0788000102", in: world)
+        let shima = Phone("Shima Serein", "0788123456", in: world)
+        shima.knows(jean)
+        let ask = jean.askNearby(shima)
+        shima.hear(ask)
+        _ = try await jean.carry(ask, to: shima).get()
+        await shima.anywhere.sync()
+        let paid = Transaction(
+            direction: .outgoing, counterparty: Recipient(name: "Jean Bosco", destination: jean.number, kind: .phone), amount: 5_000,
+            date: Self.start.addingTimeInterval(60), status: .confirmed, source: .sms
+        )
+        let received = Transaction(
+            direction: .incoming, counterparty: Recipient(name: "Shima", destination: "456", kind: .phone), amount: 5_000,
+            date: Self.start.addingTimeInterval(60), status: .confirmed, source: .sms
+        )
+        shima.requests.settle(with: [paid], at: Self.start.addingTimeInterval(120))
+        jean.requests.settle(with: [received], at: Self.start.addingTimeInterval(120))
+        #expect(shima.requests.requests.map(\.status) == [.paid] && jean.requests.requests.map(\.status) == [.paid])
+        // The asker's end closes the server's copy, so the pair may ask again.
+        await jean.anywhere.sync()
+        #expect(world.rows[ask.id]?.state == "closed")
+        await shima.anywhere.sync()
+        #expect(shima.requests.requests.map(\.status) == [.paid])
+    }
+
+    @Test func aCancelReachesThemAfterTheyWalkedAway() async throws {
+        let jean = Phone("Jean Bosco", "0788000102", in: world)
+        let shima = Phone("Shima Serein", "0788123456", in: world)
+        shima.knows(jean)
+        let ask = jean.askNearby(shima)
+        shima.hear(ask)
+        _ = try await jean.carry(ask, to: shima).get()
+        jean.requests.cancel(ask.id)
+        await jean.anywhere.report()
+        #expect(world.rows[ask.id]?.state == "closed")
+        #expect(await shima.anywhere.sync().isEmpty)
+        #expect(shima.requests.request(id: ask.id)?.status == .cancelled && shima.requests.waitingForOwner.isEmpty)
+    }
+
+    @Test func oneThatEndedNearbyBeforeTheServerTookItIsClosedThereAtOnce() async throws {
+        let jean = Phone("Jean Bosco", "0788000102", in: world)
+        let shima = Phone("Shima Serein", "0788123456", in: world)
+        shima.knows(jean)
+        let ask = jean.askNearby(shima)
+        shima.hear(ask)
+        // Declined nearby while the server copy was on its way.
+        shima.requests.decline(ask.id)
+        jean.requests.theyDeclined(ask.id)
+        let carried = try await jean.carry(ask, to: shima).get()
+        #expect(carried.status == .declined && carried.isAnywhere)
+        #expect(world.rows[ask.id]?.state == "closed")
+        #expect(await shima.anywhere.sync().isEmpty)
+        #expect(shima.requests.requests.map(\.status) == [.declined])
+        #expect(try await jean.ask(shima).get().status == .waiting)
+    }
+
+    @Test func aServerCopyThatSaysOtherwiseIsDroppedAndTheNearbyOneStays() async throws {
+        let jean = Phone("Jean Bosco", "0788000102", in: world)
+        let shima = Phone("Shima Serein", "0788123456", in: world)
+        shima.knows(jean)
+        let ask = jean.askNearby(shima)
+        shima.hear(ask)
+        var more = ask
+        more.amount = 50_000
+        _ = try await jean.carry(more, to: shima).get()
+        #expect(await shima.anywhere.sync().isEmpty)
+        let kept = try #require(shima.requests.request(id: ask.id))
+        #expect(kept.amount == 5_000 && !kept.isAnywhere && kept.status == .waiting)
+        #expect(world.rows[ask.id]?.state == "dropped")
+    }
+
+    @Test func theServerCopyKeepsTheContactsRule() async throws {
+        let jean = Phone("Jean Bosco", "0788000102", in: world)
+        let shima = Phone("Shima Serein", "0788123456", in: world)
+        shima.knows(jean)
+        let ask = jean.askNearby(shima)
+        shima.hear(ask)
+        _ = try await jean.carry(ask, to: shima).get()
+        // While Contacts cannot be read, its key waits with it.
+        shima.contacts = nil
+        #expect(await shima.anywhere.sync().isEmpty)
+        #expect(shima.requests.request(id: ask.id)?.isAnywhere == false && world.rows[ask.id]?.state == "waiting")
+        // Jean is no longer a contact: the server's copy is dropped.
+        shima.contacts = []
+        #expect(await shima.anywhere.sync().isEmpty)
+        #expect(shima.requests.request(id: ask.id)?.isAnywhere == false && world.rows[ask.id]?.state == "dropped")
+    }
+
+    @Test func aRequestTheServerCannotCarryStaysBetweenPeopleNearby() async throws {
+        let jean = Phone("Jean Bosco", "0788000102", in: world)
+        let shima = Phone("Shima Serein", "0788123456", in: world)
+        let old = Phone("Old StarHash", "0788555555", in: world, takesRequests: false)
+        let unlisted = Recipient(name: "Eric", destination: "0788000104", kind: .phone)
+        let toEric = MoneyRequest.Message.Ask(id: UUID(), name: jean.name, number: jean.number, photoID: nil, amount: 1_000, note: nil)
+        jean.requests.ask(unlisted, id: toEric.id, photoID: nil, amount: 1_000, note: nil, at: world.now)
+        #expect(await jean.anywhere.carry(toEric, to: unlisted) == .failure(.notOnStarHash))
+        #expect(await jean.carry(jean.askNearby(old), to: old) == .failure(.takesNoRequests))
+        // One to Shima already waits on the server: the second stays nearby.
+        _ = try await jean.carry(jean.askNearby(shima), to: shima).get()
+        let second = jean.askNearby(shima, amount: 2_000)
+        #expect(await jean.carry(second, to: shima) == .failure(.alreadyAsked))
+        world.reachable = false
+        #expect(await jean.carry(jean.askNearby(shima, amount: 3_000), to: shima) == .failure(.failed))
+        #expect(jean.requests.requests.count == 5)
+        #expect(jean.requests.requests.filter(\.isAnywhere).count == 1)
+        #expect(jean.requests.requests.allSatisfy { $0.status == .waiting })
     }
 
     // MARK: Who may ask

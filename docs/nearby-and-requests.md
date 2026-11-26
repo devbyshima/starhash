@@ -61,7 +61,7 @@ There's one model, `MoneyRequest`, with two ways to deliver it.
 - A number not on StarHash says so and offers Share Message: your number, the amount and the note, through the share sheet.
 
 **Delivery:**
-- **Nearby:** over the People Nearby connection, at once. If the other person walks away before answering, the request goes through the server instead.
+- **Nearby:** over the People Nearby connection, at once. With Requests Anywhere on and both people listed with a key, it also goes through the server under the same id, so if either walks away before answering, the other phone still finds it and a decline or a cancel still reaches them.
 - **Anywhere:** through the server (below).
 
 **Being asked.** Only people in your Contacts can ask you. The check runs on the phone, since your contacts never leave it.
@@ -158,7 +158,7 @@ A phone in People Nearby proves, with its directory key, that it owns the entry 
 - **Rows stay to the end of the week** (who asked whom and when, nothing sealed once closed) so the limits hold: 20 sent in any 24 hours per key, closed ones included, and one waiting per pair.
 - **While Contacts cannot be read**, requests wait on the server unread rather than being dropped, and the Requests page says why.
 - **Notifications only from Background App Refresh.** Opening StarHash shows the card, so a banner then would say the same thing twice. The Notifications page has a Requests switch.
-- **Not built yet:** a nearby request going through the server when the other person walks away before answering.
+- **A nearby request goes through the server too** (`RequestsAnywhere.carry`), under the id it went nearby with, once the asker's iPhone has the number the other phone handed over and finds it listed with a key. It is sent beside the nearby message, not after a failure, since StarHash cannot tell a missed message from a slow answer. Both iPhones keep one request whichever way arrives first: the asker's attaches the other's key to the request it already has, and the iPhone asked, finding in its inbox a request it already shows, keeps only its key, after the same checks as any request from anywhere (sealed by the key the asker's number is listed under, from the owner's Contacts) and only if it says the same number and amount; otherwise that copy is dropped and the nearby one stays. So a decline made after the asker walked away goes back through the server, and so does the asker's cancel. When the server cannot take it (not listed, the pair's limit, no connection), it stays a request between the two phones, as before.
 - **Trying it on two Simulators:** `npm run dev` in `server/` (with `--var DIRECTORY_SECRET:<anything>` and `--persist-to` a folder that `wrangler d1 execute starhash --local --file schema.sql` set up), then launch each with `-server http://127.0.0.1:8787` and its own `-profileName` and `-profileNumber`: a Worker on the Mac lets the Simulator list its owner. `starhash://refresh` runs what Background App Refresh does.
 
 ## Decided in Phase 2 (2026-11-26)

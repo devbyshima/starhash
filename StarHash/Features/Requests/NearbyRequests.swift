@@ -5,6 +5,11 @@ import SwiftUI
 /// taking one in, and the answer. The requests themselves are
 /// StarHashKit's `MoneyRequests`; this is how they travel.
 ///
+/// With Requests Anywhere on, a request sent nearby goes through the server
+/// too, under the same id (`RequestsAnywhere.carry`), so the other phone
+/// still finds it, and its decline and the owner's cancel still travel,
+/// once one of them has walked away.
+///
 /// Only people in the owner's Contacts can ask them. A request from anyone
 /// else is dropped without an answer, so all its sender sees is that it
 /// waits until it expires.
@@ -12,13 +17,15 @@ import SwiftUI
 final class NearbyRequests {
     private let requests: MoneyRequests
     private let nearby: PeopleNearbyService
+    private let anywhere: RequestsAnywhere
     /// The phone each request went to or came from in this run, for its
     /// answer. A request outlives the connection; its answer may not.
     private var peers: [UUID: String] = [:]
 
-    init(requests: MoneyRequests, nearby: PeopleNearbyService) {
+    init(requests: MoneyRequests, nearby: PeopleNearbyService, anywhere: RequestsAnywhere) {
         self.requests = requests
         self.nearby = nearby
+        self.anywhere = anywhere
         nearby.onMessage = { [weak self] peer, data in
             Task { await self?.handle(data, from: peer) }
         }
@@ -34,7 +41,8 @@ final class NearbyRequests {
     }
 
     /// Asks `person` for `amount`: their phone hands over its number, then
-    /// gets the request. Nil when it didn't (they left, or locked).
+    /// gets the request, and the server gets it too when it can. Nil when
+    /// their phone didn't (they left, or locked).
     func ask(_ person: PeopleNearby.Person, amount: Int, note: String?, owner: Owner, photoID: UUID?) async -> MoneyRequest? {
         guard let number = owner.defaultSIM, Self.missing(in: owner) == nil else { return nil }
         let ask = MoneyRequest.Message.Ask(
@@ -43,15 +51,26 @@ final class NearbyRequests {
         )
         guard let recipient = await nearby.reach(person, sending: MoneyRequest.Message.ask(ask).data) else { return nil }
         peers[ask.id] = person.id
-        return requests.ask(recipient, id: ask.id, photoID: person.photoID, amount: amount, note: ask.note)
+        let request = requests.ask(recipient, id: ask.id, photoID: person.photoID, amount: amount, note: ask.note)
+        // Not waited for: the request is already on its way nearby. What
+        // the server cannot take stays a request between the two of them.
+        if AnywhereRequests.isOn {
+            Task { [anywhere] in await anywhere.carry(ask, to: recipient) }
+        }
+        return request
     }
 
-    /// The owner declined: their phone says so, while the asker's
-    /// connection is still open.
+    /// The owner declined: their phone says so while the asker's
+    /// connection is still open, and the server tells the asker when it
+    /// carried the request too.
     func decline(_ request: MoneyRequest) {
         requests.decline(request.id)
-        guard let peer = peers.removeValue(forKey: request.id) else { return }
-        nearby.send(MoneyRequest.Message.declined(id: request.id).data, to: peer)
+        if let peer = peers.removeValue(forKey: request.id) {
+            nearby.send(MoneyRequest.Message.declined(id: request.id).data, to: peer)
+        }
+        guard AnywhereRequests.isOn else { return }
+        // Its key comes with the server's copy, which a sync fetches.
+        Task { await AnywhereRequests.sync(announce: false) }
     }
 
     private func handle(_ data: Data, from peer: String) async {
@@ -59,11 +78,23 @@ final class NearbyRequests {
         case .ask(let ask):
             let asker = Recipient(name: ask.name, destination: ask.number, kind: .phone)
             guard await Self.mayAsk(asker) == true else { return }
-            if requests.receive(ask) != nil { peers[ask.id] = peer }
+            if requests.receive(ask) != nil {
+                peers[ask.id] = peer
+            } else if let kept = requests.request(id: ask.id), kept.direction == .received,
+                      kept.person.destination == ask.number, kept.status == .waiting {
+                // It came through the server first: one request, which
+                // a decline can now also answer nearby.
+                peers[ask.id] = peer
+            }
         case .declined(let id):
             requests.theyDeclined(id)
             peers[id] = nil
             nearby.close(peer)
+            // Heard nearby: the server closes its copy, so the two may ask
+            // each other again.
+            if requests.request(id: id)?.isAnywhere == true {
+                Task { [anywhere] in await anywhere.report() }
+            }
         case nil:
             break
         }
