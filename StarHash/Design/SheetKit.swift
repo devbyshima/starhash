@@ -149,13 +149,24 @@ extension SheetHeader where Trailing == EmptyView {
 /// with no tint (iOS 26; before it, a fade of the sheet's material).
 /// Scrolling back down plays it backwards. Every part follows the scroll,
 /// so a drag half way leaves it half way.
-struct CollapsingSheetScroll<Content: View>: View {
+///
+/// The header's glass buttons (`leading`, `trailing`), as `SheetHeader`'s,
+/// stay pinned at the top over the scroll: level with the big title at
+/// rest, rising with it into the bar, the small title between them. A
+/// sheet sized to what it shows passes `contentHeight`, which reports the
+/// title and content's whole height for its `.height` detent; it then
+/// scrolls only when that is more than the screen, at the largest text
+/// sizes, and never bounces while it fits.
+struct CollapsingSheetScroll<Leading: View, Trailing: View, Content: View>: View {
     let title: String
     /// The small title's two lines, as the reference sets them: a grey
     /// caption over the main line in bold ("Request" over "5,000 RWF").
     /// Without them, the big title again, small.
     let smallCaption: String?
     let smallTitle: String?
+    let contentHeight: Binding<CGFloat>?
+    let leading: Leading
+    let trailing: Trailing
     let content: Content
 
     /// How far the scroll has moved from its top.
@@ -163,15 +174,31 @@ struct CollapsingSheetScroll<Content: View>: View {
     /// The big title's height, with its padding.
     @State private var titleHeight: CGFloat = 66
 
-    init(title: String, smallCaption: String? = nil, smallTitle: String? = nil, @ViewBuilder content: () -> Content) {
+    init(
+        title: String,
+        smallCaption: String? = nil,
+        smallTitle: String? = nil,
+        contentHeight: Binding<CGFloat>? = nil,
+        @ViewBuilder leading: () -> Leading,
+        @ViewBuilder trailing: () -> Trailing,
+        @ViewBuilder content: () -> Content
+    ) {
         self.title = title
         self.smallCaption = smallCaption
         self.smallTitle = smallTitle
+        self.contentHeight = contentHeight
+        self.leading = leading()
+        self.trailing = trailing()
         self.content = content()
     }
 
     /// The bar the small title sits in, and the blur under it.
     private static var barHeight: CGFloat { 60 }
+    /// The big title's padding above and below, `SheetHeader`'s.
+    private static var titleTop: CGFloat { 18 }
+    private static var titleBottom: CGFloat { 8 }
+
+    private var hasButtons: Bool { Leading.self != EmptyView.self || Trailing.self != EmptyView.self }
 
     var body: some View {
         ScrollView {
@@ -180,7 +207,9 @@ struct CollapsingSheetScroll<Content: View>: View {
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { titleHeight = max($0, 1) }
                 content
             }
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight?.wrappedValue = $0 }
         }
+        .scrollBounceBehavior(contentHeight == nil ? .automatic : .basedOnSize)
         .onScrollGeometryChange(for: CGFloat.self) { geometry in
             geometry.contentOffset.y + geometry.contentInsets.top
         } action: { _, now in
@@ -190,11 +219,27 @@ struct CollapsingSheetScroll<Content: View>: View {
         // Over the scroll, taking no room, so the big title sits where
         // `SheetHeader`'s does; at rest there is nothing in it.
         .overlay(alignment: .top) { smallTitleBar }
+        .overlay(alignment: .top) { if hasButtons { buttons } }
         // Solid, as What's New and the notes are: through clear glass the
         // blur under the bar would take in the page behind the sheet and
         // lighten; on the sheet's own fill it blurs only what scrolls.
         .background(Color.noteSheetBackground.ignoresSafeArea())
         .starhashContainerSurface()
+    }
+
+    /// The header's buttons, centred on the big title's line at rest and
+    /// on the bar's once it has gone, so the small title sits between them.
+    private var buttons: some View {
+        let atRest = Self.titleTop + (titleHeight - Self.titleTop - Self.titleBottom) / 2
+        let centre = atRest + (Self.barHeight / 2 - atRest) * gone
+        return HStack {
+            leading
+            Spacer(minLength: 0)
+            trailing
+        }
+        .padding(.horizontal, 20)
+        // Centred in a band twice `centre` tall, laid from the top.
+        .frame(height: centre * 2)
     }
 
     /// 0 at rest to 1 once the big title has scrolled away.
@@ -227,8 +272,8 @@ struct CollapsingSheetScroll<Content: View>: View {
             .padding(.horizontal, 52)
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 20)
-            .padding(.top, 18)
-            .padding(.bottom, 8)
+            .padding(.top, Self.titleTop)
+            .padding(.bottom, Self.titleBottom)
             .opacity(1 - gone)
             .blur(radius: gone * 8)
             .accessibilityAddTraits(.isHeader)
@@ -250,7 +295,8 @@ struct CollapsingSheetScroll<Content: View>: View {
         }
         .lineLimit(1)
         .minimumScaleFactor(0.8)
-        .padding(.horizontal, 60)
+        // Clear of the buttons when there are any.
+        .padding(.horizontal, hasButtons ? 70 : 60)
         .opacity(small)
         .blur(radius: (1 - small) * 6)
         .offset(y: (1 - small) * 4)
@@ -283,6 +329,27 @@ struct CollapsingSheetScroll<Content: View>: View {
             .init(color: .black, location: solid),
             .init(color: .clear, location: clear),
         ], startPoint: .top, endPoint: .bottom)
+    }
+}
+
+extension CollapsingSheetScroll where Leading == EmptyView, Trailing == EmptyView {
+    /// With no buttons in its header.
+    init(
+        title: String,
+        smallCaption: String? = nil,
+        smallTitle: String? = nil,
+        contentHeight: Binding<CGFloat>? = nil,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.init(
+            title: title,
+            smallCaption: smallCaption,
+            smallTitle: smallTitle,
+            contentHeight: contentHeight,
+            leading: { EmptyView() },
+            trailing: { EmptyView() },
+            content: content
+        )
     }
 }
 
