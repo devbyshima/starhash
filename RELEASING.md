@@ -46,9 +46,11 @@ CI builds and tests, and stops there. TestFlight and App Store uploads are made 
 
 StarHash follows [Semantic Versioning](https://semver.org), read for an app:
 
-- **MAJOR** (`2.0.0`): a release that changes something people rely on, such as dropping an iOS version or storing payments in a way older versions cannot read.
-- **MINOR** (`1.1.0`): each version cut from `main`, with its new features.
+- **MAJOR** (`2.0.0`): a release that changes something people rely on, such as dropping an iOS version, storing payments in a way older versions cannot read, or a server change older versions stop working with. Size alone never makes a major: a big new feature is a minor.
+- **MINOR** (`1.1.0`): each version cut from `main`, with its new features. A feature behind a [flag](#feature-flags) counts in the version that ships it, the first one cut after its flag is deleted, not the one its code first landed in.
 - **PATCH** (`1.1.1`): fixes only, from a release branch.
+
+The server's API (`/v1/directory`, `/v1/requests`, `/v1/push`, `/v1/ping`) only grows within `/v1`: a new endpoint or field changes no app version. A change that versions already on the App Store can't follow goes under `/v2`, with `/v1` kept running, and turning `/v1` off goes with a MAJOR.
 
 `MARKETING_VERSION` in `project.yml` is always plain `MAJOR.MINOR.PATCH`, since the App Store takes nothing after it. `main` always carries the next minor version: cutting `release/1.1` moves `main` to `1.2.0`.
 
