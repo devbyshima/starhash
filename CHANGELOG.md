@@ -15,10 +15,12 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 - What's New for 1.1, shown once after the update.
 - Money from a number your wallet's message hides (`*********998`) shows it in Transactions as the number it stands for, with +2507 or 07 in front: `+2507*****998` rather than `998`.
 - Checking your balance with Pay's Balance button now teaches Siri Suggestions and Spotlight when you check it, so they can suggest Check Balance at the times you usually do.
+- Request in Bulk. On Request's sheet, choose several people nearby or on StarHash, up to 10, give each their own amount (everyone starts at the amount typed), and send them all at once. The Requests page shows them together on one card, with how much has come in of the total. Remind asks the people still waiting again, at most once a day; a request you sent anyone has Remind too.
 - Split large payments, a new setting under Pay & Buy, off until you turn it on. A MoMo to MoMo payment that costs less in parts is then sent as a few smaller ones: 300,000 as two of 150,000 costs 500 in fees rather than 1,500. Pay shows the parts and what they cost against one payment, and dials one part at a time, each with its own PIN, showing whether each is waiting for its SMS or confirmed; the whole amount can still go as one payment. Each part is its own transaction, marked Part 1 of 2 in Transactions, with the whole payment on its page.
 
 ### Changed
 
+- Asking for money, and Split large payments, need auto-verify on, since both are settled from your wallet's SMS. With it off, Request and the Split large payments switch say so and open its setup.
 - A payment's page, and Verify once it confirms one, call the wallet's reference for it Transaction ID rather than Code.
 - Transactions shows money received with a green arrow and amount, and a payment that failed in grey; money sent keeps the text colour.
 - A long press on a number on a payment's page (the number or code, the transaction ID, the amounts and the balance) copies it.

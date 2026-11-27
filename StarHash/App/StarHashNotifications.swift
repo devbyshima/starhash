@@ -151,13 +151,14 @@ final class StarHashNotifications {
     }
 
     /// Word of requests the server brought while StarHash was away: one
-    /// asked of the owner, or one of theirs declined. `quietly` after a
+    /// asked of the owner, a reminder of one, or one of theirs declined. `quietly` after a
     /// push, which made the sound already.
     func announce(_ news: RequestsAnywhere.News, quietly: Bool = false) async {
         guard !news.isEmpty, await authorizationStatus().allowsDelivery else { return }
         let settings = StarHashPreferences.notifications
         let items = news.received.compactMap { NotificationPlan.requestReceived($0, name: $0.person.shownName, settings: settings) }
             + news.declined.compactMap { NotificationPlan.requestDeclined($0, name: $0.person.shownName, settings: settings) }
+            + news.reminded.compactMap { NotificationPlan.requestReminded($0, name: $0.person.shownName, settings: settings) }
         for item in items {
             let request = request(for: item)
             if quietly, let content = request.content.mutableCopy() as? UNMutableNotificationContent {

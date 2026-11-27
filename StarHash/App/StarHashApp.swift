@@ -31,9 +31,16 @@ struct StarHashApp: App {
         if DebugLaunch.arguments.contains("-nearbyHere") {
             UserDefaults.standard.set(true, forKey: Preferences.nearbyLocation.key)
         }
-        // -paySplit: Split large payments on, for the parts' sheet.
+        // -paySplit: Split large payments on, for the parts' sheet, with
+        // auto-verify, which it needs. -autoVerifyOn: auto-verify set up
+        // alone, as the guide leaves it (`AutoVerify`'s keys), for Request.
         if DebugLaunch.arguments.contains("-paySplit") {
             UserDefaults.standard.set(true, forKey: Preferences.splitLargePayments.key)
+        }
+        if DebugLaunch.arguments.contains("-paySplit") || DebugLaunch.arguments.contains("-autoVerifyOn") {
+            UserDefaults.standard.set(true, forKey: "autoVerifySetUp")
+            UserDefaults.standard.set(Date.now.timeIntervalSince1970, forKey: "lastVerifiedAt")
+            AppEnvironment.autoVerify.reload()
         }
         let owner = AppEnvironment.owner
         // -profile: a name and number, for the QR code's screens.

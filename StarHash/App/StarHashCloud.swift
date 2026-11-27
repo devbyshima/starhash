@@ -247,7 +247,8 @@ enum StarHashCloud {
             let asked = (found["asked"] as? [[String: Any]] ?? []).compactMap { row -> RequestsAnywhere.Inbox.Asked? in
                 guard let id = (row["id"] as? String).flatMap(UUID.init(uuidString:)) else { return nil }
                 let created = (row["created_at"] as? String).flatMap(Self.date)
-                return .init(id: id, sealed: row["sealed"] as? String, key: row["key"] as? String, createdAt: created)
+                let reminded = (row["reminded_at"] as? String).flatMap(Self.date)
+                return .init(id: id, sealed: row["sealed"] as? String, key: row["key"] as? String, createdAt: created, remindedAt: reminded)
             }
             let answers = (found["answers"] as? [[String: Any]] ?? []).compactMap { row -> RequestsAnywhere.Inbox.Answer? in
                 guard let id = (row["id"] as? String).flatMap(UUID.init(uuidString:)), let sealed = row["answer"] as? String else { return nil }
@@ -270,6 +271,19 @@ enum StarHashCloud {
 
         func erase(key: String) async -> Bool {
             await call("DELETE", "v1/requests", key: key)?.status == 200
+        }
+
+        func remind(id: UUID, key: String) async -> RequestsAnywhere.RemindAnswer {
+            guard let (data, status) = await call("POST", "v1/requests/\(id.uuidString.lowercased())/remind", key: key) else { return .failed }
+            switch status {
+            case 200:
+                let found = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+                return .reminded((found?["reminded_at"] as? String).flatMap(Self.date) ?? .now)
+            case 429: return .tooSoon
+            case 409: return .notWaiting
+            // 404 too: a Worker from before reminders has no such route.
+            default: return .failed
+            }
         }
 
         /// "2026-11-26T15:04:05.123Z", as the Worker writes a moment.

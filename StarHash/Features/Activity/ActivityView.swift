@@ -359,6 +359,7 @@ struct ActivityView: View {
             period = chosen
         }
         if DebugLaunch.arguments.contains("-openReport") { page = .report }
+        if DebugLaunch.arguments.contains("-openRequests") { page = .requests }
         if let text = DebugLaunch.value(after: "-activitySearch") {
             isSearching = true
             searchText = text

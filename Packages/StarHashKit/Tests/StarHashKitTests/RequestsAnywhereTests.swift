@@ -32,6 +32,7 @@ struct RequestsAnywhereTests {
             var answer: String?
             var state: String
             var createdAt: Date
+            var remindedAt: Date?
         }
 
         var directory: [String: Entry] = [:]
@@ -73,7 +74,12 @@ struct RequestsAnywhereTests {
             guard world.reachable else { return nil }
             let asked = world.rows.filter { $0.value.toSecret == key && ["waiting", "closed"].contains($0.value.state) && !expired($0.value) }
                 .sorted { $0.value.createdAt < $1.value.createdAt }
-                .map { RequestsAnywhere.Inbox.Asked(id: $0.key, sealed: $0.value.sealed, key: $0.value.fromKey, createdAt: $0.value.createdAt) }
+                .map {
+                    RequestsAnywhere.Inbox.Asked(
+                        id: $0.key, sealed: $0.value.sealed, key: $0.value.fromKey, createdAt: $0.value.createdAt,
+                        remindedAt: $0.value.remindedAt
+                    )
+                }
             let answers = world.rows.filter { $0.value.fromSecret == key && $0.value.state == "answered" && !expired($0.value) }
                 .map { RequestsAnywhere.Inbox.Answer(id: $0.key, sealed: $0.value.answer!) }
             return .init(asked: asked, answers: answers)
@@ -114,6 +120,17 @@ struct RequestsAnywhereTests {
                 world.rows[id]?.sealed = nil
             }
             return true
+        }
+
+        /// As the Worker: the asker only, a request waiting (or dropped,
+        /// silently), a day since it was asked or last reminded of.
+        func remind(id: UUID, key: String) async -> RequestsAnywhere.RemindAnswer {
+            guard world.reachable else { return .failed }
+            guard let row = world.rows[id], row.fromSecret == key else { return .notWaiting }
+            guard ["waiting", "dropped"].contains(row.state), !expired(row) else { return .notWaiting }
+            guard world.now >= (row.remindedAt ?? row.createdAt).addingTimeInterval(86_400) else { return .tooSoon }
+            world.rows[id]?.remindedAt = world.now
+            return .reminded(world.now)
         }
 
         private func expired(_ row: World.Row) -> Bool {
@@ -232,6 +249,68 @@ struct RequestsAnywhereTests {
         #expect(shima.requests.waitingForOwner.map(\.id) == [sent.id])
         // Taken in once.
         #expect(await shima.anywhere.sync(at: world.now).isEmpty)
+    }
+
+    // MARK: Reminding
+
+    @Test func aReminderGoesOnceADayAndIsSaidOnceOnTheOtherIPhone() async throws {
+        let jean = Phone("Jean Bosco", "0788000102", in: world)
+        let shima = Phone("Shima Serein", "0788123456", in: world)
+        shima.knows(jean)
+        let sent = try await jean.ask(shima).get()
+        await shima.anywhere.sync(at: world.now)
+
+        // Not the day it was asked.
+        #expect(jean.requests.request(id: sent.id)?.canRemind(at: world.now) == false)
+        #expect(await jean.anywhere.remind(sent.id, at: world.now) == .failure(.tooSoon))
+
+        world.now = Self.start.addingTimeInterval(86_400)
+        let reminded = try await jean.anywhere.remind(sent.id, at: world.now).get()
+        #expect(reminded.remindedAt == world.now)
+        #expect(reminded.nextReminderAt == world.now.addingTimeInterval(86_400))
+        #expect(!reminded.canRemind(at: world.now.addingTimeInterval(3_600)))
+
+        let news = await shima.anywhere.sync(at: world.now)
+        #expect(news.reminded.map(\.id) == [sent.id] && news.received.isEmpty)
+        #expect(shima.requests.request(id: sent.id)?.remindedAt == world.now)
+        // Said once.
+        #expect(await shima.anywhere.sync(at: world.now).isEmpty)
+
+        // A day on, once more.
+        world.now = Self.start.addingTimeInterval(2 * 86_400)
+        #expect(await jean.anywhere.remind(sent.id, at: world.now) == .success(jean.requests.request(id: sent.id)!))
+        #expect(await shima.anywhere.sync(at: world.now).reminded.map(\.id) == [sent.id])
+    }
+
+    @Test func onlyAWaitingRequestThatWentThroughTheServerIsReminded() async throws {
+        let jean = Phone("Jean Bosco", "0788000102", in: world)
+        let shima = Phone("Shima Serein", "0788123456", in: world)
+        shima.knows(jean)
+        let sent = try await jean.ask(shima).get()
+        // Asked nearby only: no way to remind them.
+        let nearby = jean.askNearby(shima, amount: 2_000)
+        world.now = Self.start.addingTimeInterval(86_400)
+        #expect(jean.requests.request(id: nearby.id)?.isRemindable == false)
+        #expect(await jean.anywhere.remind(nearby.id, at: world.now) == .failure(.notWaiting))
+
+        // Declined since: nothing left to remind of.
+        await shima.anywhere.sync(at: world.now)
+        shima.requests.decline(sent.id)
+        await shima.anywhere.report()
+        await jean.anywhere.sync(at: world.now)
+        #expect(await jean.anywhere.remind(sent.id, at: world.now) == .failure(.notWaiting))
+        #expect(world.rows[sent.id]?.remindedAt == nil)
+    }
+
+    @Test func aReminderTheServerFindsTooSoonWaitsItsDay() async throws {
+        let jean = Phone("Jean Bosco", "0788000102", in: world)
+        let shima = Phone("Shima Serein", "0788123456", in: world)
+        let sent = try await jean.ask(shima).get()
+        // Reminded from elsewhere: the server has one from an hour ago.
+        world.now = Self.start.addingTimeInterval(90_000)
+        world.rows[sent.id]?.remindedAt = world.now.addingTimeInterval(-3_600)
+        #expect(await jean.anywhere.remind(sent.id, at: world.now) == .failure(.tooSoon))
+        #expect(jean.requests.request(id: sent.id)?.canRemind(at: world.now) == false)
     }
 
     @Test func twoSyncsAtOnceShareWhatTheyBring() async throws {
@@ -532,6 +611,7 @@ struct RequestsAnywhereTests {
             func answer(id: UUID, sealed: String, key: String) async -> Bool { false }
             func close(id: UUID, key: String) async -> Bool { await inner.close(id: id, key: key) }
             func erase(key: String) async -> Bool { false }
+            func remind(id: UUID, key: String) async -> RequestsAnywhere.RemindAnswer { .failed }
         }
         let flaky = RequestsAnywhere(
             requests: shima.requests, server: Flaky(shima.server), key: { [secret = shima.secret] in secret },

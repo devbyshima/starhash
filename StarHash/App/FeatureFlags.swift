@@ -12,7 +12,7 @@ extension FeatureFlag {
     ///         detail: "Pay part of a total to each of several people",
     ///         rollout: .dev
     ///     )
-    static let all: [FeatureFlag] = [.peopleNearby, .requestsAnywhere, .tapToRequest]
+    static let all: [FeatureFlag] = [.peopleNearby, .requestsAnywhere, .tapToRequest, .bulkRequests]
 
     /// StarHash users close by on Pay, paid with a tap (`PeopleNearby`).
     static let peopleNearby = FeatureFlag(
@@ -36,6 +36,15 @@ extension FeatureFlag {
         key: "tapToRequest", title: "Tap to Request",
         detail: "Ask for money by holding your iPhone to theirs",
         rollout: .everywhere
+    )
+
+    /// Asking several people at once, each for an amount of their own
+    /// (`BulkRequest`). Only with People Nearby on too, which brings
+    /// Request to Pay.
+    static let bulkRequests = FeatureFlag(
+        key: "bulkRequests", title: "Request in Bulk",
+        detail: "Ask several people at once, each for their own amount",
+        rollout: .dev
     )
 }
 
@@ -63,6 +72,12 @@ enum FeatureFlags {
     /// Nearby's connection.
     static var tapToRequest: Bool {
         isOn(.peopleNearby) && isOn(.tapToRequest)
+    }
+
+    /// Several people asked at once: both flags, since Request on Pay
+    /// comes with People Nearby.
+    static var bulkRequests: Bool {
+        isOn(.peopleNearby) && isOn(.bulkRequests)
     }
 
     /// This device's switch for the flag, nil if never touched. A Debug

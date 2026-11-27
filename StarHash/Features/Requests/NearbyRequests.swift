@@ -151,10 +151,27 @@ enum RequestsDebug {
         let grace = Recipient(name: "Grace Mutoni", destination: "0789000103", kind: .phone)
         let paid = requests.ask(grace, photoID: nil, amount: 12_000, note: "Concert tickets", at: now.addingTimeInterval(-3 * 86_400))
         requests.markPaid(paid.id, at: now.addingTimeInterval(-2 * 86_400))
-        requests.ask(ariane, photoID: PeopleNearbyDebug.photoID, amount: 2_500, note: "Taxi", at: now.addingTimeInterval(-3_600))
+        // Asked an hour ago through the server: Remind waits its day.
+        requests.ask(ariane, photoID: PeopleNearbyDebug.photoID, amount: 2_500, note: "Taxi", at: now.addingTimeInterval(-3_600), key: "sample-key")
         let declined = MoneyRequest.Message.Ask(id: UUID(), name: "Eric Nshuti", number: "0788000104", photoID: nil, amount: 3_000, note: nil)
         requests.receive(declined, at: now.addingTimeInterval(-86_400))
         requests.decline(declined.id)
+        // A bulk request a day and more ago, through the server (a sample
+        // key), so Remind is due: one paid, one waiting, one declined.
+        let group = UUID()
+        let dinner = [
+            (Recipient(name: "Diane Ingabire", destination: "0788000105", kind: .phone), 8_000),
+            (Recipient(name: "Olivier Habimana", destination: "0789000106", kind: .phone), 6_500),
+            (Recipient(name: "Claude Mugisha", destination: "0722000107", kind: .phone), 6_500),
+        ].enumerated().map { index, asked in
+            requests.ask(
+                asked.0, photoID: nil, amount: asked.1, note: "Dinner", at: now.addingTimeInterval(-93_600 + Double(index)),
+                key: "sample-key"
+            )
+        }
+        for request in dinner { requests.group(request.id, in: group) }
+        requests.markPaid(dinner[0].id, at: now.addingTimeInterval(-3_000))
+        requests.theyDeclined(dinner[2].id, at: now.addingTimeInterval(-2_000))
         let jean = MoneyRequest.Message.Ask(id: UUID(), name: "Jean Bosco", number: "0722000102", photoID: nil, amount: 5_000, note: "Lunch")
         requests.receive(jean, at: now.addingTimeInterval(-300))
         return requests

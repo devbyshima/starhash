@@ -1,20 +1,20 @@
-# People Nearby, Requests and Split the Bill
+# People Nearby, Requests and Request in Bulk
 
-A plan, built through Phase 3 behind the `peopleNearby` and `requestsAnywhere` flags (2026-11-26), with Tap to Request behind `tapToRequest`.
+A plan, built through Phase 3 behind the `peopleNearby` and `requestsAnywhere` flags (2026-11-26), with Tap to Request behind `tapToRequest`, and Phase 4 as Request in Bulk behind `bulkRequests` (2026-11-27). Asking for money needs auto-verify on (below).
 
 ## What's in it
 
 - **People Nearby.** While StarHash is open, StarHash users close by appear on Pay. Tap one and pay them, with no QR code.
 - **Requests.** Ask one StarHash user for money, whether they're next to you or anywhere else. They get a card with Pay and Decline.
 - **Tap to Request.** Hold your iPhone to theirs, as a card reader takes a tap, and their iPhone asks them to pay.
-- **Split the Bill.** Ask several people for their share of one amount, and see who has paid.
+- **Request in Bulk.** Ask several people at once, each for an amount of their own, and see who has paid.
 
 Not in it: a request shown to everyone nearby, request links, and people without StarHash. Those wait for [web pay](web-pay.md).
 
 ## What must not change
 
 - **Nearby**, the suggestions of people paid where you are standing, keeps its name, its switch and its location permission. The new feature is **People Nearby**, with its own switch, and it never uses location.
-- **Split Large Payments** (`SplitPlan`) stays as it is. The new feature is **Split the Bill**, `BillSplit` in code.
+- **Split Large Payments** (`SplitPlan`) stays as it is. The new feature is **Request in Bulk**, `BulkRequest` in code.
 - `PaymentRequest`, the type for a scanned code, keeps its name. A request for money is `MoneyRequest`.
 - Pay keeps its order, amount then who then dial. People Nearby adds one more way to choose who.
 - A request never dials by itself. The payer always taps Pay, and the PIN is only ever typed into MTN's or Airtel's menu.
@@ -54,7 +54,7 @@ There's one model, `MoneyRequest`, with two ways to deliver it.
 - the amount, and an optional note of up to 60 characters,
 - when it was made, and when it expires (7 days),
 - its status: waiting, paid, declined, cancelled or expired,
-- a group id when it belongs to a Split the Bill.
+- a group id when it was sent in a Request in Bulk (on the asker's iPhone only).
 
 **Asking.** Type the amount on Pay and tap **Request**, beside Pay. Then choose who:
 - People Nearby come first.
@@ -70,7 +70,7 @@ There's one model, `MoneyRequest`, with two ways to deliver it.
 - If StarHash can't read Contacts, it can't tell who someone is, so it shows no requests, and the Requests page says why.
 - A request that gets through shows as a card on Pay with the photo, name, amount and note, and **Pay** and **Decline** buttons. Pay opens Pay with the person and the amount filled in, and dials when they tap Pay, as usual. Decline tells the asker. The number always shows, and Block is one tap away.
 
-**The Requests page.** Every request you've sent is listed with its status (Waiting, Paid, Declined, Cancelled or Expired) and Cancel. So is every split, and every request waiting for your answer. You reach it from Pay and from Transactions.
+**The Requests page.** Every request you've sent is listed with its status (Waiting, Paid, Declined, Cancelled or Expired) and Cancel. So is every bulk request, as one card, and every request waiting for your answer. You reach it from Pay and from Transactions.
 
 **Closing.** A request shows as Paid when either of these happens:
 - The asker's auto-verify reads a money-received SMS with the same amount and the same last three digits of the number. MTN's message hides the rest, so that's all it gives. It also has to arrive while the request is waiting.
@@ -124,14 +124,23 @@ After the owner's reference: a shop's phone showing the amount, and the customer
 
 **Try it.** `-tapSupported` shows Hold Near on the Simulator; `-tapRequest [state]` opens its sheet over Pay (with `-payAmount`) in each state, `landing` to watch Paid come; `-nodProgress` sweeps the phones. (`-holdNear` is Bring Phones Together's simulated distance.) A real tap needs two iPhones with ultra wideband.
 
-## Split the Bill
+## Request in Bulk
 
-- Start from a payment you made (**Split This** on its page), or from Request by choosing several people.
-- Set the total, the people, and equal or custom shares, with your own share left out.
-- It sends one request per person under one group id.
-- The split, on the Requests page, shows each person as Waiting, Paid or Declined, the total collected so far, and Remind, which sends again at most once a day.
-- Each friend needs you in their Contacts, or your request to them is never shown.
-- Anyone not on StarHash gets Share Message with their share, and a web pay link once that exists.
+The owner's change on 2026-11-27: not one total split into shares, but several people each asked for an amount of their own.
+
+- On Request's sheet, **Request in Bulk** (beside Hold Near Their iPhone) opens a sheet of its own, with the note typed so far.
+- Choose people nearby and contacts on StarHash, up to 10 at once (each is one of the 20 requests a day the server takes from one person). Everyone starts at the amount typed on Pay; tap their amount to change it. The total is under them.
+- **Send** asks them one after another, as Request would: people nearby over People Nearby's connection, anyone else through the server. Each gets an ordinary request; the group id (`MoneyRequest.groupID`) stays on the asker's iPhone. Each row then says Sent, or why not (not on StarHash, already asked, their iPhone out of reach), with Share Message and their own amount for someone StarHash cannot ask.
+- On the Requests page a bulk request is one outlined card: its note, how many were asked and paid, how much has come in of the total with a bar, then each person with their amount and status. A waiting one opens Mark as Paid and Cancel Request, as any request the owner sent.
+- Each person needs the owner in their Contacts, or the request is never shown to them.
+- **Remind** (2026-11-27): at the foot of a bulk request's card ("Remind Olivier", "Remind 2 People"), and on any waiting request's sheet that the owner sent through the server, as its primary button. It goes through the server (`POST /v1/requests/{id}/remind`, kept in `request_reminders`), at most once a day per request, counted from the request or the last reminder; until then it says when it can go next ("Remind at 8:00 PM", "Remind Tomorrow"). The iPhone asked reads the reminder's time with the request (`reminded_at`) and says "Jean reminds you of their request for 5,000 RWF" once, in the place of the request's own notification; with push, the server wakes it as for a new request. A request asked only between people nearby (no key) cannot be reminded. One the person asked dropped takes the reminder silently, as it still waits for the asker.
+- Not yet: a web pay link for people without StarHash.
+
+## Auto-verify comes first
+
+A request is settled from the wallet's SMS, so asking for money needs auto-verify on (`AutoVerify.isOn`: set up, the shortcut ran). With it off, Request on Pay opens **Requests Need Auto-verify** instead of Request's sheet, and Set Up Auto-verify opens the setup; once it is on, Request's sheet follows on the amount typed. That covers every way of asking: one person, Hold Near and Request in Bulk. Answering a request is never blocked: paying one records the payment as Pay does.
+
+Split large payments needs it too, since each part is confirmed by its own SMS: the switch in Settings shows off with "Needs auto-verify" and asks for it first, and `Paying` sends a payment whole while auto-verify is off, whatever the setting says.
 
 ## Phases
 
@@ -163,9 +172,9 @@ The directory's keys, sealing, the `requests` table and its endpoints, Backgroun
 - the limits hold,
 - the privacy policy says what's kept.
 
-### Phase 4: Split the Bill
+### Phase 4: Request in Bulk
 
-**Done when** a three-person split shows each share's status and the total collected, and fills in as the SMS arrive.
+Built behind `bulkRequests` (2026-11-27), on in the dev build. **Done when** a three-person bulk request shows each person's status and the total collected, and fills in as the SMS arrive.
 
 ### Phase 5: push notifications (paid team)
 
@@ -210,9 +219,9 @@ A phone in People Nearby proves, with its directory key, that it owns the entry 
 ## Decided (2026-11-26)
 
 1. **Visibility** is off until the owner says yes, asked once.
-2. **Names:** People Nearby, Let People Near You See You, and Split the Bill. Nearby and Split Large Payments keep their names.
+2. **Names:** People Nearby, Let People Near You See You, and Request in Bulk (was Split the Bill). Nearby and Split Large Payments keep their names.
 3. **Requests anywhere use Show My Name.** Turning it off stops requests from anywhere. Nearby requests still work.
-4. **Sent requests and splits** are listed on a Requests page of their own.
+4. **Sent requests and bulk requests** are listed on a Requests page of their own.
 5. **Only your Contacts can ask you.** Other requests are dropped on the phone without a reply.
 6. **Requests last 7 days,** and one person can send 20 a day.
 7. **A second iPhone will be borrowed** for testing. Until it's here, the Simulator and Serein stand in.

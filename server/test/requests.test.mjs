@@ -266,6 +266,58 @@ describe("requests", () => {
     assert.equal((await ask(shima, jean)).status, 409);
   });
 
+  test("reminded once a day by the asker alone, and the reminder reads beside the request", async () => {
+    const asker = owner("0788700001");
+    const asked = owner("0788700002");
+    await list(asker);
+    await list(asked);
+    const sent = await ask(asker, asked);
+    assert.equal(sent.status, 200);
+    const id = sent.body.id;
+    const remind = (who) => call("POST", `/v1/requests/${id}/remind`, { key: who.key });
+
+    // Not within a day of asking, nor by anyone but the asker.
+    assert.equal((await remind(asker)).status, 429);
+    assert.equal((await remind(asked)).status, 404);
+    assert.equal((await call("POST", `/v1/requests/${id}/remind`)).status, 401);
+    assert.equal((await call("GET", `/v1/requests/${id}/remind`, { key: asker.key })).status, 405);
+
+    const dayAgo = new Date(Date.now() - 86400 * 1000 - 60_000).toISOString();
+    d1(`UPDATE requests SET created_at = '${dayAgo}' WHERE id = '${id}'`);
+    const reminded = await remind(asker);
+    assert.equal(reminded.status, 200);
+    assert.equal(reminded.body.id, id);
+    // Then not again for a day.
+    assert.equal((await remind(asker)).status, 429);
+
+    const shown = (await call("GET", "/v1/requests", { key: asked.key })).body.asked.find((one) => one.id === id);
+    assert.equal(shown.reminded_at, reminded.body.reminded_at);
+    assert.equal(shown.created_at, dayAgo);
+
+    // A day on, once more.
+    d1(`UPDATE request_reminders SET reminded_at = '${dayAgo}' WHERE id = '${id}'`);
+    assert.equal((await remind(asker)).status, 200);
+
+    // Declined, or closed, nothing is left to remind of.
+    assert.equal((await call("POST", `/v1/requests/${id}/answer`, { key: asked.key, body: { sealed: sealed() } })).status, 200);
+    d1(`UPDATE request_reminders SET reminded_at = '${dayAgo}' WHERE id = '${id}'`);
+    assert.equal((await remind(asker)).status, 409);
+  });
+
+  test("a request the person asked dropped takes a reminder without telling either", async () => {
+    const asker = owner("0788700003");
+    const asked = owner("0788700004");
+    await list(asker);
+    await list(asked);
+    const sent = await ask(asker, asked);
+    assert.equal((await call("DELETE", `/v1/requests/${sent.body.id}`, { key: asked.key })).status, 200);
+    const dayAgo = new Date(Date.now() - 86400 * 1000 - 60_000).toISOString();
+    d1(`UPDATE requests SET created_at = '${dayAgo}' WHERE id = '${sent.body.id}'`);
+    // For the asker it waits, as it always did once dropped.
+    assert.equal((await call("POST", `/v1/requests/${sent.body.id}/remind`, { key: asker.key })).status, 200);
+    assert.deepEqual((await call("GET", "/v1/requests", { key: asked.key })).body.asked, []);
+  });
+
   test("someone who lists the asked number later cannot read, answer or drop the request", async () => {
     const asker = owner("0788600001");
     const asked = owner("0788600002");
@@ -324,6 +376,7 @@ describe("expiry", () => {
     const sent = await ask(asker, asked);
     const past = new Date(Date.now() - 60_000).toISOString();
     d1(`UPDATE requests SET expires_at = '${past}' WHERE id = '${sent.body.id}'`);
+    d1(`INSERT INTO request_reminders (id, reminded_at) VALUES ('${sent.body.id}', '${past}')`);
     assert.deepEqual((await call("GET", "/v1/requests", { key: asked.key })).body.asked, []);
     // Expired, it no longer holds the pair.
     assert.equal((await ask(asker, asked)).status, 200);
@@ -332,6 +385,8 @@ describe("expiry", () => {
     d1(`UPDATE directory_keys SET updated_at = '${lapsed}' WHERE public_key = '${asker.publicKey}'`);
     assert.equal((await fetch(`${BASE}/__scheduled?cron=0+1+*+*+*`)).status, 200);
     assert.equal(d1(`SELECT COUNT(*) AS n FROM requests WHERE id = '${sent.body.id}'`)[0].n, 0);
+    // A reminder goes with its request.
+    assert.equal(d1(`SELECT COUNT(*) AS n FROM request_reminders WHERE id NOT IN (SELECT id FROM requests)`)[0].n, 0);
     assert.equal(d1(`SELECT COUNT(*) AS n FROM directory_keys WHERE public_key = '${asker.publicKey}'`)[0].n, 0);
     assert.equal(d1(`SELECT COUNT(*) AS n FROM requests WHERE expires_at > '${new Date().toISOString()}'`)[0].n > 0, true);
   });

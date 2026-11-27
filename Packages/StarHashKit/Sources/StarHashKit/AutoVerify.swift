@@ -142,6 +142,17 @@ public final class AutoVerify {
         return looksBroken(at: now) ? .looksBroken : .active
     }
 
+    /// Whether auto-verify is on (set up, as Settings' switch shows it), so
+    /// what settles from the wallet's SMS may be used: Request, in every
+    /// way of asking, and Split large payments.
+    public var isOn: Bool { status() != .off }
+
+    /// The same, read straight from `defaults`, for what has no
+    /// `AutoVerify` at hand (`Paying`).
+    public nonisolated static func isOn(in defaults: UserDefaults) -> Bool {
+        defaults.bool(forKey: Key.setUp) && defaults.double(forKey: Key.shortcutRanAt) > 0
+    }
+
     /// A real message has come through the automation since the setup.
     private var isProven: Bool {
         guard let lastMessageAt else { return false }

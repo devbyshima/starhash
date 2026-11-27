@@ -6,17 +6,22 @@ import SwiftUI
 /// that can measure), then people nearby, then (with requests anywhere on)
 /// contacts and typed numbers, each checked with the directory as it is
 /// tapped, never the whole list. A tap sends it; someone not on StarHash
-/// gets Share Message instead.
+/// gets Share Message instead. Request in Bulk (with its flag on) asks
+/// several people at once, each for their own amount, on a sheet of its
+/// own.
 struct RequestSheet: View {
     let amount: Int
     /// Hold Near chosen, with the note typed: Pay opens its sheet.
     var onHoldNear: (String?) -> Void = { _ in }
+    /// Request in Bulk chosen, with the note typed: Pay opens its sheet.
+    var onBulk: (String?) -> Void = { _ in }
 
     @Environment(\.dismiss) private var dismiss
     @Environment(PeopleNearbyService.self) private var nearby
     @Environment(Owner.self) private var owner
     @FeatureFlagged(.requestsAnywhere) private var anywhereOn
     @FeatureFlagged(.tapToRequest) private var tapOn
+    @FeatureFlagged(.bulkRequests) private var bulkOn
     @AppStorage(Preferences.showMyName) private var showMyName: Bool
     @State private var note = ""
     @State private var unreachable: PeopleNearby.Person?
@@ -46,8 +51,16 @@ struct RequestSheet: View {
                     if let missing = NearbyRequests.missing(in: owner) {
                         RequestNotice(text: missing)
                     } else {
-                        if tapOn && TapToRequestService.isSupported {
-                            holdNearRow
+                        let holdsNear = tapOn && TapToRequestService.isSupported
+                        if holdsNear || bulkOn {
+                            // The ways to ask that open a sheet of their
+                            // own, on one card.
+                            VStack(spacing: 0) {
+                                if holdsNear { holdNearRow }
+                                if holdsNear && bulkOn { SheetDivider().padding(.leading, 70) }
+                                if bulkOn { bulkRow }
+                            }
+                            .sheetCard()
                         }
                         // With requests anywhere, an empty nearby says
                         // nothing: the contacts below are the way.
@@ -74,16 +87,35 @@ struct RequestSheet: View {
     /// Hold Near: the request held out for the next iPhone held to this
     /// one, on a sheet of its own.
     private var holdNearRow: some View {
+        optionRow(
+            symbol: "antenna.radiowaves.left.and.right", title: "Hold Near Their iPhone",
+            hint: "Shows the request for someone to hold their iPhone to", action: onHoldNear
+        )
+    }
+
+    /// Request in Bulk: several people, each asked for their own amount,
+    /// on a sheet of its own.
+    private var bulkRow: some View {
+        optionRow(
+            symbol: "person.2.fill", title: "Request in Bulk",
+            hint: "Asks several people at once, each for their own amount", action: onBulk
+        )
+    }
+
+    /// A way to ask that opens a sheet of its own, handed the note typed.
+    private func optionRow(
+        symbol: String, title: LocalizedStringKey, hint: LocalizedStringKey, action: @escaping (String?) -> Void
+    ) -> some View {
         Button {
             noteFocused = false
             let typed = note.trimmingCharacters(in: .whitespacesAndNewlines)
-            onHoldNear(typed.isEmpty ? nil : typed)
+            action(typed.isEmpty ? nil : typed)
         } label: {
             HStack(spacing: 12) {
-                SheetIconCircle(symbol: "antenna.radiowaves.left.and.right")
+                SheetIconCircle(symbol: symbol)
                     .frame(width: 44, height: 44)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Hold Near Their iPhone")
+                    Text(title)
                         .font(PickerType.rowName)
                         .foregroundStyle(Color.starhashPrimaryText)
                         .lineLimit(1)
@@ -100,8 +132,7 @@ struct RequestSheet: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.hapticPlain)
-        .sheetCard()
-        .accessibilityHint(Text("Shows the request for someone to hold their iPhone to"))
+        .accessibilityHint(Text(hint))
     }
 
     /// Requests through the server: both flags, as the Request button
@@ -159,7 +190,7 @@ struct RequestSheet: View {
 }
 
 /// A line on a card where a list would be: why there is nothing to tap.
-private struct RequestNotice: View {
+struct RequestNotice: View {
     let text: String
 
     var body: some View {
@@ -202,21 +233,9 @@ private struct RequestAnywhereSection: View {
     @State private var checked: Set<String> = []
     @FocusState private var searchFocused: Bool
 
-    /// One number to ask, from a contact or typed.
-    struct Row: Identifiable, Hashable {
-        let recipient: Recipient
-        /// The contact's name, nil for a number typed.
-        let name: String?
-        let contactID: String?
-        let hasPhoto: Bool
-
-        var id: String { recipient.destination }
-    }
-
     /// Why the last one tapped was not asked.
     struct Outcome: Equatable {
-        enum Kind: Equatable { case notOnStarHash, takesNoRequests, alreadyAsked, tooMany, notListed, failed }
-        let kind: Kind
+        let failure: RequestsAnywhere.AskFailure
         let name: String
     }
 
@@ -250,7 +269,7 @@ private struct RequestAnywhereSection: View {
     }
 
     /// One card of rows, each with Invite beside it when `invites`.
-    private func rowsCard(_ rows: [Row], invites: Bool) -> some View {
+    private func rowsCard(_ rows: [RequestContactRow], invites: Bool) -> some View {
         VStack(spacing: 0) {
             ForEach(Array(rows.enumerated()), id: \.element.id) { index, row in
                 if index > 0 { SheetDivider().padding(.leading, 70) }
@@ -281,20 +300,8 @@ private struct RequestAnywhereSection: View {
         }
     }
 
-    /// Every contact's Rwandan mobile number, and a number typed in full,
-    /// for the directory to say which are on StarHash.
     private var numbersToCheck: [String] {
-        let search = RecipientSearch(query: query)
-        var numbers: [String] = []
-        if let typed = search.typedRecipient, typed.kind == .phone, typed.isRwandanMobile { numbers.append(typed.destination) }
-        if enableContacts {
-            for contact in contacts.contacts {
-                for recipient in contact.recipients where recipient.kind == .phone && recipient.isRwandanMobile {
-                    numbers.append(recipient.destination)
-                }
-            }
-        }
-        return numbers
+        RequestContacts.numbers(query: query, contacts: contacts, enableContacts: enableContacts)
     }
 
     /// Checks the numbers not yet answered for: all of them as the sheet
@@ -332,32 +339,14 @@ private struct RequestAnywhereSection: View {
         .onChange(of: query) { outcome = nil }
     }
 
-    /// A number typed in full first, then the contacts' numbers matching
-    /// the search, never the owner's own.
-    private var rows: [Row] {
-        let search = RecipientSearch(query: query)
-        let own = Set([owner.defaultSIM, owner.otherSIM].compactMap { $0?.destination })
-        var rows: [Row] = []
-        var seen = own
-        if let typed = search.typedRecipient, typed.kind == .phone, typed.isRwandanMobile, !seen.contains(typed.destination) {
-            let saved = enableContacts ? contacts.contacts.first { $0.recipients.contains { $0.destination == typed.destination } } : nil
-            rows.append(Row(recipient: typed, name: saved?.name, contactID: saved?.id, hasPhoto: saved?.hasPhoto ?? false))
-            seen.insert(typed.destination)
-        }
-        guard enableContacts else { return rows }
-        for contact in contacts.contacts where search.isEmpty || search.matches(contact) {
-            for recipient in contact.recipients where recipient.kind == .phone && recipient.isRwandanMobile {
-                guard seen.insert(recipient.destination).inserted else { continue }
-                rows.append(Row(recipient: recipient, name: contact.name, contactID: contact.id, hasPhoto: contact.hasPhoto))
-            }
-        }
-        return rows
+    private var rows: [RequestContactRow] {
+        RequestContacts.rows(query: query, owner: owner, contacts: contacts, enableContacts: enableContacts)
     }
 
-    private func rowButton(_ row: Row) -> some View {
+    private func rowButton(_ row: RequestContactRow) -> some View {
         Button { ask(row) } label: {
             HStack(spacing: 12) {
-                RecipientTile(tile: tile(for: row), size: 44, fill: .sheetChip)
+                RecipientTile(tile: row.tile, size: 44, fill: .sheetChip)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(verbatim: row.name ?? row.recipient.formattedDestination)
                         .font(PickerType.rowName)
@@ -382,22 +371,16 @@ private struct RequestAnywhereSection: View {
         .accessibilityLabel(Text("Request \(Money.format(amount)) from \(row.name ?? row.recipient.formattedDestination)"))
     }
 
-    private func tile(for row: Row) -> RecipientRow.Tile {
-        let initials: RecipientRow.Tile = row.name.map { .monogram(PayContact.initials(for: $0)) } ?? .shadow(seed: row.recipient.destination)
-        guard let id = row.contactID, row.hasPhoto else { return initials }
-        return .photo(contactID: id, fallback: initials)
-    }
-
     /// Why it was not sent, with Share Message for someone StarHash cannot
     /// ask.
     private func outcomeCard(_ outcome: Outcome) -> some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text(verbatim: message(for: outcome))
+            Text(verbatim: outcome.failure.message(name: outcome.name))
                 .font(.sheetBody)
                 .foregroundStyle(Color.starhashPrimaryText)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            if outcome.kind == .notOnStarHash || outcome.kind == .takesNoRequests {
-                ShareLink(item: shareText) {
+            if outcome.failure.offersShareMessage {
+                ShareLink(item: RequestContacts.shareText(amount: amount, note: note, owner: owner)) {
                     Text("Share Message")
                 }
                 .buttonStyle(.sheetFilled)
@@ -408,65 +391,22 @@ private struct RequestAnywhereSection: View {
         .transition(.opacity)
     }
 
-    private func message(for outcome: Outcome) -> String {
-        let name = outcome.name
-        return switch outcome.kind {
-        case .notOnStarHash: String(starhash: "\(name) isn't on StarHash")
-        case .takesNoRequests: String(starhash: "\(name) can't get requests on StarHash yet")
-        case .alreadyAsked: String(starhash: "You already asked \(name). Their answer will show under Requests")
-        case .tooMany: String(starhash: "You've sent 20 requests today. Ask again tomorrow")
-        case .notListed: String(starhash: "Your name isn't on StarHash yet. Try again in a moment")
-        case .failed: String(starhash: "Couldn't reach StarHash. Try again")
-        }
-    }
-
-    /// What Share Message hands the share sheet: the amount, the note and
-    /// the owner's number, for someone to pay by hand.
-    private var shareText: String {
-        let money = Money.formatWithCurrency(amount)
-        let number = owner.defaultSIM?.formattedDestination ?? ""
-        let note = note.trimmingCharacters(in: .whitespacesAndNewlines)
-        return if !note.isEmpty {
-            String(starhash: "Could you send me \(money) for \(note)? My number is \(number).")
-        } else {
-            String(starhash: "Could you send me \(money)? My number is \(number).")
-        }
-    }
-
-    private func ask(_ row: Row) {
-        guard checking == nil, let own = owner.defaultSIM else { return }
+    private func ask(_ row: RequestContactRow) {
+        guard checking == nil else { return }
         searchFocused = false
         checking = row.recipient.destination
-        let shownName = row.name.map { $0.split(separator: " ").first.map(String.init) ?? $0 } ?? row.recipient.formattedDestination
         Task {
             defer { checking = nil }
-            let anywhere = AppEnvironment.requestsAnywhere
-            let listed: RequestsAnywhere.Listed
-            switch await anywhere.lookUp(row.recipient.destination) {
-            case .listed(let found): listed = found
-            case .notListed: return show(.notOnStarHash, shownName)
-            case .failed: return show(.failed, shownName)
-            }
-            let photo = ProfilePhoto.shared.image != nil ? AppEnvironment.serverSync.sharedPhotoID : nil
-            let ask = MoneyRequest.Message.Ask(
-                id: UUID(), name: owner.name.trimmingCharacters(in: .whitespacesAndNewlines), number: own.destination,
-                photoID: photo, amount: amount, note: note
-            )
             let person = Recipient(name: row.name, destination: row.recipient.destination, kind: .phone)
-            switch await anywhere.ask(ask, to: person, listed: listed) {
+            switch await AnywhereRequests.ask(person, amount: amount, note: note, owner: owner) {
             case .success(let sent): onSent(sent)
-            case .failure(.notOnStarHash): show(.notOnStarHash, shownName)
-            case .failure(.takesNoRequests): show(.takesNoRequests, shownName)
-            case .failure(.alreadyAsked): show(.alreadyAsked, shownName)
-            case .failure(.tooMany): show(.tooMany, shownName)
-            case .failure(.notListed): show(.notListed, shownName)
-            case .failure(.failed): show(.failed, shownName)
+            case .failure(let failure): show(failure, row.firstName)
             }
         }
     }
 
-    private func show(_ kind: Outcome.Kind, _ name: String) {
-        withAnimation(.smooth(duration: 0.25)) { outcome = Outcome(kind: kind, name: name) }
+    private func show(_ failure: RequestsAnywhere.AskFailure, _ name: String) {
+        withAnimation(.smooth(duration: 0.25)) { outcome = Outcome(failure: failure, name: name) }
     }
 }
 
@@ -500,8 +440,9 @@ extension Recipient {
 
 /// One waiting request, with its two answers and no keypad: the request
 /// already says how much. Asked of the owner, Pay dials it at once and
-/// Decline says no; asked by the owner, Mark as Paid (money that came some
-/// way StarHash didn't see) and Cancel Request.
+/// Decline says no; asked by the owner, Remind (once a day, for one that
+/// went through the server), Mark as Paid (money that came some way
+/// StarHash didn't see) and Cancel Request.
 struct RequestAnswerSheet: View {
     let request: MoneyRequest
     @Environment(\.dismiss) private var dismiss
@@ -526,11 +467,21 @@ struct RequestAnswerSheet: View {
                     dismiss()
                 }
             case .sent:
-                Button("Mark as Paid") {
-                    requests.markPaid(request.id)
-                    dismiss()
+                // Remind first while it can go: the likeliest next step
+                // for money that hasn't come.
+                if request.isRemindable {
+                    RemindButton(requests: [request], style: .sheet)
+                    SheetTextButton("Mark as Paid") {
+                        requests.markPaid(request.id)
+                        dismiss()
+                    }
+                } else {
+                    Button("Mark as Paid") {
+                        requests.markPaid(request.id)
+                        dismiss()
+                    }
+                    .buttonStyle(.sheetPrimary)
                 }
-                .buttonStyle(.sheetPrimary)
                 SheetTextButton("Cancel Request", role: .destructive) {
                     AnywhereRequests.cancel(request)
                     dismiss()
@@ -608,7 +559,7 @@ struct RequestsPage: View {
 
     var body: some View {
         let asked = requests.requests.filter { $0.direction == .received }
-        let sent = requests.requests.filter { $0.direction == .sent }
+        let sent = requests.sent
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
                 if cannotTellWhoAsks {
@@ -627,7 +578,7 @@ struct RequestsPage: View {
                     section("Asked of you", asked)
                 }
                 if !sent.isEmpty {
-                    section("You asked", sent)
+                    sentSection(sent)
                 }
             }
             .padding(.bottom, 24)
@@ -654,6 +605,24 @@ struct RequestsPage: View {
         anywhereOn && FeatureFlags.isOn(.peopleNearby) && !(enableContacts && contacts.access == .authorized)
     }
 
+    /// Those the owner sent, a bulk request's people together under it.
+    private func sentSection(_ list: [SentRequest]) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            SheetSectionLabel("You asked", onPage: true)
+                .padding(.horizontal, 18)
+                .padding(.top, 20)
+                .padding(.bottom, 6)
+            ForEach(list) { entry in
+                switch entry {
+                case .single(let request):
+                    RequestRow(request: request) { opened = request }
+                case .group(let group):
+                    RequestGroupCard(group: group) { opened = $0 }
+                }
+            }
+        }
+    }
+
     private func section(_ title: String, _ list: [MoneyRequest]) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             SheetSectionLabel(title, onPage: true)
@@ -667,26 +636,129 @@ struct RequestsPage: View {
     }
 }
 
+/// A bulk request on the Requests page: an outlined card, so its people
+/// read as one, with its note (or Request in Bulk), how many were asked
+/// and paid and when, how much has come in of all it asked for and a bar
+/// of it, then each person as the page lists them, without the note and
+/// date they share. A waiting one opens its answers.
+private struct RequestGroupCard: View {
+    let group: RequestGroup
+    let open: (MoneyRequest) -> Void
+
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: StarHashMetrics.outlinedCardRadius, style: .continuous)
+        VStack(spacing: 0) {
+            header
+                .padding(.horizontal, 16)
+                .padding(.top, 14)
+                .padding(.bottom, 12)
+            progress
+                .padding(.horizontal, 16)
+                .padding(.bottom, 16)
+            SheetDivider()
+            ForEach(Array(group.requests.enumerated()), id: \.element.id) { index, request in
+                // Between people, from where their names start.
+                if index > 0 { SheetDivider().padding(.leading, 16 + 40 + 12) }
+                RequestRow(request: request, inGroup: true) { open(request) }
+            }
+            // Everyone still waiting, at the card's foot.
+            let remindable = group.requests.filter(\.isRemindable)
+            if !remindable.isEmpty {
+                SheetDivider()
+                RemindButton(requests: remindable, style: .card)
+            }
+        }
+        .clipShape(shape)
+        .starhashOutlinedCard(padding: EdgeInsets())
+        .padding(.horizontal, StarHashMetrics.screenPadding)
+        .padding(.top, 8)
+        .padding(.bottom, 6)
+    }
+
+    private var header: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(verbatim: group.note ?? String(starhash: "Request in Bulk"))
+                    .font(PickerType.rowName)
+                    .foregroundStyle(Color.starhashPrimaryText)
+                    .lineLimit(1)
+                Text(verbatim: subtitle)
+                    .font(PickerType.rowDetail)
+                    .foregroundStyle(Color.starhashSecondaryText)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 8)
+            VStack(alignment: .trailing, spacing: 3) {
+                Text(verbatim: Money.formatWithCurrency(group.collected))
+                    .font(.starhashNumber(16, weight: .semibold))
+                    .foregroundStyle(Color.starhashPrimaryText)
+                Text(verbatim: String(starhash: "of \(Money.format(group.asked))"))
+                    .font(PickerType.rowDetail)
+                    .foregroundStyle(Color.starhashSecondaryText)
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: accessibilityText))
+    }
+
+    /// What has come in of all it asked for, in the accent on a hairline.
+    private var progress: some View {
+        let share = group.asked > 0 ? Double(group.collected) / Double(group.asked) : 0
+        return Capsule()
+            .fill(Color.starhashOutline)
+            .frame(height: 4)
+            .overlay(alignment: .leading) {
+                GeometryReader { proxy in
+                    Capsule()
+                        .fill(Color.starhashInk)
+                        .frame(width: proxy.size.width * min(max(share, 0), 1))
+                }
+            }
+            .accessibilityHidden(true)
+    }
+
+    /// "3 people · 1 paid · 26 Nov".
+    private var subtitle: String {
+        let people = group.requests.count == 1
+            ? String(starhash: "1 person")
+            : String(starhash: "\(group.requests.count) people")
+        let paid = String(starhash: "\(group.paidCount) paid")
+        let date = group.createdAt?.formatted(.dateTime.day().month(.abbreviated).locale(.starhash))
+        return [people, paid, date].compactMap { $0 }.joined(separator: " · ")
+    }
+
+    private var accessibilityText: String {
+        let title = group.note ?? String(starhash: "Request in Bulk")
+        let collected = String(starhash: "\(Money.formatWithCurrency(group.collected)) of \(Money.formatWithCurrency(group.asked)) collected")
+        return [title, subtitle, collected].joined(separator: ", ")
+    }
+}
+
 /// One request on the Requests page: the person, the amount and how it
 /// stands. Only a waiting one is a button.
 private struct RequestRow: View {
     let request: MoneyRequest
+    /// On a bulk request's card: inside its edges, with no line of its own
+    /// and without the note and date the card already gives.
+    var inGroup = false
     let open: () -> Void
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         Button(action: open) {
             HStack(spacing: 12) {
-                RequestTile(request: request)
+                RequestTile(request: request, size: inGroup ? 40 : 44)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(verbatim: request.person.shownName)
                         .font(PickerType.rowName)
                         .foregroundStyle(Color.starhashPrimaryText)
                         .lineLimit(1)
-                    Text(verbatim: subtitle)
-                        .font(PickerType.rowDetail)
-                        .foregroundStyle(Color.sheetSecondaryText)
-                        .lineLimit(1)
+                    if !inGroup {
+                        Text(verbatim: subtitle)
+                            .font(PickerType.rowDetail)
+                            .foregroundStyle(Color.sheetSecondaryText)
+                            .lineLimit(1)
+                    }
                 }
                 Spacer(minLength: 8)
                 VStack(alignment: .trailing, spacing: 3) {
@@ -698,10 +770,12 @@ private struct RequestRow: View {
                         .foregroundStyle(request.status == .waiting ? Color.starhashUrgentText : Color.starhashSecondaryText.color(scheme: colorScheme, surface: .page))
                 }
             }
-            .padding(.horizontal, 18)
+            .padding(.horizontal, inGroup ? 16 : 18)
             .padding(.vertical, 10)
             .overlay(alignment: .bottom) {
-                SheetDivider().padding(.leading, 18 + 44 + 12).padding(.trailing, 18)
+                if !inGroup {
+                    SheetDivider().padding(.leading, 18 + 44 + 12).padding(.trailing, 18)
+                }
             }
             .contentShape(Rectangle())
         }

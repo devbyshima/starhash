@@ -42,6 +42,42 @@ enum AnywhereRequests {
         return news
     }
 
+    /// Asks `person` for `amount` through the server: their number looked
+    /// up again at the moment it is asked, then the request sealed to the
+    /// key it is listed with.
+    static func ask(_ person: Recipient, amount: Int, note: String, owner: Owner) async
+        -> Result<MoneyRequest, RequestsAnywhere.AskFailure> {
+        guard let own = owner.defaultSIM else { return .failure(.failed) }
+        let anywhere = AppEnvironment.requestsAnywhere
+        let listed: RequestsAnywhere.Listed
+        switch await anywhere.lookUp(person.destination) {
+        case .listed(let found): listed = found
+        case .notListed: return .failure(.notOnStarHash)
+        case .failed: return .failure(.failed)
+        }
+        let photo = ProfilePhoto.shared.image != nil ? AppEnvironment.serverSync.sharedPhotoID : nil
+        let ask = MoneyRequest.Message.Ask(
+            id: UUID(), name: owner.name.trimmingCharacters(in: .whitespacesAndNewlines), number: own.destination,
+            photoID: photo, amount: amount, note: note
+        )
+        return await anywhere.ask(ask, to: person, listed: listed)
+    }
+
+    /// Reminds the people asked in `requests` (those the owner may remind
+    /// now), one after another, as Remind on the Requests page does: how
+    /// many were reminded, and the first reason one was not.
+    static func remind(_ requests: [MoneyRequest]) async -> (reminded: Int, failure: RequestsAnywhere.RemindFailure?) {
+        var reminded = 0
+        var failure: RequestsAnywhere.RemindFailure?
+        for request in requests where request.canRemind() {
+            switch await AppEnvironment.requestsAnywhere.remind(request.id) {
+            case .success: reminded += 1
+            case .failure(let reason): failure = failure ?? reason
+            }
+        }
+        return (reminded, failure)
+    }
+
     /// The owner declined: the asker hears over People Nearby's connection
     /// while it is open, and through the server whenever it carried the
     /// request.

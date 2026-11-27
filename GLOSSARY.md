@@ -31,8 +31,12 @@ Sending a payment to a recipient, from the amount to the code dialled: refused f
 _Avoid_: checkout, transfer
 
 **Split payment**:
-One payment sent as several smaller ones because together they cost less in fees (MTN's fee jumps from 250 to 1,500 past 150,000). Each is a **part**, its own transaction with its own SMS. Offered only with Split large payments on.
+One payment sent as several smaller ones because together they cost less in fees (MTN's fee jumps from 250 to 1,500 past 150,000). Each is a **part**, its own transaction with its own SMS. Offered only with Split large payments and auto-verify on.
 _Avoid_: instalment, chunk
+
+**Request in Bulk**:
+Several people asked for money at once, each for an amount of their own: one request each under one group id, which only the asker's iPhone keeps, shown together on the Requests page (`BulkRequest`, `RequestGroup`). Needs auto-verify on, as every request does.
+_Avoid_: split the bill, group request, mass request
 
 **Counts**:
 Whether a transaction counts in the owner's totals, chart, Report and summaries: it does unless it failed or is an own transfer. A pending payment counts, since it was dialled and most go through; a fee counts only once confirmed (`Transaction.counts`).
