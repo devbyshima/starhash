@@ -80,6 +80,9 @@ const MAX_NAME = 60;
 const REQUEST_LIFETIME_DAYS = 7;
 /// Requests one key may send in any 24 hours.
 const MAX_REQUESTS_A_DAY = 20;
+/// A request is reminded of at most once in this long, counted from when
+/// it was asked or last reminded of.
+const REMINDER_GAP_MS = 86400 * 1000;
 /// A sealed request or answer, in base64: what StarHash seals is a few
 /// hundred bytes (a name and a note of 60 characters at most).
 const MAX_SEALED = 2048;
@@ -150,12 +153,15 @@ export default {
           return text(405, "Method not allowed");
       }
     }
-    const one = url.pathname.match(/^\/v1\/requests\/([^/]+)(\/answer)?$/);
+    const one = url.pathname.match(/^\/v1\/requests\/([^/]+)(\/answer|\/remind)?$/);
     if (one) {
       const id = one[1].toLowerCase();
       if (!UUID.test(id)) return text(404, "Not found");
-      if (one[2]) {
+      if (one[2] === "/answer") {
         return request.method === "POST" ? answerRequest(id, request, env) : text(405, "Method not allowed");
+      }
+      if (one[2] === "/remind") {
+        return request.method === "POST" ? remindRequest(id, request, env, ctx) : text(405, "Method not allowed");
       }
       return request.method === "DELETE" ? closeRequest(id, request, env) : text(405, "Method not allowed");
     }
@@ -173,6 +179,7 @@ export default {
       env.DB.prepare("DELETE FROM directory_keys WHERE updated_at <= ?1").bind(lapsed),
       env.DB.prepare("DELETE FROM push_tokens WHERE updated_at <= ?1").bind(lapsed),
       env.DB.prepare("DELETE FROM requests WHERE expires_at <= ?1").bind(now.toISOString()),
+      env.DB.prepare("DELETE FROM request_reminders WHERE id NOT IN (SELECT id FROM requests)"),
     ]);
   },
 } satisfies ExportedHandler<Env>;
@@ -399,9 +406,10 @@ async function getRequests(request: Request, env: Env): Promise<Response> {
   const now = new Date();
   const [asked, answers] = await env.DB.batch<Record<string, string>>([
     env.DB.prepare(
-      `SELECT id, sealed, from_public_key, state, created_at FROM requests
-       WHERE to_key_hash = ?1 AND state IN ('waiting', 'closed') AND expires_at > ?2
-       ORDER BY created_at LIMIT 100`,
+      `SELECT q.id, q.sealed, q.from_public_key, q.state, q.created_at, r.reminded_at
+       FROM requests q LEFT JOIN request_reminders r ON r.id = q.id
+       WHERE q.to_key_hash = ?1 AND q.state IN ('waiting', 'closed') AND q.expires_at > ?2
+       ORDER BY q.created_at LIMIT 100`,
     ).bind(keyHash, now.toISOString()),
     env.DB.prepare(
       `SELECT id, answer FROM requests WHERE from_key_hash = ?1 AND state = 'answered' AND expires_at > ?2
@@ -412,7 +420,14 @@ async function getRequests(request: Request, env: Env): Promise<Response> {
     asked: asked.results.map((row) =>
       row.state === "closed"
         ? { id: row.id, closed: true }
-        : { id: row.id, sealed: row.sealed, key: row.from_public_key, created_at: row.created_at },
+        : {
+            id: row.id,
+            sealed: row.sealed,
+            key: row.from_public_key,
+            created_at: row.created_at,
+            // Only once reminded, so older apps read what they always did.
+            ...(row.reminded_at ? { reminded_at: row.reminded_at } : {}),
+          },
     ),
     answers: answers.results.map((row) => ({ id: row.id, answer: row.answer })),
   });
@@ -436,6 +451,47 @@ async function answerRequest(id: string, request: Request, env: Env): Promise<Re
     .run();
   if (result.meta.changes === 1) return text(200, "Answered");
   return (await isAskedOf(id, keyHash, env)) ? text(409, "Not waiting") : text(404, "Not found");
+}
+
+/// The asker reminds the person asked of a request still waiting: at most
+/// once a day, from when it was asked or last reminded of. The iPhone asked
+/// reads the reminder's time beside the request and says so, and is woken
+/// as for a new request. One the person asked dropped (they don't know the
+/// asker) takes the reminder without a word to either, as it waits for the
+/// asker until it expires.
+async function remindRequest(id: string, request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  const key = bearer(request);
+  if (!key) return text(401, "A key is needed");
+  const keyHash = await sha256(key);
+  const now = new Date();
+  const row = await env.DB.prepare(
+    `SELECT q.to_key_hash, q.sealed, q.from_public_key, q.state, q.created_at, q.expires_at, r.reminded_at
+     FROM requests q LEFT JOIN request_reminders r ON r.id = q.id
+     WHERE q.id = ?1 AND q.from_key_hash = ?2`,
+  )
+    .bind(id, keyHash)
+    .first<Record<string, string | null>>();
+  if (!row) return text(404, "Not found");
+  const nowISO = now.toISOString();
+  if (!["waiting", "dropped"].includes(row.state ?? "") || (row.expires_at ?? "") <= nowISO) {
+    return text(409, "Not waiting");
+  }
+  const gapStart = new Date(now.getTime() - REMINDER_GAP_MS).toISOString();
+  if ((row.reminded_at ?? row.created_at ?? "") > gapStart) return text(429, "Too soon");
+  // Kept only if no other reminder slipped in meanwhile.
+  const kept = await env.DB.prepare(
+    `INSERT INTO request_reminders (id, reminded_at) VALUES (?1, ?2)
+     ON CONFLICT(id) DO UPDATE SET reminded_at = excluded.reminded_at WHERE request_reminders.reminded_at <= ?3`,
+  )
+    .bind(id, nowISO, gapStart)
+    .run();
+  if (kept.meta.changes !== 1) return text(429, "Too soon");
+  if (row.state === "waiting" && row.sealed && row.from_public_key && row.to_key_hash) {
+    ctx.waitUntil(
+      notifyRequest(row.to_key_hash, { id, sealed: row.sealed, key: row.from_public_key }, row.expires_at ?? nowISO, lapsedBefore(now), env),
+    );
+  }
+  return json(200, { id, reminded_at: nowISO });
 }
 
 /// The asker closes their request (cancelled, or paid): it goes from the

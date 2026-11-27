@@ -15,6 +15,7 @@ struct PayView: View {
     @Environment(Owner.self) private var owner
     @Environment(PeopleNearbyService.self) private var peopleNearby
     @Environment(MoneyRequests.self) private var requests
+    @Environment(AutoVerify.self) private var autoVerify
     @FeatureFlagged(.peopleNearby) private var peopleNearbyOn
     @AppStorage(Preferences.requestBesidePay) private var requestBesidePay: Bool
     /// Request's sheet: who nearby to ask for the amount typed.
@@ -25,6 +26,16 @@ struct PayView: View {
     @State private var holdingNear: HoldNearRequest?
     /// Hold Near chosen on Request's sheet, opened as it goes.
     @State private var pendingHoldNear: HoldNearRequest?
+    /// Request in Bulk, chosen on Request's sheet: opened once that sheet
+    /// has gone, as Hold Near is.
+    @State private var bulkRequesting: BulkRequestStart?
+    @State private var pendingBulk: BulkRequestStart?
+    /// Request tapped with auto-verify off: what asks for it first.
+    @State private var needsAutoVerify: AutoVerifyRequiredSheet.Feature?
+    /// Set Up Auto-verify, chosen on that sheet: the setup opens once it
+    /// has gone.
+    @State private var pendingAutoVerifySetUp = false
+    @State private var setsUpAutoVerify = false
     private var wallet: Recipient.Network { owner.wallet }
 
     @State private var input = AmountInput()
@@ -90,13 +101,39 @@ struct PayView: View {
         .sheet(isPresented: $isRequesting, onDismiss: {
             holdingNear = pendingHoldNear
             pendingHoldNear = nil
+            bulkRequesting = pendingBulk
+            pendingBulk = nil
         }) {
             RequestSheet(amount: input.value) { note in
                 pendingHoldNear = HoldNearRequest(amount: input.value, note: note)
                 isRequesting = false
+            } onBulk: { note in
+                pendingBulk = BulkRequestStart(amount: input.value, note: note)
+                isRequesting = false
             }
         }
         .sheet(item: $holdingNear) { HoldNearSheet(amount: $0.amount, note: $0.note) }
+        .sheet(item: $bulkRequesting) { BulkRequestSheet(amount: $0.amount, note: $0.note) }
+        .sheet(item: $needsAutoVerify, onDismiss: {
+            guard pendingAutoVerifySetUp else { return }
+            pendingAutoVerifySetUp = false
+            setsUpAutoVerify = true
+        }) { feature in
+            AutoVerifyRequiredSheet(feature: feature) { pendingAutoVerifySetUp = true }
+        }
+        // The setup in full, as onboarding shows it; set up, Request opens
+        // on the amount still typed.
+        .fullScreenCover(isPresented: $setsUpAutoVerify, onDismiss: {
+            if autoVerify.isOn, !input.isZero { isRequesting = true }
+        }) {
+            NavigationStack {
+                AutoVerificationGuide(
+                    onClose: { setsUpAutoVerify = false },
+                    onLeave: { setsUpAutoVerify = false },
+                    onDone: { setsUpAutoVerify = false }
+                )
+            }
+        }
         .sheet(item: $answering) { RequestAnswerSheet(request: $0) }
         // A request's notification, tapped: its sheet, while it still waits.
         .onChange(of: router.answerRequestID, initial: true) { _, id in
@@ -281,6 +318,12 @@ struct PayView: View {
                 AccessibilityNotification.Announcement(String(starhash: "Type an amount first")).post()
                 return
             }
+            // A request is marked paid from the wallet's SMS, so asking
+            // needs auto-verify on.
+            guard autoVerify.isOn else {
+                needsAutoVerify = .requests
+                return
+            }
             isRequesting = true
         } label: {
             Text("Request")
@@ -462,6 +505,13 @@ struct PayView: View {
         // over Pay, after a moment, as -paySplit does: a sheet the root
         // opens at launch would otherwise take its place.
         if DebugLaunch.arguments.contains("-payRequest") { isRequesting = true }
+        // -payBulkRequest: Request in Bulk's sheet, after a moment.
+        if DebugLaunch.arguments.contains("-payBulkRequest") {
+            Task {
+                try? await Task.sleep(for: .seconds(1))
+                bulkRequesting = BulkRequestStart(amount: PayDebug.amount ?? 5_000, note: DebugLaunch.value(after: "-tapRequestNote"))
+            }
+        }
         if TapToRequestDebug.opensHoldNear {
             Task {
                 try? await Task.sleep(for: .seconds(1))
@@ -502,6 +552,14 @@ private struct ScanButton: View {
 
 /// A request held out with Hold Near: the amount typed and the note.
 private struct HoldNearRequest: Identifiable {
+    let id = UUID()
+    let amount: Int
+    let note: String?
+}
+
+/// Request in Bulk's sheet to open: the amount typed, as everyone's to
+/// start with, and the note.
+private struct BulkRequestStart: Identifiable {
     let id = UUID()
     let amount: Int
     let note: String?

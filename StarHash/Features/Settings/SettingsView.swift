@@ -103,6 +103,13 @@ private struct SettingsRootList: View {
     @State private var isImporting = false
     @State private var transferOutcome: DataTransfer.Outcome?
     @State private var confirmsAutoVerifyOff = SettingsLaunch.confirmsAutoVerifyOff
+    /// Split large payments switched on with auto-verify off: what asks for
+    /// it first.
+    @State private var needsAutoVerify: AutoVerifyRequiredSheet.Feature?
+    @State private var pendingAutoVerifySetUp = false
+    /// Back from the setup that Split large payments asked for: set up, the
+    /// switch goes on as the owner wanted.
+    @State private var turnsSplitOnOnceSetUp = false
     @State private var locationRefused = false
 
     var body: some View {
@@ -185,6 +192,20 @@ private struct SettingsRootList: View {
                 withAnimation(.smooth) { AppReset.eraseEverything(store: store, router: router) }
             }
             Button("Cancel", role: .cancel) {}
+        }
+        .sheet(item: $needsAutoVerify, onDismiss: {
+            guard pendingAutoVerifySetUp else { return }
+            pendingAutoVerifySetUp = false
+            turnsSplitOnOnceSetUp = true
+            setUpAutoVerify()
+        }) { feature in
+            AutoVerifyRequiredSheet(feature: feature) { pendingAutoVerifySetUp = true }
+        }
+        .onAppear {
+            // Back from the setup Split large payments asked for.
+            guard turnsSplitOnOnceSetUp else { return }
+            turnsSplitOnOnceSetUp = false
+            if autoVerify.isOn { splitLargePayments = true }
         }
         .sheet(isPresented: $confirmsAutoVerifyOff) {
             TurnOffAutoVerifySheet {
@@ -428,7 +449,8 @@ private struct SettingsRootList: View {
             symbol: "banknote.fill",
             title: "Split large payments",
             caption: "Offer to send a MoMo payment over 150,000 in parts when that costs less in fees",
-            isOn: $splitLargePayments
+            status: autoVerify.isOn ? nil : String(starhash: "Needs auto-verify"),
+            isOn: splitBinding
         )
     }
     }
@@ -566,6 +588,20 @@ private struct SettingsRootList: View {
             autoVerify.status() != .off
         } set: { isOn in
             if isOn { setUpAutoVerify() } else { confirmsAutoVerifyOff = true }
+        }
+    }
+
+    /// On only with auto-verify on too, since each part is confirmed by its
+    /// own SMS. Switched on without it, it asks for auto-verify first.
+    private var splitBinding: Binding<Bool> {
+        Binding {
+            splitLargePayments && autoVerify.isOn
+        } set: { isOn in
+            if isOn, !autoVerify.isOn {
+                needsAutoVerify = .splitPayments
+            } else {
+                splitLargePayments = isOn
+            }
         }
     }
 

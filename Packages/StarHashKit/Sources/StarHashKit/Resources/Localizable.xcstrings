@@ -995,6 +995,54 @@
           }
         }
       }
+    },
+    "%@ reminds you of their request for %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ vous rappelle sa demande de %2$@."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ arakwibutsa ubusabe bwe bwa %2$@."
+          }
+        }
+      }
+    },
+    "%@ reminds you of their request.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ vous rappelle sa demande."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ arakwibutsa ubusabe bwe."
+          }
+        }
+      }
+    },
+    "Request reminder": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rappel de demande"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kwibutsa ubusabe"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

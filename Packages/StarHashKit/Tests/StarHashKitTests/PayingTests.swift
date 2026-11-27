@@ -29,10 +29,13 @@ struct PayingTests {
         var dialled: [String] { log.codes }
 
         init(
-            splitLargePayments: Bool = false, saveTransactions: Bool = true, nearby: Bool = false,
+            splitLargePayments: Bool = false, autoVerify: Bool = true, saveTransactions: Bool = true, nearby: Bool = false,
             fix: Transaction.Coordinate? = nil, isContact: Bool? = false
         ) {
             defaults.set(splitLargePayments, forKey: Preferences.splitLargePayments.key)
+            // Set up, as the guide leaves it: the shortcut ran.
+            defaults.set(autoVerify, forKey: AutoVerify.Key.setUp)
+            defaults.set(autoVerify ? 1_800_000_000 : 0, forKey: AutoVerify.Key.shortcutRanAt)
             defaults.set(saveTransactions, forKey: Preferences.saveTransactions.key)
             defaults.set(nearby, forKey: Preferences.nearbyLocation.key)
             paying = Paying(
@@ -102,6 +105,28 @@ struct PayingTests {
         #expect(rig.paying.pay(100_000, to: mtnNumber) == .dialled)
         #expect(rig.paying.pay(400_000, to: merchant) == .dialled)
         #expect(rig.paying.split == nil)
+    }
+
+    @Test func aPaymentGoesWholeWhileAutoVerifyIsOff() {
+        // Each part is confirmed by its own SMS, so with nothing to read
+        // them, Split large payments stays out of the way.
+        let rig = Rig(splitLargePayments: true, autoVerify: false)
+        #expect(rig.paying.pay(400_000, to: mtnNumber) == .dialled)
+        #expect(rig.paying.split == nil)
+        #expect(rig.dialled == ["*182*1*1*0788123456*400000#"])
+    }
+
+    @Test func autoVerifyIsOnOnceSetUpWithAShortcutThatRan() {
+        let defaults = TestDefaults("AutoVerifyIsOn")
+        let autoVerify = AutoVerify(store: StarHashStore(fileURL: nil), defaults: defaults)
+        #expect(!autoVerify.isOn && !AutoVerify.isOn(in: defaults))
+        // The guide's check: the shortcut ran, then the setup finished.
+        defaults.set(1_800_000_000.0, forKey: AutoVerify.Key.shortcutRanAt)
+        autoVerify.reload()
+        autoVerify.finishSetUp()
+        #expect(autoVerify.isOn && AutoVerify.isOn(in: defaults))
+        autoVerify.turnOff()
+        #expect(!autoVerify.isOn && !AutoVerify.isOn(in: defaults))
     }
 
     @Test func partsAreDialledInOrderEachItsOwnPayment() throws {

@@ -253,6 +253,19 @@ public enum NotificationPlan {
         )
     }
 
+    /// Word that `name` reminded the owner of what they asked: in the place
+    /// of the request's own notification, so one request is one banner.
+    public static func requestReminded(_ request: MoneyRequest, name: String, settings: Settings) -> Item? {
+        guard settings.requests, request.direction == .received, request.status == .waiting else { return nil }
+        let body = settings.showsAmounts
+            ? String(kit: "\(name) reminds you of their request for \(Money.formatWithCurrency(request.amount)).")
+            : String(kit: "\(name) reminds you of their request.")
+        return Item(
+            id: "request-received.\(request.id.uuidString)", kind: .requestReceived, date: nil,
+            title: String(kit: "Request reminder"), body: body, transactionID: nil, requestID: request.id
+        )
+    }
+
     /// Word that `name` declined what the owner asked.
     public static func requestDeclined(_ request: MoneyRequest, name: String, settings: Settings) -> Item? {
         guard settings.requests, request.direction == .sent, request.status == .declined else { return nil }

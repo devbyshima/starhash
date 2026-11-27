@@ -11746,22 +11746,6 @@
         }
       }
     },
-    "When you ask someone who isn't near you for money, or they ask you, the request passes through StarHash's server. What it says (who asks, the number the money goes to, how much and what for) is sealed on the asker's iPhone so that only the other person's iPhone can open it, and a decline goes back sealed the same way: the server cannot read either. It keeps only which listed number asked which, and when, for the request's seven days, and deletes that the night after. Cancelling a request wipes what was sealed at once, and so does a request from someone who is not in your contacts, which StarHash never shows you. Requests need Show my name on, and your listing then also carries the public half of a key your iPhone makes, which requests to you are sealed to. When someone asks you, the server can also have Apple's push service wake StarHash with the request still sealed, so neither the server nor Apple can read it: your iPhone opens it to show who asks and for how much, only when they are in your contacts. For that, your iPhone gives the server the token Apple's service made for it, kept with your listing and deleted with it, or when you turn off notifications of requests or use Delete All Data. Requests between people standing near each other go from iPhone to iPhone, and never reach the server. Holding your iPhone to someone else's to ask for money, or to be asked, measures how far apart the two are with Nearby Interaction, between those two iPhones only, and shows that request even from someone who is not in your contacts; your number goes to the person asking only when you tap Pay.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quand vous demandez de l'argent à quelqu'un qui n'est pas près de vous, ou qu'il vous en demande, la demande passe par le serveur de StarHash. Ce qu'elle dit (qui demande, le numéro où va l'argent, combien et pour quoi) est scellé sur l'iPhone de celui qui demande, pour que seul l'iPhone de l'autre puisse l'ouvrir, et un refus revient scellé de la même façon : le serveur ne peut lire ni l'un ni l'autre. Il ne garde que quel numéro inscrit a fait une demande à quel autre, et quand, pendant les sept jours de la demande, et le supprime la nuit suivante. Annuler une demande efface aussitôt ce qui était scellé, comme pour une demande de quelqu'un qui n'est pas dans vos contacts, que StarHash ne vous montre jamais. Les demandes nécessitent qu'Afficher mon nom soit activé ; votre inscription porte alors aussi la moitié publique d'une clé que crée votre iPhone, à laquelle sont scellées les demandes qui vous sont faites. Quand quelqu'un vous fait une demande, le serveur peut aussi faire réveiller StarHash par le service de notifications d'Apple, avec la demande toujours scellée, que ni le serveur ni Apple ne peuvent lire : votre iPhone l'ouvre pour afficher qui demande et combien, seulement si cette personne est dans vos contacts. Pour cela, votre iPhone donne au serveur le jeton que le service d'Apple a créé pour lui, gardé avec votre inscription et supprimé avec elle, ou quand vous désactivez les notifications de demandes ou utilisez Supprimer toutes les données. Les demandes entre personnes proches l'une de l'autre vont d'un iPhone à l'autre et n'atteignent jamais le serveur. Approcher votre iPhone de celui de quelqu'un pour demander de l'argent, ou pour qu'on vous en demande, mesure la distance entre les deux avec Interactions à proximité, entre ces deux iPhone seulement, et affiche cette demande même si elle vient de quelqu'un qui n'est pas dans vos contacts ; votre numéro ne va à la personne qui demande que lorsque vous touchez Payer."
-          }
-        },
-        "rw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Iyo usabye amafaranga umuntu utari hafi yawe, cyangwa we akayagusaba, ubusabe bunyura kuri seriveri ya StarHash. Ibyo buvuga (usaba, nimero amafaranga ajyaho, angahe n'icyo agenewe) bifungirwa kuri iPhone y'usaba ku buryo iPhone y'undi muntu yonyine ari yo ishobora kubifungura, kandi kwanga bigaruka bifungiwe kimwe: seriveri ntishobora gusoma na kimwe muri byo. Ibika gusa nimero yanditswe yasabye indi, n'igihe, mu minsi irindwi y'ubusabe, hanyuma ikabisiba mu ijoro rikurikira. Guhagarika ubusabe bisiba ako kanya ibyari bifungiwe, kimwe n'ubusabe buvuye ku muntu utari mu bo muvugana, StarHash itajya ikwereka. Ubusabe busaba ko Erekana izina ryanjye iba ifunguye, kandi icyo gihe ibyo wanditse binatwara igice rusange cy'urufunguzo iPhone yawe ikora, ari rwo ubusabe bukugenewe bufungirwaho. Iyo hari ugusabye, seriveri ishobora no gusaba serivisi ya Apple yohereza imenyesha gukangura StarHash, ubusabe bukiri bufungiye, ku buryo seriveri cyangwa Apple bidashobora kubusoma: iPhone yawe ni yo ibufungura ikerekana usaba n'amafaranga angahe, ari uko gusa ari mu bo muvugana. Kubera ibyo, iPhone yawe iha seriveri ikimenyetso serivisi ya Apple yayikoreye, kibikwa hamwe n'ibyo wanditse kandi kigasibwa hamwe na byo, cyangwa igihe uzimije imenyesha ry'ubusabe cyangwa ukoresheje Siba amakuru yose. Ubusabe hagati y'abantu begeranye buva kuri iPhone imwe bujya ku yindi, kandi ntibugera kuri seriveri. Kwegereza iPhone yawe iy'undi muntu ngo usabe amafaranga, cyangwa bayagusabe, bipima intera iri hagati yazo hakoreshejwe Nearby Interaction, hagati y'izo iPhone ebyiri gusa, kandi bikwereka ubwo busabe kabone n'iyo buturutse ku muntu utari muri contacts zawe; nimero yawe igera ku ukwaka ari uko ukanze Ishyura gusa."
-          }
-        }
-      }
-    },
     "From": {
       "localizations": {
         "fr": {
@@ -12478,6 +12462,662 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nishyura nkoresheje MoMo na Airtel Money kuri StarHash, kandi nawe ushobora kunsabirayo amafaranga. Shakisha StarHash kuri App Store."
+          }
+        }
+      }
+    },
+    "Request in Bulk": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demander à plusieurs"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saba benshi"
+          }
+        }
+      }
+    },
+    "Asks several people at once, each for their own amount": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demande à plusieurs personnes à la fois, chacune pour son propre montant"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Isaba abantu benshi icyarimwe, buri wese amafaranga ye"
+          }
+        }
+      }
+    },
+    "Amounts": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Montants"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amafaranga"
+          }
+        }
+      }
+    },
+    "Up to %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jusqu'à %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kugeza kuri %@"
+          }
+        }
+      }
+    },
+    "Amount for %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Montant pour %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amafaranga ya %@"
+          }
+        }
+      }
+    },
+    "Sending": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoi en cours"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biroherezwa"
+          }
+        }
+      }
+    },
+    "Couldn't reach their iPhone": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de joindre son iPhone"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ntitwabashije kugera kuri iPhone ye"
+          }
+        }
+      }
+    },
+    "You can ask up to %lld people at once": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous pouvez demander à %lld personnes au plus à la fois"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ushobora gusaba abantu batarenze %lld icyarimwe"
+          }
+        }
+      }
+    },
+    "No one on StarHash matches. Type their full number": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personne sur StarHash ne correspond. Tapez son numéro complet"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta muntu uri kuri StarHash uhuye n'ibyo. Andika nimero ye yose"
+          }
+        }
+      }
+    },
+    "None of your contacts are on StarHash yet": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun de vos contacts n'est encore sur StarHash"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nta n'umwe mu bantu bawe uri kuri StarHash"
+          }
+        }
+      }
+    },
+    "Type the number of someone on StarHash": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tapez le numéro de quelqu'un sur StarHash"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andika nimero y'umuntu uri kuri StarHash"
+          }
+        }
+      }
+    },
+    "Send Request": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoyer la demande"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohereza ubusabe"
+          }
+        }
+      }
+    },
+    "Send %lld Requests": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoyer %lld demandes"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohereza ubusabe %lld"
+          }
+        }
+      }
+    },
+    "Asked 1 person": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demande envoyée à 1 personne"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wasabye umuntu 1"
+          }
+        }
+      }
+    },
+    "Asked %lld people": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demandes envoyées à %lld personnes"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wasabye abantu %lld"
+          }
+        }
+      }
+    },
+    "of %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sur %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kuri %@"
+          }
+        }
+      }
+    },
+    "1 person": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 personne"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umuntu 1"
+          }
+        }
+      }
+    },
+    "%lld people": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld personnes"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abantu %lld"
+          }
+        }
+      }
+    },
+    "%lld paid": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ont payé"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld bishyuye"
+          }
+        }
+      }
+    },
+    "%@ of %@ collected": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ reçus sur %2$@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hamaze kwakirwa %1$@ kuri %2$@"
+          }
+        }
+      }
+    },
+    "Requests Need Auto-verify": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les demandes nécessitent la vérification auto"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubusabe bukenera Kugenzura byikora"
+          }
+        }
+      }
+    },
+    "Split Payments Need Auto-verify": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les paiements fractionnés nécessitent la vérification auto"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwishyu bugabanyijemo ibice bukenera Kugenzura byikora"
+          }
+        }
+      }
+    },
+    "A request is marked paid when your wallet's SMS shows the money came in": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une demande est marquée payée quand le SMS de votre portefeuille montre que l'argent est arrivé"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubusabe bushyirwa nk'ubwishyuwe iyo SMS ya wallet yawe yerekana ko amafaranga yageze"
+          }
+        }
+      }
+    },
+    "Without it, every request waits until you mark it paid": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans elle, chaque demande attend que vous la marquiez payée"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitabaye ibyo, buri busabe butegereza ko ubushyira nk'ubwishyuwe"
+          }
+        }
+      }
+    },
+    "Each part is confirmed by its own SMS from your wallet": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chaque partie est confirmée par son propre SMS de votre portefeuille"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buri gice cyemezwa na SMS yacyo iturutse kuri wallet yawe"
+          }
+        }
+      }
+    },
+    "Without it, every part would stay pending": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans elle, chaque partie resterait en attente"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitabaye ibyo, buri gice cyaguma gitegereje"
+          }
+        }
+      }
+    },
+    "Set Up Auto-verify": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurer la vérification auto"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shyiraho Kugenzura byikora"
+          }
+        }
+      }
+    },
+    "Needs auto-verify": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nécessite la vérification auto"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bikenera Kugenzura byikora"
+          }
+        }
+      }
+    },
+    "Couldn't Remind": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rappel impossible"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ntibyashobotse kwibutsa"
+          }
+        }
+      }
+    },
+    "Reminding": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rappel en cours"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biributswa"
+          }
+        }
+      }
+    },
+    "Remind %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rappeler à %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibutsa %@"
+          }
+        }
+      }
+    },
+    "Remind %lld People": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rappeler à %lld personnes"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibutsa abantu %lld"
+          }
+        }
+      }
+    },
+    "Remind": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rappeler"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibutsa"
+          }
+        }
+      }
+    },
+    "Remind at %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rappeler à %@"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibutsa saa %@"
+          }
+        }
+      }
+    },
+    "Remind Tomorrow": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rappeler demain"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ibutsa ejo"
+          }
+        }
+      }
+    },
+    "You can remind someone once a day": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous pouvez faire un rappel une fois par jour"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ushobora kwibutsa umuntu rimwe ku munsi"
+          }
+        }
+      }
+    },
+    "That request isn't waiting anymore": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette demande n'est plus en attente"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubwo busabe ntibugitegereje"
+          }
+        }
+      }
+    },
+    "Reminded 1 person": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rappel envoyé à 1 personne"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wibukije umuntu 1"
+          }
+        }
+      }
+    },
+    "Reminded %lld people": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rappel envoyé à %lld personnes"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wibukije abantu %lld"
+          }
+        }
+      }
+    },
+    "When you ask someone who isn't near you for money, or they ask you, the request passes through StarHash's server. What it says (who asks, the number the money goes to, how much and what for) is sealed on the asker's iPhone so that only the other person's iPhone can open it, and a decline goes back sealed the same way: the server cannot read either. It keeps only which listed number asked which, when, and when the asker last reminded them, for the request's seven days, and deletes that the night after. Cancelling a request wipes what was sealed at once, and so does a request from someone who is not in your contacts, which StarHash never shows you. Requests need Show my name on, and your listing then also carries the public half of a key your iPhone makes, which requests to you are sealed to. When someone asks you, the server can also have Apple's push service wake StarHash with the request still sealed, so neither the server nor Apple can read it: your iPhone opens it to show who asks and for how much, only when they are in your contacts. For that, your iPhone gives the server the token Apple's service made for it, kept with your listing and deleted with it, or when you turn off notifications of requests or use Delete All Data. Requests between people standing near each other go from iPhone to iPhone, and never reach the server. Holding your iPhone to someone else's to ask for money, or to be asked, measures how far apart the two are with Nearby Interaction, between those two iPhones only, and shows that request even from someone who is not in your contacts; your number goes to the person asking only when you tap Pay.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quand vous demandez de l'argent à quelqu'un qui n'est pas près de vous, ou qu'il vous en demande, la demande passe par le serveur de StarHash. Ce qu'elle dit (qui demande, le numéro où va l'argent, combien et pour quoi) est scellé sur l'iPhone de celui qui demande, pour que seul l'iPhone de l'autre puisse l'ouvrir, et un refus revient scellé de la même façon : le serveur ne peut lire ni l'un ni l'autre. Il ne garde que quel numéro inscrit a fait une demande à quel autre, quand, et quand le demandeur l'a rappelée pour la dernière fois, pendant les sept jours de la demande, et le supprime la nuit suivante. Annuler une demande efface aussitôt ce qui était scellé, comme pour une demande de quelqu'un qui n'est pas dans vos contacts, que StarHash ne vous montre jamais. Les demandes nécessitent qu'Afficher mon nom soit activé ; votre inscription porte alors aussi la moitié publique d'une clé que crée votre iPhone, à laquelle sont scellées les demandes qui vous sont faites. Quand quelqu'un vous fait une demande, le serveur peut aussi faire réveiller StarHash par le service de notifications d'Apple, avec la demande toujours scellée, que ni le serveur ni Apple ne peuvent lire : votre iPhone l'ouvre pour afficher qui demande et combien, seulement si cette personne est dans vos contacts. Pour cela, votre iPhone donne au serveur le jeton que le service d'Apple a créé pour lui, gardé avec votre inscription et supprimé avec elle, ou quand vous désactivez les notifications de demandes ou utilisez Supprimer toutes les données. Les demandes entre personnes proches l'une de l'autre vont d'un iPhone à l'autre et n'atteignent jamais le serveur. Approcher votre iPhone de celui de quelqu'un pour demander de l'argent, ou pour qu'on vous en demande, mesure la distance entre les deux avec Interactions à proximité, entre ces deux iPhone seulement, et affiche cette demande même si elle vient de quelqu'un qui n'est pas dans vos contacts ; votre numéro ne va à la personne qui demande que lorsque vous touchez Payer."
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iyo usabye amafaranga umuntu utari hafi yawe, cyangwa we akayagusaba, ubusabe bunyura kuri seriveri ya StarHash. Ibyo buvuga (usaba, nimero amafaranga ajyaho, angahe n'icyo agenewe) bifungirwa kuri iPhone y'usaba ku buryo iPhone y'undi muntu yonyine ari yo ishobora kubifungura, kandi kwanga bigaruka bifungiwe kimwe: seriveri ntishobora gusoma na kimwe muri byo. Ibika gusa nimero yanditswe yasabye indi, igihe, n'igihe usaba aheruka kubwibutsa, mu minsi irindwi y'ubusabe, hanyuma ikabisiba mu ijoro rikurikira. Guhagarika ubusabe bisiba ako kanya ibyari bifungiwe, kimwe n'ubusabe buvuye ku muntu utari mu bo muvugana, StarHash itajya ikwereka. Ubusabe busaba ko Erekana izina ryanjye iba ifunguye, kandi icyo gihe ibyo wanditse binatwara igice rusange cy'urufunguzo iPhone yawe ikora, ari rwo ubusabe bukugenewe bufungirwaho. Iyo hari ugusabye, seriveri ishobora no gusaba serivisi ya Apple yohereza imenyesha gukangura StarHash, ubusabe bukiri bufungiye, ku buryo seriveri cyangwa Apple bidashobora kubusoma: iPhone yawe ni yo ibufungura ikerekana usaba n'amafaranga angahe, ari uko gusa ari mu bo muvugana. Kubera ibyo, iPhone yawe iha seriveri ikimenyetso serivisi ya Apple yayikoreye, kibikwa hamwe n'ibyo wanditse kandi kigasibwa hamwe na byo, cyangwa igihe uzimije imenyesha ry'ubusabe cyangwa ukoresheje Siba amakuru yose. Ubusabe hagati y'abantu begeranye buva kuri iPhone imwe bujya ku yindi, kandi ntibugera kuri seriveri. Kwegereza iPhone yawe iy'undi muntu ngo usabe amafaranga, cyangwa bayagusabe, bipima intera iri hagati yazo hakoreshejwe Nearby Interaction, hagati y'izo iPhone ebyiri gusa, kandi bikwereka ubwo busabe kabone n'iyo buturutse ku muntu utari muri contacts zawe; nimero yawe igera ku ukwaka ari uko ukanze Ishyura gusa."
+          }
+        }
+      }
+    },
+    "Send Requests": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoyer les demandes"
+          }
+        },
+        "rw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohereza ubusabe"
           }
         }
       }

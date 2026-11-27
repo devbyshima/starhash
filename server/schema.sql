@@ -92,6 +92,17 @@ CREATE TABLE IF NOT EXISTS requests (
 CREATE INDEX IF NOT EXISTS requests_to ON requests (to_key_hash);
 CREATE INDEX IF NOT EXISTS requests_from ON requests (from_key_hash, created_at);
 
+-- When the asker last reminded the person asked of a request still
+-- waiting (Remind on the Requests page): at most once a day, counted from
+-- the request or the reminder before. A table of its own, not a column, so
+-- this file stays safe to run again. A reminder carries nothing new: the
+-- iPhone asked reads its time beside the request and says so. Deleted
+-- with its request, the night that goes.
+CREATE TABLE IF NOT EXISTS request_reminders (
+  id TEXT PRIMARY KEY,
+  reminded_at TEXT NOT NULL
+) WITHOUT ROWID;
+
 -- One row per iPhone whose StarHash can be woken by a push (a build with
 -- STARHASH_PUSH, from a paid Apple team) while its owner takes requests
 -- from anywhere: the hash of their key (the directory's key_hash), the

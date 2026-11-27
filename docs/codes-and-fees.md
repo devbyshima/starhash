@@ -53,7 +53,7 @@ A pending payment has no fee yet, and marking a payment failed clears it.
 
 ### Splitting large payments
 
-MTN charges 250 to send up to 150,000 and 1,500 from 150,001, so a large payment can cost less sent as several smaller ones. With **Split large payments** on (Settings, Pay & Buy; off until you turn it on), Pay offers to do that whenever it saves something:
+MTN charges 250 to send up to 150,000 and 1,500 from 150,001, so a large payment can cost less sent as several smaller ones. With **Split large payments** on (Settings, Pay & Buy; off until you turn it on, and only with auto-verify on, since each part is confirmed by its own SMS), Pay offers to do that whenever it saves something:
 
 | Amount (RWF) | Parts | Fees in parts | As one payment | Saved |
 | --- | --- | --- | --- | --- |

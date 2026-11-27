@@ -73,14 +73,17 @@ public final class RequestsAnywhere {
             /// The asker's public key.
             public var key: String?
             public var createdAt: Date?
+            /// When the asker last reminded the owner of it, if they have.
+            public var remindedAt: Date?
 
             public var isClosed: Bool { sealed == nil }
 
-            public init(id: UUID, sealed: String?, key: String?, createdAt: Date?) {
+            public init(id: UUID, sealed: String?, key: String?, createdAt: Date?, remindedAt: Date? = nil) {
                 self.id = id
                 self.sealed = sealed
                 self.key = key
                 self.createdAt = createdAt
+                self.remindedAt = remindedAt
             }
         }
 
@@ -120,6 +123,26 @@ public final class RequestsAnywhere {
         /// Delete All Data: everything the owner sent closed, and everything
         /// waiting for them dropped.
         func erase(key: String) async -> Bool
+        /// Reminds the person asked of one the owner sent.
+        func remind(id: UUID, key: String) async -> RemindAnswer
+    }
+
+    /// What the server made of a reminder.
+    public enum RemindAnswer: Equatable, Sendable {
+        /// Kept, at this time.
+        case reminded(Date)
+        /// Asked, or reminded of, within the last day.
+        case tooSoon
+        /// Declined, closed or expired: nothing to remind of.
+        case notWaiting
+        case failed
+    }
+
+    /// Why a reminder did not go.
+    public enum RemindFailure: Error, Equatable, Sendable {
+        case tooSoon
+        case notWaiting
+        case failed
     }
 
     /// Why a request was not sent.
@@ -137,13 +160,16 @@ public final class RequestsAnywhere {
     public struct News: Equatable, Sendable {
         public var received: [MoneyRequest] = []
         public var declined: [MoneyRequest] = []
+        /// Requests the owner was asked before, reminded of since.
+        public var reminded: [MoneyRequest] = []
 
-        public init(received: [MoneyRequest] = [], declined: [MoneyRequest] = []) {
+        public init(received: [MoneyRequest] = [], declined: [MoneyRequest] = [], reminded: [MoneyRequest] = []) {
             self.received = received
             self.declined = declined
+            self.reminded = reminded
         }
 
-        public var isEmpty: Bool { received.isEmpty && declined.isEmpty }
+        public var isEmpty: Bool { received.isEmpty && declined.isEmpty && reminded.isEmpty }
     }
 
     /// The owner's secret key (the listing's), nil when it cannot be read.
@@ -237,6 +263,30 @@ public final class RequestsAnywhere {
         }
     }
 
+    // MARK: Reminding
+
+    /// Reminds the person asked of a request the owner sent, at most once a
+    /// day (`MoneyRequest.canRemind`). Their iPhone says so the next time it
+    /// hears from the server. The time is kept, so Remind waits its day.
+    public func remind(_ id: UUID, at now: Date = .now) async -> Result<MoneyRequest, RemindFailure> {
+        guard let request = requests.request(id: id), request.isRemindable else { return .failure(.notWaiting) }
+        guard request.canRemind(at: now) else { return .failure(.tooSoon) }
+        guard let secret = await key() else { return .failure(.failed) }
+        switch await server.remind(id: id, key: secret) {
+        case .reminded(let time):
+            requests.reminded(id, at: time)
+            return .success(requests.request(id: id) ?? request)
+        case .tooSoon:
+            // Reminded elsewhere, or the clocks differ: it waits its day.
+            requests.reminded(id, at: now)
+            return .failure(.tooSoon)
+        case .notWaiting:
+            return .failure(.notWaiting)
+        case .failed:
+            return .failure(.failed)
+        }
+    }
+
     // MARK: Keeping in step
 
     /// Takes in what waits on the server (requests from the owner's
@@ -295,6 +345,10 @@ public final class RequestsAnywhere {
             }
             if let kept = requests.request(id: asked.id) {
                 await keyFor(kept, from: asked, with: own, secret: secret)
+                // Reminded of since: said once, as a new request is.
+                if let time = asked.remindedAt, let reminded = requests.remindedOf(kept.id, at: time) {
+                    news.reminded.append(reminded)
+                }
                 continue
             }
             switch await take(asked, with: own) {

@@ -154,7 +154,8 @@ public final class Paying {
 
     /// Pays `amount` to `recipient` from the owner's wallet: refused when
     /// nothing is typed or the recipient cannot be paid; held in `split`
-    /// when Split Large Payments is on and parts cost less; otherwise
+    /// when Split Large Payments and auto-verify are on and parts cost
+    /// less; otherwise
     /// recorded and dialled after `dialDelay`.
     @discardableResult
     public func pay(_ amount: Int, to recipient: Recipient) -> Outcome {
@@ -169,7 +170,8 @@ public final class Paying {
         misses.save(in: defaults)
 
         let wallet = owner.wallet
-        if Preferences.splitLargePayments.value(in: defaults),
+        // Each part is confirmed by its own SMS, so only with auto-verify on.
+        if Preferences.splitLargePayments.value(in: defaults), AutoVerify.isOn(in: defaults),
            let plan = SplitPlan.cheapest(sending: amount, to: recipient, from: wallet) {
             split = SplitPayment(id: UUID(), recipient: recipient, plan: plan, wallet: wallet)
             splitPlace = place

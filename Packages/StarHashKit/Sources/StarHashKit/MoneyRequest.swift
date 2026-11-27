@@ -56,6 +56,14 @@ public struct MoneyRequest: Codable, Hashable, Identifiable, Sendable {
     /// one the owner sent closed there (cancelled, paid, declined or
     /// expired), which frees the two of them to ask again.
     public internal(set) var reported: Bool?
+    /// The bulk request it was sent in (`BulkRequest`), the same for each
+    /// person asked at once. Only on the asker's iPhone: the person asked
+    /// gets a request like any other. Nil for one asked on its own.
+    public internal(set) var groupID: UUID?
+    /// When it was last reminded of: by the owner, for one they sent
+    /// (Remind, through the server); by the asker, for one they received,
+    /// as the server says. Nil until then.
+    public internal(set) var remindedAt: Date?
 
     public init(
         id: UUID = UUID(), direction: Direction, person: Recipient, photoID: UUID? = nil, amount: Int,
@@ -73,6 +81,24 @@ public struct MoneyRequest: Codable, Hashable, Identifiable, Sendable {
     }
 
     public var expiresAt: Date { createdAt.addingTimeInterval(Self.lifetime) }
+
+    /// How long a request waits after it was asked, or last reminded of,
+    /// before it can be reminded of again: once a day at most.
+    public static let reminderGap: TimeInterval = 86_400
+
+    /// When the owner may next remind the person asked.
+    public var nextReminderAt: Date { (remindedAt ?? createdAt).addingTimeInterval(Self.reminderGap) }
+
+    /// Whether the owner may remind the person asked now: one they sent,
+    /// still waiting, that went through the server (a reminder goes that
+    /// way), and a day since it was asked or last reminded of.
+    public func canRemind(at now: Date = .now) -> Bool {
+        direction == .sent && status == .waiting && isAnywhere && now >= nextReminderAt && now < expiresAt
+    }
+
+    /// Whether Remind belongs on it at all, now or later: one the owner sent
+    /// that is waiting and went through the server.
+    public var isRemindable: Bool { direction == .sent && status == .waiting && isAnywhere }
 
     /// Whether it travelled through StarHash's server, so its answer or its
     /// end can too: one asked of anyone, or one asked nearby that the
@@ -306,6 +332,20 @@ public final class MoneyRequests {
         requests.first { $0.id == id }
     }
 
+    /// The requests the owner sent, newest first, each bulk request as one
+    /// group where it was asked.
+    public var sent: [SentRequest] {
+        let sent = requests.filter { $0.direction == .sent }
+        let groups = Dictionary(grouping: sent.filter { $0.groupID != nil }) { $0.groupID! }
+        var shown = Set<UUID>()
+        return sent.compactMap { request in
+            guard let groupID = request.groupID else { return .single(request) }
+            // A group sits where its newest request would.
+            guard shown.insert(groupID).inserted else { return nil }
+            return .group(RequestGroup(id: groupID, requests: groups[groupID] ?? []))
+        }
+    }
+
     // MARK: Changing
 
     /// The owner asked `person` for `amount`. `key` is theirs when it went
@@ -339,6 +379,33 @@ public final class MoneyRequests {
         )
         insert(request)
         return request
+    }
+
+    /// A request the owner just sent belongs to the bulk request `groupID`.
+    /// One already in a group stays in it.
+    public func group(_ id: UUID, in groupID: UUID) {
+        guard let index = requests.firstIndex(where: { $0.id == id }),
+              requests[index].direction == .sent, requests[index].groupID == nil else { return }
+        requests[index].groupID = groupID
+        save()
+    }
+
+    /// The owner reminded the person asked, at `now`.
+    func reminded(_ id: UUID, at now: Date) {
+        guard let index = requests.firstIndex(where: { $0.id == id }), requests[index].direction == .sent else { return }
+        requests[index].remindedAt = now
+        save()
+    }
+
+    /// The asker reminded the owner of a request still waiting, at `time`:
+    /// the request, when this is a reminder not heard of before.
+    func remindedOf(_ id: UUID, at time: Date) -> MoneyRequest? {
+        guard let index = requests.firstIndex(where: { $0.id == id }),
+              requests[index].direction == .received, requests[index].status == .waiting,
+              time > (requests[index].remindedAt ?? requests[index].createdAt) else { return nil }
+        requests[index].remindedAt = time
+        save()
+        return requests[index]
     }
 
     /// The asker took back a request the owner was sent (or was paid some
