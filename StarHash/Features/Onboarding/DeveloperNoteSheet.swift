@@ -181,6 +181,12 @@ enum DeveloperNoteLinks {
     static var writeReview: URL? {
         appStoreID.flatMap { URL(string: "https://apps.apple.com/app/id\($0)?action=write-review") }
     }
+
+    /// StarHash's App Store page, once the id is set: what an invitation
+    /// from Request shares.
+    static var appStore: URL? {
+        appStoreID.flatMap { URL(string: "https://apps.apple.com/app/id\($0)") }
+    }
 }
 
 /// The welcome note. As onboarding ends it opens over Pay, ends on Start

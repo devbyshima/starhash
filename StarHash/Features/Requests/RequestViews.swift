@@ -24,10 +24,13 @@ struct RequestSheet: View {
     @FocusState private var noteFocused: Bool
 
     var body: some View {
-        VStack(spacing: 0) {
-            SheetHeader(String(starhash: "Request \(Money.format(amount))"))
-
-            ScrollView {
+        // The title collapses to the top as the list scrolls
+        // (`CollapsingSheetScroll`).
+        CollapsingSheetScroll(
+            title: String(starhash: "Request \(Money.format(amount))"),
+            smallCaption: "Request",
+            smallTitle: Money.formatWithCurrency(amount)
+        ) {
                 VStack(alignment: .leading, spacing: 18) {
                     TextField(text: $note, prompt: Text("What for? (optional)")) { Text("Note") }
                         .font(.sheetBody)
@@ -61,9 +64,8 @@ struct RequestSheet: View {
                 }
                 .padding(.horizontal, 18)
                 .padding(.vertical, 16)
-            }
-            .scrollDismissesKeyboard(.immediately)
         }
+        .scrollDismissesKeyboard(.immediately)
         .sheetGlass(detents: [.medium, .large])
         .unreachableAlert($unreachable)
         .sensoryFeedback(.success, trigger: sentCount)
@@ -171,10 +173,14 @@ private struct RequestNotice: View {
 }
 
 /// Request's way to anyone on StarHash: a search over the owner's contacts
-/// and a number typed, each row looked up in the directory as it is
-/// tapped. Listed with a key, they are asked through the server; anyone
-/// else gets Share Message, the owner's number, the amount and the note
-/// through the share sheet.
+/// and a number typed. As it opens, the contacts' numbers are checked with
+/// the directory in one go (`StarHashCloud.listed(among:)`), so the ones on
+/// StarHash come first, under the search, and everyone else below them
+/// with Invite, which shares StarHash's App Store page. A tap looks the
+/// number up again and asks: listed with a key, through the server;
+/// anyone else gets Share Message, the owner's number, the amount and the
+/// note through the share sheet. If the check cannot be made, the
+/// contacts are one list, as before.
 private struct RequestAnywhereSection: View {
     let amount: Int
     let note: String
@@ -189,6 +195,11 @@ private struct RequestAnywhereSection: View {
     @State private var checking: String?
     /// What came of the last tap, when it was not sent.
     @State private var outcome: Outcome?
+    /// The contacts' and typed numbers the directory lists, once checked;
+    /// nil until then, or when the server could not be reached.
+    @State private var onStarHash: Set<String>?
+    /// The numbers the directory has answered for.
+    @State private var checked: Set<String> = []
     @FocusState private var searchFocused: Bool
 
     /// One number to ask, from a contact or typed.
@@ -221,17 +232,79 @@ private struct RequestAnywhereSection: View {
             searchField
             if let outcome { outcomeCard(outcome) }
             let rows = rows
-            if !rows.isEmpty {
-                VStack(spacing: 0) {
-                    ForEach(Array(rows.enumerated()), id: \.element.id) { index, row in
-                        if index > 0 { SheetDivider().padding(.leading, 70) }
-                        rowButton(row)
-                    }
+            if let onStarHash {
+                let on = rows.filter { onStarHash.contains($0.recipient.destination) }
+                let off = rows.filter { !onStarHash.contains($0.recipient.destination) }
+                if !on.isEmpty { rowsCard(on, invites: false) }
+                if !off.isEmpty {
+                    SheetSectionLabel("Invite to StarHash")
+                    rowsCard(Array(off.prefix(Self.shownLimit)), invites: true)
                 }
-                .sheetCard()
-            } else if !query.isEmpty {
+            } else if !rows.isEmpty {
+                rowsCard(Array(rows.prefix(Self.shownLimit)), invites: false)
+            }
+            if rows.isEmpty && !query.isEmpty {
                 RequestNotice(text: String(starhash: "Type a full number to ask someone not in your contacts"))
             }
+        }
+    }
+
+    /// One card of rows, each with Invite beside it when `invites`.
+    private func rowsCard(_ rows: [Row], invites: Bool) -> some View {
+        VStack(spacing: 0) {
+            ForEach(Array(rows.enumerated()), id: \.element.id) { index, row in
+                if index > 0 { SheetDivider().padding(.leading, 70) }
+                HStack(spacing: 0) {
+                    rowButton(row)
+                    if invites {
+                        ShareLink(item: inviteText) {
+                            Text("Invite")
+                        }
+                        .buttonStyle(.starhashCapsule(height: 32, horizontalPadding: 14))
+                        .padding(.trailing, 14)
+                        .accessibilityLabel(Text("Invite \(row.name ?? row.recipient.formattedDestination) to StarHash"))
+                    }
+                }
+            }
+        }
+        .sheetCard()
+        .animation(.smooth(duration: 0.3), value: onStarHash)
+    }
+
+    /// What Invite hands the share sheet: why StarHash, and its App Store
+    /// page once it is published (`DeveloperNoteLinks.appStoreID`).
+    private var inviteText: String {
+        if let link = DeveloperNoteLinks.appStore {
+            String(starhash: "I pay with MoMo and Airtel Money on StarHash, and you can ask me for money there too. Get it on the App Store: \(link.absoluteString)")
+        } else {
+            String(starhash: "I pay with MoMo and Airtel Money on StarHash, and you can ask me for money there too. Look for StarHash on the App Store.")
+        }
+    }
+
+    /// Every contact's Rwandan mobile number, and a number typed in full,
+    /// for the directory to say which are on StarHash.
+    private var numbersToCheck: [String] {
+        let search = RecipientSearch(query: query)
+        var numbers: [String] = []
+        if let typed = search.typedRecipient, typed.kind == .phone, typed.isRwandanMobile { numbers.append(typed.destination) }
+        if enableContacts {
+            for contact in contacts.contacts {
+                for recipient in contact.recipients where recipient.kind == .phone && recipient.isRwandanMobile {
+                    numbers.append(recipient.destination)
+                }
+            }
+        }
+        return numbers
+    }
+
+    /// Checks the numbers not yet answered for: all of them as the sheet
+    /// opens and the contacts load, then a number as it is typed in full.
+    private func checkDirectory() async {
+        let fresh = Array(Set(numbersToCheck).subtracting(checked))
+        guard !fresh.isEmpty, let listed = await StarHashCloud.listed(among: fresh) else { return }
+        checked.formUnion(fresh)
+        withAnimation(.smooth(duration: 0.3)) {
+            onStarHash = (onStarHash ?? []).union(listed)
         }
     }
 
@@ -254,6 +327,8 @@ private struct RequestAnywhereSection: View {
         .task(id: enableContacts) {
             if enableContacts { await contacts.loadIfAllowed() }
         }
+        // The contacts coming in, or a number typed in full.
+        .task(id: numbersToCheck.count) { await checkDirectory() }
         .onChange(of: query) { outcome = nil }
     }
 
@@ -274,7 +349,6 @@ private struct RequestAnywhereSection: View {
             for recipient in contact.recipients where recipient.kind == .phone && recipient.isRwandanMobile {
                 guard seen.insert(recipient.destination).inserted else { continue }
                 rows.append(Row(recipient: recipient, name: contact.name, contactID: contact.id, hasPhoto: contact.hasPhoto))
-                if rows.count >= Self.shownLimit { return rows }
             }
         }
         return rows

@@ -246,6 +246,58 @@ extension DetailRow where Value == Text {
     }
 }
 
+/// A detail row with a number in it that a long press copies: the value
+/// turns to "Copied" for a moment, with a success tap. `copy` is what goes
+/// on the pasteboard, the number without its spaces, separators or
+/// currency.
+struct CopyableDetailRow: View {
+    let label: String
+    let value: String
+    let copy: String
+
+    @State private var copied = false
+    /// Bumped by each copy, so a second long press restarts the moment.
+    @State private var copies = 0
+
+    init(_ label: String, _ value: String, copy: String) {
+        self.label = label
+        self.value = value
+        self.copy = copy
+    }
+
+    var body: some View {
+        DetailRow(label: label) {
+            // Both laid out, so the row keeps its width as they swap.
+            ZStack(alignment: .trailing) {
+                // Verbatim: a masked number's stars are not Markdown.
+                Text(verbatim: value)
+                    .font(.starhashNumber(17, relativeTo: .body))
+                    .opacity(copied ? 0 : 1)
+                Text(catalog: "Copied")
+                    .font(.starhash(.body, weight: .medium))
+                    .opacity(copied ? 1 : 0)
+            }
+            .foregroundStyle(Color.starhashSecondaryText)
+        }
+        .contentShape(Rectangle())
+        .onLongPressGesture(minimumDuration: 0.4, perform: copyValue)
+        .sensoryFeedback(.success, trigger: copies)
+        .accessibilityAction(named: Text(catalog: "Copy"), copyValue)
+        .task(id: copies) {
+            guard copies > 0 else { return }
+            try? await Task.sleep(for: .seconds(1.2))
+            guard !Task.isCancelled else { return }
+            withAnimation(.smooth(duration: 0.3)) { copied = false }
+        }
+    }
+
+    private func copyValue() {
+        UIPasteboard.general.string = copy
+        withAnimation(.smooth(duration: 0.2)) { copied = true }
+        copies += 1
+    }
+}
+
 /// A list of things to do in one filled card, after the owner's reference:
 /// each row its icon, its words and a chevron, a line between rows from
 /// where the words start.

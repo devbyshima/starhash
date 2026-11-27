@@ -8,11 +8,25 @@ A version's section starts as `Unreleased` when its release branch is cut and ge
 
 ### Added
 
+- People Nearby. StarHash users close by, with StarHash open, show up in a pill at the top of Pay ("Ariane is nearby"), which opens a radar of everyone around you; tap one and Pay becomes "Pay Ariane", without their number. You are seen only after you say yes, in a one-time intro or in Settings under Your SIMs.
+- Ask for money. Request sits beside Pay (Settings › Pay & Buy › Beside Pay puts Balance back): type an amount, tap Request and pick someone nearby or anyone on StarHash. The person asked sees it on Pay and pays or declines in a tap, and a request is marked paid when the wallet's SMS shows the money came in. Only people in your Contacts can ask you. Your requests are on a Requests page at the top of Transactions.
+- Requests to someone who isn't near you go through StarHash's server, sealed on the asker's iPhone so only the other person's iPhone can read them, with a notification for each one. They expire after 7 days, and Delete All Data cancels them.
+- Bring Phones Together. Hold your iPhone to theirs, with StarHash open on both, to ask them for money or to pay them; on an iPhone that can measure it, People Nearby's radar shows where each person is.
+- What's New for 1.1, shown once after the update.
+- Money from a number your wallet's message hides (`*********998`) shows it in Transactions as the number it stands for, with +2507 or 07 in front: `+2507*****998` rather than `998`.
 - Checking your balance with Pay's Balance button now teaches Siri Suggestions and Spotlight when you check it, so they can suggest Check Balance at the times you usually do.
 - Split large payments, a new setting under Pay & Buy, off until you turn it on. A MoMo to MoMo payment that costs less in parts is then sent as a few smaller ones: 300,000 as two of 150,000 costs 500 in fees rather than 1,500. Pay shows the parts and what they cost against one payment, and dials one part at a time, each with its own PIN, showing whether each is waiting for its SMS or confirmed; the whole amount can still go as one payment. Each part is its own transaction, marked Part 1 of 2 in Transactions, with the whole payment on its page.
 
 ### Changed
 
+- A payment's page, and Verify once it confirms one, call the wallet's reference for it Transaction ID rather than Code.
+- Transactions shows money received with a green arrow and amount, and a payment that failed in grey; money sent keeps the text colour.
+- A long press on a number on a payment's page (the number or code, the transaction ID, the amounts and the balance) copies it.
+- Request lists your contacts on StarHash first, under the search, and everyone else below them with Invite, which shares StarHash's App Store page. Their numbers are checked with StarHash's server as Request opens, which keeps none of them; the privacy policy says so.
+- Request's title, as the list scrolls, blurs and fades away and comes back small at the top, over a soft fade the list runs under.
+- The code on Hold Near sits straight on the sheet in both appearances, with nothing behind it: near black in light mode, white in dark mode.
+- StarHash's server takes a number however it is written (+250, 250, 00250, 07 or without the 0), so one number is always the same number for Show My Name and requests.
+- Holding your iPhone to theirs to ask for money offers Use Code Instead, and Tap Instead to go back, where it said Show Code and Hide Code.
 - Choosing who to pay scrolls smoothly with a large address book: the list is worked out once per change rather than about twenty times, and no longer redrawn on every frame of a scroll.
 - Typing your name on Profile no longer redraws your QR code at every letter, which restarted the tree's turn each time: it is drawn again once you pause, and the picture you share is made only when you tap Share Code.
 - Transactions, Settings and Buy do less work as you use them: Transactions no longer regroups your whole history each time you open and close a payment, typing the other SIM's number no longer redraws all of Settings at each digit, and dragging a pinned code moves just that tile rather than redrawing all of Buy.

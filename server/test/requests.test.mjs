@@ -118,6 +118,73 @@ describe("the directory's keys", () => {
   });
 });
 
+describe("one number, however it is written", () => {
+  test("a listing sent as +250 is found as 07, 250, 00250 and without the 0", async () => {
+    const olive = owner("+250 787 300 001");
+    await list(olive, "Olive");
+    for (const number of ["0787300001", "250787300001", "+250787300001", "00250787300001", "787300001", "0787-300-001"]) {
+      const found = await call("POST", "/v1/directory/lookup", { body: { number } });
+      assert.equal(found.status, 200, number);
+      assert.equal(found.body.name, "Olive");
+    }
+    // Sent again as 07, it is the same listing, not a second one.
+    await call("PUT", "/v1/directory", { key: olive.key, body: { numbers: ["0787300001"], name: "Olive", key: olive.publicKey } });
+    const { listed } = (await call("POST", "/v1/directory/lookup", { body: { numbers: ["250787300001"] } })).body;
+    assert.deepEqual(listed, ["250787300001"]);
+  });
+
+  test("a request to a number in another format reaches its owner", async () => {
+    const asker = owner("0787300002");
+    const asked = owner("0787300003");
+    await list(asker, "Asker");
+    await list(asked, "Asked");
+    const sent = await ask(asker, asked, { to: "+250787300003", from: "250787300002" });
+    assert.equal(sent.status, 200);
+  });
+
+  test("anything but a Rwandan mobile number is refused", async () => {
+    for (const number of ["0252123456", "+14155551234", "07881", "abc"]) {
+      const found = await call("POST", "/v1/directory/lookup", { body: { number } });
+      assert.equal(found.status, 400, number);
+    }
+  });
+});
+
+describe("checking contacts at once", () => {
+  test("says which of the numbers are listed, each as it was sent, and nothing more", async () => {
+    const paul = owner("0787400001");
+    await list(paul, "Paul");
+    const found = await call("POST", "/v1/directory/lookup", {
+      body: { numbers: ["+250 787 400 001", "0787400002", "0252123456", "not a number"] },
+    });
+    assert.equal(found.status, 200);
+    assert.deepEqual(found.body, { listed: ["+250 787 400 001"] });
+  });
+
+  test("a number two iPhones list is not listed", async () => {
+    const one = owner("0787400003");
+    const two = owner("0787400003");
+    await list(one, "One");
+    await list(two, "Two");
+    const found = await call("POST", "/v1/directory/lookup", { body: { numbers: ["0787400003"] } });
+    assert.deepEqual(found.body.listed, []);
+  });
+
+  test("more numbers than a D1 query binds are checked in parts", async () => {
+    const last = owner("0787499999");
+    await list(last, "Last");
+    const numbers = Array.from({ length: 200 }, (_, i) => `0787${String(499800 + i).padStart(6, "0")}`);
+    const found = await call("POST", "/v1/directory/lookup", { body: { numbers } });
+    assert.deepEqual(found.body.listed, ["0787499999"]);
+  });
+
+  test("at most 500 at once", async () => {
+    const numbers = Array.from({ length: 501 }, (_, i) => `0787${String(500000 + i).padStart(6, "0")}`);
+    const found = await call("POST", "/v1/directory/lookup", { body: { numbers } });
+    assert.equal(found.status, 400);
+  });
+});
+
 describe("requests", () => {
   const jean = owner("0788200001");
   const shima = owner("0788200002");

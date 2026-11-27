@@ -48,11 +48,17 @@ public struct Recipient: Codable, Hashable, Sendable {
     /// Digits only. Phone numbers in local form (07XXXXXXXX).
     public var destination: String
     public var kind: Kind
+    /// How long the number was, stars and digits, where a carrier SMS
+    /// masked it: 12 for "*********998" (250 and nine digits), 10 for a
+    /// local "07" number. Nil for every other recipient, and for masked
+    /// senders saved before it was kept.
+    public var maskedLength: Int?
 
-    public init(name: String? = nil, destination: String, kind: Kind) {
+    public init(name: String? = nil, destination: String, kind: Kind, maskedLength: Int? = nil) {
         self.name = name
         self.destination = destination
         self.kind = kind
+        self.maskedLength = maskedLength
     }
 
     /// Classifies typed or pasted input ("+250 781 234 567", "0781234567",
@@ -82,11 +88,39 @@ public struct Recipient: Codable, Hashable, Sendable {
     }
 
     /// What to show for the destination: "0781 234 567" for numbers, the
-    /// code as is for merchants.
+    /// code as is for merchants, and a sender the carrier's SMS masked
+    /// ("*********998", kept as "998") with the start every Rwandan mobile
+    /// number shares written out over its stars: "+2507*****998" for a
+    /// 12-character number, "07*****998" for a 10-character one.
     public var formattedDestination: String {
-        guard kind == .phone, destination.count == 10 else { return destination }
+        guard kind == .phone else { return destination }
+        if isMasked { return masked }
+        guard destination.count == 10 else { return destination }
         let d = Array(destination)
         return String(d[0..<4]) + " " + String(d[4..<7]) + " " + String(d[7..<10])
+    }
+
+    /// A number with only its last digits, as a carrier SMS shows a
+    /// sender: a phone with fewer digits than any number has.
+    public var isMasked: Bool {
+        kind == .phone && !destination.isEmpty && destination.count < 10 && destination.allSatisfy(\.isASCIIDigit)
+    }
+
+    /// MTN's masked numbers are 12 characters ("*********998"), so a
+    /// sender saved without its length is taken as one.
+    static let defaultMaskedLength = 12
+
+    private var masked: String {
+        let length = maskedLength ?? Self.defaultMaskedLength
+        let prefix = switch length {
+        case 12: "+2507"
+        case 10: "07"
+        default: ""
+        }
+        // "+2507" stands for the four digits "2507".
+        let covered = prefix.filter(\.isASCIIDigit).count
+        let stars = max(length - covered - destination.count, 0)
+        return prefix + String(repeating: "*", count: stars) + destination
     }
 
     /// Whether StarHash can dial a payment to it: a Rwandan mobile number,

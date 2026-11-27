@@ -9,14 +9,18 @@ import UIKit
 /// to spare, far more than the mark covers, so any scanner still reads it.
 enum QRCodeImage {
     /// The code as a square image `side` pixels wide, a quiet zone of four
-    /// modules round it, or nil if it would not encode.
-    static func image(for text: String, side: CGFloat = 1024) -> UIImage? {
+    /// modules round it, or nil if it would not encode. `clear` leaves out
+    /// the white behind it, so the sheet it sits on shows through; `onDark`
+    /// draws the modules and the mark in white, for a dark sheet, on
+    /// nothing too.
+    static func image(for text: String, side: CGFloat = 1024, clear: Bool = false, onDark: Bool = false) -> UIImage? {
+        let clear = clear || onDark
         guard let modules = QRModules(text: text, correction: "H") else { return nil }
         let count = modules.count
         let quiet = 4
         let module = side / CGFloat(count + quiet * 2)
         let origin = CGFloat(quiet) * module
-        let ink = UIColor(red: 23 / 255, green: 23 / 255, blue: 23 / 255, alpha: 1)
+        let ink = onDark ? UIColor.white : UIColor(red: 23 / 255, green: 23 / 255, blue: 23 / 255, alpha: 1)
 
         // The mark's tile: about a quarter of the code across, on whole
         // modules, an odd number so it sits dead centre.
@@ -27,11 +31,13 @@ enum QRCodeImage {
 
         let format = UIGraphicsImageRendererFormat()
         format.scale = 1
-        format.opaque = true
+        format.opaque = !clear
         return UIGraphicsImageRenderer(size: CGSize(width: side, height: side), format: format).image { context in
             let cg = context.cgContext
-            UIColor.white.setFill()
-            cg.fill(CGRect(x: 0, y: 0, width: side, height: side))
+            if !clear {
+                UIColor.white.setFill()
+                cg.fill(CGRect(x: 0, y: 0, width: side, height: side))
+            }
 
             // The modules, leaving out the corner squares (drawn whole
             // below) and the mark's tile.
@@ -67,8 +73,10 @@ enum QRCodeImage {
                 width: CGFloat(tileModules) * module,
                 height: CGFloat(tileModules) * module
             ).insetBy(dx: module * 0.3, dy: module * 0.3)
-            UIColor.white.setFill()
-            UIBezierPath(roundedRect: tile, cornerRadius: tile.width * 0.24).fill()
+            if !clear {
+                UIColor.white.setFill()
+                UIBezierPath(roundedRect: tile, cornerRadius: tile.width * 0.24).fill()
+            }
             let mark = StarHashMarkShape().path(in: tile.insetBy(dx: tile.width * 0.13, dy: tile.width * 0.13)).cgPath
             cg.addPath(mark)
             cg.setFillColor(ink.cgColor)

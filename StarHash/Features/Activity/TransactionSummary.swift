@@ -66,40 +66,46 @@ struct TransactionDetailCards<CategoryRow: View>: View {
             if let split = transaction.split {
                 VStack(spacing: 0) {
                     DetailRow("Part", String(starhash: "\(split.part) of \(split.count)"))
-                    DetailRow("Whole payment", Money.formatWithCurrency(split.total), numeric: true)
+                    CopyableDetailRow("Whole payment", Money.formatWithCurrency(split.total), copy: String(split.total))
                 }
                 .starhashOutlinedCard()
             }
 
             VStack(spacing: 0) {
-                DetailRow(
+                // A long press on a number copies it.
+                CopyableDetailRow(
                     transaction.counterparty.kind == .phone ? "Number" : "Merchant code",
                     transaction.counterparty.formattedDestination,
-                    numeric: true
+                    copy: transaction.counterparty.isMasked ? transaction.counterparty.formattedDestination : transaction.counterparty.destination
                 )
-                DetailRow(
-                    "Code",
-                    transaction.reference ?? (transaction.status == .pending ? "Waiting for SMS" : "None"),
-                    numeric: transaction.reference != nil
-                )
+                if let reference = transaction.reference {
+                    CopyableDetailRow("Transaction ID", reference, copy: reference)
+                } else {
+                    DetailRow("Transaction ID", transaction.status == .pending ? "Waiting for SMS" : "None")
+                }
             }
             .starhashOutlinedCard()
 
             VStack(spacing: 0) {
-                DetailRow("Amount", Money.formatWithCurrency(transaction.amount), numeric: true)
+                CopyableDetailRow("Amount", Money.formatWithCurrency(transaction.amount), copy: String(transaction.amount))
                 // The fee only once the carrier's SMS has confirmed it;
                 // until then the row is left out rather than guessed.
                 // MoMoAdvance's access fee gets a row of its own, so the
                 // wallet's fee reads as its message gave it.
                 if transaction.status == .confirmed, let fee = transaction.walletFee {
-                    DetailRow("Fee", fee == 0 ? "Free" : Money.formatWithCurrency(fee), numeric: fee != 0)
-                    if let accessFee = transaction.accessFee {
-                        DetailRow("MoMoAdvance fee", Money.formatWithCurrency(accessFee), numeric: true)
+                    if fee == 0 {
+                        DetailRow("Fee", "Free")
+                    } else {
+                        CopyableDetailRow("Fee", Money.formatWithCurrency(fee), copy: String(fee))
                     }
-                    DetailRow("Total", Money.formatWithCurrency(transaction.amount + (transaction.fee ?? 0)), numeric: true)
+                    if let accessFee = transaction.accessFee {
+                        CopyableDetailRow("MoMoAdvance fee", Money.formatWithCurrency(accessFee), copy: String(accessFee))
+                    }
+                    let total = transaction.amount + (transaction.fee ?? 0)
+                    CopyableDetailRow("Total", Money.formatWithCurrency(total), copy: String(total))
                 }
                 if let balance = transaction.balanceAfter {
-                    DetailRow("Balance after", Money.formatWithCurrency(balance), numeric: true)
+                    CopyableDetailRow("Balance after", Money.formatWithCurrency(balance), copy: String(balance))
                 }
             }
             .starhashOutlinedCard()
