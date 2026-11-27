@@ -865,50 +865,49 @@ private struct ShortcutEditor: View {
 
     var body: some View {
         // Sized to what it shows, growing as the symbols open; scrolls only
-        // when that is more than the screen (the largest text sizes).
-        ScrollView {
-            VStack(spacing: 0) {
-                header
-
-                VStack(spacing: 14) {
-                    // The symbol on the left, as tall as the three fields
-                    // beside it.
-                    HStack(alignment: .top, spacing: 12) {
-                        symbolButton
-                        fields
-                    }
-                    .fixedSize(horizontal: false, vertical: true)
-
-                    if choosesSymbol {
-                        symbolGrid
-                            .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .top)))
-                    }
-
-                    if showsCodeHint {
-                        hint
-                            .transition(.opacity)
-                    }
-
-                    if let editing {
-                        DeleteButton("Delete Code") {
-                            if confirmDeletes {
-                                asksDelete = true
-                            } else {
-                                shortcuts.remove(editing)
-                                dismiss()
-                            }
-                        }
-                        .padding(.top, 10)
-                    }
+        // when that is more than the screen (the largest text sizes), its
+        // title collapsing between the two buttons as it does.
+        CollapsingSheetScroll(title: editing == nil ? "New Code" : "Edit Code", contentHeight: $height) {
+            closeButton
+        } trailing: {
+            saveButton
+        } content: {
+            VStack(spacing: 14) {
+                // The symbol on the left, as tall as the three fields
+                // beside it.
+                HStack(alignment: .top, spacing: 12) {
+                    symbolButton
+                    fields
                 }
-                .padding(.horizontal, 18)
-                .padding(.top, 8)
-                .padding(.bottom, 20)
+                .fixedSize(horizontal: false, vertical: true)
+
+                if choosesSymbol {
+                    symbolGrid
+                        .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .top)))
+                }
+
+                if showsCodeHint {
+                    hint
+                        .transition(.opacity)
+                }
+
+                if let editing {
+                    DeleteButton("Delete Code") {
+                        if confirmDeletes {
+                            asksDelete = true
+                        } else {
+                            shortcuts.remove(editing)
+                            dismiss()
+                        }
+                    }
+                    .padding(.top, 10)
+                }
             }
-            .sheetHeight($height)
+            .padding(.horizontal, 18)
+            .padding(.top, 8)
+            .padding(.bottom, 20)
         }
         .scrollIndicators(.hidden)
-        .scrollBounceBehavior(.basedOnSize)
         .scrollDismissesKeyboard(.interactively)
         .sheetGlass(detents: [.height(height + 8)])
         .deleteCodeDialog(isPresented: $asksDelete, asAlert: true) {
@@ -921,37 +920,23 @@ private struct ShortcutEditor: View {
         .onAppear { if editing == nil { focused = .name } }
     }
 
-    /// Keaser's: the title between a close button and the confirm one, laid
-    /// out as `SheetHeader` lays out its own.
-    private var header: some View {
-        ZStack {
-            Text(editing == nil ? "New Code" : "Edit Code")
-                .font(.sheetLargeTitle)
-                .tracking(StarHashTracking.display(32))
-                .foregroundStyle(Color.sheetBrandText)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .padding(.horizontal, 52)
-                .accessibilityAddTraits(.isHeader)
-            HStack {
-                Button { dismiss() } label: {
-                    SheetGlassGlyph(symbol: "xmark")
-                }
-                .buttonStyle(.hapticPlain)
-                .accessibilityLabel("Close")
-                Spacer()
-                Button(action: save) {
-                    SheetGlassGlyph(symbol: "checkmark")
-                }
-                .buttonStyle(.hapticPlain)
-                .disabled(!canSave)
-                .opacity(canSave ? 1 : 0.4)
-                .accessibilityLabel(editing == nil ? "Add" : "Save")
-            }
+    /// Keaser's: the title between a close button and the confirm one.
+    private var closeButton: some View {
+        Button { dismiss() } label: {
+            SheetGlassGlyph(symbol: "xmark")
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 18)
-        .padding(.bottom, 8)
+        .buttonStyle(.hapticPlain)
+        .accessibilityLabel("Close")
+    }
+
+    private var saveButton: some View {
+        Button(action: save) {
+            SheetGlassGlyph(symbol: "checkmark")
+        }
+        .buttonStyle(.hapticPlain)
+        .disabled(!canSave)
+        .opacity(canSave ? 1 : 0.4)
+        .accessibilityLabel(editing == nil ? "Add" : "Save")
     }
 
     /// The chosen symbol on a tile as tall as the fields beside it, with
